@@ -331,7 +331,7 @@ public class FlutterFragment extends Fragment {
   }
 
   @Override
-  public void onAttach(Context context) {
+  public void onAttach(@NonNull Context context) {
     super.onAttach(context);
 
     initializeFlutter(getContextCompat());
@@ -438,7 +438,7 @@ public class FlutterFragment extends Fragment {
 
   @Nullable
   @Override
-  public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+  public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     Log.v(TAG, "Creating FlutterView.");
     flutterView = new FlutterView(getContext(), getRenderMode(), getTransparencyMode());
     flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);

@@ -87,16 +87,19 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   private static final String TAG_FLUTTER_FRAGMENT = "flutter_fragment";
   // TODO(mattcarroll): replace ID with R.id when build system supports R.java
   private static final int FRAGMENT_CONTAINER_ID = 609893468; // random number
+  @Nullable
   private FlutterFragment flutterFragment;
 
   // Used to cover the Activity until the 1st frame is rendered so as to
   // avoid a brief black flicker from a SurfaceView version of FlutterView.
+  @Nullable
   private View coverView;
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes
    * a {@code main()} Dart entrypoint, and displays the "/" route as Flutter's initial route.
    */
+  @NonNull
   public static Intent createDefaultIntent(@NonNull Context launchContext) {
     return createBuilder().build(launchContext);
   }
@@ -105,6 +108,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
    * Creates an {@link IntentBuilder}, which can be used to configure an {@link Intent} to
    * launch a {@code FlutterActivity}.
    */
+  @NonNull
   public static IntentBuilder createBuilder() {
     return new IntentBuilder(FlutterActivity.class);
   }
@@ -178,7 +182,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   }
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     configureWindowForTransparency();
     setContentView(createFragmentContainer());
@@ -368,7 +372,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   }
 
   @Override
-  protected void onNewIntent(Intent intent) {
+  protected void onNewIntent(@NonNull Intent intent) {
     // Forward Intents to our FlutterFragment in case it cares.
     flutterFragment.onNewIntent(intent);
   }

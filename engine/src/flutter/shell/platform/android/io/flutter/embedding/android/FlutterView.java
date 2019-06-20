@@ -238,7 +238,7 @@ public class FlutterView extends FrameLayout {
    * change, device language change, device text scale factor change, etc.
    */
   @Override
-  protected void onConfigurationChanged(Configuration newConfig) {
+  protected void onConfigurationChanged(@NonNull Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     Log.v(TAG, "Configuration changed. Sending locales and user settings to Flutter.");
     sendLocalesToFlutter(newConfig);
@@ -280,7 +280,8 @@ public class FlutterView extends FrameLayout {
   @Override
   @TargetApi(20)
   @RequiresApi(20)
-  public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
+  @NonNull
+  public final WindowInsets onApplyWindowInsets(@NonNull WindowInsets insets) {
     WindowInsets newInsets = super.onApplyWindowInsets(insets);
 
     // Status bar (top) and left/right system insets should partially obscure the content (padding).
@@ -315,7 +316,7 @@ public class FlutterView extends FrameLayout {
    */
   @Override
   @SuppressWarnings("deprecation")
-  protected boolean fitSystemWindows(Rect insets) {
+  protected boolean fitSystemWindows(@NonNull Rect insets) {
     if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
       // Status bar, left/right system insets partially obscure content (padding).
       viewportMetrics.paddingTop = insets.top;
@@ -358,7 +359,8 @@ public class FlutterView extends FrameLayout {
    * rather than spread that logic throughout this {@code FlutterView}.
    */
   @Override
-  public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+  @Nullable
+  public InputConnection onCreateInputConnection(@NonNull EditorInfo outAttrs) {
     if (!isAttachedToFlutterEngine()) {
       return super.onCreateInputConnection(outAttrs);
     }
@@ -380,7 +382,7 @@ public class FlutterView extends FrameLayout {
    * character.
    */
   @Override
-  public boolean onKeyUp(int keyCode, KeyEvent event) {
+  public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
     if (!isAttachedToFlutterEngine()) {
       return super.onKeyUp(keyCode, event);
     }
@@ -403,7 +405,7 @@ public class FlutterView extends FrameLayout {
    * character.
    */
   @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
+  public boolean onKeyDown(int keyCode, @NonNull KeyEvent event) {
     if (!isAttachedToFlutterEngine()) {
       return super.onKeyDown(keyCode, event);
     }
@@ -419,7 +421,7 @@ public class FlutterView extends FrameLayout {
    * method forwards all {@link MotionEvent} data from Android to Flutter.
    */
   @Override
-  public boolean onTouchEvent(MotionEvent event) {
+  public boolean onTouchEvent(@NonNull MotionEvent event) {
     if (!isAttachedToFlutterEngine()) {
       return super.onTouchEvent(event);
     }
@@ -444,7 +446,7 @@ public class FlutterView extends FrameLayout {
    * method forwards all {@link MotionEvent} data from Android to Flutter.
    */
   @Override
-  public boolean onGenericMotionEvent(MotionEvent event) {
+  public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
     boolean handled = isAttachedToFlutterEngine() && androidTouchProcessor.onGenericMotionEvent(event);
     return handled ? true : super.onGenericMotionEvent(event);
   }
@@ -461,7 +463,7 @@ public class FlutterView extends FrameLayout {
    * processed here for accessibility purposes.
    */
   @Override
-  public boolean onHoverEvent(MotionEvent event) {
+  public boolean onHoverEvent(@NonNull MotionEvent event) {
     if (!isAttachedToFlutterEngine()) {
       return super.onHoverEvent(event);
     }
@@ -477,6 +479,7 @@ public class FlutterView extends FrameLayout {
 
   //-------- Start: Accessibility -------
   @Override
+  @Nullable
   public AccessibilityNodeProvider getAccessibilityNodeProvider() {
     if (accessibilityBridge != null && accessibilityBridge.isAccessibilityEnabled()) {
       return accessibilityBridge;
@@ -661,7 +664,7 @@ public class FlutterView extends FrameLayout {
    * FlutterEngine must be non-null when this method is invoked.
    */
   @SuppressWarnings("deprecation")
-  private void sendLocalesToFlutter(Configuration config) {
+  private void sendLocalesToFlutter(@NonNull Configuration config) {
     List<Locale> locales = new ArrayList<>();
     if (Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
       LocaleList localeList = config.getLocales();

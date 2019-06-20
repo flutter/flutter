@@ -92,6 +92,7 @@ public class FlutterShellArgs {
     return new FlutterShellArgs(args);
   }
 
+  @NonNull
   private Set<String> args;
 
   /**

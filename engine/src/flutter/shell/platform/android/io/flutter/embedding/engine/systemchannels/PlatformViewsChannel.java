@@ -38,7 +38,7 @@ public class PlatformViewsChannel {
 
   private final MethodChannel.MethodCallHandler parsingHandler = new MethodChannel.MethodCallHandler() {
     @Override
-    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
       // If there is no handler to respond to this message then we don't need to
       // parse it. Return.
       if (handler == null) {
@@ -70,7 +70,7 @@ public class PlatformViewsChannel {
       }
     }
 
-    private void create(MethodCall call, MethodChannel.Result result) {
+    private void create(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
       Map<String, Object> createArgs = call.arguments();
       PlatformViewCreationRequest request = new PlatformViewCreationRequest(
           (int) createArgs.get("id"),
@@ -187,7 +187,7 @@ public class PlatformViewsChannel {
       }
     }
 
-    private void clearFocus(MethodCall call, MethodChannel.Result result) {
+    private void clearFocus(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
       int viewId = call.arguments();
       try {
         handler.clearFocus(viewId);

@@ -61,7 +61,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     }
 
     @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+    public void onSurfaceTextureSizeChanged(@NonNull SurfaceTexture surface, int width, int height) {
       Log.v(TAG, "SurfaceTextureListener.onSurfaceTextureSizeChanged()");
       if (isAttachedToFlutterRenderer) {
         changeSurfaceSize(width, height);
@@ -69,12 +69,12 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     }
 
     @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
       // Invoked every time a new frame is available. We don't care.
     }
 
     @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+    public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
       Log.v(TAG, "SurfaceTextureListener.onSurfaceTextureDestroyed()");
       isSurfaceAvailableForRendering = false;
 
@@ -93,14 +93,14 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
   /**
    * Constructs a {@code FlutterTextureView} programmatically, without any XML attributes.
    */
-  public FlutterTextureView(Context context) {
+  public FlutterTextureView(@NonNull Context context) {
     this(context, null);
   }
 
   /**
    * Constructs a {@code FlutterTextureView} in an XML-inflation-compliant manner.
    */
-  public FlutterTextureView(Context context, AttributeSet attrs) {
+  public FlutterTextureView(@NonNull Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
     init();
   }

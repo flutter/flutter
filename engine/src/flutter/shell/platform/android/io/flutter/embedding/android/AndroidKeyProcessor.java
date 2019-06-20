@@ -13,7 +13,9 @@ import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
 
 public class AndroidKeyProcessor {
+  @NonNull
   private final KeyEventChannel keyEventChannel;
+  @NonNull
   private final TextInputPlugin textInputPlugin;
   private int combiningCharacter;
 

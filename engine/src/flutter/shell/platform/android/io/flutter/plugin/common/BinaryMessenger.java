@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 
 import java.nio.ByteBuffer;
@@ -32,7 +34,7 @@ public interface BinaryMessenger {
      * between position zero and current position, or null.
      */
     @UiThread
-    void send(String channel, ByteBuffer message);
+    void send(@NonNull String channel, @Nullable ByteBuffer message);
 
     /**
      * Sends a binary message to the Flutter application, optionally expecting a reply.
@@ -46,7 +48,7 @@ public interface BinaryMessenger {
      * message, possibly null.
      */
     @UiThread
-    void send(String channel, ByteBuffer message, BinaryReply callback);
+    void send(@NonNull String channel, @Nullable ByteBuffer message, @Nullable BinaryReply callback);
 
     /**
      * Registers a handler to be invoked when the Flutter application sends a message
@@ -62,7 +64,7 @@ public interface BinaryMessenger {
      * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
      */
     @UiThread
-    void setMessageHandler(String channel, BinaryMessageHandler handler);
+    void setMessageHandler(@NonNull String channel, @Nullable BinaryMessageHandler handler);
 
     /**
      * Handler for incoming binary messages from Flutter.
@@ -82,7 +84,7 @@ public interface BinaryMessenger {
          * @param reply A {@link BinaryReply} used for submitting a reply back to Flutter.
          */
         @UiThread
-        void onMessage(ByteBuffer message, BinaryReply reply);
+        void onMessage(@Nullable ByteBuffer message, @NonNull BinaryReply reply);
     }
 
     /**
@@ -99,6 +101,6 @@ public interface BinaryMessenger {
          * Reply receivers can read from the buffer directly.
          */
         @UiThread
-        void reply(ByteBuffer reply);
+        void reply(@Nullable ByteBuffer reply);
     }
 }

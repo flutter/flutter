@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.util.Log;
 import java.nio.ByteBuffer;
@@ -28,8 +30,11 @@ import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 public final class BasicMessageChannel<T> {
     private static final String TAG = "BasicMessageChannel#";
 
+    @NonNull
     private final BinaryMessenger messenger;
+    @NonNull
     private final String name;
+    @NonNull
     private final MessageCodec<T> codec;
 
     /**
@@ -40,7 +45,7 @@ public final class BasicMessageChannel<T> {
      * @param name a channel name String.
      * @param codec a {@link MessageCodec}.
      */
-    public BasicMessageChannel(BinaryMessenger messenger, String name, MessageCodec<T> codec) {
+    public BasicMessageChannel(@NonNull BinaryMessenger messenger, @NonNull String name, @NonNull MessageCodec<T> codec) {
         if (BuildConfig.DEBUG) {
             if (messenger == null) {
                 Log.e(TAG, "Parameter messenger must not be null.");
@@ -62,7 +67,7 @@ public final class BasicMessageChannel<T> {
      *
      * @param message the message, possibly null.
      */
-    public void send(T message) {
+    public void send(@Nullable T message) {
         send(message, null);
     }
 
@@ -75,7 +80,7 @@ public final class BasicMessageChannel<T> {
      * @param callback a {@link Reply} callback, possibly null.
      */
     @UiThread
-    public void send(T message, final Reply<T> callback) {
+    public void send(@Nullable T message, @Nullable final Reply<T> callback) {
         messenger.send(name, codec.encodeMessage(message),
             callback == null ? null : new IncomingReplyHandler(callback));
     }
@@ -92,7 +97,7 @@ public final class BasicMessageChannel<T> {
      * @param handler a {@link MessageHandler}, or null to deregister.
      */
     @UiThread
-    public void setMessageHandler(final MessageHandler<T> handler) {
+    public void setMessageHandler(@Nullable final MessageHandler<T> handler) {
         messenger.setMessageHandler(name,
             handler == null ? null : new IncomingMessageHandler(handler));
     }
@@ -119,7 +124,7 @@ public final class BasicMessageChannel<T> {
          * @param message the message, possibly null.
          * @param reply a {@link Reply} for sending a single message reply back to Flutter.
          */
-        void onMessage(T message, Reply<T> reply);
+        void onMessage(@Nullable T message, @NonNull Reply<T> reply);
     }
 
     /**
@@ -133,18 +138,18 @@ public final class BasicMessageChannel<T> {
          *
          * @param reply the reply, possibly null.
          */
-        void reply(T reply);
+        void reply(@Nullable T reply);
     }
 
     private final class IncomingReplyHandler implements BinaryReply {
         private final Reply<T> callback;
 
-        private IncomingReplyHandler(Reply<T> callback) {
+        private IncomingReplyHandler(@NonNull Reply<T> callback) {
             this.callback = callback;
         }
 
         @Override
-        public void reply(ByteBuffer reply) {
+        public void reply(@Nullable ByteBuffer reply) {
             try {
                 callback.reply(codec.decodeMessage(reply));
             } catch (RuntimeException e) {
@@ -156,12 +161,12 @@ public final class BasicMessageChannel<T> {
     private final class IncomingMessageHandler implements BinaryMessageHandler {
         private final MessageHandler<T> handler;
 
-        private IncomingMessageHandler(MessageHandler<T> handler) {
+        private IncomingMessageHandler(@NonNull MessageHandler<T> handler) {
             this.handler = handler;
         }
 
         @Override
-        public void onMessage(ByteBuffer message, final BinaryReply callback) {
+        public void onMessage(@Nullable ByteBuffer message, @NonNull final BinaryReply callback) {
             try {
                 handler.onMessage(codec.decodeMessage(message), new Reply<T>() {
                     @Override

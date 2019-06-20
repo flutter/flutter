@@ -43,31 +43,46 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   private static final String TAG = "EnginePluginRegistry";
 
   // PluginRegistry
+  @NonNull
   private final Map<Class<? extends FlutterPlugin>, FlutterPlugin> plugins = new HashMap<>();
 
   // Standard FlutterPlugin
+  @NonNull
   private final FlutterPlugin.FlutterPluginBinding pluginBinding;
+  @NonNull
   private final FlutterEngineAndroidLifecycle flutterEngineAndroidLifecycle;
 
   // ActivityAware
+  @NonNull
   private final Map<Class<? extends FlutterPlugin>, ActivityAware> activityAwarePlugins = new HashMap<>();
+  @Nullable
   private Activity activity;
+  @Nullable
   private FlutterEngineActivityPluginBinding activityPluginBinding;
   private boolean isWaitingForActivityReattachment = false;
 
   // ServiceAware
+  @NonNull
   private final Map<Class<? extends FlutterPlugin>, ServiceAware> serviceAwarePlugins = new HashMap<>();
+  @Nullable
   private Service service;
+  @Nullable
   private FlutterEngineServicePluginBinding servicePluginBinding;
 
   // BroadcastReceiver
+  @NonNull
   private final Map<Class<? extends FlutterPlugin>, BroadcastReceiverAware> broadcastReceiverAwarePlugins = new HashMap<>();
+  @Nullable
   private BroadcastReceiver broadcastReceiver;
+  @Nullable
   private FlutterEngineBroadcastReceiverPluginBinding broadcastReceiverPluginBinding;
 
   // ContentProvider
+  @NonNull
   private final Map<Class<? extends FlutterPlugin>, ContentProviderAware> contentProviderAwarePlugins = new HashMap<>();
+  @Nullable
   private ContentProvider contentProvider;
+  @Nullable
   private FlutterEngineContentProviderPluginBinding contentProviderPluginBinding;
 
   FlutterEnginePluginRegistry(
@@ -329,7 +344,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   @Override
-  public boolean onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
+  public boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     Log.v(TAG, "Forwarding onActivityResult() to plugins.");
     if (isAttachedToActivity()) {
       return activityPluginBinding.onActivityResult(requestCode, resultCode, data);
@@ -486,10 +501,15 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   //----- End ContentProviderControlSurface -----
 
   private static class FlutterEngineActivityPluginBinding implements ActivityPluginBinding {
+    @NonNull
     private final Activity activity;
+    @NonNull
     private final Set<io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener> onRequestPermissionsResultListeners = new HashSet<>();
+    @NonNull
     private final Set<io.flutter.plugin.common.PluginRegistry.ActivityResultListener> onActivityResultListeners = new HashSet<>();
+    @NonNull
     private final Set<io.flutter.plugin.common.PluginRegistry.NewIntentListener> onNewIntentListeners = new HashSet<>();
+    @NonNull
     private final Set<io.flutter.plugin.common.PluginRegistry.UserLeaveHintListener> onUserLeaveHintListeners = new HashSet<>();
 
     public FlutterEngineActivityPluginBinding(@NonNull Activity activity) {
@@ -556,7 +576,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Invoked by the {@link FlutterEngine} that owns this {@code ActivityPluginBinding} when its
      * associated {@link Activity} has its {@code onActivityResult(...)} method invoked.
      */
-    boolean onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
+    boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
       boolean didConsumeResult = false;
       for (io.flutter.plugin.common.PluginRegistry.ActivityResultListener listener : onActivityResultListeners) {
         didConsumeResult = listener.onActivityResult(requestCode, resultCode, data) || didConsumeResult;
@@ -620,15 +640,17 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   private static class FlutterEngineServicePluginBinding implements ServicePluginBinding {
+    @NonNull
     private final Service service;
+    @NonNull
     private final Set<ServiceAware.OnModeChangeListener> onModeChangeListeners = new HashSet<>();
 
     FlutterEngineServicePluginBinding(@NonNull Service service) {
       this.service = service;
     }
 
-    @NonNull
     @Override
+    @NonNull
     public Service getService() {
       return service;
     }
@@ -657,6 +679,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   private static class FlutterEngineBroadcastReceiverPluginBinding implements BroadcastReceiverPluginBinding {
+    @NonNull
     private final BroadcastReceiver broadcastReceiver;
 
     FlutterEngineBroadcastReceiverPluginBinding(@NonNull BroadcastReceiver broadcastReceiver) {
@@ -671,6 +694,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   private static class FlutterEngineContentProviderPluginBinding implements ContentProviderPluginBinding {
+    @NonNull
     private final ContentProvider contentProvider;
 
     FlutterEngineContentProviderPluginBinding(@NonNull ContentProvider contentProvider) {

@@ -41,7 +41,7 @@ public class TextInputChannel {
 
   private final MethodChannel.MethodCallHandler parsingMethodHandler = new MethodChannel.MethodCallHandler() {
     @Override
-    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
       if (textInputMethodHandler == null) {
         // If no explicit TextInputMethodHandler has been registered then we don't
         // need to forward this call to an API. Return.
@@ -278,6 +278,7 @@ public class TextInputChannel {
       );
     }
 
+    @NonNull
     private static Integer inputActionFromTextInputAction(@NonNull String inputAction) {
       switch (inputAction) {
         case "TextInputAction.newline":

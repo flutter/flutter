@@ -4,12 +4,15 @@
 
 package io.flutter.embedding.engine.dart;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
  * IF YOU USE IT, WE WILL BREAK YOU.
  */
 public interface PlatformMessageHandler {
-  void handleMessageFromDart(final String channel, byte[] message, final int replyId);
+  void handleMessageFromDart(@NonNull final String channel, @Nullable byte[] message, final int replyId);
 
-  void handlePlatformMessageResponse(int replyId, byte[] reply);
+  void handlePlatformMessageResponse(int replyId, @Nullable byte[] reply);
 }

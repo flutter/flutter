@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.arch.lifecycle.Lifecycle;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 /**
  * Control surface through which an {@link Activity} attaches to a {@link FlutterEngine}.
@@ -82,7 +83,7 @@ public interface ActivityControlSurface {
    * <p>
    * Returns true if one or more plugins utilized this {@link Activity} result.
    */
-  boolean onActivityResult(int requestCode, int resultCode, Intent data);
+  boolean onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
 
   /**
    * Call this method from the {@link Activity} that is attached to this {@code ActivityControlSurface}'s

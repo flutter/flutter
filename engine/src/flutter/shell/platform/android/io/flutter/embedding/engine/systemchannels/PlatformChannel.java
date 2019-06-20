@@ -35,7 +35,7 @@ public class PlatformChannel {
 
   private final MethodChannel.MethodCallHandler parsingMethodCallHandler = new MethodChannel.MethodCallHandler() {
     @Override
-    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+    public void onMethodCall(@NonNull MethodCall call, @NonNull MethodChannel.Result result) {
       if (platformMessageHandler == null) {
         // If no explicit PlatformMessageHandler has been registered then we don't
         // need to forward this call to an API. Return.
@@ -257,6 +257,7 @@ public class PlatformChannel {
     return ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
   }
 
+  @NonNull
   private AppSwitcherDescription decodeAppSwitcherDescription(@NonNull JSONObject encodedDescription) throws JSONException {
     int color = encodedDescription.getInt("primaryColor");
     if (color != 0) { // 0 means color isn't set, use system default
@@ -272,6 +273,7 @@ public class PlatformChannel {
    * @throws JSONException if {@code encodedSystemUiOverlay} does not contain expected keys and value types.
    * @throws NoSuchFieldException if any of the given encoded overlay names are invalid.
    */
+  @NonNull
   private List<SystemUiOverlay> decodeSystemUiOverlays(@NonNull JSONArray encodedSystemUiOverlay) throws JSONException, NoSuchFieldException {
     List<SystemUiOverlay> overlays = new ArrayList<>();
     for (int i = 0; i < encodedSystemUiOverlay.length(); ++i) {
@@ -295,6 +297,7 @@ public class PlatformChannel {
    * @throws JSONException if {@code encodedStyle} does not contain expected keys and value types.
    * @throws NoSuchFieldException if any provided brightness name is invalid.
    */
+  @NonNull
   private SystemChromeStyle decodeSystemChromeStyle(@NonNull JSONObject encodedStyle) throws JSONException, NoSuchFieldException {
     Brightness systemNavigationBarIconBrightness = null;
     // TODO(mattcarroll): add color annotation
@@ -425,6 +428,7 @@ public class PlatformChannel {
   public enum SoundType {
     CLICK("SystemSoundType.click");
 
+    @NonNull
     static SoundType fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (SoundType soundType : SoundType.values()) {
         if (soundType.encodedName.equals(encodedName)) {
@@ -453,6 +457,7 @@ public class PlatformChannel {
     HEAVY_IMPACT("HapticFeedbackType.heavyImpact"),
     SELECTION_CLICK("HapticFeedbackType.selectionClick");
 
+    @NonNull
     static HapticFeedbackType fromValue(@Nullable String encodedName) throws NoSuchFieldException {
       for (HapticFeedbackType feedbackType : HapticFeedbackType.values()) {
         if ((feedbackType.encodedName == null && encodedName == null)
@@ -480,6 +485,7 @@ public class PlatformChannel {
     LANDSCAPE_LEFT("DeviceOrientation.landscapeLeft"),
     LANDSCAPE_RIGHT("DeviceOrientation.landscapeRight");
 
+    @NonNull
     static DeviceOrientation fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (DeviceOrientation orientation : DeviceOrientation.values()) {
         if (orientation.encodedName.equals(encodedName)) {
@@ -508,6 +514,7 @@ public class PlatformChannel {
     TOP_OVERLAYS("SystemUiOverlay.top"),
     BOTTOM_OVERLAYS("SystemUiOverlay.bottom");
 
+    @NonNull
     static SystemUiOverlay fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (SystemUiOverlay overlay : SystemUiOverlay.values()) {
         if (overlay.encodedName.equals(encodedName)) {
@@ -578,6 +585,7 @@ public class PlatformChannel {
     LIGHT("Brightness.light"),
     DARK("Brightness.dark");
 
+    @NonNull
     static Brightness fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (Brightness brightness : Brightness.values()) {
         if (brightness.encodedName.equals(encodedName)) {
@@ -601,7 +609,8 @@ public class PlatformChannel {
   public enum ClipboardContentFormat {
     PLAIN_TEXT("text/plain");
 
-    static ClipboardContentFormat fromValue(String encodedName) throws NoSuchFieldException {
+    @NonNull
+    static ClipboardContentFormat fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (ClipboardContentFormat format : ClipboardContentFormat.values()) {
         if (format.encodedName.equals(encodedName)) {
           return format;

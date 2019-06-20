@@ -88,7 +88,9 @@ public class FlutterEngine implements LifecycleOwner {
   @NonNull
   private final TextInputChannel textInputChannel;
 
+  @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
+  @NonNull
   private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
     @SuppressWarnings("unused")
     public void onPreEngineRestart() {

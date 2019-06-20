@@ -45,7 +45,9 @@ public class DartExecutor implements BinaryMessenger {
   @NonNull
   private final DartMessenger messenger;
   private boolean isApplicationRunning = false;
+  @Nullable
   private String isolateServiceId;
+  @Nullable
   private IsolateServiceIdListener isolateServiceIdListener;
 
   private final BinaryMessenger.BinaryMessageHandler isolateChannelMessageHandler =
@@ -206,6 +208,7 @@ public class DartExecutor implements BinaryMessenger {
    * Returns an identifier for this executor's primary isolate.  This identifier can be used
    * in queries to the Dart service protocol.
    */
+  @Nullable
   public String getIsolateServiceId() {
     return isolateServiceId;
   }
@@ -214,14 +217,14 @@ public class DartExecutor implements BinaryMessenger {
    * Callback interface invoked when the isolate identifier becomes available.
    */
   interface IsolateServiceIdListener {
-    void onIsolateServiceIdAvailable(String isolateServiceId);
+    void onIsolateServiceIdAvailable(@NonNull String isolateServiceId);
   }
 
   /**
    * Set a listener that will be notified when an isolate identifier is available for this
    * executor's primary isolate.
    */
-  public void setIsolateServiceIdListener(IsolateServiceIdListener listener) {
+  public void setIsolateServiceIdListener(@Nullable IsolateServiceIdListener listener) {
     isolateServiceIdListener = listener;
     if (isolateServiceIdListener != null && isolateServiceId != null) {
       isolateServiceIdListener.onIsolateServiceIdAvailable(isolateServiceId);

@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.Nullable;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -19,7 +21,8 @@ public interface MessageCodec<T> {
      * @return a ByteBuffer containing the encoding between position 0 and
      * the current position, or null, if message is null.
      */
-    ByteBuffer encodeMessage(T message);
+    @Nullable
+    ByteBuffer encodeMessage(@Nullable T message);
 
     /**
      * Decodes the specified message from binary.
@@ -28,5 +31,6 @@ public interface MessageCodec<T> {
      * @return a T value representation of the bytes between the given buffer's current
      * position and its limit, or null, if message is null.
      */
-    T decodeMessage(ByteBuffer message);
+    @Nullable
+    T decodeMessage(@Nullable ByteBuffer message);
 }
