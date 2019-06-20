@@ -553,7 +553,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 256,
         'scanCode': 0x00000009,
-          'charactersIgnoringModifiers': '',
+        'charactersIgnoringModifiers': '',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = escapeKeyEvent.data;

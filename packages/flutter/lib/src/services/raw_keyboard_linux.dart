@@ -84,10 +84,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     // plane.
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
+      // Not covering length > 2 case since > 1 is already unlikely.
       assert(charactersIgnoringModifiers.length <= 2);
       int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
       if (charactersIgnoringModifiers.length == 2) {
-        // Not covering length > 2 case since > 1 is already unlikely.
         final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
         codeUnit = (codeUnit << 16) | secondCode;
       }
