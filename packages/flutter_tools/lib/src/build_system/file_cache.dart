@@ -68,6 +68,7 @@ class FileCache {
     if (!file.existsSync()) {
       file.createSync();
     }
+    file.writeAsStringSync('');
     // Overwrite any outdated hashes.
     for (MapEntry<String, String> entry in currentHashes.entries) {
       previousHashes[entry.key] = entry.value;
@@ -82,13 +83,13 @@ class FileCache {
       fencepost = '\n';
       count += 1;
       if (count >= 100) {
-        file.writeAsStringSync(buffer.toString(), mode: FileMode.write);
+        file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
         count = 0;
         buffer.clear();
       }
     }
     if (count != 0) {
-      file.writeAsStringSync(buffer.toString(), mode: FileMode.write);
+      file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
     }
   }
 

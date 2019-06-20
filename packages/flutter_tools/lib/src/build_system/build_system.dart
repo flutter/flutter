@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
@@ -332,10 +333,10 @@ class Environment {
       }
       final String output = buffer.toString();
       final Digest digest = md5.convert(utf8.encode(output));
-      buildPrefix = base64.encode(digest.bytes);
+      buildPrefix = hex.encode(digest.bytes);
     } else {
       final Digest digest = md5.convert(utf8.encode('Flutter and Dart is awesome'));
-      buildPrefix = base64.encode(digest.bytes);
+      buildPrefix = hex.encode(digest.bytes);
     }
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = buildPrefix != null
