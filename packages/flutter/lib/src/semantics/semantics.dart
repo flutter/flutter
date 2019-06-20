@@ -1162,6 +1162,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   Rect _rect = Rect.zero;
   set rect(Rect value) {
     assert(value != null);
+    assert(value.isFinite, '$this (with $owner) tried to set a non-finite rect.');
     if (_rect != value) {
       _rect = value;
       _markDirty();
@@ -2178,6 +2179,7 @@ class _BoxEdge implements Comparable<_BoxEdge> {
     @required this.node,
   }) : assert(isLeadingEdge != null),
        assert(offset != null),
+       assert(offset.isFinite),
        assert(node != null);
 
   /// True if the edge comes before the seconds edge along the traversal
@@ -2384,6 +2386,7 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
   for (SemanticsNode child in children) {
+    assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
     final Rect childRect = child.rect.deflate(0.1);
     edges.add(_BoxEdge(
