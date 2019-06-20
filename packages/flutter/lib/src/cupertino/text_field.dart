@@ -175,7 +175,7 @@ class CupertinoTextField extends StatefulWidget {
     this.style,
     this.strutStyle,
     this.textAlign = TextAlign.start,
-    this.textAlignVertical = TextAlignVertical.top, // TODO(justinmc): Match previous behavior of if prefix then center
+    this.textAlignVertical,
     this.readOnly = false,
     this.showCursor,
     this.autofocus = false,
@@ -719,18 +719,31 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 
+  // True if any surrounding decoration widgets will be shown.
+  bool get _hasDecoration {
+    return widget.placeholder != null ||
+      widget.clearButtonMode != OverlayVisibilityMode.never ||
+      widget.prefix != null ||
+      widget.suffix != null;
+  }
+
+  // Provide default behavior if widget.textAlignVertical is not set.
+  TextAlignVertical get _textAlignVertical {
+    if (widget.textAlignVertical != null) {
+      return widget.textAlignVertical;
+    }
+    return _hasDecoration ? TextAlignVertical.center : TextAlignVertical.top;
+  }
+
   Widget _addTextDependentAttachments(Widget editableText, TextStyle textStyle, TextStyle placeholderStyle) {
     assert(editableText != null);
     assert(textStyle != null);
     assert(placeholderStyle != null);
     // If there are no surrounding widgets, just return the core editable text
-    // part.
-    if (widget.placeholder == null &&
-        widget.clearButtonMode == OverlayVisibilityMode.never &&
-        widget.prefix == null &&
-        widget.suffix == null) {
+    // part with the correct alignment.
+    if (!_hasDecoration) {
       return Align(
-        alignment: Alignment(-1.0, widget.textAlignVertical.y),
+        alignment: Alignment(-1.0, _textAlignVertical.y),
         child: editableText,
       );
     }
@@ -800,7 +813,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         }
 
         return Align(
-          alignment: Alignment(-1.0, widget.textAlignVertical.y),
+          alignment: Alignment(-1.0, _textAlignVertical.y),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: rowChildren,
