@@ -176,6 +176,19 @@ class ErrorHint extends _ErrorDiagnostic {
   ErrorHint._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level:DiagnosticLevel.hint);
 }
 
+/// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
+/// tune the spacing between other [DiagnosticsNode] objects.
+class ErrorSpacer extends DiagnosticsProperty<void> {
+  /// Creates an empty space to insert into a list of [DiagnosticNode] objects
+  /// typically within a [FlutterError] object.
+  ErrorSpacer() : super(
+    '',
+    null,
+    description: '',
+    showName: false,
+  );
+}
+
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
@@ -407,7 +420,7 @@ class FlutterErrorDetails extends Diagnosticable {
         }
       }
       if (ourFault) {
-        properties.add(DiagnosticsNode.message(''));
+        properties.add(ErrorSpacer());
         properties.add(ErrorHint(
           'Either the assertion indicates an error in the framework itself, or we should '
           'provide substantially more information in this error message to help you determine '
@@ -418,11 +431,11 @@ class FlutterErrorDetails extends Diagnosticable {
       }
     }
     if (stack != null) {
-      properties.add(DiagnosticsNode.message(''));
+      properties.add(ErrorSpacer());
       properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
-      properties.add(DiagnosticsNode.message(''));
+      properties.add(ErrorSpacer());
       informationCollector().forEach(properties.add);
     }
   }
