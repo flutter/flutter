@@ -332,8 +332,8 @@ Future<void> _runTests() async {
   }
 
   Future<void> runFrameworkOthers() async {
-    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter'))
-      .listSync(followLinks: false)
+    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
+      .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
       .map((Directory dir) => 'test/${path.basename(dir.path)}/')
       .toList();
