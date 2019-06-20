@@ -1,14 +1,6 @@
 #!/bin/bash
 set -e
 
-function upload_gcs() {
-  echo $GCS_SERVICE_ACCOUNT > ${HOME}/gcloud-service-key.json
-  gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-  gcloud --quiet config set project flutter-infra
-
-  gsutil cp -r "$FLUTTER_ROOT/dev/docs" gs://flutter_docs_backup/${CIRRUS_CHANGE_IN_REPO}/
-}
-
 function deploy {
   local total_tries="$1"
   local remaining_tries=$(($total_tries - 1))
@@ -133,9 +125,6 @@ cp "$FLUTTER_ROOT/dev/docs/google2ed1af765c529f57.html" "$FLUTTER_ROOT/dev/docs/
 if [[ -n "$CIRRUS_CI" && -z "$CIRRUS_PR" ]]; then
   echo "This is not a pull request; considering whether to upload docs... (branch=$CIRRUS_BRANCH)"
   if [[ "$CIRRUS_BRANCH" == "master" ]]; then
-    echo "Uploading docs to GCS..."
-    upload_gcs
-
     echo "Updating $CIRRUS_BRANCH docs: https://master-api.flutter.dev/"
     # Disable search indexing on the master staging site so searches get only
     # the stable site.
