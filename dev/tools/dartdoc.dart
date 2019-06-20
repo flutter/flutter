@@ -50,7 +50,14 @@ Future<void> main(List<String> arguments) async {
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
   buf.writeln('homepage: https://flutter.dev');
-  buf.writeln('version: $version');
+  // TODO(dnfield): We should make DartDoc able to avoid emitting this. If we
+  // use the real value here, every file will get marked as new instead of only
+  // files that have otherwise changed. Instead, we replace it dynamically using
+  // JavaScript.
+  // We'll replace this dynamically. This way, fewer files will get marked as
+  // changed.
+  // https://github.com/dart-lang/dartdoc/issues/1982
+  buf.writeln('version: 0.0.0');
   buf.writeln('dependencies:');
   for (String package in findPackageNames()) {
     buf.writeln('  $package:');
@@ -85,7 +92,7 @@ Future<void> main(List<String> arguments) async {
 
   final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
 
-  // Run pub.
+  // // Run pub.
   ProcessWrapper process = ProcessWrapper(await Process.start(
     pubExecutable,
     <String>['get'],
@@ -98,7 +105,7 @@ Future<void> main(List<String> arguments) async {
   if (code != 0)
     exit(code);
 
-  createFooter('$kDocsRoot/lib/');
+  createFooter('$kDocsRoot/lib/', version);
   copyAssets();
   createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
@@ -264,16 +271,18 @@ String gitRevision() {
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 }
 
-void createFooter(String footerPath) {
+void createFooter(String footerPath, String version) {
   final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = getBranchName();
-  final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
+  final String gitBranchOut = gitBranch.isEmpty ? '' : '• $gitBranch';
   File('${footerPath}footer.html').writeAsStringSync('<script src="footer.js"></script>');
-  final String content = <String>[
-    '• </span class="no-break">$timestamp<span>',
-    '• </span class="no-break">${gitRevision()}</span>',
-    gitBranchOut].join(' ');
-  File('$kPublishRoot/api/footer.js').writeAsStringSync('''document.write('$content');''');
+  File('$kPublishRoot/api/footer.js')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('''var span = document.querySelector('footer>span');
+if (span) {
+  span.innerText = 'Flutter $version • $timestamp • ${gitRevision()} $gitBranchOut';
+}
+''');
 }
 
 /// Generates an OpenSearch XML description that can be used to add a custom
