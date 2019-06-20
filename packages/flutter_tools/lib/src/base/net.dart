@@ -64,6 +64,9 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   } on SocketException catch (error) {
     printTrace('Download error: $error');
     return null;
+  } on HttpException catch (error) {
+    printTrace('Download error: $error');
+    return null;
   }
   final HttpClientResponse response = await request.close();
   // If we're making a HEAD request, we're only checking to see if the URL is

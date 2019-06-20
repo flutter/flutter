@@ -91,6 +91,58 @@ void main() {
         expect(capturedEnvironment['FLUTTER_TEST'], null);
       }, overrides: contextOverrides);
     });
+
+    testUsingContext('installHook creates a FlutterPlatform', () {
+      expect(() => installHook(
+        shellPath: 'abc',
+        enableObservatory: false,
+        startPaused: true
+      ), throwsA(isA<AssertionError>()));
+
+      expect(() => installHook(
+        shellPath: 'abc',
+        enableObservatory: false,
+        startPaused: false,
+        observatoryPort: 123
+      ), throwsA(isA<AssertionError>()));
+
+      FlutterPlatform capturedPlatform;
+      final Map<String, String> expectedPrecompiledDillFiles = <String, String>{'Key': 'Value'};
+      final FlutterPlatform flutterPlatform = installHook(
+        shellPath: 'abc',
+        enableObservatory: true,
+        machine: true,
+        startPaused: true,
+        disableServiceAuthCodes: true,
+        port: 100,
+        precompiledDillPath: 'def',
+        precompiledDillFiles: expectedPrecompiledDillFiles,
+        trackWidgetCreation: true,
+        updateGoldens: true,
+        buildTestAssets: true,
+        observatoryPort: 200,
+        serverType: InternetAddressType.IPv6,
+        icudtlPath: 'ghi',
+        platformPluginRegistration: (FlutterPlatform platform) {
+          capturedPlatform = platform;
+        });
+
+      expect(identical(capturedPlatform, flutterPlatform), equals(true));
+      expect(flutterPlatform.shellPath, equals('abc'));
+      expect(flutterPlatform.enableObservatory, equals(true));
+      expect(flutterPlatform.machine, equals(true));
+      expect(flutterPlatform.startPaused, equals(true));
+      expect(flutterPlatform.disableServiceAuthCodes, equals(true));
+      expect(flutterPlatform.port, equals(100));
+      expect(flutterPlatform.host, InternetAddress.loopbackIPv6);
+      expect(flutterPlatform.explicitObservatoryPort, equals(200));
+      expect(flutterPlatform.precompiledDillPath, equals('def'));
+      expect(flutterPlatform.precompiledDillFiles, expectedPrecompiledDillFiles);
+      expect(flutterPlatform.trackWidgetCreation, equals(true));
+      expect(flutterPlatform.updateGoldens, equals(true));
+      expect(flutterPlatform.buildTestAssets, equals(true));
+      expect(flutterPlatform.icudtlPath, equals('ghi'));
+    });
   });
 }
 

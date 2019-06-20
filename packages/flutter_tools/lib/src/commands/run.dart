@@ -43,24 +43,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
-      )
-      ..addFlag('train',
-        hide: !verboseHelp,
-        negatable: false,
-        help: 'Save Dart runtime compilation trace to a file. '
-              'Compilation trace will be saved to a file specified by --compilation-trace-file '
-              'when \'flutter run --dynamic --profile --train\' exits. '
-              'This file contains a list of Dart symbols that were compiled by the runtime JIT '
-              'compiler up to that point. This file can be used in subsequent --dynamic builds '
-              'to precompile some code by the offline compiler. '
-              'This flag is only allowed when running as --dynamic --profile (recommended) or '
-              '--debug (may include unwanted debug symbols).',
-      )
-      ..addOption('target-platform',
-        defaultsTo: 'default',
-        allowed: <String>['default', 'android-arm', 'android-arm64', 'android-x86', 'android-x64'],
-        help: 'Specify the target platform when building the app for an '
-              'Android device.\nIgnored on iOS.');
+      );
     usesTargetOption();
     usesPortOptions();
     usesIpv6Flag();
@@ -219,14 +202,21 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<Map<String, String>> get usageValues async {
-    final bool isEmulator = await devices[0].isLocalEmulator;
     String deviceType, deviceOsVersion;
-    if (devices.length == 1) {
+    bool isEmulator;
+
+    if (devices == null || devices.isEmpty) {
+      deviceType = 'none';
+      deviceOsVersion = 'none';
+      isEmulator = false;
+    } else if (devices.length == 1) {
       deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
       deviceOsVersion = await devices[0].sdkNameAndVersion;
+      isEmulator = await devices[0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
+      isEmulator = false;
     }
     final String modeName = getBuildInfo().modeName;
     final AndroidProject androidProject = FlutterProject.current().android;
@@ -398,11 +388,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
-        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
-      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
-          '(recommended) or --debug (may include unwanted debug symbols).');
-
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
@@ -445,7 +430,6 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -467,7 +451,6 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
