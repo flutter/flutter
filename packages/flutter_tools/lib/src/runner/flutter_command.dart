@@ -533,11 +533,14 @@ abstract class FlutterCommand extends Command<void> {
 
     devices = devices.where((Device device) => device.isSupported()).toList();
     // If the user has not specified all devices and has multiple connected
-    // then filter then list by those supported in the current project. If
-    // this ends up with a single device we can proceed as normal.
+    // then filter then list by those supported in the current project and
+    // remove non-ephemeral device types. If this ends up with a single
+    // device we can proceed as normal.
     if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
       final FlutterProject flutterProject = FlutterProject.current();
-      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
+      devices
+        ..removeWhere((Device device) => !device.ephemeral)
+        ..removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
     }
 
     if (devices.isEmpty) {
