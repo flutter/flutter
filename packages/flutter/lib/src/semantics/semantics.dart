@@ -2240,7 +2240,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     final List<_BoxEdge> edges = <_BoxEdge>[];
     for (SemanticsNode child in nodes) {
       // Using a small delta to shrink child rects removes overlapping cases.
-      final Rect childRect = child.rect.deflate(1e-15);
+      final Rect childRect = child.rect.deflate(0.1);
       edges.add(_BoxEdge(
         isLeadingEdge: true,
         offset: _pointInParentCoordinates(child, childRect.topLeft).dx,
@@ -2387,7 +2387,7 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   for (SemanticsNode child in children) {
     assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
-    final Rect childRect = child.rect.deflate(1e-15);
+    final Rect childRect = child.rect.deflate(0.1);
     edges.add(_BoxEdge(
       isLeadingEdge: true,
       offset: _pointInParentCoordinates(child, childRect.topLeft).dy,

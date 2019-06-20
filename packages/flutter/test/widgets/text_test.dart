@@ -435,7 +435,7 @@ void main() {
             TestSemantics(
               label: 'a ',
               textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(-4.0, -4.0, 60.0, 84.0),
+              rect: const Rect.fromLTRB(-4.0, 48.0, 60.0, 84.0),
             ),
             TestSemantics(
               label: 'pebble',
@@ -443,12 +443,12 @@ void main() {
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
-              rect: const Rect.fromLTRB(-4.0, -4.0, 228.0, 84.0),
+              rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
             TestSemantics(
               label: ' in the ',
               textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(-4.0, -4.0, 452.0, 84.0),
+              rect: const Rect.fromLTRB(220.0, 48.0, 452.0, 84.0),
             ),
             TestSemantics(
               label: 'INTERRUPTION',
@@ -458,7 +458,7 @@ void main() {
             TestSemantics(
               label: 'sky',
               textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(-4.0, -4.0, 576.0, 84.0),
+              rect: const Rect.fromLTRB(484.0, 48.0, 576.0, 84.0),
             ),
           ],
         ),

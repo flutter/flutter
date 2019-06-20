@@ -510,19 +510,6 @@ void main() {
                 label: routeName,
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
-                  // TODO(dnfield): This is almost certainly wrong. Suggestions
-                  // should come after Back and Search. https://github.com/flutter/flutter/issues/34432
-                  TestSemantics(
-                    id: 8,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Suggestions',
-                    textDirection: TextDirection.ltr,
-                  ),
                   TestSemantics(
                     id: 9,
                     children: <TestSemantics>[
@@ -555,6 +542,17 @@ void main() {
                         textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
+                  ),
+                  TestSemantics(
+                    id: 8,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Suggestions',
+                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),

@@ -770,8 +770,9 @@ class RenderParagraph extends RenderBox
       if (rects.isEmpty) {
         return null;
       }
-      Rect rect = Rect.zero;
-      for (ui.TextBox textBox in rects) {
+      Rect rect = rects.first.toRect();
+      currentDirection = rects.first.direction;
+      for (ui.TextBox textBox in rects.skip(1)) {
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }
