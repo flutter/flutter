@@ -94,7 +94,7 @@ class Cache {
     }
   }
 
-  static const List<String> _hostsBlockedInChina = <String> [ // TODO hmm?!
+  static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
   ];
 
@@ -236,8 +236,8 @@ class Cache {
     return fs.path.join(getArtifactDirectory(dirName).path, fileName);
   }
 
-  Map<String, String> iosUsbExecutionEnv() {
-    final String concatenatedPath = <String>[
+  String get iosUsbExecutionPath {
+    return const <String>[
       'libimobiledevice',
       'usbmuxd',
       'libplist',
@@ -245,11 +245,7 @@ class Cache {
       'ideviceinstaller',
       'libtasn1',
       'ios-deploy',
-    ].map((String path) => cache.getArtifactDirectory(path).path)
-        .toList()
-        .join(':');
-
-    return <String, String>{'DYLD_LIBRARY_PATH': concatenatedPath};
+    ].map((String path) => cache.getArtifactDirectory(path).path).join(':');
   }
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source

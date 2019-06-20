@@ -51,7 +51,7 @@ class IOSValidator extends DoctorValidator {
     final String binPath = cache.getArtifactFile('ideviceinstaller', 'ideviceinstaller');
     return exitsHappyAsync(
       <String>[binPath, '-h'],
-      environment: IosUsbArtifacts.executionEnv(),
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
       );
   }
 
@@ -59,7 +59,7 @@ class IOSValidator extends DoctorValidator {
     final String binPath = cache.getArtifactFile('ios-deploy', 'ios-deploy');
     return exitsHappyAsync(
       <String>[binPath, '--version'],
-      environment: IosUsbArtifacts.executionEnv(),
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
       );
   }
 
@@ -72,11 +72,11 @@ class IOSValidator extends DoctorValidator {
     final String binPath = cache.getArtifactFile('ios-deploy', 'ios-deploy');
     return (await runAsync(
       <String>[binPath, '--version'],
-      environment: IosUsbArtifacts.executionEnv(),
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
     )).processResult.stdout.replaceAll('\n', '');
   }
 
-  bool get hasHomebrew => os.which('brew') != null;
+  bool get hasHomebrew => os.which('brew') != null; // TODO ?
 
   Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
 
@@ -137,7 +137,7 @@ class IOSValidator extends DoctorValidator {
     if (checksFailed == totalChecks)
       packageManagerStatus = ValidationType.missing;
     if (checksFailed > 0 && !hasHomebrew) {
-      messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing));
+      messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing)); // TODO?
     }
 
     return ValidationResult(packageManagerStatus, messages);

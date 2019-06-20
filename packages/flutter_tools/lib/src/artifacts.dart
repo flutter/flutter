@@ -127,7 +127,7 @@ abstract class Artifacts {
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
 }
 
-class IosUsbArtifacts extends CachedArtifacts {
+class IosUsbArtifacts extends Artifacts {
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
     final String dirName = _artifactToFileName(artifact);
@@ -337,6 +337,15 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.libimobiledevice:
+      case Artifact.ideviceinstaller:
+      case Artifact.usbmuxd:
+      case Artifact.libplist:
+      case Artifact.openssl:
+      case Artifact.libtasn1:
+      case Artifact.iosdeploy:
+        final String artifactName = _artifactToFileName(artifact);
+        return cache.getArtifactDirectory(artifactName).path;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

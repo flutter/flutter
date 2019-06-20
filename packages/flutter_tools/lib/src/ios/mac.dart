@@ -47,11 +47,8 @@ class IMobileDevice {
 
   bool get isInstalled {
     return exitsHappy(
-      <String>[
-        cache.getArtifactFile('libimobiledevice', 'idevice_id'),
-        '-h',
-      ],
-      environment: cache.iosUsbExecutionEnv(),
+      <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-h'],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
     );
   }
 
@@ -63,7 +60,7 @@ class IMobileDevice {
       return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = cache.iosUsbExecutionEnv();
+    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath};
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
         cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
@@ -98,7 +95,7 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(
         <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-l'],
-        environment: cache.iosUsbExecutionEnv(),
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
@@ -110,7 +107,16 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]); // TODO
+      final ProcessResult result = await processManager.run(
+        <String>[
+          cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
+          '-u',
+          deviceID,
+          '-k',
+          key
+        ],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+      );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
@@ -122,11 +128,19 @@ class IMobileDevice {
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
+  Future<Process> startLogger(String deviceID) {
+    return runCommand(
+      <String>[cache.getArtifactFile('libimobiledevice', 'idevicesyslog'), '-u', deviceID],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+    );
+  }
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+    return runCheckedAsync(
+      <String>[cache.getArtifactFile('libimobiledevice', 'idevicescreenshot'), outputFile.path],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+    );
   }
 }
 

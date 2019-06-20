@@ -27,7 +27,7 @@ const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
 
-class IOSDeploy {
+class IOSDeploy { // TODO
   const IOSDeploy();
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
@@ -38,7 +38,7 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final List<String> launchCommand = <String>[
-      '/usr/bin/env',
+      '/usr/bin/env', // TODO
       'ios-deploy',
       '--id',
       deviceId,
@@ -174,11 +174,16 @@ class IOSDevice extends Device {
   }
 
   static String _checkForCommand(
-    String command, [
+    String command, {
     String macInstructions = _kIdeviceinstallerInstructions,
-  ]) {
+    bool localCache = false,
+  }) {
     try {
-      command = runCheckedSync(<String>['which', command]).trim();
+      final Map<String, String> env = <String, String>{};
+      if (localCache) {
+        env['PATH'] = cache.iosUsbExecutionPath;
+      }
+      command = runCheckedSync(<String>['which', command], environment: env).trim();
     } catch (e) {
       if (platform.isMacOS) {
         printError('$command not found. $macInstructions');

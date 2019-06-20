@@ -15,7 +15,7 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 class CocoaPodsValidator extends DoctorValidator {
   const CocoaPodsValidator() : super('CocoaPods subvalidator');
 
-  bool get hasHomebrew => os.which('brew') != null;
+  bool get hasHomebrew => os.which('brew') != null; // TODO ?
 
   @override
   Future<ValidationResult> validate() async {

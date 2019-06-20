@@ -272,12 +272,12 @@ bool exitsHappy(
     //return processManager.runSync(cli, environment: environment).exitCode == 0;
     final ProcessResult result = processManager.runSync(cli, environment: environment);
     final int code = result.exitCode;
-    if (code != 0) {
-      print('Yolo dawg!');
+    if (code != 0) { // TODO!
       print('Command was: ${cli.join(' ')}');
       print('Code was: $code');
       print(result.stdout);
-      print('env was: ${environment['DYLD_LIBRARY_PATH']}');
+      print('libpath was: ${environment['DYLD_LIBRARY_PATH']}');
+      print('path was: ${environment['PATH']}');
     }
     return code == 0;
   } catch (error) {
