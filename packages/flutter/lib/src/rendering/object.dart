@@ -2153,8 +2153,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       renderers.add(renderer);
     }
     final Matrix4 transform = Matrix4.identity();
-    for (int index = renderers.length - 1; index > 0; index -= 1)
+    for (int index = renderers.length - 1; index > 0; index -= 1) {
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
+    }
     return transform;
   }
 

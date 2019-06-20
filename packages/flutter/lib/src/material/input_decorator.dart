@@ -574,7 +574,6 @@ class _RenderDecorationLayout {
   const _RenderDecorationLayout({
     this.boxToBaseline,
     this.inputBaseline, // for InputBorderType.underline
-    this.outlineBaseline, // for InputBorderType.outline
     this.subtextBaseline,
     this.containerHeight,
     this.subtextHeight,
@@ -582,7 +581,6 @@ class _RenderDecorationLayout {
 
   final Map<RenderBox, double> boxToBaseline;
   final double inputBaseline;
-  final double outlineBaseline;
   final double subtextBaseline; // helper/error counter
   final double containerHeight;
   final double subtextHeight;
@@ -596,6 +594,7 @@ class _RenderDecoration extends RenderBox {
     @required TextBaseline textBaseline,
     @required bool isFocused,
     @required bool expands,
+    TextAlignVertical textAlignVertical,
   }) : assert(decoration != null),
        assert(textDirection != null),
        assert(textBaseline != null),
@@ -603,6 +602,7 @@ class _RenderDecoration extends RenderBox {
        _decoration = decoration,
        _textDirection = textDirection,
        _textBaseline = textBaseline,
+       _textAlignVertical = textAlignVertical,
        _isFocused = isFocused,
        _expands = expands;
 
@@ -746,6 +746,27 @@ class _RenderDecoration extends RenderBox {
     markNeedsLayout();
   }
 
+  TextAlignVertical get textAlignVertical {
+    if (_textAlignVertical == null) {
+      return _isOutlineAligned ? TextAlignVertical.center : TextAlignVertical.top;
+    }
+    return _textAlignVertical;
+  }
+  TextAlignVertical _textAlignVertical;
+  set textAlignVertical(TextAlignVertical value) {
+    assert(value != null);
+    if (_textAlignVertical == value) {
+      return;
+    }
+    // No need to relayout if the effective value is still the same.
+    if (textAlignVertical.y == value.y) {
+      _textAlignVertical = value;
+      return;
+    }
+    _textAlignVertical = value;
+    markNeedsLayout();
+  }
+
   bool get isFocused => _isFocused;
   bool _isFocused;
   set isFocused(bool value) {
@@ -764,6 +785,12 @@ class _RenderDecoration extends RenderBox {
       return;
     _expands = value;
     markNeedsLayout();
+  }
+
+  // Indicates that the decoration should be aligned to accommodate an outline
+  // border.
+  bool get _isOutlineAligned {
+    return !decoration.isCollapsed && decoration.border.isOutline;
   }
 
   @override
@@ -862,7 +889,7 @@ class _RenderDecoration extends RenderBox {
 
   EdgeInsets get contentPadding => decoration.contentPadding;
 
-  // Lay out the given box if needed, and return its baseline
+  // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
     if (box == null) {
       return 0.0;
@@ -1006,21 +1033,34 @@ class _RenderDecoration extends RenderBox {
       ? maxContainerHeight
       : math.min(contentHeight, maxContainerHeight);
 
-    // Always position the prefix/suffix in the same place (baseline).
+    // Try to consider the prefix/suffix as part of the text when aligning it.
+    // If the prefix/suffix overflows however, allow it to extend outside of the
+    // input and align the remaining part of the text and prefix/suffix.
     final double overflow = math.max(0, contentHeight - maxContainerHeight);
-    final double baselineAdjustment = fixAboveInput - overflow;
+    // Map textAlignVertical from -1:1 to 0:1 so that it can be used to scale
+    // the baseline from its minimum to maximum values.
+    final double textAlignVerticalFactor = (textAlignVertical.y + 1.0) / 2.0;
+    // Adjust to try to fit top overflow inside the input on an inverse scale of
+    // textAlignVertical, so that top aligned text adjusts the most and bottom
+    // aligned text doesn't adjust at all.
+    final double baselineAdjustment = fixAboveInput - overflow * (1 - textAlignVerticalFactor);
 
     // The baselines that will be used to draw the actual input text content.
-    final double inputBaseline = contentPadding.top
+    final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
       + baselineAdjustment;
-    // The text in the input when an outline border is present is centered
-    // within the container less 2.0 dps at the top to account for the vertical
-    // space occupied by the floating label.
-    final double outlineBaseline = inputInternalBaseline
-      + baselineAdjustment / 2
-      + (containerHeight - (2.0 + inputHeight)) / 2.0;
+    final double maxContentHeight = containerHeight
+      - contentPadding.top
+      - topHeight
+      - contentPadding.bottom;
+    final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
+    // When outline aligned, the baseline is vertically centered by default, and
+    // outlinePadding is used to account for the presence of the border and
+    // floating label.
+    final double outlinePadding = _isOutlineAligned ? 10.0 : 0;
+    final double textAlignVerticalOffset = (maxContentHeight - alignableHeight - outlinePadding) * textAlignVerticalFactor;
+    final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
 
     // Find the positions of the text below the input when it exists.
     double subtextCounterBaseline = 0;
@@ -1050,7 +1090,6 @@ class _RenderDecoration extends RenderBox {
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
-      outlineBaseline: outlineBaseline,
       subtextBaseline: subtextBaseline,
       subtextHeight: subtextHeight,
     );
@@ -1160,9 +1199,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.isCollapsed || !decoration.border.isOutline
-      ? layout.inputBaseline
-      : layout.outlineBaseline;
+    baseline = layout.inputBaseline;
 
     if (icon != null) {
       double x;
@@ -1213,12 +1250,13 @@ class _RenderDecoration extends RenderBox {
           start -= contentPadding.left;
           start += centerLayout(prefixIcon, start);
         }
-        if (label != null)
+        if (label != null) {
           if (decoration.alignLabelWithHint) {
             baselineLayout(label, start);
           } else {
             centerLayout(label, start);
           }
+        }
         if (prefix != null)
           start += baselineLayout(prefix, start);
         if (input != null)
@@ -1512,6 +1550,7 @@ class _RenderDecorationElement extends RenderObjectElement {
 class _Decorator extends RenderObjectWidget {
   const _Decorator({
     Key key,
+    @required this.textAlignVertical,
     @required this.decoration,
     @required this.textDirection,
     @required this.textBaseline,
@@ -1526,6 +1565,7 @@ class _Decorator extends RenderObjectWidget {
   final _Decoration decoration;
   final TextDirection textDirection;
   final TextBaseline textBaseline;
+  final TextAlignVertical textAlignVertical;
   final bool isFocused;
   final bool expands;
 
@@ -1538,6 +1578,7 @@ class _Decorator extends RenderObjectWidget {
       decoration: decoration,
       textDirection: textDirection,
       textBaseline: textBaseline,
+      textAlignVertical: textAlignVertical,
       isFocused: isFocused,
       expands: expands,
     );
@@ -1612,6 +1653,7 @@ class InputDecorator extends StatefulWidget {
     this.decoration,
     this.baseStyle,
     this.textAlign,
+    this.textAlignVertical,
     this.isFocused = false,
     this.isHovering = false,
     this.expands = false,
@@ -1642,6 +1684,20 @@ class InputDecorator extends StatefulWidget {
 
   /// How the text in the decoration should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// {@template flutter.widgets.inputDecorator.textAlignVertical}
+  /// How the text should be aligned vertically.
+  ///
+  /// Determines the alignment of the baseline within the available space of
+  /// the input (typically a TextField). For example, TextAlignVertical.top will
+  /// place the baseline such that the text, and any attached decoration like
+  /// prefix and suffix, is as close to the top of the input as possible without
+  /// overflowing. The heights of the prefix and suffix are similarly included
+  /// for other alignment values. If the height is greater than the height
+  /// available, then the prefix and suffix will be allowed to overflow first
+  /// before the text scrolls.
+  /// {@endtemplate}
+  final TextAlignVertical textAlignVertical;
 
   /// Whether the input field has focus.
   ///
@@ -2148,6 +2204,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
       textDirection: textDirection,
       textBaseline: textBaseline,
+      textAlignVertical: widget.textAlignVertical,
       isFocused: isFocused,
       expands: widget.expands,
     );
@@ -3466,5 +3523,44 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
+  }
+}
+
+/// The vertical alignment of text within an input.
+///
+/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
+/// of the input so that the top of the first line of text fits within the input
+/// and its padding. 0.0 aligns to the center of the input. 1.0 aligns so that
+/// the bottom of the last line of text aligns with the bottom interior edge of
+/// the input.
+///
+/// See also:
+///
+///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
+///  * [InputDecorator.textAlignVertical], which defines the alignment of
+///    prefix, input, and suffix, within the [InputDecorator].
+class TextAlignVertical {
+  /// Construct TextAlignVertical from any given y value.
+  const TextAlignVertical({
+    @required this.y,
+  }) : assert(y != null),
+       assert(y >= -1.0 && y <= 1.0);
+
+  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
+  /// locations of the top and bottom of the input text box.
+  final double y;
+
+  /// Aligns a TextField's input Text with the topmost location within the
+  /// TextField.
+  static const TextAlignVertical top = TextAlignVertical(y: -1.0);
+  /// Aligns a TextField's input Text to the center of the TextField.
+  static const TextAlignVertical center = TextAlignVertical(y: 0.0);
+  /// Aligns a TextField's input Text with the bottommost location within the
+  /// TextField.
+  static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);
+
+  @override
+  String toString() {
+    return '$runtimeType(y: $y)';
   }
 }
