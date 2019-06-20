@@ -532,17 +532,8 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     devices = devices.where((Device device) => device.isSupported()).toList();
-    // If the user has not specified all devices and has multiple connected
-    // then filter then list by those supported in the current project and
-    // remove non-ephemeral device types. If this ends up with a single
-    // device we can proceed as normal.
     if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      final FlutterProject flutterProject = FlutterProject.current();
-      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
-
-      if (devices.any((Device device) => device.ephemeral)) {
-        devices.removeWhere((Device device) => !device.ephemeral);
-      }
+      devices = filterDevices(devices);
     }
 
     if (devices.isEmpty) {
@@ -717,4 +708,23 @@ abstract class FastFlutterCommand extends FlutterCommand {
       body: runCommand,
     );
   }
+}
+
+// If the user has not specified all devices and has multiple connected
+// then filter then list by those supported in the current project and
+// remove non-ephemeral device types. If this ends up with a single
+// device we can proceed as normal.
+@visibleForTesting
+List<Device> filterDevices(List<Device> devices) {
+  final FlutterProject flutterProject = FlutterProject.current();
+  devices = devices
+      .where((Device device) => device.isSupportedForProject(flutterProject))
+      .toList();
+
+  if (devices.any((Device device) => device.ephemeral)) {
+    devices = devices
+        .where((Device device) => device.ephemeral)
+        .toList();
+  }
+  return devices;
 }
