@@ -130,7 +130,7 @@ class DartMessenger implements BinaryMessenger, PlatformMessageHandler {
     }
 
     @Override
-    public void reply(ByteBuffer reply) {
+    public void reply(@Nullable ByteBuffer reply) {
       if (done.getAndSet(true)) {
         throw new IllegalStateException("Reply already submitted");
       }

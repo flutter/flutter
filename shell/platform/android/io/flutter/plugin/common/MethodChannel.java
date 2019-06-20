@@ -142,7 +142,7 @@ public final class MethodChannel {
          * @param result A {@link Result} used for submitting the result of the call.
          */
         @UiThread
-        void onMethodCall(MethodCall call, Result result);
+        void onMethodCall(@NonNull MethodCall call, @NonNull Result result);
     }
 
     /**

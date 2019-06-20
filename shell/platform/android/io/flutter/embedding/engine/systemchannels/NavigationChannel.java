@@ -25,12 +25,12 @@ public class NavigationChannel {
     this.channel = new MethodChannel(dartExecutor, "flutter/navigation", JSONMethodCodec.INSTANCE);
   }
 
-  public void setInitialRoute(String initialRoute) {
+  public void setInitialRoute(@NonNull String initialRoute) {
     Log.v(TAG, "Sending message to set initial route to '" + initialRoute + "'");
     channel.invokeMethod("setInitialRoute", initialRoute);
   }
 
-  public void pushRoute(String route) {
+  public void pushRoute(@NonNull String route) {
     Log.v(TAG, "Sending message to push route '" + route + "'");
     channel.invokeMethod("pushRoute", route);
   }

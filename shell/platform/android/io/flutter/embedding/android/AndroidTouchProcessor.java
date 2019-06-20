@@ -89,7 +89,7 @@ public class AndroidTouchProcessor {
    * Sends the given {@link MotionEvent} data to Flutter in a format that
    * Flutter understands.
    */
-  public boolean onTouchEvent(MotionEvent event) {
+  public boolean onTouchEvent(@NonNull MotionEvent event) {
     int pointerCount = event.getPointerCount();
 
     // Prepare a data packet of the appropriate size and order.
@@ -145,7 +145,7 @@ public class AndroidTouchProcessor {
    * Generic motion events include joystick movement, mouse hover, track pad touches, scroll wheel
    * movements, etc.
    */
-  public boolean onGenericMotionEvent(MotionEvent event) {
+  public boolean onGenericMotionEvent(@NonNull MotionEvent event) {
     // Method isFromSource is only available in API 18+ (Jelly Bean MR2)
     // Mouse hover support is not implemented for API < 18.
     boolean isPointerEvent = Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2

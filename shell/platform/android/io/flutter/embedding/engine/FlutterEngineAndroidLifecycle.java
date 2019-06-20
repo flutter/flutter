@@ -40,6 +40,7 @@ final class FlutterEngineAndroidLifecycle extends LifecycleRegistry {
   private Lifecycle backingLifecycle;
   private boolean isDestroyed = false;
 
+  @NonNull
   private final LifecycleObserver forwardingObserver = new DefaultLifecycleObserver() {
     @Override
     public void onCreate(@NonNull LifecycleOwner owner) {

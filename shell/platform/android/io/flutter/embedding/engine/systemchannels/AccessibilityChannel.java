@@ -30,7 +30,7 @@ public class AccessibilityChannel {
 
   private final BasicMessageChannel.MessageHandler<Object> parsingMessageHandler = new BasicMessageChannel.MessageHandler<Object>() {
     @Override
-    public void onMessage(Object message, BasicMessageChannel.Reply<Object> reply) {
+    public void onMessage(@Nullable Object message, @NonNull BasicMessageChannel.Reply<Object> reply) {
       // If there is no handler to respond to this message then we don't need to
       // parse it. Return.
       if (handler == null) {

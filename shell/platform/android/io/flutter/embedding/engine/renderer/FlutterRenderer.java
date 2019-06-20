@@ -105,10 +105,11 @@ public class FlutterRenderer implements TextureRegistry {
 
   final class SurfaceTextureRegistryEntry implements TextureRegistry.SurfaceTextureEntry {
     private final long id;
+    @NonNull
     private final SurfaceTexture surfaceTexture;
     private boolean released;
 
-    SurfaceTextureRegistryEntry(long id, SurfaceTexture surfaceTexture) {
+    SurfaceTextureRegistryEntry(long id, @NonNull SurfaceTexture surfaceTexture) {
       this.id = id;
       this.surfaceTexture = surfaceTexture;
 
@@ -127,7 +128,7 @@ public class FlutterRenderer implements TextureRegistry {
 
     private SurfaceTexture.OnFrameAvailableListener onFrameListener = new SurfaceTexture.OnFrameAvailableListener() {
       @Override
-      public void onFrameAvailable(SurfaceTexture texture) {
+      public void onFrameAvailable(@NonNull SurfaceTexture texture) {
         if (released) {
           // Even though we make sure to unregister the callback before releasing, as of Android O
           // SurfaceTexture has a data race when accessing the callback, so the callback may
@@ -139,6 +140,7 @@ public class FlutterRenderer implements TextureRegistry {
     };
 
     @Override
+    @NonNull
     public SurfaceTexture surfaceTexture() {
       return surfaceTexture;
     }
@@ -162,7 +164,7 @@ public class FlutterRenderer implements TextureRegistry {
   //------ END TextureRegistry IMPLEMENTATION ----
 
   // TODO(mattcarroll): describe the native behavior that this invokes
-  public void surfaceCreated(Surface surface) {
+  public void surfaceCreated(@NonNull Surface surface) {
     flutterJNI.onSurfaceCreated(surface);
   }
 
@@ -201,17 +203,18 @@ public class FlutterRenderer implements TextureRegistry {
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes
+  // TODO(mattcarroll): determine if this is nullable or nonnull
   public Bitmap getBitmap() {
     return flutterJNI.getBitmap();
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes
-  public void dispatchPointerDataPacket(ByteBuffer buffer, int position) {
+  public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {
     flutterJNI.dispatchPointerDataPacket(buffer, position);
   }
 
   // TODO(mattcarroll): describe the native behavior that this invokes
-  private void registerTexture(long textureId, SurfaceTexture surfaceTexture) {
+  private void registerTexture(long textureId, @NonNull SurfaceTexture surfaceTexture) {
     flutterJNI.registerTexture(textureId, surfaceTexture);
   }
 
@@ -243,7 +246,7 @@ public class FlutterRenderer implements TextureRegistry {
   // TODO(mattcarroll): describe the native behavior that this invokes
   public void dispatchSemanticsAction(int id,
                                       int action,
-                                      ByteBuffer args,
+                                      @Nullable ByteBuffer args,
                                       int argsPosition) {
     flutterJNI.dispatchSemanticsAction(
         id,

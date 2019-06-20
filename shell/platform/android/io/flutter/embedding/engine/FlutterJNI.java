@@ -94,21 +94,30 @@ public class FlutterJNI {
   private static final String TAG = "FlutterJNI";
 
   // This is set from native code via JNI.
+  @Nullable
   private static String observatoryUri;
 
   @UiThread
   public static native boolean nativeGetIsSoftwareRenderingEnabled();
 
+  @Nullable
   public static String getObservatoryUri() {
     return observatoryUri;
   }
 
+  @Nullable
   private Long nativePlatformViewId;
+  @Nullable
   private FlutterRenderer.RenderSurface renderSurface;
+  @Nullable
   private AccessibilityDelegate accessibilityDelegate;
+  @Nullable
   private PlatformMessageHandler platformMessageHandler;
+  @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
+  @NonNull
   private final Set<OnFirstFrameRenderedListener> firstFrameListeners = new HashSet<>();
+  @NonNull
   private final Looper mainLooper; // cached to avoid synchronization on repeat access.
 
   public FlutterJNI() {
@@ -139,7 +148,7 @@ public class FlutterJNI {
     nativePlatformViewId = nativeAttach(this, isBackgroundView);
   }
 
-  private native long nativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView);
+  private native long nativeAttach(@NonNull FlutterJNI flutterJNI, boolean isBackgroundView);
 
   /**
    * Detaches this {@code FlutterJNI} instance from Flutter's native engine, which precludes
@@ -246,7 +255,7 @@ public class FlutterJNI {
     nativeSurfaceCreated(nativePlatformViewId, surface);
   }
 
-  private native void nativeSurfaceCreated(long nativePlatformViewId, Surface surface);
+  private native void nativeSurfaceCreated(long nativePlatformViewId, @NonNull Surface surface);
 
   /**
    * Call this method when the {@link Surface} changes that was previously registered with
@@ -341,14 +350,14 @@ public class FlutterJNI {
    * Sends a packet of pointer data to Flutter's engine.
    */
   @UiThread
-  public void dispatchPointerDataPacket(ByteBuffer buffer, int position) {
+  public void dispatchPointerDataPacket(@NonNull ByteBuffer buffer, int position) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeDispatchPointerDataPacket(nativePlatformViewId, buffer, position);
   }
 
   private native void nativeDispatchPointerDataPacket(long nativePlatformViewId,
-                                                      ByteBuffer buffer,
+                                                      @NonNull ByteBuffer buffer,
                                                       int position);
   //------ End Touch Interaction Support ---
 
@@ -377,7 +386,7 @@ public class FlutterJNI {
    */
   @SuppressWarnings("unused")
   @UiThread
-  private void updateSemantics(ByteBuffer buffer, String[] strings) {
+  private void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateSemantics(buffer, strings);
@@ -395,7 +404,7 @@ public class FlutterJNI {
    */
   @SuppressWarnings("unused")
   @UiThread
-  private void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings) {
+  private void updateCustomAccessibilityActions(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
     ensureRunningOnMainThread();
     if (accessibilityDelegate != null) {
       accessibilityDelegate.updateCustomAccessibilityActions(buffer, strings);
@@ -434,7 +443,7 @@ public class FlutterJNI {
    * {@link #dispatchSemanticsAction(int, AccessibilityBridge.Action, Object)}.
    */
   @UiThread
-  public void dispatchSemanticsAction(int id, int action, ByteBuffer args, int argsPosition) {
+  public void dispatchSemanticsAction(int id, int action, @Nullable ByteBuffer args, int argsPosition) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeDispatchSemanticsAction(nativePlatformViewId, id, action, args, argsPosition);
@@ -444,7 +453,7 @@ public class FlutterJNI {
       long nativePlatformViewId,
       int id,
       int action,
-      ByteBuffer args,
+      @Nullable ByteBuffer args,
       int argsPosition
   );
 
@@ -478,13 +487,13 @@ public class FlutterJNI {
    * texture within Flutter's UI.
    */
   @UiThread
-  public void registerTexture(long textureId, SurfaceTexture surfaceTexture) {
+  public void registerTexture(long textureId, @NonNull SurfaceTexture surfaceTexture) {
     ensureRunningOnMainThread();
     ensureAttachedToNative();
     nativeRegisterTexture(nativePlatformViewId, textureId, surfaceTexture);
   }
 
-  private native void nativeRegisterTexture(long nativePlatformViewId, long textureId, SurfaceTexture surfaceTexture);
+  private native void nativeRegisterTexture(long nativePlatformViewId, long textureId, @NonNull SurfaceTexture surfaceTexture);
 
   /**
    * Call this method to inform Flutter that a texture previously registered with
@@ -580,8 +589,9 @@ public class FlutterJNI {
   }
 
   // Called by native.
+  // TODO(mattcarroll): determine if message is nonull or nullable
   @SuppressWarnings("unused")
-  private void handlePlatformMessage(final String channel, byte[] message, final int replyId) {
+  private void handlePlatformMessage(@NonNull final String channel, byte[] message, final int replyId) {
     if (platformMessageHandler != null) {
       platformMessageHandler.handleMessageFromDart(channel, message, replyId);
     }
@@ -589,6 +599,7 @@ public class FlutterJNI {
   }
 
   // Called by native to respond to a platform message that we sent.
+  // TODO(mattcarroll): determine if reply is nonull or nullable
   @SuppressWarnings("unused")
   private void handlePlatformMessageResponse(int replyId, byte[] reply) {
     if (platformMessageHandler != null) {
@@ -602,7 +613,7 @@ public class FlutterJNI {
    * {@code channel}.
    */
   @UiThread
-  public void dispatchEmptyPlatformMessage(String channel, int responseId) {
+  public void dispatchEmptyPlatformMessage(@NonNull String channel, int responseId) {
     ensureRunningOnMainThread();
     if (isAttached()) {
       nativeDispatchEmptyPlatformMessage(nativePlatformViewId, channel, responseId);
@@ -614,7 +625,7 @@ public class FlutterJNI {
   // Send an empty platform message to Dart.
   private native void nativeDispatchEmptyPlatformMessage(
       long nativePlatformViewId,
-      String channel,
+      @NonNull String channel,
       int responseId
   );
 
@@ -622,7 +633,7 @@ public class FlutterJNI {
    * Sends a reply {@code message} from Android to Flutter over the given {@code channel}.
    */
   @UiThread
-  public void dispatchPlatformMessage(String channel, ByteBuffer message, int position, int responseId) {
+  public void dispatchPlatformMessage(@NonNull String channel, @Nullable ByteBuffer message, int position, int responseId) {
     ensureRunningOnMainThread();
     if (isAttached()) {
       nativeDispatchPlatformMessage(
@@ -640,8 +651,8 @@ public class FlutterJNI {
   // Send a data-carrying platform message to Dart.
   private native void nativeDispatchPlatformMessage(
       long nativePlatformViewId,
-      String channel,
-      ByteBuffer message,
+      @NonNull String channel,
+      @Nullable ByteBuffer message,
       int position,
       int responseId
   );
@@ -665,7 +676,7 @@ public class FlutterJNI {
 
   // TODO(mattcarroll): differentiate between channel responses and platform responses.
   @UiThread
-  public void invokePlatformMessageResponseCallback(int responseId, ByteBuffer message, int position) {
+  public void invokePlatformMessageResponseCallback(int responseId, @Nullable ByteBuffer message, int position) {
     ensureRunningOnMainThread();
     if (isAttached()) {
       nativeInvokePlatformMessageResponseCallback(
@@ -683,7 +694,7 @@ public class FlutterJNI {
   private native void nativeInvokePlatformMessageResponseCallback(
       long nativePlatformViewId,
       int responseId,
-      ByteBuffer message,
+      @Nullable ByteBuffer message,
       int position
   );
   //------- End Platform Message Support ----
@@ -718,6 +729,7 @@ public class FlutterJNI {
   }
   //----- End Engine Lifecycle Support ----
 
+  // TODO(mattcarroll): determine if this is nonull or nullable
   @UiThread
   public Bitmap getBitmap() {
     ensureRunningOnMainThread();
@@ -725,6 +737,7 @@ public class FlutterJNI {
     return nativeGetBitmap(nativePlatformViewId);
   }
 
+  // TODO(mattcarroll): determine if this is nonull or nullable
   private native Bitmap nativeGetBitmap(long nativePlatformViewId);
 
   private void ensureRunningOnMainThread() {
@@ -749,7 +762,7 @@ public class FlutterJNI {
      * Implementers are expected to maintain an Android-side cache of custom accessibility actions.
      * This method provides new actions to add to that cache.
      */
-    void updateCustomAccessibilityActions(ByteBuffer buffer, String[] strings);
+    void updateCustomAccessibilityActions(@NonNull ByteBuffer buffer, @NonNull String[] strings);
 
     /**
      * Sends new {@code SemanticsNode} information from Flutter to Android.
@@ -757,6 +770,6 @@ public class FlutterJNI {
      * Implementers are expected to maintain an Android-side cache of Flutter's semantics tree.
      * This method provides updates from Flutter for the Android-side semantics tree cache.
      */
-    void updateSemantics(ByteBuffer buffer, String[] strings);
+    void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings);
   }
 }

@@ -50,7 +50,7 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
   // FlutterRenderer, and then on to the JNI bridge over to native Flutter code.
   private final SurfaceHolder.Callback surfaceCallback = new SurfaceHolder.Callback() {
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    public void surfaceCreated(@NonNull SurfaceHolder holder) {
       Log.v(TAG, "SurfaceHolder.Callback.surfaceCreated()");
       isSurfaceAvailableForRendering = true;
 
@@ -60,7 +60,7 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
       Log.v(TAG, "SurfaceHolder.Callback.surfaceChanged()");
       if (isAttachedToFlutterRenderer) {
         changeSurfaceSize(width, height);
@@ -68,7 +68,7 @@ public class FlutterSurfaceView extends SurfaceView implements FlutterRenderer.R
     }
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
+    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
       Log.v(TAG, "SurfaceHolder.Callback.surfaceDestroyed()");
       isSurfaceAvailableForRendering = false;
 
