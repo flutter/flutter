@@ -31,6 +31,8 @@ task:
         FIREBASE_MASTER_TOKEN: ENCRYPTED[eb768d18798fdc5abfe09b224e1724c4d82831d715ccf90df2c79d618c317216cbd99493278361f6fe7948b409b603f0]
         # For uploading beta docs to Firebase public live site
         FIREBASE_PUBLIC_TOKEN: ENCRYPTED[37e8b82f167864cae9a3f4d2cf3f37dea331d9375c295327c45de524f6c588fa6f6d63e5784f10f6d43ce29689f36c92]
+        # For Uploading to GCS
+        GCS_SERVICE_ACCOUNT: ENCRYPTED[ca271fed014bfd5e4207c350e6567413574390b9d4152893e64231d9c09613e5c68e66ec8cb4b6025161c85efa057d65]
       docs_script: ./dev/bots/docs.sh
     - name: deploy_gallery
       depends_on:
