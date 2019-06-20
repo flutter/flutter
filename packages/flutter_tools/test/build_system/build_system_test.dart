@@ -99,7 +99,7 @@ void main() {
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
       await buildSystem.build('foo', environment, const BuildSystemConfig());
 
-      final File stampFile = fs.file('build/foo.stamp');
+      final File stampFile = fs.file(fs.path.join(environment.buildDir.path, 'foo.stamp'));
       expect(stampFile.existsSync(), true);
 
       final Map<String, Object> stampContents = json.decode(stampFile.readAsStringSync());
@@ -125,7 +125,7 @@ void main() {
     test('Runs dependencies of targets', () => testbed.run(() async {
       await buildSystem.build('bar', environment, const BuildSystemConfig());
 
-      expect(fs.file('build/bar').existsSync(), true);
+      expect(fs.file(fs.path.join(environment.buildDir.path, 'bar')).existsSync(), true);
       expect(fooInvocations, 1);
       expect(barInvocations, 1);
     }));
@@ -137,7 +137,7 @@ void main() {
         ],
         'dependencies': <Object>[],
         'name':  'foo',
-        'stamp': fs.path.absolute(fs.path.join('build', 'foo.stamp')),
+        'stamp': fs.path.join(environment.buildDir.path, 'foo.stamp'),
       });
     }));
 
@@ -339,18 +339,19 @@ void main() {
   group('Patterns', () {
     Testbed testbed;
     SourceVisitor visitor;
+    Environment environment;
 
     setUp(() {
       testbed = Testbed(setup: () {
         fs.directory('cache').createSync();
-        fs.directory('build').createSync();
-        final Environment environment = Environment(
+        environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: fs.directory('cache'),
           buildDir: fs.directory('build'),
           flutterRootDir: fs.currentDirectory,
         );
         visitor = SourceVisitor(environment);
+        environment.buildDir.createSync(recursive: true);
       });
     });
 
@@ -363,7 +364,7 @@ void main() {
     }));
 
     test('can substitute {BUILD_DIR}/bar', () => testbed.run(() {
-      final String path = fs.path.join('build', 'bar');
+      final String path = fs.path.join(environment.buildDir.path, 'bar');
       fs.file(path).createSync();
       const Source barSource = Source.pattern('{BUILD_DIR}/bar');
       barSource.accept(visitor);
