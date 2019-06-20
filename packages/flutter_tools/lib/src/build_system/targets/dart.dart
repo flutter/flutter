@@ -17,7 +17,7 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   final KernelCompiler compiler = await kernelCompilerFactory.create(
     FlutterProject.fromDirectory(environment.projectDir),
   );
-  final BuildMode buildMode = getBuildModeForName(environment.defines['shared']['buildMode']);
+  final BuildMode buildMode = getBuildModeForName(environment.defines['buildMode']);
   await compiler.compile(
     aot: buildMode != BuildMode.debug,
     trackWidgetCreation: false,

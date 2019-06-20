@@ -318,23 +318,23 @@ class Environment {
     Directory buildDir,
     Directory cacheDir,
     Directory flutterRootDir,
-    Map<String, Map<String, String>> defines = const <String, Map<String, String>>{},
+    Map<String, String> defines = const <String, String>{},
   }) {
     assert(projectDir != null);
     String buildPrefix;
     if (defines.isNotEmpty) {
-      // Sort the keys by target and then by rule so that the result is stable.
-      final List<String> targets = defines.keys.toList()..sort();
+      // Sort the keys by key so that the result is stable.
+      final List<String> keys = defines.keys.toList()..sort();
       final StringBuffer buffer = StringBuffer();
-      for (String target in targets) {
-        final List<String> keys = defines[target].keys.toList()..sort();
-        for (String key in keys) {
-          buffer.write(key);
-          buffer.write(defines[target][key]);
-        }
+      for (String key in keys) {
+        buffer.write(key);
+        buffer.write(defines[key]);
       }
       final String output = buffer.toString();
       final Digest digest = md5.convert(utf8.encode(output));
+      buildPrefix = base64.encode(digest.bytes);
+    } else {
+      final Digest digest = md5.convert(utf8.encode('Flutter and Dart is awesome'));
       buildPrefix = base64.encode(digest.bytes);
     }
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
@@ -396,8 +396,11 @@ class Environment {
   /// Defaults to the root of the flutter checkout for which this command is run.
   final Directory flutterRootDir;
 
-  /// Per-target additional condiguration.
-  final Map<String, Map<String, String>> defines;
+  /// Additional condiguration passed to the build targets.
+  ///
+  /// Setting values here forces a unique build directory to be chosen
+  /// which prevents the config from leaking into different builds.
+  final Map<String, String> defines;
 
   /// The root build directory shared by all builds.
   final Directory rootBuildDir;

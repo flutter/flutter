@@ -112,18 +112,16 @@ abstract class AssembleBase extends FlutterCommand {
     return result;
   }
 
-  static Map<String, Map<String, String>> _parseDefines(List<String> values) {
-    final Map<String, Map<String, String>> results = <String, Map<String, String>>{};
+  static Map<String, String> _parseDefines(List<String> values) {
+    final Map<String, String> results = <String, String>{};
     for (String chunk in values) {
       final List<String> parts = chunk.split('=');
-      if (parts.length != 3) {
+      if (parts.length != 2) {
         throwToolExit('Improperly formatted define flag: $chunk');
       }
-      final String target = parts[0];
-      final String key = parts[1];
-      final String value = parts[2];
-      results[target] ??= <String, String>{};
-      results[target][key] = value;
+      final String key = parts[0];
+      final String value = parts[1];
+      results[key] = value;
     }
     return results;
   }
