@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -23,6 +24,9 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
+          defines: <String, String>{
+            kBuildModeFlag: getNameForBuildMode(BuildMode.debug),
+          }
         );
         buildSystem = const BuildSystem(<Target>[
           kernelSnapshot,
@@ -43,7 +47,7 @@ flutter_tools:lib/''');
     test('Produces correct output directory', () => testbed.run(() async {
       await buildSystem.build('kernel_snapshot', environment, const BuildSystemConfig());
 
-      expect(fs.file(fs.path.join('build', 'debug', 'main.app.dill')).existsSync(), true);
+      expect(fs.file(fs.path.join(environment.buildDir.path,'main.app.dill')).existsSync(), true);
     }));
   });
 }

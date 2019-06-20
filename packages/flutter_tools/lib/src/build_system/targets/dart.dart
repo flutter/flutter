@@ -10,6 +10,9 @@ import '../../dart/package_map.dart';
 import '../../project.dart';
 import '../build_system.dart';
 
+/// The define to pass a [BuildMode].
+const String kBuildModeFlag = 'buildMode';
+
 /// Supports compiling dart source to kernel with a subset of flags.
 ///
 /// This is a non-incremental compile so the specific [updates] are ignored.
@@ -17,7 +20,7 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   final KernelCompiler compiler = await kernelCompilerFactory.create(
     FlutterProject.fromDirectory(environment.projectDir),
   );
-  final BuildMode buildMode = getBuildModeForName(environment.defines['buildMode']);
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildModeFlag]);
   await compiler.compile(
     aot: buildMode != BuildMode.debug,
     trackWidgetCreation: false,
