@@ -721,9 +721,11 @@ List<Device> filterDevices(List<Device> devices) {
       .where((Device device) => device.isSupportedForProject(flutterProject))
       .toList();
 
-  if (devices.any((Device device) => device.ephemeral)) {
+  // Note: ephemeral is nullable for device types where this is not well
+  // defined.
+  if (devices.any((Device device) => device.ephemeral == true)) {
     devices = devices
-        .where((Device device) => device.ephemeral)
+        .where((Device device) => device.ephemeral == true)
         .toList();
   }
   return devices;
