@@ -711,7 +711,7 @@ abstract class FastFlutterCommand extends FlutterCommand {
 }
 
 // If the user has not specified all devices and has multiple connected
-// then filter then list by those supported in the current project and
+// then filter the list by those supported in the current project and
 // remove non-ephemeral device types. If this ends up with a single
 // device we can proceed as normal.
 @visibleForTesting
