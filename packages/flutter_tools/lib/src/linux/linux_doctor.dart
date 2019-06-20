@@ -19,11 +19,16 @@ class LinuxDoctorValidator extends DoctorValidator {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
     /// Check for a minimum version of Clang.
-    final ProcessResult clangResult = await processManager.run(const <String>[
-      'clang++',
-      '--version',
-    ]);
-    if (clangResult.exitCode != 0) {
+    ProcessResult clangResult;
+    try {
+      clangResult = await processManager.run(const <String>[
+        'clang++',
+        '--version',
+      ]);
+    } on ArgumentError {
+      // ignore error.
+    }
+    if (clangResult == null || clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error('clang++ is not installed'));
     } else {
@@ -41,11 +46,16 @@ class LinuxDoctorValidator extends DoctorValidator {
     /// Check for make.
     // TODO(jonahwilliams): tighten this check to include a version when we have
     // a better idea about what is supported.
-    final ProcessResult makeResult = await processManager.run(const <String>[
-      'make',
-      '--version',
-    ]);
-    if (makeResult.exitCode != 0) {
+    ProcessResult makeResult;
+    try {
+      makeResult = await processManager.run(const <String>[
+        'make',
+        '--version',
+      ]);
+    } on ArgumentError {
+      // ignore error.
+    }
+    if (makeResult == null || makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error('make is not installed'));
     } else {
