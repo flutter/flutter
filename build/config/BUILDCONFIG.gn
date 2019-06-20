@@ -462,6 +462,10 @@ set_defaults("test") {
 # default toolchain.
 import("//build/toolchain/custom/custom.gni")
 
+# Define this to allow Fuchsia's fork of harfbuzz to build.
+# shlib_toolchain is a Fuchsia-specific symbol and not used by Flutter.
+shlib_toolchain = false
+
 if (custom_toolchain != "") {
   assert(custom_sysroot != "")
   assert(custom_target_triple != "")
