@@ -46,7 +46,14 @@ abstract class GoldenFileComparator {
   /// is left up to the implementation class.
   Future<void> update(Uri golden, Uint8List imageBytes);
 
-  /// TODO(Piinks): document
+  /// Updates the uri [key] of the golden file to incorporate any [version]
+  /// number.
+  ///
+  /// The [version] is an optional int that can be used to differentiate
+  /// historical golden files.
+  ///
+  /// Version numbers are used in golden file tests for package:flutter. You can
+  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
   Uri getTestUri(Uri key, int version);
 }
 
