@@ -38,8 +38,7 @@ class IOSDeploy { // TODO
     @required List<String> launchArguments,
   }) async {
     final List<String> launchCommand = <String>[
-      '/usr/bin/env', // TODO
-      'ios-deploy',
+      cache.getArtifactFile('ios-deploy', 'ios-deploy'),
       '--id',
       deviceId,
       '--bundle',
@@ -61,6 +60,7 @@ class IOSDeploy { // TODO
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
+    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.iosUsbExecutionPath;
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -176,14 +176,12 @@ class IOSDevice extends Device {
   static String _checkForCommand(
     String command, {
     String macInstructions = _kIdeviceinstallerInstructions,
-    bool localCache = false,
   }) {
     try {
-      final Map<String, String> env = <String, String>{};
-      if (localCache) {
-        env['PATH'] = cache.iosUsbExecutionPath;
-      }
-      command = runCheckedSync(<String>['which', command], environment: env).trim();
+      command = runCheckedSync(
+        <String>['which', command],
+        environment: <String, String>{'PATH': cache.iosUsbExecutionPath},
+      ).trim();
     } catch (e) {
       if (platform.isMacOS) {
         printError('$command not found. $macInstructions');

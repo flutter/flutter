@@ -179,9 +179,6 @@ class UserMessages {
   String get iOSDeployMissing =>
       'ios-deploy not installed. To install:\n'
       '  brew install ios-deploy';
-  String get iOSBrewMissing =>
-      'Brew can be used to install tools for iOS device development.\n'
-      'Download brew at https://brew.sh/.';
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';

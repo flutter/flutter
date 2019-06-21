@@ -132,12 +132,8 @@ class IOSValidator extends DoctorValidator {
       }
     }
 
-    // If one of the checks for the packages failed, we may need brew so that we can install
-    // the necessary packages. If they're all there, however, we don't even need it.
-    if (checksFailed == totalChecks)
+    if (checksFailed == totalChecks) {
       packageManagerStatus = ValidationType.missing;
-    if (checksFailed > 0 && !hasHomebrew) {
-      messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing)); // TODO?
     }
 
     return ValidationResult(packageManagerStatus, messages);
