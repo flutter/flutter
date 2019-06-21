@@ -97,6 +97,16 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: tool_tests_coverage-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+      test_script:
+        - cd ./packages/flutter_tools
+        - dart tool/tool_coverage.dart
+      container:
+        cpu: 4
+        memory: 12G
     - name: web_tests-linux
       # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
       allow_failures: true
