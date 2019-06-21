@@ -15,6 +15,7 @@
 		0D6AB6C422BB05E200EEE540 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6C322BB05E200EEE540 /* main.m */; };
 		0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */; };
 		0D6AB72C22BC339F00EEE540 /* libOCMock.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D6AB72522BC336100EEE540 /* libOCMock.a */; };
+		0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,6 +85,7 @@
 		0D6AB6CF22BB05E200EEE540 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterEngineTest.mm; sourceTree = "<group>"; };
 		0D6AB71722BC336100EEE540 /* OCMock.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OCMock.xcodeproj; path = ../../../../../third_party/ocmock/Source/OCMock.xcodeproj; sourceTree = "<group>"; };
+		0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = FlutterEngineConfig.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +148,7 @@
 				0D6AB71722BC336100EEE540 /* OCMock.xcodeproj */,
 				0D6AB6E622BB409F00EEE540 /* Source */,
 				0D6AB6CF22BB05E200EEE540 /* Info.plist */,
+				0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -321,6 +324,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D6AB73F22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -549,6 +553,7 @@
 		};
 		0D6AB6D622BB05E200EEE540 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
@@ -577,7 +582,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					../../../../out/ios_debug_sim_unopt,
+					../../../../out/$FLUTTER_ENGINE,
 					"-lFlutter",
 					"-lOCMock",
 					"-ObjC",
@@ -592,6 +597,7 @@
 		};
 		0D6AB6D722BB05E200EEE540 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0D6AB73E22BD8F0200EEE540 /* FlutterEngineConfig.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES = YES;
@@ -620,7 +626,7 @@
 				);
 				OTHER_LDFLAGS = (
 					"-L",
-					../../../../out/ios_debug_sim_unopt,
+					../../../../out/$FLUTTER_ENGINE,
 					"-lFlutter",
 					"-lOCMock",
 					"-ObjC",
