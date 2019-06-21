@@ -92,6 +92,23 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+      build_runner_cache:
+        folder: ./packages/flutter_tool/.dart_tool
+        populate_script: pushd packages/flutter_tool && pub run build_runner build && popd
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tool_tests_integration-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+      build_runner_cache:
+        folder: ./packages/flutter_tool/.dart_tool
+        populate_script: pushd packages/flutter_tool && pub run build_runner build && popd
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -234,6 +251,18 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+      build_runner_cache:
+        folder: .\packages\flutter_tool\.dart_tool
+        populate_script: cd packages\flutter_tool && pub run build_runner build && cd ..\..
+    - name: tool_tests_integration-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+      build_runner_cache:
+        folder: .\packages\flutter_tool\.dart_tool
+        populate_script: cd packages\flutter_tool && pub run build_runner build && cd ..\..
     - name: build_tests-windows
       env:
         SHARD: build_tests
@@ -314,6 +343,18 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+      build_runner_cache:
+        folder: ./packages/flutter_tool/.dart_tool
+        populate_script: pushd packages/flutter_tool && pub run build_runner build && popd
+    - name: tool_tests_integration-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+      build_runner_cache:
+        folder: ./packages/flutter_tool/.dart_tool
+        populate_script: pushd packages/flutter_tool && pub run build_runner build && popd
     - name: $SHARD-macos
       env:
         matrix:
@@ -368,6 +409,7 @@ docker_builder:
     - tests_framework_other-linux
     - tests_extras-linux
     - tool_tests-linux
+    - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
     - integration_tests_gradle-linux
