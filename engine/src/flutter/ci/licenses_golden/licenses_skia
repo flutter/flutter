@@ -1,4 +1,4 @@
-Signature: 3bddac012e193e0e66a73e50f6567362
+Signature: 840ca5e25666b9cee522981c966b4e44
 
 UNUSED LICENSES:
 
@@ -5452,6 +5452,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/GradientEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionTileEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/RadialWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TintEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TransformEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TritoneEffect.cpp
