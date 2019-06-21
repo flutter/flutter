@@ -24,6 +24,8 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
   'skia_git': 'https://skia.googlesource.com',
+  # OCMock is for testing only so there is no google clone
+  'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
   'skia_revision': '0c64a545176a0f0231bca2f9acc247bd3177588e',
 
   # When updating the Dart revision, ensure that all entries that are
@@ -99,6 +101,8 @@ vars = {
   'dart_watcher_rev': '0.9.7+12',
   'dart_web_socket_channel_tag': '1.0.9',
   'dart_yaml_tag': '2.1.15',
+
+  'ocmock_tag': 'v3.4.3',
 
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
@@ -375,6 +379,9 @@ deps = {
 
   'src/third_party/skia':
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
+
+  'src/third_party/ocmock':
+   Var('ocmock_git') + '@' +  Var('ocmock_tag'),
 
   'src/third_party/libjpeg-turbo':
    Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
