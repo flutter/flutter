@@ -347,6 +347,20 @@ enum TextCapitalization {
   none,
 }
 
+/// Indicates what caused the text input prompt rectangle to appear.
+enum TextInputPromptRectAppearCause {
+  /// The prompt rectangle appeared because of a unknown reason.
+  unspecified,
+
+  /// The prompt rectangle appeared to indicate the range of text that will be
+  /// affected by autocorrection.
+  autocorrection,
+
+  /// The prompt rectangle appeared to indicate the current pending multistage
+  /// text input range.
+  multistageText,
+}
+
 /// Controls the visual appearance of the text input control.
 ///
 /// Many [TextInputAction]s are common between Android and iOS. However, if an
@@ -620,6 +634,15 @@ abstract class TextInputClient {
 
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
+
+  /// Requests that this client display a prompt rectangle for the given text range,
+  /// to indicate the range of a pending text change, such as autocorrection
+  /// and multistage text input (e.g. Japanese).
+  ///
+  /// Currently it's only relevant on iOS.
+  void showPromptRect(int start, int end, TextInputPromptRectAppearCause cause) {
+    assert(Platform.isIOS);
+  }
 }
 
 /// An interface for interacting with a text input control.
@@ -731,13 +754,13 @@ class _TextInputClientHandler {
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     if (_currentConnection == null)
-      return;
+      return null;
     final String method = methodCall.method;
     final List<dynamic> args = methodCall.arguments;
     final int client = args[0];
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
-      return;
+      return null;
     switch (method) {
       case 'TextInputClient.updateEditingState':
         _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
@@ -747,6 +770,9 @@ class _TextInputClientHandler {
         break;
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
+      case 'TextInputClient.showPromptRect':
+        _currentConnection._client.showPromptRect(args[1], args[2], TextInputPromptRectAppearCause.values[args[3]]);
         break;
       default:
         throw MissingPluginException();

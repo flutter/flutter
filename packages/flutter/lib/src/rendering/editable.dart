@@ -30,6 +30,17 @@ const double _kFloatingCaretRadius = 1.0;
 /// Used by [RenderEditable.onSelectionChanged].
 typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
 
+/// Signature for the callback that creates a [Paint] for painting the prompt
+/// [Rect] above the text for the given text [range].
+///
+/// Used by [RenderEditable.promptRectBuilder].
+typedef PromptRectPaintBuilder = Paint Function(
+  TextRange range,
+  RenderEditable renderObject,
+  TextEditingValue editingValue,
+  TextInputPromptRectAppearCause cause,
+);
+
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).
 enum SelectionChangedCause {
@@ -163,6 +174,7 @@ class RenderEditable extends RenderBox {
     double devicePixelRatio = 1.0,
     bool enableInteractiveSelection,
     EdgeInsets floatingCursorAddedMargin = const EdgeInsets.fromLTRB(4, 4, 4, 5),
+    this.promptRectPaintBuilder,
     @required this.textSelectionDelegate,
   }) : assert(textAlign != null),
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
@@ -184,7 +196,7 @@ class RenderEditable extends RenderBox {
        assert(obscureText != null),
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
-        assert(devicePixelRatio != null),
+       assert(devicePixelRatio != null),
        _textPainter = TextPainter(
          text: text,
          textAlign: textAlign,
@@ -273,6 +285,17 @@ class RenderEditable extends RenderBox {
   /// It must not be null. It will make cut, copy and paste functionality work
   /// with the most recently set [TextSelectionDelegate].
   TextSelectionDelegate textSelectionDelegate;
+
+  /// {@template flutter.rendering.editable.promptRectPaintBuilder}
+  /// The [Paint] to use when painting the prompt rectangle.
+  ///
+  /// A prompt rectangle is a rectangular text overlay frequently used to indicate
+  /// the range of a pending text change, usually triggered by autocorrection,
+  /// autocompletion or multistage text input.
+  ///
+  /// Defaults to null, which means prompt rectangles will not be painted.
+  /// {@endtemplate}
+  PromptRectPaintBuilder promptRectPaintBuilder;
 
   Rect _lastCaretRect;
 
@@ -950,6 +973,22 @@ class RenderEditable extends RenderBox {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  TextRange _currentPromptRectRange;
+  TextInputPromptRectAppearCause _promptRectAppearCause;
+
+  /// Display a prompt rectangle over [range], if it isn't already shown.
+  /// See also [promptRectPaintBuilder], which controls the painting
+  /// of prompt rectangles.
+  void showPromptRectIfNeeded(TextRange range, TextInputPromptRectAppearCause cause) {
+    if (_currentPromptRectRange == range && _promptRectAppearCause == cause) {
+      return;
+    }
+
+    _currentPromptRectRange = range;
+    _promptRectAppearCause = cause;
+    markNeedsPaint();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -1523,6 +1562,13 @@ class RenderEditable extends RenderBox {
     _layoutText(constraints.maxWidth);
     _caretPrototype = _getCaretPrototype;
     _selectionRects = null;
+
+    // Only dismiss the rect if not composing multistage text, in order to prevent
+    // flickering. Unfortunately this hack leaks iOS implementation detail.
+    if (textSelectionDelegate.textEditingValue.composing.isCollapsed) {
+      _currentPromptRectRange = null;
+      _promptRectAppearCause = null;
+    }
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change
     // _textPainter's layout because the intrinsic size calculations are
@@ -1726,6 +1772,34 @@ class RenderEditable extends RenderBox {
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
+  void _paintPromptRectIfNeeded(Canvas canvas, Offset effectiveOffset) {
+    if (_currentPromptRectRange == null) {
+      return;
+    }
+
+    final Paint paint = (promptRectPaintBuilder ?? _defaultPromptRectPaintBuilder)(
+      _currentPromptRectRange,
+      this,
+      textSelectionDelegate.textEditingValue,
+      _promptRectAppearCause,
+    );
+
+    if (paint == null) {
+      return;
+    }
+
+    final List<TextBox> boxes = _textPainter.getBoxesForSelection(
+      TextSelection(
+        baseOffset: _currentPromptRectRange.start,
+        extentOffset: _currentPromptRectRange.end
+      )
+    );
+
+    for(Rect rect in boxes.map((TextBox box) => box.toRect())) {
+      canvas.drawRect(rect.shift(effectiveOffset), paint);
+    }
+  }
+
   void _paintContents(PaintingContext context, Offset offset) {
     assert(_textLayoutLastWidth == constraints.maxWidth,
       'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
@@ -1746,6 +1820,8 @@ class RenderEditable extends RenderBox {
       _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
       _paintSelection(context.canvas, effectiveOffset);
     }
+
+    _paintPromptRectIfNeeded(context.canvas, effectiveOffset);
 
     // On iOS, the cursor is painted over the text, on Android, it's painted
     // under it.
@@ -1802,3 +1878,11 @@ class RenderEditable extends RenderBox {
     ];
   }
 }
+
+// The default [PromptRectPaintBuilder], which returns null.
+PromptRectPaintBuilder _defaultPromptRectPaintBuilder = (
+  TextRange range,
+  RenderEditable renderObject,
+  TextEditingValue editingValue,
+  TextInputPromptRectAppearCause cause,
+) => null;

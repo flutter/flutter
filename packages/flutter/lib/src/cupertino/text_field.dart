@@ -32,9 +32,29 @@ const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
 );
 
 // Value extracted via color reader from iOS simulator.
-const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
+
+// On iOS, autocorrect prompt rectangles use the view's `tintColor` to fill itself
+// but with a different opacity. This value is the said opacity value extracted
+// from iOS simulator in sRGB color space, in the range of 0 - 255.
+//
+// Methodology:
+// Assuming linear color blending, we have for each color channel:
+// `opacity in percentage = (perceived color - background color) / (real color - background color)`
+//
+// 1. Set the `tintColor` of a `UITextField` to a specific color (the "real color").
+// 2. Set the `backgroundColor` of the `UITextField` to #FFFFFF ("background color" is 255 for each channel).
+// 3. Run on a simulator, extract the "perceived color" using a color picker, in sRGB color space.
+// 4. Verify that all 3 channels (RGB) yield opacity values close to 47/255 ≈ 0.185 using the above equation.
+const int _kAutocorrectionPromptRectOpacity = 47;
+
+// The color of a multistage text input prompt rect on iOS. Extracted from iOS
+// simulator in sRGB color space, with a similar approach to `_kAutocorrectionPromptRectOpacity`.
+const Color _kMultistageTextInputPromptRectColor = Color(0x3000519F);
+
+// Value derived from https://developer.apple.com/design/resources/.
+const Color _kSelectionHighlightColor = Color(0x2D007AFF);
 
 // An eyeballed value that moves the cursor slightly left of where it is
 // rendered for text on Android so it's positioning more accurately matches the
@@ -882,6 +902,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
             scrollController: widget.scrollController,
             scrollPhysics: widget.scrollPhysics,
             enableInteractiveSelection: widget.enableInteractiveSelection,
+            promptRectPaintBuilder: cupertinoPromptPaintBuilder,
           ),
         ),
       ),
@@ -904,3 +925,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
   }
 }
+
+
+/// Builds a [Paint] that paints an iOS style prompt rectangle.
+///
+/// More specifically, when the prompt rectangle is an autocorrection indicator,
+/// the resulting [Paint] will derive its paint color from
+/// [CupertinoTextField.selectionColor]. Otherwise the paint will use the multistage
+/// text input highlight color from iOS.
+///
+/// This is the [EditableText.promptRectPaintBuilder] used by [CupertinoTextField].
+PromptRectPaintBuilder cupertinoPromptPaintBuilder = (
+  TextRange range,
+  RenderEditable renderObject,
+  TextEditingValue editingValue,
+  TextInputPromptRectAppearCause cause,
+) {
+  return Paint()
+    ..color = cause == TextInputPromptRectAppearCause.autocorrection
+      ? renderObject.selectionColor.withAlpha(_kAutocorrectionPromptRectOpacity)
+      : _kMultistageTextInputPromptRectColor;
+};

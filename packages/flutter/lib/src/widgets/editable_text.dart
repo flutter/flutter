@@ -314,6 +314,7 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection,
     this.scrollController,
     this.scrollPhysics,
+    this.promptRectPaintBuilder,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -809,6 +810,9 @@ class EditableText extends StatefulWidget {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// {@macro flutter.rendering.editable.promptRectPaintBuilder}
+  final PromptRectPaintBuilder promptRectPaintBuilder;
+
   @override
   EditableTextState createState() => EditableTextState();
 
@@ -998,6 +1002,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         _finalizeEditing(false);
         break;
     }
+  }
+
+  @override
+  void showPromptRect(int start, int end, TextInputPromptRectAppearCause cause) {
+    if (cause == TextInputPromptRectAppearCause.autocorrection && !widget.autocorrect) {
+      return;
+    }
+
+    renderEditable.showPromptRectIfNeeded(TextRange(start: start, end: end), cause);
   }
 
   // The original position of the caret on FloatingCursorDragState.start.
@@ -1578,6 +1591,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
+              promptRectPaintBuilder: widget.promptRectPaintBuilder,
             ),
           ),
         );
@@ -1650,6 +1664,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSelectionDelegate,
     this.paintCursorAboveText,
     this.devicePixelRatio,
+    this.promptRectPaintBuilder,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -1682,6 +1697,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final bool paintCursorAboveText;
+  final PromptRectPaintBuilder promptRectPaintBuilder;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -1713,6 +1729,7 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
+      promptRectPaintBuilder: promptRectPaintBuilder,
     );
   }
 
