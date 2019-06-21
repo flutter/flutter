@@ -8,16 +8,11 @@ import 'package:flutter/physics.dart';
 /// the coordinates that are given are untransformed and in relation to the
 /// original position of the child.
 @immutable
-class GestureTransformable extends StatefulWidget {
+class GestureTransformable extends StatelessWidget {
   const GestureTransformable({
     Key key,
     // The child to perform the transformations on.
     @required this.child,
-    // The desired visible size of the widget and the area that is receptive to
-    // gestures. If a widget that's as big as possible is desired, then wrap
-    // this in a LayoutBuilder and pass
-    // `Size(constraints.maxWidth, constraints.maxHeight)`.
-    @required this.size,
     // The scale will be clamped to between these values. A maxScale of null has
     // no bounds. minScale must be greater than zero.
     this.maxScale = 2.5,
@@ -68,7 +63,6 @@ class GestureTransformable extends StatefulWidget {
     this.onScaleUpdate,
     this.onScaleEnd,
   }) : assert(child != null),
-       assert(size != null),
        assert(minScale != null),
        assert(minScale > 0),
        assert(disableTranslation != null),
@@ -80,6 +74,147 @@ class GestureTransformable extends StatefulWidget {
          'Must implement onResetEnd to use reset.',
        ),
        super(key: key);
+
+  // TODO(justinmc): Document params.
+  final Widget child;
+  final bool reset;
+  final GestureTapDownCallback onTapDown;
+  final GestureTapUpCallback onTapUp;
+  final GestureTapCallback onTap;
+  final GestureTapCancelCallback onTapCancel;
+  final GestureTapCallback onDoubleTap;
+  final GestureLongPressCallback onLongPress;
+  final GestureLongPressUpCallback onLongPressUp;
+  final GestureDragDownCallback onVerticalDragDown;
+  final GestureDragStartCallback onVerticalDragStart;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final GestureDragCancelCallback onVerticalDragCancel;
+  final GestureDragDownCallback onHorizontalDragDown;
+  final GestureDragStartCallback onHorizontalDragStart;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragEndCallback onHorizontalDragEnd;
+  final GestureDragCancelCallback onHorizontalDragCancel;
+  final GestureDragDownCallback onPanDown;
+  final GestureDragStartCallback onPanStart;
+  final GestureDragUpdateCallback onPanUpdate;
+  final GestureDragEndCallback onPanEnd;
+  final GestureDragCancelCallback onPanCancel;
+  final VoidCallback onResetEnd;
+  final GestureScaleStartCallback onScaleStart;
+  final GestureScaleUpdateCallback onScaleUpdate;
+  final GestureScaleEndCallback onScaleEnd;
+  final double maxScale;
+  final double minScale;
+  final Rect boundaryRect;
+  final bool disableTranslation;
+  final bool disableScale;
+  final bool disableRotation;
+  final Offset initialTranslation;
+  final double initialScale;
+  final double initialRotation;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        return _GestureTransformableSized(
+          child: child,
+          maxScale: maxScale,
+          minScale: minScale,
+          boundaryRect: boundaryRect,
+          initialTranslation: initialTranslation,
+          initialScale: initialScale,
+          initialRotation: initialRotation,
+          disableTranslation: disableTranslation,
+          disableScale: disableScale,
+          disableRotation: disableRotation,
+          reset: reset,
+          onTapDown: onTapDown,
+          onTapUp: onTapUp,
+          onTap: onTap,
+          onTapCancel: onTapCancel,
+          onDoubleTap: onDoubleTap,
+          onLongPress: onLongPress,
+          onLongPressUp: onLongPressUp,
+          onVerticalDragDown: onVerticalDragDown,
+          onVerticalDragStart: onVerticalDragStart,
+          onVerticalDragUpdate: onVerticalDragUpdate,
+          onVerticalDragEnd: onVerticalDragEnd,
+          onVerticalDragCancel: onVerticalDragCancel,
+          onHorizontalDragDown: onHorizontalDragDown,
+          onHorizontalDragStart: onHorizontalDragStart,
+          onHorizontalDragUpdate: onHorizontalDragUpdate,
+          onHorizontalDragEnd: onHorizontalDragEnd,
+          onHorizontalDragCancel: onHorizontalDragCancel,
+          onPanDown: onPanDown,
+          onPanStart: onPanStart,
+          onPanUpdate: onPanUpdate,
+          onPanEnd: onPanEnd,
+          onPanCancel: onPanCancel,
+          onResetEnd: onResetEnd,
+          onScaleStart: onScaleStart,
+          onScaleUpdate: onScaleUpdate,
+          onScaleEnd: onScaleEnd,
+          size: Size(constraints.maxWidth, constraints.maxHeight),
+        );
+      },
+    );
+  }
+}
+
+@immutable
+class _GestureTransformableSized extends StatefulWidget {
+  const _GestureTransformableSized({
+    @required this.child,
+    @required this.size,
+    this.maxScale,
+    this.minScale,
+    this.boundaryRect,
+    this.initialTranslation,
+    this.initialScale,
+    this.initialRotation,
+    this.disableTranslation,
+    this.disableScale,
+    this.disableRotation,
+    this.reset,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTap,
+    this.onTapCancel,
+    this.onDoubleTap,
+    this.onLongPress,
+    this.onLongPressUp,
+    this.onVerticalDragDown,
+    this.onVerticalDragStart,
+    this.onVerticalDragUpdate,
+    this.onVerticalDragEnd,
+    this.onVerticalDragCancel,
+    this.onHorizontalDragDown,
+    this.onHorizontalDragStart,
+    this.onHorizontalDragUpdate,
+    this.onHorizontalDragEnd,
+    this.onHorizontalDragCancel,
+    this.onPanDown,
+    this.onPanStart,
+    this.onPanUpdate,
+    this.onPanEnd,
+    this.onPanCancel,
+    this.onResetEnd,
+    this.onScaleStart,
+    this.onScaleUpdate,
+    this.onScaleEnd,
+  }) : assert(child != null),
+       assert(minScale != null),
+       assert(minScale > 0),
+       assert(disableTranslation != null),
+       assert(disableScale != null),
+       assert(disableRotation != null),
+       assert(reset != null),
+       assert(
+         !reset || onResetEnd != null,
+         'Must implement onResetEnd to use reset.',
+       );
 
   final Widget child;
   final Size size;
@@ -132,7 +267,7 @@ enum _GestureType {
 }
 
 // This is public only for access from a unit test.
-class _GestureTransformableState extends State<GestureTransformable> with TickerProviderStateMixin {
+class _GestureTransformableState extends State<_GestureTransformableSized> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
   Animation<Matrix4> _animationReset;
@@ -143,7 +278,6 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   Offset _translateFromScene; // Point where a single translation began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
-  Rect _boundaryRect;
   Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
   _GestureType gestureType;
@@ -183,10 +317,14 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
+  Rect get _boundaryRect {
+    assert(widget.size != null);
+    return widget.boundaryRect ?? Offset.zero & widget.size;
+  }
+
   @override
   void initState() {
     super.initState();
-    _boundaryRect = widget.boundaryRect ?? Offset.zero & widget.size;
     _transform = _initialTransform;
     _controller = AnimationController(
       vsync: this,
@@ -200,7 +338,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
   }
 
   @override
-  void didUpdateWidget(GestureTransformable oldWidget) {
+  void didUpdateWidget(_GestureTransformableSized oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
       _animateResetInitialize();
@@ -285,13 +423,12 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
       onScaleStart: _onScaleStart,
       onScaleUpdate: _onScaleUpdate,
       child: ClipRect(
-        // The scene is panned/zoomed/rotated using this Transform widget.
         child: Transform(
           transform: _transform,
           child: Container(
-            child: widget.child,
-            height: widget.size.height,
             width: widget.size.width,
+            height: widget.size.height,
+            child: widget.child,
           ),
         ),
       ),

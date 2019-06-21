@@ -76,7 +76,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
             // GestureTransformable.
             initialTranslation: Offset(size.width / 2, size.height / 2),
             onTapUp: _onTapUp,
-            size: size,
           );
         },
       ),

@@ -176,6 +176,17 @@ class GridDemoPhotoItem extends StatelessWidget {
             child: Hero(
               tag: photo.tag,
               child: GridPhotoViewer(photo: photo),
+              // TODO(justinmc): This should work with GestureTransformable
+              // instead of GridPhotoViewer.
+              /*
+              child: GestureTransformable(
+                child: Image.asset(
+                  photo.assetName,
+                  package: photo.assetPackage,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              */
             ),
           ),
         );
