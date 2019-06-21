@@ -13,7 +13,7 @@ import 'package:flutter/services.dart';
 /// image, creates single flutter widget with five copies of requested
 /// image and prints how long the loading took.
 ///
-/// This is used in [$FH/flutter/devicelab/bin/tasks/image_loading_reported_duration.dart] test.
+/// This is used in [$FH/flutter/devicelab/bin/tasks/image_list_reported_duration.dart] test.
 Future<void> main() async {
   final HttpServer httpServer =
       await HttpServer.bind(InternetAddress.anyIPv6, 0);
@@ -103,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
       completer5.future
     ]).then((_) {
       print(
-          '===image_loading=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
+          '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
     });
     return Scaffold(
       appBar: AppBar(

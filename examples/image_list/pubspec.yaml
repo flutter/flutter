@@ -1,4 +1,4 @@
-name: image_loading
+name: image_list
 description: Simple Flutter project used for benchmarking image loading over network.
 
 version: 1.0.0+1

@@ -14,7 +14,7 @@ import 'package:path/path.dart' as path;
 Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(() async {
-    return inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/image_loading', () async {
+    return inDirectory<TaskResult>('${flutterDirectory.path}/dev/integration_tests/image_list', () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       final String deviceId = device.deviceId;
