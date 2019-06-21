@@ -797,19 +797,28 @@ Future<void> _verifyVersion(String filename) async {
 }
 
 Future<void> _runIntegrationTests() async {
-  print('Platform env vars:');
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  await _runDevicelabTest('dartdocs');
+  switch (subShard) {
+    case 'gradle1':
+    case 'gradle2':
+      // This runs some gradle integration tests if the subshard is Android.
+      await _androidGradleTests(subShard);
+      break;
+    default:
+      await _runDevicelabTest('dartdocs');
 
-  if (Platform.isLinux) {
-    await _runDevicelabTest('flutter_create_offline_test_linux');
-  } else if (Platform.isWindows) {
-    await _runDevicelabTest('flutter_create_offline_test_windows');
-  } else if (Platform.isMacOS) {
-    await _runDevicelabTest('flutter_create_offline_test_mac');
-    await _runDevicelabTest('module_test_ios');
+      if (Platform.isLinux) {
+        await _runDevicelabTest('flutter_create_offline_test_linux');
+      } else if (Platform.isWindows) {
+        await _runDevicelabTest('flutter_create_offline_test_windows');
+      } else if (Platform.isMacOS) {
+        await _runDevicelabTest('flutter_create_offline_test_mac');
+        await _runDevicelabTest('module_test_ios');
+      }
+      // This does less work if the subshard isn't Android.
+      await _androidPluginTest();
   }
-  await _integrationTestsAndroidSdk();
 }
 
 Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
@@ -821,12 +830,19 @@ Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async
   );
 }
 
-Future<void> _integrationTestsAndroidSdk() async {
+String get androidSdkRoot {
   final String androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
       ? Platform.environment['ANDROID_SDK_ROOT']
       : Platform.environment['ANDROID_HOME'];
   if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('No Android SDK detected, skipping Android Integration Tests');
+    return null;
+  }
+  return androidSdkRoot;
+}
+
+Future<void> _androidPluginTest() async {
+  if (androidSdkRoot == null) {
+    print('No Android SDK detected, skipping Android Plugin test.');
     return;
   }
 
@@ -835,13 +851,27 @@ Future<void> _integrationTestsAndroidSdk() async {
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
 
+  await _runDevicelabTest('plugin_test', env: env);
+}
+
+Future<void> _androidGradleTests(String subShard) async {
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
-  if (!Platform.isWindows) {
+  if (androidSdkRoot == null || Platform.isWindows) {
+    print('No Android SDK detected or on Windows, skipping Android gradle test.');
+    return;
+  }
+
+  final Map<String, String> env = <String, String> {
+    'ANDROID_HOME': androidSdkRoot,
+    'ANDROID_SDK_ROOT': androidSdkRoot,
+  };
+
+  if (subShard == 'gradle1') {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+  }
+  if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
-  // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
-  await _runDevicelabTest('plugin_test', env: env);
 }
