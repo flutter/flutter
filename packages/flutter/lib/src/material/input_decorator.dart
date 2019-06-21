@@ -1069,8 +1069,8 @@ class _RenderDecoration extends RenderBox {
     //  * bottom (1.0): bottommost point considering padding.
     //
     // That means that if the padding is uneven, center is not the exact
-    // midpoint of top and bottom. To account for this, the points are
-    // interpolated between independently.
+    // midpoint of top and bottom. To account for this, the above center and
+    // below center alignments are interpolated independently.
     final double outlineCenterBaseline = inputInternalBaseline
       + baselineAdjustment / 2.0
       + (containerHeight - (2.0 + inputHeight)) / 2.0;
@@ -1118,8 +1118,12 @@ class _RenderDecoration extends RenderBox {
   }
 
   // Interpolate between three stops using textAlignVertical. This is used to
-  // calculate the outline baseline, which ignores padding for its middle but
-  // uses padding for its beginning and end.
+  // calculate the outline baseline, which ignores padding when the alignment is
+  // middle. When the alignment is less than zero, it interpolates between the
+  // centered text box's top and the top of the content padding. When the
+  // alignment is greater than zero, it interpolates between the centered box's
+  // top and the position that would align the bottom of the box with the bottom
+  // padding.
   double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
     if (textAlignVertical.y <= 0) {
       // It's possible for begin, middle, and end to not be in order because of
