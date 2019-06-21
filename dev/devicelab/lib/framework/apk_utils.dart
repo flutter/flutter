@@ -136,7 +136,6 @@ subprojects {
     ''');
   }
 
-
   Future<void> addPlugin(String plugin) async {
     final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
     String content = await pubspec.readAsString();
