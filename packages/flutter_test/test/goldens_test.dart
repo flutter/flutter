@@ -191,7 +191,7 @@ void main() {
       });
       test('does nothing for null version number', () {
         final Uri key = Uri.parse('foo.png');
-        final Uri keyNull = comparator.getTestUri(key, 1);
+        final Uri keyNull = comparator.getTestUri(key, null);
         expect(keyNull, Uri.parse('foo.png'));
       });
     });

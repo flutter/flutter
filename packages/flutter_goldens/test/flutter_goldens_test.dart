@@ -60,7 +60,25 @@ void main() {
     });
   });
 
-  group('FlutterGoldenFileComparator', () {
+  group('Skia Gold', () {
+    SkiaGoldClient goldens;
+
+    setUp(() {
+      goldens = SkiaGoldClient(
+        fs: fs,
+        platform: platform,
+      );
+    });
+
+    group('auth', () {
+      test('auth returns false when service account is unavailable', () async {
+        final bool result = await goldens.auth(fs.directory(fs.directory(_kFlutterRoot)));
+        expect(result, isFalse);
+      });
+    });
+  });
+
+  group('FlutterGoldenFileComparator - GoldensClient', () {
     MemoryFileSystem fs;
     FlutterGoldenFileComparator comparator;
 
@@ -88,7 +106,7 @@ void main() {
         final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
         when(goldens.fs).thenReturn(fs);
         when(goldens.flutterRoot).thenReturn(flutterRoot);
-        when(goldens.repositoryRoot).thenReturn(goldensRoot);
+        when(goldens.comparisonRoot).thenReturn(goldensRoot);
         when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
         comparator = await FlutterGoldenFileComparator.fromDefaultComparator(
             goldens: goldens, defaultComparator: defaultComparator);
@@ -140,19 +158,62 @@ void main() {
         expect(goldenFile.readAsBytesSync(), <int>[1, 2, 3]);
       });
     });
-    group('Skia Gold', () {
-      final MemoryFileSystem fs = MemoryFileSystem();
-      final FakePlatform platform = FakePlatform(environment: <String, String>{
-        'FLUTTER_ROOT': _kFlutterRoot
+
+    group('getTestUri', () {
+      test('incorporates version number', () {
+        final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
+        expect(key, Uri.parse('foo.1.png'));
       });
-      final SkiaGoldClient skiaClient = SkiaGoldClient(
+      test('ignores null version number', () {
+        final Uri key = comparator.getTestUri(Uri.parse('foo.png'), null);
+        expect(key, Uri.parse('foo.png'));
+      });
+    });
+  });
+
+  group('FlutterGoldenFileComparator - SkiaGoldClient', () {
+    MemoryFileSystem fs;
+    FlutterGoldenFileComparator comparator;
+
+    setUp(() {
+      fs = MemoryFileSystem();
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'CIRRUS_CI' : 'y',
+          'CIRRUS_BRANCH' : 'master',
+        },
+      );
+      final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
+      final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
+      final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
+      comparator = FlutterGoldenFileComparator(
+        testDirectory.uri,
         fs: fs,
         platform: platform,
       );
+    });
 
-      test('auth returns false when service account is unavailable', () async {
-        final bool result = await skiaClient.auth(fs.directory(comparator.basedir));
-        expect(result, isFalse);
+    group('fromDefaultComparator', () {
+      test('calculates the basedir correctly', () async {
+        final MockSkiaGoldClient goldens = MockSkiaGoldClient();
+        final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
+        final Directory flutterRoot = fs.directory('/foo')..createSync(recursive: true);
+        final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
+        when(goldens.fs).thenReturn(fs);
+        when(goldens.flutterRoot).thenReturn(flutterRoot);
+        when(goldens.comparisonRoot).thenReturn(goldensRoot);
+        when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
+        comparator = await FlutterGoldenFileComparator.fromDefaultComparator(
+          goldens: goldens, defaultComparator: defaultComparator);
+        expect(comparator.basedir, fs.directory('/foo/bar/baz').uri);
+      });
+    });
+
+    group('getTestUri', () {
+      test('ignores version number', () {
+        final Uri key = comparator.getTestUri(Uri.parse('foo.png'), 1);
+        expect(key, Uri.parse('foo.png'));
       });
     });
   });
@@ -160,4 +221,5 @@ void main() {
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockGoldensClient extends Mock implements GoldensClient {}
+class MockSkiaGoldClient extends Mock implements SkiaGoldClient {}
 class MockLocalFileComparator extends Mock implements LocalFileComparator {}

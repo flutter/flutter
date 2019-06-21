@@ -56,7 +56,7 @@ class GoldensClient {
   /// The local [Directory] where the goldens repository is hosted.
   ///
   /// Uses the [fs] file system.
-  Directory get repositoryRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
   /// file testing.
@@ -95,40 +95,40 @@ class GoldensClient {
   }
 
   Future<String> _getCurrentCommit() async {
-    if (!repositoryRoot.existsSync()) {
+    if (!comparisonRoot.existsSync()) {
       return null;
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: repositoryRoot.path,
+        workingDirectory: comparisonRoot.path,
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
   }
 
   Future<void> _initRepository() async {
-    await repositoryRoot.create(recursive: true);
+    await comparisonRoot.create(recursive: true);
     await _runCommands(
       <String>[
         'git init',
         'git remote add upstream https://github.com/flutter/goldens.git',
         'git remote set-url --push upstream git@github.com:flutter/goldens.git',
       ],
-      workingDirectory: repositoryRoot,
+      workingDirectory: comparisonRoot,
     );
   }
 
   Future<void> _checkCanSync() async {
     final io.ProcessResult result = await process.run(
       <String>['git', 'status', '--porcelain'],
-      workingDirectory: repositoryRoot.path,
+      workingDirectory: comparisonRoot.path,
     );
     if (result.stdout.trim().isNotEmpty) {
       final StringBuffer buf = StringBuffer();
       buf
-        ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
+        ..writeln('flutter_goldens git checkout at ${comparisonRoot.path} has local changes and cannot be synced.')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
-        ..writeln('cd ${repositoryRoot.path}')
+        ..writeln('cd ${comparisonRoot.path}')
         ..writeln('git reset --hard HEAD')
         ..writeln('git clean -x -d -f -f');
       throw NonZeroExitCode(1, buf.toString());
@@ -142,7 +142,7 @@ class GoldensClient {
         'git fetch upstream $commit',
         'git reset --hard FETCH_HEAD',
       ],
-      workingDirectory: repositoryRoot,
+      workingDirectory: comparisonRoot,
     );
   }
 

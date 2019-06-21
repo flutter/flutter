@@ -27,10 +27,10 @@ class SkiaGoldClient {
   /// Create a handle to a local workspace for the Skia Gold Client
   SkiaGoldClient({
     this.fs = const LocalFileSystem(),
-    this.platform = const LocalPlatform(),
-  });
+    Platform platform = const LocalPlatform(),
+  }) : _platform = platform;
 
-  /// The file system to use for storing local files for running imgtests.
+  /// The file system to use for storing local files for running image tests.
   ///
   /// This is useful in tests, where a local file system (the default) can be
   /// replaced by a memory file system.
@@ -38,19 +38,29 @@ class SkiaGoldClient {
 
   /// A wrapper for the [dart:io.Platform] API.
   ///
-  /// This is useful in tests, where the system platform (the default) can be
-  /// replaced by mock platform instance.
-  final Platform platform;
+  /// This is only for use in tests, where the system platform (the default) can
+  /// be replaced by mock platform instance.
+  Platform get platform => _platform;
 
-  /// The local [Directory] where The Skia Client will be operating tests.
-  ///
-  /// This is provided by the [FlutterGoldenFileComparator], cannot be null.
-  Directory _workDirectory;
+  Platform _platform;
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
+
+  /// The local [Directory] root of all image tests.
+  ///
+  /// Uses the [fs] file system.
+  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+
+  /// The local [Directory] within the [comparisonRoot] for the current test
+  /// context. In this directory, the client will create image and json files
+  /// for the goldctl tool to use.
+  ///
+  /// This is provided by the [FlutterGoldenFileComparator] to the [auth]
+  /// method, cannot be null.
+  Directory _workDirectory;
 
   /// The [path] to the local [Directory] where the goldctl tool is hosted.
   ///
@@ -64,7 +74,8 @@ class SkiaGoldClient {
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
   /// Prepares the local work space for golden file testing and initializes the
-  /// goldctl authorization for executing tests.
+  /// goldctl authorization for executing tests, will return a boolean Future to
+  /// indicate whether the client has been successfully authorized.
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<bool> auth(Directory workDirectory) async {
@@ -73,12 +84,12 @@ class SkiaGoldClient {
     if (_serviceAccount == null)
       return false;
 
-    final String authorization ='${_workDirectory.path}serviceAccount.json';
-    await io.File(authorization).writeAsString(_serviceAccount);
+    final File authorization = _workDirectory.childFile('serviceAccount.json');
+    await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
       'auth',
-      '--service-account', authorization,
+      '--service-account', authorization.path,
       '--work-dir', _workDirectory.childDirectory('temp').path,
     ];
 
@@ -87,7 +98,7 @@ class SkiaGoldClient {
       authArguments,
     );
 
-    if(authResults.exitCode != 0) {
+    if (authResults.exitCode != 0) {
       final StringBuffer buf = StringBuffer();
       buf
         ..writeln('Flutter + Skia Gold auth failed.')
@@ -100,11 +111,11 @@ class SkiaGoldClient {
 
   Future<void> imgtestInit() async {
     final String commitHash = await _getCommitHash();
-    final String keys = '${_workDirectory.path}keys.json';
-    final String failures = '${_workDirectory.path}failures.json';
+    final File keys = _workDirectory.childFile('keys.json');
+    final File failures = _workDirectory.childFile('failures.json');
 
-    await io.File(keys).writeAsString(_getKeysJSON());
-    await io.File(failures).create();
+    await keys.writeAsString(_getKeysJSON());
+    await failures.create();
 
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
@@ -113,8 +124,8 @@ class SkiaGoldClient {
         .childDirectory('temp')
         .path,
       '--commit', commitHash,
-      '--keys-file', keys,
-      '--failure-file', failures,
+      '--keys-file', keys.path,
+      '--failure-file', failures.path,
       '--passfail',
     ];
 
@@ -148,51 +159,40 @@ class SkiaGoldClient {
       '--png-file', goldenFile.path,
     ];
 
-    if(imgtestArguments.contains(null)) {
+    if (imgtestArguments.contains(null)) {
       final StringBuffer buf = StringBuffer();
       buf.writeln('Null argument for Skia Gold imgtest add:');
       imgtestArguments.forEach(buf.writeln);
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    //final io.ProcessResult imgtestResult =
-    await io.Process.run( //Sync(
+    await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
 
-    // Will not turn the tree red.
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
-    // if (imgtestResult.exitCode != 0) {
-    //   final StringBuffer buf = StringBuffer();
-    //  buf
-    //    ..writeln('Flutter + Skia Gold imgtest add failed.')
-    //    ..writeln('If this is the first execution of this test, it may need to be triaged.')
-    //    ..writeln('In this case, re-run the test after triage is completed.\n')
-    //    ..writeln('stdout: ${imgtestResult.stdout}')
-    //    ..writeln('stderr: ${imgtestResult.stderr}');
-    //  throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
-    // }
+    // Will not turn the tree red in this implementation.
     return true;
   }
 
   Future<String> _getCommitHash() async {
     if (!flutterRoot.existsSync()) {
       return null;
-    } else {
-      final io.ProcessResult revParse = io.Process.runSync(
-        'git',
-        <String>['rev-parse', 'HEAD'],
-        workingDirectory: flutterRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
+    final io.ProcessResult revParse = io.Process.runSync(
+      'git',
+      <String>['rev-parse', 'HEAD'],
+      workingDirectory: flutterRoot.path,
+    );
+    return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
   }
 
   String _getKeysJSON() {
     return convert.json.encode(
-    <String, dynamic>{
-    'Platform' : platform.operatingSystem,
-    });
+      <String, dynamic>{
+        'Platform' : platform.operatingSystem,
+      }
+    );
   }
 }
