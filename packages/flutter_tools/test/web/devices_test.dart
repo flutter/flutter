@@ -13,7 +13,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(WebDevice, () {
+  group(ChromeDevice, () {
    MockChromeLauncher mockChromeLauncher;
    MockPlatform mockPlatform;
    MockProcessManager mockProcessManager;
@@ -28,10 +28,10 @@ void main() {
     });
 
     test('Defaults', () async {
-      final WebDevice device = WebDevice();
+      final ChromeDevice device = ChromeDevice();
 
       expect(device.name, 'Chrome');
-      expect(device.id, 'web');
+      expect(device.id, 'chrome');
       expect(device.supportsHotReload, true);
       expect(device.supportsHotRestart, true);
       expect(device.supportsStartPaused, true);
@@ -46,7 +46,7 @@ void main() {
       when(mockProcessManager.run(<String>['chrome.foo', '--version'])).thenAnswer((Invocation invocation) async {
         return MockProcessResult(0, 'ABC');
       });
-      final WebDevice webDevice = WebDevice();
+      final ChromeDevice webDevice = ChromeDevice();
 
       expect(webDevice.isSupported(), true);
       expect(await webDevice.sdkNameAndVersion, 'ABC');
@@ -67,7 +67,7 @@ void main() {
       ])).thenAnswer((Invocation invocation) async {
         return MockProcessResult(0, r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A');
       });
-      final WebDevice webDevice = WebDevice();
+      final ChromeDevice webDevice = ChromeDevice();
 
       expect(webDevice.isSupported(), true);
       expect(await webDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
