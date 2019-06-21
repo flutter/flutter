@@ -1,7 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
-
-
-import 'package:flutter_tools/src/extension/doctor.dart';
 import 'package:flutter_tools/src/extension/extension.dart';
 
 import '../src/common.dart';
@@ -72,38 +72,38 @@ void main() {
     });
 
     test('can send response to extension', () async {
-      final TestDoctorDomain testDoctorDomain = testExtension.doctorDomain;
+      final TestDomain testDoctorDomain = testExtension.testDomain;
       expect(testDoctorDomain.received, false);
 
-      final Response response = await extensionShim.sendRequest('test', 'doctor.diagnose');
+      final Response response = await extensionShim.sendRequest('test', 'example.bar');
 
       expect(response.hasError, false);
       expect(testDoctorDomain.received, true);
     });
 
     test('can handle error from extension', () async {
-      final TestDoctorDomain testDoctorDomain = testExtension.doctorDomain;
+      final TestDomain testDoctorDomain = testExtension.testDomain;
       expect(testDoctorDomain.received, false);
 
       testDoctorDomain.domainHandler = (Map<String, Object> arguments) async {
         throw Exception('Something went wrong');
       };
 
-      final Response response = await extensionShim.sendRequest('test', 'doctor.diagnose');
+      final Response response = await extensionShim.sendRequest('test', 'example.bar');
 
       expect(response.hasError, true);
       expect(testDoctorDomain.received, true);
     });
 
     test('can receive data from extension', () async {
-      final TestDoctorDomain testDoctorDomain = testExtension.doctorDomain;
+      final TestDomain testDoctorDomain = testExtension.testDomain;
       expect(testDoctorDomain.received, false);
 
       testDoctorDomain.domainHandler = (Map<String, Object> arguments) async {
-        return <String, Object>{'foo': 'bar'};
+        return FakeSerializable(<String, Object>{'foo': 'bar'});
       };
 
-      final Response response = await extensionShim.sendRequest('test', 'doctor.diagnose');
+      final Response response = await extensionShim.sendRequest('test', 'example.bar');
 
       expect(response.hasError, false);
       expect(response.body, <String, Object>{'foo': 'bar'});
@@ -113,20 +113,31 @@ void main() {
 }
 
 class TestExtension extends ToolExtension {
-  @override
-  final DoctorDomain doctorDomain = TestDoctorDomain();
+  TestExtension() {
+    registerMethod('example.bar', testDomain.example);
+  }
+
+  final TestDomain testDomain = TestDomain();
 
   @override
   String get name => 'test';
 }
 
-class TestDoctorDomain extends DoctorDomain {
+class TestDomain extends Domain {
   bool received = false;
-  DomainHandler domainHandler = (Map<String, Object> arguments) async => <String, Object>{};
+  DomainHandler domainHandler = (Map<String, Object> arguments) async => FakeSerializable(<String, Object>{});
 
-  @override
-  Future<Map<String, Object>> diagnose(Map<String, Object> arguments) async {
+  Future<FakeSerializable> example(Map<String, Object> arguments) async {
     received = true;
     return domainHandler(arguments);
   }
+}
+
+class FakeSerializable extends Serializable {
+  FakeSerializable(this.value);
+
+  final Map<String, Object> value;
+
+  @override
+  Object toJson() => value;
 }

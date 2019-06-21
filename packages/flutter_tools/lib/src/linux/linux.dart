@@ -1,23 +1,30 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../base/version.dart';
-import '../doctor.dart';
+import '../extension/doctor.dart';
+import '../extension/extension.dart';
 
-/// A validator that checks for Clang and Make build dependencies
-class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop');
-
-  /// The minimum version of clang supported.
-  final Version minimumClangVersion = Version(3, 4, 0);
+class LinuxExtension extends ToolExtension {
+  @override
+  String get name => 'Linux Desktop';
 
   @override
-  Future<ValidationResult> validate() async {
+  final LinuxDoctorDomain doctorDomain = LinuxDoctorDomain();
+}
+
+class LinuxDoctorDomain extends DoctorDomain {
+  /// The minimum version of clang supported.
+  final Version minimumClangVersion = Version(3, 4, 0);
+  static const String kValidatiorName = 'Linux toolchain - develop for Linux desktop';
+
+  @override
+  Future<ValidationResult> diagnose(Map<String, Object> arguments) async {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
+
     /// Check for a minimum version of Clang.
     ProcessResult clangResult;
     try {
@@ -30,7 +37,10 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (clangResult == null || clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('clang++ is not installed'));
+      messages.add(const ValidationMessage(
+        'clang++ is not installed',
+        type: ValidationMessageType.error,
+      ));
     } else {
       final String firstLine = clangResult.stdout.split('\n').first.trim();
       final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
@@ -39,7 +49,10 @@ class LinuxDoctorValidator extends DoctorValidator {
         messages.add(ValidationMessage('clang++ $version'));
       } else {
         validationType = ValidationType.partial;
-        messages.add(ValidationMessage.error('clang++ $version is below minimum version of $minimumClangVersion'));
+        messages.add(ValidationMessage(
+          'clang++ $version is below minimum version of $minimumClangVersion',
+          type: ValidationMessageType.error,
+        ));
       }
     }
 
@@ -57,12 +70,19 @@ class LinuxDoctorValidator extends DoctorValidator {
     }
     if (makeResult == null || makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('make is not installed'));
+      messages.add(const ValidationMessage(
+        'make is not installed',
+        type: ValidationMessageType.error,
+      ));
     } else {
       final String firstLine = makeResult.stdout.split('\n').first.trim();
       messages.add(ValidationMessage(firstLine));
     }
 
-    return ValidationResult(validationType, messages);
+    return ValidationResult(
+      type: validationType,
+      messages: messages,
+      name: kValidatiorName,
+    );
   }
 }

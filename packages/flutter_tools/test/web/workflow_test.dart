@@ -17,23 +17,15 @@ import '../src/testbed.dart';
 void main() {
   group('WebWorkflow', () {
     Testbed testbed;
-    MockPlatform notSupported;
-    MockPlatform windows;
-    MockPlatform linux;
     MockPlatform macos;
     MockProcessManager mockProcessManager;
     MockFlutterVersion unstable;
     MockFlutterVersion stable;
-    WebWorkflow workflow;
 
     setUpAll(() {
       unstable = MockFlutterVersion(false);
       stable = MockFlutterVersion(true);
-      notSupported = MockPlatform(linux: false, windows: false, macos: false);
-      windows = MockPlatform(windows: true);
-      linux = MockPlatform(linux: true);
       macos = MockPlatform(macos: true);
-      workflow = const WebWorkflow();
       mockProcessManager = MockProcessManager();
       testbed = Testbed(setup: () async {
         fs.file('chrome').createSync();
@@ -44,48 +36,8 @@ void main() {
       });
     });
 
-    test('Applies on Linux', () => testbed.run(() {
-      expect(workflow.appliesToHostPlatform, true);
-      expect(workflow.canLaunchDevices, true);
-      expect(workflow.canListDevices, true);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => linux,
-    }));
-
-    test('Applies on macOS', () => testbed.run(() {
-      expect(workflow.appliesToHostPlatform, true);
-      expect(workflow.canLaunchDevices, true);
-      expect(workflow.canListDevices, true);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => macos,
-    }));
-
-    test('Applies on Windows', () => testbed.run(() {
-      expect(workflow.appliesToHostPlatform, true);
-      expect(workflow.canLaunchDevices, true);
-      expect(workflow.canListDevices, true);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => windows,
-    }));
-
-    test('does not apply on other platforms', () => testbed.run(() {
-      when(mockProcessManager.canRun('chrome')).thenReturn(false);
-      expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => notSupported,
-    }));
-
     test('does not apply on stable branch', () => testbed.run(() {
-      expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
+      expect(flutterWebEnabled, false);
     }, overrides: <Type, Generator>{
       Platform: () => macos,
       FlutterVersion: () => stable,

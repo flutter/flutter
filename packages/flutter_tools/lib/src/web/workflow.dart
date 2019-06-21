@@ -5,10 +5,8 @@
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-import '../doctor.dart';
 import '../version.dart';
 import 'chrome.dart';
 
@@ -27,25 +25,6 @@ bool get flutterWebEnabled {
     return platformEnabled && !FlutterVersion.instance.isStable;
   }
   return !FlutterVersion.instance.isStable;
-}
-
-/// The  web workflow instance.
-WebWorkflow get webWorkflow => context.get<WebWorkflow>();
-
-class WebWorkflow extends Workflow {
-  const WebWorkflow();
-
-  @override
-  bool get appliesToHostPlatform => flutterWebEnabled && (platform.isWindows || platform.isMacOS || platform.isLinux);
-
-  @override
-  bool get canLaunchDevices => flutterWebEnabled && canFindChrome();
-
-  @override
-  bool get canListDevices => flutterWebEnabled && canFindChrome();
-
-  @override
-  bool get canListEmulators => false;
 }
 
 /// Whether we can locate the chrome executable.

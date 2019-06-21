@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/file.dart';
-import 'package:file/local.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'doctor.dart';
@@ -103,27 +104,33 @@ class ExtensionShim {
   }
 }
 
+/// A type that can be converted into a JSON-safe object.
+abstract class Serializable {
+  /// Convert this object to a JSON-safe object.
+  Object toJson();
+}
+
 /// A callback used to respond to an extension request.
-typedef DomainHandler = Future<Map<String, Object>> Function(Map<String, Object>);
+typedef DomainHandler = Future<Serializable> Function(Map<String, Object>);
 
 /// An extension is a pluggable piece of tool functionality.
 abstract class ToolExtension {
-  ToolExtension({
-    this.fileSystem = const LocalFileSystem(),
-    this.processManager = const LocalProcessManager(),
-}) {
+  ToolExtension() {
     if (doctorDomain != null) {
       doctorDomain._parent = this;
-      _registerMethod('doctor.diagnose', doctorDomain.diagnose);
+      registerMethod('doctor.diagnose', doctorDomain.diagnose);
     }
   }
 
-  final FileSystem fileSystem;
-  final ProcessManager processManager;
+  FileSystem fileSystem = const LocalFileSystem();
+
+  ProcessManager processManager = const LocalProcessManager();
+
+  Platform platform = const LocalPlatform();
 
   final Map<String, DomainHandler> _domainHandlers = <String, DomainHandler>{};
 
-  void _registerMethod(String name, DomainHandler domainHandler) {
+  void registerMethod(String name, DomainHandler domainHandler) {
     _domainHandlers[name] = domainHandler;
   }
 
@@ -132,14 +139,14 @@ abstract class ToolExtension {
     final DomainHandler handler = _domainHandlers[request.method];
     if (handler != null) {
       try {
-        final Map<String, Object> body = await handler(request.arguments);
+        final Serializable body = await handler(request.arguments);
         // Forward compatibility with isolates: force data to be json serializable.
         assert(() {
           // Should throw an exception if code is not json serializable.
           json.encode(body);
           return true;
         }());
-        response = Response(request.id, body);
+        response = Response(request.id, body.toJson());
       } catch (err, stackTrace) {
         response = Response(request.id, null, <String, Object>{
           'error': err.toString(),
@@ -154,18 +161,20 @@ abstract class ToolExtension {
     return response;
   }
 
-
   /// The name of this extension.
   ///
   /// This is currently only used for debugging purposes.
   String get name;
 
   /// The [DoctorDomain] for this extension, or null if not supported.
-  DoctorDomain get doctorDomain;
+  DoctorDomain get doctorDomain => null;
 }
 
 /// A building-block of tool functionality.
+///
+/// This class must be extended in order to function correctly.
 abstract class Domain {
+  // Initialized after the domain is created.
   ToolExtension _parent;
 
   /// An injectable interface for filesystem interaction.
@@ -179,4 +188,10 @@ abstract class Domain {
   /// Extensions should use this instead of `dart:io` directly to improve
   /// testability.
   ProcessManager get processManager => _parent.processManager;
+
+  /// An injectable manager for interacting with the current platform.
+  ///
+  /// Extensions should use this instead of `dart:io` directly to improve
+  /// testability.
+  Platform get platform => _parent.platform;
 }

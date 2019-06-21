@@ -21,13 +21,15 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'desktop.dart';
 import 'device.dart';
-import 'extension/doctor.dart';
+import 'extension/doctor.dart' hide ValidationResult, ValidationMessage;
+import 'extension/doctor.dart' as doctor_domain show ValidationResult, ValidationMessage;
+import 'extension/extension.dart' as extension;
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
-import 'linux/linux_doctor.dart';
+import 'linux/linux.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -36,7 +38,7 @@ import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
-import 'web/web_validator.dart';
+import 'web/web.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -59,6 +61,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
+  final extension.ExtensionShim extensionShim = extension.ExtensionShim(<extension.ToolExtension>[
+    LinuxExtension()
+      ..processManager = processManager
+      ..fileSystem = fs,
+    WebExtension()
+      ..processManager = processManager
+      ..fileSystem = fs
+  ]);
+
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
@@ -74,13 +85,13 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
 
-      if (webWorkflow.appliesToHostPlatform)
-        _validators.add(const WebValidator());
+      if (flutterWebEnabled)
+        _validators.add(ExtensionCompatDoctorValidation('Flutter Web', extensionShim));
 
       // Add desktop doctors to workflow if the flag is enabled.
       if (flutterDesktopEnabled) {
         if (linuxWorkflow.appliesToHostPlatform) {
-          _validators.add(LinuxDoctorValidator());
+          _validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
         }
         if (windowsWorkflow.appliesToHostPlatform) {
           _validators.add(visualStudioValidator);
@@ -324,6 +335,42 @@ abstract class DoctorValidator {
   Future<ValidationResult> validate();
 }
 
+/// A compatibility layer until all custom doctor implementations use the
+/// extension shim.
+class ExtensionCompatDoctorValidation implements DoctorValidator {
+  ExtensionCompatDoctorValidation(this.name, this.shim);
+
+  final String name;
+  final extension.ExtensionShim shim;
+
+  @override
+  String get slowWarning => 'This is taking an unexpectedly long time...';
+
+  @override
+  String get title => _title;
+  String _title;
+
+  @override
+  Future<ValidationResult> validate() async {
+    final extension.Response response = await shim.sendRequest(name, 'doctor.diagnose');
+    if (response.hasError) {
+      if (response.error['stackTrace'] != null) {
+        printTrace('Original Stack: ${response.error['stackTrace']}');
+      }
+      throw Exception(response.error['error']);
+    }
+    final doctor_domain.ValidationResult result = doctor_domain.ValidationResult.fromJson(response.body);
+    _title = result.name;
+    return ValidationResult(result.type, <ValidationMessage>[
+      for (doctor_domain.ValidationMessage message in result.messages)
+        ValidationMessage._(
+          message.message,
+          message.type
+        )
+    ]);
+  }
+}
+
 /// A validator that runs other [DoctorValidator]s and combines their output
 /// into a single [ValidationResult]. It uses the title of the first validator
 /// passed to the constructor and reports the statusInfo of the first validator
@@ -387,6 +434,7 @@ class GroupedValidator extends DoctorValidator {
   }
 }
 
+// TODO(jonahwilliams): deprecate and remove.
 class ValidationResult {
   /// [ValidationResult.type] should only equal [ValidationResult.installed]
   /// if no [messages] are hints or errors.
@@ -426,10 +474,13 @@ class ValidationResult {
   }
 }
 
+// TODO(jonahwilliams): deprecate and remove.
 class ValidationMessage {
   ValidationMessage(this.message) : type = ValidationMessageType.information;
   ValidationMessage.error(this.message) : type = ValidationMessageType.error;
   ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
+
+  ValidationMessage._(this.message, this.type);
 
   final ValidationMessageType type;
   bool get isError => type == ValidationMessageType.error;

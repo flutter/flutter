@@ -3,57 +3,51 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/extension/doctor.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/web_validator.dart';
+import 'package:flutter_tools/src/web/web.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/testbed.dart';
 
 void main() {
   group('WebValidator', () {
-    Testbed testbed;
-    WebValidator webValidator;
+    WebExtension webExtension;
     MockPlatform mockPlatform;
     MockProcessManager mockProcessManager;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      testbed = Testbed(setup: () {
-        when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(true);
-        return null;
-      }, overrides: <Type, Generator>{
-        Platform: () => mockPlatform,
-        ProcessManager: () => mockProcessManager,
-      });
-      webValidator = const WebValidator();
       mockPlatform = MockPlatform();
+      webExtension = WebExtension();
       when(mockPlatform.isMacOS).thenReturn(true);
       when(mockPlatform.isWindows).thenReturn(false);
       when(mockPlatform.isLinux).thenReturn(false);
+      when(mockProcessManager.canRun(any)).thenReturn(true);
+      webExtension.processManager = mockProcessManager;
+      webExtension.platform = mockPlatform;
     });
 
-    test('Can find macOS executable ', () => testbed.run(() async {
-      final ValidationResult result = await webValidator.validate();
+    test('Can find macOS executable ', () async {
+      final ValidationResult result = await webExtension.doctorDomain.diagnose(const <String, Object>{});
       expect(result.type, ValidationType.installed);
-    }));
+    });
 
-    test('Can notice missing macOS executable ', () => testbed.run(() async {
+    test('Can notice missing macOS executable ', () async {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
-      final ValidationResult result = await webValidator.validate();
+      final ValidationResult result = await webExtension.doctorDomain.diagnose(const <String, Object>{});
       expect(result.type, ValidationType.missing);
-    }));
+    });
 
-    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () => testbed.run(() async {
+    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () async {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
-      final ValidationResult result = await webValidator.validate();
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.hint('CHROME_EXECUTABLE not set')
+      final ValidationResult result = await webExtension.doctorDomain.diagnose(const <String, Object>{});
+      expect(result.messages, const <ValidationMessage>[
+        ValidationMessage('CHROME_EXECUTABLE not set', type: ValidationMessageType.hint)
       ]);
       expect(result.type, ValidationType.missing);
-    }));
+    });
   });
 }
 

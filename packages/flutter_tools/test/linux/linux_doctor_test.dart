@@ -2,26 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/linux/linux_doctor.dart';
+import 'package:flutter_tools/src/extension/doctor.dart';
+import 'package:flutter_tools/src/linux/linux.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  group(LinuxDoctorValidator, () {
+  group(LinuxDoctorDomain, () {
     ProcessManager processManager;
-    LinuxDoctorValidator linuxDoctorValidator;
+    LinuxExtension linuxExtension;
 
     setUp(() {
       processManager = MockProcessManager();
-      linuxDoctorValidator = LinuxDoctorValidator();
+      linuxExtension = LinuxExtension()
+        ..processManager = processManager;
     });
 
-    testUsingContext('Returns full validation when clang++ and make are availibe', () async {
+    test('Returns full validation when clang++ and make are availibe', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
@@ -38,17 +38,15 @@ void main() {
         );
       });
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
+      final ValidationResult result = await linuxExtension.doctorDomain.diagnose(<String, Object>{});
       expect(result.type, ValidationType.installed);
-      expect(result.messages, <ValidationMessage>[
+      expect(result.messages, const <ValidationMessage>[
         ValidationMessage('clang++ 4.0.1'),
         ValidationMessage('GNU Make 4.1'),
       ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
     });
 
-    testUsingContext('Returns partial validation when clang++ version is too old', () async {
+    test('Returns partial validation when clang++ version is too old', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
@@ -65,17 +63,15 @@ void main() {
         );
       });
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
+      final ValidationResult result = await linuxExtension.doctorDomain.diagnose(<String, Object>{});
       expect(result.type, ValidationType.partial);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ 2.0.1 is below minimum version of 3.4.0'),
+      expect(result.messages, const <ValidationMessage>[
+        ValidationMessage('clang++ 2.0.1 is below minimum version of 3.4.0', type: ValidationMessageType.error),
         ValidationMessage('GNU Make 4.1'),
       ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
     });
 
-    testUsingContext('Returns mising validation when make is not availible', () async {
+    test('Returns mising validation when make is not availible', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
@@ -92,17 +88,15 @@ void main() {
         );
       });
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
+      final ValidationResult result = await linuxExtension.doctorDomain.diagnose(<String, Object>{});
       expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
+      expect(result.messages, const <ValidationMessage>[
         ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage.error('make is not installed')
+        ValidationMessage('make is not installed', type: ValidationMessageType.error)
       ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
     });
 
-    testUsingContext('Returns mising validation when clang++ is not availible', () async {
+    test('Returns mising validation when clang++ is not availible', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: '',
@@ -119,18 +113,15 @@ void main() {
         );
       });
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
+      final ValidationResult result = await linuxExtension.doctorDomain.diagnose(<String, Object>{});
       expect(result.type, ValidationType.missing);
-      expect(result.messages, <ValidationMessage>[
-        ValidationMessage.error('clang++ is not installed'),
+      expect(result.messages, const <ValidationMessage>[
+        ValidationMessage('clang++ is not installed', type: ValidationMessageType.error),
         ValidationMessage('GNU Make 4.1'),
       ]);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
     });
 
-
-    testUsingContext('Returns missing validation when clang and make are not availible', () async {
+    test('Returns missing validation when clang and make are not availible', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: '',
@@ -147,10 +138,8 @@ void main() {
         );
       });
 
-      final ValidationResult result = await linuxDoctorValidator.validate();
+      final ValidationResult result = await linuxExtension.doctorDomain.diagnose(<String, Object>{});
       expect(result.type, ValidationType.missing);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => processManager,
     });
   });
 }

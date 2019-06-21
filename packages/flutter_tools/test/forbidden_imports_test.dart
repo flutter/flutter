@@ -12,6 +12,8 @@ void main() {
   test('no unauthorized imports of dart:io', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'extension.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'doctor.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
@@ -34,12 +36,16 @@ void main() {
   });
 
   test('no unauthorized imports of package:path', () {
-    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart');
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'extension.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'doctor.dart'),
+    ];
     for (String dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
-        .where((FileSystemEntity entity) => entity.path != whitelistedPath)
+        .where((FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path))
         .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
@@ -53,9 +59,29 @@ void main() {
     }
   });
 
+  test('nothing in lib/src/extension imports outside of this directory', () {
+    final String dirName = fs.path.joinAll(<String>['lib', 'src', 'extension']);
+    final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
+      .listSync(recursive: true)
+      .where(_isDartFile)
+      .map(_asFile);
+    for (File file in files) {
+      for (String line in file.readAsLinesSync()) {
+        if (line.startsWith(RegExp(r'import.*\.dart')) &&
+            !line.contains('package:') && !line.contains('dart:') &&
+            (line.contains('./') || line.contains('../'))) {
+          final String relativePath = fs.path.relative(file.path, from:flutterTools);
+          fail('$relativePath imports file from outside extension directory: $line');
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of dart:convert', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'extension.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'doctor.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
