@@ -19,19 +19,12 @@ import android.view.View;
 
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.PlatformViewsChannel;
-import io.flutter.plugin.common.BinaryMessenger;
-import io.flutter.plugin.common.MethodCall;
-import io.flutter.plugin.common.MethodChannel;
-import io.flutter.plugin.common.StandardMethodCodec;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -64,10 +57,10 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
     private final HashMap<Integer, VirtualDisplayController> vdControllers;
 
-    // The set of root views for all active virtual displays managed by this controller.
-    // This allows an O(1) check whether a view is managed by this controller(by checking if it's root view is in this
-    // set). This is used by isPlatformView.
-    private final HashSet<View> vdRootViews;
+    // Maps a virtual display's context to the platform view hosted in this virtual display.
+    // Since each virtual display has it's unique context this allows associating any view with the platform view that
+    // it is associated with(e.g if a platform view creates other views in the same virtual display.
+    private final HashMap<Context, View> contextToPlatformView;
 
     private final PlatformViewsChannel.PlatformViewsHandler channelHandler = new PlatformViewsChannel.PlatformViewsHandler() {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -125,7 +118,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             vdControllers.put(request.viewId, vdController);
             View platformView = vdController.getView();
             platformView.setLayoutDirection(request.direction);
-            vdRootViews.add(platformView.getRootView());
+            contextToPlatformView.put(platformView.getContext(), platformView);
 
             // TODO(amirh): copy accessibility nodes to the FlutterView's accessibility tree.
 
@@ -142,8 +135,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + viewId);
             }
 
-            View rootView = vdController.getView().getRootView();
-            vdRootViews.remove(rootView);
+            contextToPlatformView.remove(vdController.getView().getContext());
 
             vdController.dispose();
             vdControllers.remove(viewId);
@@ -170,7 +162,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                 // and unlock after the resize is complete.
                 textInputPlugin.lockPlatformViewInputConnection();
             }
-            vdRootViews.remove(vdController.getView().getRootView());
             vdController.resize(
                     physicalWidth,
                     physicalHeight,
@@ -184,7 +175,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                         }
                     }
             );
-            vdRootViews.add(vdController.getView().getRootView());
         }
 
         @Override
@@ -264,7 +254,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         registry = new PlatformViewRegistryImpl();
         vdControllers = new HashMap<>();
         accessibilityEventsDelegate = new AccessibilityEventsDelegate();
-        vdRootViews = new HashSet<>();
+        contextToPlatformView = new HashMap<>();
     }
 
     /**
@@ -335,10 +325,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     }
 
     /**
-     * Returns true if the view is a platform view managed by this controller.
+     * Returns true if Flutter should perform input connection proxying for the view.
+     *
+     * If the view is a platform view managed by this platform views controller returns true.
+     * Else if the view was created in a platform view's VD, delegates the decision to the platform view's
+     * {@link View#checkInputConnectionProxy(View)} method.
+     * Else returns false.
      */
-    public boolean isPlatformView(View view) {
-        return vdRootViews.contains(view.getRootView());
+    public boolean checkInputConnectionProxy(View view) {
+        if(!contextToPlatformView.containsKey(view.getContext())) {
+            return false;
+        }
+        View platformView = contextToPlatformView.get(view.getContext());
+        if (platformView == view) {
+            return true;
+        }
+        return platformView.checkInputConnectionProxy(view);
     }
 
     public PlatformViewRegistry getRegistry() {
