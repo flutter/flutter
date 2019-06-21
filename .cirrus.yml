@@ -105,7 +105,7 @@ task:
       test_script:
         - cd ./packages/flutter_tools
         - dart tool/tool_coverage.dart
-        - bash < (curl -s https://codecov.io/bash)
+        - bash <(curl -s https://codecov.io/bash)
       container:
         cpu: 4
         memory: 12G
