@@ -380,12 +380,10 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   Color get _currentOutlineColor {
-    if (!widget.enabled) {
+    if (!widget.enabled)
       return widget.disabledBorderColor;
-    }
-    if (_pressed) {
+    if (_pressed)
       return widget.highlightedBorderColor;
-    }
     return widget.borderSide?.color;
   }
 

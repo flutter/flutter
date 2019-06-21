@@ -325,9 +325,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   ShapeBorder get _effectiveShape {
     final dynamic widgetShape = widget.shape;
-    if (widgetShape is MaterialStateProperty<ShapeBorder>) {
+    if (widgetShape is MaterialStateProperty<ShapeBorder>)
       return widgetShape.resolve(_states);
-    }
     return widget.shape;
   }
 

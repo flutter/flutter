@@ -376,8 +376,7 @@ void main() {
 
     // Highlighted (pressed).
     await gesture.down(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: pressedColor));
     await gesture.removePointer();
   });
@@ -416,8 +415,7 @@ void main() {
 
     // Highlighted (pressed).
     await tester.press(outlineButton);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: pressedColor));
   });
 
