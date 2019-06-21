@@ -1779,7 +1779,7 @@ class _MockHttpRequest extends HttpClientRequest {
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
-// TODO(tvolkert): Change to `extends Stream<Uint8List> once
+// TODO(tvolkert): Change to `extends Stream<Uint8List>` once
 // https://dart-review.googlesource.com/c/sdk/+/104525 is rolled into the framework.
 class _MockHttpResponse implements HttpClientResponse {
   final Stream<Uint8List> _delegate = Stream<Uint8List>.fromIterable(const Iterable<Uint8List>.empty());
