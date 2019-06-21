@@ -803,7 +803,7 @@ Future<void> _runIntegrationTests() async {
     case 'gradle1':
     case 'gradle2':
       // This runs some gradle integration tests if the subshard is Android.
-      await _androidGradleTests();
+      await _androidGradleTests(subShard);
       break;
     default:
       await _runDevicelabTest('dartdocs');
