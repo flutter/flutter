@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -22,6 +23,7 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
+class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
@@ -32,59 +34,82 @@ void main() {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
     MockProcessManager mockProcessManager;
+    final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
+    final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
+    final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
+    MockCache mockCache;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
+      mockCache = MockCache();
+      when(mockCache.getArtifactFile('libimobiledevice', 'idevice_id')).thenReturn(ideviceIdPath);
+      when(mockCache.iosUsbExecutionPath).thenReturn(libimobiledevicePath);
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
-      when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenThrow(const ProcessException('idevice_id', <String>['-l']));
+      when(mockProcessManager.run(
+        <String>[ideviceIdPath, '-l'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenThrow(ProcessException(ideviceIdPath, <String>['-l']));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
-      when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
+      when(mockProcessManager.run(
+        <String>[ideviceIdPath, '-l'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 1, '', 'Sad today')));
       expect(() async => await iMobileDevice.getAvailableDeviceIDs(), throwsToolExit());
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
     });
 
     testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
-      when(mockProcessManager.run(<String>['idevice_id', '-l']))
-          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
+      when(mockProcessManager.run(
+        <String>[ideviceIdPath, '-l'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 0, 'foo', '')));
       expect(await iMobileDevice.getAvailableDeviceIDs(), 'foo');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
     });
 
     testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockProcessManager.run(<String>['ideviceinfo', '-u', 'foo', '-k', 'bar']))
-          .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
+      when(mockCache.getArtifactFile('libimobiledevice', 'ideviceinfo')).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, 'No device found with udid foo, is it plugged in?', '')));
       expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotFoundError>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
     });
 
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
+      final String binPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
       MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
         mockOutputFile = MockFile();
+        when(mockCache.getArtifactFile('libimobiledevice', 'idevicescreenshot')).thenReturn(binPath);
+        when(mockCache.iosUsbExecutionPath).thenReturn(libimobiledevicePath);
       });
 
       testUsingContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
 
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
-            environment: null,
+        when(mockProcessManager.run(<String>[binPath, outputPath],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
@@ -92,20 +117,22 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         Platform: () => osx,
+        Cache: () => mockCache,
       });
 
       testUsingContext('idevicescreenshot captures and returns screenshot', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
-        when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
+        when(mockProcessManager.run(any, environment: anyNamed('environment'), workingDirectory: null)).thenAnswer(
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
-            environment: null,
+        verify(mockProcessManager.run(<String>[binPath, outputPath],
+            environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
+        Cache: () => mockCache,
       });
     });
   });

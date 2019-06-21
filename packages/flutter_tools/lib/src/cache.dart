@@ -931,10 +931,6 @@ abstract class IosUsbArtifacts extends CachedArtifact {
     const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
 
-  String getBinaryFileName(String packageName, String binaryName) {
-    return fs.path.join(cache.getArtifactDirectory(packageName).path, binaryName);
-  }
-
   @override
   Future<void> updateInner() {
     final Uri archiveUri = Uri.parse(fs.path.join(_storageBaseUrl, 'flutter_infra', 'ios-usb-dependencies', name, version, '$name.zip'));
