@@ -800,7 +800,8 @@ Future<void> _runIntegrationTests() async {
   final String subShard = Platform.environment['SUBSHARD'];
 
   switch (subShard) {
-    case 'gradle':
+    case 'gradle1':
+    case 'gradle2':
       // This runs some gradle integration tests if the subshard is Android.
       await _androidGradleTests();
       break;
@@ -853,7 +854,7 @@ Future<void> _androidPluginTest() async {
   await _runDevicelabTest('plugin_test', env: env);
 }
 
-Future<void> _androidGradleTests() async {
+Future<void> _androidGradleTests(String subShard) async {
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (androidSdkRoot == null || Platform.isWindows) {
     print('No Android SDK detected or on Windows, skipping Android gradle test.');
@@ -865,8 +866,12 @@ Future<void> _androidGradleTests() async {
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
 
-  await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
-  await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
-  await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
-  await _runDevicelabTest('module_test', env: env);
+  if (subShard == 'gradle1') {
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+  }
+  if (subShard == 'gradle2') {
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
+    await _runDevicelabTest('module_test', env: env);
+  }
 }
