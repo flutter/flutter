@@ -79,6 +79,7 @@ void main() {
         ],
         'type': 0,
         'name': 'foobar',
+        'statusText': null,
       });
       expect(repsonse.type, ValidationType.missing);
       expect(repsonse.messages.single, const ValidationMessage('goodbye', type: ValidationMessageType.error));
