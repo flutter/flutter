@@ -133,7 +133,7 @@ Future<void> main(List<String> arguments) async {
   }
   dartdocBaseArgs.addAll(<String>['--link-to-source-excludes', '../../bin/cache',
                                   '--link-to-source-root', '../..',
-                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/${gitRevision()}/%f%#L%l%']);
+                                  '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%']);
   // Generate the documentation.
   // We don't need to exclude flutter_tools in this list because it's not in the
   // recursive dependencies of the package defined at dev/docs/pubspec.yaml
@@ -276,10 +276,16 @@ void createFooter(String footerPath, String version) {
   File('${footerPath}footer.html').writeAsStringSync('<script src="footer.js"></script>');
   File('$kPublishRoot/api/footer.js')
     ..createSync(recursive: true)
-    ..writeAsStringSync('''var span = document.querySelector('footer>span');
-if (span) {
-  span.innerText = 'Flutter $version • $timestamp • ${gitRevision()} $gitBranchOut';
-}
+    ..writeAsStringSync('''(function() {
+  var span = document.querySelector('footer>span');
+  if (span) {
+    span.innerText = 'Flutter $version • $timestamp • ${gitRevision()} $gitBranchOut';
+  }
+  var sourceLink = document.querySelector('a.source-link');
+  if (sourceLink) {
+    sourceLink.href = sourceLink.href.replace('/master/', '/${gitRevision()}/');
+  }
+})();
 ''');
 }
 
