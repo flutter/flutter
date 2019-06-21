@@ -128,14 +128,14 @@ class RangeSlider extends StatefulWidget {
     this.inactiveColor,
     this.semanticFormatterCallback
   }) : assert(values != null),
-        assert(min != null),
-        assert(max != null),
-        assert(min <= max),
-        assert(values.start <= values.end),
-        assert(values.start >= min && values.start <= max),
-        assert(values.end >= min && values.end <= max),
-        assert(divisions == null || divisions > 0),
-        super(key: key);
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(values.start <= values.end),
+       assert(values.start >= min && values.start <= max),
+       assert(values.end >= min && values.end <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected values for this range slider.
   ///
@@ -371,19 +371,19 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       vsync: this,
     );
     enableController = AnimationController(
-        duration: enableAnimationDuration,
-        vsync: this,
-        value: widget.onChanged != null ? 1.0 : 0.0
+      duration: enableAnimationDuration,
+      vsync: this,
+      value: widget.onChanged != null ? 1.0 : 0.0,
     );
     startPositionController = AnimationController(
-        duration: Duration.zero,
-        vsync: this,
-        value: _unlerp(widget.values.start)
+      duration: Duration.zero,
+      vsync: this,
+      value: _unlerp(widget.values.start),
     );
     endPositionController = AnimationController(
-        duration: Duration.zero,
-        vsync: this,
-        value: _unlerp(widget.values.end)
+      duration: Duration.zero,
+      vsync: this,
+      value: _unlerp(widget.values.end),
     );
   }
 
@@ -1005,12 +1005,12 @@ class _RenderRangeSlider extends RenderBox {
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
         _state.interactionTimer =
-            Timer(_minimumInteractionTime * timeDilation, () {
-              _state.interactionTimer = null;
-              if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
-                _state.valueIndicatorController.reverse();
-              }
-            });
+          Timer(_minimumInteractionTime * timeDilation, () {
+            _state.interactionTimer = null;
+            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+              _state.valueIndicatorController.reverse();
+            }
+          });
       }
     }
   }
