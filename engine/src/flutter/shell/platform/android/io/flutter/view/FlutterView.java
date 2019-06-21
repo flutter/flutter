@@ -399,8 +399,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
     @Override
     public boolean checkInputConnectionProxy(View view) {
-        PlatformViewsController platformViewsController = mNativeView.getPluginRegistry().getPlatformViewsController();
-        return platformViewsController.isPlatformView(view);
+        return mNativeView.getPluginRegistry().getPlatformViewsController().checkInputConnectionProxy(view);
     }
 
     @Override
