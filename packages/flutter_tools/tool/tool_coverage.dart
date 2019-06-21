@@ -65,7 +65,6 @@ class ToolCoverageRunner {
         continue;
       }
       pending.add(_runTest(fileSystemEntity));
-      break; // TEST: remove
     }
     await Future.wait(pending);
 
