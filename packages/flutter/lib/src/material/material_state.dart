@@ -193,13 +193,13 @@ class _MaterialStateColor extends MaterialStateColor {
 /// [MaterialState]s.
 ///
 /// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>`
-/// because it has a `resolve` method that returns a different color depending
+/// because it has a `resolve` method that returns a different [Color] depending
 /// on the given set of [MaterialState]s.
 abstract class MaterialStateProperty<T> {
 
   /// Returns a different value of type `T` depending on the given `states`.
   ///
-  /// Some components (such as [RawMaterialButton]s) keep track of their set of
+  /// Some widgets (such as [RawMaterialButton]) keep track of their set of
   /// [MaterialState]s, and will call `resolve` with the current states at build
   /// time for specified properties (such as [RawMaterialButton.textStyle]'s color).
   T resolve(Set<MaterialState> states);
