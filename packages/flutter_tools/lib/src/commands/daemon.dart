@@ -26,7 +26,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.5.1';
+const String protocolVersion = '0.5.2';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -49,6 +49,7 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
+    isRunningFromDaemon = true;
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
 
@@ -783,6 +784,8 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
   return <String, dynamic>{
     'id': emulator.id,
     'name': emulator.name,
+    'category': emulator.category?.toString(),
+    'platformType': emulator.platformType?.toString(),
   };
 }
 

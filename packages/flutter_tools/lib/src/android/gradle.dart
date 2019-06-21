@@ -509,7 +509,7 @@ Future<void> _buildGradleProjectV2(
   flutterUsage.sendTiming('build', 'gradle-v2', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (!isBuildingBundle) {
-    final Iterable<File> apkFiles = _findApkFiles(project, androidBuildInfo);
+    final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
     if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
     // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
@@ -546,22 +546,23 @@ Future<void> _buildGradleProjectV2(
   }
 }
 
-Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
+@visibleForTesting
+Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
   final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
   if (apkFileNames.isEmpty)
     return const <File>[];
 
-  return apkFileNames.map<File>((String apkFileName) {
+  return apkFileNames.expand<File>((String apkFileName) {
     File apkFile = project.apkDirectory.childFile(apkFileName);
     if (apkFile.existsSync())
-      return apkFile;
+      return <File>[apkFile];
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String modeName = camelCase(buildInfo.modeName);
     apkFile = project.apkDirectory
         .childDirectory(modeName)
         .childFile(apkFileName);
     if (apkFile.existsSync())
-      return apkFile;
+      return <File>[apkFile];
     if (buildInfo.flavor != null) {
       // Android Studio Gradle plugin v3 adds flavor to path.
       apkFile = project.apkDirectory
@@ -569,9 +570,9 @@ Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuil
           .childDirectory(modeName)
           .childFile(apkFileName);
       if (apkFile.existsSync())
-        return apkFile;
+        return <File>[apkFile];
     }
-    return null;
+    return const <File>[];
   });
 }
 

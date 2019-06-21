@@ -21,10 +21,10 @@ class LinuxWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isLinux;
 
   @override
-  bool get canLaunchDevices => flutterDesktopEnabled;
+  bool get canLaunchDevices => platform.isLinux && flutterDesktopEnabled;
 
   @override
-  bool get canListDevices => flutterDesktopEnabled;
+  bool get canListDevices => platform.isLinux && flutterDesktopEnabled;
 
   @override
   bool get canListEmulators => false;
