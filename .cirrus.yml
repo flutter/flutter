@@ -130,10 +130,10 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: integration_tests_android-linux
+    - name: integration_tests_agradle-linux
       env:
         SHARD: integration_tests
-        SUBSHARD: android
+        SUBSHARD: gradle
       test_script:
         # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
         # might include non-ASCII characters which makes Gradle crash.
@@ -222,13 +222,6 @@ task:
     - name: integration_tests-windows
       env:
         SHARD: integration_tests
-      container:
-        cpu: 4
-        memory: 12G
-    - name: integration_tests_android-windows
-      env:
-        SHARD: integration_tests
-        SUBSHARD: android
       container:
         cpu: 4
         memory: 12G
@@ -356,7 +349,7 @@ docker_builder:
     - tool_tests-linux
     - build_tests-linux
     - integration_tests-linux
-    - integration_tests_android-linux
+    - integration_tests_gradle-linux
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"
