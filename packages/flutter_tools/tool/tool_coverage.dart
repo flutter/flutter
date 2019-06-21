@@ -63,7 +63,7 @@ class ToolCoverageRunner {
   );
 
   final ArgResults argResults;
-  final Pool pool = Pool(Platform.numberOfProcessors);
+  final Pool pool = Pool(1);
   final Directory tempDirectory;
   final CoverageCollector coverageCollector;
   final String flutterRoot;
