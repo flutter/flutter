@@ -439,6 +439,7 @@ void main() {
           body: Center(
             child: OutlineButton(
               child: const Text('OutlineButton'),
+              onPressed: null,
               borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
               highlightedBorderColor: ignoredDisabledColor,
             ),
