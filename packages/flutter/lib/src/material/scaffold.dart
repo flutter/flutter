@@ -2063,6 +2063,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
 
@@ -2091,6 +2092,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: false,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
 

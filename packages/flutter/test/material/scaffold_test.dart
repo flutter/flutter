@@ -203,6 +203,40 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
 
+  testWidgets('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        floatingActionButton: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
     final Key drawerKey = UniqueKey();
     const double appBarHeight = 256.0;
@@ -348,6 +382,40 @@ void main() {
     expect(appBarBottomRight, equals(sheetTopRight));
   });
 
+  testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        bottomSheet: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Persistent bottom buttons are persistent', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
@@ -401,6 +469,40 @@ void main() {
     );
     expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(10.0, 560.0));
     expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(770.0, 560.0));
+  });
+
+  testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        persistentFooterButtons: const <Widget>[Placeholder()],
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   group('back arrow', () {
