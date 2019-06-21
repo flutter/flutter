@@ -74,7 +74,7 @@ class WebDevice extends Device {
   bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override
-  String get name => 'web';
+  String get name => 'Chrome';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
