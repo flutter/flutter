@@ -729,6 +729,7 @@ class _RenderRangeSlider extends RenderBox {
   HorizontalDragGestureRecognizer _drag;
   TapGestureRecognizer _tap;
   bool _active = false;
+  RangeValues _newValues;
 
   bool get isEnabled => onChanged != null;
 
@@ -878,12 +879,12 @@ class _RenderRangeSlider extends RenderBox {
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
-      // Matches iOS implementation of material slider.
+        // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       default:
-      // Matches Android implementation of material slider.
+        // Matches Android implementation of material slider.
         return 0.05;
     }
   }
@@ -974,8 +975,6 @@ class _RenderRangeSlider extends RenderBox {
   RangeValues _discretizeRangeValues(RangeValues values) {
     return RangeValues(_discretize(values.start), _discretize(values.end));
   }
-
-  RangeValues _newValues;
 
   void _startInteraction(Offset globalPosition) {
     final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
