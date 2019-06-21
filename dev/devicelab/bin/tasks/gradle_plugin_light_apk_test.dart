@@ -39,6 +39,60 @@ Future<void> main() async {
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+        section('APK content for task assembleDebug with target platform = android-x86');
+        // This is used by `flutter run`
+        await pluginProject.runGradleTask('assembleDebug',
+            options: <String>['-Ptarget-platform=android-x86']);
+
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+
+        checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+          'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
+        ], apkFiles);
+
+        checkItDoesNotContain<String>(<String>[
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
+        ], apkFiles);
+      });
+
+      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+        section('APK content for task assembleDebug with target platform = android-x64');
+        // This is used by `flutter run`
+        await pluginProject.runGradleTask('assembleDebug',
+            options: <String>['-Ptarget-platform=android-x64']);
+
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+
+        checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+          'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
+        ], apkFiles);
+
+        checkItDoesNotContain<String>(<String>[
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
+        ], apkFiles);
+      });
+
+      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleRelease with target platform = android-arm');
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm']);

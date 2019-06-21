@@ -9,7 +9,6 @@ import 'package:pool/pool.dart';
 
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
@@ -46,7 +45,6 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kVMSnapshotData = 'vm_snapshot_data';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
-const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 
 /// Provides a `build` method that builds the bundle.
 class BundleBuilder {
@@ -67,7 +65,6 @@ class BundleBuilder {
     bool precompiledSnapshot = false,
     bool reportLicensedPackages = false,
     bool trackWidgetCreation = false,
-    String compilationTraceFilePath,
     List<String> extraFrontEndOptions = const <String>[],
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
@@ -79,27 +76,6 @@ class BundleBuilder {
     applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
 
-    if (compilationTraceFilePath != null) {
-      if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
-        // Silently ignore JIT snapshotting for those builds that don't support it.
-        compilationTraceFilePath = null;
-
-      } else if (compilationTraceFilePath.isEmpty) {
-        // Disable JIT snapshotting if flag is empty.
-        printStatus('Code snapshot will be disabled for this build.');
-        compilationTraceFilePath = null;
-
-      } else if (!fs.file(compilationTraceFilePath).existsSync()) {
-        // Be forgiving if compilation trace file is missing.
-        printStatus('No compilation trace available. To optimize performance, consider using --train.');
-        final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
-        compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
-
-      } else {
-        printStatus('Code snapshot will use compilation training file $compilationTraceFilePath.');
-      }
-    }
-
     DevFSContent kernelContent;
     if (!precompiledSnapshot) {
       if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
@@ -108,8 +84,6 @@ class BundleBuilder {
       final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
       final CompilerOutput compilerOutput = await kernelCompiler.compile(
         sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-        incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
-            fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
         mainPath: fs.file(mainPath).absolute.path,
         outputFilePath: applicationKernelFilePath,
         depFilePath: depfilePath,
@@ -118,7 +92,6 @@ class BundleBuilder {
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         packagesPath: packagesPath,
-        linkPlatformKernelIn: compilationTraceFilePath != null,
       );
       if (compilerOutput?.outputFilename == null) {
         throwToolExit('Compiler failed on $mainPath');
@@ -127,22 +100,6 @@ class BundleBuilder {
 
       await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
           .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
-
-      if (compilationTraceFilePath != null) {
-        final JITSnapshotter snapshotter = JITSnapshotter();
-        final int snapshotExitCode = await snapshotter.build(
-          platform: platform,
-          buildMode: buildMode,
-          mainPath: applicationKernelFilePath,
-          outputPath: getBuildDirectory(),
-          packagesPath: packagesPath,
-          compilationTraceFilePath: compilationTraceFilePath,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
-        );
-        if (snapshotExitCode != 0) {
-          throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-        }
-      }
     }
 
     final AssetBundle assets = await buildAssets(
@@ -160,7 +117,6 @@ class BundleBuilder {
       kernelContent: kernelContent,
       privateKeyPath: privateKeyPath,
       assetDirPath: assetDirPath,
-      compilationTraceFilePath: compilationTraceFilePath,
     );
   }
 }
@@ -196,27 +152,17 @@ Future<void> assemble({
   DevFSContent kernelContent,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
-  String compilationTraceFilePath,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
   final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
-    if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
-      final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
-      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
-      assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
-    } else {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
-      assetEntries[_kKernelKey] = kernelContent;
-      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
-    }
+    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
+    assetEntries[_kKernelKey] = kernelContent;
+    assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
+    assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
   }
 
   printTrace('Writing asset files to $assetDirPath');

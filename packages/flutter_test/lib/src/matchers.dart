@@ -413,6 +413,7 @@ Matcher matchesSemantics({
   bool isButton = false,
   bool isFocused = false,
   bool isTextField = false,
+  bool isReadOnly = false,
   bool hasEnabledState = false,
   bool isEnabled = false,
   bool isInMutuallyExclusiveGroup = false,
@@ -464,6 +465,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isButton);
   if (isTextField)
     flags.add(SemanticsFlag.isTextField);
+  if (isReadOnly)
+    flags.add(SemanticsFlag.isReadOnly);
   if (isFocused)
     flags.add(SemanticsFlag.isFocused);
   if (hasEnabledState)
@@ -1108,7 +1111,8 @@ class _IsWithinDistance<T> extends Matcher {
 }
 
 class _MoreOrLessEquals extends Matcher {
-  const _MoreOrLessEquals(this.value, this.epsilon);
+  const _MoreOrLessEquals(this.value, this.epsilon)
+    : assert(epsilon >= 0);
 
   final double value;
   final double epsilon;
@@ -1125,6 +1129,12 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
+
+  @override
+  Description describeMismatch(Object item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return super.describeMismatch(item, mismatchDescription, matchState, verbose)
+      ..add('$item is not in the range of $value (±$epsilon).');
+  }
 }
 
 class _IsMethodCall extends Matcher {

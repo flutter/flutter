@@ -38,7 +38,6 @@ void main() {
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       when(mockWebCompilationProxy.initialize(
         projectDirectory: anyNamed('projectDirectory'),
-        targets: anyNamed('targets'),
         release: anyNamed('release')
       )).thenAnswer((Invocation invocation) {
         final String path = fs.path.join('.dart_tool', 'build', 'flutter_web', 'foo', 'lib', 'main_web_entrypoint.dart.js');
