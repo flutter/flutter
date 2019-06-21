@@ -26,6 +26,20 @@ void main() {
         return null;
       });
     });
+
+    test('Defaults', () async {
+      final WebDevice device = WebDevice();
+
+      expect(device.name, 'Chrome');
+      expect(device.id, 'web');
+      expect(device.supportsHotReload, true);
+      expect(device.supportsHotRestart, true);
+      expect(device.supportsStartPaused, true);
+      expect(device.supportsFlutterExit, true);
+      expect(device.supportsScreenshot, false);
+      expect(await device.isLocalEmulator, false);
+    });
+
     testUsingContext('Invokes version command on non-Windows platforms', () async{
       when(mockPlatform.isWindows).thenReturn(false);
       when(mockProcessManager.canRun('chrome.foo')).thenReturn(true);
