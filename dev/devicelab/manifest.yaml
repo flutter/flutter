@@ -129,6 +129,7 @@ tasks:
     description: >
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_win
+    flaky: true
     required_agent_capabilities: ["windows/android"]
 
   # Android on-device tests
@@ -444,6 +445,7 @@ tasks:
     description: >
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
+    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   # Tests running on Windows host
