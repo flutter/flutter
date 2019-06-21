@@ -1799,8 +1799,8 @@ void main() {
       testWidgets('Centers when border', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
             ),
           ),
         );
@@ -1815,9 +1815,9 @@ void main() {
       testWidgets('Centers when border and label', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'label',
-              border: const OutlineInputBorder(),
+              border: OutlineInputBorder(),
             ),
           ),
         );
@@ -1832,9 +1832,9 @@ void main() {
       testWidgets('Centers when border and contentPadding', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
                 12.0, 14.0,
                 8.0, 14.0,
               ),
@@ -1852,10 +1852,10 @@ void main() {
       testWidgets('Centers when border and contentPadding and label', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'label',
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
                 12.0, 14.0,
                 8.0, 14.0,
               ),
@@ -1873,10 +1873,10 @@ void main() {
       testWidgets('Centers when border and lopsided contentPadding and label', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'label',
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
                 12.0, 104.0,
                 8.0, 0.0,
               ),
@@ -1896,76 +1896,80 @@ void main() {
       testWidgets('top align includes padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
+            expands: true,
             textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
-                12.0, 104.0,
-                8.0, 0.0,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 51.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 67.0);
-        expect(getBorderBottom(tester), 120.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
+        // Aligned to the top including the 24px padding.
+        expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+        expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
-      // TODO(justinmc): Actually in this example the padding exceeds the
-      // center. Like the final example in this group. Should shrink padding and
-      // confirm it's right in both cases.
       testWidgets('center align ignores padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
+            expands: true,
             textAlignVertical: TextAlignVertical.center,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
-                12.0, 104.0,
-                8.0, 0.0,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 51.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 67.0);
-        expect(getBorderBottom(tester), 120.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
+        // Baseline is on the center of the 600px high input.
+        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
       testWidgets('bottom align includes padding', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
+            expands: true,
             textAlignVertical: TextAlignVertical.bottom,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
-                12.0, 104.0,
-                8.0, 0.0,
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
+                12.0, 24.0,
+                8.0, 2.0,
               ),
             ),
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 120.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 104.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 120.0);
-        expect(getBorderBottom(tester), 120.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
+        // Includes bottom padding of 2px.
+        expect(tester.getTopLeft(find.text('text')).dy, 582.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 598.0);
+        expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
 
       testWidgets('padding exceeds middle keeps top at middle', (WidgetTester tester) async {
         await tester.pumpWidget(
           buildInputDecorator(
+            expands: true,
             textAlignVertical: TextAlignVertical.top,
-            decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              contentPadding: const EdgeInsets.fromLTRB(
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.fromLTRB(
                 12.0, 504.0,
                 8.0, 0.0,
               ),
@@ -1973,10 +1977,11 @@ void main() {
           ),
         );
 
-        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 520.0));
-        expect(tester.getTopLeft(find.text('text')).dy, 251.0);
-        expect(tester.getBottomLeft(find.text('text')).dy, 267.0);
-        expect(getBorderBottom(tester), 520.0);
+        expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 600.0));
+        // Same position as the center example above.
+        expect(tester.getTopLeft(find.text('text')).dy, 291.0);
+        expect(tester.getBottomLeft(find.text('text')).dy, 307.0);
+        expect(getBorderBottom(tester), 600.0);
         expect(getBorderWeight(tester), 1.0);
       });
     });

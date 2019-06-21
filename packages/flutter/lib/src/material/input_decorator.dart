@@ -1120,7 +1120,6 @@ class _RenderDecoration extends RenderBox {
   // Interpolate between three stops using textAlignVertical. This is used to
   // calculate the outline baseline, which ignores padding for its middle but
   // uses padding for its beginning and end.
-  @visibleForTesting
   double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
     if (textAlignVertical.y <= 0) {
       // It's possible for begin, middle, and end to not be in order because of
