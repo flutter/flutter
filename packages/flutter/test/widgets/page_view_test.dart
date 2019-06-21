@@ -593,8 +593,8 @@ void main() {
 
       for (int index in visiblePages) {
         expect(find.text(index.toString()), findsOneWidget);
-        // The center of 3 has an x-coordinate of 800, so we have to manually
-        // offset it a bit.
+        // The center of page 2's x-coordinate is 800, so we have to manually
+        // offset it a bit to make sure the tap lands within the screen.
         final Offset center = tester.getCenter(find.text(index.toString())).translate(-3, 0);
         await tester.tapAt(center);
         expect(tappedIndex, index);
