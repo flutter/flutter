@@ -425,7 +425,7 @@ void main() {
       final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
-        testLogger.errorText,
+        testLogger.errorText.replaceAll('\n', ' '),
         contains('Saved signing certificate "iPhone Developer: Invalid Profile" is not a valid development certificate'),
       );
       expect(
