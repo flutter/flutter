@@ -799,17 +799,24 @@ Future<void> _verifyVersion(String filename) async {
 Future<void> _runIntegrationTests() async {
   print('Platform env vars:');
 
-  await _runDevicelabTest('dartdocs');
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  if (Platform.isLinux) {
-    await _runDevicelabTest('flutter_create_offline_test_linux');
-  } else if (Platform.isWindows) {
-    await _runDevicelabTest('flutter_create_offline_test_windows');
-  } else if (Platform.isMacOS) {
-    await _runDevicelabTest('flutter_create_offline_test_mac');
-    await _runDevicelabTest('module_test_ios');
+  switch (subShard) {
+    case 'android':
+      await _integrationTestsAndroidSdk();
+      break;
+    default:
+      await _runDevicelabTest('dartdocs');
+
+      if (Platform.isLinux) {
+        await _runDevicelabTest('flutter_create_offline_test_linux');
+      } else if (Platform.isWindows) {
+        await _runDevicelabTest('flutter_create_offline_test_windows');
+      } else if (Platform.isMacOS) {
+        await _runDevicelabTest('flutter_create_offline_test_mac');
+        await _runDevicelabTest('module_test_ios');
+      }
   }
-  await _integrationTestsAndroidSdk();
 }
 
 Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
