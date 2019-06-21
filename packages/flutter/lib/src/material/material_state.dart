@@ -158,13 +158,14 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   Color resolve(Set<MaterialState> states);
 
   /// Returns the color for the given set of states if `color` is a
-  /// [MaterialStateColor], otherwise returns the color itself.
+  /// [MaterialStateProperty], otherwise returns the color itself.
   ///
   /// This is useful for widgets that have parameters which can be [Color] or
-  /// [MaterialStateColor] values.
+  /// `MaterialStateProperty<Color>` values.
   static Color resolveColor(Color color, Set<MaterialState> states) {
-    if (color is MaterialStateColor) {
-      return color.resolve(states);
+    final dynamic dynamicColor = color;
+    if (dynamicColor is MaterialStateProperty<Color>) {
+      return dynamicColor.resolve(states);
     }
     return color;
   }
@@ -188,15 +189,18 @@ class _MaterialStateColor extends MaterialStateColor {
   Color resolve(Set<MaterialState> states) => _resolve(states);
 }
 
-/// Interface for classes that can return a value of type `T` based on a set of [MaterialState]s.
+/// Interface for classes that can return a value of type `T` based on a set of
+/// [MaterialState]s.
 ///
-/// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>` because it has a `resolve` method that
-/// returns a different color depending on the given set of [MaterialState]s.
+/// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>`
+/// because it has a `resolve` method that returns a different color depending
+/// on the given set of [MaterialState]s.
 abstract class MaterialStateProperty<T> {
 
   /// Returns a different value of type `T` depending on the given `states`.
   ///
-  /// Some components (such as [RawMaterialButton]s) keep track of their set of [MaterialState]s, and will call
-  /// `resolve` with the current states at build time for specified properties (such as [RawMaterialButton.textStyle]'s color).
+  /// Some components (such as [RawMaterialButton]s) keep track of their set of
+  /// [MaterialState]s, and will call `resolve` with the current states at build
+  /// time for specified properties (such as [RawMaterialButton.textStyle]'s color).
   T resolve(Set<MaterialState> states);
 }

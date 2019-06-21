@@ -387,7 +387,6 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
       return widget.highlightedBorderColor;
     }
     return widget.borderSide?.color;
-
   }
 
   BorderSide _getOutline() {
