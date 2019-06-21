@@ -176,7 +176,7 @@ bool FlutterMain::Register(JNIEnv* env) {
       },
   };
 
-  jclass clazz = env->FindClass("io/flutter/view/FlutterMain");
+  jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
 
   if (clazz == nullptr) {
     return false;

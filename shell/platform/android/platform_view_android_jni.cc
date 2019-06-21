@@ -637,6 +637,13 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(JJ)V",
           .fnPtr = reinterpret_cast<void*>(&UnregisterTexture),
       },
+
+      // Methods for Dart callback functionality.
+      {
+          .name = "nativeLookupCallbackInformation",
+          .signature = "(J)Lio/flutter/view/FlutterCallbackInformation;",
+          .fnPtr = reinterpret_cast<void*>(&LookupCallbackInformation),
+      },
   };
 
   if (env->RegisterNatives(g_flutter_jni_class->obj(), flutter_jni_methods,
@@ -732,21 +739,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       env, env->FindClass("android/graphics/SurfaceTexture"));
   if (g_surface_texture_class->is_null()) {
     FML_LOG(ERROR) << "Could not locate SurfaceTexture class";
-    return false;
-  }
-
-  static const JNINativeMethod callback_info_methods[] = {
-      {
-          .name = "nativeLookupCallbackInformation",
-          .signature = "(J)Lio/flutter/view/FlutterCallbackInformation;",
-          .fnPtr = reinterpret_cast<void*>(&LookupCallbackInformation),
-      },
-  };
-
-  if (env->RegisterNatives(g_flutter_callback_info_class->obj(),
-                           callback_info_methods,
-                           fml::size(callback_info_methods)) != 0) {
-    FML_LOG(ERROR) << "Failed to RegisterNatives with FlutterCallbackInfo";
     return false;
   }
 

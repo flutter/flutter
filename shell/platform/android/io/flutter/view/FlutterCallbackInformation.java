@@ -4,6 +4,10 @@
 
 package io.flutter.view;
 
+import android.support.annotation.NonNull;
+
+import io.flutter.embedding.engine.FlutterJNI;
+
 /**
  * A class representing information for a callback registered using
  * `PluginUtilities` from `dart:ui`.
@@ -19,8 +23,9 @@ public final class FlutterCallbackInformation {
    * `PluginUtilities.getCallbackHandle` in `dart:ui`.
    * @return an instance of FlutterCallbackInformation for the provided handle.
    */
+  @NonNull
   public static FlutterCallbackInformation lookupCallbackInformation(long handle) {
-    return nativeLookupCallbackInformation(handle);
+    return FlutterJNI.nativeLookupCallbackInformation(handle);
   }
 
   private FlutterCallbackInformation(String callbackName,
@@ -29,6 +34,4 @@ public final class FlutterCallbackInformation {
     this.callbackClassName = callbackClassName;
     this.callbackLibraryPath = callbackLibraryPath;
   }
-
-  private static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
 }
