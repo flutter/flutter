@@ -1703,9 +1703,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _testingWithSkiaGold()
-      ? key
-      :_addVersion(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1728,29 +1726,8 @@ class _MatchesGoldenFile extends AsyncMatcher {
 
   @override
   Description describe(Description description) {
-    final Uri testNameUri = _testingWithSkiaGold()
-      ? key
-      :_addVersion(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
     return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
-  }
-
-  Uri _addVersion(Uri key, int version) {
-    return version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
-  }
-
-  bool _testingWithSkiaGold() {
-    final String cirrusCI = Platform.environment['CIRRUS_CI'] ?? '';
-    final String cirrusPR = Platform.environment['CIRRUS_PR'] ?? '';
-    final String cirrusBranch = Platform.environment['CIRRUS_BRANCH'] ?? '';
-    return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
   }
 }
 

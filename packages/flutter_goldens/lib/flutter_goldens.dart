@@ -17,6 +17,9 @@ import 'package:flutter_goldens_client/skia_client.dart';
 export 'package:flutter_goldens_client/client.dart';
 export 'package:flutter_goldens_client/skia_client.dart';
 
+/// The service account key for authentication wiht goldctl.
+///
+/// This is provided by the Cirrus CI environment.
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
@@ -40,7 +43,9 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///
 /// For testing across all platforms, the [SkiaGoldClient] is used to upload
 /// widgets for framework-related golden tests and process results. Currently
-/// these tests are designed to be run in CI post-submit.
+/// these tests are designed to be run post-submit on Cirrus CI, informed by the
+/// environment. When running test pre-submit or locally, they are executed via
+/// the [GoldensClient].
 ///
 /// This comparator will instantiate [GoldensClient] and [SkiaGoldClient].
 class FlutterGoldenFileComparator implements GoldenFileComparator {
@@ -52,8 +57,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   FlutterGoldenFileComparator(
     this.basedir, {
     this.fs = const LocalFileSystem(),
-    this.platform = const LocalPlatform(),
-  });
+    Platform platform = const LocalPlatform(),
+  }) : assert(basedir != null),
+       _platform = platform;
 
   /// The directory to which golden file URIs will be resolved in [compare] and [update].
   final Uri basedir;
@@ -64,9 +70,12 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   /// A wrapper for the [dart:io.Platform] API.
   ///
-  /// This is useful in tests, where the system platform (the default) can be
+  /// This only for use in tests, where the system platform (the default) can be
   /// replaced by mock platform instance.
-  final Platform platform;
+  @visibleForTesting
+  Platform get platform => _platform;
+
+  Platform _platform;
 
   /// Instance of the [SkiaGoldClient] for executing tests.
   final SkiaGoldClient _skiaClient = SkiaGoldClient();
@@ -87,7 +96,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
     const Platform platform = LocalPlatform();
     goldens ??= GoldensClient();
-    if(platform.environment[_kServiceAccountKey] == null) {
+    if (platform.environment[_kServiceAccountKey] == null) {
       // Prepare the goldens repo.
       await goldens.prepare();
     }
@@ -101,7 +110,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    if(_testingWithSkiaGold()) {
+    if (_testingWithSkiaGold()) {
       // Library prefix notation for Skia Gold.
       golden = _addPrefix(golden);
       // Always updating for SkiaGold testing.
@@ -116,15 +125,17 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     if (_testingWithSkiaGold()) {
       // Testing with SkiaGoldClient.
       final bool authorized = await _skiaClient.auth(fs.directory(basedir));
-      if(!authorized) {
+      if (!authorized) {
         throw TestFailure('Could not authorize goldctl.');
       }
 
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
 
-    } else if (platform.isLinux) {
-      // Testing with GoldensClient.
+    }
+
+    if (_platform.isLinux) {
+      // Testing with GoldensRepositoryClient.
       final List<int> goldenBytes = await goldenFile.readAsBytes();
       if (goldenBytes.length != imageBytes.length) {
         return false;
@@ -135,11 +146,11 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
         }
       }
       return true;
-    } else {
-      // Testing skipped.
-      print('Skipping "$golden" : Skia Gold unavailable && !isLinux');
-      return true;
     }
+
+    // Testing skipped.
+    print('Skipping "$golden" : Skia Gold unavailable && !isLinux');
+    return true;
   }
 
   @override
@@ -149,9 +160,28 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return _testingWithSkiaGold()
+      ? key
+      : _addVersion(key, version);
+  }
+
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
     return Uri.parse(prefix + '.' + golden.toString());
+  }
+
+  Uri _addVersion(Uri key, int version) {
+    return version == null ? key : Uri.parse(
+      key
+        .toString()
+        .splitMapJoin(
+          RegExp(r'.png'),
+          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
+          onNonMatch: (String n) => '$n'
+        )
+    );
   }
 
   File _getGoldenFile(Uri uri) {
@@ -159,9 +189,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   }
 
   bool _testingWithSkiaGold() {
-    final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
-    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
+    final String cirrusCI = _platform.environment['CIRRUS_CI'] ?? '';
+    final String cirrusPR = _platform.environment['CIRRUS_PR'] ?? '';
+    final String cirrusBranch = _platform.environment['CIRRUS_BRANCH'] ?? '';
     return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
   }
 }

@@ -45,6 +45,9 @@ abstract class GoldenFileComparator {
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
   Future<void> update(Uri golden, Uint8List imageBytes);
+
+  /// TODO(Piinks): document
+  Uri getTestUri(Uri key, int version);
 }
 
 /// Compares rasterized image bytes against a golden image file.
@@ -126,6 +129,11 @@ class TrivialComparator implements GoldenFileComparator {
   Future<void> update(Uri golden, Uint8List imageBytes) {
     throw StateError('goldenFileComparator has not been initialized');
   }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return key;
+  }
 }
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
@@ -188,6 +196,19 @@ class LocalFileComparator implements GoldenFileComparator {
     final File goldenFile = _getFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
+  }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return version == null ? key : Uri.parse(
+      key
+        .toString()
+        .splitMapJoin(
+        RegExp(r'.png'),
+        onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
+        onNonMatch: (String n) => '$n'
+      )
+    );
   }
 
   File _getFile(Uri golden) {
