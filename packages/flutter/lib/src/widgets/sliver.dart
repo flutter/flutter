@@ -1068,7 +1068,7 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   ) {
     final double padding = (1 - viewportFraction) * constraints.viewportMainAxisExtent;
     if (delegate.estimatedChildCount == null) {
-      return trailingScrollOffset + padding / 2;
+      return double.infinity;
     }
 
     return delegate.estimatedChildCount > 0
