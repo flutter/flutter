@@ -130,7 +130,7 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: integration_tests_agradle-linux
+    - name: integration_tests_gradle-linux
       env:
         SHARD: integration_tests
         SUBSHARD: gradle
