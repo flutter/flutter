@@ -105,7 +105,7 @@ task:
       test_script:
         - cd ./packages/flutter_tools
         - dart tool/tool_coverage.dart
-        - curl -s https://codecov.io/bash | bash -f coverage/lcov.info
+        - bash < (curl -s https://codecov.io/bash)
       container:
         cpu: 4
         memory: 12G
