@@ -1072,7 +1072,7 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
     }
 
     return delegate.estimatedChildCount > 0
-      ? padding + viewportFraction * constraints.viewportMainAxisExtent * (delegate.estimatedChildCount)
+      ? padding + viewportFraction * constraints.viewportMainAxisExtent * delegate.estimatedChildCount
       : 0;
   }
 }
