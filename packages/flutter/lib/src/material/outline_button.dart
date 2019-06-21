@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'material_button.dart';
@@ -417,7 +418,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightElevation: _getHighlightElevation(),
           onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
-          shape: _OutlineBorder(
+          shape: OutlineBorder(
             shape: widget.shape,
             side: _getOutline(),
           ),
@@ -433,8 +434,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
 // Render the button's outline border using using the OutlineButton's
 // border parameters and the button or buttonTheme's shape.
-class _OutlineBorder extends ShapeBorder {
-  const _OutlineBorder({
+class OutlineBorder extends ShapeBorder {
+  const OutlineBorder({
     @required this.shape,
     @required this.side,
   }) : assert(shape != null),
@@ -450,7 +451,7 @@ class _OutlineBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return _OutlineBorder(
+    return OutlineBorder(
       shape: shape.scale(t),
       side: side.scale(t),
     );
@@ -459,8 +460,8 @@ class _OutlineBorder extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is _OutlineBorder) {
-      return _OutlineBorder(
+    if (a is OutlineBorder) {
+      return OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
         shape: ShapeBorder.lerp(a.shape, shape, t),
       );
@@ -471,8 +472,8 @@ class _OutlineBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is _OutlineBorder) {
-      return _OutlineBorder(
+    if (b is OutlineBorder) {
+      return OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),
         shape: ShapeBorder.lerp(shape, b.shape, t),
       );
@@ -506,7 +507,7 @@ class _OutlineBorder extends ShapeBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final _OutlineBorder typedOther = other;
+    final OutlineBorder typedOther = other;
     return side == typedOther.side && shape == typedOther.shape;
   }
 

@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/outline_button.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -318,6 +319,16 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   @override
   Widget build(BuildContext context) {
     final Color effectiveTextColor = MaterialStateColor.resolveColor(widget.textStyle?.color, _states);
+
+    ShapeBorder effectiveShape = widget.shape;
+    if (effectiveShape is OutlineBorder) {
+      final OutlineBorder typedShape = effectiveShape;
+      final Color resolvedBorderColor = MaterialStateColor.resolveColor(typedShape.side.color, _states);
+      effectiveShape = OutlineBorder(
+        shape: typedShape.shape,
+        side: typedShape.side.copyWith(color: resolvedBorderColor),
+      );
+    }
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
