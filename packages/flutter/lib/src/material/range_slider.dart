@@ -128,14 +128,14 @@ class RangeSlider extends StatefulWidget {
     this.inactiveColor,
     this.semanticFormatterCallback
   }) : assert(values != null),
-       assert(min != null),
-       assert(max != null),
-       assert(min <= max),
-       assert(values.start <= values.end),
-       assert(values.start >= min && values.start <= max),
-       assert(values.end >= min && values.end <= max),
-       assert(divisions == null || divisions > 0),
-       super(key: key);
+        assert(min != null),
+        assert(max != null),
+        assert(min <= max),
+        assert(values.start <= values.end),
+        assert(values.start >= min && values.start <= max),
+        assert(values.end >= min && values.end <= max),
+        assert(divisions == null || divisions > 0),
+        super(key: key);
 
   /// The currently selected values for this range slider.
   ///
@@ -371,19 +371,19 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       vsync: this,
     );
     enableController = AnimationController(
-      duration: enableAnimationDuration,
-      vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0
+        duration: enableAnimationDuration,
+        vsync: this,
+        value: widget.onChanged != null ? 1.0 : 0.0
     );
     startPositionController = AnimationController(
-      duration: Duration.zero,
-      vsync: this,
-      value: _unlerp(widget.values.start)
+        duration: Duration.zero,
+        vsync: this,
+        value: _unlerp(widget.values.start)
     );
     endPositionController = AnimationController(
-      duration: Duration.zero,
-      vsync: this,
-      value: _unlerp(widget.values.end)
+        duration: Duration.zero,
+        vsync: this,
+        value: _unlerp(widget.values.end)
     );
   }
 
@@ -464,7 +464,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       Size thumbSize,
       Size trackSize,
       double dx, // drag velocity
-    ) {
+      ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
@@ -878,12 +878,12 @@ class _RenderRangeSlider extends RenderBox {
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
-        // Matches iOS implementation of material slider.
+      // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
       default:
-        // Matches Android implementation of material slider.
+      // Matches Android implementation of material slider.
         return 0.05;
     }
   }
@@ -975,6 +975,8 @@ class _RenderRangeSlider extends RenderBox {
     return RangeValues(_discretize(values.start), _discretize(values.end));
   }
 
+  RangeValues _newValues;
+
   void _startInteraction(Offset globalPosition) {
     final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
     _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, tapValue, _thumbSize, size, 0);
@@ -985,11 +987,10 @@ class _RenderRangeSlider extends RenderBox {
       // a tap, it consists of a call to onChangeStart with the previous value and
       // a call to onChangeEnd with the new value.
       final RangeValues currentValues = _discretizeRangeValues(values);
-      RangeValues newValues;
       if (_lastThumbSelection == Thumb.start) {
-        newValues = RangeValues(tapValue, currentValues.end);
+        _newValues = RangeValues(tapValue, currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
-        newValues = RangeValues(currentValues.start, tapValue);
+        _newValues = RangeValues(currentValues.start, tapValue);
       }
       _updateLabelPainter(_lastThumbSelection);
 
@@ -997,19 +998,19 @@ class _RenderRangeSlider extends RenderBox {
         onChangeStart(currentValues);
       }
 
-      onChanged(_discretizeRangeValues(newValues));
+      onChanged(_discretizeRangeValues(_newValues));
 
       _state.overlayController.forward();
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
         _state.interactionTimer?.cancel();
         _state.interactionTimer =
-          Timer(_minimumInteractionTime * timeDilation, () {
-            _state.interactionTimer = null;
-            if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
-              _state.valueIndicatorController.reverse();
-            }
-          });
+            Timer(_minimumInteractionTime * timeDilation, () {
+              _state.interactionTimer = null;
+              if (!_active && _state.valueIndicatorController.status == AnimationStatus.completed) {
+                _state.valueIndicatorController.reverse();
+              }
+            });
       }
     }
   }
@@ -1017,11 +1018,15 @@ class _RenderRangeSlider extends RenderBox {
   void _handleDragUpdate(DragUpdateDetails details) {
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
-    // If no selection has been made yet, use the velocity of the drag to
-    // determine which thumb should be selected.
+    // If no selection has been made yet, test for thumb selection again now
+    // that the value if dx is non zero. If this is the first selection of the
+    // interaction, then onChangeStart must be called.
+    bool shouldCallOnChangeStart = false;
     if (_lastThumbSelection == null) {
       _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, dragValue, _thumbSize, size, details.delta.dx);
       if (_lastThumbSelection != null) {
+        shouldCallOnChangeStart = true;
+        _active = true;
         _state.overlayController.forward();
         if (showValueIndicator) {
           _state.valueIndicatorController.forward();
@@ -1031,16 +1036,18 @@ class _RenderRangeSlider extends RenderBox {
 
     if (isEnabled && _lastThumbSelection != null) {
       final RangeValues currentValues = _discretizeRangeValues(values);
+      if (onChangeStart != null && shouldCallOnChangeStart) {
+        onChangeStart(currentValues);
+      }
       final double currentDragValue = _discretize(dragValue);
 
-      RangeValues newValues;
       final double minThumbSeparationValue = isDiscrete ? 0 : sliderTheme.minThumbSeparation / _trackRect.width;
       if (_lastThumbSelection == Thumb.start) {
-        newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
+        _newValues = RangeValues(math.min(currentDragValue, currentValues.end - minThumbSeparationValue), currentValues.end);
       } else if (_lastThumbSelection == Thumb.end) {
-        newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + minThumbSeparationValue));
+        _newValues = RangeValues(currentValues.start, math.max(currentDragValue, currentValues.start + minThumbSeparationValue));
       }
-      onChanged(newValues);
+      onChanged(_newValues);
     }
   }
 
@@ -1053,7 +1060,7 @@ class _RenderRangeSlider extends RenderBox {
     if (_active && _state.mounted) {
       if (_lastThumbSelection == null)
         return;
-      final RangeValues discreteValues = _discretizeRangeValues(values);
+      final RangeValues discreteValues = _discretizeRangeValues(_newValues);
       if (onChangeEnd != null) {
         onChangeEnd(discreteValues);
       }
