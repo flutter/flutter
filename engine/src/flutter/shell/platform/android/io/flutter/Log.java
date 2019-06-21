@@ -9,41 +9,54 @@ import android.support.annotation.NonNull;
 import io.flutter.BuildConfig;
 
 /**
- * Port of {@link android.util.Log} that only logs in {@link BuildConfig#DEBUG} mode.
+ * Port of {@link android.util.Log} that only logs in {@link BuildConfig#DEBUG} mode and
+ * internally filters logs based on a {@link #logLevel}.
  */
 public class Log {
+  private static int logLevel = android.util.Log.DEBUG;
+
+  /**
+   * Sets a log cutoff such that a log level of lower priority than {@code logLevel} is
+   * filtered out.
+   * <p>
+   * See {@link android.util.Log} for log level constants.
+   */
+  public static void setLogLevel(int logLevel) {
+    Log.logLevel = logLevel;
+  }
+
   public static void v(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.VERBOSE) {
       android.util.Log.v(tag, message);
     }
   }
 
   public static void v(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.VERBOSE) {
       android.util.Log.v(tag, message, tr);
     }
   }
 
   public static void i(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.INFO) {
       android.util.Log.i(tag, message);
     }
   }
 
   public static void i(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.INFO) {
       android.util.Log.i(tag, message, tr);
     }
   }
 
   public static void d(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.DEBUG) {
       android.util.Log.d(tag, message);
     }
   }
 
   public static void d(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel >= android.util.Log.DEBUG) {
       android.util.Log.d(tag, message, tr);
     }
   }
