@@ -373,17 +373,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     enableController = AnimationController(
       duration: enableAnimationDuration,
       vsync: this,
-      value: widget.onChanged != null ? 1.0 : 0.0,
+      value: widget.onChanged != null ? 1.0 : 0.0
     );
     startPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.start),
+      value: _unlerp(widget.values.start)
     );
     endPositionController = AnimationController(
       duration: Duration.zero,
       vsync: this,
-      value: _unlerp(widget.values.end),
+      value: _unlerp(widget.values.end)
     );
   }
 
@@ -464,7 +464,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       Size thumbSize,
       Size trackSize,
       double dx, // drag velocity
-      ) {
+    ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
