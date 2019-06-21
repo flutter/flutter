@@ -79,7 +79,8 @@ class SafeArea extends StatelessWidget {
   /// SafeArea, the padding can be maintained below the obstruction rather than
   /// being consumed. This can be helpful in cases where your layout contains
   /// flexible widgets, which could visibly move when opening a software
-  /// keyboard due to the change in the padding value.
+  /// keyboard due to the change in the padding value. Setting this to true will
+  /// avoid the UI shift.
   final bool maintainBottomViewPadding;
 
   /// The widget below this widget in the tree.
