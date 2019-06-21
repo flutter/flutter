@@ -7,7 +7,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/outline_button.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
@@ -88,7 +87,7 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [textStyle.color] is a [MaterialStateColor], [MaterialStateColor.resolveColor]
+  /// If [textStyle.color] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
@@ -200,6 +199,14 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
+  ///
+  /// If [shape] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  /// * [MaterialState.pressed].
+  /// * [MaterialState.hovered].
+  /// * [MaterialState.focused].
+  /// * [MaterialState.disabled].
   final ShapeBorder shape;
 
   /// Defines the duration of animated changes for [shape] and [elevation].
@@ -316,19 +323,18 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     return widget.elevation;
   }
 
+  ShapeBorder get _effectiveShape {
+    final dynamic widgetShape = widget.shape;
+    if (widgetShape is MaterialStateProperty<ShapeBorder>) {
+      return widgetShape.resolve(_states);
+    }
+    return widget.shape;
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color effectiveTextColor = MaterialStateColor.resolveColor(widget.textStyle?.color, _states);
-
-    ShapeBorder effectiveShape = widget.shape;
-    if (effectiveShape is OutlineBorder) {
-      final OutlineBorder typedShape = effectiveShape;
-      final Color resolvedBorderColor = MaterialStateColor.resolveColor(typedShape.side.color, _states);
-      effectiveShape = OutlineBorder(
-        shape: typedShape.shape,
-        side: typedShape.side.copyWith(color: resolvedBorderColor),
-      );
-    }
+    final ShapeBorder effectiveShape = _effectiveShape;
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
@@ -338,7 +344,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         child: Material(
           elevation: _effectiveElevation,
           textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: widget.shape,
+          shape: effectiveShape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
           animationDuration: widget.animationDuration,
@@ -351,7 +357,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             hoverColor: widget.hoverColor,
             onHover: _handleHoveredChanged,
             onTap: widget.onPressed,
-            customBorder: widget.shape,
+            customBorder: effectiveShape,
             child: IconTheme.merge(
               data: IconThemeData(color: effectiveTextColor),
               child: Container(

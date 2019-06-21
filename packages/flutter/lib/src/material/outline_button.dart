@@ -5,10 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 
@@ -133,12 +133,16 @@ class OutlineButton extends MaterialButton {
   ///
   /// By default the border's color does not change when the button
   /// is pressed.
+  ///
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
   ///
   /// By default the outline border's color does not change when the
   /// button is disabled.
+  ///
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -149,6 +153,10 @@ class OutlineButton extends MaterialButton {
   ///
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
+  ///
+  /// If [borderSide.color] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
+  /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
+  /// are ignored.
   final BorderSide borderSide;
 
   @override
@@ -371,14 +379,29 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
+  Color get _currentOutlineColor {
+    if (!widget.enabled) {
+      return widget.disabledBorderColor;
+    }
+    if (_pressed) {
+      return widget.highlightedBorderColor;
+    }
+    return widget.borderSide?.color;
+
+  }
+
   BorderSide _getOutline() {
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
-    final Color specifiedColor = widget.enabled
-      ? (_pressed ? widget.highlightedBorderColor : null) ?? widget.borderSide?.color
-      : widget.disabledBorderColor;
-
+    Color specifiedColor;
+    // If outline color is a `MaterialStateProperty`, it will be used in all
+    // states, otherwise we determine the outline color in the current state.
+    if (widget.borderSide?.color is MaterialStateProperty<Color>) {
+      specifiedColor = widget.borderSide?.color;
+    } else {
+      specifiedColor = _currentOutlineColor;
+    }
     final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
     return BorderSide(
@@ -418,7 +441,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           highlightElevation: _getHighlightElevation(),
           onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
-          shape: OutlineBorder(
+          shape: _OutlineBorder(
             shape: widget.shape,
             side: _getOutline(),
           ),
@@ -434,8 +457,8 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
 // Render the button's outline border using using the OutlineButton's
 // border parameters and the button or buttonTheme's shape.
-class OutlineBorder extends ShapeBorder {
-  const OutlineBorder({
+class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeBorder>{
+  const _OutlineBorder({
     @required this.shape,
     @required this.side,
   }) : assert(shape != null),
@@ -451,7 +474,7 @@ class OutlineBorder extends ShapeBorder {
 
   @override
   ShapeBorder scale(double t) {
-    return OutlineBorder(
+    return _OutlineBorder(
       shape: shape.scale(t),
       side: side.scale(t),
     );
@@ -460,8 +483,8 @@ class OutlineBorder extends ShapeBorder {
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     assert(t != null);
-    if (a is OutlineBorder) {
-      return OutlineBorder(
+    if (a is _OutlineBorder) {
+      return _OutlineBorder(
         side: BorderSide.lerp(a.side, side, t),
         shape: ShapeBorder.lerp(a.shape, shape, t),
       );
@@ -472,8 +495,8 @@ class OutlineBorder extends ShapeBorder {
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     assert(t != null);
-    if (b is OutlineBorder) {
-      return OutlineBorder(
+    if (b is _OutlineBorder) {
+      return _OutlineBorder(
         side: BorderSide.lerp(side, b.side, t),
         shape: ShapeBorder.lerp(shape, b.shape, t),
       );
@@ -507,10 +530,18 @@ class OutlineBorder extends ShapeBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final OutlineBorder typedOther = other;
+    final _OutlineBorder typedOther = other;
     return side == typedOther.side && shape == typedOther.shape;
   }
 
   @override
   int get hashCode => hashValues(side, shape);
+
+  @override
+  ShapeBorder resolve(Set<MaterialState> states) {
+    return _OutlineBorder(
+      shape: shape,
+      side: side.copyWith(color: MaterialStateColor.resolveColor(side.color, states),
+    ));
+  }
 }

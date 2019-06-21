@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Color;
 
+import 'package:flutter/painting.dart';
+
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
@@ -109,7 +111,7 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 /// ),
 /// ```
 /// {@end-tool}
-abstract class MaterialStateColor extends Color {
+abstract class MaterialStateColor extends Color implements MaterialStateProperty<Color> {
   /// Creates a [MaterialStateColor].
   ///
   /// If you want a `const` [MaterialStateColor], you'll need to extend
@@ -152,6 +154,7 @@ abstract class MaterialStateColor extends Color {
 
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
+  @override
   Color resolve(Set<MaterialState> states);
 
   /// Returns the color for the given set of states if `color` is a
@@ -183,4 +186,17 @@ class _MaterialStateColor extends MaterialStateColor {
 
   @override
   Color resolve(Set<MaterialState> states) => _resolve(states);
+}
+
+/// Interface for classes that can return a value of type `T` based on a set of [MaterialState]s.
+///
+/// For example, [MaterialStateColor] implements `MaterialStateProperty<Color>` because it has a `resolve` method that
+/// returns a different color depending on the given set of [MaterialState]s.
+abstract class MaterialStateProperty<T> {
+
+  /// Returns a different value of type `T` depending on the given `states`.
+  ///
+  /// Some components (such as [RawMaterialButton]s) keep track of their set of [MaterialState]s, and will call
+  /// `resolve` with the current states at build time for specified properties (such as [RawMaterialButton.textStyle]'s color).
+  T resolve(Set<MaterialState> states);
 }
