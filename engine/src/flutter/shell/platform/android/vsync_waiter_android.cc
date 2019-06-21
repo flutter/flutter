@@ -87,7 +87,7 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
       .fnPtr = reinterpret_cast<void*>(&OnNativeVsync),
   }};
 
-  jclass clazz = env->FindClass("io/flutter/view/VsyncWaiter");
+  jclass clazz = env->FindClass("io/flutter/embedding/engine/FlutterJNI");
 
   if (clazz == nullptr) {
     return false;

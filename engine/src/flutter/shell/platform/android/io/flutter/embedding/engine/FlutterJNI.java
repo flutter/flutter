@@ -4,6 +4,7 @@
 
 package io.flutter.embedding.engine;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
@@ -18,14 +19,14 @@ import java.nio.ByteBuffer;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.flutter.BuildConfig;
 import io.flutter.Log;
-import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
+import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.common.StandardMessageCodec;
 import io.flutter.view.AccessibilityBridge;
+import io.flutter.view.FlutterCallbackInformation;
 
 /**
  * Interface between Flutter embedding's Java code and Flutter engine's C/C++ code.
@@ -93,17 +94,63 @@ import io.flutter.view.AccessibilityBridge;
 public class FlutterJNI {
   private static final String TAG = "FlutterJNI";
 
+  @Nullable
+  private static AsyncWaitForVsyncDelegate asyncWaitForVsyncDelegate;
+  // This should also be updated by FlutterView when it is attached to a Display.
+  // The initial value of 0.0 indicates unknown refresh rate.
+  private static float refreshRateFPS = 0.0f;
+
   // This is set from native code via JNI.
   @Nullable
   private static String observatoryUri;
 
+  // TODO(mattcarroll): add javadocs
+  public static native void nativeInit(
+      @NonNull Context context,
+      @NonNull String[] args,
+      @Nullable String bundlePath,
+      @NonNull String appStoragePath,
+      @NonNull String engineCachesPath
+  );
+
+  // TODO(mattcarroll): add javadocs
+  public static native void nativeRecordStartTimestamp(long initTimeMillis);
+
+  // TODO(mattcarroll): add javadocs
   @UiThread
   public static native boolean nativeGetIsSoftwareRenderingEnabled();
 
   @Nullable
+  // TODO(mattcarroll): add javadocs
   public static String getObservatoryUri() {
     return observatoryUri;
   }
+
+  public static void setRefreshRateFPS(float refreshRateFPS) {
+    FlutterJNI.refreshRateFPS = refreshRateFPS;
+  }
+
+  // TODO(mattcarroll): add javadocs
+  public static void setAsyncWaitForVsyncDelegate(@Nullable AsyncWaitForVsyncDelegate delegate) {
+    asyncWaitForVsyncDelegate = delegate;
+  }
+
+  // TODO(mattcarroll): add javadocs
+  // Called by native.
+  private static void asyncWaitForVsync(final long cookie) {
+    if (asyncWaitForVsyncDelegate != null) {
+      asyncWaitForVsyncDelegate.asyncWaitForVsync(cookie);
+    } else {
+      throw new IllegalStateException("An AsyncWaitForVsyncDelegate must be registered with FlutterJNI before asyncWaitForVsync() is invoked.");
+    }
+  }
+
+  // TODO(mattcarroll): add javadocs
+  public static native void nativeOnVsync(long frameTimeNanos, long frameTargetTimeNanos, long cookie);
+
+  // TODO(mattcarroll): add javadocs
+  @NonNull
+  public static native FlutterCallbackInformation nativeLookupCallbackInformation(long handle);
 
   @Nullable
   private Long nativePlatformViewId;
@@ -771,5 +818,9 @@ public class FlutterJNI {
      * This method provides updates from Flutter for the Android-side semantics tree cache.
      */
     void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings);
+  }
+
+  public interface AsyncWaitForVsyncDelegate {
+    void asyncWaitForVsync(final long cookie);
   }
 }

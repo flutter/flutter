@@ -652,11 +652,6 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
                 mMetrics.physicalHeight, mMetrics.physicalPaddingTop, mMetrics.physicalPaddingRight,
                 mMetrics.physicalPaddingBottom, mMetrics.physicalPaddingLeft, mMetrics.physicalViewInsetTop,
                 mMetrics.physicalViewInsetRight, mMetrics.physicalViewInsetBottom, mMetrics.physicalViewInsetLeft);
-
-        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
-        float fps = wm.getDefaultDisplay().getRefreshRate();
-        VsyncWaiter.refreshPeriodNanos = (long) (1000000000.0 / fps);
-        VsyncWaiter.refreshRateFPS = fps;
     }
 
     // Called by native to update the semantics/accessibility tree.
