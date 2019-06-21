@@ -207,14 +207,12 @@ class LocalFileComparator implements GoldenFileComparator {
 
   @override
   Uri getTestUri(Uri key, int version) {
+    final String extension = path.extension(key.toString());
     return version == null ? key : Uri.parse(
       key
         .toString()
-        .splitMapJoin(
-        RegExp(r'.png'),
-        onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-        onNonMatch: (String n) => '$n'
-      )
+        .split(extension)
+        .join() + '.' + version.toString() + extension
     );
   }
 

@@ -28,6 +28,7 @@ class SkiaGoldClient {
   SkiaGoldClient({
     this.fs = const LocalFileSystem(),
     Platform platform = const LocalPlatform(),
+    this.hasBeenAuthorized = false,
   }) : _platform = platform;
 
   /// The file system to use for storing local files for running image tests.
@@ -43,6 +44,7 @@ class SkiaGoldClient {
   Platform get platform => _platform;
 
   Platform _platform;
+
 
   /// The local [Directory] where the Flutter repository is hosted.
   ///
@@ -62,6 +64,15 @@ class SkiaGoldClient {
   /// method, cannot be null.
   Directory _workDirectory;
 
+  /// Flag to specify is authorization has been completed for a given testing
+  /// context.
+  ///
+  /// Within each test file that contains a golden test, authorization should
+  /// only be executed once.
+  ///
+  /// Defaults to false until authorization is completed in [auth].
+  bool hasBeenAuthorized;
+
   /// The [path] to the local [Directory] where the goldctl tool is hosted.
   ///
   /// Uses the [platform] [environment] in this iteration.
@@ -73,9 +84,9 @@ class SkiaGoldClient {
   /// Uses the [platform] [environment] in this iteration.
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
-  /// Prepares the local work space for golden file testing and initializes the
-  /// goldctl authorization for executing tests, will return a boolean Future to
-  /// indicate whether the client has been successfully authorized.
+  /// Prepares the local work space for golden file testing and calls the
+  /// goldctl `auth` command, will return a Future of true if successful, or
+  /// throw an error.
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<bool> auth(Directory workDirectory) async {
@@ -106,9 +117,14 @@ class SkiaGoldClient {
         ..writeln('stderr: ${authResults.stderr}');
       throw NonZeroExitCode(authResults.exitCode, buf.toString());
     }
+    hasBeenAuthorized = true;
     return true;
   }
 
+  /// Executes the `imgtest init` command in the goldctl tool.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
     final String commitHash = await _getCommitHash();
     final File keys = _workDirectory.childFile('keys.json');
@@ -151,6 +167,12 @@ class SkiaGoldClient {
     }
   }
 
+  /// Executes the `imgtest add` command in the goldctl tool.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `add` argument uploads the current image test. A response is
+  /// returned from the invocation of this command that indicates a pass or fail
+  /// result.
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',

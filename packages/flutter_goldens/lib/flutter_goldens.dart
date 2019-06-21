@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 
 import 'package:flutter_goldens_client/client.dart';
@@ -52,7 +53,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   FlutterGoldenFileComparator(
     this.basedir, {
     this.fs = const LocalFileSystem(),
-    Platform platform = const LocalPlatform(),
+    this.platform = const LocalPlatform(),
   }) : assert(basedir != null),
        _platform = platform;
 
@@ -68,9 +69,13 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   /// This is only for use in tests, where the system platform (the default) can
   /// be replaced by mock platform instance.
   @visibleForTesting
-  Platform get platform => _platform;
+  final Platform platform;
 
   Platform _platform;
+
+  /// Instance of the [SkiaGoldClient] for executing tests with the goldctl
+  /// tool.
+  final SkiaGoldClient _skiaClient = SkiaGoldClient();
 
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
@@ -96,7 +101,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     }
 
     // Calculate the appropriate basedir for the current test context.
-    const FileSystem fs = LocalFileSystem();
+    final FileSystem fs = goldens.fs;
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
     return FlutterGoldenFileComparator(goldens.comparisonRoot.childDirectory(testDirectoryRelativePath).uri);
@@ -104,9 +109,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    SkiaGoldClient _skiaClient;
     if (_testingWithSkiaGold(_platform)) {
-      _skiaClient = SkiaGoldClient();
       golden = _addPrefix(golden);
       await update(golden, imageBytes);
     }
@@ -117,9 +120,11 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     }
 
     if (_testingWithSkiaGold(_platform)) {
-      final bool authorized = await _skiaClient.auth(fs.directory(basedir));
-      if (!authorized) {
-        throw TestFailure('Could not authorize goldctl.');
+      if(!_skiaClient.hasBeenAuthorized) {
+        final bool authorized = await _skiaClient.auth(fs.directory(basedir));
+        if (!authorized) {
+          throw TestFailure('Could not authorize goldctl.');
+        }
       }
 
       await _skiaClient.imgtestInit();
@@ -163,14 +168,12 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   }
 
   Uri _addVersion(Uri key, int version) {
+    final String extension = path.extension(key.toString());
     return version == null ? key : Uri.parse(
       key
         .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
+        .split(extension)
+        .join() + '.' + version.toString() + extension
     );
   }
 
