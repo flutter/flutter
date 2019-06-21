@@ -69,9 +69,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
 
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosValidator);
-
       if (webWorkflow.appliesToHostPlatform)
         _validators.add(const WebValidator());
 

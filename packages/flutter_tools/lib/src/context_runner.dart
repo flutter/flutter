@@ -87,7 +87,6 @@ Future<T> runInContext<T>(
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
-      IOSValidator: () => const IOSValidator(),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),

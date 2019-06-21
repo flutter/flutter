@@ -27,7 +27,7 @@ const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
 
-class IOSDeploy { // TODO
+class IOSDeploy {
   const IOSDeploy();
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
