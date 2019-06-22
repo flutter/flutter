@@ -71,6 +71,7 @@ void main() {
         ],
         'type': 3,
         'name': 'tester',
+        'statusText': null
       });
 
       final ValidationResult repsonse = ValidationResult.fromJson(<String, Object>{
