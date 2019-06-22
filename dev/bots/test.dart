@@ -721,6 +721,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (shouldProcessOutput) {
     args.add('--machine');
   }
+  if (Platform.isLinux) {
+    args.add('--coverage');
+  }
 
   if (script != null) {
     final String fullScriptPath = path.join(workingDirectory, script);
