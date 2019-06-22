@@ -23,10 +23,6 @@ import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
-const String _kIdeviceinstallerInstructions =
-    'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
-    'brew install ideviceinstaller.';
-
 class IOSDeploy {
   const IOSDeploy();
 
@@ -173,10 +169,7 @@ class IOSDevice extends Device {
     return devices;
   }
 
-  static String _checkForCommand(
-    String command, {
-    String macInstructions = _kIdeviceinstallerInstructions,
-  }) {
+  static String _checkForCommand(String command) {
     try {
       command = runCheckedSync(
         <String>['which', command],
@@ -184,7 +177,7 @@ class IOSDevice extends Device {
       ).trim();
     } catch (e) {
       if (platform.isMacOS) {
-        printError('$command not found. $macInstructions');
+        printError('$command not found.');
       } else {
         printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
       }
