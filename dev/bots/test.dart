@@ -721,7 +721,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   if (shouldProcessOutput) {
     args.add('--machine');
   }
-  if (Platform.isLinux) {
+  if (Platform.isLinux && Platform.environment['COVERAGE'] == 'true') {
     final String shard = Platform.environment['SHARD'];
     final String subShard = Platform.environment['SUBSHARD'];
     args.add('--coverage');

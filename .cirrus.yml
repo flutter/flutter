@@ -63,6 +63,7 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        COVERAGE: true
       coverage_cache:
         folder: packages/flutter/coverage/
       test_script:
@@ -75,6 +76,7 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        COVERAGE: true
       coverage_cache:
         folder: packages/flutter/coverage/
       test_script:
@@ -87,8 +89,6 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: extras
-      coverage_cache:
-        folder: packages/flutter/coverage/
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -192,7 +192,6 @@ task:
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
     - name: upload_coverage
       depends_on:
-        - tests_extras-linux
         - tests_widgets-linux
         - tests_framework_other-linux
       env:
