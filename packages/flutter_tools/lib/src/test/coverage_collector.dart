@@ -126,7 +126,6 @@ class CoverageCollector extends TestWatcher {
     coverage.Formatter formatter,
     Directory coverageDirectory,
   }) async {
-    printTrace('formating coverage data');
     if (_globalHitmap == null) {
       return null;
     }

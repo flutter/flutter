@@ -8,7 +8,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/context_runner.dart';
 import 'package:path/path.dart' as p;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -31,16 +30,14 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 ///
 ///    dart tool/tool_coverage.dart.
 Future<void> main(List<String> arguments) async {
-  return runInContext(() async {
-    final VMPlatform vmPlatform = VMPlatform();
-    hack.registerPlatformPlugin(
-      <Runtime>[Runtime.vm],
-      () => vmPlatform,
-    );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
-    await vmPlatform.close();
-    return exitCode;
-  });
+  final VMPlatform vmPlatform = VMPlatform();
+  hack.registerPlatformPlugin(
+    <Runtime>[Runtime.vm],
+    () => vmPlatform,
+  );
+  await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
+  await vmPlatform.close();
+  return exitCode;
 }
 
 /// A platform that loads tests in isolates spawned within this Dart process.
@@ -138,7 +135,7 @@ class VMEnvironment implements Environment {
 
   @override
   CancelableOperation<void> displayPause() {
-    final  CancelableCompleter<dynamic> completer = CancelableCompleter<dynamic>(onCancel: () => _isolate.resume());
+    final CancelableCompleter<dynamic> completer = CancelableCompleter<dynamic>(onCancel: () => _isolate.resume());
 
     completer.complete(_isolate.pause().then((dynamic _) => _isolate.onPauseOrResume
         .firstWhere((VMPauseEvent event) => event is VMResumeEvent)));
