@@ -38,7 +38,7 @@ Future<void> main(List<String> arguments) async {
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
+    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
     exit(exitCode);
   });
 }
@@ -71,7 +71,8 @@ class VMPlatform extends PlatformPlugin {
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
         .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
       await coverageCollector.collectCoverageIsolate(info.serverUri);
-      isolate.kill();
+      isolate.kill(priority: Isolate.immediate);
+      isolate = null;
       sink.close();
       completer.complete();
     }));

@@ -106,7 +106,7 @@ task:
         - export FLUTTER_ROOT=$(pwd)
         - cd ./packages/flutter_tools
         - pub run build_runner build
-        - dart tool/tool_coverage.dart -j1
+        - dart tool/tool_coverage.dart
         - bash <(curl -s https://codecov.io/bash) -f coverage/lcov.info
       container:
         cpu: 8
