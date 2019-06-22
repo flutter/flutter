@@ -642,7 +642,7 @@ void main() {
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
-  testWidgets('Snackbar bottom padding is not consumned by viewInsets', (WidgetTester tester) async {
+  testWidgets('SnackBar bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
       child: Scaffold(
