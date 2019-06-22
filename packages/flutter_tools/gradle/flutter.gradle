@@ -268,13 +268,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static Boolean getBuildShareLibrary(Project project) {
-        if (project.hasProperty('build-shared-library')) {
-            return project.property('build-shared-library').toBoolean()
-        }
-        return false;
-    }
-
     private static Boolean splitPerAbi(Project project) {
         if (project.hasProperty('split-per-abi')) {
             return project.property('split-per-abi').toBoolean()
@@ -645,7 +638,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "build", "aot"
                 args "--suppress-analytics"
                 args "--quiet"
-                args "--build-shared-library"
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
                 args "--target-platform", "${targetPlatform}"
