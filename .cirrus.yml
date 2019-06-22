@@ -104,6 +104,7 @@ task:
         SHARD: tool_tests
       test_script:
         - cd ./packages/flutter_tools
+        - pub run build_runner build
         - dart tool/tool_coverage.dart
         - bash <(curl -s https://codecov.io/bash) -f coverage/lcov.info
       container:

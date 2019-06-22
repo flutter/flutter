@@ -3,134 +3,146 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
+import 'dart:isolate';
 
-import 'package:args/args.dart';
+import 'package:async/async.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:path/path.dart' as p;
+import 'package:stream_channel/isolate_channel.dart';
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
+import 'package:vm_service_client/vm_service_client.dart';
+import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
-import 'package:pool/pool.dart';
 
-final ArgParser argParser = ArgParser()
-  ..addOption('output-lcov',
-    defaultsTo: 'coverage/lcov.info',
-    help: 'The output path for the lcov data.'
-  )
-  ..addOption('test-directory',
-    defaultsTo: 'test/',
-    help: 'The path to the test directory.'
-  )
-  ..addOption('packages',
-    defaultsTo: '.packages',
-    help: 'The path to the .packages file.'
-  );
-
-/// Generates an html coverage report for the flutter_tool.
+/// Generates an lcov report for the flutter tool unit tests.
 ///
 /// Example invocation:
 ///
-///    dart tool/tool_coverage.dart --packages=.packages --test-directory=test
+///    dart tool/tool_coverage.dart.
 Future<void> main(List<String> arguments) async {
-  final ArgResults argResults = argParser.parse(arguments);
-  await runInContext(() async {
-    final CoverageCollector coverageCollector = CoverageCollector(
-      flutterProject: FlutterProject.current(),
+  return runInContext(() async {
+    final VMPlatform vmPlatform = VMPlatform();
+    hack.registerPlatformPlugin(
+      <Runtime>[Runtime.vm],
+      () => vmPlatform,
     );
-    final String flutterRoot = File(Platform.script.toFilePath()).parent.parent.parent.parent.path;
-    await ToolCoverageRunner(coverageCollector, flutterRoot, argResults).collectCoverage();
+    await test.main(<String>['-x', 'no_coverage', ...arguments]);
+    await vmPlatform.close();
+    return exitCode;
   });
 }
 
-class ToolCoverageRunner {
-  ToolCoverageRunner(
-    this.coverageCollector,
-    this.flutterRoot,
-    this.argResults,
+/// A platform that loads tests in isolates spawned within this Dart process.
+class VMPlatform extends PlatformPlugin {
+  final CoverageCollector coverageCollector = CoverageCollector(
+    flutterProject: FlutterProject.current(),
   );
+  final String precompiledPath = p.join('.dart_tool', 'build', 'generated', 'flutter_tools');
 
-  final ArgResults argResults;
-  final Pool pool = Pool(1);
-  final CoverageCollector coverageCollector;
-  final String flutterRoot;
+  @override
+  StreamChannel<void> loadChannel(String path, SuitePlatform platform) =>
+      throw UnimplementedError();
 
-  Future<void> collectCoverage() async {
-    final List<Future<void>> pending = <Future<void>>[];
+  @override
+  Future<RunnerSuite> load(String path, SuitePlatform platform,
+      SuiteConfiguration suiteConfig, Object message) async {
+    assert(platform.runtime == Runtime.vm);
 
-    final Directory testDirectory = Directory(argResults['test-directory']);
-    final List<FileSystemEntity> fileSystemEntities = testDirectory.listSync(recursive: true);
-    for (FileSystemEntity fileSystemEntity in fileSystemEntities) {
-      // Skip non-tests and expensive integration tests.
-      if (!fileSystemEntity.path.endsWith('_test.dart') || fileSystemEntity.path.contains('integration')) {
-        continue;
-      }
-      pending.add(_runTest(fileSystemEntity));
+    final ReceivePort receivePort = ReceivePort();
+    Isolate isolate;
+    try {
+      isolate = await _spawnIsolate(path, receivePort.sendPort);
+    } catch (error) {
+      receivePort.close();
+      rethrow;
     }
-    await Future.wait(pending);
+    final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
+    final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
+        .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
+      await coverageCollector.collectCoverageIsolate(info.serverUri);
+      isolate.kill();
+      sink.close();
+    }));
 
+    VMEnvironment environment;
+    final RunnerSuiteController controller = deserializeSuite(
+      path,
+      platform,
+      suiteConfig,
+      environment,
+      channel,
+      message,
+    );
+    return await controller.suite;
+  }
+
+  /// Spawns an isolate and passes it [message].
+  ///
+  /// This isolate connects an [IsolateChannel] to [message] and sends the
+  /// serialized tests over that channel.
+  Future<Isolate> _spawnIsolate(String path, SendPort message) async {
+    return _spawnPrecompiledIsolate(path, message, precompiledPath);
+  }
+
+  Future<Isolate> _spawnPrecompiledIsolate(String testPath, SendPort message, String precompiledPath) async {
+    testPath = p.absolute(p.join(precompiledPath, testPath) + '.vm_test.dart');
+    final String dillTestpath = testPath.substring(0, testPath.length - '.dart'.length) + '.vm.app.dill';
+    if (File(dillTestpath).existsSync()) {
+      testPath = dillTestpath;
+    }
+    return await Isolate.spawnUri(p.toUri(testPath), <String>[], message,
+      packageConfig: p.toUri(p.join(precompiledPath, '.packages')),
+      checked: true,
+    );
+  }
+
+  @override
+  Future<void> close() async {
     final String lcovData = await coverageCollector.finalizeCoverage();
-    final String outputLcovPath = argResults['output-lcov'];
+    final String outputLcovPath = p.join('coverage', 'lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(lcovData);
   }
+}
 
-  Future<void> _runTest(File testFile) async {
-    final PoolResource resource = await pool.request();
-    final int port = await _findPort();
-    final Uri coverageUri = Uri.parse('http://127.0.0.1:$port');
-    final Completer<void> completer = Completer<void>();
-    final String packagesPath = argResults['packages'];
-    final Process testProcess = await Process.start(
-      Platform.resolvedExecutable,
-      <String>[
-        '--packages=$packagesPath',
-        '--pause-isolates-on-exit',
-        '--disable-service-auth-codes',
-        '--enable-vm-service=${coverageUri.port}',
-        testFile.path,
-      ],
-      environment: <String, String>{
-        'FLUTTER_ROOT': flutterRoot,
-      }).timeout(const Duration(seconds: 30));
-    testProcess.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen((String line) {
-        print(line);
-        if (line.contains('All tests passed') || line.contains('Some tests failed')) {
-          completer.complete(null);
-        }
-      });
-    testProcess.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(print);
-    try {
-      await completer.future;
-      await coverageCollector.collectCoverage(testProcess, coverageUri)
-        .timeout(const Duration(seconds: 30));
-      testProcess?.kill();
-    } on TimeoutException {
-      print('Failed to collect coverage for ${testFile.path} after 10 seconds');
-    } finally {
-      resource.release();
-    }
-  }
+class VMEnvironment implements Environment {
+  VMEnvironment(this.observatoryUrl, this._isolate);
 
-  Future<int> _findPort() async {
-    int port = 0;
-    ServerSocket serverSocket;
-    try {
-      serverSocket = await ServerSocket.bind(InternetAddress.loopbackIPv4.address, 0);
-      port = serverSocket.port;
-    } catch (e) {
-      // Failures are signaled by a return value of 0 from this function.
-      print('_findPort failed: $e');
-    }
-    if (serverSocket != null) {
-      await serverSocket.close();
-    }
-    return port;
+  @override
+  final bool supportsDebugging = true;
+
+  @override
+  final Uri observatoryUrl;
+
+  /// The VM service isolate object used to control this isolate.
+  final VMIsolateRef _isolate;
+
+
+  @override
+  Uri get remoteDebuggerUrl => null;
+
+  @override
+  Stream<void> get onRestart => StreamController<dynamic>.broadcast().stream;
+
+  @override
+  CancelableOperation<void> displayPause() {
+    final  CancelableCompleter<dynamic> completer = CancelableCompleter<dynamic>(onCancel: () => _isolate.resume());
+
+    completer.complete(_isolate.pause().then((dynamic _) => _isolate.onPauseOrResume
+        .firstWhere((VMPauseEvent event) => event is VMResumeEvent)));
+
+    return completer.operation;
   }
 }

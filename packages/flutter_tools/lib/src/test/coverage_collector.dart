@@ -41,6 +41,41 @@ class CoverageCollector extends TestWatcher {
     }
   }
 
+  /// Collects coverage for an isolate using the given `port`.
+  ///
+  /// This should be called when the code whose coverage data is being collected
+  /// has been run to completion so that all coverage data has been recorded.
+  ///
+  /// The returned [Future] completes when the coverage is collected.
+  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
+    assert(observatoryUri != null);
+    print('ollecting coverage data from $observatoryUri...');
+
+    Map<String, dynamic> data;
+    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
+      // If we have a specified coverage directory or could not find the package name, then
+      // accept all libraries.
+      if (coverageDirectory != null) {
+        return true;
+      }
+      if (flutterProject == null) {
+        return true;
+      }
+      return libraryName.contains(flutterProject.manifest.appName);
+    })
+      .then<void>((Map<String, dynamic> result) {
+        if (result == null)
+          throw Exception('Failed to collect coverage.');
+        data = result;
+      });
+    await Future.any<void>(<Future<void>>[ collectionComplete ]);
+    assert(data != null);
+
+    print('($observatoryUri): collected coverage data; merging...');
+    _addHitmap(coverage.createHitmap(data['coverage']));
+    print('($observatoryUri): done merging coverage data into global coverage map.');
+  }
+
   /// Collects coverage for the given [Process] using the given `port`.
   ///
   /// This should be called when the code whose coverage data is being collected
