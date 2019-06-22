@@ -208,7 +208,7 @@ Future<void> _runToolCoverageA() async {
   );
   await runCommand(
     dart,
-    <String>['--']..addAll(tests),
+    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests),
     workingDirectory: toolRoot,
     environment: <String, String>{
       'FLUTTER_ROOT': flutterRoot
@@ -225,7 +225,7 @@ Future<void> _runToolCoverageB() async {
   );
   await runCommand(
     dart,
-    <String>['--']..addAll(tests),
+    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests),
     workingDirectory: toolRoot,
     environment: <String, String>{
       'FLUTTER_ROOT': flutterRoot
