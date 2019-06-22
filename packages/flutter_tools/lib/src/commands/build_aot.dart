@@ -137,6 +137,11 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             ..addAll(dylibs)
             ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
           );
+           final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM'));
+          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
+          await runCheckedAsync(<String>['lipo']
+            ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF', 'App')])
+            ..addAll(dSYMs.map((path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))));
         } else {
           status?.cancel();
           exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {

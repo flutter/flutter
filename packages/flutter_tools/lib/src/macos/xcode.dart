@@ -97,6 +97,14 @@ class Xcode {
     return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
   }
 
+  Future<RunResult> dsymutil(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'dsymutil']..addAll(args));
+  }
+
+  Future<RunResult> strip(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'strip']..addAll(args));
+  }
+
   String getSimulatorPath() {
     if (xcodeSelectPath == null)
       return null;

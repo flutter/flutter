@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert' show LineSplitter, utf8;
 
 import 'package:meta/meta.dart';
 
@@ -142,7 +143,7 @@ class AOTSnapshotter {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
-      genSnapshotArgs.add('--assembly=$assembly');
+      genSnapshotArgs.add('--assembly=$assembly.xyz');
     } else if (buildSharedLibrary) {
       final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
@@ -218,6 +219,16 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
+
+    if (platform == TargetPlatform.ios) {
+      final sink = fs.file(assembly).openWrite();
+      await for (var line in fs.file('$assembly.xyz').openRead().cast<List<int>>().transform(utf8.decoder).transform(const LineSplitter())) {
+        if (line.startsWith('.section __DWARF')) break;
+        sink.writeln(line);
+      }
+      await sink.close();
+    }
+
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
@@ -248,7 +259,7 @@ class AOTSnapshotter {
     final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
-    final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
+    final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO, '-fembed-bitcode']));
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
@@ -262,6 +273,7 @@ class AOTSnapshotter {
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
         '-install_name', '@rpath/App.framework/App',
+        '-fembed-bitcode',
         '-o', appLib,
         assemblyO,
     ]);
@@ -269,7 +281,16 @@ class AOTSnapshotter {
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
-    return linkResult;
+    final RunResult dsymResult = await xcode.dsymutil([appLib, '-o', fs.path.join(outputPath, 'App.framework.dSYM')]);
+    if (dsymResult.exitCode != 0) {
+      printError('Failed to extract dSYM out of dynamic lib');
+      return dsymResult;
+    }
+    // final RunResult stripResult = await xcode.strip([appLib]);
+    // if (stripResult.exitCode != 0) {
+    //  printError('Failed to strip dynamic lib');
+    // }
+    return dsymResult;//stripResult;
   }
 
   /// Compiles a Dart file to kernel.
