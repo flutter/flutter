@@ -232,7 +232,7 @@ task:
     - git fetch origin master
   build_runner_cache:
     folder: .\packages\flutter_tools\.dart_tool
-    populate_script: .\dev\bots\flutter_tool_build_cache.ps1
+    populate_script: cd packages\flutter_tools && ..\..\bin\cache\dart-sdk\bin\pub.exe run build_runner build && cd ..\..
   test_all_script:
     - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
