@@ -436,7 +436,6 @@ Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buil
   final Set<String> packageNames = inputSources.map((AssetId s) => s.package).toSet();
   final String packagesFileContent =
       packageNames.map((String name) => '$name:packages/$name/').join('\n');
-  log.shout(packagesFileContent);
   await packagesFile
       .writeAsString('# Generated for $inputUri\n$packagesFileContent');
   return packageFileName;
