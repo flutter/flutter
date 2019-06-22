@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
+import 'package:coverage/coverage.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:path/path.dart' as p;
 import 'package:stream_channel/isolate_channel.dart';
@@ -37,9 +38,8 @@ Future<void> main(List<String> arguments) async {
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
-    await vmPlatform.close();
-    return exitCode;
+    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
+    exit(exitCode);
   });
 }
 
@@ -48,6 +48,7 @@ class VMPlatform extends PlatformPlugin {
   final CoverageCollector coverageCollector = CoverageCollector(
     flutterProject: FlutterProject.current(),
   );
+  final List<Future<void>> _pending = <Future<void>>[];
   final String precompiledPath = p.join('.dart_tool', 'build', 'generated', 'flutter_tools');
 
   @override
@@ -65,12 +66,14 @@ class VMPlatform extends PlatformPlugin {
       receivePort.close();
       rethrow;
     }
+    final Completer<void> completer = Completer<void>();
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
         .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
       await coverageCollector.collectCoverageIsolate(info.serverUri);
       isolate.kill();
       sink.close();
+      completer.complete();
     }));
 
     VMEnvironment environment;
@@ -82,6 +85,7 @@ class VMPlatform extends PlatformPlugin {
       channel,
       message,
     );
+    _pending.add(completer.future);
     return await controller.suite;
   }
 
@@ -104,11 +108,19 @@ class VMPlatform extends PlatformPlugin {
 
   @override
   Future<void> close() async {
-    final String lcovData = await coverageCollector.finalizeCoverage();
+    await Future.wait(_pending);
+    final String packagePath = Directory.current.path;
+    final Resolver resolver = Resolver(packagesPath: '.packages');
+    final Formatter formatter = LcovFormatter(resolver, reportOn: <String>[
+      'lib',
+    ], basePath: packagePath);
+    final String result = await coverageCollector.finalizeCoverage(
+      formatter: formatter,
+    );
     final String outputLcovPath = p.join('coverage', 'lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
-      ..writeAsStringSync(lcovData);
+      ..writeAsStringSync(result);
   }
 }
 
