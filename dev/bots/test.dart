@@ -20,6 +20,7 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
@@ -30,6 +31,8 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
+  'tool_coverage_a': _runToolCoverageA,
+  'tool_coverage_b': _runToolCoverageB,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
   'integration_tests': _runIntegrationTests,
@@ -176,16 +179,70 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
   }
 }
 
+List<List<String>> _partitionToolTests() {
+  final List<File> pending = <File>[];
+  final String toolTestDir = path.join(toolRoot, 'test');
+  for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
+    if (entity is File && entity.path.endsWith('_test.dart')) {
+      pending.add(entity);
+    }
+  }
+  final List<String> groupA = <String>[];
+  final List<String> groupB = <String>[];
+  for (int i = 0; i < pending.length; i += 1) {
+    if (i.isEven) {
+      groupA.add(pending[i].path);
+    } else {
+      groupB.add(pending[i].path);
+    }
+  }
+  return <List<String>>[groupA, groupB];
+}
+
+Future<void> _runToolCoverageA() async {
+  final List<String> tests = _partitionToolTests().first;
+  await runCommand(
+    pub,
+    <String>['run', 'build_runner', 'build'],
+    workingDirectory: toolRoot,
+  );
+  await runCommand(
+    dart,
+    <String>['--']..addAll(tests),
+    workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot
+    }
+  );
+}
+
+Future<void> _runToolCoverageB() async {
+  final List<String> tests = _partitionToolTests().last;
+  await runCommand(
+    pub,
+    <String>['run', 'build_runner', 'build'],
+    workingDirectory: toolRoot,
+  );
+  await runCommand(
+    dart,
+    <String>['--']..addAll(tests),
+    workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot
+    }
+  );
+}
+
 Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
 
   // The flutter_tool will currently be snapshotted without asserts. We need
   // to force it to be regenerated with them enabled.
-  if (!Platform.isWindows) {
-    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
-    File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
-  }
+  // if (!Platform.isWindows) {
+  //   File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
+  //   File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
+  // }
   if (noUseBuildRunner) {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
