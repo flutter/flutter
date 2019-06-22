@@ -38,7 +38,7 @@ Future<void> main(List<String> arguments) async {
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
+    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
     exit(exitCode);
   });
 }

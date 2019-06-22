@@ -109,8 +109,8 @@ task:
         - dart tool/tool_coverage.dart -j1
         - bash <(curl -s https://codecov.io/bash) -f coverage/lcov.info
       container:
-        cpu: 4
-        memory: 12G
+        cpu: 8
+        memory: 24G
     # - name: web_tests-linux
     #   # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
     #   allow_failures: true
