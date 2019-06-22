@@ -49,7 +49,7 @@ class CoverageCollector extends TestWatcher {
   /// The returned [Future] completes when the coverage is collected.
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
-    print('ollecting coverage data from $observatoryUri...');
+    printTrace('collecting coverage data from $observatoryUri...');
 
     Map<String, dynamic> data;
     final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {

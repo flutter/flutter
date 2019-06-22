@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:async/async.dart';
+import 'package:flutter_tools/src/context_runner.dart';
 import 'package:path/path.dart' as p;
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -30,14 +31,16 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 ///
 ///    dart tool/tool_coverage.dart.
 Future<void> main(List<String> arguments) async {
-  final VMPlatform vmPlatform = VMPlatform();
-  hack.registerPlatformPlugin(
-    <Runtime>[Runtime.vm],
-    () => vmPlatform,
-  );
-  await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
-  await vmPlatform.close();
-  return exitCode;
+  return runInContext(() async {
+    final VMPlatform vmPlatform = VMPlatform();
+    hack.registerPlatformPlugin(
+      <Runtime>[Runtime.vm],
+      () => vmPlatform,
+    );
+    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', ...arguments]);
+    await vmPlatform.close();
+    return exitCode;
+  });
 }
 
 /// A platform that loads tests in isolates spawned within this Dart process.
@@ -54,8 +57,6 @@ class VMPlatform extends PlatformPlugin {
   @override
   Future<RunnerSuite> load(String path, SuitePlatform platform,
       SuiteConfiguration suiteConfig, Object message) async {
-    assert(platform.runtime == Runtime.vm);
-
     final ReceivePort receivePort = ReceivePort();
     Isolate isolate;
     try {
@@ -94,12 +95,9 @@ class VMPlatform extends PlatformPlugin {
 
   Future<Isolate> _spawnPrecompiledIsolate(String testPath, SendPort message, String precompiledPath) async {
     testPath = p.absolute(p.join(precompiledPath, testPath) + '.vm_test.dart');
-    final String dillTestpath = testPath.substring(0, testPath.length - '.dart'.length) + '.vm.app.dill';
-    if (File(dillTestpath).existsSync()) {
-      testPath = dillTestpath;
-    }
+    testPath = testPath.substring(0, testPath.length - '.dart'.length) + '.vm.app.dill';
     return await Isolate.spawnUri(p.toUri(testPath), <String>[], message,
-      packageConfig: p.toUri(p.join(precompiledPath, '.packages')),
+      packageConfig: p.toUri('.packages'),
       checked: true,
     );
   }
@@ -118,7 +116,7 @@ class VMEnvironment implements Environment {
   VMEnvironment(this.observatoryUrl, this._isolate);
 
   @override
-  final bool supportsDebugging = true;
+  final bool supportsDebugging = false;
 
   @override
   final Uri observatoryUrl;
