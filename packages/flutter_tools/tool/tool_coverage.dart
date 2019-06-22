@@ -48,7 +48,7 @@ class VMPlatform extends PlatformPlugin {
   final CoverageCollector coverageCollector = CoverageCollector(
     flutterProject: FlutterProject.current(),
   );
-  final List<Future<void>> _pending = <Future<void>>[];
+  final Map<String, Future<void>> _pending = <String, Future<void>>{};
   final String precompiledPath = p.join('.dart_tool', 'build', 'generated', 'flutter_tools');
 
   @override
@@ -75,6 +75,11 @@ class VMPlatform extends PlatformPlugin {
       isolate = null;
       sink.close();
       completer.complete();
+    }, handleError: (dynamic error, StackTrace stackTrace, EventSink<Object> sink) {
+      isolate.kill(priority: Isolate.immediate);
+      isolate = null;
+      sink.close();
+      completer.complete();
     }));
 
     VMEnvironment environment;
@@ -86,7 +91,7 @@ class VMPlatform extends PlatformPlugin {
       channel,
       message,
     );
-    _pending.add(completer.future);
+    _pending[path] = completer.future;
     return await controller.suite;
   }
 
@@ -109,7 +114,11 @@ class VMPlatform extends PlatformPlugin {
 
   @override
   Future<void> close() async {
-    await Future.wait(_pending);
+    try {
+      await Future.wait(_pending.values).timeout(const Duration(seconds: 10));
+    } on TimeoutException {
+      // Do nothing.
+    }
     final String packagePath = Directory.current.path;
     final Resolver resolver = Resolver(packagesPath: '.packages');
     final Formatter formatter = LcovFormatter(resolver, reportOn: <String>[
