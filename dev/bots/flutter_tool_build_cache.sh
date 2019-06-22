@@ -2,6 +2,6 @@
 
 pushd "$CIRRUS_WORKING_DIR/packages/flutter_tools"
 
-pub run build_runner build
+"$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin/pub" run build_runner build
 
 popd

@@ -94,7 +94,7 @@ task:
         SHARD: tool_tests
         SUBSHARD: tool
       build_runner_cache:
-        folder: ./packages/flutter_tool/.dart_tool
+        folder: ./packages/flutter_tools/.dart_tool
         populate_script: ./dev/bots/flutter_tool_build_cache.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -107,7 +107,7 @@ task:
         SHARD: tool_tests
         SUBSHARD: integration
       build_runner_cache:
-        folder: ./packages/flutter_tool/.dart_tool
+        folder: ./packages/flutter_tools/.dart_tool
         populate_script: ./dev/bots/flutter_tool_build_cache.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
@@ -231,7 +231,7 @@ task:
     - bin\flutter.bat update-packages
     - git fetch origin master
   build_runner_cache:
-    folder: .\packages\flutter_tool\.dart_tool
+    folder: .\packages\flutter_tools\.dart_tool
     populate_script: .\dev\bots\flutter_tool_build_cache.ps1
   test_all_script:
     - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
@@ -372,7 +372,7 @@ task:
     - bin/flutter doctor -v
     - bin/flutter update-packages
   build_runner_cache:
-    folder: ./packages/flutter_tool/.dart_tool
+    folder: ./packages/flutter_tools/.dart_tool
     populate_script: ./dev/bots/flutter_tool_build_cache.sh
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
