@@ -722,7 +722,10 @@ Future<void> _runFlutterTest(String workingDirectory, {
     args.add('--machine');
   }
   if (Platform.isLinux) {
+    final String shard = Platform.environment['SHARD'];
+    final String subShard = Platform.environment['SUBSHARD'];
     args.add('--coverage');
+    args.add('--coverage-path=coverage/$shard.$subShard.lcov.info');
   }
 
   if (script != null) {

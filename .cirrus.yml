@@ -61,36 +61,36 @@ task:
     - name: tests_widgets-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
         SHARD: tests
         SUBSHARD: widgets
+      coverage_cache:
+        folder: packages/flutter/coverage/
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -f packages/flutter/coverage/lcov.info
       container:
         cpu: 4
         memory: 12G
     - name: tests_framework_other-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
         SHARD: tests
         SUBSHARD: framework_other
+      coverage_cache:
+        folder: packages/flutter/coverage/
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -f packages/flutter/coverage/lcov.info
       container:
         cpu: 4
         memory: 12G
     - name: tests_extras-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
         SHARD: tests
         SUBSHARD: extras
+      coverage_cache:
+        folder: packages/flutter/coverage/
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -f packages/flutter/coverage/lcov.info
       container:
         cpu: 4
         memory: 12G
@@ -190,6 +190,15 @@ task:
         - ./dev/bots/firebase_testlab.sh
         - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+    - name: upload_coverage
+      depends_on:
+        - tests_extras-linux
+        - tests_widgets-linux
+        - tests_framework_other-linux
+      env:
+        - CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
+      test_script:
+        - bash <(curl -s https://codecov.io/bash) -s packages/flutter/coverage/
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
