@@ -127,7 +127,8 @@ class VMPlatform extends PlatformPlugin {
     final String result = await coverageCollector.finalizeCoverage(
       formatter: formatter,
     );
-    final String outputLcovPath = p.join('coverage', 'lcov.info');
+    final String prefix = Platform.environment['SUBSHARD'] ?? '';
+    final String outputLcovPath = p.join('coverage', '$prefix.lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);

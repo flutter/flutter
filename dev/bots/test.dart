@@ -31,8 +31,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
-  'tool_coverage_a': _runToolCoverageA,
-  'tool_coverage_b': _runToolCoverageB,
+  'tool_coverage': _runToolCoverage,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
   'integration_tests': _runIntegrationTests,
@@ -200,8 +199,9 @@ List<List<String>> _partitionToolTests() {
   return <List<String>>[groupA, groupB];
 }
 
-Future<void> _runToolCoverageA() async {
-  final List<String> tests = _partitionToolTests().first;
+Future<void> _runToolCoverage() async {
+  final bool isA = Platform.environment['SUBSHARD'] == 'A';
+  final List<List<String>> tests = _partitionToolTests();
   await runCommand(
     pub,
     <String>['run', 'build_runner', 'build'],
@@ -209,24 +209,7 @@ Future<void> _runToolCoverageA() async {
   );
   await runCommand(
     dart,
-    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests),
-    workingDirectory: toolRoot,
-    environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot
-    }
-  );
-}
-
-Future<void> _runToolCoverageB() async {
-  final List<String> tests = _partitionToolTests().last;
-  await runCommand(
-    pub,
-    <String>['run', 'build_runner', 'build'],
-    workingDirectory: toolRoot,
-  );
-  await runCommand(
-    dart,
-    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests),
+    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(isA ? tests.first : tests.last),
     workingDirectory: toolRoot,
     environment: <String, String>{
       'FLUTTER_ROOT': flutterRoot
