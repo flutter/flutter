@@ -128,8 +128,10 @@ task:
         - analyze
         - tool_coverage_a-linux
         - tool_coverage_b-linux
+      coverage_cache:
+        folder: packages/flutter_tools/coverage/
       test_script:
-        - bash <(curl -s https://codecov.io/bash) -s packages/flutter_tools/coverage/
+        - bash <(curl -s https://codecov.io/bash) -s packages/flutter_tools/coverage/ -F flutter_tools
     - name: web_tests-linux
       # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
       allow_failures: true
