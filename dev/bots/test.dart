@@ -200,19 +200,29 @@ List<List<String>> _partitionToolTests() {
 }
 
 Future<void> _runToolCoverage() async {
-  final bool isA = Platform.environment['SUBSHARD'] == 'A';
   final List<List<String>> tests = _partitionToolTests();
   await runCommand(
     pub,
     <String>['run', 'build_runner', 'build'],
     workingDirectory: toolRoot,
   );
+  // We run out of memory on CI if these are run together.
   await runCommand(
     dart,
-    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(isA ? tests.first : tests.last),
+    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests.first),
     workingDirectory: toolRoot,
     environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot
+      'FLUTTER_ROOT': flutterRoot,
+      'SUBSHARD': 'A',
+    }
+  );
+  await runCommand(
+    dart,
+    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests.last),
+    workingDirectory: toolRoot,
+    environment: <String, String>{
+      'FLUTTER_ROOT': flutterRoot,
+      'SUBSHARD': 'B',
     }
   );
 }
