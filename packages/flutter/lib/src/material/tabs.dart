@@ -1255,35 +1255,9 @@ class _TabBarViewState extends State<TabBarView> {
       return Future<void>.value();
 
     final int previousIndex = _controller.previousIndex;
-    if ((_currentIndex - previousIndex).abs() == 1)
-      return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
-
-    assert((_currentIndex - previousIndex).abs() > 1);
-    final int initialPage = _currentIndex > previousIndex
-        ? _currentIndex - 1
-        : _currentIndex + 1;
-    final List<Widget> originalChildren = _childrenWithKey;
-    setState(() {
-      _warpUnderwayCount += 1;
-
-      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
-      final Widget temp = _childrenWithKey[initialPage];
-      _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
-      _childrenWithKey[previousIndex] = temp;
-    });
-    _pageController.jumpToPage(initialPage);
-
-    await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
-    if (!mounted)
-      return Future<void>.value();
-    setState(() {
-      _warpUnderwayCount -= 1;
-      if (widget.children != _children) {
-        _updateChildren();
-      } else {
-        _childrenWithKey = originalChildren;
-      }
-    });
+    
+    return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
+    
   }
 
   // Called when the PageView scrolls
