@@ -249,7 +249,7 @@ class _SlidersState extends State<_Sliders> {
               Semantics(
                 label: 'Editable numerical value',
                 child: SizedBox(
-                  width: 610,
+                  width: 64,
                   height: 48,
                   child: TextField(
                     textAlign: TextAlign.center,
