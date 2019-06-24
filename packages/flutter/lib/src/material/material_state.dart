@@ -4,8 +4,6 @@
 
 import 'dart:ui' show Color;
 
-import 'package:flutter/painting.dart';
-
 /// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///

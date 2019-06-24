@@ -379,7 +379,11 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
-  Color get _currentOutlineColor {
+  Color get _outlineColor {
+    // If outline color is a `MaterialStateProperty`, it will be used in all
+    // states, otherwise we determine the outline color in the current state.
+    if (widget.borderSide?.color is MaterialStateProperty<Color>)
+      return widget.borderSide.color;
     if (!widget.enabled)
       return widget.disabledBorderColor;
     if (_pressed)
@@ -391,18 +395,10 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
-    Color specifiedColor;
-    // If outline color is a `MaterialStateProperty`, it will be used in all
-    // states, otherwise we determine the outline color in the current state.
-    if (widget.borderSide?.color is MaterialStateProperty<Color>) {
-      specifiedColor = widget.borderSide?.color;
-    } else {
-      specifiedColor = _currentOutlineColor;
-    }
     final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
     return BorderSide(
-      color: specifiedColor ?? themeColor,
+      color: _outlineColor ?? themeColor,
       width: widget.borderSide?.width ?? 1.0,
     );
   }
