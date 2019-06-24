@@ -206,7 +206,7 @@ task:
     fingerprint_script: echo %OS% & type bin\internal\engine.version
   artifacts_cache:
     folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
     - bin\flutter.bat config --no-analytics
     - bin\flutter.bat doctor -v
