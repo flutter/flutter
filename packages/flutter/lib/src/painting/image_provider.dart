@@ -12,8 +12,9 @@ import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import '_network_image_io.dart'
+  if (dart.library.html) '_network_image_web.dart' as network_image;
 import 'binding.dart';
-import 'debug.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
@@ -375,7 +376,6 @@ abstract class ImageProvider<T> {
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
   /// implements [==]).
-  @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
@@ -469,52 +469,6 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   }
 }
 
-class _DownloadRequest {
-  _DownloadRequest(this.sendPort, this.uri, this.headers);
-
-  SendPort sendPort;
-  Uri uri;
-  Map<String, String> headers;
-}
-
-class _HttpClientIsolateParameters {
-  _HttpClientIsolateParameters(this.sendPort, this.chunkEvents);
-
-  SendPort sendPort;
-  StreamController<ImageChunkEvent> chunkEvents;
-}
-
-void _handleHttpClientGet(_HttpClientIsolateParameters params) {
-  final HttpClient _httpClient = HttpClient();
-  final RawReceivePort receivePort = RawReceivePort((_DownloadRequest downloadRequest) async {
-      try {
-        final HttpClientRequest request = await _httpClient.getUrl(downloadRequest.uri);
-        downloadRequest.headers?.forEach((String name, String value) {
-          request.headers.add(name, value);
-        });
-        final HttpClientResponse response = await request.close();
-        if (response.statusCode != HttpStatus.ok) {
-          throw Exception(
-              'HTTP request failed, statusCode: ${response
-                  ?.statusCode}, ${downloadRequest.uri}');
-        }
-        final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
-            response,
-            onBytesReceived: (int cumulative, int total) {
-              params.chunkEvents.add(ImageChunkEvent(
-                cumulativeBytesLoaded: cumulative,
-                expectedTotalBytes: total,
-              ));
-            });
-        downloadRequest.sendPort.send(transferable);
-      } catch (error) {
-          downloadRequest.sendPort.send(error.toString());
-      }
-  });
-
-  params.sendPort.send(receivePort.sendPort);
-}
-
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
@@ -525,168 +479,25 @@ void _handleHttpClientGet(_HttpClientIsolateParameters params) {
 // TODO(ianh): Find some way to honor cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
-class NetworkImage extends ImageProvider<NetworkImage> {
+abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
-  /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
-    : assert(url != null),
-      assert(scale != null);
+  /// The arguments [url] and [scale] must not be null.
+  const factory NetworkImage(String url, { double scale, Map<String, String> headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
-  final String url;
+  String get url;
 
   /// The scale to place in the [ImageInfo] object of the image.
-  final double scale;
+  double get scale;
 
   /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
-  final Map<String, String> headers;
+  ///
+  /// When running flutter on the web, headers are not used.
+  Map<String, String> get headers;
 
   @override
-  Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
-    return SynchronousFuture<NetworkImage>(this);
-  }
-
-  @override
-  ImageStreamCompleter load(NetworkImage key) {
-    // Ownership of this controller is handed off to [_loadAsync]; it is that
-    // method's responsibility to close the controller's stream when the image
-    // has been loaded or an error is thrown.
-    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
-
-    return MultiFrameImageStreamCompleter(
-      codec: _loadAsyncOnDesignatedIsolate(key, chunkEvents),
-      chunkEvents: chunkEvents.stream,
-      scale: key.scale,
-      informationCollector: () sync* {
-        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
-        yield DiagnosticsProperty<NetworkImage>('Image key', key);
-      },
-    );
-  }
-
-  // Do not access this field directly; use [_httpClient] instead.
-  // We set `autoUncompress` to false to ensure that we can trust the value of
-  // the `Content-Length` HTTP header. We automatically uncompress the content
-  // in our call to [consolidateHttpClientResponseBytes].
-  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
-
-  static HttpClient get _httpClient {
-    HttpClient client = _sharedHttpClient;
-    assert(() {
-      if (debugNetworkImageHttpClientProvider != null)
-        client = debugNetworkImageHttpClientProvider();
-      return true;
-    }());
-    return client;
-  }
-
-  Future<ui.Codec> _loadAsync(
-    NetworkImage key,
-    StreamController<ImageChunkEvent> chunkEvents,
-  ) async {
-    try {
-      assert(key == this);
-
-      final Uri resolved = Uri.base.resolve(key.url);
-      final HttpClientRequest request = await _httpClient.getUrl(resolved);
-      headers?.forEach((String name, String value) {
-        request.headers.add(name, value);
-      });
-      final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok)
-        throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
-
-      final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
-        response,
-        client: _httpClient,
-        onBytesReceived: (int cumulative, int total) {
-          chunkEvents.add(ImageChunkEvent(
-            cumulativeBytesLoaded: cumulative,
-            expectedTotalBytes: total,
-          ));
-        },
-      );
-      final Uint8List bytes = transferable.materialize().asUint8List();
-      if (bytes.lengthInBytes == 0)
-        throw Exception('NetworkImage is an empty file: $resolved');
-
-      return PaintingBinding.instance.instantiateImageCodec(bytes);
-    } finally {
-      chunkEvents.close();
-    }
-  }
-
-  static Future<Isolate> _pendingLoader;
-  static List<Function> _pendingLoaderUsers;
-  static SendPort _requestPort;
-
-  Future<ui.Codec> _loadAsyncOnDesignatedIsolate(
-      NetworkImage key,
-      StreamController<ImageChunkEvent> chunkEvents,) async {
-    assert(key == this);
-
-    final Uri resolved = Uri.base.resolve(key.url);
-
-    final Completer<TransferableTypedData> completer = Completer<TransferableTypedData>();
-    final RawReceivePort port = RawReceivePort((dynamic message) {
-        if (message is TransferableTypedData) {
-          completer.complete(message);
-        } else {
-          completer.completeError(message);
-        }
-      }
-    );
-
-    final _DownloadRequest downloadRequest = _DownloadRequest(port.sendPort,
-        resolved, headers);
-    if (_requestPort != null) {
-      _requestPort.send(downloadRequest);
-    } else {
-      if (_pendingLoader == null) {
-        _pendingLoaderUsers = <Function>[];
-        _pendingLoader =
-          Isolate.spawn<_HttpClientIsolateParameters>(
-            _handleHttpClientGet,
-            _HttpClientIsolateParameters(RawReceivePort((SendPort sendPort) {
-              _requestPort = sendPort;
-              for (Function function in _pendingLoaderUsers) {
-                function(sendPort);
-              }
-            }).sendPort, chunkEvents),
-          )..catchError((dynamic error, StackTrace stackTrace) {
-              completer.completeError(error, stackTrace);
-          });
-      }
-      _pendingLoaderUsers.add((SendPort sendPort) {
-        sendPort.send(downloadRequest);
-      });
-    }
-
-    final TransferableTypedData transferable = await completer.future;
-    port.close();
-
-    final Uint8List bytes = transferable.materialize().asUint8List();
-    if (bytes.isEmpty)
-      throw Exception('NetworkImage is an empty file: $resolved');
-
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final NetworkImage typedOther = other;
-    return url == typedOther.url
-        && scale == typedOther.scale;
-  }
-
-  @override
-  int get hashCode => hashValues(url, scale);
-
-  @override
-  String toString() => '$runtimeType("$url", scale: $scale)';
+  ImageStreamCompleter load(NetworkImage key);
 }
 
 /// Decodes the given [File] object as an image, associating it with the given

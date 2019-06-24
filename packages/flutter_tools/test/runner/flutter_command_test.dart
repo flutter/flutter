@@ -4,6 +4,8 @@
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -49,6 +51,114 @@ void main() {
       Cache: () => cache,
     });
 
+    testUsingContext('reports command that results in success', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'dummy',
+          const <String, String>{'cd26': 'success'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in warning', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.warning);
+        }
+      );
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'dummy',
+          const <String, String>{'cd26': 'warning'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in failure', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.fail);
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+      } on ToolExit {
+        expect(
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'dummy',
+            const <String, String>{'cd26': 'fail'}
+          ],
+        );
+      }
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in error', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+        fail('Mock should make this fail');
+      } on ToolExit {
+        expect(
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'dummy',
+            const <String, String>{'cd26': 'fail'}
+          ],
+        );
+      }
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
     testUsingContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
@@ -61,7 +171,12 @@ void main() {
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
+        <dynamic>[
+          'flutter',
+          'dummy',
+          const Duration(milliseconds: 1000),
+          null
+        ],
       );
     },
     overrides: <Type, Generator>{
@@ -176,6 +291,43 @@ void main() {
       FlutterVersion: () => betaVersion,
     });
   });
+
+  group('Filter devices', () {
+    MockDevice ephemeral;
+    MockDevice nonEphemeralOne;
+    MockDevice nonEphemeralTwo;
+    MockDevice unsupported;
+
+    setUp(() {
+      ephemeral = MockDevice(true);
+      nonEphemeralOne = MockDevice(false);
+      nonEphemeralTwo = MockDevice(false);
+      unsupported = MockDevice(true, false);
+    });
+
+    test('chooses ephemeral device', () {
+      final List<Device> filtered = filterDevices(<Device>[
+        ephemeral,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+        unsupported,
+      ]);
+
+      expect(filtered.single, ephemeral);
+    });
+
+    test('does not remove all non-ephemeral', () {
+      final List<Device> filtered = filterDevices(<Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+
+      expect(filtered, <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    });
+  });
 }
 
 
@@ -196,3 +348,15 @@ class FakeCommand extends FlutterCommand {
 }
 
 class MockVersion extends Mock implements FlutterVersion {}
+
+class MockDevice extends Mock implements Device {
+  MockDevice(this.ephemeral, [this._isSupported = true]);
+
+  @override
+  final bool ephemeral;
+
+  bool _isSupported;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
+}

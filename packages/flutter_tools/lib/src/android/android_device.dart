@@ -72,7 +72,12 @@ class AndroidDevice extends Device {
     this.productID,
     this.modelID,
     this.deviceCodeName,
-  }) : super(id);
+  }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.android,
+      ephemeral: true,
+  );
 
   final String productID;
   final String modelID;
@@ -391,15 +396,29 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !(debuggingOptions.buildInfo.isDebug ||
-          debuggingOptions.buildInfo.isDynamic)) {
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
 
-    BuildInfo buildInfo = debuggingOptions.buildInfo;
-    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
-      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
+    AndroidArch androidArch;
+    switch (devicePlatform) {
+      case TargetPlatform.android_arm:
+        androidArch = AndroidArch.armeabi_v7a;
+        break;
+      case TargetPlatform.android_arm64:
+        androidArch = AndroidArch.arm64_v8a;
+        break;
+      case TargetPlatform.android_x64:
+        androidArch = AndroidArch.x86_64;
+        break;
+      case TargetPlatform.android_x86:
+        androidArch = AndroidArch.x86;
+        break;
+      default:
+        printError('Android platforms are only supported.');
+        return LaunchResult.failed();
+    }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
@@ -407,7 +426,9 @@ class AndroidDevice extends Device {
       await buildApk(
           project: project,
           target: mainPath,
-          buildInfo: buildInfo,
+          androidBuildInfo: AndroidBuildInfo(debuggingOptions.buildInfo,
+            targetArchs: <AndroidArch>[androidArch]
+          ),
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
@@ -474,6 +495,8 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.disableServiceAuthCodes)
         cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
+      if (debuggingOptions.dartFlags.isNotEmpty)
+        cmd.addAll(<String>['--es', 'dart-flags', debuggingOptions.dartFlags]);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {

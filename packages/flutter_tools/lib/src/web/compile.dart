@@ -19,6 +19,9 @@ import '../usage.dart';
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
 Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
+  if (!flutterProject.web.existsSync()) {
+    throwToolExit('Missing index.html.');
+  }
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   final Directory outputDir = fs.directory(getWebBuildDirectory())
@@ -27,7 +30,6 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   try {
     result = await webCompilationProxy.initialize(
       projectDirectory: FlutterProject.current().directory,
-      targets: <String>[target],
       release: buildInfo.isRelease,
     );
     if (result) {
@@ -76,11 +78,8 @@ class WebCompilationProxy {
   ///
   /// `release` controls whether we build the bundle for dartdevc or only
   /// the entrypoints for dart2js to later take over.
-  ///
-  /// `targets` controls the specific compiler targets.
   Future<bool> initialize({
     @required Directory projectDirectory,
-    @required List<String> targets,
     String testOutputDir,
     bool release,
   }) async {

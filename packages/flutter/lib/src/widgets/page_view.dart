@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -36,6 +37,87 @@ import 'viewport.dart';
 /// See also:
 ///
 ///  * [PageView], which is the widget this object controls.
+///
+/// {@tool sample}
+///
+/// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
+/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// to animate the [PageView] using a [PageController].
+///
+/// ```dart
+/// class MyPageView extends StatefulWidget {
+///   MyPageView({Key key}) : super(key: key);
+///
+///   _MyPageViewState createState() => _MyPageViewState();
+/// }
+///
+/// class _MyPageViewState extends State<MyPageView> {
+///   PageController _pageController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _pageController = PageController();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _pageController.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: PageView(
+///           controller: _pageController,
+///           children: [
+///             Container(
+///               color: Colors.red,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         1,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Next'),
+///                 ),
+///               ),
+///             ),
+///             Container(
+///               color: Colors.blue,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         0,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Previous'),
+///                 ),
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+/// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
@@ -287,7 +369,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    return math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double round = actual.roundToDouble();
+    if ((actual - round).abs() < precisionErrorTolerance) {
+      return round;
+    }
+    return actual;
   }
 
   double getPixelsFromPage(double page) {
@@ -295,7 +382,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  double get page {
+    assert(
+      pixels == null || (minScrollExtent != null && maxScrollExtent != null),
+      'Page value is only available after content dimensions are established.',
+    );
+    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  }
 
   @override
   void saveScrollOffset() {

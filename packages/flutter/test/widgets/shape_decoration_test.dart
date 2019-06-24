@@ -59,7 +59,7 @@ Future<void> main() async {
         ..rect(color: Colors.black)
         ..rect(color: Colors.white),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('TestBorder and Directionality - 1', (WidgetTester tester) async {
     final List<String> log = <String>[];

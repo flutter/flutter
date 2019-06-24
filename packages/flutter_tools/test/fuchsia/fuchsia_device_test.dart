@@ -695,6 +695,22 @@ class FakeFuchsiaAmberCtl implements FuchsiaAmberCtl {
   Future<bool> getUp(FuchsiaDevice device, String packageName) async {
     return true;
   }
+
+  @override
+  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
+    return true;
+  }
+
+  @override
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
+                             String packageName) async {
+    return true;
+  }
+
+  @override
+  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
+    return true;
+  }
 }
 
 class FailingAmberCtl implements FuchsiaAmberCtl {
@@ -710,6 +726,22 @@ class FailingAmberCtl implements FuchsiaAmberCtl {
 
   @override
   Future<bool> getUp(FuchsiaDevice device, String packageName) async {
+    return false;
+  }
+
+  @override
+  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
+    return false;
+  }
+
+  @override
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server,
+                             String packageName) async {
+    return false;
+  }
+
+  @override
+  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
     return false;
   }
 }

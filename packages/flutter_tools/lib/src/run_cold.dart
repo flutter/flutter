@@ -23,14 +23,12 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
-             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -193,9 +191,6 @@ class ColdRunner extends ResidentRunner {
       ? 'To detach, press "d"; to quit, press "q".'
       : 'To quit, press "q".';
     if (haveDetails && !details) {
-      if (saveCompilationTrace) {
-        printStatus('Compilation training data will be saved when flutter run quits...');
-      }
       printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". $quitMessage');

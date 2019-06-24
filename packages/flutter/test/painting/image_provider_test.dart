@@ -175,7 +175,7 @@ void main() {
         debugNetworkImageHttpClientProvider = () => client2;
         await loadNetworkImage();
         expect(capturedErrors, <dynamic>['client1', 'client2']);
-      });
+      }, skip: isBrowser);
 
       test('Propagates http client errors during resolve()', () async {
         when(httpClient.getUrl(any)).thenThrow(Error());
@@ -253,7 +253,7 @@ void main() {
           expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
-      });
+      }, skip: isBrowser);
     });
   });
 }

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
@@ -32,7 +33,10 @@ class IOSEmulator extends Emulator {
   String get manufacturer => 'Apple';
 
   @override
-  String get label => null;
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.ios;
 
   @override
   Future<void> launch() async {

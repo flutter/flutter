@@ -483,7 +483,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
@@ -744,13 +744,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         // if needed.
         if (widget.placeholder != null && text.text.isEmpty) {
           stackChildren.add(
-            Padding(
-              padding: widget.padding,
-              child: Text(
-                widget.placeholder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: placeholderStyle
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: widget.padding,
+                child: Text(
+                  widget.placeholder,
+                  maxLines: widget.maxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: placeholderStyle,
+                  textAlign: widget.textAlign,
+                ),
               ),
             ),
           );
