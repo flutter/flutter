@@ -58,6 +58,7 @@ List of devices attached
 ''', devices: devices);
       expect(devices, hasLength(1));
       expect(devices.first.name, 'Nexus 7');
+      expect(devices.first.category, Category.mobile);
     });
 
     testUsingContext('emulators and short listings', () {

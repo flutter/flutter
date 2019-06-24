@@ -38,7 +38,6 @@ void main() {
           precompiledSnapshot: anyNamed('precompiledSnapshot'),
           reportLicensedPackages: anyNamed('reportLicensedPackages'),
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
-          compilationTraceFilePath: anyNamed('compilationTraceFilePath'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),

@@ -30,7 +30,6 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   try {
     result = await webCompilationProxy.initialize(
       projectDirectory: FlutterProject.current().directory,
-      targets: <String>[target],
       release: buildInfo.isRelease,
     );
     if (result) {
@@ -79,11 +78,8 @@ class WebCompilationProxy {
   ///
   /// `release` controls whether we build the bundle for dartdevc or only
   /// the entrypoints for dart2js to later take over.
-  ///
-  /// `targets` controls the specific compiler targets.
   Future<bool> initialize({
     @required Directory projectDirectory,
-    @required List<String> targets,
     String testOutputDir,
     bool release,
   }) async {
