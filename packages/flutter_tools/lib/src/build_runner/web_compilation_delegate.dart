@@ -4,7 +4,7 @@
 
 // ignore_for_file: implementation_imports
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
