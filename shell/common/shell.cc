@@ -938,7 +938,8 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
   // require a latency of no more than 100ms. Hence we lower that 1-second
   // threshold to 100ms because performance overhead isn't that critical in
   // those cases.
-  if (UnreportedFramesCount() >= 100) {
+  if (!first_frame_rasterized_ || UnreportedFramesCount() >= 100) {
+    first_frame_rasterized_ = true;
     ReportTimings();
   } else if (!frame_timings_report_scheduled_) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
