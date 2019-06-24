@@ -485,41 +485,44 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
     final Rect center = outer.deflate(horizontalBorderSide.width / 2.0);
 
-    final double bottom = center.bottom;
-    final double left = center.left;
-    final double top = center.top;
-    final double right = center.right;
+    final RRect rrect = RRect.fromRectAndCorners(
+      center,
+      topLeft: borderRadius.topLeft,
+      topRight: borderRadius.topRight,
+      bottomLeft: borderRadius.bottomLeft,
+      bottomRight: borderRadius.bottomRight,
+    ).scaleRadii();
 
-    final Radius tlRadius = borderRadius.topLeft;
-    final Radius trRadius = borderRadius.topRight;
-    final Radius blRadius = borderRadius.bottomLeft;
-    final Radius brRadius = borderRadius.bottomRight;
+    final double bottom = rrect.bottom;
+    final double left = rrect.left;
+    final double top = rrect.top;
+    final double right = rrect.right;
 
     final double sweepAngle = math.pi / 2.0;
 
     final Rect tlCorner = Rect.fromLTWH(
       left,
       top,
-      tlRadius.x * 2.0,
-      tlRadius.y * 2.0,
+      rrect.tlRadiusX * 2.0,
+      rrect.tlRadiusY * 2.0,
     );
     final Rect blCorner = Rect.fromLTWH(
       left,
-      bottom - (blRadius.y * 2.0),
-      blRadius.x * 2.0,
-      blRadius.y * 2.0,
+      bottom - (rrect.blRadiusY * 2.0),
+      rrect.blRadiusX * 2.0,
+      rrect.blRadiusY * 2.0,
     );
     final Rect trCorner = Rect.fromLTWH(
-      right - (trRadius.x * 2),
+      right - (rrect.trRadiusX * 2),
       top,
-      trRadius.x * 2,
-      trRadius.y * 2,
+      rrect.trRadiusX * 2,
+      rrect.trRadiusY * 2,
     );
     final Rect brCorner = Rect.fromLTWH(
-      right - (brRadius.x * 2),
-      bottom - (brRadius.y * 2),
-      brRadius.x * 2,
-      brRadius.y * 2,
+      right - (rrect.brRadiusX * 2),
+      bottom - (rrect.brRadiusY * 2),
+      rrect.brRadiusX * 2,
+      rrect.brRadiusY * 2,
     );
 
     final Paint leadingPaint = leadingBorderSide.toPaint();
@@ -528,9 +531,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         if (isFirstButton) {
           final Path leadingPath = Path()
             ..moveTo(outer.right, bottom)
-            ..lineTo(left + blRadius.x, bottom)
+            ..lineTo(left + rrect.blRadiusX, bottom)
             ..addArc(blCorner, math.pi / 2.0, sweepAngle)
-            ..lineTo(left, top + tlRadius.y)
+            ..lineTo(left, top + rrect.tlRadiusY)
             ..addArc(tlCorner, math.pi, sweepAngle)
             ..lineTo(outer.right, top);
           context.canvas.drawPath(leadingPath, leadingPaint);
@@ -543,9 +546,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Paint endingPaint = trailingBorderSide.toPaint();
           final Path endingPath = Path()
             ..moveTo(left + horizontalBorderSide.width / 2.0, top)
-            ..lineTo(right - trRadius.x, top)
+            ..lineTo(right - rrect.trRadiusX, top)
             ..addArc(trCorner, math.pi * 3.0 / 2.0, sweepAngle)
-            ..lineTo(right, bottom - brRadius.y)
+            ..lineTo(right, bottom - rrect.brRadiusY)
             ..addArc(brCorner, 0, sweepAngle)
             ..lineTo(left + horizontalBorderSide.width / 2.0, bottom);
           context.canvas.drawPath(endingPath, endingPaint);
@@ -558,9 +561,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Paint horizontalPaint = horizontalBorderSide.toPaint();
           final Path horizontalPaths = Path()
             ..moveTo(left + horizontalBorderSide.width / 2.0, top)
-            ..lineTo(outer.right - trRadius.x, top)
-            ..moveTo(left + horizontalBorderSide.width / 2.0 + tlRadius.x, bottom)
-            ..lineTo(outer.right - trRadius.x, bottom);
+            ..lineTo(outer.right - rrect.trRadiusX, top)
+            ..moveTo(left + horizontalBorderSide.width / 2.0 + rrect.tlRadiusX, bottom)
+            ..lineTo(outer.right - rrect.trRadiusX, bottom);
           context.canvas.drawPath(horizontalPaths, horizontalPaint);
         }
         break;
@@ -568,9 +571,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         if (isFirstButton) {
           final Path leadingPath = Path()
             ..moveTo(outer.left, bottom)
-            ..lineTo(right - brRadius.x, bottom)
+            ..lineTo(right - rrect.brRadiusX, bottom)
             ..addArc(brCorner, math.pi / 2.0, -sweepAngle)
-            ..lineTo(right, top + trRadius.y)
+            ..lineTo(right, top + rrect.trRadiusY)
             ..addArc(trCorner, 0, -sweepAngle)
             ..lineTo(outer.left, top);
           context.canvas.drawPath(leadingPath, leadingPaint);
@@ -583,9 +586,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Paint endingPaint = trailingBorderSide.toPaint();
           final Path endingPath = Path()
             ..moveTo(right - horizontalBorderSide.width / 2.0, top)
-            ..lineTo(left + tlRadius.x, top)
+            ..lineTo(left + rrect.tlRadiusX, top)
             ..addArc(tlCorner, math.pi * 3.0 / 2.0, -sweepAngle)
-            ..lineTo(left, bottom - blRadius.y)
+            ..lineTo(left, bottom - rrect.blRadiusY)
             ..addArc(blCorner, math.pi, -sweepAngle)
             ..lineTo(right - horizontalBorderSide.width / 2.0, bottom);
           context.canvas.drawPath(endingPath, endingPaint);
@@ -598,9 +601,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Paint horizontalPaint = horizontalBorderSide.toPaint();
           final Path horizontalPaths = Path()
             ..moveTo(right - horizontalBorderSide.width / 2.0, top)
-            ..lineTo(outer.left - tlRadius.x, top)
-            ..moveTo(right - horizontalBorderSide.width / 2.0 + trRadius.x, bottom)
-            ..lineTo(outer.left - tlRadius.x, bottom);
+            ..lineTo(outer.left - rrect.tlRadiusX, top)
+            ..moveTo(right - horizontalBorderSide.width / 2.0 + rrect.trRadiusX, bottom)
+            ..lineTo(outer.left - rrect.tlRadiusX, bottom);
           context.canvas.drawPath(horizontalPaths, horizontalPaint);
         }
         break;
