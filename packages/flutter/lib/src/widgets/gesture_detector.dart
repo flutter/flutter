@@ -812,7 +812,8 @@ class RawGestureDetector extends StatefulWidget {
   /// It has no effect if [excludeFromSemantics] is true.
   ///
   /// When [semantics] is null, [RawGestureDetector] will fall back to a
-  /// default delegate that behaves as follows:
+  /// default delegate which checks if the detector owns certain gesture
+  /// recognizers and calls their callbacks if they exist.
   ///
   ///  * During a semantic tap, it looks for [TapGestureRecognizer] and calls
   ///    `onTapDown`, `onTapUp`, and `onTap`.
@@ -1012,8 +1013,9 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 }
 
 /// A base class that describes what semantics notations a [RawGestureDetector]
-/// should add to the render object [RenderSemanticsGestureHandler]. It is
-/// used when defining a custom gesture detector.
+/// should add to the render object [RenderSemanticsGestureHandler].
+///
+/// It is used to allow custom [GestureDetector]s to add semantics notations.
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
   SemanticsGestureDelegate();
