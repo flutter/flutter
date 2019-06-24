@@ -128,7 +128,6 @@ class Shell final : public PlatformView::Delegate,
   // How many frames have been timed since last report.
   size_t UnreportedFramesCount() const;
 
-  Shell(TaskRunners task_runners, Settings settings);
   Shell(DartVMRef vm, TaskRunners task_runners, Settings settings);
 
   static std::unique_ptr<Shell> CreateShellOnPlatformThread(
