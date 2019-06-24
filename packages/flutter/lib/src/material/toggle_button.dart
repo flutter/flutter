@@ -28,8 +28,7 @@ class ToggleButtons extends StatelessWidget {
   }) :
     assert(children != null),
     assert(isSelected != null),
-    assert(borderRadius != null),
-    assert(borderWidth != null);
+    assert(borderRadius != null);
 
   /// The corresponding widget values in the toggle buttons.
   ///
@@ -74,6 +73,11 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
+  ///
+  /// To omit the border entirely, set this value to null.
+  ///
+  /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
+  /// See [BorderSide.width] for more details on hairline borders.
   final double borderWidth;
 
   /// The radii of the border's corners.
@@ -89,6 +93,51 @@ class ToggleButtons extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List<Widget>.generate(children.length, (int index) {
+        BorderRadius edgeBorderRadius;
+        BorderRadius clipBorderRadius;
+        if (
+          index == 0 && textDirection == TextDirection.ltr ||
+          index == children.length - 1 && textDirection == TextDirection.rtl
+        ) {
+          edgeBorderRadius = BorderRadius.only(
+            topLeft: borderRadius.topLeft,
+            bottomLeft: borderRadius.bottomLeft,
+          );
+          clipBorderRadius = BorderRadius.only(
+            topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+            bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+          );
+        } else if (
+          index == children.length - 1 && textDirection == TextDirection.ltr ||
+          index == 0 && textDirection == TextDirection.rtl
+        ) {
+          edgeBorderRadius = BorderRadius.only(
+            topRight: borderRadius.topRight,
+            bottomRight: borderRadius.bottomRight,
+          );
+          clipBorderRadius = BorderRadius.only(
+            topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+            bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+          );
+        }
+
+        if (borderWidth == null) {
+          return _ToggleButton(
+            onPressed: onPressed != null
+              ? () { onPressed(index); }
+              : null,
+            selected: isSelected[index],
+            leadingBorderSide: BorderSide.none,
+            horizontalBorderSide: BorderSide.none,
+            trailingBorderSide: BorderSide.none,
+            borderRadius: edgeBorderRadius ?? BorderRadius.zero,
+            clipRadius: clipBorderRadius ?? BorderRadius.zero,
+            isFirstButton: index == 0,
+            isLastButton: index == children.length - 1,
+            child: children[index],
+          );
+        }
+
         BorderSide horizontalBorderSide;
         BorderSide leadingBorderSide;
         BorderSide trailingBorderSide;
@@ -146,34 +195,6 @@ class ToggleButtons extends StatelessWidget {
               width: borderWidth,
             );
           }
-        }
-
-        BorderRadius edgeBorderRadius;
-        BorderRadius clipBorderRadius;
-        if (
-          index == 0 && textDirection == TextDirection.ltr ||
-          index == children.length - 1 && textDirection == TextDirection.rtl
-        ) {
-          edgeBorderRadius = BorderRadius.only(
-            topLeft: borderRadius.topLeft,
-            bottomLeft: borderRadius.bottomLeft,
-          );
-          clipBorderRadius = BorderRadius.only(
-            topLeft: borderRadius.topLeft - Radius.circular(borderWidth / 2.0),
-            bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth / 2.0),
-          );
-        } else if (
-          index == children.length - 1 && textDirection == TextDirection.ltr ||
-          index == 0 && textDirection == TextDirection.rtl
-        ) {
-          edgeBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight,
-            bottomRight: borderRadius.bottomRight,
-          );
-          clipBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight - Radius.circular(borderWidth / 2.0),
-            bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth / 2.0),
-          );
         }
 
         return _ToggleButton(
@@ -467,7 +488,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           leftConstraint + child.size.width + rightConstraint,
           horizontalBorderSide.width * 2.0 + child.size.height,
         ));
-
         break;
       case TextDirection.rtl:
         rightConstraint = leadingBorderSide.width;
@@ -495,7 +515,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           leftConstraint + child.size.width + rightConstraint,
           horizontalBorderSide.width * 2.0 + child.size.height,
         ));
-
         break;
     }
   }
