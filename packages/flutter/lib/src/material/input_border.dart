@@ -390,6 +390,12 @@ class OutlineInputBorder extends InputBorder {
     // size of the width/height of the RRect.
     final RRect scaledRRect = center.scaleRadii();
 
+    final Rect tlCorner = Rect.fromLTWH(
+      scaledRRect.left,
+      scaledRRect.top,
+      scaledRRect.tlRadiusX * 2.0,
+      scaledRRect.tlRadiusY * 2.0,
+    );
     final Rect trCorner = Rect.fromLTWH(
       scaledRRect.right - scaledRRect.trRadiusX * 2.0,
       scaledRRect.top,
@@ -401,12 +407,6 @@ class OutlineInputBorder extends InputBorder {
       scaledRRect.bottom - scaledRRect.brRadiusY * 2.0,
       scaledRRect.brRadiusX * 2.0,
       scaledRRect.brRadiusY * 2.0,
-    );
-    final Rect tlCorner = Rect.fromLTWH(
-      scaledRRect.left,
-      scaledRRect.top,
-      scaledRRect.tlRadiusX * 2.0,
-      scaledRRect.tlRadiusY * 2.0,
     );
     final Rect blCorner = Rect.fromLTWH(
       scaledRRect.left,
