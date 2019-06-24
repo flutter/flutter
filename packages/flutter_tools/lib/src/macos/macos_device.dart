@@ -20,7 +20,12 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends Device {
-  MacOSDevice() : super('macOS');
+  MacOSDevice() : super(
+      'macOS',
+      category: Category.desktop,
+      platformType: PlatformType.macos,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }
@@ -75,7 +80,11 @@ class MacOSDevice extends Device {
     // Stop any running applications with the same executable.
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
-      await buildMacOS(FlutterProject.current(), debuggingOptions?.buildInfo);
+      await buildMacOS(
+        flutterProject: FlutterProject.current(),
+        buildInfo: debuggingOptions?.buildInfo,
+        targetOverride: mainPath,
+      );
     }
 
     // Ensure that the executable is locatable.
