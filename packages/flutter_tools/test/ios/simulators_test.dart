@@ -109,15 +109,21 @@ void main() {
   group('sdkMajorVersion', () {
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     test('can be parsed from iOS-11-3', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
 
       expect(await device.sdkMajorVersion, 11);
     });
 
     test('can be parsed from iOS 11.2', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
 
       expect(await device.sdkMajorVersion, 11);
+    });
+
+    test('Has a simulator category', () async {
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+
+      expect(device.category, Category.mobile);
     });
   });
 
@@ -246,7 +252,7 @@ void main() {
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -258,7 +264,7 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -280,7 +286,7 @@ void main() {
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -292,7 +298,7 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.0');
       await launchSystemLogTool(device);
       verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
     },
@@ -330,7 +336,7 @@ void main() {
           return Future<Process>.value(mockProcess);
         });
 
-      final IOSSimulator device = IOSSimulator('123456', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('123456', simulatorCategory: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
         app: BuildableIOSApp(mockIosProject),
       );
@@ -430,7 +436,7 @@ void main() {
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
-        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
         when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
 
         final Directory mockDir = fs.currentDirectory;

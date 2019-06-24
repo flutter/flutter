@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
-import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
+import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus, OutputLocation;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
@@ -27,7 +27,8 @@ import '../project.dart';
 import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.2.8';
+const String kMinimumBuildRunnerVersion = '1.4.0';
+const String kSupportedBuildDaemonVersion = '1.0.0';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -47,7 +48,7 @@ class BuildRunner extends CodeGenerator {
     final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
 
     // Check if contents of builders changed. If so, invalidate build script
-    // and regnerate.
+    // and regenerate.
     final YamlMap builders = flutterProject.builders;
     final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
@@ -100,6 +101,7 @@ class BuildRunner extends CodeGenerator {
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      stringBuffer.writeln('  build_daemon: $kSupportedBuildDaemonVersion');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -160,7 +162,7 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
-         '--delete-conflicting-outputs'
+         '--delete-conflicting-outputs',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(
         flutterProject.directory.path,
@@ -172,11 +174,19 @@ class BuildRunner extends CodeGenerator {
     } finally {
       status.stop();
     }
+    // Empty string indicates we should build everything.
+    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+      ..output = ''
+      ..useSymlinks = false
+      ..hoist = false,
+    );
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
-      builder.target = flutterProject.manifest.appName;
+      builder.target = 'lib';
+      builder.outputLocation = outputLocation.toBuilder();
     }));
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = 'test';
+      builder.outputLocation = outputLocation.toBuilder();
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }

@@ -10,7 +10,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -21,64 +20,15 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart';
-import '../macos/cocoapods.dart';
+import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../services.dart';
+import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
-PlistBuddy get plistBuddy => context.get<PlistBuddy>();
-
-class PlistBuddy {
-  const PlistBuddy();
-
-  static const String path = '/usr/libexec/PlistBuddy';
-
-  Future<ProcessResult> run(List<String> args) => processManager.run(<String>[path]..addAll(args));
-}
-
-/// A property list is a key-value representation commonly used for
-/// configuration on macOS/iOS systems.
-class PropertyList {
-  const PropertyList(this.plistPath);
-
-  final String plistPath;
-
-  /// Prints the specified key, or returns null if not present.
-  Future<String> read(String key) async {
-    final ProcessResult result = await _runCommand('Print $key');
-    if (result.exitCode == 0)
-      return result.stdout.trim();
-    return null;
-  }
-
-  /// Adds [key]. Has no effect if the key already exists.
-  Future<void> addString(String key, String value) async {
-    await _runCommand('Add $key string $value');
-  }
-
-  /// Updates [key] with the new [value]. Has no effect if the key does not exist.
-  Future<void> update(String key, String value) async {
-    await _runCommand('Set $key $value');
-  }
-
-  /// Deletes [key].
-  Future<void> delete(String key) async {
-    await _runCommand('Delete $key');
-  }
-
-  /// Deletes the content of the property list and creates a new root of the specified type.
-  Future<void> clearToDict() async {
-    await _runCommand('Clear dict');
-  }
-
-  Future<ProcessResult> _runCommand(String command) async {
-    return await plistBuddy.run(<String>['-c', command, plistPath]);
-  }
-}
 
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
@@ -151,47 +101,6 @@ class IMobileDevice {
   }
 }
 
-/// Sets the Xcode system.
-///
-/// Xcode 10 added a new (default) build system with better performance and
-/// stricter checks. Flutter apps without plugins build fine under the new
-/// system, but it causes build breakages in projects with CocoaPods enabled.
-/// This affects Flutter apps with plugins.
-///
-/// Once Flutter has been updated to be fully compliant with the new build
-/// system, this can be removed.
-//
-// TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
-Future<void> setXcodeWorkspaceBuildSystem({
-  @required Directory workspaceDirectory,
-  @required File workspaceSettings,
-  @required bool modern,
-}) async {
-  // If this isn't a workspace, we're not using CocoaPods and can use the new
-  // build system.
-  if (!workspaceDirectory.existsSync())
-    return;
-
-  final PropertyList plist = PropertyList(workspaceSettings.path);
-  if (!workspaceSettings.existsSync()) {
-    workspaceSettings.parent.createSync(recursive: true);
-    await plist.clearToDict();
-  }
-
-  const String kBuildSystemType = 'BuildSystemType';
-  if (modern) {
-    printTrace('Using new Xcode build system.');
-    await plist.delete(kBuildSystemType);
-  } else {
-    printTrace('Using legacy Xcode build system.');
-    if (await plist.read(kBuildSystemType) == null) {
-      await plist.addString(kBuildSystemType, 'Original');
-    } else {
-      await plist.update(kBuildSystemType, 'Original');
-    }
-  }
-}
-
 Future<XcodeBuildResult> buildXcodeProject({
   BuildableIOSApp app,
   BuildInfo buildInfo,
@@ -207,12 +116,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   if (!_checkXcodeVersion())
     return XcodeBuildResult(success: false);
 
-  // TODO(cbracken): remove when https://github.com/flutter/flutter/issues/20685 is fixed.
-  await setXcodeWorkspaceBuildSystem(
-    workspaceDirectory: app.project.xcodeWorkspace,
-    workspaceSettings: app.project.xcodeWorkspaceSharedSettings,
-    modern: false,
-  );
 
   final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
@@ -274,29 +177,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
-    // If the Xcode project, Podfile, or Generated.xcconfig have changed since
-    // last run, pods should be updated.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
-      paths: <String>[
-        app.project.xcodeProjectInfoFile.path,
-        app.project.podfile.path,
-        app.project.generatedXcodePropertiesFile.path,
-      ],
-      properties: <String, String>{},
-    );
-
-    final bool didPodInstall = await cocoaPods.processPods(
-      iosProject: project.ios,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
-    );
-    if (didPodInstall)
-      await fingerprinter.writeFingerprint();
-  }
+  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
@@ -398,7 +279,11 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = Stopwatch()..start();
+  // Don't log analytics for downstream Flutter commands.
+  // e.g. `flutter build bundle`.
+  buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+
+  final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
@@ -411,11 +296,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus = null;
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
-  buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
   );
+  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(

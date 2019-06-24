@@ -48,6 +48,7 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "androidX": { "type": "boolean" },
                         "androidPackage": { "type": "string" },
                         "iosBundleIdentifier": { "type": "string" }
                     }

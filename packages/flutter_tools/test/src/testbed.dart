@@ -8,14 +8,24 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/usage.dart';
+
+import 'context.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
+// A default value should be provided if one of the following criteria is met:
+//    - The vast majority of tests should use this provider. For example,
+//      [BufferLogger], [MemoryFileSystem].
+//    - More TBD.
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
-  FileSystem: () => MemoryFileSystem(),
-  Logger: () => BufferLogger(),
+  FileSystem: () => MemoryFileSystem(), // Keeps tests fast by avoid actual file system.
+  Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
+  OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
+  Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -52,7 +62,7 @@ class Testbed {
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({Future<void> Function() setup, Map<Type, Generator> overrides})
+  Testbed({FutureOr<void> Function() setup, Map<Type, Generator> overrides})
     : _setup = setup,
       _overrides = overrides;
 
@@ -61,10 +71,18 @@ class Testbed {
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.
-  FutureOr<T> run<T>(FutureOr<T> Function() test) {
+  ///
+  /// `overrides` may be used to provide new context values for the single test
+  /// case or override any context values from the setup.
+  FutureOr<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
     final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
+    // Add the initial setUp overrides
     if (_overrides != null) {
       testOverrides.addAll(_overrides);
+    }
+    // Add the test-specific overrides
+    if (overrides != null) {
+      testOverrides.addAll(overrides);
     }
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
@@ -84,4 +102,42 @@ class Testbed {
       );
     });
   }
+}
+
+/// A no-op implementation of [Usage] for testing.
+class NoOpUsage implements Usage {
+  @override
+  bool enabled = false;
+
+  @override
+  bool suppressAnalytics = true;
+
+  @override
+  String get clientId => 'test';
+
+  @override
+  Future<void> ensureAnalyticsSent() {
+    return null;
+  }
+
+  @override
+  bool get isFirstRun => false;
+
+  @override
+  Stream<Map<String, Object>> get onSend => const Stream<Object>.empty();
+
+  @override
+  void printWelcome() {}
+
+  @override
+  void sendCommand(String command, {Map<String, String> parameters}) {}
+
+  @override
+  void sendEvent(String category, String parameter, {Map<String, String> parameters}) {}
+
+  @override
+  void sendException(dynamic exception, StackTrace trace) {}
+
+  @override
+  void sendTiming(String category, String variableName, Duration duration, {String label}) {}
 }

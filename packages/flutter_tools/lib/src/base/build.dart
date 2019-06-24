@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -16,6 +15,7 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../usage.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
@@ -63,7 +63,17 @@ class GenSnapshot {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
       return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
     }
-    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
+
+    StringConverter outputFilter;
+    if (additionalArgs.contains('--strip')) {
+      // Filter out gen_snapshot's warning message about stripping debug symbols
+      // from ELF library snapshots.
+      const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
+      outputFilter = (String line) => line != kStripWarning ? line : null;
+    }
+
+    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args),
+                                     mapFunction: outputFilter);
   }
 }
 
@@ -82,7 +92,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
@@ -96,23 +105,6 @@ class AOTSnapshotter {
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || iosArch != null);
-
-    // buildSharedLibrary is ignored for iOS builds.
-    if (platform == TargetPlatform.ios)
-      buildSharedLibrary = false;
-
-    if (buildSharedLibrary && androidSdk.ndk == null) {
-      final String explanation = AndroidNdk.explainMissingNdk(androidSdk.directory);
-      printError(
-        'Could not find NDK in Android SDK at ${androidSdk.directory}:\n'
-        '\n'
-        '  $explanation\n'
-        '\n'
-        'Unable to build with --build-shared-library\n'
-        'To install the NDK, see instructions at https://developer.android.com/ndk/guides/'
-      );
-      return 1;
-    }
 
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -141,25 +133,17 @@ class AOTSnapshotter {
     }
 
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (buildSharedLibrary || platform == TargetPlatform.ios) {
+    if (platform == TargetPlatform.ios) {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
     } else {
-      // Blob AOT snapshot.
-      final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-      final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-      final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-      final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
-      genSnapshotArgs.addAll(<String>[
-        '--snapshot_kind=app-aot-blobs',
-        '--vm_snapshot_data=$vmSnapshotData',
-        '--isolate_snapshot_data=$isolateSnapshotData',
-        '--vm_snapshot_instructions=$vmSnapshotInstructions',
-        '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-      ]);
+      final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
+      outputPaths.add(aotSharedLibrary);
+      genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
+      genSnapshotArgs.add('--elf=$aotSharedLibrary');
+      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
@@ -189,7 +173,6 @@ class AOTSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': Cache.instance.engineRevision,
         'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
@@ -203,7 +186,9 @@ class AOTSnapshotter {
     // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
-    final int genSnapshotExitCode = await _timedStep('snapshot(CompileTime)', () => genSnapshot.run(
+    final int genSnapshotExitCode =
+      await _timedStep('snapshot(CompileTime)', 'aot-snapshot',
+        () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
@@ -224,12 +209,6 @@ class AOTSnapshotter {
       final RunResult result = await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
       if (result.exitCode != 0)
         return result.exitCode;
-    } else if (buildSharedLibrary) {
-      final RunResult result = await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
-      if (result.exitCode != 0) {
-        printError('Failed to build AOT snapshot. Compiler terminated with exit code ${result.exitCode}');
-        return result.exitCode;
-      }
     }
 
     // Compute and record build fingerprint.
@@ -273,25 +252,6 @@ class AOTSnapshotter {
     return linkResult;
   }
 
-  /// Builds an Android shared library at [outputPath]/app.so from the assembly
-  /// source at [assemblyPath].
-  Future<RunResult> _buildAndroidSharedLibrary({
-    @required String assemblyPath,
-    @required String outputPath,
-  }) async {
-    // A word of warning: Instead of compiling via two steps, to a .o file and
-    // then to a .so file we use only one command. When using two commands
-    // gcc will end up putting a .eh_frame and a .debug_frame into the shared
-    // library. Without stripping .debug_frame afterwards, unwinding tools
-    // based upon libunwind use just one and ignore the contents of the other
-    // (which causes it to not look into the other section and therefore not
-    // find the correct unwinding information).
-    final String assemblySo = fs.path.join(outputPath, 'app.so');
-    return await runCheckedAsync(<String>[androidSdk.ndk.compiler]
-        ..addAll(androidSdk.ndk.compilerArgs)
-        ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assemblyPath ]));
-  }
-
   /// Compiles a Dart file to kernel.
   ///
   /// Returns the output kernel file path, or null on failure.
@@ -315,7 +275,9 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await _timedStep('frontend(CompileTime)', () => kernelCompiler.compile(
+    final CompilerOutput compilerOutput =
+      await _timedStep('frontend(CompileTime)', 'aot-kernel',
+        () => kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
@@ -357,12 +319,13 @@ class AOTSnapshotter {
   /// to find.
   /// Important: external performance tracking tools expect format of this
   /// output to be stable.
-  Future<T> _timedStep<T>(String marker, FutureOr<T> Function() action) async {
+  Future<T> _timedStep<T>(String marker, String analyticsVar, FutureOr<T> Function() action) async {
     final Stopwatch sw = Stopwatch()..start();
     final T value = await action();
     if (reportTimings) {
       printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
+    flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
     return value;
   }
 }
