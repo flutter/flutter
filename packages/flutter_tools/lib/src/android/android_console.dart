@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
 import 'package:async/async.dart';
 import '../base/context.dart';
+import '../base/io.dart';
+import '../convert.dart';
 
 /// Default factory that creates a real Android console connection.
 final AndroidConsoleSocketFactory _kAndroidConsoleSocketFactory = (String host, int port) => Socket.connect( host,  port);
