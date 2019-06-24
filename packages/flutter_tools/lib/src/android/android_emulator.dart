@@ -32,14 +32,13 @@ class AndroidEmulator extends Emulator {
 
   Map<String, String> _properties;
 
+  // Android Studio uses the ID with underscores replaced with spaces
+  // for the name if displayname is not set so we do the same.
   @override
-  String get name => _prop('hw.device.name');
+  String get name => _prop('avd.ini.displayname') ?? id.replaceAll('_', ' ').trim();
 
   @override
   String get manufacturer => _prop('hw.device.manufacturer');
-
-  @override
-  String get label => _prop('avd.ini.displayname');
 
   @override
   Category get category => Category.mobile;
