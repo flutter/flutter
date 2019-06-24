@@ -463,16 +463,17 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       double tapValue,
       Size thumbSize,
       Size trackSize,
-      double dx, // drag displacement
+      double dx, // The horizontal delta or displacement of the drag update.
     ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
 
-    // Use the displacement if the thumb touch targets overlap. If dx is 0 and
-    // the the drag position is in both touch targets, no thumb is selected
-    // because it is ambiguous to which thumb should be selected. Once the drag
-    // displacement is non-zero, the thumb selection can be determined.
+    // Use dx if the thumb touch targets overlap. If dx is 0 and the drag
+    // position is in both touch targets, no thumb is selected because it is
+    // ambiguous to which thumb should be selected. If the dx is non-zero, the
+    // thumb selection is determined by the direction of the dx. The left thumb
+    // is chosen for negative dx, and the right thumb is chosen for positive dx.
     if (inStartTouchTarget && inEndTouchTarget) {
       bool towardsStart;
       bool towardsEnd;
@@ -1018,8 +1019,8 @@ class _RenderRangeSlider extends RenderBox {
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
     // If no selection has been made yet, test for thumb selection again now
-    // that the value of dx is non-zero. If this is the first selection of the
-    // interaction, then onChangeStart must be called.
+    // that the value of dx can be non-zero. If this is the first selection of
+    // the interaction, then onChangeStart must be called.
     bool shouldCallOnChangeStart = false;
     if (_lastThumbSelection == null) {
       _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, dragValue, _thumbSize, size, details.delta.dx);

@@ -49,7 +49,8 @@ void main() {
     await tester.pump();
     expect(values, equals(const RangeValues(0.3, 0.7)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -103,7 +104,8 @@ void main() {
     await tester.pump();
     expect(values, equals(const RangeValues(0.3, 0.7)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -160,7 +162,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(values, equals(const RangeValues(30, 70)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -219,7 +222,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(values, equals(const RangeValues(30, 70)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -267,7 +271,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -311,7 +316,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -358,7 +364,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -405,7 +412,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -449,7 +457,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -499,7 +508,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -552,7 +562,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -605,7 +616,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -655,7 +667,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -705,7 +718,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -758,7 +772,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -811,7 +826,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -871,7 +887,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -926,7 +943,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -1343,7 +1361,8 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -1412,7 +1431,8 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
