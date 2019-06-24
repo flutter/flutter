@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:isolate';
 import 'dart:typed_data';
 import 'dart:ui' as ui show Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
