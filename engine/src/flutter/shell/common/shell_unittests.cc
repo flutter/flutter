@@ -156,7 +156,7 @@ TEST_F(ShellTest, InitializeWithGPUAndPlatformThreadsTheSame) {
 TEST_F(ShellTest, FixturesAreFunctional) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   auto settings = CreateSettingsForFixture();
-  auto shell = CreateShell(std::move(settings));
+  auto shell = CreateShell(settings);
   ASSERT_TRUE(ValidateShell(shell.get()));
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -178,7 +178,7 @@ TEST_F(ShellTest, FixturesAreFunctional) {
 TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
   auto settings = CreateSettingsForFixture();
-  auto shell = CreateShell(std::move(settings));
+  auto shell = CreateShell(settings);
   ASSERT_TRUE(ValidateShell(shell.get()));
 
   auto configuration = RunConfiguration::InferFromSettings(settings);
@@ -251,7 +251,7 @@ TEST_F(ShellTest, WhitelistedDartVMFlag) {
 
 TEST_F(ShellTest, NoNeedToReportTimingsByDefault) {
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell = CreateShell(settings);
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -278,7 +278,7 @@ TEST_F(ShellTest, NoNeedToReportTimingsByDefault) {
 
 TEST_F(ShellTest, NeedsReportTimingsIsSetWithCallback) {
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell = CreateShell(settings);
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -315,7 +315,7 @@ static void CheckFrameTimings(const std::vector<FrameTiming>& timings,
 TEST_F(ShellTest, ReportTimingsIsCalled) {
   fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell = CreateShell(settings);
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -381,7 +381,7 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
     timingLatch.Signal();
   };
 
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell = CreateShell(settings);
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -433,13 +433,59 @@ TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
 }
 
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
-TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
-#else
 TEST_F(ShellTest, ReportTimingsIsCalledLaterInReleaseMode) {
+#else
+TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
 #endif
   fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
-  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("reportTimingsMain");
+
+  // Wait for 2 reports: the first one is the immediate callback of the first
+  // frame; the second one will exercise the batching logic.
+  fml::CountDownLatch reportLatch(2);
+  std::vector<int64_t> timestamps;
+  auto nativeTimingCallback = [&reportLatch,
+                               &timestamps](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
+        args, 0, exception);
+    reportLatch.CountDown();
+  };
+  AddNativeCallback("NativeReportTimingsCallback",
+                    CREATE_NATIVE_ENTRY(nativeTimingCallback));
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get());
+  PumpOneFrame(shell.get());
+
+  reportLatch.Wait();
+  shell.reset();
+
+  fml::TimePoint finish = fml::TimePoint::Now();
+  fml::TimeDelta ellapsed = finish - start;
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+  // Our batch time is 1000ms. Hopefully the 800ms limit is relaxed enough to
+  // make it not too flaky.
+  ASSERT_TRUE(ellapsed >= fml::TimeDelta::FromMilliseconds(800));
+#else
+  // Our batch time is 100ms. Hopefully the 500ms limit is relaxed enough to
+  // make it not too flaky.
+  ASSERT_TRUE(ellapsed <= fml::TimeDelta::FromMilliseconds(500));
+#endif
+}
+
+TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
 
   // Create the surface needed by rasterizer
   PlatformViewNotifyCreated(shell.get());
@@ -460,23 +506,16 @@ TEST_F(ShellTest, ReportTimingsIsCalledLaterInReleaseMode) {
                     CREATE_NATIVE_ENTRY(nativeTimingCallback));
   RunEngine(shell.get(), std::move(configuration));
 
-  PumpOneFrame(shell.get());
+  for (int i = 0; i < 10; i += 1) {
+    PumpOneFrame(shell.get());
+  }
 
   reportLatch.Wait();
   shell.reset();
 
-  fml::TimePoint finish = fml::TimePoint::Now();
-  fml::TimeDelta ellapsed = finish - start;
-
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
-  // Our batch time is 1000ms. Hopefully the 800ms limit is relaxed enough to
-  // make it not too flaky.
-  ASSERT_TRUE(ellapsed >= fml::TimeDelta::FromMilliseconds(800));
-#else
-  // Our batch time is 100ms. Hopefully the 500ms limit is relaxed enough to
-  // make it not too flaky.
-  ASSERT_TRUE(ellapsed <= fml::TimeDelta::FromMilliseconds(500));
-#endif
+  // Check for the immediate callback of the first frame that doesn't wait for
+  // the other 9 frames to be rasterized.
+  ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
 }  // namespace testing

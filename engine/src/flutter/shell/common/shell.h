@@ -110,6 +110,8 @@ class Shell final : public PlatformView::Delegate,
   bool is_setup_ = false;
   uint64_t next_pointer_flow_id_ = 0;
 
+  bool first_frame_rasterized_ = false;
+
   // Written in the UI thread and read from the GPU thread. Hence make it
   // atomic.
   std::atomic<bool> needs_report_timings_{false};
