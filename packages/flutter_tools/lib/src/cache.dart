@@ -933,7 +933,10 @@ abstract class IosUsbArtifacts extends CachedArtifact {
 
   @override
   Future<void> updateInner() {
-    final Uri archiveUri = Uri.parse(fs.path.join(_storageBaseUrl, 'flutter_infra', 'ios-usb-dependencies', name, version, '$name.zip'));
+    if (!platform.isMacOS) {
+      return Future<void>.value();
+    }
+    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
 }
