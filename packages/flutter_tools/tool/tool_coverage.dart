@@ -11,6 +11,7 @@ import 'package:async/async.dart';
 import 'package:coverage/coverage.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:path/path.dart' as p;
+import 'package:pedantic/pedantic.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
@@ -67,6 +68,11 @@ class VMPlatform extends PlatformPlugin {
       rethrow;
     }
     final Completer<void> completer = Completer<void>();
+    // When this is completed we remove it from the map of pending so we can
+    // log the futures that get "stuck".
+    unawaited(completer.future.whenComplete(() {
+      _pending.remove(path);
+    }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
         .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
@@ -100,11 +106,7 @@ class VMPlatform extends PlatformPlugin {
   /// This isolate connects an [IsolateChannel] to [message] and sends the
   /// serialized tests over that channel.
   Future<Isolate> _spawnIsolate(String path, SendPort message) async {
-    return _spawnPrecompiledIsolate(path, message, precompiledPath);
-  }
-
-  Future<Isolate> _spawnPrecompiledIsolate(String testPath, SendPort message, String precompiledPath) async {
-    testPath = p.absolute(p.join(precompiledPath, testPath) + '.vm_test.dart');
+    String testPath = p.absolute(p.join(precompiledPath, path) + '.vm_test.dart');
     testPath = testPath.substring(0, testPath.length - '.dart'.length) + '.vm.app.dill';
     return await Isolate.spawnUri(p.toUri(testPath), <String>[], message,
       packageConfig: p.toUri('.packages'),
@@ -117,7 +119,12 @@ class VMPlatform extends PlatformPlugin {
     try {
       await Future.wait(_pending.values).timeout(const Duration(seconds: 10));
     } on TimeoutException {
-      // Do nothing.
+      // TODO(jonahwilliams): resolve whether there are any specific tests that
+      // get stuck or if it is a general infra issue with how we are collecting
+      // coverage.
+      // Log tests that are "Stuck" waiuting for coverage.
+      print('The folllowing tests timed out waiting for coverage:');
+      print(_pending.keys.join(', '));
     }
     final String packagePath = Directory.current.path;
     final Resolver resolver = Resolver(packagesPath: '.packages');
@@ -146,7 +153,6 @@ class VMEnvironment implements Environment {
 
   /// The VM service isolate object used to control this isolate.
   final VMIsolateRef _isolate;
-
 
   @override
   Uri get remoteDebuggerUrl => null;

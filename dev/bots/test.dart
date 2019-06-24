@@ -178,53 +178,55 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
   }
 }
 
+// Tools tests run with coverage enabled have much higher memory usage than
+// our current CI infrastructure can support. Here we partition the tests into
+// two sets and run them in separate invocations of dart to reduce peak memory
+// usage. codecov.io automatically handles merging different coverage files
+// together, so producing separate files is OK.
 List<List<String>> _partitionToolTests() {
-  final List<File> pending = <File>[];
+  final List<String> pending = <String>[];
   final String toolTestDir = path.join(toolRoot, 'test');
   for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
     if (entity is File && entity.path.endsWith('_test.dart')) {
-      pending.add(entity);
+      final String relativePath = path.relative(entity.path, from: toolRoot);
+      pending.add(relativePath);
     }
   }
-  final List<String> groupA = <String>[];
-  final List<String> groupB = <String>[];
-  for (int i = 0; i < pending.length; i += 1) {
-    final String relativePath = path.relative(pending[i].path, from: toolRoot);
-    if (i.isEven) {
-      groupA.add(relativePath);
-    } else {
-      groupB.add(relativePath);
-    }
-  }
+  // Shuffle the tests to avoid giving an expensive test directory like
+  // integration to a single run of tests.
+  pending..shuffle();
+  final int aboutHalf = pending.length ~/ 2;
+  final List<String> groupA = pending.take(aboutHalf).toList();
+  final List<String> groupB = pending.skip(aboutHalf).toList();
   return <List<String>>[groupA, groupB];
 }
 
 Future<void> _runToolCoverage() async {
   final List<List<String>> tests = _partitionToolTests();
+  // Precompile tests to speed up subsequent runs.
   await runCommand(
     pub,
     <String>['run', 'build_runner', 'build'],
     workingDirectory: toolRoot,
   );
-  // We run out of memory on CI if these are run together.
-  await runCommand(
-    dart,
-    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests.first),
-    workingDirectory: toolRoot,
-    environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot,
-      'SUBSHARD': 'A',
-    }
-  );
-  await runCommand(
-    dart,
-    <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(tests.last),
-    workingDirectory: toolRoot,
-    environment: <String, String>{
-      'FLUTTER_ROOT': flutterRoot,
-      'SUBSHARD': 'B',
-    }
-  );
+  // We run out of memory on CI if these are run together, see
+  // explaination on `_partitionToolTests`.
+
+  // The name of this subshard has to match the --file path provided at
+  // the end of this test script in `.cirrus.yml`.
+  String subshard = 'A';
+  for (List<String> testGroup in tests) {
+    await runCommand(
+      dart,
+      <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
+      workingDirectory: toolRoot,
+      environment: <String, String>{
+        'FLUTTER_ROOT': flutterRoot,
+        'SUBSHARD': subshard,
+      }
+    );
+    subshard = 'B';
+  }
 }
 
 Future<void> _runToolTests() async {
