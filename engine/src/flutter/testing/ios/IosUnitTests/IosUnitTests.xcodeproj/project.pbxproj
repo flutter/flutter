@@ -346,7 +346,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "TARGET_FRAMEWORKS_PATH=\"$TARGET_BUILD_DIR/../Frameworks\"\nFRAMEWORK_PATH=`find $PWD/../../../../out/ios_debug_sim_unopt -name Flutter.framework`\ncp -R \"$FRAMEWORK_PATH\" \"$TARGET_FRAMEWORKS_PATH\"\n";
+			shellScript = "TARGET_FRAMEWORKS_PATH=\"$TARGET_BUILD_DIR/../Frameworks\"\nFRAMEWORK_PATH=`find $PWD/../../../../out/$FLUTTER_ENGINE -name Flutter.framework`\ncp -R \"$FRAMEWORK_PATH\" \"$TARGET_FRAMEWORKS_PATH\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
