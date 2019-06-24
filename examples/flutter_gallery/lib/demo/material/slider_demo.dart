@@ -15,7 +15,7 @@ class SliderDemo extends StatefulWidget {
   _SliderDemoState createState() => _SliderDemoState();
 }
 
-Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
+Path _downTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   final Path thumbPath = Path();
   final double height = math.sqrt(3.0) / 2.0;
   final double centerHeight = size * height / 3.0;
@@ -28,7 +28,7 @@ Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   return thumbPath;
 }
 
-Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
+Path _rightTriangle(double size, Offset thumbCenter, { bool invert = false }) {
   final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
@@ -248,8 +248,8 @@ class _SlidersState extends State<_Sliders> {
             children: <Widget>[
               Semantics(
                 label: 'Editable numerical value',
-                child: Container(
-                  width: 48,
+                child: SizedBox(
+                  width: 610,
                   height: 48,
                   child: TextField(
                     textAlign: TextAlign.center,
@@ -312,15 +312,15 @@ class _SlidersState extends State<_Sliders> {
               SliderTheme(
                 data: theme.sliderTheme.copyWith(
                   activeTrackColor: Colors.deepPurple,
-                  inactiveTrackColor: Colors.black26,
-                  activeTickMarkColor: Colors.white70,
-                  inactiveTickMarkColor: Colors.black,
-                  overlayColor: Colors.black12,
+                  inactiveTrackColor: theme.colorScheme.onSurface.withOpacity(0.5),
+                  activeTickMarkColor: theme.colorScheme.onSurface.withOpacity(0.7),
+                  inactiveTickMarkColor:  theme.colorScheme.surface.withOpacity(0.7),
+                  overlayColor: theme.colorScheme.onSurface.withOpacity(0.12),
                   thumbColor: Colors.deepPurple,
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   thumbShape: _CustomThumbShape(),
                   valueIndicatorShape: _CustomValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
+                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: theme.colorScheme.onSurface),
                 ),
                 child: Slider(
                   value: _discreteCustomValue,
