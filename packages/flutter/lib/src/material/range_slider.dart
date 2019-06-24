@@ -454,8 +454,8 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
   }
 
   // Finds closest thumb. If the thumbs are close to each other, no thumb is
-  // immediately selected while the drag velocity is zero. If the first
-  // non-zero velocity is negative, then the left thumb is selected, and if its
+  // immediately selected while the drag displacement is zero. If the first
+  // non-zero displacement is negative, then the left thumb is selected, and if its
   // positive, then the right thumb is selected.
   static final RangeThumbSelector _defaultRangeThumbSelector = (
       TextDirection textDirection,
@@ -463,16 +463,16 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       double tapValue,
       Size thumbSize,
       Size trackSize,
-      double dx, // drag velocity
+      double dx, // drag displacement
     ) {
     final double touchRadius = math.max(thumbSize.width, RangeSlider._minTouchTargetWidth) / 2;
     final bool inStartTouchTarget = (tapValue - values.start).abs() * trackSize.width < touchRadius;
     final bool inEndTouchTarget = (tapValue - values.end).abs() * trackSize.width < touchRadius;
 
-    // Use the velocity if the thumb touch targets overlap. If dx is 0 and the
-    // the drag position is in both touch targets, no thumb is selected because
-    // it is ambiguous to which thumb should be selected. Once the drag
-    // velocity is non-zero, the thumb selection can be determined.
+    // Use the displacement if the thumb touch targets overlap. If dx is 0 and
+    // the the drag position is in both touch targets, no thumb is selected
+    // because it is ambiguous to which thumb should be selected. Once the drag
+    // displacement is non-zero, the thumb selection can be determined.
     if (inStartTouchTarget && inEndTouchTarget) {
       bool towardsStart;
       bool towardsEnd;
@@ -1018,7 +1018,7 @@ class _RenderRangeSlider extends RenderBox {
     final double dragValue = _getValueFromGlobalPosition(details.globalPosition);
 
     // If no selection has been made yet, test for thumb selection again now
-    // that the value if dx is non zero. If this is the first selection of the
+    // that the value of dx is non-zero. If this is the first selection of the
     // interaction, then onChangeStart must be called.
     bool shouldCallOnChangeStart = false;
     if (_lastThumbSelection == null) {
@@ -1056,9 +1056,7 @@ class _RenderRangeSlider extends RenderBox {
       _state.valueIndicatorController.reverse();
     }
 
-    if (_active && _state.mounted) {
-      if (_lastThumbSelection == null)
-        return;
+    if (_active && _state.mounted && _lastThumbSelection != null) {
       final RangeValues discreteValues = _discretizeRangeValues(_newValues);
       if (onChangeEnd != null) {
         onChangeEnd(discreteValues);
