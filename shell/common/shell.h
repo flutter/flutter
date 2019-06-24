@@ -96,7 +96,10 @@ class Shell final : public PlatformView::Delegate,
   std::unique_ptr<Rasterizer> rasterizer_;       // on GPU task runner
   std::unique_ptr<ShellIOManager> io_manager_;   // on IO task runner
 
-  fml::WeakPtr<Engine> weak_engine_;  // to be shared across threads
+  fml::WeakPtr<Engine> weak_engine_;          // to be shared across threads
+  fml::WeakPtr<Rasterizer> weak_rasterizer_;  // to be shared across threads
+  fml::WeakPtr<PlatformView>
+      weak_platform_view_;  // to be shared across threads
 
   std::unordered_map<std::string,  // method
                      std::pair<fml::RefPtr<fml::TaskRunner>,
