@@ -11,22 +11,39 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import '../base/context.dart';
+
+/// Default factory that creates a real Android console connection.
+final AndroidConsoleSocketFactory _kAndroidConsoleSocketFactory = (String host, int port) => Socket.connect( host,  port);
+
+/// Currently active implementation of the AndroidConsoleFactory.
+///
+/// The default implementation will create real connections to a device.
+/// Override this in tests with an implementation that returns mock responses.
+AndroidConsoleSocketFactory get androidConsoleSocketFactory => context.get<AndroidConsoleSocketFactory>() ?? _kAndroidConsoleSocketFactory;
+
+typedef AndroidConsoleSocketFactory = Future<Socket> Function(String host, int port);
 
 /// Creates a console connection to an Android emulator that can be used to run
 /// commands such as "avd name" which are not available to ADB.
+///
+/// See documentation at
+/// https://developer.android.com/studio/run/emulator-console
 class AndroidConsole {
-  AndroidConsole._(this.socket):
-    queue = StreamQueue<String>(socket.asyncMap(ascii.decode));
+  AndroidConsole(this._socket);
 
-  final Socket socket;
-  final StreamQueue<String> queue;
+  Socket _socket;
+  StreamQueue<String> _queue;
 
-  static Future<AndroidConsole> connect(String host, int port) async {
-    final Socket socket = await Socket.connect(host, port);
-    final AndroidConsole console = AndroidConsole._(socket);
-    // Discard initial connection text.
-    await console._readResponse();
-    return console;
+  Future<void> connect() async {
+    assert(_socket != null);
+    assert(_queue == null);
+
+    _queue = StreamQueue<String>(_socket.asyncMap(ascii.decode));
+
+    // Discard any initial connection text.
+    await _readResponse();
   }
 
   Future<String> getAvdName() async {
@@ -34,17 +51,31 @@ class AndroidConsole {
     return _readResponse();
   }
 
-  void destroy()  => socket.destroy();
+  void destroy() {
+    if (_socket != null) {
+      _socket.destroy();
+      _socket = null;
+      _queue = null;
+    }
+  }
 
   Future<String> _readResponse() async {
-    String text = (await queue.next).trim();
-    if (text.endsWith('\nOK')) {
-      text = text.substring(0, text.length - 3);
+    final StringBuffer output = StringBuffer();
+    while (true) {
+      final String text = await _queue.next;
+      final String trimmedText = text.trim();
+      if (trimmedText == 'OK')
+        break;
+      if (trimmedText.endsWith('\nOK')) {
+        output.write(trimmedText.substring(0, trimmedText.length - 3));
+        break;
+      }
+      output.write(text);
     }
-    return text.trim();
+    return output.toString().trim();
   }
 
   void _write(String text) {
-    socket.add(ascii.encode(text));
+    _socket.add(ascii.encode(text));
   }
 }

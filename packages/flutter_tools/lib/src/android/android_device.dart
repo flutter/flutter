@@ -143,29 +143,41 @@ class AndroidDevice extends Device {
   /// will be returned.
   @override
   Future<String> get emulatorId async {
-    // Emulators always have IDs in the format emulator-(port) where port is the
-    // Android Console port number.
-    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
     if (!(await isLocalEmulator))
       return null;
 
-    try {
-      final Match portMatch = emulatorPortRegex.firstMatch(id);
-      if (portMatch == null || portMatch.groupCount < 1) {
-        return null;
-      }
+    // Emulators always have IDs in the format emulator-(port) where port is the
+    // Android Console port number.
+    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
 
-      const String host = 'localhost';
-      final int port = int.parse(portMatch.group(1));
-      printTrace('Connecting to $host:$port to get avd name');
-      final AndroidConsole console = await AndroidConsole.connect('localhost', port);
+    final Match portMatch = emulatorPortRegex.firstMatch(id);
+    if (portMatch == null || portMatch.groupCount < 1) {
+      return null;
+    }
+
+    const String host = 'localhost';
+    final int port = int.parse(portMatch.group(1));
+    printTrace('Fetching avd name for $name via Android console on $host:$port');
+
+    try {
+      final Socket socket = await androidConsoleSocketFactory(host, port);
+      final AndroidConsole console = AndroidConsole(socket);
+
       try {
-        return await console.getAvdName();
+        await console
+            .connect()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('Connection timed out'));
+
+        return await console
+            .getAvdName()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('"avd name" timed out'));
       } finally {
         console.destroy();
       }
     } catch (e) {
-      printTrace('Failed to fetch avd name for emulator $name: $e');
+      printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
       // If we fail to connect to the device, we should not fail so just return
       // an empty name. This data is best-effort.
       return null;
