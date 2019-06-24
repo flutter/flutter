@@ -392,10 +392,9 @@ bool Shell::Setup(std::unique_ptr<PlatformView> platform_view,
 
   // The weak ptr must be generated in the platform thread which owns the unique
   // ptr.
-  //
-  // TODO(liyuqian): make weak_rasterizer_ and weak_platform_view_ and use
-  // them in the getters.
   weak_engine_ = engine_->GetWeakPtr();
+  weak_rasterizer_ = rasterizer_->GetWeakPtr();
+  weak_platform_view_ = platform_view_->GetWeakPtr();
 
   is_setup_ = true;
 
@@ -420,7 +419,7 @@ const TaskRunners& Shell::GetTaskRunners() const {
 
 fml::WeakPtr<Rasterizer> Shell::GetRasterizer() {
   FML_DCHECK(is_setup_);
-  return rasterizer_->GetWeakPtr();
+  return weak_rasterizer_;
 }
 
 fml::WeakPtr<Engine> Shell::GetEngine() {
@@ -430,7 +429,7 @@ fml::WeakPtr<Engine> Shell::GetEngine() {
 
 fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   FML_DCHECK(is_setup_);
-  return platform_view_->GetWeakPtr();
+  return weak_platform_view_;
 }
 
 DartVM* Shell::GetDartVM() {
