@@ -18,7 +18,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';

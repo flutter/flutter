@@ -31,13 +31,6 @@ enum Artifact {
   dartdevcSnapshot,
   kernelWorkerSnapshot,
   flutterWebSdk,
-  libimobiledevice,
-  usbmuxd,
-  libplist,
-  openssl,
-  ideviceinstaller,
-  libtasn1,
-  iosdeploy,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -81,20 +74,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dartdevc.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
-    case Artifact.libimobiledevice:
-      return 'libimobiledevice';
-    case Artifact.usbmuxd:
-      return 'usbmuxd';
-    case Artifact.libplist:
-      return 'libplist';
-    case Artifact.openssl:
-      return 'openssl';
-    case Artifact.ideviceinstaller:
-      return 'ideviceinstaller';
-    case Artifact.libtasn1:
-      return 'libtasn1';
-    case Artifact.iosdeploy:
-      return 'ios-deploy';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -125,20 +104,6 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
-}
-
-class IosUsbArtifacts extends Artifacts {
-  @override
-  String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    final String dirName = _artifactToFileName(artifact);
-    return cache.getArtifactDirectory(dirName).path;
-  }
-
-  @override
-  String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
-    assert (false);
-    return 'This should never run.';
-  }
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
@@ -212,7 +177,7 @@ class CachedArtifacts extends Artifacts {
     return cache.getWebSdkDirectory().path;
   }
 
-  String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) { // TODO look
+  String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     switch (artifact) {
       case Artifact.genSnapshot:
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
@@ -337,15 +302,6 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
-      case Artifact.libimobiledevice:
-      case Artifact.ideviceinstaller:
-      case Artifact.usbmuxd:
-      case Artifact.libplist:
-      case Artifact.openssl:
-      case Artifact.libtasn1:
-      case Artifact.iosdeploy:
-        final String artifactName = _artifactToFileName(artifact);
-        return cache.getArtifactDirectory(artifactName).path;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

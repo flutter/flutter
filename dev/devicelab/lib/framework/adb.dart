@@ -392,10 +392,33 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
+  // Return path to cached binaries, hard-coded relative to devicelab directory
+  String get _artifactDirName {
+    return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+  }
+
   @override
   Future<List<String>> discoverDevices() async {
-    final String binPath = cache.getArtifactFile('libimobiledevice', 'idevice_id'); // TODO huh?!
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval(binPath, <String>['-l'])) // TODO add env
+    final String ideviceIdPath = path.join(_artifactDirName, 'libimobiledevice', 'idevice_id');
+    final String cat = <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'libtasn1',
+      'ios-deploy',
+    ].map((String packageName) => path.join(_artifactDirName, packageName)).join(':');
+
+    final Map<String, String> env = <String, String>{
+      'DYLD_LIBRARY_PATH': cat,
+    };
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: env))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();

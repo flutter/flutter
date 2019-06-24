@@ -23,7 +23,7 @@ void main() {
     });
 
     testUsingContext('Emits installed status when CocoaPods is installed', () async {
-      final CocoaPodsValidator workflow = CocoaPodsValidator();
+      const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
@@ -33,7 +33,7 @@ void main() {
     testUsingContext('Emits missing status when CocoaPods is not installed', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
-      final CocoaPodsValidator workflow = CocoaPodsValidator();
+      const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{
@@ -43,7 +43,7 @@ void main() {
     testUsingContext('Emits partial status when CocoaPods is installed with unknown version', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
-      final CocoaPodsValidator workflow = CocoaPodsValidator();
+      const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -52,7 +52,7 @@ void main() {
 
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
-      final CocoaPodsValidator workflow = CocoaPodsValidator();
+      const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -62,7 +62,7 @@ void main() {
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
-      final CocoaPodsValidator workflow = CocoaPodsValidator();
+      const CocoaPodsValidator workflow = CocoaPodsValidator();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
