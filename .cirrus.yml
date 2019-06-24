@@ -97,7 +97,7 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: tool_coverage_a-linux
+    - name: tool_coverage-linux
       # Only re-run tool coverage if the package itself changed.
       skip: "!changesInclude('./packages/flutter_tools/**/*', '.cirrus.yml', './dev/bots/test.dart')"
       env:
