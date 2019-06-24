@@ -402,10 +402,9 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     );
   }
 
-  @override
-  Future<List<String>> discoverDevices() async {
-    final String ideviceIdPath = path.join(_artifactDirName, 'libimobiledevice', 'idevice_id');
-    final String cat = <String>[
+  // Return the path to all dynamically linked libraries
+  Map<String, String> get _ideviceIdEnvironment {
+    final String libPath = const <String>[
       'libimobiledevice',
       'usbmuxd',
       'libplist',
@@ -414,11 +413,13 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'libtasn1',
       'ios-deploy',
     ].map((String packageName) => path.join(_artifactDirName, packageName)).join(':');
+    return Map<String, String>{'DYLD_LIBRARY_PATH': libPath};
+  }
 
-    final Map<String, String> env = <String, String>{
-      'DYLD_LIBRARY_PATH': cat,
-    };
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: env))
+  @override
+  Future<List<String>> discoverDevices() async {
+    final String ideviceIdPath = path.join(_artifactDirName, 'libimobiledevice', 'idevice_id');
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();
