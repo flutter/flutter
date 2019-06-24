@@ -54,15 +54,15 @@ class FlutterDevice {
     Device device, {
     @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
+    @required String target,
+    @required BuildMode buildMode,
     String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
-    @required String target,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-    @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
     if (flutterProject.hasBuilders) {
@@ -512,7 +512,6 @@ abstract class ResidentRunner {
     this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
-    this.saveCompilationTrace,
     this.stayResident,
     this.ipv6,
   }) {
@@ -527,7 +526,6 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
-  final bool saveCompilationTrace;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
@@ -585,8 +583,6 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    if (saveCompilationTrace)
-      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -701,35 +697,6 @@ abstract class ResidentRunner {
     } catch (error) {
       status.cancel();
       printError('Error taking screenshot: $error');
-    }
-  }
-
-  Future<void> _debugSaveCompilationTrace() async {
-    if (!supportsServiceProtocol)
-      return;
-
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        final int index = device.views.indexOf(view);
-        final File outputFile = fs.currentDirectory
-            .childFile('compilation${index == 0 ? '' : index}.txt');
-
-        printStatus('Saving compilation training data '
-            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
-            'to ${fs.path.relative(outputFile.path)}...');
-
-        List<int> buffer;
-        try {
-          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
-          assert(buffer != null);
-        } catch (error) {
-          printError('Error communicating with Flutter on the device: $error');
-          continue;
-        }
-
-        outputFile.parent.createSync(recursive: true);
-        outputFile.writeAsBytesSync(buffer);
-      }
     }
   }
 

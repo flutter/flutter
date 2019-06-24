@@ -68,12 +68,14 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
 
+typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
+
 /// Configure the `test` package to work with Flutter.
 ///
 /// On systems where each [FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
-void installHook({
+FlutterPlatform installHook({
   @required String shellPath,
   TestWatcher watcher,
   bool enableObservatory = false,
@@ -91,32 +93,40 @@ void installHook({
   Uri projectRootDirectory,
   FlutterProject flutterProject,
   String icudtlPath,
+  PlatformPluginRegistration platformPluginRegistration
 }) {
   assert(enableObservatory || (!startPaused && observatoryPort == null));
-  hack.registerPlatformPlugin(
-    <Runtime>[Runtime.vm],
-    () {
-      return FlutterPlatform(
-        shellPath: shellPath,
-        watcher: watcher,
-        machine: machine,
-        enableObservatory: enableObservatory,
-        startPaused: startPaused,
-        disableServiceAuthCodes: disableServiceAuthCodes,
-        explicitObservatoryPort: observatoryPort,
-        host: _kHosts[serverType],
-        port: port,
-        precompiledDillPath: precompiledDillPath,
-        precompiledDillFiles: precompiledDillFiles,
-        trackWidgetCreation: trackWidgetCreation,
-        updateGoldens: updateGoldens,
-        buildTestAssets: buildTestAssets,
-        projectRootDirectory: projectRootDirectory,
-        flutterProject: flutterProject,
-        icudtlPath: icudtlPath,
-      );
-    }
+
+  // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
+  platformPluginRegistration ??= (FlutterPlatform platform) {
+    hack.registerPlatformPlugin(
+      <Runtime>[Runtime.vm],
+        () {
+        return platform;
+      }
+    );
+  };
+  final FlutterPlatform platform = FlutterPlatform(
+    shellPath: shellPath,
+    watcher: watcher,
+    machine: machine,
+    enableObservatory: enableObservatory,
+    startPaused: startPaused,
+    disableServiceAuthCodes: disableServiceAuthCodes,
+    explicitObservatoryPort: observatoryPort,
+    host: _kHosts[serverType],
+    port: port,
+    precompiledDillPath: precompiledDillPath,
+    precompiledDillFiles: precompiledDillFiles,
+    trackWidgetCreation: trackWidgetCreation,
+    updateGoldens: updateGoldens,
+    buildTestAssets: buildTestAssets,
+    projectRootDirectory: projectRootDirectory,
+    flutterProject: flutterProject,
+    icudtlPath: icudtlPath,
   );
+  platformPluginRegistration(platform);
+  return platform;
 }
 
 /// Generates the bootstrap entry point script that will be used to launch an

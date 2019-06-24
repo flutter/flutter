@@ -925,12 +925,12 @@ class ButtonThemeData extends Diagnosticable {
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
     ));
-    properties.add(DiagnosticsProperty<Color>('buttonColor', _buttonColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', _disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', _focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', _hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', _highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', _splashColor, defaultValue: null));
+    properties.add(ColorProperty('buttonColor', _buttonColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', _disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', _focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', _hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', _highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', _splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', _materialTapTargetSize, defaultValue: null));
   }

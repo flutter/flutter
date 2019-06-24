@@ -286,7 +286,7 @@ class _Asset {
   @override
   int get hashCode {
     return baseDir.hashCode
-        ^relativeUri.hashCode
+        ^ relativeUri.hashCode
         ^ entryUri.hashCode;
   }
 }

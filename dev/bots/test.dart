@@ -307,50 +307,114 @@ Future<void> _runAdd2AppTest() async {
 Future<void> _runTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), tableData: bigqueryApi?.tabledata);
-  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
-  // needs to be run with --track-widget-creation but it is nice to run
-  // all of the tests in package:flutter with the flag to ensure that
-  // the Dart kernel transformer triggered by the flag does not break anything.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi?.tabledata);
-  // Regression test to ensure that code outside of package:flutter can run
-  // with --track-widget-creation.
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
-  // Smoke test for code generation.
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
-    'FLUTTER_EXPERIMENTAL_BUILD': 'true',
-  });
+  Future<void> runWidgets() async {
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[
+        'test/widgets/',
+      ],
+    );
+    // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+    // needs to be run with --track-widget-creation but it is nice to run
+    // all of the tests in package:flutter with the flag to ensure that
+    // the Dart kernel transformer triggered by the flag does not break anything.
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--track-widget-creation'],
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[
+        'test/widgets/',
+      ],
+    );
+  }
+
+  Future<void> runFrameworkOthers() async {
+    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
+      .listSync(followLinks: false, recursive: false)
+      .whereType<Directory>()
+      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .toList();
+
+    print('Running tests for: ${tests.join(';')}');
+
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      tableData: bigqueryApi?.tabledata,
+      tests: tests,
+    );
+    // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+    // needs to be run with --track-widget-creation but it is nice to run
+    // all of the tests in package:flutter with the flag to ensure that
+    // the Dart kernel transformer triggered by the flag does not break anything.
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--track-widget-creation'],
+      tableData: bigqueryApi?.tabledata,
+      tests: tests,
+    );
+  }
+
+  Future<void> runExtras() async {
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi?.tabledata);
+    // Regression test to ensure that code outside of package:flutter can run
+    // with --track-widget-creation.
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
+    // Smoke test for code generation.
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
+      'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+    });
+  }
+  switch (subShard) {
+    case 'widgets':
+      await runWidgets();
+      break;
+    case 'framework_other':
+      await runFrameworkOthers();
+      break;
+    case 'extras':
+      runExtras();
+      break;
+    default:
+      print('Unknown sub-shard $subShard, running all tests!');
+      await runWidgets();
+      await runFrameworkOthers();
+      await runExtras();
+
+  }
 
   print('${bold}DONE: All tests successful.$reset');
 }
 
 Future<void> _runWebTests() async {
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
     'test/foundation/',
     'test/physics/',
     'test/rendering/',
     'test/services/',
     'test/painting/',
     'test/scheduler/',
-    'test/widgets/',
     'test/semantics/',
-    'test/material/',
+    // TODO(flutterweb): re-enable when instabiliy around pumpAndSettle is
+    // resolved.
+    // 'test/widgets/',
+    // 'test/material/',
   ]);
 }
 
@@ -607,7 +671,6 @@ class EvalResult {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, {
-  bool expectFailure = false,
   bool printOutput = true,
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -627,7 +690,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
       flutter,
       args,
       workingDirectory: workingDirectory,
-      expectNonZeroExit: expectFailure,
+      expectFlaky: true,
       timeout: timeout,
       environment: <String, String>{
         'FLUTTER_WEB': 'true',
@@ -648,6 +711,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   bq.TabledataResourceApi tableData,
   Map<String, String> environment,
+  List<String> tests = const <String>[],
 }) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -672,6 +736,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
+
+  args.addAll(tests);
+
   if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
@@ -730,19 +797,28 @@ Future<void> _verifyVersion(String filename) async {
 }
 
 Future<void> _runIntegrationTests() async {
-  print('Platform env vars:');
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  await _runDevicelabTest('dartdocs');
+  switch (subShard) {
+    case 'gradle1':
+    case 'gradle2':
+      // This runs some gradle integration tests if the subshard is Android.
+      await _androidGradleTests(subShard);
+      break;
+    default:
+      await _runDevicelabTest('dartdocs');
 
-  if (Platform.isLinux) {
-    await _runDevicelabTest('flutter_create_offline_test_linux');
-  } else if (Platform.isWindows) {
-    await _runDevicelabTest('flutter_create_offline_test_windows');
-  } else if (Platform.isMacOS) {
-    await _runDevicelabTest('flutter_create_offline_test_mac');
-    await _runDevicelabTest('module_test_ios');
+      if (Platform.isLinux) {
+        await _runDevicelabTest('flutter_create_offline_test_linux');
+      } else if (Platform.isWindows) {
+        await _runDevicelabTest('flutter_create_offline_test_windows');
+      } else if (Platform.isMacOS) {
+        await _runDevicelabTest('flutter_create_offline_test_mac');
+        await _runDevicelabTest('module_test_ios');
+      }
+      // This does less work if the subshard isn't Android.
+      await _androidPluginTest();
   }
-  await _integrationTestsAndroidSdk();
 }
 
 Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
@@ -754,12 +830,19 @@ Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async
   );
 }
 
-Future<void> _integrationTestsAndroidSdk() async {
+String get androidSdkRoot {
   final String androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
       ? Platform.environment['ANDROID_SDK_ROOT']
       : Platform.environment['ANDROID_HOME'];
   if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('No Android SDK detected, skipping Android Integration Tests');
+    return null;
+  }
+  return androidSdkRoot;
+}
+
+Future<void> _androidPluginTest() async {
+  if (androidSdkRoot == null) {
+    print('No Android SDK detected, skipping Android Plugin test.');
     return;
   }
 
@@ -768,13 +851,27 @@ Future<void> _integrationTestsAndroidSdk() async {
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
 
+  await _runDevicelabTest('plugin_test', env: env);
+}
+
+Future<void> _androidGradleTests(String subShard) async {
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
-  if (!Platform.isWindows) {
+  if (androidSdkRoot == null || Platform.isWindows) {
+    print('No Android SDK detected or on Windows, skipping Android gradle test.');
+    return;
+  }
+
+  final Map<String, String> env = <String, String> {
+    'ANDROID_HOME': androidSdkRoot,
+    'ANDROID_SDK_ROOT': androidSdkRoot,
+  };
+
+  if (subShard == 'gradle1') {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+  }
+  if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
-  // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
-  await _runDevicelabTest('plugin_test', env: env);
 }
