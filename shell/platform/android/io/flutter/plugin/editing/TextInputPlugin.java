@@ -237,6 +237,21 @@ public class TextInputPlugin {
         return lastInputConnection;
     }
 
+    /**
+     * Clears a platform view text input client if it is the current input target.
+     *
+     * This is called when a platform view is disposed to make sure we're not hanging to a stale input
+     * connection.
+     */
+    public void clearPlatformViewClient(int platformViewId) {
+        if (inputTarget.type == InputTarget.Type.PLATFORM_VIEW && inputTarget.id == platformViewId) {
+            inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+            hideTextInput(mView);
+            mImm.restartInput(mView);
+            mRestartInputPending = false;
+        }
+    }
+
     private void showTextInput(View view) {
         view.requestFocus();
         mImm.showSoftInput(view, 0);

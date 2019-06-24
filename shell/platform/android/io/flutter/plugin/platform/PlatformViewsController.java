@@ -135,8 +135,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                     + viewId);
             }
 
-            contextToPlatformView.remove(vdController.getView().getContext());
+            if (textInputPlugin != null) {
+                textInputPlugin.clearPlatformViewClient(viewId);
+            }
 
+            contextToPlatformView.remove(vdController.getView().getContext());
             vdController.dispose();
             vdControllers.remove(viewId);
         }
