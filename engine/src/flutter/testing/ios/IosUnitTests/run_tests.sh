@@ -1,3 +1,4 @@
+#!/bin/sh
 FLUTTER_ENGINE=ios_debug_sim_unopt
 
 if [ $# -eq 1 ]; then

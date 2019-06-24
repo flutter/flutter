@@ -1,3 +1,4 @@
+#!/bin/sh
 pushd $PWD
 cd ../../../..
 ./flutter/tools/gn --ios --simulator --unoptimized
