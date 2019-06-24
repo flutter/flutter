@@ -178,11 +178,7 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
   }
 }
 
-// Tools tests run with coverage enabled have much higher memory usage than
-// our current CI infrastructure can support. Here we partition the tests into
-// two sets and run them in separate invocations of dart to reduce peak memory
-// usage. codecov.io automatically handles merging different coverage files
-// together, so producing separate files is OK.
+// Partition tool tests into two groups, see explanation on `_runToolCoverage`.
 List<List<String>> _partitionToolTests() {
   final List<String> pending = <String>[];
   final String toolTestDir = path.join(toolRoot, 'test');
@@ -201,6 +197,13 @@ List<List<String>> _partitionToolTests() {
   return <List<String>>[groupA, groupB];
 }
 
+// Tools tests run with coverage enabled have much higher memory usage than
+// our current CI infrastructure can support. We partition the tests into
+// two sets and run them in separate invocations of dart to reduce peak memory
+// usage. codecov.io automatically handles merging different coverage files
+// together, so producing separate files is OK.
+//
+// See: https://github.com/flutter/flutter/issues/35025
 Future<void> _runToolCoverage() async {
   final List<List<String>> tests = _partitionToolTests();
   // Precompile tests to speed up subsequent runs.
@@ -209,8 +212,6 @@ Future<void> _runToolCoverage() async {
     <String>['run', 'build_runner', 'build'],
     workingDirectory: toolRoot,
   );
-  // We run out of memory on CI if these are run together, see
-  // explaination on `_partitionToolTests`.
 
   // The name of this subshard has to match the --file path provided at
   // the end of this test script in `.cirrus.yml`.
