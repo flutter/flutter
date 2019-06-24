@@ -1825,31 +1825,31 @@ TEST_F(ParagraphTest, DecorationsParagraph) {
   text_style.decoration_color = SK_ColorBLACK;
   text_style.decoration_thickness_multiplier = 2.0;
   builder.PushStyle(text_style);
-  builder.AddText("This text should be");
+  builder.AddText(u"This text should be");
 
   text_style.decoration_style = txt::TextDecorationStyle::kDouble;
   text_style.decoration_color = SK_ColorBLUE;
   text_style.decoration_thickness_multiplier = 1.0;
   builder.PushStyle(text_style);
-  builder.AddText(" decorated even when");
+  builder.AddText(u" decorated even when");
 
   text_style.decoration_style = txt::TextDecorationStyle::kDotted;
   text_style.decoration_color = SK_ColorBLACK;
   builder.PushStyle(text_style);
-  builder.AddText(" wrapped around to");
+  builder.AddText(u" wrapped around to");
 
   text_style.decoration_style = txt::TextDecorationStyle::kDashed;
   text_style.decoration_color = SK_ColorBLACK;
   text_style.decoration_thickness_multiplier = 3.0;
   builder.PushStyle(text_style);
-  builder.AddText(" the next line.");
+  builder.AddText(u" the next line.");
 
   text_style.decoration_style = txt::TextDecorationStyle::kWavy;
   text_style.decoration_color = SK_ColorRED;
   text_style.decoration_thickness_multiplier = 1.0;
   builder.PushStyle(text_style);
 
-  builder.AddText(" Otherwise, bad things happen.");
+  builder.AddText(u" Otherwise, bad things happen.");
 
   builder.Pop();
 
@@ -1911,14 +1911,14 @@ TEST_F(ParagraphTest, ItalicsParagraph) {
   text_style.color = SK_ColorRED;
   text_style.font_size = 10;
   builder.PushStyle(text_style);
-  builder.AddText("No italic ");
+  builder.AddText(u"No italic ");
 
   text_style.font_style = txt::FontStyle::italic;
   builder.PushStyle(text_style);
-  builder.AddText("Yes Italic ");
+  builder.AddText(u"Yes Italic ");
 
   builder.Pop();
-  builder.AddText("No Italic again.");
+  builder.AddText(u"No Italic again.");
 
   auto paragraph = builder.Build();
   paragraph->Layout(GetTestCanvasWidth());
@@ -3493,28 +3493,28 @@ TEST_F(ParagraphTest, SpacingParagraph) {
   text_style.letter_spacing = 0;
   text_style.word_spacing = 0;
   builder.PushStyle(text_style);
-  builder.AddText("|");
+  builder.AddText(u"|");
   builder.Pop();
 
   text_style.font_size = 50;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 20;
   builder.PushStyle(text_style);
-  builder.AddText("H ");
+  builder.AddText(u"H ");
   builder.Pop();
 
   text_style.font_size = 50;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 0;
   builder.PushStyle(text_style);
-  builder.AddText("H ");
+  builder.AddText(u"H ");
   builder.Pop();
 
   text_style.font_size = 50;
   text_style.letter_spacing = 0;
   text_style.word_spacing = 20;
   builder.PushStyle(text_style);
-  builder.AddText("H ");
+  builder.AddText(u"H ");
   builder.Pop();
 
   auto paragraph = builder.Build();
@@ -3598,16 +3598,16 @@ TEST_F(ParagraphTest, KernScaleParagraph) {
   text_style.color = SK_ColorBLACK;
   text_style.height = 1;
   builder.PushStyle(text_style);
-  builder.AddText("AVAVAWAH A0 V0 VA To The Lo");
+  builder.AddText(u"AVAVAWAH A0 V0 VA To The Lo");
   builder.PushStyle(text_style);
-  builder.AddText("A");
+  builder.AddText(u"A");
   builder.PushStyle(text_style);
-  builder.AddText("V");
+  builder.AddText(u"V");
   text_style.font_size = 14 / scale;
   builder.PushStyle(text_style);
   builder.AddText(
-      " Dialog Text List lots of words to see if kerning works on a bigger set "
-      "of characters AVAVAW");
+      u" Dialog Text List lots of words to see if kerning works on a bigger "
+      u"set of characters AVAVAW");
 
   builder.Pop();
 
@@ -3641,7 +3641,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
   text_style.height = 1;
   builder.PushStyle(text_style);
   builder.AddText(
-      "line1\nline2 test1 test2 test3 test4 test5 test6 test7\nline3\n\nline4 "
+      u"line1\nline2 test1 test2 test3 test4 test5 test6 test7\nline3\n\nline4 "
       "test1 test2 test3 test4");
 
   builder.Pop();

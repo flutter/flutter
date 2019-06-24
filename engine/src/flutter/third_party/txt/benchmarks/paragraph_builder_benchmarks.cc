@@ -63,7 +63,7 @@ static void BM_ParagraphBuilderPushPop(benchmark::State& state) {
 BENCHMARK(BM_ParagraphBuilderPushPop);
 
 static void BM_ParagraphBuilderAddTextString(benchmark::State& state) {
-  std::string text = "Hello World";
+  std::u16string text = u"Hello World";
 
   auto font_collection = GetTestFontCollection();
 
@@ -77,7 +77,7 @@ static void BM_ParagraphBuilderAddTextString(benchmark::State& state) {
 BENCHMARK(BM_ParagraphBuilderAddTextString);
 
 static void BM_ParagraphBuilderAddTextChar(benchmark::State& state) {
-  const char* text = "Hello World";
+  std::u16string text = u"Hello World";
 
   txt::ParagraphStyle paragraph_style;
   auto font_collection = GetTestFontCollection();
