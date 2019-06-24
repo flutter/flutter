@@ -2529,6 +2529,8 @@ void main() {
     await tester.pump();
     expect(tapCount, 1);
 
+    // Wait out the double tap interval so the next tap doesn't end up being
+    // recognized as a double tap.
     await tester.pump(const Duration(seconds: 1));
 
     // Double tap count as one single tap.
@@ -2558,6 +2560,8 @@ void main() {
       await tester.pump();
       expect(tapCount, 0);
 
+      // Wait out the double tap interval so the next tap doesn't end up being
+      // recognized as a double tap.
       await tester.pump(const Duration(seconds: 1));
 
       // Enabling the text field, now it should accept taps.
@@ -2573,6 +2577,8 @@ void main() {
 
       await tester.tap(find.byType(CupertinoTextField));
       expect(tapCount, 1);
+
+      await tester.pump(const Duration(seconds: 1));
 
       // Disable it again.
       await tester.pumpWidget(
