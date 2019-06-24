@@ -19,8 +19,8 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
   ///
-  /// The [toolkit], [scanCode], [codePoint], [keyCode], and
-  /// [modifiers], arguments must not be null.
+  /// The [toolkit], [scanCode], [codePoint], [keyCode], and [modifiers],
+  /// arguments must not be null.
   const RawKeyEventDataLinux({
     @required this.keyHelper,
     this.codePoint = '',
@@ -130,8 +130,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   String toString() {
     return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' codePoint: $codePoint, modifiers: $modifiers, '
-        'modifiers down: $modifiersPressed)';
+        ' codePoint: $codePoint, modifiers: $modifiers, modifiers down: $modifiersPressed)';
   }
 }
 
