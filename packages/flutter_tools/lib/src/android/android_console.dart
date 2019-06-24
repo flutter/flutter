@@ -11,7 +11,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import '../base/context.dart';
 
 /// Default factory that creates a real Android console connection.
