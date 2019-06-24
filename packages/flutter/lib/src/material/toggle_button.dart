@@ -491,7 +491,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           childParentData.offset = Offset(0, horizontalBorderSide.width);
         }
 
-        print('$leftConstraint $rightConstraint');
         size = constraints.constrain(Size(
           leftConstraint + child.size.width + rightConstraint,
           horizontalBorderSide.width * 2.0 + child.size.height,
