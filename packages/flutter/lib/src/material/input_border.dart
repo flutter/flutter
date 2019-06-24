@@ -415,43 +415,38 @@ class OutlineInputBorder extends InputBorder {
       scaledRRect.blRadiusX * 2.0,
     );
 
-    final double tlRadius = tlCorner.height / 2.0;
-    final double blRadius = blCorner.height / 2.0;
-    final double trRadius = trCorner.height / 2.0;
-    final double brRadius = brCorner.height / 2.0;
-
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = start < tlRadius
-      ? math.asin((start / tlRadius).clamp(-1.0, 1.0))
+    final double tlCornerArcSweep = start < scaledRRect.tlRadiusX
+      ? math.asin((start / scaledRRect.tlRadiusX).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep)
-      ..moveTo(scaledRRect.left + tlRadius, scaledRRect.top);
+      ..moveTo(scaledRRect.left + scaledRRect.tlRadiusX, scaledRRect.top);
 
-    if (start > tlRadius)
+    if (start > scaledRRect.tlRadiusX)
       path.lineTo(scaledRRect.left + start, scaledRRect.top);
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
-    if (start + extent < scaledRRect.width - trRadius) {
+    if (start + extent < scaledRRect.width - scaledRRect.trRadiusX) {
       path
         ..relativeMoveTo(extent, 0.0)
-        ..lineTo(scaledRRect.right - trRadius, scaledRRect.top)
+        ..lineTo(scaledRRect.right - scaledRRect.trRadiusX, scaledRRect.top)
         ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
     } else if (start + extent < scaledRRect.width) {
       final double dx = scaledRRect.width - (start + extent);
-      final double sweep = math.acos(dx / trRadius);
+      final double sweep = math.acos(dx / scaledRRect.trRadiusX);
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
     return path
-      ..moveTo(scaledRRect.right, scaledRRect.top + trRadius)
-      ..lineTo(scaledRRect.right, scaledRRect.bottom - brRadius)
+      ..moveTo(scaledRRect.right, scaledRRect.top + scaledRRect.trRadiusY)
+      ..lineTo(scaledRRect.right, scaledRRect.bottom - scaledRRect.brRadiusY)
       ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(scaledRRect.left + blRadius, scaledRRect.bottom)
+      ..lineTo(scaledRRect.left + scaledRRect.blRadiusX, scaledRRect.bottom)
       ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
-      ..lineTo(scaledRRect.left, scaledRRect.top + tlRadius);
+      ..lineTo(scaledRRect.left, scaledRRect.top + scaledRRect.tlRadiusY);
   }
 
   /// Draw a rounded rectangle around [rect] using [borderRadius].
