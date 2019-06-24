@@ -3170,6 +3170,110 @@ void main() {
     expect(getBorder(tester), disabledBorder);
   });
 
+  testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/34327
+    const double largerBorderRadius = 200.0;
+    const double smallerBorderRadius = 100.0;
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    const double inputDecoratorHeight = 56.0;
+    const double inputDecoratorWidth = 800.0;
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: Color(0xFF00FF00),
+          labelText: 'label text',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.only(
+              // Intentionally large values that are larger than the InputDecorator
+              topLeft: Radius.circular(smallerBorderRadius),
+              bottomLeft: Radius.circular(smallerBorderRadius),
+              topRight: Radius.circular(largerBorderRadius),
+              bottomRight: Radius.circular(largerBorderRadius),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Skia determines the scale based on the ratios of radii to the total
+    // height or width allowed. In this case, it is the right side of the
+    // border, which have two corners with largerBorderRadius that add up
+    // to be 400.0.
+    const double denominator = largerBorderRadius * 2.0;
+
+    const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
+    const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
+
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: const <Offset>[
+          // The border should draw along the four edges of the
+          // InputDecorator.
+
+          // Top center
+          Offset(inputDecoratorWidth / 2.0, 0.0),
+          // Bottom center
+          Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
+          // Left center
+          Offset(0.0, inputDecoratorHeight / 2.0),
+          // Right center
+          Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
+
+          // The border path should contain points where each rounded corner
+          // ends.
+
+          // Bottom-right arc
+          Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
+          // Top-right arc
+          Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
+          // Bottom-left arc
+          Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
+          // Top-left arc
+          Offset(0.0,0.0 + smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, 0.0),
+        ],
+        excludes: const <Offset>[
+          // The border should not contain the corner points, since the border
+          // is rounded.
+
+          // Top-left
+          Offset(0.0, 0.0),
+          // Top-right
+          Offset(inputDecoratorWidth, 0.0),
+          // Bottom-left
+          Offset(0.0, inputDecoratorHeight),
+          // Bottom-right
+          Offset(inputDecoratorWidth, inputDecoratorHeight),
+
+          // Corners with larger border ratio should not contain points outside
+          // of the larger radius.
+
+          // Bottom-right arc
+          Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+          // Top-left arc
+          Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
+        ],
+      )
+      ..restore()
+    );
+  });
+
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
     const Key key = Key('textField');
