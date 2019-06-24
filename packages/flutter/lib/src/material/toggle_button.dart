@@ -14,8 +14,8 @@ import 'theme.dart';
 
 class ToggleButtons extends StatelessWidget {
   const ToggleButtons({
-    this.children,
-    this.isSelected,
+    @required this.children,
+    @required this.isSelected,
     this.onPressed,
     this.color,
     this.activeColor,
@@ -25,12 +25,25 @@ class ToggleButtons extends StatelessWidget {
     this.disabledBorderColor,
     this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
     this.borderWidth = 1.0,
-  }); // borderRadius cannot be null
+  }) :
+    assert(children != null),
+    assert(isSelected != null),
+    assert(borderRadius != null),
+    assert(borderWidth != null);
 
+  /// The corresponding widget values in the toggle buttons.
+  ///
+  /// The selection state corresponds to its state in the [isSelected] list.
   final List<Widget> children;
 
+  /// The corresponding selection state of each toggle button.
+  ///
+  /// The boolean values in the list map directly to [children] by its index.
   final List<bool> isSelected;
 
+  /// The callback that is called when a button is tapped.
+  ///
+  /// When set to null, all toggle buttons will be disabled.
   final Function onPressed;
 
   /// The color for [Text] and [Icon] widgets.
@@ -48,14 +61,24 @@ class ToggleButtons extends StatelessWidget {
   /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
 
+  /// The border color to display when the toggle button is selected.
   final Color borderColor;
 
+  /// The border color to display when the toggle button is active/selectable.
   final Color activeBorderColor;
 
+  /// The border color to display when the toggle button is disabled.
   final Color disabledBorderColor;
 
+  /// The width of the border surrounding teach toggle button.
+  ///
+  /// This applies to both the greater surrounding border, as well as the
+  /// borders dividing each toggle button.
   final double borderWidth;
 
+  /// The radii of the border's corners.
+  ///
+  /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
   @override
