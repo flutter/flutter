@@ -19,16 +19,16 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
   ///
-  /// The [toolkit], [scanCode], [charactersIgnoringModifiers], [keyCode], and
+  /// The [toolkit], [scanCode], [codePoint], [keyCode], and
   /// [modifiers], arguments must not be null.
   const RawKeyEventDataLinux({
     @required this.keyHelper,
-    this.charactersIgnoringModifiers = '',
+    this.codePoint = '',
     this.scanCode = 0,
     this.keyCode = 0,
     this.modifiers = 0,
   }) : assert(scanCode != null),
-       assert(charactersIgnoringModifiers != null),
+       assert(codePoint != null),
        assert(keyCode != null),
        assert(modifiers != null),
        assert(keyHelper != null);
@@ -43,7 +43,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// typically the character that key would produce without any modifier keys.
   /// For dead keys, it is typically the diacritic it would add to a character.
   /// Defaults to an empty string, asserted to be not null.
-  final String charactersIgnoringModifiers;
+  final String codePoint;
 
   /// The hardware scan code id corresponding to this key event.
   ///
@@ -54,7 +54,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The hardware key code corresponding to this key event.
   ///
   /// This is the physical key that was pressed, not the Unicode character.
-  /// See [charactersIgnoringModifiers] for the unmodified Unicode character.
+  /// See [codePoint] for the unmodified Unicode character.
   /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int keyCode;
 
@@ -63,7 +63,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String get keyLabel => charactersIgnoringModifiers.isEmpty ? null : charactersIgnoringModifiers;
+  String get keyLabel => codePoint.isEmpty ? null : codePoint;
 
   @override
   PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
@@ -85,10 +85,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
       // Not covering length > 2 case since > 1 is already unlikely.
-      assert(charactersIgnoringModifiers.length <= 2);
-      int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
-      if (charactersIgnoringModifiers.length == 2) {
-        final int secondCode = charactersIgnoringModifiers.codeUnitAt(1);
+      assert(codePoint.length <= 2);
+      int codeUnit = codePoint.codeUnitAt(0);
+      if (codePoint.length == 2) {
+        final int secondCode = codePoint.codeUnitAt(1);
         codeUnit = (codeUnit << 16) | secondCode;
       }
 
@@ -130,7 +130,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   String toString() {
     return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' charactersIgnoringModifiers: $charactersIgnoringModifiers, modifiers: $modifiers, '
+        ' codePoint: $codePoint, modifiers: $modifiers, '
         'modifiers down: $modifiersPressed)';
   }
 }

@@ -467,9 +467,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
-          'keyCode': 0x04,
-          'scanCode': 0x01,
-          'charactersIgnoringModifiers': 'a',
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'codePoint': 'a',
           'modifiers': modifier,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -501,9 +501,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
-          'keyCode': 0x04,
-          'scanCode': 0x64,
-          'charactersIgnoringModifiers': 'a',
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'codePoint': 'a',
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -538,13 +538,13 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'charactersIgnoringModifiers': 'a',
+        'codePoint': 'q',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
-      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('a'));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
+      expect(data.keyLabel, equals('q'));
     });
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -553,7 +553,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 256,
         'scanCode': 0x00000009,
-        'charactersIgnoringModifiers': '',
+        'codePoint': '',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = escapeKeyEvent.data;
@@ -568,7 +568,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 340,
         'scanCode': 0x00000032,
-        'charactersIgnoringModifiers': '',
+        'codePoint': '',
       });
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
