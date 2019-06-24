@@ -61,12 +61,6 @@ class ParagraphBuilder {
   // on the style_stack_;
   void AddText(const std::u16string& text);
 
-  // Converts to u16string before adding.
-  void AddText(const std::string& text);
-
-  // Converts to u16string before adding.
-  void AddText(const char* text);
-
   // Pushes the information requried to leave an open space, where Flutter may
   // draw a custom placeholder into.
   //
