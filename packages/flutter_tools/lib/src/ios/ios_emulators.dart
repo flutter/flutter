@@ -33,9 +33,6 @@ class IOSEmulator extends Emulator {
   String get manufacturer => 'Apple';
 
   @override
-  String get label => null;
-
-  @override
   Category get category => Category.mobile;
 
   @override
