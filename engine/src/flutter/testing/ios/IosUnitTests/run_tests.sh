@@ -9,7 +9,7 @@ if which xcpretty; then
   PRETTY="xcpretty"
 fi
 
-xcodebuild -sdk iphonesimulator \
+set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme IosUnitTests \
   -destination 'platform=iOS Simulator,name=iPhone SE,OS=12.2' \
   test \
