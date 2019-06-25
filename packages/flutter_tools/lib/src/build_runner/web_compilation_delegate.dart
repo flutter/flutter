@@ -219,33 +219,24 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
 
   @override
   Future<bool> canRead(AssetId id) {
-    if (packageGraph[id.package] == packageGraph.root &&
-      !fs.file(path.join(packageGraph.root.path, id.path)).existsSync()) {
-        return fs.file(
-          path.join(generatedDirectory.path, packageGraph.root.name, id.path)
-        ).exists();
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).exists();
     }
     return super.canRead(id);
   }
 
   @override
   Future<List<int>> readAsBytes(AssetId id) {
-    if (packageGraph[id.package] == packageGraph.root &&
-      !fs.file(path.join(packageGraph.root.path, id.path)).existsSync()) {
-        return fs.file(
-          path.join(generatedDirectory.path, packageGraph.root.name, id.path)
-        ).readAsBytes();
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).readAsBytes();
     }
     return super.readAsBytes(id);
   }
 
   @override
   Future<String> readAsString(AssetId id, {Encoding encoding}) {
-    if (packageGraph[id.package] == packageGraph.root &&
-      !fs.file(path.join(packageGraph.root.path, id.path)).existsSync()) {
-        return fs.file(
-          path.join(generatedDirectory.path, packageGraph.root.name, id.path)
-        ).readAsString();
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).readAsString();
     }
     return super.readAsString(id, encoding: encoding);
   }
@@ -253,8 +244,8 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
-      await for (io.FileSystemEntity  entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && !path.basename(entity.path).startsWith('._')) {
+      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
+        if (entity is io.File && _isNotHidden(entity)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
       }
@@ -265,14 +256,27 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
         return;
       }
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
-        if (entity is io.File && !path.basename(entity.path).startsWith('._')) {
-          final AssetId id = _fileToAssetId(entity, packageGraph.root, generatedRoot);
-          yield id;
+        if (entity is io.File && _isNotHidden(entity)) {
+          yield _fileToAssetId(entity, packageGraph.root, generatedRoot);
         }
       }
       return;
     }
     yield* super.findAssets(glob, package: package);
+  }
+
+  bool _isNotHidden(io.FileSystemEntity entity) {
+    return !path.basename(entity.path).startsWith('._');
+  }
+
+  bool _missingSource(AssetId id) {
+    return !fs.file(path.join(packageGraph.root.path, id.path)).existsSync();
+  }
+
+  File _generatedFile(AssetId id) {
+    return fs.file(
+      path.join(generatedDirectory.path, packageGraph.root.name, id.path)
+    );
   }
 
   /// Creates an [AssetId] for [file], which is a part of [packageNode].
