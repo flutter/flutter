@@ -182,7 +182,7 @@ linter:
     - unnecessary_this
     - unrelated_type_equality_checks
     # - unsafe_html # not yet tested
-    # - use_full_hex_values_for_flutter_colors # not yet tested
+    - use_full_hex_values_for_flutter_colors
     # - use_function_type_syntax_for_parameters # not yet tested
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested
