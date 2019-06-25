@@ -602,38 +602,6 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     }
 
     /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`.
-     */
-    @Deprecated
-    public void runFromBundle(String bundlePath, String defaultPath) {
-        runFromBundle(bundlePath, defaultPath, "main", false);
-    }
-
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`.
-     */
-    @Deprecated
-    public void runFromBundle(String bundlePath, String defaultPath, String entrypoint) {
-        runFromBundle(bundlePath, defaultPath, entrypoint, false);
-    }
-
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`.
-     * Parameter `reuseRuntimeController` has no effect.
-     */
-    @Deprecated
-    public void runFromBundle(String bundlePath, String defaultPath, String entrypoint, boolean reuseRuntimeController) {
-        FlutterRunArguments args = new FlutterRunArguments();
-        args.bundlePath = bundlePath;
-        args.entrypoint = entrypoint;
-        args.defaultPath = defaultPath;
-        runFromBundle(args);
-    }
-
-    /**
      * Return the most recent frame as a bitmap.
      *
      * @return A bitmap.

@@ -86,44 +86,17 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     public void runFromBundle(FlutterRunArguments args) {
-        boolean hasBundlePaths = args.bundlePaths != null && args.bundlePaths.length != 0;
-        if (args.bundlePath == null && !hasBundlePaths) {
-            throw new AssertionError("Either bundlePath or bundlePaths must be specified");
-        } else if ((args.bundlePath != null || args.defaultPath != null) &&
-                hasBundlePaths) {
-            throw new AssertionError("Can't specify both bundlePath and bundlePaths");
-        } else if (args.entrypoint == null) {
+        if (args.entrypoint == null) {
             throw new AssertionError("An entrypoint must be specified");
         }
-        if (hasBundlePaths) {
-            runFromBundleInternal(args.bundlePaths, args.entrypoint, args.libraryPath);
-        } else {
-            runFromBundleInternal(new String[] {args.bundlePath, args.defaultPath},
-                    args.entrypoint, args.libraryPath);
-        }
-    }
-
-    /**
-     * @deprecated
-     * Please use runFromBundle with `FlutterRunArguments`.
-     * Parameter `reuseRuntimeController` has no effect.
-     */
-    @Deprecated
-    public void runFromBundle(String bundlePath, String defaultPath, String entrypoint,
-            boolean reuseRuntimeController) {
-        runFromBundleInternal(new String[] {bundlePath, defaultPath}, entrypoint, null);
-    }
-
-    private void runFromBundleInternal(String[] bundlePaths, String entrypoint,
-        String libraryPath) {
         assertAttached();
         if (applicationIsRunning)
             throw new AssertionError(
                     "This Flutter engine instance is already running an application");
         mFlutterJNI.runBundleAndSnapshotFromLibrary(
-            bundlePaths,
-            entrypoint,
-            libraryPath,
+            args.bundlePath,
+            args.entrypoint,
+            args.libraryPath,
             mContext.getResources().getAssets()
         );
 

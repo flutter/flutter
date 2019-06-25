@@ -33,8 +33,8 @@ class FlutterMain {
                    jclass clazz,
                    jobject context,
                    jobjectArray jargs,
-                   jstring bundlePath,
-                   jstring appRootPath,
+                   jstring kernelPath,
+                   jstring appStoragePath,
                    jstring engineCachesPath);
 
   void SetupObservatoryUriCallback(JNIEnv* env);

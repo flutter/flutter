@@ -60,7 +60,7 @@ void FlutterMain::Init(JNIEnv* env,
                        jclass clazz,
                        jobject context,
                        jobjectArray jargs,
-                       jstring bundlePath,
+                       jstring kernelPath,
                        jstring appStoragePath,
                        jstring engineCachesPath) {
   std::vector<std::string> args;
@@ -71,8 +71,6 @@ void FlutterMain::Init(JNIEnv* env,
   auto command_line = fml::CommandLineFromIterators(args.begin(), args.end());
 
   auto settings = SettingsFromCommandLine(command_line);
-
-  settings.assets_path = fml::jni::JavaStringToString(env, bundlePath);
 
   // Restore the callback cache.
   // TODO(chinmaygarde): Route all cache file access through FML and remove this
@@ -85,11 +83,11 @@ void FlutterMain::Init(JNIEnv* env,
 
   flutter::DartCallbackCache::LoadCacheFromDisk();
 
-  if (!flutter::DartVM::IsRunningPrecompiledCode()) {
+  if (!flutter::DartVM::IsRunningPrecompiledCode() && kernelPath) {
     // Check to see if the appropriate kernel files are present and configure
     // settings accordingly.
     auto application_kernel_path =
-        fml::paths::JoinPaths({settings.assets_path, "kernel_blob.bin"});
+        fml::jni::JavaStringToString(env, kernelPath);
 
     if (fml::IsFile(application_kernel_path)) {
       settings.application_kernel_asset = application_kernel_path;
