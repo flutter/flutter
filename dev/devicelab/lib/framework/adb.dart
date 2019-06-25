@@ -413,7 +413,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'libtasn1',
       'ios-deploy',
     ].map((String packageName) => path.join(_artifactDirName, packageName)).join(':');
-    return Map<String, String>{'DYLD_LIBRARY_PATH': libPath};
+    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
   }
 
   @override
