@@ -318,18 +318,28 @@ class _ToggleButton extends StatelessWidget {
   /// button has an elevation, then its drop shadow is defined by this shape.
   final ShapeBorder shape;
 
+  /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
 
+  /// The width and color of the button's top and bottom side borders.
   final BorderSide horizontalBorderSide;
 
+  /// The width and color of the button's trailing side border.
   final BorderSide trailingBorderSide;
 
+  /// The border radii of each corner of the button.
   final BorderRadius borderRadius;
 
+  /// The corner radii used to clip the button's contents.
+  ///
+  /// This is used to have the button's contents be properly clipped taking
+  /// the [borderRadius] and the border's width into account.
   final BorderRadius clipRadius;
 
+  /// Whether or not this toggle button is the first button in the list.
   final bool isFirstButton;
 
+  /// Whether or not this toggle button is the last button in the list.
   final bool isLastButton;
 
   /// The button's label, which is usually an [Icon] or a [Text] widget.
@@ -393,7 +403,6 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   const _SelectToggleButton({
     Key key,
     Widget child,
-    this.color,
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
@@ -405,18 +414,22 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     child: child,
   );
 
-  final Color color;
-
+  // The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
 
+  // The width and color of the button's top and bottom side borders.
   final BorderSide horizontalBorderSide;
 
+  // The width and color of the button's trailing side border.
   final BorderSide trailingBorderSide;
 
+  // The border radii of each corner of the button.
   final BorderRadius borderRadius;
 
+  // Whether or not this toggle button is the first button in the list.
   final bool isFirstButton;
 
+  // Whether or not this toggle button is the last button in the list.
   final bool isLastButton;
 
   @override
@@ -455,18 +468,25 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     RenderBox child,
   }) : super(child);
 
-  BorderSide leadingBorderSide;
+  // The width and color of the button's leading side border.
+  final BorderSide leadingBorderSide;
 
-  BorderSide horizontalBorderSide;
+  // The width and color of the button's top and bottom side borders.
+  final BorderSide horizontalBorderSide;
 
-  BorderSide trailingBorderSide;
+  // The width and color of the button's trailing side border.
+  final BorderSide trailingBorderSide;
 
-  BorderRadius borderRadius;
+  // The border radii of each corner of the button.
+  final BorderRadius borderRadius;
 
-  bool isFirstButton;
+  // Whether or not this toggle button is the first button in the list.
+  final bool isFirstButton;
 
-  bool isLastButton;
+  // Whether or not this toggle button is the last button in the list.
+  final bool isLastButton;
 
+  // The direction in which text flows for this application.
   TextDirection textDirection;
 
   @override
