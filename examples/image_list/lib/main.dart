@@ -30,6 +30,8 @@ Future<void> main() async {
   runApp(MyApp(port));
 }
 
+const int IMAGES = 50;
+
 @immutable
 class MyApp extends StatelessWidget {
   const MyApp(this.port);
@@ -71,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
       fit: FlexFit.tight,
       flex: index,
       child: Image.network(
-        'http://localhost:${widget.port}/${_counter * 5 + index}',
+        'http://localhost:${widget.port}/${_counter * IMAGES + index}',
         frameBuilder: (
           BuildContext context,
           Widget child,
@@ -89,19 +91,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final Completer<bool> completer1 = Completer<bool>();
-    final Completer<bool> completer2 = Completer<bool>();
-    final Completer<bool> completer3 = Completer<bool>();
-    final Completer<bool> completer4 = Completer<bool>();
-    final Completer<bool> completer5 = Completer<bool>();
+    final List<Completer<bool>> completers = List<Completer<bool>>(IMAGES);
+    for (int i = 0; i < IMAGES; i++) {
+      completers[i] = Completer<bool>();
+    }
+    List<Future<bool>> futures = completers.map((completer) => completer.future).toList();
     final DateTime started = DateTime.now();
-    Future.wait(<Future<bool>>[
-      completer1.future,
-      completer2.future,
-      completer3.future,
-      completer4.future,
-      completer5.future
-    ]).then((_) {
+    Future.wait(futures).then((_) {
       print(
           '===image_list=== all loaded in ${DateTime.now().difference(started).inMilliseconds}ms.');
     });
@@ -113,13 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: <Widget>[
-              createImage(1, completer1),
-              createImage(2, completer2),
-              createImage(3, completer3),
-              createImage(4, completer4),
-              createImage(5, completer5),
-            ]),
+            Row(children: CreateImageList(IMAGES, completers)),
             const Text(
               'You have pushed the button this many times:',
             ),
@@ -136,5 +126,13 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ),
     );
+  }
+
+  List<Widget> CreateImageList(int count, List<Completer> completers) {
+    List<Widget> list = <Widget>[];
+    for (int i = 0; i < count; i++) {
+      list.add(createImage(i + 1, completers[i]));
+    }
+    return list;
   }
 }
