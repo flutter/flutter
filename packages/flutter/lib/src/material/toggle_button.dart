@@ -90,128 +90,131 @@ class ToggleButtons extends StatelessWidget {
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List<Widget>.generate(children.length, (int index) {
-        BorderRadius edgeBorderRadius;
-        BorderRadius clipBorderRadius;
-        if (
-          index == 0 && textDirection == TextDirection.ltr ||
-          index == children.length - 1 && textDirection == TextDirection.rtl
-        ) {
-          edgeBorderRadius = BorderRadius.only(
-            topLeft: borderRadius.topLeft,
-            bottomLeft: borderRadius.bottomLeft,
-          );
-          clipBorderRadius = BorderRadius.only(
-            topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
-            bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
-          );
-        } else if (
-          index == children.length - 1 && textDirection == TextDirection.ltr ||
-          index == 0 && textDirection == TextDirection.rtl
-        ) {
-          edgeBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight,
-            bottomRight: borderRadius.bottomRight,
-          );
-          clipBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
-            bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
-          );
-        }
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: List<Widget>.generate(children.length, (int index) {
+          BorderRadius edgeBorderRadius;
+          BorderRadius clipBorderRadius;
+          if (
+            index == 0 && textDirection == TextDirection.ltr ||
+            index == children.length - 1 && textDirection == TextDirection.rtl
+          ) {
+            edgeBorderRadius = BorderRadius.only(
+              topLeft: borderRadius.topLeft,
+              bottomLeft: borderRadius.bottomLeft,
+            );
+            clipBorderRadius = BorderRadius.only(
+              topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+              bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+            );
+          } else if (
+            index == children.length - 1 && textDirection == TextDirection.ltr ||
+            index == 0 && textDirection == TextDirection.rtl
+          ) {
+            edgeBorderRadius = BorderRadius.only(
+              topRight: borderRadius.topRight,
+              bottomRight: borderRadius.bottomRight,
+            );
+            clipBorderRadius = BorderRadius.only(
+              topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+              bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+            );
+          }
 
-        if (borderWidth == null) {
+          if (borderWidth == null) {
+            return _ToggleButton(
+              onPressed: onPressed != null
+                ? () { onPressed(index); }
+                : null,
+              selected: isSelected[index],
+              leadingBorderSide: BorderSide.none,
+              horizontalBorderSide: BorderSide.none,
+              trailingBorderSide: BorderSide.none,
+              borderRadius: edgeBorderRadius ?? BorderRadius.zero,
+              clipRadius: clipBorderRadius ?? BorderRadius.zero,
+              isFirstButton: index == 0,
+              isLastButton: index == children.length - 1,
+              child: children[index],
+            );
+          }
+
+          BorderSide horizontalBorderSide;
+          BorderSide leadingBorderSide;
+          BorderSide trailingBorderSide;
+
+          if (onPressed != null && isSelected[index]) {
+            horizontalBorderSide = BorderSide(
+              color: borderColor ?? themeData.colorScheme.primary,
+              width: borderWidth,
+            );
+          } else if (onPressed != null && !isSelected[index]) {
+            horizontalBorderSide = BorderSide(
+              color: activeBorderColor ?? themeData.colorScheme.onSurface,
+              width: borderWidth,
+            );
+          } else {
+            horizontalBorderSide = BorderSide(
+              color: disabledBorderColor ?? themeData.disabledColor,
+              width: borderWidth,
+            );
+          }
+
+          if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
+            leadingBorderSide = BorderSide(
+              color: borderColor ?? themeData.colorScheme.primary,
+              width: borderWidth,
+            );
+          } else if (onPressed != null && !isSelected[index]) {
+            leadingBorderSide = BorderSide(
+              color: activeBorderColor ?? themeData.colorScheme.onSurface,
+              width: borderWidth,
+            );
+          } else {
+            leadingBorderSide = BorderSide(
+              color: disabledBorderColor ?? themeData.disabledColor,
+              width: borderWidth,
+            );
+          }
+
+          if (index != children.length - 1) {
+            trailingBorderSide = null;
+          } else {
+            if (onPressed != null && (isSelected[index])) {
+              trailingBorderSide = BorderSide(
+              color: borderColor ?? themeData.colorScheme.primary,
+              width: borderWidth,
+            );
+            } else if (onPressed != null && !isSelected[index]) {
+              trailingBorderSide = BorderSide(
+              color: activeBorderColor ?? themeData.colorScheme.onSurface,
+              width: borderWidth,
+            );
+            } else {
+              trailingBorderSide = BorderSide(
+                color: disabledBorderColor ?? themeData.disabledColor,
+                width: borderWidth,
+              );
+            }
+          }
+
           return _ToggleButton(
             onPressed: onPressed != null
               ? () { onPressed(index); }
               : null,
             selected: isSelected[index],
-            leadingBorderSide: BorderSide.none,
-            horizontalBorderSide: BorderSide.none,
-            trailingBorderSide: BorderSide.none,
+            leadingBorderSide: leadingBorderSide,
+            horizontalBorderSide: horizontalBorderSide,
+            trailingBorderSide: trailingBorderSide,
             borderRadius: edgeBorderRadius ?? BorderRadius.zero,
             clipRadius: clipBorderRadius ?? BorderRadius.zero,
             isFirstButton: index == 0,
             isLastButton: index == children.length - 1,
             child: children[index],
           );
-        }
-
-        BorderSide horizontalBorderSide;
-        BorderSide leadingBorderSide;
-        BorderSide trailingBorderSide;
-
-        if (onPressed != null && isSelected[index]) {
-          horizontalBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-        } else if (onPressed != null && !isSelected[index]) {
-          horizontalBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-        } else {
-          horizontalBorderSide = BorderSide(
-            color: disabledBorderColor ?? themeData.disabledColor,
-            width: borderWidth,
-          );
-        }
-
-        if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
-          leadingBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-        } else if (onPressed != null && !isSelected[index]) {
-          leadingBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-        } else {
-          leadingBorderSide = BorderSide(
-            color: disabledBorderColor ?? themeData.disabledColor,
-            width: borderWidth,
-          );
-        }
-
-        if (index != children.length - 1) {
-          trailingBorderSide = null;
-        } else {
-          if (onPressed != null && (isSelected[index])) {
-            trailingBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-          } else if (onPressed != null && !isSelected[index]) {
-            trailingBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-          } else {
-            trailingBorderSide = BorderSide(
-              color: disabledBorderColor ?? themeData.disabledColor,
-              width: borderWidth,
-            );
-          }
-        }
-
-        return _ToggleButton(
-          onPressed: onPressed != null
-            ? () { onPressed(index); }
-            : null,
-          selected: isSelected[index],
-          leadingBorderSide: leadingBorderSide,
-          horizontalBorderSide: horizontalBorderSide,
-          trailingBorderSide: trailingBorderSide,
-          borderRadius: edgeBorderRadius ?? BorderRadius.zero,
-          clipRadius: clipBorderRadius ?? BorderRadius.zero,
-          isFirstButton: index == 0,
-          isLastButton: index == children.length - 1,
-          child: children[index],
-        );
-      }),
+        }),
+      ),
     );
   }
 
