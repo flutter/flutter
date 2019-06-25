@@ -106,7 +106,7 @@ task:
         SHARD: tool_coverage
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
-        - bash <(curl -s https://codecov.io/bash) -c -d -f './packages/flutter_tools/coverage/*.lcov.info' -F flutter_tool
+        - bash <(curl -s https://codecov.io/bash) -c -s ./packages/flutter_tools/coverage/ -f '*.lcov.info' -F flutter_tool
       container:
         cpu: 8
         memory: 24G
