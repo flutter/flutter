@@ -26,37 +26,37 @@ public class Log {
   }
 
   public static void v(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.VERBOSE) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.VERBOSE) {
       android.util.Log.v(tag, message);
     }
   }
 
   public static void v(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.VERBOSE) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.VERBOSE) {
       android.util.Log.v(tag, message, tr);
     }
   }
 
   public static void i(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.INFO) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.INFO) {
       android.util.Log.i(tag, message);
     }
   }
 
   public static void i(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.INFO) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.INFO) {
       android.util.Log.i(tag, message, tr);
     }
   }
 
   public static void d(@NonNull String tag, @NonNull String message) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.DEBUG) {
       android.util.Log.d(tag, message);
     }
   }
 
   public static void d(@NonNull String tag, @NonNull String message, @NonNull Throwable tr) {
-    if (BuildConfig.DEBUG && logLevel >= android.util.Log.DEBUG) {
+    if (BuildConfig.DEBUG && logLevel <= android.util.Log.DEBUG) {
       android.util.Log.d(tag, message, tr);
     }
   }
