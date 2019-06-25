@@ -2512,6 +2512,90 @@ void main() {
     },
   );
 
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            onTap: () => tapCount++,
+          ),
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 1);
+
+    // Wait out the double tap interval so the next tap doesn't end up being
+    // recognized as a double tap.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Double tap count as one single tap.
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 2);
+  });
+
+  testWidgets('onTap does not work when the text field is disabled',
+    (WidgetTester tester) async {
+      int tapCount = 0;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      expect(tapCount, 0);
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 0);
+
+      // Wait out the double tap interval so the next tap doesn't end up being
+      // recognized as a double tap.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Enabling the text field, now it should accept taps.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoTextField));
+      expect(tapCount, 1);
+
+      await tester.pump(const Duration(seconds: 1));
+
+      // Disable it again.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 1);
+  });
+
   testWidgets(
     'text field respects theme',
     (WidgetTester tester) async {
