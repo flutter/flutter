@@ -168,11 +168,11 @@ class DeviceManager {
     return diagnostics;
   }
 
-  /// Find and return the List of target [Device] based upon currently connected
-  /// devices and criteria entered by the user on the command line.
-  /// If the user has not specified all devices and has multiple connected
-  /// then filter the list by those supported in the current project and
-  /// remove non-ephemeral device types.
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user. If the user has not specified
+  /// all devices and has multiple connected then filter the list by those supported
+  /// in the current project and remove non-ephemeral device types.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
     List<Device> devices = await getDevices().toList();
 
