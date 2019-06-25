@@ -134,7 +134,19 @@ import 'theme.dart';
 /// To remove the border, set [borderWidth] to null. Setting [borderWidth] to
 /// 0.0 results in a hairline border. For more information on hairline borders,
 /// see [BorderSide.width].
+///
+/// See also:
+///
+///  * <https://material.io/design/components/buttons.html#toggle-button>
 class ToggleButtons extends StatelessWidget {
+  /// Creates a horizontal set of toggle buttons.
+  ///
+  /// It displays its widgets provided in a [List] of [children] horizontally.
+  /// The state of each button is controlled by [isSelected], which is a list of
+  /// bools that determine if a button is in an active, disabled, or selected
+  /// state. They are both correlated by their index in the list.
+  ///
+  /// Both [children] and [isSelected] properties arguments are required.
   const ToggleButtons({
     @required this.children,
     @required this.isSelected,
