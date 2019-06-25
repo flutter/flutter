@@ -30,7 +30,7 @@ class AndroidEmulator extends Emulator {
   AndroidEmulator(String id, [this._properties])
     : super(id, _properties != null && _properties.isNotEmpty);
 
-  Map<String, String> _properties;
+  final Map<String, String> _properties;
 
   // Android Studio uses the ID with underscores replaced with spaces
   // for the name if displayname is not set so we do the same.
