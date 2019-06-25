@@ -250,7 +250,6 @@ class _ToggleButton extends StatelessWidget {
   /// It takes in a [shape] property to modify the borders of the button,
   /// which is used by [ToggleButtons] to customize borders based on the
   /// order in which this button appears in the list.
-  ///
   const _ToggleButton({
     Key key,
     this.selected = false,
@@ -263,7 +262,6 @@ class _ToggleButton extends StatelessWidget {
     this.hoverColor,
     this.splashColor,
     this.onPressed,
-    this.shape,
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
@@ -311,12 +309,6 @@ class _ToggleButton extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
-
-  /// The shape of the button's [Material].
-  ///
-  /// The button's highlight and splash are clipped to this shape. If the
-  /// button has an elevation, then its drop shadow is defined by this shape.
-  final ShapeBorder shape;
 
   /// The width and color of the button's leading side border.
   final BorderSide leadingBorderSide;
