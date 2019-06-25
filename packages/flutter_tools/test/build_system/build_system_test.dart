@@ -7,7 +7,8 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/file_cache.dart';
+import 'package:flutter_tools/src/build_system/file_hash_store.dart';
+import 'package:flutter_tools/src/build_system/filecache.pb.dart' as pb;
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 
@@ -22,6 +23,7 @@ void main() {
     Environment environment;
     Target fooTarget;
     Target barTarget;
+    Target fizzTarget;
     BuildSystem buildSystem;
     int fooInvocations;
     int barInvocations;
@@ -48,7 +50,7 @@ void main() {
               Source.pattern('{BUILD_DIR}/out'),
             ],
             dependencies: <Target>[],
-            invocation: (Map<String, ChangeType> updates, Environment environment) {
+            buildAction: (Map<String, ChangeType> updates, Environment environment) {
               environment
                 .buildDir
                 .childFile('out')
@@ -66,7 +68,7 @@ void main() {
               Source.pattern('{BUILD_DIR}/bar'),
             ],
             dependencies: <Target>[fooTarget],
-            invocation: (Map<String, ChangeType> updates, Environment environment) {
+            buildAction: (Map<String, ChangeType> updates, Environment environment) {
               environment.buildDir
                 .childFile('bar')
                 ..createSync(recursive: true)
@@ -74,10 +76,24 @@ void main() {
               barInvocations++;
             }
           );
-          buildSystem = BuildSystem(<Target>[
-            fooTarget,
-            barTarget,
-          ]);
+          fizzTarget = Target(
+              name: 'fizz',
+              inputs: const <Source>[
+                Source.pattern('{BUILD_DIR}/out'),
+              ],
+              outputs: const <Source>[
+                Source.pattern('{BUILD_DIR}/fizz'),
+              ],
+              dependencies: <Target>[fooTarget],
+              buildAction: (Map<String, ChangeType> updates, Environment environment) {
+                throw Exception('something bad happens');
+              }
+          );
+          buildSystem = BuildSystem(<String, Target>{
+            fooTarget.name: fooTarget,
+            barTarget.name: barTarget,
+            fizzTarget.name: fizzTarget,
+          });
         },
         overrides: <Type, Generator>{
           Platform: () => mockPlatform,
@@ -130,6 +146,10 @@ void main() {
       expect(barInvocations, 1);
     }));
 
+    test('handles a throwing build action', () => testbed.run(() async {
+      expect(buildSystem.build('fizz', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
+    }));
+
     test('Can describe itself with JSON output', () => testbed.run(() {
       expect(fooTarget.toJson(environment), <String, dynamic>{
         'inputs':  <Object>[
@@ -143,7 +163,7 @@ void main() {
 
     test('Compute update recognizes added files', () => testbed.run(() async {
       fs.directory('build').createSync();
-      final FileCache fileCache = FileCache(environment);
+      final FileHashStore fileCache = FileHashStore(environment);
       fileCache.initialize();
       final List<SourceFile> inputs = fooTarget.resolveInputs(environment);
       final Map<String, ChangeType> changes = await fooTarget.computeChanges(inputs, environment, fileCache);
@@ -174,38 +194,46 @@ void main() {
     });
 
     test('Initializes file cache', () => testbed.run(() {
-      final FileCache fileCache = FileCache(environment);
+      final FileHashStore fileCache = FileHashStore(environment);
       fileCache.initialize();
       fileCache.persist();
 
       expect(fs.file(fs.path.join('build', '.filecache')).existsSync(), true);
-      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '');
-      expect(fs.file(fs.path.join('build', '.filecache_version')).existsSync(), true);
-      expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
+
+      final List<int> buffer = fs.file(fs.path.join('build', '.filecache')).readAsBytesSync();
+      final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
+
+      expect(fileStorage.files, isEmpty);
+      expect(fileStorage.version, 1);
     }));
 
     test('saves and restores to file cache', () => testbed.run(() {
       final SourceFile file = SourceFile(fs.file('foo.dart')
         ..createSync()
         ..writeAsStringSync('hello'));
-      final FileCache fileCache = FileCache(environment);
+      final FileHashStore fileCache = FileHashStore(environment);
       fileCache.initialize();
       fileCache.hashFiles(<SourceFile>[file]);
       fileCache.persist();
-
       final String currentHash =  fileCache.currentHashes[file.path];
-      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '${fs.path.absolute('foo.dart')} : $currentHash');
-      expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
+      final List<int> buffer = fs.file(fs.path.join('build', '.filecache')).readAsBytesSync();
+      pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
 
-      final FileCache newFileCache = FileCache(environment);
+      expect(fileStorage.files.single.hash, currentHash);
+      expect(fileStorage.files.single.path, file.path);
+
+
+      final FileHashStore newFileCache = FileHashStore(environment);
       newFileCache.initialize();
       expect(newFileCache.currentHashes, isEmpty);
       expect(newFileCache.previousHashes[fs.path.absolute('foo.dart')],  currentHash);
       newFileCache.persist();
 
       // Still persisted correctly.
-      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '${fs.path.absolute('foo.dart')} : $currentHash');
-      expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
+      fileStorage = pb.FileStorage.fromBuffer(buffer);
+
+      expect(fileStorage.files.single.hash, currentHash);
+      expect(fileStorage.files.single.path, file.path);
     }));
   });
 
@@ -236,7 +264,7 @@ void main() {
               ],
               outputs: const <Source>[],
               dependencies: <Target>[],
-              invocation: (Map<String, ChangeType> updates, Environment environment) {
+              buildAction: (Map<String, ChangeType> updates, Environment environment) {
                 shared += 1;
               }
             );
@@ -249,7 +277,7 @@ void main() {
                   Source.pattern('{BUILD_DIR}/out'),
                 ],
                 dependencies: <Target>[sharedTarget],
-                invocation: (Map<String, ChangeType> updates, Environment environment) {
+                buildAction: (Map<String, ChangeType> updates, Environment environment) {
                   environment
                     .buildDir
                     .childFile('out')
@@ -266,7 +294,7 @@ void main() {
                   Source.pattern('{BUILD_DIR}/bar'),
                 ],
                 dependencies: <Target>[fooTarget, sharedTarget],
-                invocation: (Map<String, ChangeType> updates, Environment environment) {
+                buildAction: (Map<String, ChangeType> updates, Environment environment) {
                   environment
                     .buildDir
                     .childFile('bar')
@@ -274,11 +302,11 @@ void main() {
                     ..writeAsStringSync('there');
                 }
             );
-            buildSystem = BuildSystem(<Target>[
-              fooTarget,
-              barTarget,
-              sharedTarget,
-            ]);
+            buildSystem = BuildSystem(<String, Target>{
+              fooTarget.name: fooTarget,
+              barTarget.name: barTarget,
+              sharedTarget.name: sharedTarget,
+            });
           },
           overrides: <Type, Generator>{
             Platform: () => mockPlatform,
@@ -396,28 +424,67 @@ void main() {
       expect(visitor.sources.single.path, fs.path.absolute('foo.fizz'));
     }));
 
+    test('can substitute {PROJECT_DIR}/fizz.*', () => testbed.run(() {
+      const Source fizzSource = Source.pattern('{PROJECT_DIR}/fizz.*');
+      fizzSource.accept(visitor);
+
+      expect(visitor.sources, isEmpty);
+
+      fs.file('fizz.foo').createSync();
+      fs.file('fizz').createSync();
+
+      fizzSource.accept(visitor);
+
+      expect(visitor.sources.single.path, fs.path.absolute('fizz.foo'));
+    }));
+
+
+    test('can substitute {PROJECT_DIR}/a*bc', () => testbed.run(() {
+      const Source fizzSource = Source.pattern('{PROJECT_DIR}/bc*bc');
+      fizzSource.accept(visitor);
+
+      expect(visitor.sources, isEmpty);
+
+      fs.file('bcbc').createSync();
+      fs.file('bc').createSync();
+
+      fizzSource.accept(visitor);
+
+      expect(visitor.sources.single.path, fs.path.absolute('bcbc'));
+    }));
+
+
+    test('crashes on bad substitute of two **', () => testbed.run(() {
+      const Source fizzSource = Source.pattern('{PROJECT_DIR}/*.*bar');
+
+      fs.file('abcd.bar').createSync();
+
+      expect(() => fizzSource.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
+    }));
+
 
     test('can\'t substitute foo', () => testbed.run(() {
       const Source invalidBase = Source.pattern('foo');
 
       expect(() => invalidBase.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
     }));
-
   });
+
+
 
   test('Can find dependency cycles', () {
     final Target barTarget = Target(
       name: 'bar',
       inputs: <Source>[],
       outputs: <Source>[],
-      invocation: null,
+      buildAction: null,
       dependencies: nonconst(<Target>[])
     );
     final Target fooTarget = Target(
       name: 'foo',
       inputs: <Source>[],
       outputs: <Source>[],
-      invocation: null,
+      buildAction: null,
       dependencies: nonconst(<Target>[])
     );
     barTarget.dependencies.add(fooTarget);

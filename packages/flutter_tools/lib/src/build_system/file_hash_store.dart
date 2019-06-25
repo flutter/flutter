@@ -4,26 +4,27 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 
 import '../base/file_system.dart';
 import '../globals.dart';
 import 'build_system.dart';
+import 'filecache.pb.dart' as pb;
 
-/// The file cache is a globally accessible cache of file hashes.
+/// A globally accessible cache of file hashes.
 ///
 /// In cases where multiple targets read the same source files as inputs, we
 /// avoid recomputing or storing multiple copies of hashes by delegating
 /// through this class. All file hashes are held in memory during a build
-/// operation, and persisted to cache in `{BUILD_DIR}/.filecache`.
+/// operation, and persisted to cache in the root build directory.
 ///
-/// To avoid persisting entries forever, it has a built in limit of 1,000,000
-/// entries.
-///
-/// The format of the file cache is subject to change and not part of its API.
-class FileCache {
-  FileCache(this.environment);
+/// The format of the file store is subject to change and not part of its API.
+// TODO(jonahwilliams): find a better way to clear out old entries, perhaps
+// track the last access or modification date?
+class FileHashStore {
+  FileHashStore(this.environment);
 
   final Environment environment;
   final HashMap<String, String> previousHashes = HashMap<String, String>();
@@ -32,65 +33,48 @@ class FileCache {
   // The name of the file which stores the file hashes.
   static const String _kFileCache = '.filecache';
 
-  // The name of the file which stores the cache version.
-  static const String _kFileCacheVersion = '.filecache_version';
-
   // The current version of the file cache storage format.
-  static const String _kVersion = '1';
+  static const int _kVersion = 1;
 
   /// Read file hashes from disk.
   void initialize() {
-    printTrace('Initializing file cache');
-    if (!_versionFile.existsSync()) {
+    printTrace('Initializing file store');
+    if (!_cacheFile.existsSync()) {
       return;
     }
-    if (_versionFile.readAsStringSync() != _kVersion) {
+    final List<int> data = _cacheFile.readAsBytesSync();
+    final pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(data);
+    if (fileStorage.version != _kVersion) {
       _cacheFile.deleteSync();
-      _versionFile.deleteSync();
-    } else if (!_cacheFile.existsSync()) {
       return;
     }
-
-    for (String line in _cacheFile.readAsLinesSync()) {
-      final List<String> parts = line.split(' : ');
-      if (parts.length != 2) {
-        continue;
-      }
-      previousHashes[parts[0]] = parts[1];
+    for (pb.FileHash fileHash in fileStorage.files) {
+      previousHashes[fileHash.path] = fileHash.hash;
     }
+    printTrace('Done initializing file store');
   }
 
   /// Persist file hashes to disk.
   void persist() {
-    final File version = _versionFile;
-    version.writeAsStringSync(_kVersion);
+    printTrace('Persisting file store');
+    final pb.FileStorage fileStorage = pb.FileStorage();
+    fileStorage.version = _kVersion;
     final File file = _cacheFile;
     if (!file.existsSync()) {
       file.createSync();
     }
-    file.writeAsStringSync('');
-    // Overwrite any outdated hashes.
     for (MapEntry<String, String> entry in currentHashes.entries) {
       previousHashes[entry.key] = entry.value;
     }
-
-    // Write 100 entries at a time to disk.
-    String fencepost = '';
-    final StringBuffer buffer = StringBuffer();
-    int count = 0;
     for (MapEntry<String, String> entry in previousHashes.entries) {
-      buffer.write('$fencepost${entry.key} : ${entry.value}');
-      fencepost = '\n';
-      count += 1;
-      if (count >= 100) {
-        file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
-        count = 0;
-        buffer.clear();
-      }
+      final pb.FileHash fileHash = pb.FileHash();
+      fileHash.path = entry.key;
+      fileHash.hash = entry.value;
+      fileStorage.files.add(fileHash);
     }
-    if (count != 0) {
-      file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
-    }
+    final Uint8List buffer = fileStorage.writeToBuffer();
+    file.writeAsBytesSync(buffer);
+    printTrace('Done persisting file store');
   }
 
   /// Computes a hash of the provided files and returns a list of entities
@@ -114,8 +98,6 @@ class FileCache {
     }
     return dirty;
   }
-
-  File get _versionFile => environment.rootBuildDir.childFile(_kFileCacheVersion);
 
   File get _cacheFile => environment.rootBuildDir.childFile(_kFileCache);
 }

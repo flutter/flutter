@@ -27,16 +27,16 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
         );
-        buildSystem = const BuildSystem(<Target>[
-          unpackLinux,
-        ]);
-        fs.file('cache/linux-x64/libflutter_linux.so').createSync(recursive: true);
-        fs.file('cache/linux-x64/flutter_export.h').createSync();
-        fs.file('cache/linux-x64/flutter_messenger.h').createSync();
-        fs.file('cache/linux-x64/flutter_plugin_registrar.h').createSync();
-        fs.file('cache/linux-x64/flutter_glfw.h').createSync();
-        fs.file('cache/linux-x64/icudtl.dat').createSync();
-        fs.file('cache/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
+        buildSystem = BuildSystem(<String, Target>{
+          unpackLinux.name: unpackLinux,
+        });
+        fs.file('cache/engine/linux-x64/libflutter_linux.so').createSync(recursive: true);
+        fs.file('cache/engine/linux-x64/flutter_export.h').createSync();
+        fs.file('cache/engine/linux-x64/flutter_messenger.h').createSync();
+        fs.file('cache/engine/linux-x64/flutter_plugin_registrar.h').createSync();
+        fs.file('cache/engine/linux-x64/flutter_glfw.h').createSync();
+        fs.file('cache/engine/linux-x64/icudtl.dat').createSync();
+        fs.file('cache/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
         fs.directory('linux').createSync();
       }, overrides: <Type, Generator>{
         Platform: () => mockPlatform,
@@ -66,7 +66,7 @@ void main() {
     test('Detects changes in input cache files', () => testbed.run(() async {
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
       final DateTime modified = fs.file('linux/flutter/libflutter_linux.so').statSync().modified;
-      fs.file('cache/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
+      fs.file('cache/engine/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
 
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 

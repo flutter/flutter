@@ -16,15 +16,6 @@ import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
-// TODO(jonahwilliams): create a namepsaced registry system for targets.
-const BuildSystem buildSystem = BuildSystem(<Target>[
-  unpackMacos,
-  unpackLinux,
-  unpackWindows,
-  copyAssets,
-  kernelSnapshot,
-]);
-
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
@@ -68,6 +59,15 @@ abstract class AssembleBase extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.'
     );
   }
+
+  // TODO(jonahwilliams): create a namepsaced registry system for targets.
+  static final BuildSystem buildSystem = BuildSystem(<String, Target>{
+    unpackMacos.name: unpackMacos,
+    unpackLinux.name: unpackLinux,
+    unpackWindows.name: unpackWindows,
+    copyAssets.name: copyAssets,
+    kernelSnapshot.name: kernelSnapshot,
+  });
 
   /// Returns the provided target platform.
   ///
@@ -141,7 +141,7 @@ class AssembleRun extends AssembleBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     try {
-      await buildSystem.build(targetName, environment, BuildSystemConfig(
+      await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
         resourcePoolSize: argResults['resource-pool-size'],
       ));
     } on Exception catch (err, stackTrace) {
@@ -167,7 +167,7 @@ class AssembleDescribe extends AssembleBase {
   Future<FlutterCommandResult> runCommand() {
     try {
       print(
-        json.encode(buildSystem.describe(targetName, environment))
+        json.encode(AssembleBase.buildSystem.describe(targetName, environment))
       );
     } on Exception catch (err, stackTrace) {
       printTrace(stackTrace.toString());
@@ -191,7 +191,8 @@ class AssembleListInputs extends AssembleBase {
   @override
   Future<FlutterCommandResult> runCommand() {
     try {
-      final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
+      final List<Map<String, Object>> results = AssembleBase
+          .buildSystem.describe(targetName, environment);
       for (Map<String, Object> result in results) {
         if (result['name'] == targetName) {
           final List<String> inputs = result['inputs'];

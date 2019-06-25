@@ -8,8 +8,10 @@ import '../build_system.dart';
 /// Copies all of the input files to the correct copy dir.
 Future<void> copyWindowsAssets(Map<String, ChangeType> updates,
   Environment environment) async {
+  // This path needs to match the prefix in the rule below.
   final String basePath = fs.path.join(
     environment.cacheDir.absolute.path,
+    'engine',
     'windows-x64',
   );
   for (String input in updates.keys) {
@@ -31,16 +33,16 @@ Future<void> copyWindowsAssets(Map<String, ChangeType> updates,
 const Target unpackWindows = Target(
   name: 'unpack_windows',
   inputs: <Source>[
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_windows.dll'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_windows.dll.exp'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_windows.dll.lib'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_windows.dll.pdb'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_export.h'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_messenger.h'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_plugin_registrar.h'),
-    Source.pattern('{CACHE_DIR}/windows-x64/flutter_glfw.h'),
-    Source.pattern('{CACHE_DIR}/windows-x64/icudtl.dat'),
-    Source.pattern('{CACHE_DIR}/windows-x64/cpp_client_wrapper/*'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_windows.dll'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_windows.dll.exp'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_windows.dll.lib'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_windows.dll.pdb'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_export.h'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_messenger.h'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_plugin_registrar.h'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/flutter_glfw.h'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/icudtl.dat'),
+    Source.pattern('{CACHE_DIR}/engine/windows-x64/cpp_client_wrapper/*'),
   ],
   outputs: <Source>[
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll'),
@@ -55,5 +57,5 @@ const Target unpackWindows = Target(
     Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
   ],
   dependencies: <Target>[],
-  invocation: copyWindowsAssets,
+  buildAction: copyWindowsAssets,
 );

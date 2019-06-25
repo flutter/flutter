@@ -108,7 +108,7 @@ class SourceVisitor {
     if (isDirectory) {
       sources.add(SourceFile(fs.directory(fs.path.normalize(filePath))));
     } else if (hasWildcard) {
-      // Perform a simple match by splitting the wildcard containing file on
+      // Perform a simple match by splitting the wildcard containing file one
       // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
       // that part of the file matches. If there are values before and after
       // the `*` we need to check that both match without overlapping. For

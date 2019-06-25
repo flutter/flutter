@@ -45,11 +45,11 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
 const Target unpackMacos = Target(
   name: 'unpack_macos',
   inputs: <Source>[
-    Source.pattern('{CACHE_DIR}/darwin-x64/FlutterMacOS.framework/'),
+    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/'),
   ],
   outputs: <Source>[
     Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/'),
   ],
   dependencies: <Target>[],
-  invocation: copyFramework,
+  buildAction: copyFramework,
 );

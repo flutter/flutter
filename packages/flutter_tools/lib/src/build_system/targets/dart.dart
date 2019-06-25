@@ -57,10 +57,11 @@ const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
   inputs: <Source>[
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and .packages
+    Source.pattern('{CACHE_DIR}/engine/common/flutter_patched_sdk/platform_strong.dill'),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
   ],
   dependencies: <Target>[],
-  invocation: compileKernel,
+  buildAction: compileKernel,
 );

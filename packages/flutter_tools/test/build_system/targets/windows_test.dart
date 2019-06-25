@@ -29,21 +29,21 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
         );
-        buildSystem = const BuildSystem(<Target>[
-          unpackWindows,
-        ]);
-        fs.file(r'C:\cache\windows-x64\flutter_export.h').createSync(recursive: true);
-        fs.file(r'C:\cache\windows-x64\flutter_messenger.h').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_windows.dll').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_windows.dll.exp').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_windows.dll.lib').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_windows.dll.pdb').createSync();
-        fs.file(r'C:\cache\windows-x64\lutter_export.h').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_messenger.h').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_plugin_registrar.h').createSync();
-        fs.file(r'C:\cache\windows-x64\flutter_glfw.h').createSync();
-        fs.file(r'C:\cache\windows-x64\icudtl.dat').createSync();
-        fs.file(r'C:\cache\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
+        buildSystem = BuildSystem(<String, Target>{
+          unpackWindows.name: unpackWindows,
+        });
+        fs.file(r'C:\cache\engine\windows-x64\flutter_export.h').createSync(recursive: true);
+        fs.file(r'C:\cache\engine\windows-x64\flutter_messenger.h').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_windows.dll').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_windows.dll.exp').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_windows.dll.lib').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_windows.dll.pdb').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\lutter_export.h').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_messenger.h').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_plugin_registrar.h').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\flutter_glfw.h').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\icudtl.dat').createSync();
+        fs.file(r'C:\cache\engine\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
         fs.directory('windows').createSync();
       }, overrides: <Type, Generator>{
         FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
@@ -79,7 +79,7 @@ void main() {
     test('Detects changes in input cache files', () => testbed.run(() async {
       await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
       final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
-      fs.file(r'C:\cache\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
+      fs.file(r'C:\cache\engine\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
 
       await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
 

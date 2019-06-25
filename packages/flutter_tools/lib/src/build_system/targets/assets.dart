@@ -84,5 +84,5 @@ const Target copyAssets = Target(
     Source.behavior(AssetBehavior()), // <- everything in this subdirectory.
   ],
   dependencies: <Target>[],
-  invocation: copyAssetsInvocation,
+  buildAction: copyAssetsInvocation,
 );

@@ -17,8 +17,8 @@ class MissingInputException implements Exception {
 
   @override
   String toString() {
-    return '$path was declared as an input, but does not exist on '
-        'disk. Check the definition of target:$target for errors';
+    return '$path was declared as an input, but does not exist. '
+        'Check the definition of target:$target for errors';
   }
 }
 

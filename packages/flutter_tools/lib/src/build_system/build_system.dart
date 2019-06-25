@@ -16,14 +16,14 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import 'exceptions.dart';
-import 'file_cache.dart';
+import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
-typedef BuildInvocation = FutureOr<void> Function(
+typedef BuildAction = FutureOr<void> Function(
     Map<String, ChangeType> inputs, Environment environment);
 
 /// A description of the update to each input file.
@@ -38,6 +38,7 @@ enum ChangeType {
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
+  /// Create a new [BuildSystemConfig].
   const BuildSystemConfig({this.resourcePoolSize});
 
   /// The maximum number of concurrent tasks the build system will run.
@@ -53,13 +54,12 @@ class BuildSystemConfig {
 ///
 /// To determine if a target needs to be executed, the [BuildSystem] performs
 /// a  hash of the file contents. This is tracked separately in the
-/// [FileCache].
+/// [FileHashStore].
 ///
-/// The name of each stamp is the target name, joined with target platform and
-/// mode if the target declares that it depends on them. The output files are
-/// also stored to protect against deleted files.
+/// The name of each stamp is the target name with a .stamp extension. The
+/// output files are also stored to protect against deleted files.
 ///
-///  file: `example_target.debug.android_arm64`
+///  file: `example_target.stamp`
 ///
 /// {
 ///   "inputs": [
@@ -76,7 +76,7 @@ class Target {
     @required this.name,
     @required this.inputs,
     @required this.outputs,
-    @required this.invocation,
+    @required this.buildAction,
     this.dependencies = const <Target>[],
   });
 
@@ -96,14 +96,14 @@ class Target {
   // TODO(jonahwilliams): track outputs to allow more surgical flutter clean.
   final List<Source> outputs;
 
-  /// The invocation which performs this build step.
-  final BuildInvocation invocation;
+  /// The action which performs this build step.
+  final BuildAction buildAction;
 
-  /// Check if we can skip the target invocation and collect hashes for all inputs.
+  /// Check if we can skip the target action and collect hashes for all inputs.
   Future<Map<String, ChangeType>> computeChanges(
     List<SourceFile> inputs,
     Environment environment,
-    FileCache fileCache,
+    FileHashStore fileHashStore,
   ) async {
     final Map<String, ChangeType> updates = <String, ChangeType>{};
     final File stamp = _findStampFile(environment);
@@ -125,18 +125,20 @@ class Target {
 
     // For each input type, first determine if we've already computed the hash
     // for it. If not and it is a directory we skip hashing and instead use a
-    // timestamp. If it is a file we collect it to be sent of for hashing as
+    // timestamp. If it is a file we collect it to be sent off for hashing as
     // a group.
     final List<SourceFile> sourcesToHash = <SourceFile>[];
     for (SourceFile entity in inputs) {
       if (!entity.existsSync()) {
+        // TODO(jonahwilliams): check all inputs at once to allow logging
+        // multiple missing input exception.
         throw MissingInputException(entity.unresolvedPath, name);
       }
 
       final String absolutePath = entity.path;
-      final String previousHash = fileCache.previousHashes[absolutePath];
-      if (fileCache.currentHashes.containsKey(absolutePath)) {
-        final String currentHash = fileCache.currentHashes[absolutePath];
+      final String previousHash = fileHashStore.previousHashes[absolutePath];
+      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
           updates[absolutePath] = previousInputs.contains(absolutePath)
               ? ChangeType.Modified
@@ -150,7 +152,7 @@ class Target {
     // If we have files to hash, compute them asynchronously and then
     // update the result.
     if (sourcesToHash.isNotEmpty) {
-      final List<SourceFile> dirty = await fileCache.hashFiles(sourcesToHash);
+      final List<SourceFile> dirty = await fileHashStore.hashFiles(sourcesToHash);
       for (SourceFile file in dirty) {
         final String absolutePath = file.path;
         updates[absolutePath] = previousInputs.contains(absolutePath)
@@ -184,6 +186,8 @@ class Target {
     final List<String> outputStamps = <String>[];
     for (SourceFile output in outputs) {
       if (!output.existsSync()) {
+        // TODO(jonahwilliams): check all inputs at once to allow logging
+        // multiple missing output exception.
         throw MissingOutputException(output.unresolvedPath, name);
       }
       outputStamps.add(output.path);
@@ -296,16 +300,17 @@ class TargetDefines {
 ///
 /// Example (Good):
 ///
-/// Using the build mode to produce different output. Note that the invocation
+/// Using the build mode to produce different output. Note that the action
 /// is still responsible for outputting a different file, as defined by the
 /// corresponding output [Source].
 ///
-///    if (environment.buildMode == BuildMode.debug) {
-///      environment.buildDir.childFile('debug.output)
+///    final BuildMode buildMode = getBuildModeFromDefines(environment.defines);
+///    if (buildMode == BuildMode.debug) {
+///      environment.buildDir.childFile('debug.output')
 ///        ..createSync()
 ///        ..writeAsStringSync('debug');
 ///    } else {
-///      environment.buildDir.childFile('non_debug.output)
+///      environment.buildDir.childFile('non_debug.output')
 ///        ..createSync()
 ///        ..writeAsStringSync('non_debug');
 ///    }
@@ -322,9 +327,11 @@ class Environment {
     Map<String, String> defines = const <String, String>{},
   }) {
     assert(projectDir != null);
+
+    // Compute a unique hash of this build's particular environment.
+    // Sort the keys by key so that the result is stable.
     String buildPrefix;
     if (defines.isNotEmpty) {
-      // Sort the keys by key so that the result is stable.
       final List<String> keys = defines.keys.toList()..sort();
       final StringBuffer buffer = StringBuffer();
       for (String key in keys) {
@@ -338,17 +345,16 @@ class Environment {
       final Digest digest = md5.convert(utf8.encode('Flutter and Dart is awesome'));
       buildPrefix = hex.encode(digest.bytes);
     }
+
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
-    final Directory buildDirectory = buildPrefix != null
-        ? rootBuildDir.childDirectory(buildPrefix)
-        : rootBuildDir;
+    final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
     return Environment._(
       projectDir: projectDir,
       flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
       cacheDir: cacheDir ??
-          Cache.instance.getCacheArtifacts().childDirectory('engine'),
+          Cache.instance.getCacheArtifacts(),
       defines: defines,
     );
   }
@@ -397,7 +403,7 @@ class Environment {
   /// Defaults to the root of the flutter checkout for which this command is run.
   final Directory flutterRootDir;
 
-  /// Additional condiguration passed to the build targets.
+  /// Additional configuration passed to the build targets.
   ///
   /// Setting values here forces a unique build directory to be chosen
   /// which prevents the config from leaking into different builds.
@@ -411,7 +417,8 @@ class Environment {
 class BuildSystem {
   const BuildSystem([this.targets]);
 
-  final List<Target> targets;
+  /// All currently registered targets.
+  final Map<String, Target> targets;
 
   /// Build the target `name` and all of its dependencies.
   Future<void> build(
@@ -422,15 +429,15 @@ class BuildSystem {
     final Target target = _getNamedTarget(name);
     environment.buildDir.createSync(recursive: true);
 
-    // Load file cache from previous builds.
-    final FileCache fileCache = FileCache(environment)
+    // Load file hash store from previous builds.
+    final FileHashStore fileCache = FileHashStore(environment)
       ..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
 
     // TODO(jonahwilliams): create a separate configuration for the settings and
-    // constants which effect build running.
+    // constants which affect build running.
     final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
     try {
       await buildInstance.invokeTarget(target);
@@ -461,10 +468,9 @@ class BuildSystem {
 
   // Returns the corresponding target or throws.
   Target _getNamedTarget(String name) {
-    final Target target = targets
-        .firstWhere((Target target) => target.name == name, orElse: () => null);
+    final Target target = targets[name];
     if (target == null) {
-      throw Exception('No registered target named $name.');
+      throw Exception('No registered target:$name.');
     }
     return target;
   }
@@ -479,7 +485,7 @@ class _BuildInstance {
   final Pool resourcePool;
   final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
   final Environment environment;
-  final FileCache fileCache;
+  final FileHashStore fileCache;
 
   Future<void> invokeTarget(Target target) async {
     await Future.wait(target.dependencies.map(invokeTarget));
@@ -490,13 +496,14 @@ class _BuildInstance {
   Future<void> _invokeInternal(Target target) async {
     final PoolResource resource = await resourcePool.request();
     try {
+      // TODO(jonahwilliams): collect and log analyrtics from build action times.
       final List<SourceFile> inputs = target.resolveInputs(environment);
       final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
       if (updates.isEmpty) {
         printTrace('Skipping target: ${target.name}');
       } else {
         printTrace('${target.name}: Starting');
-        await target.invocation(updates, environment);
+        await target.buildAction(updates, environment);
         printTrace('${target.name}: Complete');
 
         final List<SourceFile> outputs = target.resolveOutputs(environment);

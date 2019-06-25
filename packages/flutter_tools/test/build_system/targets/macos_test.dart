@@ -30,11 +30,11 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
         );
-        buildSystem = const BuildSystem(<Target>[
-          unpackMacos,
-        ]);
-        fs.directory('cache/darwin-x64/FlutterMacOS.framework').createSync(recursive: true);
-        fs.file('cache/darwin-x64/FlutterMacOS.framework/foo').createSync();
+        buildSystem = BuildSystem(<String, Target>{
+          unpackMacos.name: unpackMacos,
+        });
+        fs.directory('cache/engine/darwin-x64/FlutterMacOS.framework').createSync(recursive: true);
+        fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/foo').createSync();
         when(processManager.runSync(any)).thenAnswer((Invocation invocation) {
           final List<String> arguments = invocation.positionalArguments.first;
           fs.directory(arguments.last).createSync(recursive: true);
