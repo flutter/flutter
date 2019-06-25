@@ -589,7 +589,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.flutter.IosUnitTestsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SYSTEM_HEADER_SEARCH_PATHS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../../third_party/ocmock/Source/;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosUnitTests.app/IosUnitTests";
 			};
@@ -633,7 +633,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.google.flutter.IosUnitTestsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SYSTEM_HEADER_SEARCH_PATHS = "";
+				SYSTEM_HEADER_SEARCH_PATHS = ../../../../third_party/ocmock/Source/;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IosUnitTests.app/IosUnitTests";
 			};
