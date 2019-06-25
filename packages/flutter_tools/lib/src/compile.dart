@@ -450,8 +450,8 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final StdoutHandler _stdoutHandler;
-  String _initializeFromDill;
-  bool _unsafePackageSerialization;
+  final String _initializeFromDill;
+  final bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
   bool _compileRequestNeedsConfirmation = false;
 
