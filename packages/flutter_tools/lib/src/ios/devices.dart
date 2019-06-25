@@ -585,12 +585,15 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       printTrace('attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await runCommand(<String>[
-        device._iproxyPath,
-        hostPort.toString(),
-        devicePort.toString(),
-        device.id,
-      ]);
+      process = await runCommand(
+        <String>[
+          device._iproxyPath,
+          hostPort.toString(),
+          devicePort.toString(),
+          device.id,
+        ],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+      );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
