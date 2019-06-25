@@ -2173,7 +2173,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
 
     // extendBody locked when keyboard is open
-    final bool _extendBody = minInsets.bottom > 0 ? false : widget.extendBody;
+    final bool _extendBody = minInsets.bottom <= 0 && widget.extendBody;
 
     return _ScaffoldScope(
       hasDrawer: hasDrawer,

@@ -33,6 +33,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
+import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -248,6 +249,8 @@ class Doctor {
           break;
       }
 
+      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
+
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
@@ -327,6 +330,7 @@ enum ValidationMessageType {
 abstract class DoctorValidator {
   const DoctorValidator(this.title);
 
+  /// This is displayed in the CLI.
   final String title;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
@@ -431,6 +435,22 @@ class ValidationResult {
       case ValidationType.notAvailable:
       case ValidationType.partial:
        return terminal.color(leadingBox, TerminalColor.yellow);
+    }
+    return null;
+  }
+
+  /// The string representation of the type.
+  String get typeStr {
+    assert(type != null);
+    switch (type) {
+      case ValidationType.missing:
+        return 'missing';
+      case ValidationType.installed:
+        return 'installed';
+      case ValidationType.notAvailable:
+        return 'notAvailable';
+      case ValidationType.partial:
+        return 'partial';
     }
     return null;
   }

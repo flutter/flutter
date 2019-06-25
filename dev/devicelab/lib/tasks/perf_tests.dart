@@ -54,6 +54,14 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createBackdropFilterPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/backdrop_filter_perf.dart',
+    'backdrop_filter_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
