@@ -101,11 +101,17 @@ struct Settings {
   std::string advisory_script_entrypoint = "main";
 
   // Observatory settings
+
+  // Whether the Dart VM service should be enabled.
   bool enable_observatory = false;
-  // Port on target will be auto selected by the OS. A message will be printed
-  // on the target with the port after it has been selected.
+
+  // The IP address to which the Dart VM service is bound.
+  std::string observatory_host;
+
+  // The port to which the Dart VM service is bound. When set to `0`, a free
+  // port will be automatically selected by the OS. A message is logged on the
+  // target indicating the URL at which the VM service can be accessed.
   uint32_t observatory_port = 0;
-  bool ipv6 = false;
 
   // Determines whether an authentication code is required to communicate with
   // the VM service.

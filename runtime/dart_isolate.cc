@@ -613,9 +613,9 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
 
   tonic::DartState::Scope scope(service_isolate);
   if (!DartServiceIsolate::Startup(
-          settings.ipv6 ? "::1" : "127.0.0.1",  // server IP address
-          settings.observatory_port,            // server observatory port
-          tonic::DartState::HandleLibraryTag,   // embedder library tag handler
+          settings.observatory_host,           // server IP address
+          settings.observatory_port,           // server observatory port
+          tonic::DartState::HandleLibraryTag,  // embedder library tag handler
           false,  //  disable websocket origin check
           settings.disable_service_auth_codes,  // disable VM service auth codes
           error                                 // error (out)

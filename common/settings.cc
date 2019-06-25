@@ -42,8 +42,8 @@ std::string Settings::ToString() const {
   stream << "enable_dart_profiling: " << enable_dart_profiling << std::endl;
   stream << "disable_dart_asserts: " << disable_dart_asserts << std::endl;
   stream << "enable_observatory: " << enable_observatory << std::endl;
+  stream << "observatory_host: " << observatory_host << std::endl;
   stream << "observatory_port: " << observatory_port << std::endl;
-  stream << "ipv6: " << ipv6 << std::endl;
   stream << "use_test_fonts: " << use_test_fonts << std::endl;
   stream << "enable_software_rendering: " << enable_software_rendering
          << std::endl;
