@@ -85,6 +85,117 @@ class ToggleButtons extends StatelessWidget {
   /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
+  BorderRadius _getEdgeBorderRadius (int index, int length, TextDirection textDirection) {
+    if (
+      index == 0 && textDirection == TextDirection.ltr ||
+      index == children.length - 1 && textDirection == TextDirection.rtl
+    ) {
+      return BorderRadius.only(
+        topLeft: borderRadius.topLeft,
+        bottomLeft: borderRadius.bottomLeft,
+      );
+    } else if (
+      index == children.length - 1 && textDirection == TextDirection.ltr ||
+      index == 0 && textDirection == TextDirection.rtl
+    ) {
+      return BorderRadius.only(
+        topRight: borderRadius.topRight,
+        bottomRight: borderRadius.bottomRight,
+      );
+    }
+    return BorderRadius.zero;
+  }
+
+  BorderRadius _getClipBorderRadius (int index, int length, TextDirection textDirection) {
+    if (
+      index == 0 && textDirection == TextDirection.ltr ||
+      index == children.length - 1 && textDirection == TextDirection.rtl
+    ) {
+      return BorderRadius.only(
+        topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+        bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+      );
+    } else if (
+      index == children.length - 1 && textDirection == TextDirection.ltr ||
+      index == 0 && textDirection == TextDirection.rtl
+    ) {
+      return BorderRadius.only(
+        topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+        bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+      );
+    }
+    return BorderRadius.zero;
+  }
+
+  BorderSide _getLeadingBorderSide(int index, ThemeData themeData) {
+    if (borderWidth == null)
+      return BorderSide.none;
+
+    if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
+      return BorderSide(
+        color: borderColor ?? themeData.colorScheme.primary,
+        width: borderWidth,
+      );
+    } else if (onPressed != null && !isSelected[index]) {
+      return BorderSide(
+        color: activeBorderColor ?? themeData.colorScheme.onSurface,
+        width: borderWidth,
+      );
+    } else {
+      return BorderSide(
+        color: disabledBorderColor ?? themeData.disabledColor,
+        width: borderWidth,
+      );
+    }
+  }
+
+  BorderSide _getHorizontalBorderSide(int index, ThemeData themeData) {
+    if (borderWidth == null)
+      return BorderSide.none;
+
+    if (onPressed != null && isSelected[index]) {
+      return BorderSide(
+        color: borderColor ?? themeData.colorScheme.primary,
+        width: borderWidth,
+      );
+    } else if (onPressed != null && !isSelected[index]) {
+      return BorderSide(
+        color: activeBorderColor ?? themeData.colorScheme.onSurface,
+        width: borderWidth,
+      );
+    } else {
+      return BorderSide(
+        color: disabledBorderColor ?? themeData.disabledColor,
+        width: borderWidth,
+      );
+    }
+  }
+
+  BorderSide _getTrailingBorderSide(int index, ThemeData themeData) {
+    if (borderWidth == null)
+      return BorderSide.none;
+
+    if (index != children.length - 1)
+      return null;
+
+    if (onPressed != null && (isSelected[index])) {
+      return BorderSide(
+        color: borderColor ?? themeData.colorScheme.primary,
+        width: borderWidth,
+      );
+    } else if (onPressed != null && !isSelected[index]) {
+      return BorderSide(
+        color: activeBorderColor ?? themeData.colorScheme.onSurface,
+        width: borderWidth,
+      );
+    } else {
+      return BorderSide(
+        color: disabledBorderColor ?? themeData.disabledColor,
+        width: borderWidth,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -95,109 +206,12 @@ class ToggleButtons extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: List<Widget>.generate(children.length, (int index) {
-          BorderRadius edgeBorderRadius;
-          BorderRadius clipBorderRadius;
-          if (
-            index == 0 && textDirection == TextDirection.ltr ||
-            index == children.length - 1 && textDirection == TextDirection.rtl
-          ) {
-            edgeBorderRadius = BorderRadius.only(
-              topLeft: borderRadius.topLeft,
-              bottomLeft: borderRadius.bottomLeft,
-            );
-            clipBorderRadius = BorderRadius.only(
-              topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
-              bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
-            );
-          } else if (
-            index == children.length - 1 && textDirection == TextDirection.ltr ||
-            index == 0 && textDirection == TextDirection.rtl
-          ) {
-            edgeBorderRadius = BorderRadius.only(
-              topRight: borderRadius.topRight,
-              bottomRight: borderRadius.bottomRight,
-            );
-            clipBorderRadius = BorderRadius.only(
-              topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
-              bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
-            );
-          }
+          final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(index, children.length, textDirection);
+          final BorderRadius clipBorderRadius = _getClipBorderRadius(index, children.length, textDirection);
 
-          if (borderWidth == null) {
-            return _ToggleButton(
-              onPressed: onPressed != null
-                ? () { onPressed(index); }
-                : null,
-              selected: isSelected[index],
-              leadingBorderSide: BorderSide.none,
-              horizontalBorderSide: BorderSide.none,
-              trailingBorderSide: BorderSide.none,
-              borderRadius: edgeBorderRadius ?? BorderRadius.zero,
-              clipRadius: clipBorderRadius ?? BorderRadius.zero,
-              isFirstButton: index == 0,
-              isLastButton: index == children.length - 1,
-              child: children[index],
-            );
-          }
-
-          BorderSide horizontalBorderSide;
-          BorderSide leadingBorderSide;
-          BorderSide trailingBorderSide;
-
-          if (onPressed != null && isSelected[index]) {
-            horizontalBorderSide = BorderSide(
-              color: borderColor ?? themeData.colorScheme.primary,
-              width: borderWidth,
-            );
-          } else if (onPressed != null && !isSelected[index]) {
-            horizontalBorderSide = BorderSide(
-              color: activeBorderColor ?? themeData.colorScheme.onSurface,
-              width: borderWidth,
-            );
-          } else {
-            horizontalBorderSide = BorderSide(
-              color: disabledBorderColor ?? themeData.disabledColor,
-              width: borderWidth,
-            );
-          }
-
-          if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
-            leadingBorderSide = BorderSide(
-              color: borderColor ?? themeData.colorScheme.primary,
-              width: borderWidth,
-            );
-          } else if (onPressed != null && !isSelected[index]) {
-            leadingBorderSide = BorderSide(
-              color: activeBorderColor ?? themeData.colorScheme.onSurface,
-              width: borderWidth,
-            );
-          } else {
-            leadingBorderSide = BorderSide(
-              color: disabledBorderColor ?? themeData.disabledColor,
-              width: borderWidth,
-            );
-          }
-
-          if (index != children.length - 1) {
-            trailingBorderSide = null;
-          } else {
-            if (onPressed != null && (isSelected[index])) {
-              trailingBorderSide = BorderSide(
-              color: borderColor ?? themeData.colorScheme.primary,
-              width: borderWidth,
-            );
-            } else if (onPressed != null && !isSelected[index]) {
-              trailingBorderSide = BorderSide(
-              color: activeBorderColor ?? themeData.colorScheme.onSurface,
-              width: borderWidth,
-            );
-            } else {
-              trailingBorderSide = BorderSide(
-                color: disabledBorderColor ?? themeData.disabledColor,
-                width: borderWidth,
-              );
-            }
-          }
+          final BorderSide leadingBorderSide = _getLeadingBorderSide(index, themeData);
+          final BorderSide horizontalBorderSide = _getHorizontalBorderSide(index, themeData);
+          final BorderSide trailingBorderSide = _getTrailingBorderSide(index, themeData);
 
           return _ToggleButton(
             onPressed: onPressed != null
@@ -207,8 +221,8 @@ class ToggleButtons extends StatelessWidget {
             leadingBorderSide: leadingBorderSide,
             horizontalBorderSide: horizontalBorderSide,
             trailingBorderSide: trailingBorderSide,
-            borderRadius: edgeBorderRadius ?? BorderRadius.zero,
-            clipRadius: clipBorderRadius ?? BorderRadius.zero,
+            borderRadius: edgeBorderRadius,
+            clipRadius: clipBorderRadius,
             isFirstButton: index == 0,
             isLastButton: index == children.length - 1,
             child: children[index],
