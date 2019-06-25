@@ -66,7 +66,10 @@ void TransformLayer::Paint(PaintContext& context) const {
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->concat(transform_);
+  context.mutators_stack.pushTransform(transform_);
+
   PaintChildren(context);
+  context.mutators_stack.pop();
 }
 
 }  // namespace flutter
