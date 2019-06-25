@@ -80,7 +80,7 @@ class SnackBarThemeData extends Diagnosticable {
 
   /// Used to configure the [DefaultTextStyle] for the [SnackBar.content] widget.
   ///
-  /// If null, [SnackBar] defaults to [ThemeData.textTheme.subhead].
+  /// If null, [SnackBar] defaults to a dark theme variant of [ThemeData.textTheme.subhead].
   final TextStyle contentTextStyle;
 
   /// Default value for [SnackBar.elevation].

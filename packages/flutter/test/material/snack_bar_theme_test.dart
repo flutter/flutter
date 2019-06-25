@@ -89,7 +89,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
 
     final Material material = _getSnackBarMaterial(tester);
-    final RenderParagraph content = _getTextRenderObject(tester, text);
+    final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, Typography().white.subhead);
     expect(material.color, const Color(0xFF323232));
@@ -127,7 +127,7 @@ void main() {
 
     final Material material = _getSnackBarMaterial(tester);
     final RawMaterialButton button = _getSnackBarButton(tester);
-    final RenderParagraph content = _getTextRenderObject(tester, text);
+    final RenderParagraph content = _getSnackBarTextRenderObject(tester, text);
 
     expect(content.text.style, snackBarTheme.contentTextStyle);
     expect(material.color, snackBarTheme.backgroundColor);
@@ -299,7 +299,7 @@ RawMaterialButton _getSnackBarButton(WidgetTester tester) {
   );
 }
 
-RenderParagraph _getTextRenderObject(WidgetTester tester, String text) {
+RenderParagraph _getSnackBarTextRenderObject(WidgetTester tester, String text) {
   return tester.element<StatelessElement>(
     find.descendant(
       of: find.byType(SnackBar),
