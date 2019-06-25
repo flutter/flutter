@@ -355,7 +355,7 @@ class MockDevice extends Mock implements Device {
   @override
   final bool ephemeral;
 
-  bool _isSupported;
+  final bool _isSupported;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;

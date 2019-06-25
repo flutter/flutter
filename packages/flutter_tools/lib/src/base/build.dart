@@ -175,7 +175,7 @@ class AOTSnapshotter {
         'entryPoint': mainPath,
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': Cache.instance.engineRevision,
-        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+        'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
       },
       depfilePaths: <String>[],
     );
