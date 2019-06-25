@@ -89,7 +89,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       } else {
         if (_pendingLoader == null) {
           _pendingLoaderUsers = <Function>[];
-          _pendingLoader = _setupIsolate(chunkEvents, completer);
+          _pendingLoader = _setupIsolate(completer);
         }
         _pendingLoaderUsers.add((SendPort sendPort) {
           sendPort.send(downloadRequest);
@@ -109,8 +109,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     }
   }
 
-  Future<Isolate> _setupIsolate(StreamController<ImageChunkEvent> chunkEvents,
-      Completer<TransferableTypedData> completer) {
+  Future<Isolate> _setupIsolate(Completer<TransferableTypedData> completer) {
     final RawReceivePort receivePort = RawReceivePort((SendPort sendPort) {
       _requestPort = sendPort;
       for (Function function in _pendingLoaderUsers) {
@@ -141,8 +140,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 }
 
 class _DownloadRequest {
-  _DownloadRequest(this.sendPort, this.uri, this.headers,
-      this.debugNetworkImageHttpClientProvider);
+  _DownloadRequest(this.sendPort, this.uri, this.headers, this.debugNetworkImageHttpClientProvider);
 
   final SendPort sendPort;
   final Uri uri;
