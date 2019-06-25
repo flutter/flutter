@@ -94,6 +94,7 @@ task:
         SHARD: tool_tests
         SUBSHARD: tool
       build_runner_cache:
+        fingerprint_script: cat bin/cache/dart-sdk/version
         folder: ./packages/flutter_tools/.dart_tool
         populate_script: ./dev/bots/flutter_tool_build_cache.sh
       test_script:
@@ -107,6 +108,7 @@ task:
         SHARD: tool_tests
         SUBSHARD: integration
       build_runner_cache:
+        fingerprint_script: cat bin/cache/dart-sdk/version
         folder: ./packages/flutter_tools/.dart_tool
         populate_script: ./dev/bots/flutter_tool_build_cache.sh
       test_script:
@@ -231,6 +233,7 @@ task:
     - bin\flutter.bat update-packages
     - git fetch origin master
   build_runner_cache:
+    fingerprint_script: type bin/cache/dart-sdk/version
     folder: .\packages\flutter_tools\.dart_tool
     populate_script: powershell dev/bots/flutter_tool_build_cache.ps1
   test_all_script:
@@ -372,6 +375,7 @@ task:
     - bin/flutter doctor -v
     - bin/flutter update-packages
   build_runner_cache:
+    fingerprint_script: cat bin/cache/dart-sdk/version
     folder: ./packages/flutter_tools/.dart_tool
     populate_script: ./dev/bots/flutter_tool_build_cache.sh
   test_all_script: |
