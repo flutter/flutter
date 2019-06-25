@@ -114,6 +114,7 @@ executable("flow_unittests") {
     "layers/performance_overlay_layer_unittests.cc",
     "layers/physical_shape_layer_unittests.cc",
     "matrix_decomposition_unittests.cc",
+    "mutators_stack_unittests.cc",
     "raster_cache_unittests.cc",
   ]
 
