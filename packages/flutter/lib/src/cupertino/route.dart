@@ -618,9 +618,9 @@ class _CupertinoBackGestureController<T> {
     // or after mid screen, we should animate the page out. Otherwise, the page
     // should be animated back in.
     if (velocity.abs() >= _kMinFlingVelocity)
-      animateForward = velocity > 0 ? false : true;
+      animateForward = velocity <= 0;
     else
-      animateForward = controller.value > 0.5 ? true : false;
+      animateForward = controller.value > 0.5;
 
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
