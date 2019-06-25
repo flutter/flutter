@@ -2707,7 +2707,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
-  DiagnosticLevel _defaultLevel;
+  final DiagnosticLevel _defaultLevel;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
