@@ -12,6 +12,97 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'theme.dart';
 
+/// A horizontal set of toggle buttons.
+///
+/// It displays its widgets provided in a [List] of [children] horizontally.
+/// The state of each button is controlled by [isSelected], which is a list of
+/// bools that determine if a button is in an active, disabled, or selected
+/// state. They are both correlated by their index in the list.
+///
+/// ## Customizing toggle buttons
+/// The toggle buttons are designed to be configurable, meaning that
+/// selections can be mutually exclusive, or that multiple buttons can be
+/// toggled at the same time. This can be configured using the [onPressed]
+/// callback, which is triggered when a button is pressed
+///
+/// Here is an implementation that allows for multiple buttons to be
+/// simultaneously selected, while requiring none of the buttons to be
+/// selected.
+/// ```dart
+/// ToggleButtons(
+///   children: <Widget>[
+///     Icon(Icons.ac_unit),
+///     Icon(Icons.call),
+///     Icon(Icons.cake),
+///   ],
+///   onPressed: (int index) {
+///     setState(() {
+///       isSelected[index] = !isSelected[index];
+///     });
+///   },
+///   isSelected: isSelected,
+/// ),
+/// ```
+///
+/// Here is an implementation that requires mutually exclusive selection
+/// while requiring at least one selection. Note that this assumes that
+/// [isSelected] was properly initialized with one selection.
+/// ```dart
+/// ToggleButtons(
+///   children: <Widget>[
+///     Icon(Icons.ac_unit),
+///     Icon(Icons.call),
+///     Icon(Icons.cake),
+///   ],
+///   onPressed: (int index) {
+///     setState(() {
+///       isSelected.asMap().forEach((int currentIndex, bool val) {
+///         if (currentIndex == index) {
+///           isSelected[currentIndex] = true;
+///         } else {
+///           isSelected[currentIndex] = false;
+///         }
+///       });
+///     });
+///   },
+///   isSelected: isSelected,
+/// ),
+/// ```
+///
+/// Here is an implementation that allows for multiple buttons to be
+/// simultaneously selected, while requiring at least one selection. Note
+/// that this assumes that [isSelected] was properly initialized with one
+/// selection.
+/// ```dart
+/// ToggleButtons(
+///   children: <Widget>[
+///     Icon(Icons.ac_unit),
+///     Icon(Icons.call),
+///     Icon(Icons.cake),
+///   ],
+///   onPressed: (int index) {
+///     int count = 0;
+///     isSelected.forEach((bool val) {
+///       if (val) count++;
+///     });
+///
+///     if (isSelected[index] && count < 2)
+///       return;
+///
+///     setState(() {
+///       isSelected[index] = !isSelected[index];
+///     });
+///   },
+///   isSelected: isSelected,
+/// ),
+/// ```
+///
+/// // sample, non-mutually exclusive
+///
+/// SECTION ON BORDERS
+/// touch on border colors
+///
+/// touch on border width settings
 class ToggleButtons extends StatelessWidget {
   const ToggleButtons({
     @required this.children,
