@@ -203,6 +203,7 @@ void main() {
         final ImageProvider imageProvider = NetworkImage(nonconst('foo'));
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
         final List<ImageChunkEvent> events = <ImageChunkEvent>[];
+
         result.addListener(ImageStreamListener(
           (ImageInfo image, bool synchronousCall) {
             imageAvailable.complete();
@@ -221,6 +222,25 @@ void main() {
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
       }, skip: isBrowser);
+
+      test('Uses http request headers', () async {
+        debugNetworkImageHttpClientProvider = respondOnAnyWithHeaders;
+
+        final Completer<bool> imageAvailable = Completer<bool>();
+        final ImageProvider imageProvider = NetworkImage(nonconst('foo'),
+          headers: const <String, String>{'flutter': 'flutter'},
+        );
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener(ImageStreamListener(
+              (ImageInfo image, bool synchronousCall) {
+            imageAvailable.complete(true);
+          },
+          onError: (dynamic error, StackTrace stackTrace) {
+            imageAvailable.completeError(error, stackTrace);
+          },
+        ));
+        expect(await imageAvailable.future, isTrue);
+      }, skip: isBrowser);
     });
   });
 }
@@ -228,6 +248,7 @@ void main() {
 class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpHeaders extends Mock implements HttpHeaders {}
 
 HttpClient throwOnAnyClient1() {
   final MockHttpClient httpClient = MockHttpClient();
@@ -255,6 +276,54 @@ HttpClient respondOnAny() {
   final MockHttpClient httpClient = MockHttpClient();
   when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
   when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+  when(response.statusCode).thenReturn(HttpStatus.ok);
+  when(response.contentLength).thenReturn(kTransparentImage.length);
+  when(response.listen(
+    any,
+    onDone: anyNamed('onDone'),
+    onError: anyNamed('onError'),
+    cancelOnError: anyNamed('cancelOnError'),
+  )).thenAnswer((Invocation invocation) {
+    final void Function(List<int>) onData = invocation.positionalArguments[0];
+    final void Function(Object) onError = invocation.namedArguments[#onError];
+    final void Function() onDone = invocation.namedArguments[#onDone];
+    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+    return Stream<List<int>>.fromIterable(chunks).listen(
+      onData,
+      onDone: onDone,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
+  });
+  return httpClient;
+}
+
+HttpClient respondOnAnyWithHeaders() {
+  final List<Invocation> invocations = <Invocation>[];
+
+  const int chunkSize = 8;
+  final List<List<int>> chunks = createChunks(chunkSize);
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpClient httpClient = MockHttpClient();
+  final MockHttpHeaders headers = MockHttpHeaders();
+  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+  when(request.headers).thenReturn(headers);
+  when(headers.add(any, any)).thenAnswer((Invocation invocation) {
+    invocations.add(invocation);
+  });
+
+  when(request.close()).thenAnswer((Invocation invocation) {
+    if (invocations.length == 1 &&
+        invocations[0].positionalArguments.length == 2 &&
+        invocations[0].positionalArguments[0] == 'flutter' &&
+        invocations[0].positionalArguments[1] == 'flutter') {
+      return Future<HttpClientResponse>.value(response);
+    } else {
+      return Future<HttpClientResponse>.value(null);
+    }
+  });
   when(response.statusCode).thenReturn(HttpStatus.ok);
   when(response.contentLength).thenReturn(kTransparentImage.length);
   when(response.listen(

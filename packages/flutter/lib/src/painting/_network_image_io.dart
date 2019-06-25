@@ -165,14 +165,14 @@ void _handleHttpClientGet(_HttpClientIsolateParameters params) {
 
     HttpClient _httpClient = _sharedHttpClient;
     assert(() {
-      if (downloadRequest.debugNetworkImageHttpClientProvider != null)
+      if (downloadRequest.debugNetworkImageHttpClientProvider != null) {
         _httpClient = downloadRequest.debugNetworkImageHttpClientProvider();
+      }
       return true;
     }());
 
     try {
-      final HttpClientRequest request =
-          await _httpClient.getUrl(downloadRequest.uri);
+      final HttpClientRequest request = await _httpClient.getUrl(downloadRequest.uri);
       downloadRequest.headers?.forEach((String name, String value) {
         request.headers.add(name, value);
       });
