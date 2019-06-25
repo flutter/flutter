@@ -29,6 +29,8 @@ import 'icon_theme_data.dart';
 /// This example shows how to use [Icon] to create an addition icon, in the
 /// color pink, and 30 x 30 pixels in size.
 ///
+/// ![A pink plus sign](https://raw.githubusercontent.com/flutter/assets-for-api-docs/master/assets/widgets/icon.png)
+///
 /// ```dart
 /// Icon(
 ///   Icons.add,
