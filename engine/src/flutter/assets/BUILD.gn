@@ -9,17 +9,11 @@ source_set("assets") {
     "asset_resolver.h",
     "directory_asset_bundle.cc",
     "directory_asset_bundle.h",
-    "zip_asset_store.cc",
-    "zip_asset_store.h",
   ]
 
   deps = [
     "$flutter_root/common",
     "$flutter_root/fml",
-  ]
-
-  public_deps = [
-    "//third_party/zlib:minizip",
   ]
 
   public_configs = [ "$flutter_root:config" ]

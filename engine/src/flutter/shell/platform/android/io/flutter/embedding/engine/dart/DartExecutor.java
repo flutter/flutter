@@ -120,10 +120,7 @@ public class DartExecutor implements BinaryMessenger {
     Log.v(TAG, "Executing Dart entrypoint: " + dartEntrypoint);
 
     flutterJNI.runBundleAndSnapshotFromLibrary(
-        new String[]{
-            dartEntrypoint.pathToPrimaryBundle,
-            dartEntrypoint.pathToFallbackBundle
-        },
+        dartEntrypoint.pathToBundle,
         dartEntrypoint.dartEntrypointFunctionName,
         null,
         dartEntrypoint.androidAssetManager
@@ -148,10 +145,7 @@ public class DartExecutor implements BinaryMessenger {
     Log.v(TAG, "Executing Dart callback: " + dartCallback);
 
     flutterJNI.runBundleAndSnapshotFromLibrary(
-        new String[]{
-            dartCallback.pathToPrimaryBundle,
-            dartCallback.pathToFallbackBundle
-        },
+        dartCallback.pathToBundle,
         dartCallback.callbackHandle.callbackName,
         dartCallback.callbackHandle.callbackLibraryPath,
         dartCallback.androidAssetManager
@@ -243,16 +237,10 @@ public class DartExecutor implements BinaryMessenger {
     public final AssetManager androidAssetManager;
 
     /**
-     * The first place that Dart will look for a given function or asset.
+     * The path within the AssetManager where the app will look for assets.
      */
     @NonNull
-    public final String pathToPrimaryBundle;
-
-    /**
-     * A secondary fallback location that Dart will look for a given function or asset.
-     */
-    @Nullable
-    public final String pathToFallbackBundle;
+    public final String pathToBundle;
 
     /**
      * The name of a Dart function to execute.
@@ -265,30 +253,15 @@ public class DartExecutor implements BinaryMessenger {
         @NonNull String pathToBundle,
         @NonNull String dartEntrypointFunctionName
     ) {
-      this(
-          androidAssetManager,
-          pathToBundle,
-          null,
-          dartEntrypointFunctionName
-      );
-    }
-
-    public DartEntrypoint(
-        @NonNull AssetManager androidAssetManager,
-        @NonNull String pathToPrimaryBundle,
-        @Nullable String pathToFallbackBundle,
-        @NonNull String dartEntrypointFunctionName
-    ) {
       this.androidAssetManager = androidAssetManager;
-      this.pathToPrimaryBundle = pathToPrimaryBundle;
-      this.pathToFallbackBundle = pathToFallbackBundle;
+      this.pathToBundle = pathToBundle;
       this.dartEntrypointFunctionName = dartEntrypointFunctionName;
     }
 
     @Override
     @NonNull
     public String toString() {
-      return "DartEntrypoint( bundle path: " + pathToPrimaryBundle + ", function: " + dartEntrypointFunctionName + " )";
+      return "DartEntrypoint( bundle path: " + pathToBundle + ", function: " + dartEntrypointFunctionName + " )";
     }
   }
 
@@ -303,14 +276,9 @@ public class DartExecutor implements BinaryMessenger {
     public final AssetManager androidAssetManager;
 
     /**
-     * The first place that Dart will look for a given function or asset.
+     * The path within the AssetManager where the app will look for assets.
      */
-    public final String pathToPrimaryBundle;
-
-    /**
-     * A secondary fallback location that Dart will look for a given function or asset.
-     */
-    public final String pathToFallbackBundle;
+    public final String pathToBundle;
 
     /**
      * A Dart callback that was previously registered with the Dart VM.
@@ -319,33 +287,18 @@ public class DartExecutor implements BinaryMessenger {
 
     public DartCallback(
         @NonNull AssetManager androidAssetManager,
-        @NonNull String pathToPrimaryBundle,
-        @NonNull FlutterCallbackInformation callbackHandle
-    ) {
-      this(
-          androidAssetManager,
-          pathToPrimaryBundle,
-          null,
-          callbackHandle
-      );
-    }
-
-    public DartCallback(
-        @NonNull AssetManager androidAssetManager,
-        @NonNull String pathToPrimaryBundle,
-        @Nullable String pathToFallbackBundle,
+        @NonNull String pathToBundle,
         @NonNull FlutterCallbackInformation callbackHandle
     ) {
       this.androidAssetManager = androidAssetManager;
-      this.pathToPrimaryBundle = pathToPrimaryBundle;
-      this.pathToFallbackBundle = pathToFallbackBundle;
+      this.pathToBundle = pathToBundle;
       this.callbackHandle = callbackHandle;
     }
 
     @Override
     @NonNull
     public String toString() {
-      return "DartCallback( bundle path: " + pathToPrimaryBundle
+      return "DartCallback( bundle path: " + pathToBundle
           + ", library path: " + callbackHandle.callbackLibraryPath
           + ", function: " + callbackHandle.callbackName + " )";
     }

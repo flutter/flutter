@@ -163,8 +163,12 @@ public class FlutterMain {
             if (args != null) {
                 Collections.addAll(shellArgs, args);
             }
+
+            String kernelPath = null;
             if (BuildConfig.DEBUG) {
-                shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + PathUtils.getDataDirectory(applicationContext) + "/" + sFlutterAssetsDir);
+                String snapshotAssetPath = PathUtils.getDataDirectory(applicationContext) + File.separator + sFlutterAssetsDir;
+                kernelPath = snapshotAssetPath + File.separator + DEFAULT_KERNEL_BLOB;
+                shellArgs.add("--" + SNAPSHOT_ASSET_PATH_KEY + "=" + snapshotAssetPath);
                 shellArgs.add("--" + VM_SNAPSHOT_DATA_KEY + "=" + sVmSnapshotData);
                 shellArgs.add("--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + sIsolateSnapshotData);
             } else {
@@ -176,11 +180,10 @@ public class FlutterMain {
                 shellArgs.add("--log-tag=" + sSettings.getLogTag());
             }
 
-            String appBundlePath = findAppBundlePath(applicationContext);
             String appStoragePath = PathUtils.getFilesDir(applicationContext);
             String engineCachesPath = PathUtils.getCacheDirectory(applicationContext);
             FlutterJNI.nativeInit(applicationContext, shellArgs.toArray(new String[0]),
-                appBundlePath, appStoragePath, engineCachesPath);
+                kernelPath, appStoragePath, engineCachesPath);
 
             sInitialized = true;
         } catch (Exception e) {
@@ -263,9 +266,8 @@ public class FlutterMain {
     private static void initResources(@NonNull Context applicationContext) {
         new ResourceCleaner(applicationContext).start();
 
-        final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
-
         if (BuildConfig.DEBUG) {
+            final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
             final String packageName = applicationContext.getPackageName();
             final PackageManager packageManager = applicationContext.getPackageManager();
             final AssetManager assetManager = applicationContext.getResources().getAssets();
@@ -279,20 +281,12 @@ public class FlutterMain {
                 .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB));
 
             sResourceExtractor.start();
-        } else {
-            // AOT modes obtain compiled Dart assets from a ELF library that does
-            // not need to be extracted out of the APK.
-            // Create an empty directory that can be passed as the bundle path
-            // in the engine RunBundle API.
-            new File(dataDirPath, sFlutterAssetsDir).mkdirs();
         }
     }
 
     @Nullable
     public static String findAppBundlePath(@NonNull Context applicationContext) {
-        String dataDirectory = PathUtils.getDataDirectory(applicationContext);
-        File appBundle = new File(dataDirectory, sFlutterAssetsDir);
-        return appBundle.exists() ? appBundle.getPath() : null;
+        return sFlutterAssetsDir;
     }
 
     /**

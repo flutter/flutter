@@ -15,8 +15,6 @@ FILE: ../../../flutter/assets/asset_manager.h
 FILE: ../../../flutter/assets/asset_resolver.h
 FILE: ../../../flutter/assets/directory_asset_bundle.cc
 FILE: ../../../flutter/assets/directory_asset_bundle.h
-FILE: ../../../flutter/assets/zip_asset_store.cc
-FILE: ../../../flutter/assets/zip_asset_store.h
 FILE: ../../../flutter/benchmarking/benchmarking.cc
 FILE: ../../../flutter/benchmarking/benchmarking.h
 FILE: ../../../flutter/common/exported_symbols.sym

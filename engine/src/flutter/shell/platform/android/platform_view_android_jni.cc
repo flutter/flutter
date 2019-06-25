@@ -9,7 +9,6 @@
 #include <utility>
 
 #include "flutter/assets/directory_asset_bundle.h"
-#include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/settings.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/platform/android/jni_util.h"
@@ -190,87 +189,34 @@ static void SurfaceDestroyed(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   ANDROID_SHELL_HOLDER->GetPlatformView()->NotifyDestroyed();
 }
 
-std::unique_ptr<IsolateConfiguration> CreateIsolateConfiguration(
-    const flutter::AssetManager& asset_manager) {
-  if (flutter::DartVM::IsRunningPrecompiledCode()) {
-    return IsolateConfiguration::CreateForAppSnapshot();
-  }
-
-  const auto configuration_from_blob =
-      [&asset_manager](const std::string& snapshot_name)
-      -> std::unique_ptr<IsolateConfiguration> {
-    auto blob = asset_manager.GetAsMapping(snapshot_name);
-    auto delta = asset_manager.GetAsMapping("kernel_delta.bin");
-    if (blob && delta) {
-      std::vector<std::unique_ptr<const fml::Mapping>> kernels;
-      kernels.emplace_back(std::move(blob));
-      kernels.emplace_back(std::move(delta));
-      return IsolateConfiguration::CreateForKernelList(std::move(kernels));
-    }
-    if (blob) {
-      return IsolateConfiguration::CreateForKernel(std::move(blob));
-    }
-    if (delta) {
-      return IsolateConfiguration::CreateForKernel(std::move(delta));
-    }
-    return nullptr;
-  };
-
-  if (auto kernel = configuration_from_blob("kernel_blob.bin")) {
-    return kernel;
-  }
-
-  // This happens when starting isolate directly from CoreJIT snapshot.
-  return IsolateConfiguration::CreateForAppSnapshot();
-}
-
 static void RunBundleAndSnapshotFromLibrary(JNIEnv* env,
                                             jobject jcaller,
                                             jlong shell_holder,
-                                            jobjectArray jbundlepaths,
+                                            jstring jBundlePath,
                                             jstring jEntrypoint,
                                             jstring jLibraryUrl,
                                             jobject jAssetManager) {
   auto asset_manager = std::make_shared<flutter::AssetManager>();
-  for (const auto& bundlepath :
-       fml::jni::StringArrayToVector(env, jbundlepaths)) {
-    if (bundlepath.empty()) {
-      continue;
+
+  asset_manager->PushBack(std::make_unique<flutter::APKAssetProvider>(
+      env,                                             // jni environment
+      jAssetManager,                                   // asset manager
+      fml::jni::JavaStringToString(env, jBundlePath))  // apk asset dir
+  );
+
+  std::unique_ptr<IsolateConfiguration> isolate_configuration;
+  if (flutter::DartVM::IsRunningPrecompiledCode()) {
+    isolate_configuration = IsolateConfiguration::CreateForAppSnapshot();
+  } else {
+    std::unique_ptr<fml::Mapping> kernel_blob =
+        fml::FileMapping::CreateReadOnly(
+            ANDROID_SHELL_HOLDER->GetSettings().application_kernel_asset);
+    if (!kernel_blob) {
+      FML_DLOG(ERROR) << "Unable to load the kernel blob asset.";
+      return;
     }
-
-    // If we got a bundle path, attempt to use that as a directory asset
-    // bundle or a zip asset bundle.
-    const auto file_ext_index = bundlepath.rfind(".");
-    if (bundlepath.substr(file_ext_index) == ".zip") {
-      asset_manager->PushBack(std::make_unique<flutter::ZipAssetStore>(
-          bundlepath, "assets/flutter_assets"));
-
-    } else {
-      asset_manager->PushBack(
-          std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
-              bundlepath.c_str(), false, fml::FilePermission::kRead)));
-
-      // Use the last path component of the bundle path to determine the
-      // directory in the APK assets.
-      const auto last_slash_index = bundlepath.rfind("/", bundlepath.size());
-      if (last_slash_index != std::string::npos) {
-        auto apk_asset_dir = bundlepath.substr(
-            last_slash_index + 1, bundlepath.size() - last_slash_index);
-
-        asset_manager->PushBack(std::make_unique<flutter::APKAssetProvider>(
-            env,                       // jni environment
-            jAssetManager,             // asset manager
-            std::move(apk_asset_dir))  // apk asset dir
-        );
-      }
-    }
-  }
-
-  auto isolate_configuration = CreateIsolateConfiguration(*asset_manager);
-  if (!isolate_configuration) {
-    FML_DLOG(ERROR)
-        << "Isolate configuration could not be determined for engine launch.";
-    return;
+    isolate_configuration =
+        IsolateConfiguration::CreateForKernel(std::move(kernel_blob));
   }
 
   RunConfiguration config(std::move(isolate_configuration),
@@ -544,7 +490,7 @@ bool RegisterApi(JNIEnv* env) {
       },
       {
           .name = "nativeRunBundleAndSnapshotFromLibrary",
-          .signature = "(J[Ljava/lang/String;Ljava/lang/String;"
+          .signature = "(JLjava/lang/String;Ljava/lang/String;"
                        "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
           .fnPtr = reinterpret_cast<void*>(&RunBundleAndSnapshotFromLibrary),
       },

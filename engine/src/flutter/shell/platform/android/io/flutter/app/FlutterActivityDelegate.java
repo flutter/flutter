@@ -356,9 +356,7 @@ public final class FlutterActivityDelegate
     private void runBundle(String appBundlePath) {
         if (!flutterView.getFlutterNativeView().isApplicationRunning()) {
             FlutterRunArguments args = new FlutterRunArguments();
-            ArrayList<String> bundlePaths = new ArrayList<>();
-            bundlePaths.add(appBundlePath);
-            args.bundlePaths = bundlePaths.toArray(new String[0]);
+            args.bundlePath = appBundlePath;
             args.entrypoint = "main";
             flutterView.runFromBundle(args);
         }

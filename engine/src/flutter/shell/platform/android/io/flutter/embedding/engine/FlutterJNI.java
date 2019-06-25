@@ -580,7 +580,7 @@ public class FlutterJNI {
    */
   @UiThread
   public void runBundleAndSnapshotFromLibrary(
-      @NonNull String[] prioritizedBundlePaths,
+      @NonNull String bundlePath,
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager assetManager
@@ -589,7 +589,7 @@ public class FlutterJNI {
     ensureAttachedToNative();
     nativeRunBundleAndSnapshotFromLibrary(
         nativePlatformViewId,
-        prioritizedBundlePaths,
+        bundlePath,
         entrypointFunctionName,
         pathToEntrypointFunction,
         assetManager
@@ -598,7 +598,7 @@ public class FlutterJNI {
 
   private native void nativeRunBundleAndSnapshotFromLibrary(
       long nativePlatformViewId,
-      @NonNull String[] prioritizedBundlePaths,
+      @NonNull String bundlePath,
       @Nullable String entrypointFunctionName,
       @Nullable String pathToEntrypointFunction,
       @NonNull AssetManager manager
