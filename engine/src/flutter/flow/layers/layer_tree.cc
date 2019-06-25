@@ -83,11 +83,13 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
     }
   }
 
+  MutatorsStack stack;
   Layer::PaintContext context = {
       (SkCanvas*)&internal_nodes_canvas,
       frame.canvas(),
       frame.gr_context(),
       frame.view_embedder(),
+      stack,
       frame.context().raster_time(),
       frame.context().ui_time(),
       frame.context().texture_registry(),
@@ -108,6 +110,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
     return nullptr;
   }
 
+  MutatorsStack unused_stack;
   const Stopwatch unused_stopwatch;
   TextureRegistry unused_texture_registry;
   SkMatrix root_surface_transformation;
@@ -135,6 +138,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       canvas,  // canvas
       nullptr,
       nullptr,
+      unused_stack,
       unused_stopwatch,         // frame time (dont care)
       unused_stopwatch,         // engine time (dont care)
       unused_texture_registry,  // texture registry (not supported)
