@@ -600,11 +600,11 @@ void main() {
             child: CupertinoTextField(
               placeholder: 'placeholder',
               style: TextStyle(
-                color: Color(0X00FFFFFF),
+                color: Color(0x00FFFFFF),
                 fontWeight: FontWeight.w300,
               ),
               placeholderStyle: TextStyle(
-                color: Color(0XAAFFFFFF),
+                color: Color(0xAAFFFFFF),
                 fontWeight: FontWeight.w600
               ),
             ),
@@ -613,14 +613,14 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.color, const Color(0xAAFFFFFF));
       expect(placeholder.style.fontWeight, FontWeight.w600);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
 
       final EditableText inputText = tester.widget(find.text('input'));
-      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.color, const Color(0x00FFFFFF));
       expect(inputText.style.fontWeight, FontWeight.w300);
     },
   );
