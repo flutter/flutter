@@ -20,10 +20,10 @@ import 'theme.dart';
 /// state. They are both correlated by their index in the list.
 ///
 /// ## Customizing toggle buttons
-/// The toggle buttons are designed to be configurable, meaning that
-/// selections can be mutually exclusive, or that multiple buttons can be
-/// toggled at the same time. This can be configured using the [onPressed]
-/// callback, which is triggered when a button is pressed
+/// The toggle buttons are designed to be configurable, meaning the actions
+/// performed by tapping a toggle button and the desired interface can be
+/// designed. This can be configured using the [onPressed] callback, which
+/// is triggered when a button is pressed.
 ///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring none of the buttons to be
@@ -56,13 +56,37 @@ import 'theme.dart';
 ///   ],
 ///   onPressed: (int index) {
 ///     setState(() {
-///       isSelected.asMap().forEach((int currentIndex, bool val) {
+///       for (int currentIndex = 0; currentIndex < isSelected.length; currentIndex++) {
 ///         if (currentIndex == index) {
 ///           isSelected[currentIndex] = true;
 ///         } else {
 ///           isSelected[currentIndex] = false;
 ///         }
-///       });
+///       }
+///     });
+///   },
+///   isSelected: isSelected,
+/// ),
+/// ```
+///
+/// Here is an implementation that requires mutually exclusive selection,
+/// but allows for none of the buttons to be selected.
+/// ```dart
+/// ToggleButtons(
+///   children: <Widget>[
+///     Icon(Icons.ac_unit),
+///     Icon(Icons.call),
+///     Icon(Icons.cake),
+///   ],
+///   onPressed: (int index) {
+///     setState(() {
+///       for (int currentIndex = 0; currentIndex < isSelected.length; currentIndex++) {
+///         if (currentIndex == index) {
+///           isSelected[currentIndex] = !isSelected[currentIndex];
+///         } else {
+///           isSelected[currentIndex] = false;
+///         }
+///       }
 ///     });
 ///   },
 ///   isSelected: isSelected,
@@ -97,12 +121,19 @@ import 'theme.dart';
 /// ),
 /// ```
 ///
-/// // sample, non-mutually exclusive
+/// ## ToggleButton Borders
+/// The toggle buttons, by default, have a solid, 1 dp pixel surrounding itself
+/// and separating each button. The toggle button borders' color, width, and
+/// corner radii are configurable.
 ///
-/// SECTION ON BORDERS
-/// touch on border colors
+/// The [activeBorderColor] determines the border's color when the button is
+/// enabled, while [disabledBorderColor] determines the border's color when
+/// the button is disabled. [borderColor] is used when the button is selected
+/// and enabled.
 ///
-/// touch on border width settings
+/// To remove the border, set [borderWidth] to null. Setting [borderWidth] to
+/// 0.0 results in a hairline border. For more information on hairline borders,
+/// see [BorderSide.width].
 class ToggleButtons extends StatelessWidget {
   const ToggleButtons({
     @required this.children,
