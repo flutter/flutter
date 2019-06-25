@@ -260,7 +260,7 @@ class LocalEngineArtifacts extends Artifacts {
 
   final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
-  String _hostEngineOutPath;
+  final String _hostEngineOutPath;
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {

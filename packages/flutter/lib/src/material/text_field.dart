@@ -432,7 +432,8 @@ class TextField extends StatefulWidget {
     return enableInteractiveSelection ?? !obscureText;
   }
 
-  /// Called when the user taps on this text field.
+  /// {@template flutter.material.textfield.onTap}
+  /// Called for each distinct tap except for every second tap of a double tap.
   ///
   /// The text field builds a [GestureDetector] to handle input events like tap,
   /// to trigger focus requests, to move the caret, adjust the selection, etc.
@@ -450,6 +451,7 @@ class TextField extends StatefulWidget {
   ///
   /// To listen to arbitrary pointer events without competing with the
   /// text field's internal gesture detector, use a [Listener].
+  /// {@endtemplate}
   final GestureTapCallback onTap;
 
   /// Callback that generates a custom [InputDecorator.counter] widget.

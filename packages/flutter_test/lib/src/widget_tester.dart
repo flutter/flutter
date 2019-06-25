@@ -769,7 +769,7 @@ typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  final _TickerDisposeCallback _onDispose;
 
   @override
   void dispose() {
