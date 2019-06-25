@@ -154,6 +154,11 @@ class ToggleButtons extends StatelessWidget {
     this.color,
     this.activeColor,
     this.disabledColor,
+    this.fillColor,
+    this.focusColor,
+    this.highlightColor,
+    this.hoverColor,
+    this.splashColor,
     this.borderColor,
     this.activeBorderColor,
     this.disabledBorderColor,
@@ -194,6 +199,16 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
+
+  final Color fillColor;
+
+  final Color focusColor;
+
+  final Color highlightColor;
+
+  final Color splashColor;
+
+  final Color hoverColor;
 
   /// The border color to display when the toggle button is selected.
   final Color borderColor;
@@ -353,10 +368,18 @@ class ToggleButtons extends StatelessWidget {
           final BorderSide trailingBorderSide = _getTrailingBorderSide(index, themeData);
 
           return _ToggleButton(
+            selected: isSelected[index],
+            color: color,
+            activeColor: activeColor,
+            disabledColor: disabledColor,
+            fillColor: fillColor,
+            focusColor: focusColor,
+            highlightColor: highlightColor,
+            hoverColor: hoverColor,
+            splashColor: splashColor,
             onPressed: onPressed != null
               ? () { onPressed(index); }
               : null,
-            selected: isSelected[index],
             leadingBorderSide: leadingBorderSide,
             horizontalBorderSide: horizontalBorderSide,
             trailingBorderSide: trailingBorderSide,
