@@ -85,7 +85,7 @@ class ToggleButtons extends StatelessWidget {
   /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
-  BorderRadius _getEdgeBorderRadius (int index, int length, TextDirection textDirection) {
+  BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection) {
     if (
       index == 0 && textDirection == TextDirection.ltr ||
       index == children.length - 1 && textDirection == TextDirection.rtl
@@ -106,7 +106,7 @@ class ToggleButtons extends StatelessWidget {
     return BorderRadius.zero;
   }
 
-  BorderRadius _getClipBorderRadius (int index, int length, TextDirection textDirection) {
+  BorderRadius _getClipBorderRadius(int index, int length, TextDirection textDirection) {
     if (
       index == 0 && textDirection == TextDirection.ltr ||
       index == children.length - 1 && textDirection == TextDirection.rtl
