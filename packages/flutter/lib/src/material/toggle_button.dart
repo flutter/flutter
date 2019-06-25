@@ -172,6 +172,7 @@ class ToggleButtons extends StatelessWidget {
   /// The corresponding selection state of each toggle button.
   ///
   /// The boolean values in the list map directly to [children] by its index.
+  /// The values in the list cannot be null.
   final List<bool> isSelected;
 
   /// The callback that is called when a button is tapped.
@@ -332,6 +333,10 @@ class ToggleButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(
+      !isSelected.any((bool val) => val == null),
+      'There is a null value in isSelected: $isSelected'
+    );
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
