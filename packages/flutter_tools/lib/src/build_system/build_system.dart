@@ -536,7 +536,7 @@ void checkCycles(Target initial) {
   checkInternal(initial, <Target>{}, <Target>{});
 }
 
-/// Verifies that all  files are in a subdirectory of [Environment.buildDir].
+/// Verifies that all files are in a subdirectory of [Environment.buildDir].
 void verifyOutputDirectories(List<SourceFile> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
