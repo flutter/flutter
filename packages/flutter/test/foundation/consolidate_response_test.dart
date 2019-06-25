@@ -7,6 +7,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -15,8 +16,8 @@ import '../flutter_test_alternative.dart';
 
 void main() {
   group(consolidateHttpClientResponseBytes, () {
-    final List<int> chunkOne = <int>[0, 1, 2, 3, 4, 5];
-    final List<int> chunkTwo = <int>[6, 7, 8, 9, 10];
+    final List<int> chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
+    final List<int> chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
     MockHttpClientResponse response;
 
     setUp(() {
