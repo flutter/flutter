@@ -198,10 +198,12 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   for (auto& task : paint_tasks_) {
     FML_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
+    flutter::MutatorsStack stack;
     Layer::PaintContext context = {canvas,
                                    canvas,
                                    frame.gr_context(),
                                    nullptr,
+                                   stack,
                                    frame.context().raster_time(),
                                    frame.context().ui_time(),
                                    frame.context().texture_registry(),
