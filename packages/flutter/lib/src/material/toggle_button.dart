@@ -200,14 +200,23 @@ class ToggleButtons extends StatelessWidget {
   /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
 
+  /// The fill color for selected toggle buttons.
   final Color fillColor;
 
+  /// The color to use for filling the button when the button has input focus.
+  ///
+  /// Defaults to [ThemeData.focusColor] for the current theme.
   final Color focusColor;
 
+  /// The highlight color for the button's [InkWell].
   final Color highlightColor;
 
+  /// The splash color for the button's [InkWell].
   final Color splashColor;
 
+  /// The color to use for filling the button when the button has a pointer hovering over it.
+  ///
+  /// Defaults to ThemeData.hoverColor for the current theme.
   final Color hoverColor;
 
   /// The border color to display when the toggle button is selected.
