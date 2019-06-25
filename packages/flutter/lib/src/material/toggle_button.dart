@@ -469,22 +469,22 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }) : super(child);
 
   // The width and color of the button's leading side border.
-  final BorderSide leadingBorderSide;
+  BorderSide leadingBorderSide;
 
   // The width and color of the button's top and bottom side borders.
-  final BorderSide horizontalBorderSide;
+  BorderSide horizontalBorderSide;
 
   // The width and color of the button's trailing side border.
-  final BorderSide trailingBorderSide;
+  BorderSide trailingBorderSide;
 
   // The border radii of each corner of the button.
-  final BorderRadius borderRadius;
+  BorderRadius borderRadius;
 
   // Whether or not this toggle button is the first button in the list.
-  final bool isFirstButton;
+  bool isFirstButton;
 
   // Whether or not this toggle button is the last button in the list.
-  final bool isLastButton;
+  bool isLastButton;
 
   // The direction in which text flows for this application.
   TextDirection textDirection;
