@@ -159,7 +159,6 @@ void RasterCache::Prepare(PrerollContext* context,
     entry.image = Rasterize(context->gr_context, ctm, context->dst_color_space,
                             checkerboard_images_, layer->paint_bounds(),
                             [layer, context](SkCanvas* canvas) {
-                              MutatorsStack stack;
                               SkISize canvas_size = canvas->getBaseLayerSize();
                               SkNWayCanvas internal_nodes_canvas(
                                   canvas_size.width(), canvas_size.height());
@@ -169,7 +168,6 @@ void RasterCache::Prepare(PrerollContext* context,
                                   canvas,
                                   context->gr_context,
                                   nullptr,
-                                  stack,
                                   context->raster_time,
                                   context->ui_time,
                                   context->texture_registry,
