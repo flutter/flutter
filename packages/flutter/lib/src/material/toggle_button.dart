@@ -148,6 +148,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// Both [children] and [isSelected] properties arguments are required.
   const ToggleButtons({
+    Key key,
     @required this.children,
     @required this.isSelected,
     this.onPressed,
@@ -167,7 +168,8 @@ class ToggleButtons extends StatelessWidget {
   }) :
     assert(children != null),
     assert(isSelected != null),
-    assert(borderRadius != null);
+    assert(borderRadius != null),
+    super(key: key);
 
   /// The corresponding widget values in the toggle buttons.
   ///
