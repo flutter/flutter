@@ -49,21 +49,7 @@ const String kCommandBuildBundleTargetPlatform = 'cd24';
 const String kCommandBuildBundleIsModule = 'cd25';
 
 const String kCommandResult = 'cd26';
-
-const String kCommandDoctorDeviceValidator = 'cd27';
-const String kCommandDoctorIntelliJValidator = 'cd28';
-const String kCommandDoctorNoIdeValidator = 'cd29';
-const String kCommandDoctorFlutterValidator = 'cd30';
-const String kCommandDoctorAndroidHostPlatformValidator = 'cd31';
-const String kCommandDoctorIosHostPlatformValidator = 'cd32';
-const String kCommandDoctorIOSValidator = 'cd33';
-const String kCommandDoctorVisualStudioValidator = 'cd34';
-const String kCommandDoctorWebValidator = 'cd35';
-const String kCommandDoctorAndroidStudioValidator = 'cd36';
-const String kCommandDoctorNoAndroidStudioValidator = 'cd37';
-const String kCommandDoctorProxyValidator = 'cd38';
-const String kCommandDoctorVsCodeValidator = 'cd39';
-// Next ID: cd40
+// Next ID: cd27
 
 Usage get flutterUsage => Usage.instance;
 

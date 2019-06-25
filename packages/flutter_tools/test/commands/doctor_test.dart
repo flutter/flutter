@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:flutter_tools/src/usage.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -192,7 +193,7 @@ void main() {
 
   group('doctor with overridden validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect((await doctor.diagnose(verbose: false)).success, isTrue);
+      expect(await doctor.diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -208,46 +209,78 @@ void main() {
   });
 
   group('doctor usage params', () {
-    testUsingContext('contains installed', () async {
-      final Map<Type, String> results = getValidationResultMap(
-          (await doctor.diagnose(verbose: false)).validations);
+    Usage mockUsage;
 
-      expect(results, const <Type, String>{
-        PassingValidator: 'installed',
-      });
+    setUp(() {
+      mockUsage = MockUsage();
+      when(mockUsage.isFirstRun).thenReturn(true);
+    });
+
+    testUsingContext('contains installed', () async {
+      await doctor.diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed', 'installed'],
+      );
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
     });
 
     testUsingContext('contains installed and partial', () async {
-      final Map<Type, String> results = getValidationResultMap(
-          (await FakePassingDoctor().diagnose(verbose: false)).validations);
+      await FakePassingDoctor().diagnose(verbose: false);
 
-      expect(results, const <Type, String>{
-        PassingValidator: 'installed',
-        PartialValidatorWithHintsOnly: 'partial',
-        PartialValidatorWithErrors: 'partial',
-      });
-    }, overrides: noColorTerminalOverride);
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
 
     testUsingContext('contains installed, missing and partial', () async {
-      final Map<Type, String> results = getValidationResultMap(
-          (await FakeDoctor().diagnose(verbose: false)).validations);
+      await FakeDoctor().diagnose(verbose: false);
 
-      expect(results, const <Type, String>{
-        PassingValidator: 'installed',
-        MissingValidator: 'missing',
-        NotAvailableValidator: 'notAvailable',
-        PartialValidatorWithHintsOnly: 'partial',
-        PartialValidatorWithErrors: 'partial',
-      });
-    }, overrides: noColorTerminalOverride);
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.MissingValidator', captureAny)).captured,
+        <dynamic>['missing'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.NotAvailableValidator', captureAny)).captured,
+        <dynamic>['notAvailable'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
   });
 
   group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect((await FakeQuietDoctor().diagnose(verbose: false)).success, isTrue);
+      expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -260,7 +293,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
-      expect((await FakeSinglePassingDoctor().diagnose(verbose: false)).success, isTrue);
+      expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[!] Partial Validator with only a Hint\n'
@@ -271,7 +304,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
-      expect((await FakePassingDoctor().diagnose(verbose: false)).success, isTrue);
+      expect(await FakePassingDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -287,7 +320,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format', () async {
-      expect((await FakeDoctor().diagnose(verbose: false)).success, isFalse);
+      expect(await FakeDoctor().diagnose(verbose: false), isFalse);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -308,7 +341,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate verbose output format', () async {
-      expect((await FakeDoctor().diagnose(verbose: true)).success, isFalse);
+      expect(await FakeDoctor().diagnose(verbose: true), isFalse);
       expect(testLogger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -344,7 +377,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 1, '', ''));
 
-      expect((await FlutterValidatorDoctor().diagnose(verbose: false)).success, isTrue);
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
       final List<String> statusLines = testLogger.statusText.split('\n');
       for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
         expect(statusLines, contains(contains(msg)));
@@ -362,7 +395,7 @@ void main() {
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
-    expect((await FakeDoctor().diagnose(verbose: false)).success, isFalse);
+    expect(await FakeDoctor().diagnose(verbose: false), isFalse);
     expect(testLogger.statusText, equals(
         'Doctor summary (to see all\n'
         'details, run flutter doctor\n'
@@ -396,7 +429,7 @@ void main() {
   });
 
   testUsingContext('validate verbose output wrapping', () async {
-    expect((await FakeDoctor().diagnose(verbose: true)).success, isFalse);
+    expect(await FakeDoctor().diagnose(verbose: true), isFalse);
     expect(testLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
@@ -443,7 +476,7 @@ void main() {
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
-      expect((await FakeGroupedDoctor().diagnose()).success, isTrue);
+      expect(await FakeGroupedDoctor().diagnose(), isTrue);
       expect(testLogger.statusText, equals(
               '[✓] Category 1\n'
               '    • A helpful message\n'
@@ -459,7 +492,7 @@ void main() {
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
       // There are two subvalidators. Only the second contains statusInfo.
-      expect((await FakeGroupedDoctorWithStatus().diagnose()).success, isTrue);
+      expect(await FakeGroupedDoctorWithStatus().diagnose(), isTrue);
       expect(testLogger.statusText, equals(
               '[✓] First validator title (A status message)\n'
               '    • A helpful message\n'
@@ -477,57 +510,53 @@ void main() {
     final MissingGroupedValidator missing = MissingGroupedValidator('Category');
 
     testUsingContext('validate installed + installed = installed', () async {
-      expect((await FakeSmallGroupDoctor(installed, installed).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[✓]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + partial = partial', () async {
-      expect((await FakeSmallGroupDoctor(installed, partial).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + missing = partial', () async {
-      expect((await FakeSmallGroupDoctor(installed, missing).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + installed = partial', () async {
-      expect((await FakeSmallGroupDoctor(partial, installed).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + partial = partial', () async {
-      expect((await FakeSmallGroupDoctor(partial, partial).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + missing = partial', () async {
-      expect((await FakeSmallGroupDoctor(partial, missing).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + installed = partial', () async {
-      expect((await FakeSmallGroupDoctor(missing, installed).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + partial = partial', () async {
-      expect((await FakeSmallGroupDoctor(missing, partial).diagnose()).success, isTrue);
+      expect(await FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + missing = missing', () async {
-      expect((await FakeSmallGroupDoctor(missing, missing).diagnose()).success, isFalse);
+      expect(await FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
       expect(testLogger.statusText, startsWith('[✗]'));
     }, overrides: noColorTerminalOverride);
   });
 }
 
-Map<Type, String> getValidationResultMap(Map<Type, ValidationResult> validations) {
-  return validations.map<Type, String>((Type validationType, ValidationResult validationResult) {
-    return MapEntry<Type, String>(validationType, validationResult.typeStr);
-  });
-}
+class MockUsage extends Mock implements Usage {}
 
 class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
@@ -540,15 +569,14 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(String title) : super(title);
+  PassingValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage('A helpful message'));
     messages.add(ValidationMessage('A second, somewhat longer helpful message'));
-    return ValidationResult(ValidationType.installed, messages,
-        statusInfo: 'with statusInfo');
+    return ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
   }
 }
 
@@ -723,8 +751,7 @@ class PassingGroupedValidatorWithStatus extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage('A different message'));
-    return ValidationResult(ValidationType.installed, messages,
-        statusInfo: 'A status message');
+    return ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
   }
 }
 

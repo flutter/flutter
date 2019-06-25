@@ -31,6 +31,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
+import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -61,22 +62,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(AndroidHostPlatformValidator(
-          <DoctorValidator>[
-            androidValidator,
-            androidLicenseValidator,
-          ]
-        )
-      );
+        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        _validators.add(IosHostPlatformValidator(
-          <DoctorValidator>[
-            xcodeValidator,
-            cocoapodsValidator
-          ]
-        )
-      );
+        _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
@@ -138,20 +127,6 @@ class ValidatorTask {
   ValidatorTask(this.validator, this.result);
   final DoctorValidator validator;
   final Future<ValidationResult> result;
-}
-
-/// The diagnosis of [Doctor].
-class DiagnoseResult {
-  const DiagnoseResult({
-    this.success,
-    this.validations = const <Type, ValidationResult>{},
-  });
-  /// Whether all the validations passed. This means that no validation
-  /// resulted in [ValidationType.missing].
-  final bool success;
-
-  /// The result of the validations performed.
-  final Map<Type, ValidationResult> validations;
 }
 
 class Doctor {
@@ -227,16 +202,14 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<DiagnoseResult> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return DiagnoseResult(success: await AndroidLicenseValidator.runLicenseManager());
+      return AndroidLicenseValidator.runLicenseManager();
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
-
-    final Map<Type, ValidationResult> validationResults = <Type, ValidationResult>{};
-    bool doctorSuccess = true;
+    bool doctorResult = true;
     int issues = 0;
 
     for (ValidatorTask validatorTask in startValidatorTasks()) {
@@ -254,11 +227,9 @@ class Doctor {
       }
       status.stop();
 
-      validationResults[validator.runtimeType] = result;
-
       switch (result.type) {
         case ValidationType.missing:
-          doctorSuccess = false;
+          doctorResult = false;
           issues += 1;
           break;
         case ValidationType.partial:
@@ -268,6 +239,8 @@ class Doctor {
         case ValidationType.installed:
           break;
       }
+
+      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
 
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
@@ -302,7 +275,8 @@ class Doctor {
     } else {
       printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
     }
-    return DiagnoseResult(success: doctorSuccess, validations: validationResults);
+
+    return doctorResult;
   }
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
@@ -356,10 +330,9 @@ abstract class DoctorValidator {
 }
 
 /// A validator that runs other [DoctorValidator]s and combines their output
-/// into a single [ValidationResult]. It uses the title and the usage param key
-/// of the first validator passed to the constructor and reports the statusInfo
-/// of the first validator that provides one. Other titles and statusInfo strings
-/// are discarded.
+/// into a single [ValidationResult]. It uses the title of the first validator
+/// passed to the constructor and reports the statusInfo of the first validator
+/// that provides one. Other titles and statusInfo strings are discarded.
 class GroupedValidator extends DoctorValidator {
   GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
@@ -413,24 +386,10 @@ class GroupedValidator extends DoctorValidator {
       }
       mergedMessages.addAll(result.messages);
     }
-    return ValidationResult(
-        mergedType,
-        mergedMessages,
-        statusInfo: statusInfo,
-      );
+
+    return ValidationResult(mergedType, mergedMessages,
+        statusInfo: statusInfo);
   }
-}
-
-/// This wrapper class is needed to distinguish the type of the validator
-/// exported by [Doctor.diagnose].
-class AndroidHostPlatformValidator extends GroupedValidator {
-  AndroidHostPlatformValidator(List<DoctorValidator> subValidators) : super(subValidators);
-}
-
-/// This wrapper class is needed to distinguish the type of the validator
-/// exported by [Doctor.diagnose].
-class IosHostPlatformValidator extends GroupedValidator {
-  IosHostPlatformValidator(List<DoctorValidator> subValidators) : super(subValidators);
 }
 
 class ValidationResult {
@@ -589,9 +548,7 @@ class NoIdeValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     return ValidationResult(ValidationType.missing, <ValidationMessage>[
       ValidationMessage(userMessages.noIdeInstallationInfo),
-      ],
-      statusInfo: userMessages.noIdeStatusInfo
-    );
+    ], statusInfo: userMessages.noIdeStatusInfo);
   }
 }
 
@@ -811,8 +768,7 @@ class DeviceValidator extends DoctorValidator {
     if (devices.isEmpty) {
       return ValidationResult(ValidationType.notAvailable, messages);
     } else {
-      return ValidationResult(ValidationType.installed, messages,
-          statusInfo: userMessages.devicesAvailable(devices.length));
+      return ValidationResult(ValidationType.installed, messages, statusInfo: userMessages.devicesAvailable(devices.length));
     }
   }
 }

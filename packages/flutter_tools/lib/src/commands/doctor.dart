@@ -4,19 +4,9 @@
 
 import 'dart:async';
 
-import '../android/android_studio_validator.dart';
-import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../doctor.dart';
-import '../ios/ios_workflow.dart';
-import '../macos/cocoapods_validator.dart';
-import '../macos/xcode_validator.dart';
-import '../proxy_validator.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
-import '../vscode/vscode_validator.dart';
-import '../web/web_validator.dart';
-import '../windows/visual_studio_validator.dart';
 
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({this.verbose = false}) {
@@ -40,67 +30,6 @@ class DoctorCommand extends FlutterCommand {
   @override
   final String description = 'Show information about the installed tooling.';
 
-  Map<Type, ValidationResult> _validations;
-
-  @override
-  Future<Map<String, String>> get usageValues async {
-    assert(_validations != null);
-    return _validations
-      .map<String, String>((Type validationType, ValidationResult result) {
-        String dimension = '';
-        switch (validationType) {
-          case DeviceValidator:
-            dimension = kCommandDoctorDeviceValidator;
-            break;
-          case IntelliJValidator:
-            dimension = kCommandDoctorIntelliJValidator;
-            break;
-          case NoIdeValidator:
-            dimension = kCommandDoctorNoIdeValidator;
-            break;
-          case FlutterValidator:
-            dimension = kCommandDoctorFlutterValidator;
-            break;
-          case AndroidValidator:
-          case AndroidHostPlatformValidator:
-          case AndroidLicenseValidator:
-            dimension = kCommandDoctorAndroidHostPlatformValidator;
-            break;
-          case XcodeValidator:
-          case IosHostPlatformValidator:
-          case CocoaPodsValidator:
-            dimension = kCommandDoctorIosHostPlatformValidator;
-            break;
-          case IOSValidator:
-            dimension = kCommandDoctorIOSValidator;
-            break;
-          case VisualStudioValidator:
-            dimension = kCommandDoctorVisualStudioValidator;
-            break;
-          case WebValidator:
-            dimension = kCommandDoctorWebValidator;
-            break;
-          case AndroidStudioValidator:
-            dimension = kCommandDoctorAndroidStudioValidator;
-            break;
-          case NoAndroidStudioValidator:
-            dimension = kCommandDoctorNoAndroidStudioValidator;
-            break;
-          case ProxyValidator:
-            dimension = kCommandDoctorProxyValidator;
-            break;
-          case VsCodeValidator:
-            dimension = kCommandDoctorVsCodeValidator;
-            break;
-          default:
-            print(validationType);
-            break;
-        }
-        return MapEntry<String, String>(dimension, result.typeStr);
-      }
-    );
-  }
-
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.wasParsed('check-for-remote-artifacts')) {
@@ -116,11 +45,7 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final DiagnoseResult result = await doctor.diagnose(
-      androidLicenses: argResults['android-licenses'],
-      verbose: verbose,
-    );
-    _validations = result.validations;
-    return FlutterCommandResult(result.success ? ExitStatus.success : ExitStatus.warning);
+    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
+    return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }
