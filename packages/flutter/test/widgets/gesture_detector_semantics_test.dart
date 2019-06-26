@@ -703,17 +703,17 @@ Map<Type, GestureRecognizerFactory> _buildGestureMap<T extends GestureRecognizer
 }
 
 class _TestSemanticsGestureDelegate extends SemanticsGestureDelegate {
-  _TestSemanticsGestureDelegate({
+  const _TestSemanticsGestureDelegate({
     this.onTap,
     this.onLongPress,
     this.onHorizontalDragUpdate,
     this.onVerticalDragUpdate,
   });
 
-  GestureTapCallback onTap;
-  GestureLongPressCallback onLongPress;
-  GestureDragUpdateCallback onHorizontalDragUpdate;
-  GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureTapCallback onTap;
+  final GestureLongPressCallback onLongPress;
+  final GestureDragUpdateCallback onHorizontalDragUpdate;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
 
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {

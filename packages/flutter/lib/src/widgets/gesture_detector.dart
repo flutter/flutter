@@ -1062,7 +1062,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 /// It is used to allow custom [GestureDetector]s to add semantics notations.
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
-  SemanticsGestureDelegate();
+  const SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the [RenderSemanticsGestureHandler] render
   /// object of the gesture detector.
