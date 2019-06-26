@@ -26,7 +26,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.5.2';
+const String protocolVersion = '0.5.3';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -777,6 +777,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
     'ephemeral': device.ephemeral,
+    'emulatorId': await device.emulatorId,
   };
 }
 
