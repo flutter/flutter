@@ -88,10 +88,33 @@ task:
       container:
         cpu: 4
         memory: 12G
+    # all of the tests except the ones in test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tool_tests_create-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -185,6 +208,57 @@ task:
         - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
 
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  windows_container:
+    image: cirrusci/android-sdk:28-windowsservercore-2019
+    os_version: 2019
+    cpu: 4
+  env:
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+  git_fetch_script:
+    - git clean -xfd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $APPDATA\Pub\Cache
+    fingerprint_script:
+      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+  flutter_pkg_cache:
+    folder: bin\cache\pkg
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  artifacts_cache:
+    folder: bin\cache\artifacts
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  setup_script:
+    - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat doctor -v
+    - bin\flutter.bat update-packages
+    - git fetch origin master
+  test_all_script:
+    - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
+  matrix:
+    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
+    - name: tool_tests-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: tool
+        SHARD_INDEX: 1
+    # all of the tests in test/commands/create_test
+    - name: tool_tests_create-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
@@ -230,10 +304,6 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: extras
-    - name: tool_tests-windows
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
     - name: build_tests-windows
       env:
         SHARD: build_tests
@@ -294,6 +364,58 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
+  print_date_script:
+    - date
+  git_fetch_script:
+    - git clean -xfd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter doctor -v
+    - bin/flutter update-packages
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+  matrix:
+    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
+    - name: tool_tests-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: tool
+        SHARD_INDEX: 1
+    # all of the tests in test/commands/create_test
+    - name: tool_tests_create-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  osx_instance:
+    image: mojave-xcode-10.1
+  depends_on:
+    - analyze
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+    COCOAPODS_DISABLE_STATS: true
   matrix:
     - name: tests_widgets-macos
       env:
@@ -310,10 +432,6 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: extras
-    - name: tool_tests-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
     - name: $SHARD-macos
       env:
         matrix:
@@ -368,6 +486,8 @@ docker_builder:
     - tests_framework_other-linux
     - tests_extras-linux
     - tool_tests-linux
+    - tool_tests_create-linux
+    - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
     - integration_tests_gradle-linux

@@ -1953,12 +1953,6 @@ abstract class RenderBox extends RenderObject {
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
         final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
-        errorParts.add(ErrorSummary('$runtimeType object was given an infinite size during layout.'));
-        errorParts.add(ErrorDescription(
-          'This probably means that it is a render object that tries to be '
-          'as big as possible, but it was put inside another render object '
-          'that allows its children to pick their own size.'
-        ));
         errorParts.addAll(information);
         errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
         errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));

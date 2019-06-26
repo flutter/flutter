@@ -116,6 +116,42 @@ android {
     ''');
   }
 
+  Future<void> addGlobalBuildType(String name, {String initWith}) async {
+    final File buildScript = File(
+      path.join(androidPath, 'build.gradle'),
+    );
+
+    buildScript.openWrite(mode: FileMode.append).write('''
+subprojects {
+  afterEvaluate {
+    android {
+        buildTypes {
+            $name {
+                initWith $initWith
+            }
+        }
+    }
+  }
+}
+    ''');
+  }
+
+  Future<void> addPlugin(String plugin) async {
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
+    String content = await pubspec.readAsString();
+    content = content.replaceFirst(
+      '\ndependencies:\n',
+      '\ndependencies:\n  $plugin:\n',
+    );
+    await pubspec.writeAsString(content, flush: true);
+  }
+
+  Future<void> getPackages() async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('pub', options: <String>['get']);
+    });
+  }
+
   Future<void> addProductFlavors(Iterable<String> flavors) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
