@@ -727,7 +727,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     final Offset bottomRight = size.bottomRight(offset);
     final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
     final Rect center = outer.deflate(horizontalBorderSide.width / 2.0);
-    final double sweepAngle = math.pi / 2.0;
+    const double sweepAngle = math.pi / 2.0;
 
     final RRect rrect = RRect.fromRectAndCorners(
       center,
