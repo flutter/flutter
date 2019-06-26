@@ -129,7 +129,7 @@ class ToggleButtonsTheme extends InheritedWidget {
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
   ///
-  /// To omit the border entirely, set this value to null.
+  /// To omit the border entirely, set [renderBorder] to false.
   ///
   /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
   /// See [BorderSide.width] for more details on hairline borders.
@@ -318,15 +318,15 @@ class ToggleButtons extends StatelessWidget {
     this.highlightColor,
     this.hoverColor,
     this.splashColor,
+    this.renderBorder = true,
     this.borderColor,
     this.activeBorderColor,
     this.disabledBorderColor,
-    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
-    this.borderWidth = 1.0,
+    this.borderRadius,
+    this.borderWidth,
   }) :
     assert(children != null),
     assert(isSelected != null),
-    assert(borderRadius != null),
     super(key: key);
 
   /// The corresponding widget values in the toggle buttons.
@@ -379,6 +379,13 @@ class ToggleButtons extends StatelessWidget {
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
 
+  /// Whether or not to render a border around each toggle button.
+  ///
+  /// When set to true, a border with [borderWidth], [borderRadius] and the
+  /// corresponsing border colors will render. Otherwise, no border will be
+  /// rendered.
+  final bool renderBorder;
+
   /// The border color to display when the toggle button is selected.
   final Color borderColor;
 
@@ -404,43 +411,47 @@ class ToggleButtons extends StatelessWidget {
   /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
-  BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection) {
+  BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsTheme toggleButtonsTheme) {
+    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius;
+
     if (
       index == 0 && textDirection == TextDirection.ltr ||
       index == children.length - 1 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topLeft: borderRadius.topLeft,
-        bottomLeft: borderRadius.bottomLeft,
+        topLeft: resultingBorderRadius.topLeft,
+        bottomLeft: resultingBorderRadius.bottomLeft,
       );
     } else if (
       index == children.length - 1 && textDirection == TextDirection.ltr ||
       index == 0 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topRight: borderRadius.topRight,
-        bottomRight: borderRadius.bottomRight,
+        topRight: resultingBorderRadius.topRight,
+        bottomRight: resultingBorderRadius.bottomRight,
       );
     }
     return BorderRadius.zero;
   }
 
-  BorderRadius _getClipBorderRadius(int index, int length, TextDirection textDirection) {
+  BorderRadius _getClipBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsTheme toggleButtonsTheme) {
+    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius;
+
     if (
       index == 0 && textDirection == TextDirection.ltr ||
       index == children.length - 1 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topLeft: borderRadius.topLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
-        bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth ?? 0.0 / 2.0),
+        topLeft: resultingBorderRadius.topLeft - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
+        bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
       );
     } else if (
       index == children.length - 1 && textDirection == TextDirection.ltr ||
       index == 0 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topRight: borderRadius.topRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
-        bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth ?? 0.0 / 2.0),
+        topRight: resultingBorderRadius.topRight - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
+        bottomRight: resultingBorderRadius.bottomRight - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
       );
     }
     return BorderRadius.zero;
@@ -451,7 +462,7 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsTheme toggleButtonsTheme,
   ) {
-    if (borderWidth == null)
+    if (!renderBorder)
       return BorderSide.none;
 
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
@@ -477,7 +488,7 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsTheme toggleButtonsTheme,
   ) {
-    if (borderWidth == null)
+    if (!renderBorder)
       return BorderSide.none;
 
     if (onPressed != null && isSelected[index]) {
@@ -503,7 +514,7 @@ class ToggleButtons extends StatelessWidget {
     ThemeData theme,
     ToggleButtonsTheme toggleButtonsTheme,
   ) {
-    if (borderWidth == null)
+    if (!renderBorder)
       return BorderSide.none;
 
     if (index != children.length - 1)
@@ -542,8 +553,8 @@ class ToggleButtons extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: List<Widget>.generate(children.length, (int index) {
-          final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(index, children.length, textDirection);
-          final BorderRadius clipBorderRadius = _getClipBorderRadius(index, children.length, textDirection);
+          final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(index, children.length, textDirection, toggleButtonsTheme);
+          final BorderRadius clipBorderRadius = _getClipBorderRadius(index, children.length, textDirection, toggleButtonsTheme);
 
           final BorderSide leadingBorderSide = _getLeadingBorderSide(index, theme, toggleButtonsTheme);
           final BorderSide horizontalBorderSide = _getHorizontalBorderSide(index, theme, toggleButtonsTheme);
