@@ -471,9 +471,6 @@ void main() {
         expect(tester.getBottomLeft(find.text('label')).dy, 308.0);
 
         // Entering text happens in the center as well.
-        // TODO(justinmc): This is the last failing test right now. Looking at
-        // the above app, I expect the text the center in the input. However,
-        // currently it happens at the top.
         await tester.enterText(find.byType(InputDecorator), text);
         expect(tester.getTopLeft(find.text(text)).dy, 291.0);
         controller.clear();

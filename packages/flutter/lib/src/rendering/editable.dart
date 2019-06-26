@@ -1252,11 +1252,6 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    // Use the full available height if expands is true.
-    if (expands) {
-      return constraints.maxHeight;
-    }
-
     // Lock height to maxLines if needed.
     final bool lockedMax = maxLines != null && minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
