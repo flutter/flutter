@@ -124,7 +124,7 @@ void main() {
   });
 
   testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
-    bool _called = false;
+    String _value;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -132,7 +132,7 @@ void main() {
           child: Center(
             child: TextFormField(
               onChanged: (String value) {
-                _called = true;
+                _value = value;
               },
             ),
           ),
@@ -142,7 +142,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), 'Soup');
     await tester.pump();
-    expect(_called, true);
+    expect(_value, 'Soup');
   });
 
   testWidgets('autovalidate is passed to super', (WidgetTester tester) async {

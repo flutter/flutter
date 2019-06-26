@@ -172,7 +172,6 @@ class TextFormField extends FormField<String> {
         minLines: minLines,
         expands: expands,
         maxLength: maxLength,
-        // onChanged: field.didChange,
         onChanged: onChangedHandler,
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
