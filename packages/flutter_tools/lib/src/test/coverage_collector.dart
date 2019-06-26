@@ -50,9 +50,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     printTrace('collecting coverage data from $observatoryUri...');
-
-    Map<String, dynamic> data;
-    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
+    final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
       // If we have a specified coverage directory or could not find the package name, then
       // accept all libraries.
       if (coverageDirectory != null) {
@@ -62,13 +60,10 @@ class CoverageCollector extends TestWatcher {
         return true;
       }
       return libraryName.contains(flutterProject.manifest.appName);
-    })
-      .then<void>((Map<String, dynamic> result) {
-        if (result == null)
-          throw Exception('Failed to collect coverage.');
-        data = result;
-      });
-    await Future.any<void>(<Future<void>>[ collectionComplete ]);
+    });
+    if (data == null) {
+      throw Exception('Failed to collect coverage.');
+    }
     assert(data != null);
 
     print('($observatoryUri): collected coverage data; merging...');

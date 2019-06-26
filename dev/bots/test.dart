@@ -215,18 +215,18 @@ Future<void> _runToolCoverage() async {
 
   // The name of this subshard has to match the --file path provided at
   // the end of this test script in `.cirrus.yml`.
-  String subshard = 'A';
-  for (List<String> testGroup in tests) {
+  const List<String> subshards = <String>['A', 'B'];
+  for (int i = 0; i < tests.length; i++) {
+    final List<String> testGroup = tests[i];
     await runCommand(
       dart,
       <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
       workingDirectory: toolRoot,
       environment: <String, String>{
         'FLUTTER_ROOT': flutterRoot,
-        'SUBSHARD': subshard,
+        'SUBSHARD': subshards[i],
       }
     );
-    subshard = 'B';
   }
 }
 

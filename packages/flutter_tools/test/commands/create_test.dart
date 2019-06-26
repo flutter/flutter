@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['no_coverage']) // This test takes nearly 45 minutes with coverage enabled.
+// This test performs too poorly to run with coverage enabled.
+@Tags(<String>['no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
