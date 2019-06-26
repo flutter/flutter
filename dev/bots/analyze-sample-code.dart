@@ -430,7 +430,7 @@ class SampleChecker {
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null ? sampleMatch[1] == 'snippet' : false;
+            inSnippet = sampleMatch != null && sampleMatch[1] == 'snippet';
             if (inSnippet) {
               startLine = Line(
                 '',
