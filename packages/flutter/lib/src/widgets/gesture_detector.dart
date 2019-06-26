@@ -813,19 +813,63 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// When [semantics] is null, [RawGestureDetector] will fall back to a
   /// default delegate which checks if the detector owns certain gesture
-  /// recognizers and calls their callbacks if they exist.
+  /// recognizers and calls their callbacks if they exist:
   ///
-  ///  * During a semantic tap, it looks for [TapGestureRecognizer] and calls
+  ///  * During a semantic tap, it calls [TapGestureRecognizer]'s
   ///    `onTapDown`, `onTapUp`, and `onTap`.
-  ///  * During a semantic long press, it looks for [LongPressGestureRecognizer]
-  ///    and calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
-  ///    `onLongPressUp`.
-  ///  * During a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
-  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same callbacks.
-  ///  * During a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
-  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same callbacks.
+  ///  * During a semantic long press, it calls [LongPressGestureRecognizer]'s
+  ///    `onLongPressStart`, `onLongPress`, `onLongPressEnd` and `onLongPressUp`.
+  ///  * During a semantic horizontal drag, it calls [HorizontalDragGestureRecognizer]'s
+  ///    `onDown`, `onStart`, `onUpdate` and `onEnd`, then
+  ///    [PanGestureRecognizer]'s `onDown`, `onStart`, `onUpdate` and `onEnd`.
+  ///  * During a semantic vertical drag, it calls [VerticalDragGestureRecognizer]'s
+  ///    `onDown`, `onStart`, `onUpdate` and `onEnd`, then
+  ///    [PanGestureRecognizer]'s `onDown`, `onStart`, `onUpdate` and `onEnd`.
+  ///
+  /// {@tool sample}
+  /// This custom gesture detector listens to force presses, while also allows
+  /// the same callback to be triggered by semantic long presses.
+  ///
+  /// ```dart
+  /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
+  ///   const ForcePressGestureDetectorWithSemantics({
+  ///     this.child,
+  ///     this.onForcePress,
+  ///   });
+  ///
+  ///   final Widget child;
+  ///   final VoidCallback onForcePress;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RawGestureDetector(
+  ///       gestures: <Type, GestureRecognizerFactory>{
+  ///         ForcePressGestureRecognizer: GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+  ///           () => ForcePressGestureRecognizer(debugOwner: this),
+  ///           (ForcePressGestureRecognizer instance) {
+  ///             instance.onStart = (_) => onForcePress();
+  ///           }
+  ///         ),
+  ///       },
+  ///       behavior: HitTestBehavior.opaque,
+  ///       semantics: _LongPressSemanticsDelegate(onForcePress),
+  ///       child: child,
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class _LongPressSemanticsDelegate extends SemanticsGestureDelegate {
+  ///   _LongPressSemanticsDelegate(this.onLongPress);
+  ///
+  ///   VoidCallback onLongPress;
+  ///
+  ///   @override
+  ///   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  ///     renderObject.onLongPress = onLongPress;
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   final SemanticsGestureDelegate semantics;
 
   @override
