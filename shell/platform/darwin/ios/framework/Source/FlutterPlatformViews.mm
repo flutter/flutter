@@ -230,7 +230,7 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
 
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view) {
-  FML_DCHECK(CATransform3DEqualToTransform(head.layer.transform, CATransform3DIdentity));
+  FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
 
   UIView* head = embedded_view;
   head.clipsToBounds = YES;
