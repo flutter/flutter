@@ -597,6 +597,7 @@ void main() {
          isSelected: true,
          isButton: true,
          isTextField: true,
+         isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
          isEnabled: true,

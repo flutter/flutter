@@ -105,7 +105,7 @@ Future<int> runTests(
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  loader.installHook(
+  final loader.FlutterPlatform platform = loader.installHook(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -145,5 +145,6 @@ Future<int> runTests(
     return exitCode;
   } finally {
     fs.currentDirectory = saved;
+    await platform.close();
   }
 }

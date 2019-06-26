@@ -218,7 +218,6 @@ abstract class Emulator {
   final bool hasConfig;
   String get name;
   String get manufacturer;
-  String get label;
   Category get category;
   PlatformType get platformType;
 
@@ -250,7 +249,7 @@ abstract class Emulator {
         emulator.id ?? '',
         emulator.name ?? '',
         emulator.manufacturer ?? '',
-        emulator.label ?? '',
+        emulator.platformType?.toString() ?? '',
       ]);
     }
 

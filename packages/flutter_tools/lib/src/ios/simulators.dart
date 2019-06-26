@@ -27,6 +27,7 @@ import 'mac.dart';
 import 'plist_utils.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
+const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('iOS simulators');
@@ -229,6 +230,9 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => true;
+
+  @override
+  Future<String> get emulatorId async => iosSimulatorId;
 
   @override
   bool get supportsHotReload => true;
