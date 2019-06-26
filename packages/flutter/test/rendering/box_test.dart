@@ -9,6 +9,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'rendering_tester.dart';
 
+class MissingPerformLayoutRenderBox extends RenderBox {
+  void triggerExceptionSettingSizeOutsideOfLayout() {
+    size = const Size(200, 200);
+  }
+
+  // performLayout is left unimplemented to test the error reported if it is
+  // missing.
+}
+
+class FakeMissingSizeRenderBox extends RenderBox {
+  @override
+  void performLayout() {
+    size = constraints.biggest;
+  }
+
+  @override
+  bool get hasSize => !fakeMissingSize && super.hasSize;
+
+  bool fakeMissingSize = false;
+}
+
 void main() {
   test('should size to render view', () {
     final RenderBox root = RenderDecoratedBox(
@@ -25,6 +46,165 @@ void main() {
     layout(root);
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
+  });
+
+  test('performLayout error message', () {
+    FlutterError result;
+    try {
+      MissingPerformLayoutRenderBox().performLayout();
+    }  on FlutterError catch (e) {
+      result = e;
+    }
+    expect(result, isNotNull);
+    expect(
+      result.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   MissingPerformLayoutRenderBox did not implement performLayout().\n'
+        '   RenderBox subclasses need to either override performLayout() to\n'
+        '   set a size and lay out any children, or, set sizedByParent to\n'
+        '   true so that performResize() sizes the render object.\n'
+      )
+    );
+    expect(
+      result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+      'RenderBox subclasses need to either override performLayout() to set a '
+      'size and lay out any children, or, set sizedByParent to true so that '
+      'performResize() sizes the render object.'
+    );
+  });
+
+  test('applyPaintTransform error message', () {
+    final RenderBox paddingBox = RenderPadding(
+      padding: const EdgeInsets.all(10.0),
+    );
+    final RenderBox root = RenderPadding(
+      padding: const EdgeInsets.all(10.0),
+      child: paddingBox,
+    );
+    layout(root);
+    // Trigger the error by overriding the parentData with data that isn't a
+    // BoxParentData.
+    paddingBox.parentData = ParentData();
+
+    FlutterError result;
+    try {
+      root.applyPaintTransform(paddingBox, Matrix4.identity());
+    } on FlutterError catch (e) {
+      result = e;
+    }
+    expect(result, isNotNull);
+    expect(
+      result.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   RenderPadding does not implement applyPaintTransform.\n'
+        '   The following RenderPadding object: RenderPadding#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE:\n'
+        '     parentData: <none>\n'
+        '     constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '     size: Size(800.0, 600.0)\n'
+        '     padding: EdgeInsets.all(10.0)\n'
+        '   ...did not use a BoxParentData class for the parentData field of the following child:\n'
+        '     RenderPadding#00000 NEEDS-PAINT:\n'
+        '     parentData: <none> (can use size)\n'
+        '     constraints: BoxConstraints(w=780.0, h=580.0)\n'
+        '     size: Size(780.0, 580.0)\n'
+        '     padding: EdgeInsets.all(10.0)\n'
+        '   The RenderPadding class inherits from RenderBox.\n'
+        '   The default applyPaintTransform implementation provided by\n'
+        '   RenderBox assumes that the children all use BoxParentData objects\n'
+        '   for their parentData field. Since RenderPadding does not in fact\n'
+        '   use that ParentData class for its children, it must provide an\n'
+        '   implementation of applyPaintTransform that supports the specific\n'
+        '   ParentData subclass used by its children (which apparently is\n'
+        '   ParentData).\n'
+      ),
+    );
+
+    expect(
+      result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+      'The default applyPaintTransform implementation provided by RenderBox '
+      'assumes that the children all use BoxParentData objects for their '
+      'parentData field. Since RenderPadding does not in fact use that '
+      'ParentData class for its children, it must provide an implementation '
+      'of applyPaintTransform that supports the specific ParentData subclass '
+      'used by its children (which apparently is ParentData).'
+    );
+
+  });
+
+  test('Set size error messages', () {
+    final RenderBox root = RenderDecoratedBox(
+      decoration: const BoxDecoration(
+        color: Color(0xFF00FF00),
+      ),
+    );
+    layout(root);
+
+    final MissingPerformLayoutRenderBox testBox = MissingPerformLayoutRenderBox();
+    {
+      FlutterError result;
+      try {
+        testBox.triggerExceptionSettingSizeOutsideOfLayout();
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   RenderBox size setter called incorrectly.\n'
+          '   The size setter was called from outside layout (neither\n'
+          '   performResize() nor performLayout() were being run for this\n'
+          '   object).\n'
+          '   Because this RenderBox has sizedByParent set to false, it must\n'
+          '   set its size in performLayout().\n'
+        )
+      );
+      expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint), isEmpty);
+    }
+    {
+      FlutterError result;
+      try {
+        testBox.debugAdoptSize(root.size);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The size property was assigned a size inappropriately.\n'
+          '   The following render object: MissingPerformLayoutRenderBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED:\n'
+          '     parentData: MISSING\n'
+          '     constraints: MISSING\n'
+          '     size: MISSING\n'
+          '   ...was assigned a size obtained from: RenderDecoratedBox#00000 NEEDS-PAINT:\n'
+          '     parentData: <none>\n'
+          '     constraints: BoxConstraints(w=800.0, h=600.0)\n'
+          '     size: Size(800.0, 600.0)\n'
+          '     decoration: BoxDecoration:\n'
+          '       color: Color(0xff00ff00)\n'
+          '     configuration: ImageConfiguration()\n'
+          '   However, this second render object is not, or is no longer, a\n'
+          '   child of the first, and it is therefore a violation of the\n'
+          '   RenderBox layout protocol to use that size in the layout of the\n'
+          '   first render object.\n'
+          '   If the size was obtained at a time where it was valid to read the\n'
+          '   size (because the second render object above was a child of the\n'
+          '   first at the time), then it should be adopted using\n'
+          '   debugAdoptSize at that time.\n'
+          '   If the size comes from a grandchild or a render object from an\n'
+          '   entirely different part of the render tree, then there is no way\n'
+          '   to be notified when the size changes and therefore attempts to\n'
+          '   read that size are almost certainly a source of bugs. A different\n'
+          '   approach should be used.\n'
+        )
+      );
+      expect(result.diagnostics.where((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).length, 2);
+    }
   });
 
   test('Flex and padding', () {
@@ -190,6 +370,230 @@ void main() {
     expect(unconstrained.getMaxIntrinsicHeight(100.0), equals(0.0));
     expect(unconstrained.getMinIntrinsicWidth(100.0), equals(200.0));
     expect(unconstrained.getMaxIntrinsicWidth(100.0), equals(200.0));
+  });
+
+  test ('getMinInstrinsicWidth error handling', () {
+    final RenderUnconstrainedBox unconstrained = RenderUnconstrainedBox(
+      textDirection: TextDirection.ltr,
+      child: RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200.0),
+      ),
+      alignment: Alignment.center,
+    );
+    const BoxConstraints viewport = BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    layout(unconstrained, constraints: viewport);
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMinIntrinsicWidth(null);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The height argument to getMinIntrinsicWidth was null.\n'
+          '   The argument to getMinIntrinsicWidth must not be negative or\n'
+          '   null.\n'
+          '   If you do not have a specific height in mind, then pass\n'
+          '   double.infinity instead.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you do not have a specific height in mind, then pass double.infinity instead.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMinIntrinsicWidth(-1);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The height argument to getMinIntrinsicWidth was negative.\n'
+          '   The argument to getMinIntrinsicWidth must not be negative or\n'
+          '   null.\n'
+          '   If you perform computations on another height before passing it\n'
+          '   to getMinIntrinsicWidth, consider using math.max() or\n'
+          '   double.clamp() to force the value into the valid range.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you perform computations on another height before passing it to '
+        'getMinIntrinsicWidth, consider using math.max() or double.clamp() '
+        'to force the value into the valid range.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMinIntrinsicHeight(null);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The width argument to getMinIntrinsicHeight was null.\n'
+          '   The argument to getMinIntrinsicHeight must not be negative or\n'
+          '   null.\n'
+          '   If you do not have a specific width in mind, then pass\n'
+          '   double.infinity instead.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you do not have a specific width in mind, then pass double.infinity instead.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMinIntrinsicHeight(-1);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The width argument to getMinIntrinsicHeight was negative.\n'
+          '   The argument to getMinIntrinsicHeight must not be negative or\n'
+          '   null.\n'
+          '   If you perform computations on another width before passing it to\n'
+          '   getMinIntrinsicHeight, consider using math.max() or\n'
+          '   double.clamp() to force the value into the valid range.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you perform computations on another width before passing it to '
+        'getMinIntrinsicHeight, consider using math.max() or double.clamp() '
+        'to force the value into the valid range.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMaxIntrinsicWidth(null);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The height argument to getMaxIntrinsicWidth was null.\n'
+          '   The argument to getMaxIntrinsicWidth must not be negative or\n'
+          '   null.\n'
+          '   If you do not have a specific height in mind, then pass\n'
+          '   double.infinity instead.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you do not have a specific height in mind, then pass double.infinity instead.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMaxIntrinsicWidth(-1);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The height argument to getMaxIntrinsicWidth was negative.\n'
+          '   The argument to getMaxIntrinsicWidth must not be negative or\n'
+          '   null.\n'
+          '   If you perform computations on another height before passing it\n'
+          '   to getMaxIntrinsicWidth, consider using math.max() or\n'
+          '   double.clamp() to force the value into the valid range.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you perform computations on another height before passing it to '
+        'getMaxIntrinsicWidth, consider using math.max() or double.clamp() '
+        'to force the value into the valid range.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMaxIntrinsicHeight(null);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The width argument to getMaxIntrinsicHeight was null.\n'
+          '   The argument to getMaxIntrinsicHeight must not be negative or\n'
+          '   null.\n'
+          '   If you do not have a specific width in mind, then pass\n'
+          '   double.infinity instead.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you do not have a specific width in mind, then pass double.infinity instead.'
+      );
+    }
+
+    {
+      FlutterError result;
+      try {
+        unconstrained.getMaxIntrinsicHeight(-1);
+      } on FlutterError catch (e) {
+        result = e;
+      }
+      expect(result, isNotNull);
+      expect(
+        result.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   The width argument to getMaxIntrinsicHeight was negative.\n'
+          '   The argument to getMaxIntrinsicHeight must not be negative or\n'
+          '   null.\n'
+          '   If you perform computations on another width before passing it to\n'
+          '   getMaxIntrinsicHeight, consider using math.max() or\n'
+          '   double.clamp() to force the value into the valid range.\n'
+        ),
+      );
+      expect(
+        result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+        'If you perform computations on another width before passing it to '
+        'getMaxIntrinsicHeight, consider using math.max() or double.clamp() '
+        'to force the value into the valid range.'
+      );
+    }
   });
 
   test('UnconstrainedBox.toStringDeep returns useful information', () {
@@ -512,6 +916,84 @@ void main() {
       expect(isHit, isTrue);
       expect(positions.single, position + const Offset(20, 30));
       positions.clear();
+    });
+
+    test('error message', () {
+      {
+        final RenderBox renderObject = RenderConstrainedBox(
+          additionalConstraints: const BoxConstraints().tighten(height: 100.0),
+        );
+        FlutterError result;
+        try {
+          final BoxHitTestResult result = BoxHitTestResult();
+          renderObject.hitTest(result, position: Offset.zero);
+        } on FlutterError catch (e) {
+          result = e;
+        }
+        expect(result, isNotNull);
+        expect(
+          result.toStringDeep(),
+          equalsIgnoringHashCodes(
+            'FlutterError\n'
+            '   Cannot hit test a render box that has never been laid out.\n'
+            '   The hitTest() method was called on this RenderBox: RenderConstrainedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED:\n'
+            '     parentData: MISSING\n'
+            '     constraints: MISSING\n'
+            '     size: MISSING\n'
+            '     additionalConstraints: BoxConstraints(0.0<=w<=Infinity, h=100.0)\n'
+            '   Unfortunately, this object\'s geometry is not known at this time,\n'
+            '   probably because it has never been laid out. This means it cannot\n'
+            '   be accurately hit-tested.\n'
+            '   If you are trying to perform a hit test during the layout phase\n'
+            '   itself, make sure you only hit test nodes that have completed\n'
+            '   layout (e.g. the node\'s children, after their layout() method has\n'
+            '   been called).\n'
+          ),
+        );
+        expect(
+          result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'If you are trying to perform a hit test during the layout phase '
+          'itself, make sure you only hit test nodes that have completed '
+          'layout (e.g. the node\'s children, after their layout() method has '
+          'been called).'
+        );
+      }
+
+      {
+        FlutterError result;
+        final FakeMissingSizeRenderBox renderObject = FakeMissingSizeRenderBox();
+        layout(renderObject);
+        renderObject.fakeMissingSize = true;
+        try {
+          final BoxHitTestResult result = BoxHitTestResult();
+          renderObject.hitTest(result, position: Offset.zero);
+        } on FlutterError catch (e) {
+          result = e;
+        }
+        expect(result, isNotNull);
+        expect(
+          result.toStringDeep(),
+          equalsIgnoringHashCodes(
+            'FlutterError\n'
+            '   Cannot hit test a render box with no size.\n'
+            '   The hitTest() method was called on this RenderBox: FakeMissingSizeRenderBox#00000 NEEDS-PAINT:\n'
+            '     parentData: <none>\n'
+            '     constraints: BoxConstraints(w=800.0, h=600.0)\n'
+            '     size: Size(800.0, 600.0)\n'
+            '   Although this node is not marked as needing layout, its size is\n'
+            '   not set.\n'
+            '   A RenderBox object must have an explicit size before it can be\n'
+            '   hit-tested. Make sure that the RenderBox in question sets its\n'
+            '   size during layout.\n'
+          ),
+        );
+        expect(
+          result.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'A RenderBox object must have an explicit size before it can be '
+          'hit-tested. Make sure that the RenderBox in question sets its '
+          'size during layout.'
+        );
+      }
     });
   });
 }

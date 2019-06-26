@@ -474,6 +474,7 @@ void main() {
           selected: true,
           button: true,
           textField: true,
+          readOnly: true,
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,
@@ -536,7 +537,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

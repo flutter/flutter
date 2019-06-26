@@ -253,7 +253,7 @@ void main() {
           expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
           expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
-      });
+      }, skip: isBrowser);
     });
   });
 }

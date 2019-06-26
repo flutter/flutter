@@ -140,10 +140,13 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.default.0.png'),
+      matchesGoldenFile(
+        'dropdown_test.default.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
@@ -153,10 +156,13 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.expanded.0.png'),
+      matchesGoldenFile(
+        'dropdown_test.expanded.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
