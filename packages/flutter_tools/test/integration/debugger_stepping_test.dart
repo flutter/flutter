@@ -49,5 +49,5 @@ void main() {
           reason: 'After $i steps, debugger should stop at $expectedLine but stopped at $actualLine');
       }
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
 }

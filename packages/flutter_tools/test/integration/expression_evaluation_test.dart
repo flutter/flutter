@@ -81,7 +81,7 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
 
   group('flutter test expression evaluation', () {
     Directory tempDir;
@@ -126,7 +126,7 @@ void main() {
       await evaluateComplexReturningExpressions(_flutter);
     });
     // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(10), skip: true); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10), skip: true, tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
