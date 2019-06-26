@@ -42,8 +42,8 @@ void VmoFile::Describe(fuchsia::io::NodeInfo* out_info) {
           .vmo = std::move(temp_vmo), .length = length_, .offset = offset_};
       break;
     case Sharing::CLONE_COW:
-      if (vmo_.clone(ZX_VMO_CLONE_COPY_ON_WRITE, offset_, length_, &temp_vmo) !=
-          ZX_OK) {
+      if (vmo_.create_child(ZX_VMO_CLONE_COPY_ON_WRITE, offset_, length_,
+                            &temp_vmo) != ZX_OK) {
         return;
       }
       out_info->vmofile() = fuchsia::io::Vmofile{
