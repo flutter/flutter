@@ -583,9 +583,6 @@ class ToggleButtons extends StatelessWidget {
 ///
 /// This button is used by [ToggleButtons] to implement a set of segmented controls.
 class _ToggleButton extends StatelessWidget {
-  // TODO(WIP): Figure out which properties should be required and if
-  // additional properties are required.
-
   /// Creates a toggle button based on [RawMaterialButton].
   ///
   /// This class adds some logic to determine between enabled, active, and
