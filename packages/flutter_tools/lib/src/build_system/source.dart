@@ -73,10 +73,6 @@ class SourceVisitor {
     final List<String> segments = <String>[];
     final List<String> rawParts = pattern.split('/');
     final bool hasWildcard = rawParts.last.contains('*');
-    final bool isDirectory = pattern.endsWith('/');
-    if (hasWildcard && isDirectory) {
-      throw Exception('wildcard patterns are not supported with directories.');
-    }
     String wildcardFile;
     if (hasWildcard) {
       wildcardFile = rawParts.removeLast();
@@ -105,9 +101,7 @@ class SourceVisitor {
     }
     rawParts.skip(1).forEach(segments.add);
     final String filePath = fs.path.joinAll(segments);
-    if (isDirectory) {
-      sources.add(SourceFile(fs.directory(fs.path.normalize(filePath))));
-    } else if (hasWildcard) {
+    if (hasWildcard) {
       // Perform a simple match by splitting the wildcard containing file one
       // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
       // that part of the file matches. If there are values before and after
@@ -180,6 +174,16 @@ abstract class Source {
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
+
+  /// Whether the output source provided can be known before executing the rule.
+  ///
+  /// This does not apply to inputs, which are always explicit and must be
+  /// evaluated before the build.
+  ///
+  /// For example, [Source.pattern] and [Source.version] are not implicit
+  /// provided they do not use any wildcards. [Source.behavior] and
+  /// [Source.function] are always implicit.
+  bool get implicit;
 }
 
 /// An interface for describing input and output copies together.
@@ -200,6 +204,9 @@ class _SourceBehavior implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
+
+  @override
+  bool get implicit => true;
 }
 
 class _FunctionSource implements Source {
@@ -209,6 +216,9 @@ class _FunctionSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitFunction(value);
+
+  @override
+  bool get implicit => true;
 }
 
 class _PatternSource implements Source {
@@ -218,6 +228,9 @@ class _PatternSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitPattern(value);
+
+  @override
+  bool get implicit => value.contains('*');
 }
 
 class _VersionSource implements Source {
@@ -228,4 +241,7 @@ class _VersionSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitVersion(value, version);
+
+  @override
+  bool get implicit => value.contains('*');
 }

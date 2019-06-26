@@ -56,6 +56,17 @@ class BuildSystemConfig {
 /// a  hash of the file contents. This is tracked separately in the
 /// [FileHashStore].
 ///
+/// A Target has both implicit and explicit inputs and outputs. Only the
+/// later are safe to evaluate before invoking the [buildAction]. For example,
+/// a wildcard output pattern requires the outputs to exist before it can
+/// glob files correctly.
+///
+/// - All listed inputs are considered explicit inputs.
+/// - Outputs of all dependencies are considered implicit inputs.
+/// - Outputs which are provided as [Source.pattern] or [Source.version]
+///  without wildcards are considered explicit.
+/// - The remaining outputs are considered implicit.
+///
 /// The name of each stamp is the target name with a .stamp extension. The
 /// output files are also stored to protect against deleted files.
 ///
@@ -99,7 +110,7 @@ class Target {
   /// The action which performs this build step.
   final BuildAction buildAction;
 
-  /// Check if we can skip the target action and collect hashes for all inputs.
+  /// Collect hashes for all inputs to determine if any have changed.
   Future<Map<String, ChangeType>> computeChanges(
     List<SourceFile> inputs,
     Environment environment,
@@ -128,11 +139,11 @@ class Target {
     // timestamp. If it is a file we collect it to be sent off for hashing as
     // a group.
     final List<SourceFile> sourcesToHash = <SourceFile>[];
+    final List<SourceFile> missingInputs = <SourceFile>[];
     for (SourceFile entity in inputs) {
       if (!entity.existsSync()) {
-        // TODO(jonahwilliams): check all inputs at once to allow logging
-        // multiple missing input exception.
-        throw MissingInputException(entity.unresolvedPath, name);
+        missingInputs.add(entity);
+        continue;
       }
 
       final String absolutePath = entity.path;
@@ -147,6 +158,9 @@ class Target {
       } else {
         sourcesToHash.add(entity);
       }
+    }
+    if (missingInputs.isNotEmpty) {
+      throw MissingInputException(missingInputs, name);
     }
 
     // If we have files to hash, compute them asynchronously and then
@@ -173,28 +187,39 @@ class Target {
     return updates;
   }
 
+  /// Invoke to remove the stamp file if the [buildAction] threw an exception;
+  void clearStamp(Environment environment) {
+    final File stamp = _findStampFile(environment);
+    if (stamp.existsSync()) {
+      stamp.deleteSync();
+    }
+  }
+
   void _writeStamp(
     List<SourceFile> inputs,
     List<SourceFile> outputs,
     Environment environment,
   ) {
     final File stamp = _findStampFile(environment);
-    final List<String> inputStamps = <String>[];
+    final List<String> inputPaths = <String>[];
     for (SourceFile input in inputs) {
-      inputStamps.add(input.path);
+      inputPaths.add(input.path);
     }
-    final List<String> outputStamps = <String>[];
+    final List<String> outputPaths = <String>[];
+    final List<SourceFile> missingOutputs = <SourceFile>[];
     for (SourceFile output in outputs) {
       if (!output.existsSync()) {
-        // TODO(jonahwilliams): check all inputs at once to allow logging
-        // multiple missing output exception.
-        throw MissingOutputException(output.unresolvedPath, name);
+        missingOutputs.add(output);
+      } else {
+        outputPaths.add(output.path);
       }
-      outputStamps.add(output.path);
+    }
+    if (missingOutputs.isNotEmpty) {
+      throw MissingOutputException(missingOutputs, name);
     }
     final Map<String, Object> result = <String, Object>{
-      'inputs': inputStamps,
-      'outputs': outputStamps,
+      'inputs': inputPaths,
+      'outputs': outputPaths,
     };
     if (!stamp.existsSync()) {
       stamp.createSync();
@@ -207,15 +232,21 @@ class Target {
   List<SourceFile> resolveInputs(
     Environment environment,
   ) {
-    return _resolveConfiguration(inputs, environment);
+    return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
+  ///
+  /// The [implicit] flag controls whether it is safe to evaluate [Source]s
+  /// which uses functions, behaviors, or patterns.
   List<SourceFile> resolveOutputs(
     Environment environment,
+    { bool implicit = true, }
   ) {
-    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment, false);
-    verifyOutputDirectories(outputEntities, environment, this);
+    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment, implicit: implicit, inputs: false);
+    if (implicit) {
+      verifyOutputDirectories(outputEntities, environment, this);
+    }
     return outputEntities;
   }
 
@@ -238,6 +269,9 @@ class Target {
       'inputs': resolveInputs(environment)
           .map((SourceFile file) => file.path)
           .toList(),
+      'outputs': resolveOutputs(environment, implicit: false)
+          .map((SourceFile file) => file.unresolvedPath)
+          .toList(),
       'stamp': _findStampFile(environment).absolute.path,
     };
   }
@@ -249,7 +283,7 @@ class Target {
   }
 
   static List<SourceFile> _resolveConfiguration(
-      List<Source> config, Environment environment, [bool inputs = true]) {
+      List<Source> config, Environment environment, { bool implicit = true, bool inputs = true }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
       source.accept(collector);
@@ -329,22 +363,20 @@ class Environment {
     assert(projectDir != null);
 
     // Compute a unique hash of this build's particular environment.
-    // Sort the keys by key so that the result is stable.
+    // Sort the keys by key so that the result is stable. We always
+    // include the engine and dart versions.
     String buildPrefix;
-    if (defines.isNotEmpty) {
-      final List<String> keys = defines.keys.toList()..sort();
-      final StringBuffer buffer = StringBuffer();
-      for (String key in keys) {
-        buffer.write(key);
-        buffer.write(defines[key]);
-      }
-      final String output = buffer.toString();
-      final Digest digest = md5.convert(utf8.encode(output));
-      buildPrefix = hex.encode(digest.bytes);
-    } else {
-      final Digest digest = md5.convert(utf8.encode('Flutter and Dart is awesome'));
-      buildPrefix = hex.encode(digest.bytes);
+    final List<String> keys = defines.keys.toList()..sort();
+    final StringBuffer buffer = StringBuffer();
+    for (String key in keys) {
+      buffer.write(key);
+      buffer.write(defines[key]);
     }
+    buffer.write(Cache.instance.getStampFor('engine'));
+    buffer.write(Cache.instance.getStampFor('engine-dart-sdk'));
+    final String output = buffer.toString();
+    final Digest digest = md5.convert(utf8.encode(output));
+    buildPrefix = hex.encode(digest.bytes);
 
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
@@ -436,13 +468,12 @@ class BuildSystem {
     // Perform sanity checks on build.
     checkCycles(target);
 
-    // TODO(jonahwilliams): create a separate configuration for the settings and
-    // constants which affect build running.
     final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
     try {
       await buildInstance.invokeTarget(target);
     } finally {
       // Always persist the file cache to disk.
+      // TODO(jonahwilliams): analytics reporting of timing data.
       fileCache.persist();
     }
   }
@@ -487,6 +518,9 @@ class _BuildInstance {
   final Environment environment;
   final FileHashStore fileCache;
 
+  // Timings collected during target invocation.
+  final Map<String, _ActionMeasurement> stepTimings = <String, _ActionMeasurement>{};
+
   Future<void> invokeTarget(Target target) async {
     await Future.wait(target.dependencies.map(invokeTarget));
     final AsyncMemoizer<void> memoizer = pending[target.name] ??= AsyncMemoizer<void>();
@@ -495,24 +529,45 @@ class _BuildInstance {
 
   Future<void> _invokeInternal(Target target) async {
     final PoolResource resource = await resourcePool.request();
+    final Stopwatch stopwatch = Stopwatch()..start();
+    bool failed = false;
+    bool skipped = false;
     try {
-      // TODO(jonahwilliams): collect and log analyrtics from build action times.
       final List<SourceFile> inputs = target.resolveInputs(environment);
       final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
       if (updates.isEmpty) {
-        printTrace('Skipping target: ${target.name}');
+        skipped = true;
+        printStatus('Skipping target: ${target.name}');
       } else {
-        printTrace('${target.name}: Starting');
+        printStatus('${target.name}: Starting');
         await target.buildAction(updates, environment);
-        printTrace('${target.name}: Complete');
+        printStatus('${target.name}: Complete');
 
         final List<SourceFile> outputs = target.resolveOutputs(environment);
         target._writeStamp(inputs, outputs, environment);
       }
+    } catch (_) {
+      // TODO(jonahwilliams): test
+      target.clearStamp(environment);
+      failed = true;
+      skipped = false;
+      rethrow;
     } finally {
       resource.release();
+      stopwatch.stop();
+      stepTimings[target.name] = _ActionMeasurement(
+          target.name, stopwatch.elapsedMilliseconds, skipped, failed);
     }
   }
+}
+
+// Helper class to collect measurement data.
+class _ActionMeasurement {
+  _ActionMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.failed);
+  final int elapsedMilliseconds;
+  final String target;
+  final bool skiped;
+  final bool failed;
 }
 
 /// Check if there are any dependency cycles in the target.

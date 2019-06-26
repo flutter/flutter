@@ -25,7 +25,7 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
           defines: <String, String>{
-            kBuildModeFlag: getNameForBuildMode(BuildMode.debug),
+            kBuildMode: getNameForBuildMode(BuildMode.debug),
           }
         );
         buildSystem = BuildSystem(<String, Target>{

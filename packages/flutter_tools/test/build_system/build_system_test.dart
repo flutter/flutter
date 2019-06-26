@@ -151,9 +151,13 @@ void main() {
     }));
 
     test('Can describe itself with JSON output', () => testbed.run(() {
+      environment.buildDir.createSync(recursive: true);
       expect(fooTarget.toJson(environment), <String, dynamic>{
         'inputs':  <Object>[
           '/foo.dart'
+        ],
+        'outputs': <Object>[
+          fs.path.join(environment.buildDir.path, 'out'),
         ],
         'dependencies': <Object>[],
         'name':  'foo',
@@ -364,7 +368,7 @@ void main() {
     });
   });
 
-  group('Patterns', () {
+  group('Source', () {
     Testbed testbed;
     SourceVisitor visitor;
     Environment environment;
@@ -382,6 +386,15 @@ void main() {
         environment.buildDir.createSync(recursive: true);
       });
     });
+
+    test('configures implicit vs explict correctly', () => testbed.run(() {
+      expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
+      expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
+      expect(const Source.version('{PROJECT_DIR}/foo', version: '{PROJECT_DIR}/foo').implicit, false);
+      expect(const Source.version('{PROJECT_DIR}/*foo', version: '{PROJECT_DIR}/foo').implicit, true);
+      expect(Source.function((Environment environment) => <SourceFile>[]).implicit, true);
+      expect(Source.behavior(TestBehavior()).implicit, true);
+    }));
 
     test('can substitute {PROJECT_DIR}/foo', () => testbed.run(() {
       fs.file('foo').createSync();
@@ -497,3 +510,15 @@ class MockPlatform extends Mock implements Platform {}
 
 // Work-around for silly lint check.
 T nonconst<T>(T input) => input;
+
+class TestBehavior extends SourceBehavior {
+  @override
+  List<FileSystemEntity> inputs(Environment environment) {
+    return null;
+  }
+
+  @override
+  List<FileSystemEntity> outputs(Environment environment) {
+    return null;
+  }
+}

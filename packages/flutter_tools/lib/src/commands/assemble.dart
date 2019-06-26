@@ -67,6 +67,7 @@ abstract class AssembleBase extends FlutterCommand {
     unpackWindows.name: unpackWindows,
     copyAssets.name: copyAssets,
     kernelSnapshot.name: kernelSnapshot,
+    aotSnapshot.name: aotSnapshot,
   });
 
   /// Returns the provided target platform.
