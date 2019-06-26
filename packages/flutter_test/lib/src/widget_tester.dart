@@ -107,7 +107,6 @@ void testWidgets(
   test(
     description,
     () {
-      debugResetSemanticsIdCounter();
       SemanticsHandle semanticsHandle;
       if (semanticsEnabled == true) {
         semanticsHandle = tester.ensureSemantics();
@@ -116,6 +115,7 @@ void testWidgets(
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () async {
+          debugResetSemanticsIdCounter();
           await callback(tester);
           semanticsHandle?.dispose();
         },
