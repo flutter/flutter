@@ -753,6 +753,9 @@ class _TextInputClientHandler {
       case 'TextInputClient.updateFloatingCursor':
         _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
         break;
+      case 'TextInput.clearClient':
+        _currentConnection.close();
+        break;
       default:
         throw MissingPluginException();
     }
