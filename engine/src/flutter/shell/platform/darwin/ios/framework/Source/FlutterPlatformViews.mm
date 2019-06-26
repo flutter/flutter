@@ -230,9 +230,10 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
 
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view) {
+  FML_DCHECK(CATransform3DEqualToTransform(head.layer.transform, CATransform3DIdentity));
+
   UIView* head = embedded_view;
   head.clipsToBounds = YES;
-  head.layer.transform = CATransform3DIdentity;
   ResetAnchor(head.layer);
 
   std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.bottom();
@@ -278,6 +279,7 @@ void FlutterPlatformViewsController::CompositeWithParams(
     const flutter::EmbeddedViewParams& params) {
   CGRect frame = CGRectMake(0, 0, params.sizePoints.width(), params.sizePoints.height());
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
+  touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
 
   int currentClippingCount = CountClips(params.mutatorsStack);
