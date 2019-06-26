@@ -474,8 +474,11 @@ Future<void> _buildRunnerTest(
     case 'integration':
       args.addAll(<String>['--tags', 'integration']);
       break;
+    case 'create':
+      args.addAll(<String>['--tags', 'create']);
+      break;
     case 'tool':
-      args.addAll(<String>['--exclude-tags', 'integration']);
+      args.addAll(<String>['-x', 'integration', '-x', 'create']);
       break;
   }
 
@@ -529,11 +532,7 @@ Future<void> _pubRunTest(
       args.addAll(<String>['--tags', 'integration']);
       break;
     case 'tool':
-      args.addAll(<String>[
-        '--exclude-tags', 'integration',
-        '--total-shards', '2',
-        '--shard-index', Platform.environment['SHARD_INDEX'],
-      ]);
+      args.addAll(<String>['--exclude-tags', 'integration']);
       break;
   }
 
