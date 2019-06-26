@@ -184,7 +184,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
   /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
   ///
-  /// The parameter [enviroment] is exposed to test different environment
+  /// The parameter `environment` is exposed to test different environment
   /// variable values, and should not be used.
   static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
     if (!isBrowser) {
