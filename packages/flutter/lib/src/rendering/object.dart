@@ -3585,8 +3585,8 @@ class _SemanticsGeometry {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
       _applyIntermediatePaintTransforms(parent, child, _transform);
-      _semanticsClipRect = _transformRect(_semanticsClipRect, _transform);
-      _paintClipRect = _transformRect(_paintClipRect, _transform);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _transform.clone());
+      _paintClipRect = _transformRect(_paintClipRect, _transform.clone());
     }
 
     final RenderObject owner = ancestors.first;
