@@ -3584,9 +3584,9 @@ class _SemanticsGeometry {
       } else {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
-      _semanticsClipRect = _transformRect(_semanticsClipRect, parent, child);
-      _paintClipRect = _transformRect(_paintClipRect, parent, child);
-      parent.applyPaintTransform(child, _transform);
+      _applyIntermediatePaintTransforms(parent, child, _transform);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _transform);
+      _paintClipRect = _transformRect(_paintClipRect, _transform);
     }
 
     final RenderObject owner = ancestors.first;
@@ -3600,14 +3600,28 @@ class _SemanticsGeometry {
   }
 
   /// From parent to child coordinate system.
-  static Rect _transformRect(Rect rect, RenderObject parent, RenderObject child) {
+  static Rect _transformRect(Rect rect, Matrix4 transform) {
+    assert(transform != null);
     if (rect == null)
       return null;
     if (rect.isEmpty)
       return Rect.zero;
-    final Matrix4 transform = Matrix4.identity();
-    parent.applyPaintTransform(child, transform);
     return MatrixUtils.inverseTransformRect(transform, rect);
+  }
+
+  static void _applyIntermediatePaintTransforms(RenderObject ancestor, RenderObject child, Matrix4 transform) {
+    assert(ancestor != null);
+    assert(child != null);
+    assert(transform != null);
+    RenderObject intermediateParent = child.parent;
+    assert(intermediateParent != null);
+    while (intermediateParent != ancestor) {
+      intermediateParent.applyPaintTransform(child, transform);
+      intermediateParent = intermediateParent.parent;
+      child = child.parent;
+      assert(intermediateParent != null);
+    }
+    ancestor.applyPaintTransform(child, transform);
   }
 
   static Rect _intersectRects(Rect a, Rect b) {
