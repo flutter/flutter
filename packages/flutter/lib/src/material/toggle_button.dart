@@ -12,6 +12,164 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'theme.dart';
 
+/// An inherited widget that defines color and border parameters for
+/// [ToggleButtons] in this widget's subtree.
+///
+/// Values specified here are used for [ToggleButtons] properties that are not
+/// given an explicit non-null value.
+class ToggleButtonsTheme extends InheritedWidget {
+  /// Creates a toggle buttons theme that controls the color and border
+  /// parameters for [ToggleButtons].
+  const ToggleButtonsTheme({
+    Key key,
+    this.color,
+    this.activeColor,
+    this.disabledColor,
+    this.fillColor,
+    this.focusColor,
+    this.highlightColor,
+    this.hoverColor,
+    this.splashColor,
+    this.borderColor,
+    this.activeBorderColor,
+    this.disabledBorderColor,
+    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    this.borderWidth = 1.0,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// Creates a toggle buttons theme that controls the color and style
+  /// parameters for [ToggleButtons], and merges in the current toggle buttons
+  /// theme, if any.
+  ///
+  /// The [child] argument must not be null.
+  static Widget merge({
+    Key key,
+    Color color,
+    Color activeColor,
+    Color disabledColor,
+    Color fillColor,
+    Color focusColor,
+    Color highlightColor,
+    Color hoverColor,
+    Color splashColor,
+    Color borderColor,
+    Color activeBorderColor,
+    Color disabledBorderColor,
+    BorderRadius borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    double borderWidth = 1.0,
+    @required Widget child,
+  }) {
+    assert(child != null);
+    return Builder(
+      builder: (BuildContext context) {
+        final ToggleButtonsTheme parent = ToggleButtonsTheme.of(context);
+        return ToggleButtonsTheme(
+          key: key,
+          color: color ?? parent.color,
+          activeColor: activeColor ?? parent.activeColor,
+          disabledColor: disabledColor ?? parent.disabledColor,
+          fillColor: fillColor ?? parent.fillColor,
+          focusColor: focusColor ?? parent.focusColor,
+          highlightColor: highlightColor ?? parent.highlightColor,
+          hoverColor: hoverColor ?? parent.hoverColor,
+          splashColor: splashColor ?? parent.splashColor,
+          borderColor: borderColor ?? parent.borderColor,
+          activeBorderColor: activeBorderColor ?? parent.activeBorderColor,
+          disabledBorderColor: disabledBorderColor ?? parent.disabledBorderColor,
+          borderRadius: borderRadius ?? parent.borderRadius,
+          borderWidth: borderWidth ?? parent.borderWidth,
+          child: child,
+        );
+      },
+    );
+  }
+
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  final Color color;
+
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  final Color activeColor;
+
+  /// The color for [Text] and [Icon] widgets if the button is disabled.
+  ///
+  /// If [onPressed] is null, this color will be used.
+  final Color disabledColor;
+
+  /// The fill color for selected toggle buttons.
+  final Color fillColor;
+
+  /// The color to use for filling the button when the button has input focus.
+  final Color focusColor;
+
+  /// The highlight color for the button's [InkWell].
+  final Color highlightColor;
+
+  /// The splash color for the button's [InkWell].
+  final Color splashColor;
+
+  /// The color to use for filling the button when the button has a pointer hovering over it.
+  final Color hoverColor;
+
+  /// The border color to display when the toggle button is selected.
+  final Color borderColor;
+
+  /// The border color to display when the toggle button is active/selectable.
+  final Color activeBorderColor;
+
+  /// The border color to display when the toggle button is disabled.
+  final Color disabledBorderColor;
+
+  /// The width of the border surrounding teach toggle button.
+  ///
+  /// This applies to both the greater surrounding border, as well as the
+  /// borders dividing each toggle button.
+  ///
+  /// To omit the border entirely, set this value to null.
+  ///
+  /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
+  /// See [BorderSide.width] for more details on hairline borders.
+  final double borderWidth;
+
+  /// The radii of the border's corners.
+  ///
+  /// By default, the border's corners are not rounded.
+  final BorderRadius borderRadius;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ToggleButtonsTheme theme = ToggleButtonsTheme.of(context);
+  /// ```
+  static ToggleButtonsTheme of(BuildContext context) {
+    final ToggleButtonsTheme result = context.inheritFromWidgetOfExactType(ToggleButtonsTheme);
+    return result ?? const ToggleButtonsTheme();
+  }
+
+  @override
+  bool updateShouldNotify(ToggleButtonsTheme oldWidget) {
+    return color != oldWidget.color
+        || activeColor != oldWidget.activeColor
+        || disabledColor != oldWidget.disabledColor
+        || fillColor != oldWidget.fillColor
+        || focusColor != oldWidget.focusColor
+        || highlightColor != oldWidget.highlightColor
+        || hoverColor != oldWidget.hoverColor
+        || splashColor != oldWidget.splashColor
+        || borderColor != oldWidget.borderColor
+        || activeBorderColor != oldWidget.activeBorderColor
+        || disabledBorderColor != oldWidget.disabledBorderColor
+        || borderRadius != oldWidget.borderRadius
+        || borderWidth != oldWidget.borderWidth;
+  }
+}
+
 /// A horizontal set of toggle buttons.
 ///
 /// It displays its widgets provided in a [List] of [children] horizontally.
@@ -218,7 +376,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The color to use for filling the button when the button has a pointer hovering over it.
   ///
-  /// Defaults to ThemeData.hoverColor for the current theme.
+  /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
 
   /// The border color to display when the toggle button is selected.
