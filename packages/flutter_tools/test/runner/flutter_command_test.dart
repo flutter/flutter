@@ -4,8 +4,6 @@
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
@@ -291,43 +289,6 @@ void main() {
       FlutterVersion: () => betaVersion,
     });
   });
-
-  group('Filter devices', () {
-    MockDevice ephemeral;
-    MockDevice nonEphemeralOne;
-    MockDevice nonEphemeralTwo;
-    MockDevice unsupported;
-
-    setUp(() {
-      ephemeral = MockDevice(true);
-      nonEphemeralOne = MockDevice(false);
-      nonEphemeralTwo = MockDevice(false);
-      unsupported = MockDevice(true, false);
-    });
-
-    test('chooses ephemeral device', () {
-      final List<Device> filtered = filterDevices(<Device>[
-        ephemeral,
-        nonEphemeralOne,
-        nonEphemeralTwo,
-        unsupported,
-      ]);
-
-      expect(filtered.single, ephemeral);
-    });
-
-    test('does not remove all non-ephemeral', () {
-      final List<Device> filtered = filterDevices(<Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
-      ]);
-
-      expect(filtered, <Device>[
-        nonEphemeralOne,
-        nonEphemeralTwo,
-      ]);
-    });
-  });
 }
 
 
@@ -348,15 +309,3 @@ class FakeCommand extends FlutterCommand {
 }
 
 class MockVersion extends Mock implements FlutterVersion {}
-
-class MockDevice extends Mock implements Device {
-  MockDevice(this.ephemeral, [this._isSupported = true]);
-
-  @override
-  final bool ephemeral;
-
-  final bool _isSupported;
-
-  @override
-  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
-}
