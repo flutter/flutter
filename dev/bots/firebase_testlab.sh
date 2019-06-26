@@ -8,6 +8,16 @@ pushd dev/integration_tests/release_smoke_test
 
 ../../../bin/flutter build appbundle --target-platform android-arm,android-arm64
 
+# New contributors will not have permissions to run this test - they won't be
+# able to access the service account information. We should just mark the test
+# as passed - it will run fine on post submit, where it will still catch
+# failures.
+# We can also still make sure that building a release app bundle still works.
+if [[ $GCLOUD_FIREBASE_TESTLAB_KEY == ENCRYPTED* ]]; then
+  echo "This user does not have permission to run this test."
+  exit 0
+fi
+
 echo $GCLOUD_FIREBASE_TESTLAB_KEY > ${HOME}/gcloud-service-key.json
 gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
 gcloud --quiet config set project flutter-infra
