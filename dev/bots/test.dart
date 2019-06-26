@@ -20,6 +20,7 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
@@ -30,6 +31,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
+  'tool_coverage': _runToolCoverage,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
   'integration_tests': _runIntegrationTests,
@@ -173,6 +175,58 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
     print('Failed to get BigQuery API client.');
     print(e);
     return null;
+  }
+}
+
+// Partition tool tests into two groups, see explanation on `_runToolCoverage`.
+List<List<String>> _partitionToolTests() {
+  final List<String> pending = <String>[];
+  final String toolTestDir = path.join(toolRoot, 'test');
+  for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
+    if (entity is File && entity.path.endsWith('_test.dart')) {
+      final String relativePath = path.relative(entity.path, from: toolRoot);
+      pending.add(relativePath);
+    }
+  }
+  // Shuffle the tests to avoid giving an expensive test directory like
+  // integration to a single run of tests.
+  pending..shuffle();
+  final int aboutHalf = pending.length ~/ 2;
+  final List<String> groupA = pending.take(aboutHalf).toList();
+  final List<String> groupB = pending.skip(aboutHalf).toList();
+  return <List<String>>[groupA, groupB];
+}
+
+// Tools tests run with coverage enabled have much higher memory usage than
+// our current CI infrastructure can support. We partition the tests into
+// two sets and run them in separate invocations of dart to reduce peak memory
+// usage. codecov.io automatically handles merging different coverage files
+// together, so producing separate files is OK.
+//
+// See: https://github.com/flutter/flutter/issues/35025
+Future<void> _runToolCoverage() async {
+  final List<List<String>> tests = _partitionToolTests();
+  // Precompile tests to speed up subsequent runs.
+  await runCommand(
+    pub,
+    <String>['run', 'build_runner', 'build'],
+    workingDirectory: toolRoot,
+  );
+
+  // The name of this subshard has to match the --file path provided at
+  // the end of this test script in `.cirrus.yml`.
+  const List<String> subshards = <String>['A', 'B'];
+  for (int i = 0; i < tests.length; i++) {
+    final List<String> testGroup = tests[i];
+    await runCommand(
+      dart,
+      <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
+      workingDirectory: toolRoot,
+      environment: <String, String>{
+        'FLUTTER_ROOT': flutterRoot,
+        'SUBSHARD': subshards[i],
+      }
+    );
   }
 }
 
