@@ -2604,6 +2604,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XcnP3_mO_Ms}
+///
 /// For example, a 16:9 width:height aspect ratio would have a value of
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
