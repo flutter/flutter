@@ -17,11 +17,61 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleDebug',
             options: <String>['-Ptarget-platform=android-arm']);
 
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+          'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
+        ], apkFiles);
+
+        checkItDoesNotContain<String>(<String>[
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
+        ], apkFiles);
+      });
+
+      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+        section('APK content for task assembleDebug with target platform = android-x86');
+        // This is used by `flutter run`
+        await pluginProject.runGradleTask('assembleDebug',
+            options: <String>['-Ptarget-platform=android-x86']);
+
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
+
+        checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+          'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
+          'lib/x86/libflutter.so',
+          'lib/x86_64/libflutter.so',
+        ], apkFiles);
+
+        checkItDoesNotContain<String>(<String>[
+          'lib/armeabi-v7a/libapp.so',
+          'lib/x86/libapp.so',
+          'lib/x86_64/libapp.so',
+        ], apkFiles);
+      });
+
+      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+        section('APK content for task assembleDebug with target platform = android-x64');
+        // This is used by `flutter run`
+        await pluginProject.runGradleTask('assembleDebug',
+            options: <String>['-Ptarget-platform=android-x64']);
+
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -47,11 +97,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm']);
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -74,11 +120,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm64']);
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -123,8 +165,19 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        section('gradlew assembleLocal (plugin with custom build type)');
+        await project.addCustomBuildType('local', initWith: 'debug');
+        await project.addGlobalBuildType('local', initWith: 'debug');
+        section('Add plugin');
+        await project.addPlugin('path_provider');
+        await project.getPackages();
+
+        await project.runGradleTask('assembleLocal');
+      });
+
+      await runProjectTest((FlutterProject project) async {
         section('gradlew assembleFreeDebug (product flavor)');
-        await project.addProductFlavor('free');
+        await project.addProductFlavors(<String>['free']);
         await project.runGradleTask('assembleFreeDebug');
       });
 
@@ -169,7 +222,7 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
-        if (!pluginProject.hasDebugApk)
+        if (!File(pluginProject.debugApkPath).existsSync())
           throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
       });

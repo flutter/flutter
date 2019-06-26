@@ -140,7 +140,10 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.default.0.png'),
+      matchesGoldenFile(
+        'dropdown_test.default.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);
@@ -153,7 +156,10 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesGoldenFile('dropdown_test.expanded.0.png'),
+      matchesGoldenFile(
+        'dropdown_test.expanded.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);
