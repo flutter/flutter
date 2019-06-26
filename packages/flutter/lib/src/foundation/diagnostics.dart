@@ -1469,7 +1469,7 @@ abstract class DiagnosticsNode {
   ///
   /// If `minLevel` is [DiagnosticLevel.hidden] no diagnostics will be filtered.
   /// If `minLevel` is [DiagnosticLevel.off] all diagnostics will be filtered.
-  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode ? true : level.index < minLevel.index;
+  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode || level.index < minLevel.index;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -2707,7 +2707,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
-  DiagnosticLevel _defaultLevel;
+  final DiagnosticLevel _defaultLevel;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.

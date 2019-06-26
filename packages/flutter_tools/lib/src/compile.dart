@@ -246,7 +246,7 @@ class KernelCompiler {
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
           'engineHash': Cache.instance.engineRevision,
-          'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+          'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
@@ -450,8 +450,8 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final StdoutHandler _stdoutHandler;
-  String _initializeFromDill;
-  bool _unsafePackageSerialization;
+  final String _initializeFromDill;
+  final bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
   bool _compileRequestNeedsConfirmation = false;
 

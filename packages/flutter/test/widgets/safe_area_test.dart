@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   group('SafeArea', () {
@@ -84,6 +85,92 @@ void main() {
       );
       expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(100.0, 30.0));
       expect(tester.getBottomRight(find.byType(Placeholder)), const Offset(800.0, 600.0));
+    });
+
+    group('SafeArea maintains bottom viewPadding when specified for consumed bottom padding', () {
+      Widget boilerplate(Widget child) {
+        return Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(textDirection: TextDirection.ltr, child: child),
+        );
+      }
+
+      testWidgets('SafeArea alone.', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Column(
+            children: const <Widget>[
+              Expanded(child: Placeholder())
+            ],
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 300.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
+
+      testWidgets('SafeArea with nested Scaffold', (WidgetTester tester) async {
+        final Widget child = boilerplate(SafeArea(
+          maintainBottomViewPadding: true,
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: Column(
+              children: const <Widget>[
+                Expanded(child: Placeholder())
+              ],
+            ),
+          ),
+        ));
+
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.symmetric(vertical: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+        // Consume bottom padding - as if by the keyboard opening
+        await tester.pumpWidget(
+          MediaQuery(
+            data: const MediaQueryData(
+              padding: EdgeInsets.only(top: 20.0),
+              viewPadding: EdgeInsets.only(bottom: 20.0),
+              viewInsets: EdgeInsets.only(bottom: 300.0),
+            ),
+            child: child,
+          ),
+        );
+        final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+        expect(initialPoint, finalPoint);
+      });
     });
   });
 

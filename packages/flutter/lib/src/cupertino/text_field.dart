@@ -196,6 +196,7 @@ class CupertinoTextField extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.onTap,
     this.scrollController,
     this.scrollPhysics,
   }) : assert(textAlign != null),
@@ -458,6 +459,9 @@ class CupertinoTextField extends StatefulWidget {
     return enableInteractiveSelection ?? !obscureText;
   }
 
+  /// {@macro flutter.material.textfield.onTap}
+  final GestureTapCallback onTap;
+
   @override
   _CupertinoTextFieldState createState() => _CupertinoTextFieldState();
 
@@ -584,6 +588,9 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
     }
     _requestKeyboard();
+    if (widget.onTap != null) {
+      widget.onTap();
+    }
   }
 
   void _handleSingleLongTapStart(LongPressStartDetails details) {

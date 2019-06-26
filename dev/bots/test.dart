@@ -20,6 +20,7 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
@@ -30,6 +31,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
+  'tool_coverage': _runToolCoverage,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
   'integration_tests': _runIntegrationTests,
@@ -173,6 +175,58 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
     print('Failed to get BigQuery API client.');
     print(e);
     return null;
+  }
+}
+
+// Partition tool tests into two groups, see explanation on `_runToolCoverage`.
+List<List<String>> _partitionToolTests() {
+  final List<String> pending = <String>[];
+  final String toolTestDir = path.join(toolRoot, 'test');
+  for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
+    if (entity is File && entity.path.endsWith('_test.dart')) {
+      final String relativePath = path.relative(entity.path, from: toolRoot);
+      pending.add(relativePath);
+    }
+  }
+  // Shuffle the tests to avoid giving an expensive test directory like
+  // integration to a single run of tests.
+  pending..shuffle();
+  final int aboutHalf = pending.length ~/ 2;
+  final List<String> groupA = pending.take(aboutHalf).toList();
+  final List<String> groupB = pending.skip(aboutHalf).toList();
+  return <List<String>>[groupA, groupB];
+}
+
+// Tools tests run with coverage enabled have much higher memory usage than
+// our current CI infrastructure can support. We partition the tests into
+// two sets and run them in separate invocations of dart to reduce peak memory
+// usage. codecov.io automatically handles merging different coverage files
+// together, so producing separate files is OK.
+//
+// See: https://github.com/flutter/flutter/issues/35025
+Future<void> _runToolCoverage() async {
+  final List<List<String>> tests = _partitionToolTests();
+  // Precompile tests to speed up subsequent runs.
+  await runCommand(
+    pub,
+    <String>['run', 'build_runner', 'build'],
+    workingDirectory: toolRoot,
+  );
+
+  // The name of this subshard has to match the --file path provided at
+  // the end of this test script in `.cirrus.yml`.
+  const List<String> subshards = <String>['A', 'B'];
+  for (int i = 0; i < tests.length; i++) {
+    final List<String> testGroup = tests[i];
+    await runCommand(
+      dart,
+      <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
+      workingDirectory: toolRoot,
+      environment: <String, String>{
+        'FLUTTER_ROOT': flutterRoot,
+        'SUBSHARD': subshards[i],
+      }
+    );
   }
 }
 
@@ -469,6 +523,19 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'create':
+      args.addAll(<String>['--tags', 'create']);
+      break;
+    case 'tool':
+      args.addAll(<String>['-x', 'integration', '-x', 'create']);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -512,6 +579,17 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
+
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'tool':
+      args.addAll(<String>['--exclude-tags', 'integration']);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -797,19 +875,28 @@ Future<void> _verifyVersion(String filename) async {
 }
 
 Future<void> _runIntegrationTests() async {
-  print('Platform env vars:');
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  await _runDevicelabTest('dartdocs');
+  switch (subShard) {
+    case 'gradle1':
+    case 'gradle2':
+      // This runs some gradle integration tests if the subshard is Android.
+      await _androidGradleTests(subShard);
+      break;
+    default:
+      await _runDevicelabTest('dartdocs');
 
-  if (Platform.isLinux) {
-    await _runDevicelabTest('flutter_create_offline_test_linux');
-  } else if (Platform.isWindows) {
-    await _runDevicelabTest('flutter_create_offline_test_windows');
-  } else if (Platform.isMacOS) {
-    await _runDevicelabTest('flutter_create_offline_test_mac');
-    await _runDevicelabTest('module_test_ios');
+      if (Platform.isLinux) {
+        await _runDevicelabTest('flutter_create_offline_test_linux');
+      } else if (Platform.isWindows) {
+        await _runDevicelabTest('flutter_create_offline_test_windows');
+      } else if (Platform.isMacOS) {
+        await _runDevicelabTest('flutter_create_offline_test_mac');
+        await _runDevicelabTest('module_test_ios');
+      }
+      // This does less work if the subshard isn't Android.
+      await _androidPluginTest();
   }
-  await _integrationTestsAndroidSdk();
 }
 
 Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async {
@@ -821,12 +908,19 @@ Future<void> _runDevicelabTest(String testName, {Map<String, String> env}) async
   );
 }
 
-Future<void> _integrationTestsAndroidSdk() async {
+String get androidSdkRoot {
   final String androidSdkRoot = (Platform.environment['ANDROID_HOME']?.isEmpty ?? true)
       ? Platform.environment['ANDROID_SDK_ROOT']
       : Platform.environment['ANDROID_HOME'];
   if (androidSdkRoot == null || androidSdkRoot.isEmpty) {
-    print('No Android SDK detected, skipping Android Integration Tests');
+    return null;
+  }
+  return androidSdkRoot;
+}
+
+Future<void> _androidPluginTest() async {
+  if (androidSdkRoot == null) {
+    print('No Android SDK detected, skipping Android Plugin test.');
     return;
   }
 
@@ -835,13 +929,27 @@ Future<void> _integrationTestsAndroidSdk() async {
     'ANDROID_SDK_ROOT': androidSdkRoot,
   };
 
+  await _runDevicelabTest('plugin_test', env: env);
+}
+
+Future<void> _androidGradleTests(String subShard) async {
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
-  if (!Platform.isWindows) {
+  if (androidSdkRoot == null || Platform.isWindows) {
+    print('No Android SDK detected or on Windows, skipping Android gradle test.');
+    return;
+  }
+
+  final Map<String, String> env = <String, String> {
+    'ANDROID_HOME': androidSdkRoot,
+    'ANDROID_SDK_ROOT': androidSdkRoot,
+  };
+
+  if (subShard == 'gradle1') {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+  }
+  if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
-  // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
-  await _runDevicelabTest('plugin_test', env: env);
 }
