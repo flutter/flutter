@@ -27,7 +27,7 @@ void main() {
         fs.file(fs.path.join('.dart_tool', 'build', 'generated', 'foobar', 'lib', 'bar.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('bar');
-        fs.file(fs.path.join('.dart_tool', 'build', 'generated', 'foobar', 'lib', '_hidden.dart'))
+        fs.file(fs.path.join('.dart_tool', 'build', 'generated', 'foobar', 'lib', '._hidden.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync('bar');
         fs.file('pubspec.yaml')
@@ -45,7 +45,7 @@ void main() {
       // Note: we can't read from the regular directory because the default
       // asset reader uses the regular file system.
       expect(await reader.canRead(AssetId('foobar', fs.path.join('lib', 'bar.dart'))), true);
-      expect(await reader.canRead(AssetId('foobar', fs.path.join('lib', '_hidden.dart'))), false);
+      expect(await reader.canRead(AssetId('foobar', fs.path.join('lib', '._hidden.dart'))), false);
       expect(await reader.readAsString(AssetId('foobar', fs.path.join('lib', 'bar.dart'))), 'bar');
       expect(await reader.readAsBytes(AssetId('foobar', fs.path.join('lib', 'bar.dart'))), utf8.encode('bar'));
     }));
