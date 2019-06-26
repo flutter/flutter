@@ -11,15 +11,13 @@ import 'platform.dart';
 
 /// Generates and caches a snapshot of the tool extension apis to apply.
 class CrossIsolateShim {
-  CrossIsolateShim() {
-    // HARDCODED.
-    const String path = '/Users/jonahwilliams/Documents/flutter/packages/flutter_tool_macos';
-    final String manifestPath = fs.path.join(path, 'tool_api.yaml');
-    name = 'flutter_tool_macos';
+  CrossIsolateShim(String libraryPath) {
+    final String manifestPath = fs.path.join(libraryPath, 'tool_api.yaml');
+    name = fs.path.basename(libraryPath);
     final YamlMap manifest = loadYaml(fs.file(manifestPath).readAsStringSync());
     final String className = manifest['name'];
     final String relativefileUri = Uri.file(manifest['file']).toFilePath(windows: platform.isWindows);
-    final String absolute = fs.path.join(path, 'lib', relativefileUri);
+    final String absolute = fs.path.join(libraryPath, 'lib', relativefileUri);
     final String entrypoint = '''
 import 'dart:async';
 import 'dart:convert';
@@ -53,7 +51,6 @@ void main(List<String> args, [SendPort sendPort]) {
     final ReceivePort receivePort = ReceivePort();
     Isolate.spawnUri(fs.path.toUri('${sourceFile.path}'), <String>[], receivePort.sendPort)
       .then((Isolate isolate) {
-        _isolate = isolate;
         _receivePort = receivePort;
         _receivePort.listen((dynamic data) {
           if (data is SendPort) {
@@ -71,9 +68,8 @@ void main(List<String> args, [SendPort sendPort]) {
       });
   }
 
-  final Completer<void> _doneLoading = Completer();
+  final Completer<void> _doneLoading = Completer<void>();
   String name;
-  Isolate _isolate;
   ReceivePort _receivePort;
   SendPort _sendPort;
   final Map<int, Completer<Response>> _pending = <int, Completer<Response>>{};
@@ -87,8 +83,8 @@ void main(List<String> args, [SendPort sendPort]) {
 }
 
 /// This is a temporary class for running extensions in the same isolate.
-class SharedIsolateExtensions {
-  SharedIsolateExtensions(this.extensions, this.crossIsolateShims);
+class ToolExtensionManager {
+  ToolExtensionManager(this.extensions, this.crossIsolateShims);
 
   final List<ToolExtension> extensions;
   final List<CrossIsolateShim> crossIsolateShims;
@@ -121,6 +117,9 @@ class SharedIsolateExtensions {
     if (extension == null) {
       final CrossIsolateShim shim = crossIsolateShims
         .firstWhere((CrossIsolateShim shim) => shim.name == extensionName, orElse: () => null);
+      if (shim == null) {
+        return Response(_nextId, <String, Object>{}, <String, Object>{'error': 'No extension named $extensionName'});
+      }
       return shim.handleMessage(request);
     }
     return extension.handleMessage(request);

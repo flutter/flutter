@@ -1,0 +1,9 @@
+name: web_extension
+
+dependencies:
+  flutter_tool_api:
+    path: ../flutter_tool_api
+
+dev_dependencies:
+  test:
+  mockito:

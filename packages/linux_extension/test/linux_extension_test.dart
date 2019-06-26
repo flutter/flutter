@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:linux_extension/main.dart';
 import 'package:flutter_tool_api/doctor.dart';
-import 'package:flutter_tools/src/linux/linux.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-
-import '../src/common.dart';
-import '../src/mocks.dart';
+import 'package:test/test.dart';
 
 void main() {
   group(LinuxDoctorDomain, () {
     ProcessManager processManager;
-    LinuxExtension linuxExtension;
+    FlutterLinuxExtension linuxExtension;
 
     setUp(() {
       processManager = MockProcessManager();
-      linuxExtension = LinuxExtension()
+      linuxExtension = FlutterLinuxExtension()
         ..processManager = processManager;
     });
 
@@ -145,3 +146,24 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
+class FakeProcessResult implements ProcessResult {
+  FakeProcessResult({
+    this.exitCode = 0,
+    this.pid = 1,
+    this.stderr = '',
+    this.stdout = '',
+  });
+
+  @override
+  final int exitCode;
+
+  @override
+  final int pid;
+
+  @override
+  final String stderr;
+
+  @override
+  final String stdout;
+}

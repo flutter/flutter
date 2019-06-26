@@ -31,7 +31,6 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
-import 'linux/linux.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -40,7 +39,6 @@ import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
-import 'web/web.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
@@ -64,15 +62,14 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
-  final SharedIsolateExtensions extensionShim = SharedIsolateExtensions(<extension.ToolExtension>[
-    LinuxExtension()
-      ..processManager = processManager
-      ..fileSystem = fs,
-    WebExtension()
-      ..processManager = processManager
-      ..fileSystem = fs
+  final ToolExtensionManager extensionShim = ToolExtensionManager(<extension.ToolExtension>[
   ], <CrossIsolateShim>[
-    CrossIsolateShim(),
+    CrossIsolateShim(
+      fs.path.join(Cache.flutterRoot, 'packages', 'web_extension'),
+    ),
+    CrossIsolateShim(
+      fs.path.join(Cache.flutterRoot, 'packages', 'linux_extension'),
+    ),
   ]);
 
   @override
@@ -96,14 +93,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       // Add desktop doctors to workflow if the flag is enabled.
       if (flutterDesktopEnabled) {
         if (linuxWorkflow.appliesToHostPlatform) {
-          _validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
+          //_validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
         }
         if (windowsWorkflow.appliesToHostPlatform) {
           _validators.add(visualStudioValidator);
         }
       }
-
-      _validators.add(ExtensionCompatDoctorValidation('flutter_tool_macos', extensionShim));
+      // TESTING
+      _validators.add(ExtensionCompatDoctorValidation('linux_extension', extensionShim));
+      _validators.add(ExtensionCompatDoctorValidation('web_extension', extensionShim));
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -348,7 +346,7 @@ class ExtensionCompatDoctorValidation implements DoctorValidator {
   ExtensionCompatDoctorValidation(this.name, this.shim);
 
   final String name;
-  final SharedIsolateExtensions shim;
+  final ToolExtensionManager shim;
 
   @override
   String get slowWarning => 'This is taking an unexpectedly long time...';
@@ -364,7 +362,8 @@ class ExtensionCompatDoctorValidation implements DoctorValidator {
       if (response.error['stackTrace'] != null) {
         printTrace('Original Stack: ${response.error['stackTrace']}');
       }
-      throw Exception(response.error['error']);
+      printError(response.error['error']);
+      return null;
     }
     final doctor_domain.ValidationResult result = doctor_domain.ValidationResult.fromJson(response.body);
     _title = result.name;

@@ -3,24 +3,24 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tool_api/doctor.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/web.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:test/test.dart';
 
-import '../src/common.dart';
+import 'package:platform/platform.dart';
+import 'package:web_extension/main.dart';
 
 void main() {
-  group('WebValidator', () {
-    WebExtension webExtension;
+  group('FlutterWebExtension', () {
+    FlutterWebExtension webExtension;
     MockPlatform mockPlatform;
     MockProcessManager mockProcessManager;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockPlatform = MockPlatform();
-      webExtension = WebExtension();
+      webExtension = FlutterWebExtension();
       when(mockPlatform.isMacOS).thenReturn(true);
       when(mockPlatform.isWindows).thenReturn(false);
       when(mockPlatform.isLinux).thenReturn(false);

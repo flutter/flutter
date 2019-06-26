@@ -102,6 +102,7 @@ typedef DomainHandler = Future<Serializable> Function(Map<String, Object>);
 
 /// An extension is a pluggable piece of tool functionality.
 abstract class ToolExtension {
+  /// WIP
   ToolExtension() {
     if (doctorDomain != null) {
       doctorDomain._parent = this;
@@ -109,18 +110,23 @@ abstract class ToolExtension {
     }
   }
 
+  /// WIP
   FileSystem fileSystem = const LocalFileSystem();
 
+  /// WIP
   ProcessManager processManager = const LocalProcessManager();
 
+  /// WIP
   Platform platform = const LocalPlatform();
 
   final Map<String, DomainHandler> _domainHandlers = <String, DomainHandler>{};
 
+  /// WIP
   void registerMethod(String name, DomainHandler domainHandler) {
     _domainHandlers[name] = domainHandler;
   }
 
+  /// WIP
   Future<Response> handleMessage(Request request) async {
     Response response;
     final DomainHandler handler = _domainHandlers[request.method];

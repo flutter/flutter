@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tool_api/doctor.dart';
-import 'package:flutter_tool_api/extension.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -18,7 +17,7 @@ void main() {
       expect(ValidationType.fromJson(1), ValidationType.partial);
       expect(ValidationType.fromJson(2), ValidationType.notAvailable);
       expect(ValidationType.fromJson(3), ValidationType.installed);
-      expect(() => ValidationType.fromJson(9), throwsA(isInstanceOf<ArgumentError>()));
+      expect(() => ValidationType.fromJson(9), throwsA(isA<ArgumentError>()));
     });
 
     test('ValidationMessageType', () {
@@ -29,7 +28,7 @@ void main() {
       expect(ValidationMessageType.fromJson(0), ValidationMessageType.error);
       expect(ValidationMessageType.fromJson(1), ValidationMessageType.hint);
       expect(ValidationMessageType.fromJson(2), ValidationMessageType.information);
-      expect(() => ValidationMessageType.fromJson(9), throwsA(isInstanceOf<ArgumentError>()));
+      expect(() => ValidationMessageType.fromJson(9), throwsA(isA<ArgumentError>()));
     });
 
     test('ValidationMessage', () {
