@@ -79,6 +79,7 @@ void main() {
     await gesture.removePointer();
   },
     semanticsEnabled: true,
+    skip: isBrowser,
   );
 
   testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -142,16 +143,17 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     await gesture.removePointer();
   },
+    skip: isBrowser,
     semanticsEnabled: true,
   );
 
   testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -215,10 +217,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -280,9 +282,9 @@ void main() {
   testWidgets('OutlineButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color disabledColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color unusedDisabledTextColor = Color(3);
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color unusedDisabledTextColor = Color(0x00000003);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -423,7 +425,7 @@ void main() {
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
     _checkPhysicalLayer(
       tester.element(outlineButton),
-      const Color(0),
+      const Color(0x00000000),
       clipPath: clipPath,
       clipRect: clipRect,
     );
@@ -480,7 +482,7 @@ void main() {
       clipPath: clipPath,
       clipRect: clipRect,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('OutlineButton has no clip by default', (WidgetTester tester) async {
     final GlobalKey buttonKey = GlobalKey();
@@ -614,7 +616,7 @@ void main() {
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('OutlineButton pressed fillColor default', (WidgetTester tester) async {
     Widget buildFrame(ThemeData theme) {

@@ -462,11 +462,9 @@ class FloatingActionButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      result = MergeSemantics(
-        child: Tooltip(
-          message: tooltip,
-          child: result,
-        ),
+      result = Tooltip(
+        message: tooltip,
+        child: result,
       );
     }
 
@@ -477,7 +475,7 @@ class FloatingActionButton extends StatelessWidget {
       );
     }
 
-    return result;
+    return MergeSemantics(child: result);
   }
 
   @override
@@ -485,10 +483,10 @@ class FloatingActionButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: null));

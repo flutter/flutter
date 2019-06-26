@@ -767,7 +767,7 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// Gesture detectors can contribute semantic information to the tree that is
   /// used by assistive technology. The behavior can be configured by
-  /// `semantics`, or disabled with [excludeFromSemantics].
+  /// [semantics], or disabled with [excludeFromSemantics].
   const RawGestureDetector({
     Key key,
     this.child,
@@ -811,20 +811,65 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// It has no effect if [excludeFromSemantics] is true.
   ///
-  /// When [semantics] is null, [RawGestureDetector] will fall back to
-  /// default delegate that behaves as follows:
+  /// When [semantics] is null, [RawGestureDetector] will fall back to a
+  /// default delegate which checks if the detector owns certain gesture
+  /// recognizers and calls their callbacks if they exist:
   ///
-  ///  * During a semantic tap, it looks for [TapGestureRecognizer] and calls
+  ///  * During a semantic tap, it calls [TapGestureRecognizer]'s
   ///    `onTapDown`, `onTapUp`, and `onTap`.
-  ///  * During a semantic long press, it looks for [LongPressGestureRecognizer]
-  ///    and calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
-  ///    `onLongPressUp`.
-  ///  * During a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
-  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same methods.
-  ///  * During a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
-  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same methods.
+  ///  * During a semantic long press, it calls [LongPressGestureRecognizer]'s
+  ///    `onLongPressStart`, `onLongPress`, `onLongPressEnd` and `onLongPressUp`.
+  ///  * During a semantic horizontal drag, it calls [HorizontalDragGestureRecognizer]'s
+  ///    `onDown`, `onStart`, `onUpdate` and `onEnd`, then
+  ///    [PanGestureRecognizer]'s `onDown`, `onStart`, `onUpdate` and `onEnd`.
+  ///  * During a semantic vertical drag, it calls [VerticalDragGestureRecognizer]'s
+  ///    `onDown`, `onStart`, `onUpdate` and `onEnd`, then
+  ///    [PanGestureRecognizer]'s `onDown`, `onStart`, `onUpdate` and `onEnd`.
+  ///
+  /// {@tool sample}
+  /// This custom gesture detector listens to force presses, while also allows
+  /// the same callback to be triggered by semantic long presses.
+  ///
+  /// ```dart
+  /// class ForcePressGestureDetectorWithSemantics extends StatelessWidget {
+  ///   const ForcePressGestureDetectorWithSemantics({
+  ///     this.child,
+  ///     this.onForcePress,
+  ///   });
+  ///
+  ///   final Widget child;
+  ///   final VoidCallback onForcePress;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return RawGestureDetector(
+  ///       gestures: <Type, GestureRecognizerFactory>{
+  ///         ForcePressGestureRecognizer: GestureRecognizerFactoryWithHandlers<ForcePressGestureRecognizer>(
+  ///           () => ForcePressGestureRecognizer(debugOwner: this),
+  ///           (ForcePressGestureRecognizer instance) {
+  ///             instance.onStart = (_) => onForcePress();
+  ///           }
+  ///         ),
+  ///       },
+  ///       behavior: HitTestBehavior.opaque,
+  ///       semantics: _LongPressSemanticsDelegate(onForcePress),
+  ///       child: child,
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class _LongPressSemanticsDelegate extends SemanticsGestureDelegate {
+  ///   _LongPressSemanticsDelegate(this.onLongPress);
+  ///
+  ///   VoidCallback onLongPress;
+  ///
+  ///   @override
+  ///   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  ///     renderObject.onLongPress = onLongPress;
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   final SemanticsGestureDelegate semantics;
 
   @override
@@ -846,8 +891,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Re-initialize semantics delegate unless delegate has always been default
-    // (avoid unnecessary construction of _DefaultGestureSemanticsDelegate).
     if (!(oldWidget.semantics == null && widget.semantics == null)) {
       _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     }
@@ -883,7 +926,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      _updateSemanticsForObject(semanticsGestureHandler);
+      _updateSemanticsForRenderObject(semanticsGestureHandler);
     }
   }
 
@@ -951,7 +994,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
-  void _updateSemanticsForObject(RenderSemanticsGestureHandler renderObject) {
+  void _updateSemanticsForRenderObject(RenderSemanticsGestureHandler renderObject) {
     assert(!widget.excludeFromSemantics);
     assert(_semantics != null);
     _semantics.assignSemantics(renderObject);
@@ -967,7 +1010,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!widget.excludeFromSemantics)
       result = _GestureSemantics(
         child: result,
-        assignSemantics: _updateSemanticsForObject,
+        assignSemantics: _updateSemanticsForRenderObject,
       );
     return result;
   }
@@ -1014,16 +1057,17 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 }
 
 /// A base class that describes what semantics notations a [RawGestureDetector]
-/// should add to the render object [RenderSemanticsGestureHandler]. It is
-/// used when defining a custom gesture detector.
+/// should add to the render object [RenderSemanticsGestureHandler].
+///
+/// It is used to allow custom [GestureDetector]s to add semantics notations.
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
-  SemanticsGestureDelegate();
+  const SemanticsGestureDelegate();
 
-  /// Assigns semantics notations to the render object
-  /// [RenderSemanticsGestureHandler] of the gesture detector.
+  /// Assigns semantics notations to the [RenderSemanticsGestureHandler] render
+  /// object of the gesture detector.
   ///
-  /// It is called when the widget is created, updated, or during
+  /// This method is called when the widget is created, updated, or during
   /// [RawGestureDetector.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }

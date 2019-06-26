@@ -109,6 +109,11 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      return false;
+    }
+
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
     if (_currentPlatform != TargetPlatform.iOS

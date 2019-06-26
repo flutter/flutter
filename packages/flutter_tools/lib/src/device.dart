@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -27,6 +29,38 @@ import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
+
+/// A description of the kind of workflow the device supports.
+class Category {
+  const Category._(this.value);
+
+  static const Category web = Category._('web');
+  static const Category desktop = Category._('desktop');
+  static const Category mobile = Category._('mobile');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
+
+/// The platform sub-folder that a device type supports.
+class PlatformType {
+  const PlatformType._(this.value);
+
+  static const PlatformType web = PlatformType._('web');
+  static const PlatformType android = PlatformType._('android');
+  static const PlatformType ios = PlatformType._('ios');
+  static const PlatformType linux = PlatformType._('linux');
+  static const PlatformType macos = PlatformType._('macos');
+  static const PlatformType windows = PlatformType._('windows');
+  static const PlatformType fuchsia = PlatformType._('fuchsia');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -133,6 +167,35 @@ class DeviceManager {
     }
     return diagnostics;
   }
+
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user. If the user has not specified
+  /// all devices and has multiple connected then filter the list by those supported
+  /// in the current project and remove non-ephemeral device types.
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    List<Device> devices = await getDevices().toList();
+
+    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
+      devices = devices
+          .where((Device device) => isDeviceSupportedForProject(device, flutterProject))
+          .toList();
+
+      // Note: ephemeral is nullable for device types where this is not well
+      // defined.
+      if (devices.any((Device device) => device.ephemeral == true)) {
+        devices = devices
+            .where((Device device) => device.ephemeral == true)
+            .toList();
+      }
+    }
+    return devices;
+  }
+
+  /// Returns whether the device is supported for the project.
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
+  }
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
@@ -208,9 +271,18 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
 abstract class Device {
 
-  Device(this.id);
+  Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
+
+  /// The [Category] for this device type.
+  final Category category;
+
+  /// The [PlatformType] for this device.
+  final PlatformType platformType;
+
+  /// Whether this is an ephemeral device.
+  final bool ephemeral;
 
   String get name;
 
@@ -218,6 +290,14 @@ abstract class Device {
 
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
+
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  Future<String> get emulatorId;
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
   Future<bool> get supportsHardwareRendering async {

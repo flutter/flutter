@@ -47,8 +47,8 @@ export 'dart:io'
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
-        // TODO(tvolkert): Uncomment (flutter/flutter#33791)
-        //HttpClientResponseCompressionState,
+        HttpClientResponseCompressionState,
+        HttpException,
         HttpHeaders,
         HttpRequest,
         HttpServer,
@@ -163,7 +163,7 @@ class Stdio {
   bool get hasTerminal => io.stdout.hasTerminal;
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
-  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
+  bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
 }
 
 Stdio get stdio => context.get<Stdio>() ?? const Stdio();

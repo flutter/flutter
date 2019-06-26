@@ -327,6 +327,12 @@ class AnimatedBezierState extends State<AnimatedBezier>
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return CustomPaint(
         foregroundPainter: BezierPainter(widget.color,

@@ -103,6 +103,19 @@ void main() {
       }, initializeFlutterRoot: false);
     });
 
+    testUsingContext('Doesnt crash on invalid .packages file', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages')
+        ..createSync()
+        ..writeAsStringSync('Not a valid package');
+
+      await runner.run(<String>['dummy']);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      Platform: () => platform,
+    }, initializeFlutterRoot: false);
+
     group('version', () {
       testUsingContext('checks that Flutter toJson output reports the flutter framework version', () async {
         final ProcessResult result = ProcessResult(0, 0, 'random', '0');
