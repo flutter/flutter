@@ -137,9 +137,8 @@ BuildMode getBuildModeForName(String name) {
       return BuildMode.profile;
     case 'release':
       return BuildMode.release;
-    default:
-      throw ArgumentError('$name is not a valid build mode');
   }
+  return null;
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {

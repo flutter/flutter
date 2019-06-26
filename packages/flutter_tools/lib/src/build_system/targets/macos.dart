@@ -14,14 +14,15 @@ import '../build_system.dart';
 ///
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
+// TODO(jonahwilliams): remove shell out.
 Future<void> copyFramework(Map<String, ChangeType> updates,
     Environment environment) async {
-  // Ensure that the path is a framework, to minimize the potential for
-  // catastrophic deletion bugs with bad arguments.
-  if (fs.path.extension(updates.keys.single) != '.framework') {
-    throw Exception('Attempted to delete a non-framework directory: ${updates.keys.single}');
-  }
-  final Directory input = fs.directory(updates.keys.single);
+  final Directory input = fs.directory(fs.path.join(
+    environment.cacheDir.path,
+    'engine',
+    'darwin-x64',
+    'FlutterMacOS.framework',
+  ));
   final Directory targetDirectory = environment
     .projectDir
     .childDirectory('macos')
@@ -65,7 +66,24 @@ const Target unpackMacos = Target(
     // Ignore Versions folder for now
   ],
   outputs: <Source>[
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/FlutterMacOS'),
+    // Headers
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEView.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEViewController.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterChannels.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+    // Modules
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Modules/module.modulemap'),
+    // Resources
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Resources/icudtl.dat'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Resources/info.plist'),
+    // Ignore Versions folder for now
   ],
   dependencies: <Target>[],
   buildAction: copyFramework,

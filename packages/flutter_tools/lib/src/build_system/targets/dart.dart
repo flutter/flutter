@@ -12,6 +12,7 @@ import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
+import '../exceptions.dart';
 
 /// The define to pass a [BuildMode].
 const String kBuildMode= 'BuildMode';
@@ -30,6 +31,9 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
     FlutterProject.fromDirectory(environment.projectDir),
   );
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  if (buildMode == null) {
+    throw MissingDefineException(kBuildMode, 'kernel_snapshot');
+  }
   final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
 
   final CompilerOutput output = await compiler.compile(
@@ -56,14 +60,16 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   final String outputPath = environment.buildDir.path;
   final bool use64Bit = environment.defines[kAndroid64Bit] == 'true';
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  if (buildMode == null) {
+    throw MissingDefineException(kBuildMode, 'kernel_snapshot');
+  }
 
   final int snapshotExitCode = await snapshotter.build(
     platform: use64Bit ? TargetPlatform.android_arm64 : TargetPlatform.android_arm,
     buildMode: buildMode,
     mainPath: environment.buildDir.childFile('main.app.dill').path,
-    packagesPath: PackageMap.globalPackagesPath,
+    packagesPath: environment.projectDir.childFile('.packages').path,
     outputPath: outputPath,
-    buildSharedLibrary: true,
   );
   if (snapshotExitCode != 0) {
     throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -104,10 +110,13 @@ const Target kernelSnapshot = Target(
 
 /// Generate an ELF binary from a dart snapshot.
 // TODO(jonahwilliams): does this need a dependency on gen_snapshot?.
-const Target aotSnapshot = Target(
+const Target aotElf = Target(
   name: 'aot_elf',
   inputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.pattern('{CACHE_DIR}/pkg/sky_engine/lib/ui/ui.dart'),
+    Source.pattern('{CACHE_DIR}/pkg/sky_engine/sdk_ext/vmservice_io.dart'),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/app.so'),
@@ -117,3 +126,4 @@ const Target aotSnapshot = Target(
   ],
   buildAction: compileAotElf,
 );
+

@@ -1,3 +1,5 @@
+
+
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -33,11 +35,40 @@ void main() {
         buildSystem = BuildSystem(<String, Target>{
           unpackMacos.name: unpackMacos,
         });
-        fs.directory('cache/engine/darwin-x64/FlutterMacOS.framework').createSync(recursive: true);
-        fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/foo').createSync();
+        final List<File> inputs = <File>[
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
+          fs.file('cache/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+        ];
+        for (File input in inputs) {
+          input.createSync(recursive: true);
+        }
         when(processManager.runSync(any)).thenAnswer((Invocation invocation) {
           final List<String> arguments = invocation.positionalArguments.first;
-          fs.directory(arguments.last).createSync(recursive: true);
+          final Directory source = fs.directory(arguments[arguments.length - 2]);
+          final Directory target = fs.directory(arguments.last)
+            ..createSync(recursive: true);
+          for (FileSystemEntity entity in source.listSync(recursive: true)) {
+            if (entity is File) {
+              final String relative = fs.path.relative(entity.path, from: source.path);
+              final String destination = fs.path.join(target.path, relative);
+              if (!fs.file(destination).parent.existsSync()) {
+                fs.file(destination).parent.createSync();
+              }
+              entity.copySync(destination);
+            }
+          }
           return FakeProcessResult()..exitCode = 0;
         });
       }, overrides: <Type, Generator>{
@@ -50,6 +81,20 @@ void main() {
       await buildSystem.build('unpack_macos', environment, const BuildSystemConfig());
 
       expect(fs.directory('macos/Flutter/FlutterMacOS.framework').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/FlutterMacOS').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEReshapeListener.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEView.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEViewController.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterChannels.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterCodecs.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterMacOS.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Modules/module.modulemap').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Resources/icudtl.dat').existsSync(), true);
+      expect(fs.file('macos/Flutter/FlutterMacOS.framework/Resources/info.plist').existsSync(), true);
     }));
   });
 }

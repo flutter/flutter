@@ -77,3 +77,17 @@ class MisplacedOutputException implements Exception {
         ' Which is outside of the current build or project directory';
   }
 }
+
+/// An exception thrown if a build action is missing a required define.
+class MissingDefineException implements Exception {
+  MissingDefineException(this.define, this.target);
+
+  final String define;
+  final String target;
+
+  @override
+  String toString() {
+    return 'Target $target required define $define '
+        'but it was not provided';
+  }
+}
