@@ -470,7 +470,7 @@ class ButtonThemeData extends Diagnosticable {
 
   Color _getDisabledColor(MaterialButton button) {
     return getBrightness(button) == Brightness.dark
-      ? colorScheme.onSurface.withOpacity(0.30)  // default == Colors.white30
+      ? colorScheme.onSurface.withOpacity(0.38)  // default == Colors.white38
       : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
   }
 
