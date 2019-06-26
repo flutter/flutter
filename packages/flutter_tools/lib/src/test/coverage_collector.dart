@@ -53,13 +53,9 @@ class CoverageCollector extends TestWatcher {
     final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
       // If we have a specified coverage directory or could not find the package name, then
       // accept all libraries.
-      if (coverageDirectory != null) {
-        return true;
-      }
-      if (flutterProject == null) {
-        return true;
-      }
-      return libraryName.contains(flutterProject.manifest.appName);
+      return (coverageDirectory != null)
+          || (flutterProject == null)
+          || libraryName.contains(flutterProject.manifest.appName);
     });
     if (data == null) {
       throw Exception('Failed to collect coverage.');
