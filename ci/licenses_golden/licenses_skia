@@ -1,4 +1,4 @@
-Signature: 0afa84887369c41dbecc2c17256f88f0
+Signature: 6f6c50776c1eeb09e69861164fac3a7c
 
 UNUSED LICENSES:
 
@@ -5458,6 +5458,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/RadialWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TintEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TransformEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TritoneEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/VenetianBlindsEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
