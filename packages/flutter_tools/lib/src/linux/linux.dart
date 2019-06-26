@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tool_api/doctor.dart';
+import 'package:flutter_tool_api/extension.dart';
+
 import '../base/io.dart';
 import '../base/version.dart';
-import '../extension/doctor.dart';
-import '../extension/extension.dart';
 
 class LinuxExtension extends ToolExtension {
   @override

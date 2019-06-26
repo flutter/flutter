@@ -4,6 +4,11 @@
 
 import 'dart:async';
 
+import 'package:flutter_tool_api/doctor.dart' hide ValidationResult, ValidationMessage;
+import 'package:flutter_tool_api/doctor.dart' as doctor_domain show ValidationResult, ValidationMessage;
+import 'package:flutter_tool_api/extension.dart' as extension;
+import 'package:flutter_tools/src/base/extension_host.dart';
+
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
@@ -21,9 +26,6 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'desktop.dart';
 import 'device.dart';
-import 'extension/doctor.dart' hide ValidationResult, ValidationMessage;
-import 'extension/doctor.dart' as doctor_domain show ValidationResult, ValidationMessage;
-import 'extension/extension.dart' as extension;
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
@@ -43,7 +45,8 @@ import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
-export 'extension/doctor.dart';
+// TODO(jonahwilliams): remove export when all implementations are moved.
+export 'package:flutter_tool_api/doctor.dart';
 
 Doctor get doctor => context.get<Doctor>();
 
@@ -61,13 +64,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
-  final extension.ExtensionShim extensionShim = extension.ExtensionShim(<extension.ToolExtension>[
+  final SharedIsolateExtensions extensionShim = SharedIsolateExtensions(<extension.ToolExtension>[
     LinuxExtension()
       ..processManager = processManager
       ..fileSystem = fs,
     WebExtension()
       ..processManager = processManager
       ..fileSystem = fs
+  ], <CrossIsolateShim>[
+    CrossIsolateShim(),
   ]);
 
   @override
@@ -97,6 +102,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           _validators.add(visualStudioValidator);
         }
       }
+
+      _validators.add(ExtensionCompatDoctorValidation('flutter_tool_macos', extensionShim));
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -341,7 +348,7 @@ class ExtensionCompatDoctorValidation implements DoctorValidator {
   ExtensionCompatDoctorValidation(this.name, this.shim);
 
   final String name;
-  final extension.ExtensionShim shim;
+  final SharedIsolateExtensions shim;
 
   @override
   String get slowWarning => 'This is taking an unexpectedly long time...';

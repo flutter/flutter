@@ -15,7 +15,19 @@ import 'doctor.dart';
 /// A request sent to a tool extension from the host.
 class Request {
   /// Create a new [Request] object.
-  Request(this.id, this.method, this.arguments);
+  const Request(this.id, this.method, this.arguments);
+
+  /// Create a new [Request] object from a json object.
+  factory Request.fromJson(Map<String, Object> json) {
+    final int id =  json['id'];
+    final Map<String, Object> arguments = json['arguments'];
+    final String method = json['method'];
+    return Request(
+      id,
+      method,
+      arguments,
+    );
+  }
 
   /// The unique identifier of this request.
   ///
@@ -41,7 +53,19 @@ class Request {
 /// A response sent from a tool extension to the host.
 class Response {
   /// Create a new [Response] object.
-  Response(this.id, this.body, [ this.error ]);
+  const Response(this.id, this.body, [ this.error ]);
+
+  /// Create a new [Response] object from a json object.
+  factory Response.fromJson(Map<String, Object> json) {
+    final int id = json['id'];
+    final Map<String, Object> body = json['body'];
+    final Map<String, Object> error = json['error'];
+    return Response(
+      id,
+      body,
+      error,
+    );
+  }
 
   /// The unique identifier of this response.
   ///
@@ -64,43 +88,6 @@ class Response {
       'body': body,
       'error': error,
     };
-  }
-}
-
-/// This is a temporary class for running extensions in the same isolate.
-class ExtensionShim {
-  ExtensionShim(this.extensions);
-
-  final List<ToolExtension> extensions;
-  int _nextId = 0;
-
-  /// Send a request to every active extension.
-  Future<List<Response>> sendRequestAll(String method,
-      {Map<String, Object> arguments = const <String, Object>{}}) async {
-    final int id = _nextId;
-    _nextId += 1;
-    final Request request = Request(id, method, arguments);
-    final List<Future<Response>> pendingResponses = <Future<Response>>[];
-    for (ToolExtension extension in extensions) {
-      pendingResponses.add(extension._handleMessage(request));
-    }
-    return Future.wait(pendingResponses);
-  }
-
-  /// Send a request to a single named extension.
-  Future<Response> sendRequest(String extensionName, String method,
-      {Map<String, Object> arguments = const <String, Object>{}}) async {
-    final int id = _nextId;
-    _nextId += 1;
-    final Request request = Request(id, method, arguments);
-    final ToolExtension extension = extensions
-        .firstWhere((ToolExtension extension) => extension.name == extensionName, orElse: () => null);
-    if (extension == null) {
-      return Response(id, null, <String, Object>{
-        'error': 'No extension named $extensionName defined',
-      });
-    }
-    return extension._handleMessage(request);
   }
 }
 
@@ -134,7 +121,7 @@ abstract class ToolExtension {
     _domainHandlers[name] = domainHandler;
   }
 
-  Future<Response> _handleMessage(Request request) async {
+  Future<Response> handleMessage(Request request) async {
     Response response;
     final DomainHandler handler = _domainHandlers[request.method];
     if (handler != null) {

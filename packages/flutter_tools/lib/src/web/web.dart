@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../extension/doctor.dart';
-import '../extension/extension.dart';
+import 'package:flutter_tool_api/doctor.dart';
+import 'package:flutter_tool_api/extension.dart';
 
 import 'chrome.dart';
 

@@ -33,6 +33,7 @@ class ValidationType implements Serializable {
   /// Some requirements are met.
   static const ValidationType partial = ValidationType._(1);
 
+  /// Some requirements are met.
   // TODO(jonahwilliams): deprecate this enum.
   static const ValidationType notAvailable = ValidationType._(2);
 

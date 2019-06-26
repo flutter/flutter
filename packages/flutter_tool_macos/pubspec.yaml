@@ -1,0 +1,5 @@
+name: flutter_tool_macos
+
+dependencies:
+  flutter_tool_api:
+    path: ../flutter_tool_api
