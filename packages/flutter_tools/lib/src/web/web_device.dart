@@ -71,6 +71,9 @@ class ChromeDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override

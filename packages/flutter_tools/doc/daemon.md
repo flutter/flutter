@@ -157,7 +157,7 @@ This is sent when an app is stopped or detached from. The `params` field will be
 
 #### device.getDevices
 
-Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and `emulator` (a boolean).
+Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, `emulator` (a boolean) and `emulatorId`.
 
 `category` is string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
 
@@ -166,6 +166,8 @@ supports. The current catgetories are "android", "ios", "linux", "macos",
 "fuchsia", "windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
 
 `ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.
+
+`emulatorId` is an string ID that matches the ID from `getEmulators` to allow clients to match running devices to the emulators that started them (for example to hide emulators that are already running). This field is not guaranteed to be populated even if a device was spawned from an emulator as it may require a successful connection to the device to retrieve it. In the case of a failed connection or the device is not an emulator, this field will be null.
 
 #### device.enable
 
@@ -258,6 +260,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.5.3: Added `emulatorId` field to device.
 - 0.5.2: Added `platformType` and `category` fields to emulator.
 - 0.5.1: Added `platformType`, `ephemeral`, and `category` fields to device.
 - 0.5.0: Added `daemon.getSupportedPlatforms` command
