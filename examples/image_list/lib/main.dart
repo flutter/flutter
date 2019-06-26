@@ -21,9 +21,10 @@ Future<void> main() async {
   print('Listening on port $port.');
 
   final ByteData byteData = await rootBundle.load('images/coast.jpg');
+  final Uint8List bytes = byteData.buffer
+      .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes);
   httpServer.listen((HttpRequest request) async {
-    request.response.add(byteData.buffer
-        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+    request.response.add(bytes);
     request.response.close();
   });
 
