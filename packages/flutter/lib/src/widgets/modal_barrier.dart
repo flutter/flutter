@@ -57,9 +57,9 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 }
 
 class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
-  _ModalBarrierSemanticsDelegate({this.onAnyTapDown});
+  const _ModalBarrierSemanticsDelegate({this.onAnyTapDown});
 
-  VoidCallback onAnyTapDown;
+  final VoidCallback onAnyTapDown;
 
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
