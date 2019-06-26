@@ -469,6 +469,19 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'create':
+      args.addAll(<String>['--tags', 'create']);
+      break;
+    case 'tool':
+      args.addAll(<String>['-x', 'integration', '-x', 'create']);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -512,6 +525,17 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
+
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'tool':
+      args.addAll(<String>['--exclude-tags', 'integration']);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
