@@ -23,9 +23,11 @@ import 'plugins.dart';
 import 'template.dart';
 import 'web/workflow.dart';
 
-FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? FlutterProjectFactory();
+FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? const FlutterProjectFactory();
 
 class FlutterProjectFactory {
+  const FlutterProjectFactory();
+
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
