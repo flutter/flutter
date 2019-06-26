@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 // This test performs too poorly to run with coverage enabled.
-@Tags(<String>['no_coverage'])
+@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
