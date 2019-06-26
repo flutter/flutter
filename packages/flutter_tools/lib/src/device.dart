@@ -167,6 +167,35 @@ class DeviceManager {
     }
     return diagnostics;
   }
+
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user. If the user has not specified
+  /// all devices and has multiple connected then filter the list by those supported
+  /// in the current project and remove non-ephemeral device types.
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    List<Device> devices = await getDevices().toList();
+
+    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
+      devices = devices
+          .where((Device device) => isDeviceSupportedForProject(device, flutterProject))
+          .toList();
+
+      // Note: ephemeral is nullable for device types where this is not well
+      // defined.
+      if (devices.any((Device device) => device.ephemeral == true)) {
+        devices = devices
+            .where((Device device) => device.ephemeral == true)
+            .toList();
+      }
+    }
+    return devices;
+  }
+
+  /// Returns whether the device is supported for the project.
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
+  }
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
