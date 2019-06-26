@@ -88,45 +88,23 @@ task:
       container:
         cpu: 4
         memory: 12G
-    - name: tool_tests_1-linux
+    # all of the tests except the ones in test/integration for packages/flutter_tools
+    - name: tool_tests-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: tool
-        SHARD_INDEX: 1
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
-    - name: tool_tests_integration_1-linux
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: integration
-        SHARD_INDEX: 1
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tool_tests_2-linux
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: tool
-        SHARD_INDEX: 2
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
-      container:
-        cpu: 4
-        memory: 12G
-    - name: tool_tests_integration_2-linux
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
-        SHARD_INDEX: 2
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -251,30 +229,18 @@ task:
   test_all_script:
     - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
-    - name: tool_tests_1-windows
+    # all of the tests except test/integration for packages/flutter_tools
+    - name: tool_tests-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: tool
-        SHARD_INDEX: 1
-    - name: tool_tests_integration_1-windows
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: integration
-        SHARD_INDEX: 1
-    - name: tool_tests_2-windows
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: tool
-        SHARD_INDEX: 2
-    - name: tool_tests_integration_2-windows
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
-        SHARD_INDEX: 2
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
@@ -404,30 +370,18 @@ task:
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
+    # all of the tests except test/integration for packages/flutter_tools
     - name: tool_tests-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: tool
-        SHARD_INDEX: 1
+    # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: integration
-        SHARD_INDEX: 1
-    - name: tool_tests_2-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: tool
-        SHARD_INDEX: 2
-    - name: tool_tests_integration_2-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tool_tests
-        SUBSHARD: integration
-        SHARD_INDEX: 2
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
@@ -507,10 +461,8 @@ docker_builder:
     - tests_widgets-linux
     - tests_framework_other-linux
     - tests_extras-linux
-    - tool_tests_1-linux
-    - tool_tests_2-linux
-    - tool_tests_integration_2-linux
-    - tool_tests_integration_2-linux
+    - tool_tests-linux
+    - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
     - integration_tests_gradle-linux
