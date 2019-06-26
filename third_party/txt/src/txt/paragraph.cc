@@ -402,6 +402,33 @@ bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
   if (!U_SUCCESS(status))
     return false;
 
+  // Detect if final trailing run is a single ambiguous whitespace.
+  // We want to bundle the final ambiguous whitespace with the preceding
+  // run in order to maintain logical typing behavior when mixing RTL and LTR
+  // text. We do not want this to be a true ghost run since the contrasting
+  // directionality causes the trailing space to not render at the visual end of
+  // the paragraph.
+  //
+  // This only applies to the final whitespace at the end as other whitespace is
+  // no longer ambiguous when surrounded by additional text.
+  bool has_trailing_whitespace = false;
+  int32_t bidi_run_start, bidi_run_length;
+  if (bidi_run_count > 1) {
+    ubidi_getVisualRun(bidi.get(), bidi_run_count - 1, &bidi_run_start,
+                       &bidi_run_length);
+    if (!U_SUCCESS(status))
+      return false;
+    if (bidi_run_length == 1) {
+      UChar32 last_char;
+      U16_GET(text_.data(), 0, bidi_run_start + bidi_run_length - 1,
+              static_cast<int>(text_.size()), last_char);
+      if (u_hasBinaryProperty(last_char, UCHAR_WHITE_SPACE)) {
+        has_trailing_whitespace = true;
+        bidi_run_count--;
+      }
+    }
+  }
+
   // Build a map of styled runs indexed by start position.
   std::map<size_t, StyledRuns::Run> styled_run_map;
   for (size_t i = 0; i < runs_.size(); ++i) {
@@ -411,7 +438,6 @@ bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
 
   for (int32_t bidi_run_index = 0; bidi_run_index < bidi_run_count;
        ++bidi_run_index) {
-    int32_t bidi_run_start, bidi_run_length;
     UBiDiDirection direction = ubidi_getVisualRun(
         bidi.get(), bidi_run_index, &bidi_run_start, &bidi_run_length);
     if (!U_SUCCESS(status))
@@ -437,6 +463,11 @@ bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
     }
     if (bidi_run_length == 0)
       continue;
+
+    // Attach the final trailing whitespace as part of this run.
+    if (has_trailing_whitespace && bidi_run_index == bidi_run_count - 1) {
+      bidi_run_length++;
+    }
 
     size_t bidi_run_end = bidi_run_start + bidi_run_length;
     TextDirection text_direction =
