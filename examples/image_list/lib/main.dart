@@ -59,7 +59,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   int _counter = 0;
 
   void _incrementCounter() {
@@ -69,10 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget createImage(final int index, final Completer<bool> completer) {
-    return Flexible(
-      fit: FlexFit.tight,
-      flex: index,
-      child: Image.network(
+    return Image.network(
         'http://localhost:${widget.port}/${_counter * IMAGES + index}',
         frameBuilder: (
           BuildContext context,
@@ -85,17 +82,24 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           return child;
         },
-      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final List<AnimationController> controllers = List<AnimationController>(IMAGES);
+    for (int i = 0; i < IMAGES; i++) {
+      controllers[i] = AnimationController(
+        duration: const Duration(milliseconds: 3600),
+        vsync: this,
+      )..repeat();
+    }
     final List<Completer<bool>> completers = List<Completer<bool>>(IMAGES);
     for (int i = 0; i < IMAGES; i++) {
       completers[i] = Completer<bool>();
     }
-    List<Future<bool>> futures = completers.map((completer) => completer.future).toList();
+    final List<Future<bool>> futures = completers.map(
+        (Completer<bool> completer) => completer.future).toList();
     final DateTime started = DateTime.now();
     Future.wait(futures).then((_) {
       print(
@@ -109,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(children: CreateImageList(IMAGES, completers)),
+            Row(children: createImageList(IMAGES, completers, controllers)),
             const Text(
               'You have pushed the button this many times:',
             ),
@@ -128,10 +132,16 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  List<Widget> CreateImageList(int count, List<Completer> completers) {
-    List<Widget> list = <Widget>[];
+  List<Widget> createImageList(int count, List<Completer<bool>> completers,
+      List<AnimationController> controllers) {
+    final List<Widget> list = <Widget>[];
     for (int i = 0; i < count; i++) {
-      list.add(createImage(i + 1, completers[i]));
+      list.add(Flexible(
+          fit: FlexFit.tight,
+          flex: i + 1,
+          child: RotationTransition(
+              turns: controllers[i],
+              child: createImage(i + 1, completers[i]))));
     }
     return list;
   }
