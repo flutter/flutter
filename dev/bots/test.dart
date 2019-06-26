@@ -529,7 +529,11 @@ Future<void> _pubRunTest(
       args.addAll(<String>['--tags', 'integration']);
       break;
     case 'tool':
-      args.addAll(<String>['--exclude-tags', 'integration']);
+      args.addAll(<String>[
+        '--exclude-tags', 'integration',
+        '--total-shards', '2',
+        '--shard-index', Platform.environment['SHARD_INDEX'],
+      ]);
       break;
   }
 
