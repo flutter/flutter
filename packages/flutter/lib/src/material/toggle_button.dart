@@ -124,7 +124,7 @@ class ToggleButtonsTheme extends InheritedWidget {
   /// The border color to display when the toggle button is disabled.
   final Color disabledBorderColor;
 
-  /// The width of the border surrounding teach toggle button.
+  /// The width of the border surrounding each toggle button.
   ///
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
@@ -388,7 +388,7 @@ class ToggleButtons extends StatelessWidget {
   /// The border color to display when the toggle button is disabled.
   final Color disabledBorderColor;
 
-  /// The width of the border surrounding teach toggle button.
+  /// The width of the border surrounding each toggle button.
   ///
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
