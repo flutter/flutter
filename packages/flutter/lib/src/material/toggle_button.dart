@@ -446,51 +446,63 @@ class ToggleButtons extends StatelessWidget {
     return BorderRadius.zero;
   }
 
-  BorderSide _getLeadingBorderSide(int index, ThemeData themeData) {
+  BorderSide _getLeadingBorderSide(
+    int index,
+    ThemeData theme,
+    ToggleButtonsTheme toggleButtonsTheme,
+  ) {
     if (borderWidth == null)
       return BorderSide.none;
 
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
       return BorderSide(
-        color: borderColor ?? themeData.colorScheme.primary,
-        width: borderWidth,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? themeData.colorScheme.onSurface,
-        width: borderWidth,
+        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? themeData.disabledColor,
-        width: borderWidth,
+        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     }
   }
 
-  BorderSide _getHorizontalBorderSide(int index, ThemeData themeData) {
+  BorderSide _getHorizontalBorderSide(
+    int index,
+    ThemeData theme,
+    ToggleButtonsTheme toggleButtonsTheme,
+  ) {
     if (borderWidth == null)
       return BorderSide.none;
 
     if (onPressed != null && isSelected[index]) {
       return BorderSide(
-        color: borderColor ?? themeData.colorScheme.primary,
-        width: borderWidth,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? themeData.colorScheme.onSurface,
-        width: borderWidth,
+        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? themeData.disabledColor,
-        width: borderWidth,
+        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     }
   }
 
-  BorderSide _getTrailingBorderSide(int index, ThemeData themeData) {
+  BorderSide _getTrailingBorderSide(
+    int index,
+    ThemeData theme,
+    ToggleButtonsTheme toggleButtonsTheme,
+  ) {
     if (borderWidth == null)
       return BorderSide.none;
 
@@ -499,18 +511,18 @@ class ToggleButtons extends StatelessWidget {
 
     if (onPressed != null && (isSelected[index])) {
       return BorderSide(
-        color: borderColor ?? themeData.colorScheme.primary,
-        width: borderWidth,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? themeData.colorScheme.onSurface,
-        width: borderWidth,
+        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? themeData.disabledColor,
-        width: borderWidth,
+        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     }
   }
@@ -521,7 +533,8 @@ class ToggleButtons extends StatelessWidget {
       !isSelected.any((bool val) => val == null),
       'There is a null value in isSelected: $isSelected'
     );
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final ToggleButtonsTheme toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
     return IntrinsicHeight(
@@ -532,9 +545,9 @@ class ToggleButtons extends StatelessWidget {
           final BorderRadius edgeBorderRadius = _getEdgeBorderRadius(index, children.length, textDirection);
           final BorderRadius clipBorderRadius = _getClipBorderRadius(index, children.length, textDirection);
 
-          final BorderSide leadingBorderSide = _getLeadingBorderSide(index, themeData);
-          final BorderSide horizontalBorderSide = _getHorizontalBorderSide(index, themeData);
-          final BorderSide trailingBorderSide = _getTrailingBorderSide(index, themeData);
+          final BorderSide leadingBorderSide = _getLeadingBorderSide(index, theme, toggleButtonsTheme);
+          final BorderSide horizontalBorderSide = _getHorizontalBorderSide(index, theme, toggleButtonsTheme);
+          final BorderSide trailingBorderSide = _getTrailingBorderSide(index, theme, toggleButtonsTheme);
 
           return _ToggleButton(
             selected: isSelected[index],
@@ -672,15 +685,22 @@ class _ToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
-    final ThemeData themeData = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
+    final ToggleButtonsTheme toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
     if (onPressed != null && selected) {
-      final Color primary = themeData.colorScheme.primary;
-      currentColor = activeColor ?? primary;
+      currentColor = activeColor
+        ?? toggleButtonsTheme.color
+        ?? theme.colorScheme.primary;
     } else if (onPressed != null && !selected) {
-      currentColor = color ?? themeData.colorScheme.onSurface;
+      currentColor = color
+        ?? toggleButtonsTheme.activeColor
+        ?? theme.colorScheme.onSurface;
     } else {
-      currentColor = disabledColor ?? themeData.disabledColor;
+      currentColor =
+      disabledColor
+        ?? toggleButtonsTheme.disabledColor
+        ?? theme.disabledColor;
     }
 
     final Widget result = IconTheme.merge(
