@@ -1064,10 +1064,10 @@ abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
   SemanticsGestureDelegate();
 
-  /// Assigns semantics notations to the render object
-  /// [RenderSemanticsGestureHandler] of the gesture detector.
+  /// Assigns semantics notations to the [RenderSemanticsGestureHandler] render
+  /// object of the gesture detector.
   ///
-  /// It is called when the widget is created, updated, or during
+  /// This method is called when the widget is created, updated, or during
   /// [RawGestureDetector.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }
