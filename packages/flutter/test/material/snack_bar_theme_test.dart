@@ -41,7 +41,7 @@ void main() {
       backgroundColor: const Color(0xFFFFFFFF),
       actionTextColor: const Color(0xFF0000AA),
       disabledActionTextColor: const Color(0xFF00AA00),
-      contentTextStyle: TextStyle(color: const Color(0xFF123456)),
+      contentTextStyle: const TextStyle(color: Color(0xFF123456)),
       elevation: 2.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
       behavior: SnackBarBehavior.floating,
@@ -275,7 +275,7 @@ SnackBarThemeData _snackBarTheme() {
   return SnackBarThemeData(
     backgroundColor: Colors.orange,
     actionTextColor: Colors.green,
-    contentTextStyle: TextStyle(color: Colors.blue),
+    contentTextStyle: const TextStyle(color: Colors.blue),
     elevation: 12.0,
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
   );
