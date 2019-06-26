@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@Tags(<String>['create'])
+// This test performs too poorly to run with coverage enabled.
+@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
