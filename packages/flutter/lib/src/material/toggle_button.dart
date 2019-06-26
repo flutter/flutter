@@ -33,7 +33,7 @@ class ToggleButtonsTheme extends InheritedWidget {
     this.borderColor,
     this.activeBorderColor,
     this.disabledBorderColor,
-    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    this.borderRadius = BorderRadius.zero,
     this.borderWidth = 1.0,
     Widget child,
   }) : super(key: key, child: child);
@@ -56,7 +56,7 @@ class ToggleButtonsTheme extends InheritedWidget {
     Color borderColor,
     Color activeBorderColor,
     Color disabledBorderColor,
-    BorderRadius borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    BorderRadius borderRadius = BorderRadius.zero,
     double borderWidth = 1.0,
     @required Widget child,
   }) {
