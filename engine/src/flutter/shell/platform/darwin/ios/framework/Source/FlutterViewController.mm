@@ -209,11 +209,6 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
                object:nil];
 
   [center addObserver:self
-             selector:@selector(onMemoryWarning:)
-                 name:UIApplicationDidReceiveMemoryWarningNotification
-               object:nil];
-
-  [center addObserver:self
              selector:@selector(onUserSettingsChanged:)
                  name:UIContentSizeCategoryDidChangeNotification
                object:nil];
@@ -792,12 +787,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   platformView->SetSemanticsEnabled(enabled || UIAccessibilityIsSpeakScreenEnabled());
   platformView->SetAccessibilityFeatures(flags);
 #endif
-}
-
-#pragma mark - Memory Notifications
-
-- (void)onMemoryWarning:(NSNotification*)notification {
-  [[_engine.get() systemChannel] sendMessage:@{@"type" : @"memoryPressure"}];
 }
 
 #pragma mark - Locale updates

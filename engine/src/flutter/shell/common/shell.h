@@ -78,6 +78,13 @@ class Shell final : public PlatformView::Delegate,
 
   DartVM* GetDartVM();
 
+  // Embedders should call this under low memory conditions to free up
+  // internal caches used.
+  //
+  // This method posts a task to the GPU threads to signal the Rasterizer to
+  // free resources.
+  void NotifyLowMemoryWarning() const;
+
   bool IsSetup() const;
 
   Rasterizer::Screenshot Screenshot(Rasterizer::ScreenshotType type,
