@@ -270,7 +270,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   bool _missingSource(AssetId id) {
-    return !fs.file(path.join(packageGraph.root.path, id.path)).existsSync();
+    return !fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
   }
 
   File _generatedFile(AssetId id) {
