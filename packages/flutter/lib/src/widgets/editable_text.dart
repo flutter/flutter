@@ -1442,7 +1442,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreen();
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        widget.controller.selection = TextSelection.collapsed(offset: _value.text.length);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, SelectionChangedCause.tap);
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
