@@ -19,6 +19,7 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
     Environment environment) async {
   final Directory input = fs.directory(fs.path.join(
     environment.cacheDir.path,
+    'artifacts',
     'engine',
     'darwin-x64',
     'FlutterMacOS.framework',
@@ -46,23 +47,23 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
 const Target unpackMacos = Target(
   name: 'unpack_macos',
   inputs: <Source>[
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
     // Headers
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
     // Modules
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
     // Resources
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
-    Source.pattern('{CACHE_DIR}/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
     // Ignore Versions folder for now
   ],
   outputs: <Source>[

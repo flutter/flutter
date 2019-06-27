@@ -49,7 +49,7 @@ flutter_tools:lib/''');
         fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'bar.dart')).createSync();
         fs.file(fs.path.join('lib', 'fizz')).createSync();
-        fs.file(fs.path.join('cache', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
+        fs.file(fs.path.join('cache', 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
       }, overrides: <Type, Generator>{
         KernelCompilerFactory: () => FakeKernelCompilerFactory(),
         GenSnapshot: () => FakeGenSnapshot(),

@@ -83,12 +83,12 @@ class FileHashStore {
   // linux and certutil on Windows, as well as dividing up computation across
   // isolates. This also related to the current performance issue with checking
   // APKs before installing them on device.
-  Future<List<SourceFile>> hashFiles(List<SourceFile> files) async {
-    final List<SourceFile> dirty = <SourceFile>[];
-    for (SourceFile file in files) {
-      final String absolutePath = file.path;
+  Future<List<File>> hashFiles(List<File> files) async {
+    final List<File> dirty = <File>[];
+    for (File file in files) {
+      final String absolutePath = file.resolveSymbolicLinksSync();
       final String previousHash = previousHashes[absolutePath];
-      final List<int> bytes = file.bytesForVersion();
+      final List<int> bytes = file.readAsBytesSync();
       final String currentHash = md5.convert(bytes).toString();
 
       if (currentHash != previousHash) {

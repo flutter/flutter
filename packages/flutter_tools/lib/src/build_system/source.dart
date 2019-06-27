@@ -2,44 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/file_system.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
 /// An input function produces a list of additional input files for an
 /// [Environment].
-typedef InputFunction = List<SourceFile> Function(Environment environment);
-
-/// A wrapped for a [FileSystemEntity] that abstracts version logic.
-class SourceFile {
-  const SourceFile(this._fileSystemEntity, [this._versionFile]);
-
-  final FileSystemEntity _fileSystemEntity;
-  final File _versionFile;
-
-  /// Whether the source exists on disk.
-  bool existsSync() => _fileSystemEntity.existsSync();
-
-  /// The path to the file or directory.
-  String get path => _fileSystemEntity.resolveSymbolicLinksSync();
-
-  /// The unresolved path to the file or directory.
-  String get unresolvedPath => _fileSystemEntity.path;
-
-  /// Return the bytes used to compute a version hash for the file.
-  List<int> bytesForVersion() {
-    if (_versionFile != null) {
-      return _versionFile.readAsBytesSync();
-    }
-    if (_fileSystemEntity is File) {
-      final File file = _fileSystemEntity;
-      return file.readAsBytesSync();
-    }
-    return _fileSystemEntity.statSync().modified.toIso8601String().codeUnits;
-  }
-}
+typedef InputFunction = List<File> Function(Environment environment);
 
 /// Collects sources for a [Target] into a single list of [FileSystemEntities].
 class SourceVisitor {
@@ -55,7 +24,7 @@ class SourceVisitor {
   final bool inputs;
 
   /// The entities are populated after visiting each source.
-  final List<SourceFile> sources = <SourceFile>[];
+  final List<File> sources = <File>[];
 
   /// Visit a [Source] which contains a function.
   ///
@@ -119,41 +88,31 @@ class SourceVisitor {
       for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
         final String filename = fs.path.basename(entity.path);
         if (segments.isEmpty) {
-          sources.add(SourceFile(entity.absolute));
+          sources.add(fs.file(entity.absolute));
         } else if (segments.length == 1) {
           if (filename.startsWith(segments[0]) ||
               filename.endsWith(segments[0])) {
-            sources.add(SourceFile(entity.absolute));
+            sources.add(entity.absolute);
           }
         } else if (filename.startsWith(segments[0])) {
           if (filename.substring(segments[0].length).endsWith(segments[1])) {
-            sources.add(SourceFile(entity.absolute));
+            sources.add(entity.absolute);
           }
         }
       }
     } else {
-      sources.add(SourceFile(fs.file(fs.path.normalize(filePath))));
+      sources.add(fs.file(fs.path.normalize(filePath)));
     }
   }
 
   /// Visit a [Source] which contains a [SourceBehavior].
   void visitBehavior(SourceBehavior sourceBehavior) {
     if (inputs) {
-      sources.addAll(
-          sourceBehavior.inputs(environment).map((FileSystemEntity entity) {
-        return SourceFile(entity);
-      }));
+      sources.addAll(sourceBehavior.inputs(environment));
     } else {
-      sources.addAll(
-          sourceBehavior.outputs(environment).map((FileSystemEntity entity) {
-        return SourceFile(entity);
-      }));
+      sources.addAll(sourceBehavior.outputs(environment));
     }
   }
-
-  /// Visit a [Source] which has a separate version file.
-  // TODO(jonahwilliams): implement correctly with tool depenendencies.
-  void visitVersion(String pattern, String version) {}
 }
 
 /// A description of an input or output of a [Target].
@@ -167,10 +126,6 @@ abstract class Source {
 
   /// This source is produced by the [SourceBehavior] class.
   const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
-
-  /// This source is versioned via a separate vile.
-  const factory Source.version(String pattern, {@required String version}) =
-      _VersionSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -191,10 +146,10 @@ abstract class SourceBehavior {
   const SourceBehavior();
 
   /// The inputs for a particular target.
-  List<FileSystemEntity> inputs(Environment environment);
+  List<File> inputs(Environment environment);
 
   /// The outputs for a particular target.
-  List<FileSystemEntity> outputs(Environment environment);
+  List<File> outputs(Environment environment);
 }
 
 class _SourceBehavior implements Source {
@@ -228,19 +183,6 @@ class _PatternSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitPattern(value);
-
-  @override
-  bool get implicit => value.contains('*');
-}
-
-class _VersionSource implements Source {
-  const _VersionSource(this.value, {@required this.version});
-
-  final String value;
-  final String version;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitVersion(value, version);
 
   @override
   bool get implicit => value.contains('*');

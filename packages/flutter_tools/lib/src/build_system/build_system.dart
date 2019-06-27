@@ -112,13 +112,14 @@ class Target {
 
   /// Collect hashes for all inputs to determine if any have changed.
   Future<Map<String, ChangeType>> computeChanges(
-    List<SourceFile> inputs,
+    List<File> inputs,
     Environment environment,
     FileHashStore fileHashStore,
   ) async {
     final Map<String, ChangeType> updates = <String, ChangeType>{};
     final File stamp = _findStampFile(environment);
     final Set<String> previousInputs = <String>{};
+    final List<String> previousOutputs = <String>[];
 
     // If the stamp file doesn't exist, we haven't run this step before and
     // all inputs were added.
@@ -130,7 +131,9 @@ class Target {
       } else {
         final Map<String, Object> values = json.decode(content);
         final List<Object> inputs = values['inputs'];
+        final List<Object> outputs = values['outputs'];
         inputs.cast<String>().forEach(previousInputs.add);
+        outputs.cast<String>().forEach(previousOutputs.add);
       }
     }
 
@@ -138,15 +141,15 @@ class Target {
     // for it. If not and it is a directory we skip hashing and instead use a
     // timestamp. If it is a file we collect it to be sent off for hashing as
     // a group.
-    final List<SourceFile> sourcesToHash = <SourceFile>[];
-    final List<SourceFile> missingInputs = <SourceFile>[];
-    for (SourceFile entity in inputs) {
-      if (!entity.existsSync()) {
-        missingInputs.add(entity);
+    final List<File> sourcesToHash = <File>[];
+    final List<File> missingInputs = <File>[];
+    for (File file in inputs) {
+      if (!file.existsSync()) {
+        missingInputs.add(file);
         continue;
       }
 
-      final String absolutePath = entity.path;
+      final String absolutePath = file.resolveSymbolicLinksSync();
       final String previousHash = fileHashStore.previousHashes[absolutePath];
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
@@ -156,9 +159,30 @@ class Target {
               : ChangeType.Added;
         }
       } else {
-        sourcesToHash.add(entity);
+        sourcesToHash.add(file);
       }
     }
+    // Check if any outputs were deleted or modified from the previous run.
+    for (String previousOutput in previousOutputs) {
+      final File file = fs.file(previousOutput);
+      if (!file.existsSync()) {
+        updates[previousOutput] = ChangeType.Removed;
+        continue;
+      }
+      final String absolutePath = file.resolveSymbolicLinksSync();
+      final String previousHash = fileHashStore.previousHashes[absolutePath];
+      if (fileHashStore.currentHashes.containsKey(absolutePath)) {
+        final String currentHash = fileHashStore.currentHashes[absolutePath];
+        if (currentHash != previousHash) {
+          updates[absolutePath] = previousInputs.contains(absolutePath)
+              ? ChangeType.Modified
+              : ChangeType.Added;
+        }
+      } else {
+        sourcesToHash.add(file);
+      }
+    }
+
     if (missingInputs.isNotEmpty) {
       throw MissingInputException(missingInputs, name);
     }
@@ -166,9 +190,9 @@ class Target {
     // If we have files to hash, compute them asynchronously and then
     // update the result.
     if (sourcesToHash.isNotEmpty) {
-      final List<SourceFile> dirty = await fileHashStore.hashFiles(sourcesToHash);
-      for (SourceFile file in dirty) {
-        final String absolutePath = file.path;
+      final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
+      for (File file in dirty) {
+        final String absolutePath = file.resolveSymbolicLinksSync();
         updates[absolutePath] = previousInputs.contains(absolutePath)
             ? ChangeType.Modified
             : ChangeType.Added;
@@ -177,7 +201,7 @@ class Target {
 
     // Find which, if any, inputs have been deleted.
     final Set<String> currentInputPaths = Set<String>.from(
-      inputs.map<String>((SourceFile entity) => entity.path)
+      inputs.map<String>((File entity) => entity.resolveSymbolicLinksSync())
     );
     for (String previousInput in previousInputs) {
       if (!currentInputPaths.contains(previousInput)) {
@@ -196,22 +220,22 @@ class Target {
   }
 
   void _writeStamp(
-    List<SourceFile> inputs,
-    List<SourceFile> outputs,
+    List<File> inputs,
+    List<File> outputs,
     Environment environment,
   ) {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
-    for (SourceFile input in inputs) {
-      inputPaths.add(input.path);
+    for (File input in inputs) {
+      inputPaths.add(input.resolveSymbolicLinksSync());
     }
     final List<String> outputPaths = <String>[];
-    final List<SourceFile> missingOutputs = <SourceFile>[];
-    for (SourceFile output in outputs) {
+    final List<File> missingOutputs = <File>[];
+    for (File output in outputs) {
       if (!output.existsSync()) {
         missingOutputs.add(output);
       } else {
-        outputPaths.add(output.path);
+        outputPaths.add(output.resolveSymbolicLinksSync());
       }
     }
     if (missingOutputs.isNotEmpty) {
@@ -229,7 +253,7 @@ class Target {
 
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
-  List<SourceFile> resolveInputs(
+  List<File> resolveInputs(
     Environment environment,
   ) {
     return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
@@ -239,11 +263,11 @@ class Target {
   ///
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
-  List<SourceFile> resolveOutputs(
+  List<File> resolveOutputs(
     Environment environment,
     { bool implicit = true, }
   ) {
-    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment, implicit: implicit, inputs: false);
+    final List<File> outputEntities = _resolveConfiguration(outputs, environment, implicit: implicit, inputs: false);
     if (implicit) {
       verifyOutputDirectories(outputEntities, environment, this);
     }
@@ -267,10 +291,10 @@ class Target {
       'name': name,
       'dependencies': dependencies.map((Target target) => target.name).toList(),
       'inputs': resolveInputs(environment)
-          .map((SourceFile file) => file.path)
+          .map((File file) => file.resolveSymbolicLinksSync())
           .toList(),
       'outputs': resolveOutputs(environment, implicit: false)
-          .map((SourceFile file) => file.unresolvedPath)
+          .map((File file) => file.path)
           .toList(),
       'stamp': _findStampFile(environment).absolute.path,
     };
@@ -282,7 +306,7 @@ class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static List<SourceFile> _resolveConfiguration(
+  static List<File> _resolveConfiguration(
       List<Source> config, Environment environment, { bool implicit = true, bool inputs = true }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
@@ -385,8 +409,7 @@ class Environment {
       flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: cacheDir ??
-          Cache.instance.getCacheArtifacts(),
+      cacheDir: cacheDir ?? Cache.instance.getRoot(),
       defines: defines,
     );
   }
@@ -533,7 +556,7 @@ class _BuildInstance {
     bool failed = false;
     bool skipped = false;
     try {
-      final List<SourceFile> inputs = target.resolveInputs(environment);
+      final List<File> inputs = target.resolveInputs(environment);
       final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
       if (updates.isEmpty) {
         skipped = true;
@@ -543,7 +566,9 @@ class _BuildInstance {
         await target.buildAction(updates, environment);
         printStatus('${target.name}: Complete');
 
-        final List<SourceFile> outputs = target.resolveOutputs(environment);
+        final List<File> outputs = target.resolveOutputs(environment);
+        // Update hashes for output files.
+        await fileCache.hashFiles(outputs);
         target._writeStamp(inputs, outputs, environment);
       }
     } catch (_) {
@@ -592,11 +617,11 @@ void checkCycles(Target initial) {
 }
 
 /// Verifies that all files are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<SourceFile> outputs, Environment environment, Target target) {
+void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  for (SourceFile sourceFile in outputs) {
-    final String path = sourceFile.path;
+  for (File sourceFile in outputs) {
+    final String path = sourceFile.resolveSymbolicLinksSync();
     if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
       throw MisplacedOutputException(path, target);
     }

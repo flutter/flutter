@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -138,6 +137,34 @@ void main() {
       expect(fooInvocations, 2);
     }));
 
+    test('does not re-invoke build if input timestamp changes', () => testbed.run(() async {
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+
+      fs.file('foo.dart').writeAsStringSync('');
+
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+      expect(fooInvocations, 1);
+    }));
+
+    test('does not re-invoke build if output timestamp changes', () => testbed.run(() async {
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+
+      environment.buildDir.childFile('out').writeAsStringSync('hey');
+
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+      expect(fooInvocations, 1);
+    }));
+
+
+    test('Re-invoke build if output is modified', () => testbed.run(() async {
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+
+      environment.buildDir.childFile('out').writeAsStringSync('Something different');
+
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+      expect(fooInvocations, 2);
+    }));
+
     test('Runs dependencies of targets', () => testbed.run(() async {
       await buildSystem.build('bar', environment, const BuildSystemConfig());
 
@@ -169,7 +196,7 @@ void main() {
       fs.directory('build').createSync();
       final FileHashStore fileCache = FileHashStore(environment);
       fileCache.initialize();
-      final List<SourceFile> inputs = fooTarget.resolveInputs(environment);
+      final List<File> inputs = fooTarget.resolveInputs(environment);
       final Map<String, ChangeType> changes = await fooTarget.computeChanges(inputs, environment, fileCache);
       fileCache.persist();
 
@@ -212,19 +239,19 @@ void main() {
     }));
 
     test('saves and restores to file cache', () => testbed.run(() {
-      final SourceFile file = SourceFile(fs.file('foo.dart')
+      final File file = fs.file('foo.dart')
         ..createSync()
-        ..writeAsStringSync('hello'));
+        ..writeAsStringSync('hello');
       final FileHashStore fileCache = FileHashStore(environment);
       fileCache.initialize();
-      fileCache.hashFiles(<SourceFile>[file]);
+      fileCache.hashFiles(<File>[file]);
       fileCache.persist();
-      final String currentHash =  fileCache.currentHashes[file.path];
+      final String currentHash =  fileCache.currentHashes[file.resolveSymbolicLinksSync()];
       final List<int> buffer = fs.file(fs.path.join('build', '.filecache')).readAsBytesSync();
       pb.FileStorage fileStorage = pb.FileStorage.fromBuffer(buffer);
 
       expect(fileStorage.files.single.hash, currentHash);
-      expect(fileStorage.files.single.path, file.path);
+      expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
 
 
       final FileHashStore newFileCache = FileHashStore(environment);
@@ -237,7 +264,7 @@ void main() {
       fileStorage = pb.FileStorage.fromBuffer(buffer);
 
       expect(fileStorage.files.single.hash, currentHash);
-      expect(fileStorage.files.single.path, file.path);
+      expect(fileStorage.files.single.path, file.resolveSymbolicLinksSync());
     }));
   });
 
@@ -325,49 +352,6 @@ void main() {
     }));
   });
 
-  group('SourceFile', () {
-    MemoryFileSystem memoryFileSystem;
-
-    setUp(() {
-       memoryFileSystem = MemoryFileSystem();
-    });
-
-    test('exposes limited API from the underlying file', () {
-      final File file = memoryFileSystem.file('test')
-        ..createSync()
-        ..writeAsBytesSync(<int>[1, 2, 3]);
-      final SourceFile sourceFile = SourceFile(file);
-
-      expect(sourceFile.existsSync(), true);
-      expect(sourceFile.path, '/test');
-      expect(sourceFile.bytesForVersion(), <int>[1, 2, 3]);
-    });
-
-    test('exposes limited API from the underlying directory', () {
-      final Directory directory = memoryFileSystem.directory('test')
-        ..createSync();
-      final SourceFile sourceFile = SourceFile(directory);
-
-      expect(sourceFile.existsSync(), true);
-      expect(sourceFile.path, '/test');
-      expect(sourceFile.bytesForVersion(), directory.statSync().modified.toIso8601String().codeUnits);
-    });
-
-    test('Allows separate versioning of file', () {
-      final File file = memoryFileSystem.file('test')
-        ..writeAsBytesSync(<int>[1, 2, 3])
-        ..createSync();
-      final File version = memoryFileSystem.file('version')
-        ..createSync()
-        ..writeAsBytesSync(<int>[4, 5, 6]);
-      final SourceFile sourceFile = SourceFile(file, version);
-
-      expect(sourceFile.existsSync(), true);
-      expect(sourceFile.path, '/test');
-      expect(sourceFile.bytesForVersion(), <int>[4, 5, 6]);
-    });
-  });
-
   group('Source', () {
     Testbed testbed;
     SourceVisitor visitor;
@@ -390,9 +374,7 @@ void main() {
     test('configures implicit vs explict correctly', () => testbed.run(() {
       expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
       expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
-      expect(const Source.version('{PROJECT_DIR}/foo', version: '{PROJECT_DIR}/foo').implicit, false);
-      expect(const Source.version('{PROJECT_DIR}/*foo', version: '{PROJECT_DIR}/foo').implicit, true);
-      expect(Source.function((Environment environment) => <SourceFile>[]).implicit, true);
+      expect(Source.function((Environment environment) => <File>[]).implicit, true);
       expect(Source.behavior(TestBehavior()).implicit, true);
     }));
 
@@ -513,12 +495,12 @@ T nonconst<T>(T input) => input;
 
 class TestBehavior extends SourceBehavior {
   @override
-  List<FileSystemEntity> inputs(Environment environment) {
+  List<File> inputs(Environment environment) {
     return null;
   }
 
   @override
-  List<FileSystemEntity> outputs(Environment environment) {
+  List<File> outputs(Environment environment) {
     return null;
   }
 }

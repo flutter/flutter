@@ -16,7 +16,8 @@ class AssetBehavior extends SourceBehavior {
   const AssetBehavior();
 
   @override
-  List<FileSystemEntity> inputs(Environment environment) {
+  List<File
+  > inputs(Environment environment) {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     assetBundle.build(
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
@@ -31,7 +32,7 @@ class AssetBehavior extends SourceBehavior {
   }
 
   @override
-  List<FileSystemEntity> outputs(Environment environment) {
+  List<File> outputs(Environment environment) {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     assetBundle.build(
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
@@ -47,9 +48,6 @@ class AssetBehavior extends SourceBehavior {
 }
 
 /// Copies the asset files from the [copyAssets] rule into place.
-///
-/// Based on the contents of [updates], we copy the file in the case of
-/// [ChangeType.Added] and [ChangeType.Modified].
 Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment environment) async {
   final Directory output = environment
     .buildDir

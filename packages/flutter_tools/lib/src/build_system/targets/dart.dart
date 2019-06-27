@@ -80,14 +80,14 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
 ///
 /// This does not attempt to determine if a file is used or imported, so it
 /// may otherwise report more files than strictly necessary.
-List<SourceFile> listDartSources(Environment environment) {
+List<File> listDartSources(Environment environment) {
   final Map<String, Uri> packageMap = PackageMap(PackageMap.globalPackagesPath).map;
-  final List<SourceFile> dartFiles = <SourceFile>[];
+  final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
-        dartFiles.add(SourceFile(entity));
+        dartFiles.add(entity);
       }
     }
   }
@@ -99,7 +99,7 @@ const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
   inputs: <Source>[
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and .packages
-    Source.pattern('{CACHE_DIR}/engine/common/flutter_patched_sdk/platform_strong.dill'),
+    Source.pattern('{CACHE_DIR}/artifacts/engine/common/flutter_patched_sdk/platform_strong.dill'),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
