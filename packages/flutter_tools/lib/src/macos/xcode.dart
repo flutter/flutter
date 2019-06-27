@@ -90,11 +90,11 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'cc', ...args]);
   }
 
   Future<RunResult> clang(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
   }
 
   String getSimulatorPath() {

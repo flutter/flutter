@@ -220,7 +220,7 @@ Future<void> _runToolCoverage() async {
     final List<String> testGroup = tests[i];
     await runCommand(
       dart,
-      <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
+      <String>[path.join('tool', 'tool_coverage.dart'), '--', ...testGroup],
       workingDirectory: toolRoot,
       environment: <String, String>{
         'FLUTTER_ROOT': flutterRoot,
@@ -791,7 +791,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
-  final List<String> args = <String>['test']..addAll(options);
+  final List<String> args = <String>['test', ...options];
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 

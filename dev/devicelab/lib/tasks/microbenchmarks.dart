@@ -65,7 +65,7 @@ Future<Process> _startFlutter({
   bool canFail = false,
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>['run']..addAll(options);
+  final List<String> args = <String>['run', ...options];
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 
