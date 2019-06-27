@@ -17,6 +17,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
+        final String assetPath = fs.path.join('assets', 'foo', 'bar.png');
         final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
           projectDir: fs.currentDirectory,
@@ -36,7 +37,7 @@ name: example
 
 flutter:
   assets:
-    - assets/foo/bar.png
+    - $assetPath
 ''');
       });
     });
