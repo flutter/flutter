@@ -40,6 +40,10 @@ dependencies:
     path: ../flutter_goldens_client
   flutter_tool_api:
     path: ../flutter_tool_api
+  linux_extension:
+    path: ../linux_extension
+  web_extension:
+    path: ../web_extension
 
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading

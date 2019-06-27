@@ -9,6 +9,10 @@ import 'package:flutter_tool_api/doctor.dart' as doctor_domain show ValidationRe
 import 'package:flutter_tool_api/extension.dart' as extension;
 import 'package:flutter_tools/src/base/extension_host.dart';
 
+// TODO(jonahwilliams): remove this once cross isolate is stable.
+import 'package:web_extension/main.dart' as web_extension;
+import 'package:linux_extension/main.dart' as linux_extension;
+
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
 import 'artifacts.dart';
@@ -49,6 +53,9 @@ export 'package:flutter_tool_api/doctor.dart';
 
 Doctor get doctor => context.get<Doctor>();
 
+// Temporary config to enabel the cross isolate doctor.
+bool get useCrossIsolateExtensions => platform.environment['FLUTTER_TOOL_CROSS_ISOLATE'] == 'true';
+
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
   static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
@@ -63,15 +70,30 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
-  final ToolExtensionManager extensionShim = ToolExtensionManager(<extension.ToolExtension>[
-  ], <CrossIsolateShim>[
-    CrossIsolateShim(
-      fs.path.join(Cache.flutterRoot, 'packages', 'web_extension'),
-    ),
-    CrossIsolateShim(
-      fs.path.join(Cache.flutterRoot, 'packages', 'linux_extension'),
-    ),
-  ]);
+  final ToolExtensionManager extensionShim = ToolExtensionManager(
+    useCrossIsolateExtensions
+      ? <extension.ToolExtension>[]
+      : <extension.ToolExtension>[
+        web_extension.FlutterWebExtension()
+          ..fileSystem = fs
+          ..processManager = processManager
+          ..platform = platform,
+        linux_extension.FlutterLinuxExtension()
+          ..fileSystem = fs
+          ..processManager = processManager
+          ..platform = platform
+      ],
+    useCrossIsolateExtensions
+      ? <CrossIsolateShim>[
+        CrossIsolateShim(
+          fs.path.join(Cache.flutterRoot, 'packages', 'web_extension'),
+          'Flutter Web',
+        ),
+        CrossIsolateShim(
+          fs.path.join(Cache.flutterRoot, 'packages', 'linux_extension'),
+          'Linux Desktop',
+        ),
+      ] : <CrossIsolateShim>[]);
 
   @override
   List<DoctorValidator> get validators {
@@ -94,15 +116,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       // Add desktop doctors to workflow if the flag is enabled.
       if (flutterDesktopEnabled) {
         if (linuxWorkflow.appliesToHostPlatform) {
-          //_validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
+          _validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
         }
         if (windowsWorkflow.appliesToHostPlatform) {
           _validators.add(visualStudioValidator);
         }
       }
-      // TESTING
-      _validators.add(ExtensionCompatDoctorValidation('linux_extension', extensionShim));
-      _validators.add(ExtensionCompatDoctorValidation('web_extension', extensionShim));
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -191,6 +210,9 @@ class Doctor {
     for (DoctorValidator validator in validators) {
       final StringBuffer lineBuffer = StringBuffer();
       final ValidationResult result = await validator.validate();
+      if (result == null) {
+        continue;
+      }
       lineBuffer.write('${result.coloredLeadingBox} ${validator.title} is ');
       switch (result.type) {
         case ValidationType.missing:

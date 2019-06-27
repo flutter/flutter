@@ -9,18 +9,19 @@ import '../globals.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
+// Testing Hack
+// Need to produce document on handshake, cache, and snapshot procedure.
 /// Generates and caches a snapshot of the tool extension apis to apply.
 class CrossIsolateShim {
-  CrossIsolateShim(String libraryPath) {
+  CrossIsolateShim(String libraryPath, this.name) {
     final String manifestPath = fs.path.join(libraryPath, 'tool_api.yaml');
-    name = fs.path.basename(libraryPath);
     final YamlMap manifest = loadYaml(fs.file(manifestPath).readAsStringSync());
     final String className = manifest['name'];
     final String relativefileUri = Uri.file(manifest['file']).toFilePath(windows: platform.isWindows);
     final String absolute = fs.path.join(libraryPath, 'lib', relativefileUri);
     final String entrypoint = '''
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert'; // ignore: dart_convert_import
 import 'dart:isolate';
 
 import 'package:flutter_tool_api/extension.dart';
@@ -69,10 +70,10 @@ void main(List<String> args, [SendPort sendPort]) {
   }
 
   final Completer<void> _doneLoading = Completer<void>();
-  String name;
+  final String name;
+  final Map<int, Completer<Response>> _pending = <int, Completer<Response>>{};
   ReceivePort _receivePort;
   SendPort _sendPort;
-  final Map<int, Completer<Response>> _pending = <int, Completer<Response>>{};
 
   Future<Response> handleMessage(Request request) async {
     await _doneLoading.future;
