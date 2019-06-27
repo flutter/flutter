@@ -2,6 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// This library contains the extension API for extending the 'flutter doctor'
+/// command with new checks.
+///
+/// Example:
+///
+///    class MyDoctor extends DoctorDomain {
+///      ...
+///    }
+///
+/// For a fuller example see packages/web_extension.
+library doctor;
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
@@ -219,5 +231,5 @@ class ValidationResult implements Serializable {
 abstract class DoctorDomain extends Domain {
 
   /// Diagnose problems with the user's environment.
-  Future<ValidationResult> diagnose(Map<String, Object> arguments);
+  Future<ValidationResult> diagnose();
 }

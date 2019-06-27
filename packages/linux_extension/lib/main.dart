@@ -21,7 +21,7 @@ class LinuxDoctorDomain extends DoctorDomain {
   static const String _kValidatiorName = 'Linux toolchain - develop for Linux desktop';
 
   @override
-  Future<ValidationResult> diagnose(Map<String, Object> arguments) async {
+  Future<ValidationResult> diagnose() async {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
 

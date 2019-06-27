@@ -30,7 +30,7 @@ class WebDoctorDomain extends DoctorDomain {
   static const String kValidatorName = 'Flutter Web - develop for the web';
 
   @override
-  Future<ValidationResult> diagnose(Map<String, Object> arguments) async {
+  Future<ValidationResult> diagnose() async {
     final String chrome = _findChromeExecutable();
     bool canRunChrome;
     try {

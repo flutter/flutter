@@ -12,6 +12,12 @@ import 'package:process/process.dart';
 
 import 'doctor.dart';
 
+/// This library contains the basic types of the extension API.
+///
+/// See also:
+///   - doctor.dart, for the `flutter doctor` tool extensions.
+library extension;
+
 /// A request sent to a tool extension from the host.
 class Request {
   /// Create a new [Request] object.
@@ -106,7 +112,7 @@ abstract class ToolExtension {
   ToolExtension() {
     if (doctorDomain != null) {
       doctorDomain._parent = this;
-      registerMethod('doctor.diagnose', doctorDomain.diagnose);
+      registerMethod('doctor.diagnose', (Map<String, Object> args) => doctorDomain.diagnose());
     }
   }
 
