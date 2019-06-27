@@ -1087,7 +1087,8 @@ class Paint {
   List<dynamic> _objects;
   static const int _kShaderIndex = 0;
   static const int _kColorFilterMatrixIndex = 1;
-  static const int _kObjectCount = 2; // Must be one larger than the largest index.
+  static const int _kImageFilterIndex = 2;
+  static const int _kObjectCount = 3; // Must be one larger than the largest index.
 
   /// Whether to apply anti-aliasing to lines and images drawn on the
   /// canvas.
@@ -1387,6 +1388,39 @@ class Paint {
     }
   }
 
+  /// The [ImageFilter] to use when drawing raster images.
+  ///
+  /// For example, to blur an image using [Canvas.drawImage], apply an
+  /// [ImageFilter.blur]:
+  ///
+  /// ```dart
+  /// import 'dart:ui' as ui;
+  ///
+  /// ui.Image image;
+  ///
+  /// void paint(Canvas canvas, Size size) {
+  ///   canvas.drawImage(
+  ///     image,
+  ///     Offset.zero,
+  ///     Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: .5, sigmaY: .5),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [MaskFilter], which is used for drawing geometry.
+  ImageFilter get imageFilter {
+    if (_objects == null)
+      return null;
+    return _objects[_kImageFilterIndex];
+  }
+  set imageFilter(ImageFilter value) {
+    _objects ??= List<dynamic>(_kObjectCount);
+    _objects[_kImageFilterIndex] = value;
+  }
+
+
   /// Whether the colors of the image are inverted when drawn.
   ///
   /// Inverting the colors of an image applies a new color filter that will
@@ -1449,6 +1483,10 @@ class Paint {
     }
     if (shader != null) {
       result.write('${semicolon}shader: $shader');
+      semicolon = '; ';
+    }
+    if (imageFilter != null) {
+      result.write('${semicolon}imageFilter: $imageFilter');
       semicolon = '; ';
     }
     if (invertColors)
