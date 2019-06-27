@@ -47,16 +47,16 @@ class CoverageCollector extends TestWatcher {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<void> collectCoverageIsolate(Uri observatoryUri) async {
+  Future<void> collectCoverageIsolate(Uri observatoryUri, String debugName) async {
     assert(observatoryUri != null);
-    printTrace('collecting coverage data from $observatoryUri...');
+    print('collecting coverage data from $observatoryUri...');
     final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
       // If we have a specified coverage directory or could not find the package name, then
       // accept all libraries.
       return (coverageDirectory != null)
           || (flutterProject == null)
           || libraryName.contains(flutterProject.manifest.appName);
-    }, waitPaused: true);
+    }, waitPaused: true, debugName: debugName);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -184,27 +184,30 @@ class CoverageCollector extends TestWatcher {
   }
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, { bool waitPaused = false }) async {
-  const int _kPausePollLimit = 5;
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, { bool waitPaused = false, String debugName, }) async {
   final VMService vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
   await vmService.getVM();
-  if (waitPaused) {
-    int i = 0;
-    Duration waitDuration = const Duration(seconds: 0);
-    while (i < _kPausePollLimit) {
-      await Future<void>.delayed(waitDuration);
-      for (Isolate isolateRef in vmService.vm.isolates) {
-        await isolateRef.load();
-        if (isolateRef.pauseEvent?.kind != ServiceEvent.kPauseStart) {
-          i += 1;
-          waitDuration = const Duration(milliseconds: 100);
-          break;
-        }
-      }
-      print('isolate is paused, collecting coverage...');
+  final Isolate isolate = vmService.vm.isolates.firstWhere((Isolate isolate) => isolate.name == debugName);
+  if (!waitPaused) {
+    return _getAllCoverage(vmService, libraryPredicate);
+  }
+  int i = 0;
+  while (i < 20) {
+    await isolate.load();
+    if (isolate.pauseEvent?.kind == ServiceEvent.kPauseStart) {
       break;
     }
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    i += 1;
   }
+  if (i == 20) {
+    print('Isolate $debugName was never paused, refusing to collect coverage');
+    return const <String, dynamic>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[]
+    };
+  }
+  print('isolate is paused, collecting coverage...');
   return _getAllCoverage(vmService, libraryPredicate);
 }
 

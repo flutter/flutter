@@ -80,7 +80,7 @@ class VMPlatform extends PlatformPlugin {
         // Pause the isolate so it is ready for coverage collection.
         isolate.pause();
         // this will throw if collection fails.
-        await coverageCollector.collectCoverageIsolate(info.serverUri);
+        await coverageCollector.collectCoverageIsolate(info.serverUri, path);
       } finally {
         isolate.kill(priority: Isolate.immediate);
         isolate = null;
@@ -117,6 +117,7 @@ class VMPlatform extends PlatformPlugin {
     return await Isolate.spawnUri(p.toUri(testPath), <String>[], message,
       packageConfig: p.toUri('.packages'),
       checked: true,
+      debugName: path,
     );
   }
 
