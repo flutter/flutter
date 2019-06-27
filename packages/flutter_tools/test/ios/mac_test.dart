@@ -43,7 +43,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       mockCache = MockCache();
       when(mockCache.getArtifactFile('libimobiledevice', 'idevice_id')).thenReturn(ideviceIdPath);
-      when(mockCache.iosUsbExecutionPath).thenReturn(libimobiledevicePath);
+      when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {
@@ -101,7 +101,7 @@ void main() {
         mockProcessManager = MockProcessManager();
         mockOutputFile = MockFile();
         when(mockCache.getArtifactFile('libimobiledevice', 'idevicescreenshot')).thenReturn(binPath);
-        when(mockCache.iosUsbExecutionPath).thenReturn(libimobiledevicePath);
+        when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
       });
 
       testUsingContext('error if idevicescreenshot is not installed', () async {

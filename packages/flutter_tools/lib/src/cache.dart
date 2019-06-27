@@ -83,7 +83,7 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
-      for (String artifactName in _iosUsbArtifactNames) {
+      for (String artifactName in iosUsbArtifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
     } else {
@@ -92,7 +92,7 @@ class Cache {
   }
 
   /// The names of iOS/USB utility artifacts in the cache.
-  static const List<String> _iosUsbArtifactNames = <String>[
+  static const List<String> iosUsbArtifactNames = <String>[
     'libimobiledevice',
     'usbmuxd',
     'libplist',
@@ -244,16 +244,16 @@ class Cache {
     return fs.path.join(getArtifactDirectory(dirName).path, fileName);
   }
 
-  String get iosUsbExecutionPath {
-    return const <String>[
-      'libimobiledevice',
-      'usbmuxd',
-      'libplist',
-      'openssl',
-      'ideviceinstaller',
-      'libtasn1',
-      'ios-deploy',
-    ].map((String path) => cache.getArtifactDirectory(path).path).join(':');
+  String get dyLdLibPath {
+    final List<String> paths = <String>[];
+    String currentPath;
+    for (CachedArtifact artifact in _artifacts) {
+      currentPath = artifact.dyLdLibPath;
+      if (currentPath.isNotEmpty) {
+        paths.add(currentPath);
+      }
+    }
+    return paths.join(':');
   }
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
@@ -362,6 +362,8 @@ abstract class CachedArtifact {
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
   String get stampName => name;
+
+  String get dyLdLibPath => '';
 
   /// All development artifacts this cache provides.
   final Set<DevelopmentArtifact> developmentArtifacts;
@@ -938,6 +940,13 @@ class IosUsbArtifacts extends CachedArtifact {
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
+
+  @override
+  String get dyLdLibPath {
+    return Cache.iosUsbArtifactNames
+      .map((String path) => cache.getArtifactDirectory(path).path)
+      .join(':');
+  }
 
   @override
   Future<void> updateInner() {

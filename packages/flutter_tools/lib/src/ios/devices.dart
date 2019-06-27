@@ -56,7 +56,7 @@ class IOSDeploy {
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.iosUsbExecutionPath;
+    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibPath;
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -581,7 +581,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
           devicePort.toString(),
           device.id,
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);

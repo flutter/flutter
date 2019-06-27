@@ -47,7 +47,7 @@ class IMobileDevice {
   bool get isInstalled {
     return exitsHappy(
       <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-h'],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
 
@@ -59,7 +59,7 @@ class IMobileDevice {
       return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath};
+    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath};
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
         cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
@@ -94,7 +94,7 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(
         <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
@@ -114,7 +114,7 @@ class IMobileDevice {
           '-k',
           key
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
@@ -130,7 +130,7 @@ class IMobileDevice {
   Future<Process> startLogger(String deviceID) {
     return runCommand(
       <String>[cache.getArtifactFile('libimobiledevice', 'idevicesyslog'), '-u', deviceID],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
 
@@ -138,7 +138,7 @@ class IMobileDevice {
   Future<void> takeScreenshot(File outputFile) {
     return runCheckedAsync(
       <String>[cache.getArtifactFile('libimobiledevice', 'idevicescreenshot'), outputFile.path],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.iosUsbExecutionPath},
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
 }
