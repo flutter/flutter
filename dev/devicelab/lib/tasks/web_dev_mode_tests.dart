@@ -37,7 +37,7 @@ TaskFunction createWebDevModeTest() {
           await packagesGet.exitCode;
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
@@ -96,7 +96,7 @@ TaskFunction createWebDevModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },

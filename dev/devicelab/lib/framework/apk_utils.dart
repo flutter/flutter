@@ -194,7 +194,7 @@ android {
   Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
     return Process.run(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>[command]..addAll(options),
+      <String>[command, ...options],
       workingDirectory: rootPath,
     );
   }
