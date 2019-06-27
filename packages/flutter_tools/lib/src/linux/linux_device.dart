@@ -19,7 +19,12 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends Device {
-  LinuxDevice() : super('Linux');
+  LinuxDevice() : super(
+      'Linux',
+      category: Category.desktop,
+      platformType: PlatformType.linux,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }
@@ -47,6 +52,9 @@ class LinuxDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool isSupported() => true;

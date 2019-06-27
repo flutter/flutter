@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test performs too poorly to run with coverage enabled.
+@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -1284,7 +1286,7 @@ class MockHttpClientRequest implements HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+class MockHttpClientResponse implements HttpClientResponse {
   MockHttpClientResponse(this.statusCode, {this.result});
 
   @override
@@ -1309,6 +1311,12 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   }) {
     return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
+    action(Uint8List.fromList(result.codeUnits));
+    return Future<void>.value();
   }
 
   @override

@@ -28,11 +28,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('build-shared-library',
-        negatable: false,
-        defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).',
-      )
       ..addFlag('report-timings',
         negatable: false,
         defaultsTo: false,
@@ -122,7 +117,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then<int>((int buildExitCode) {
             return buildExitCode;
@@ -152,7 +146,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
         if (snapshotExitCode != 0) {

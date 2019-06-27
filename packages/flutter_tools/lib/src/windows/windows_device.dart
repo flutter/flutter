@@ -21,7 +21,12 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends Device {
-  WindowsDevice() : super('Windows');
+  WindowsDevice() : super(
+      'Windows',
+      category: Category.desktop,
+      platformType: PlatformType.windows,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }
@@ -49,6 +54,9 @@ class WindowsDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool isSupported() => true;

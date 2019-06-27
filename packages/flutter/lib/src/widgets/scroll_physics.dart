@@ -431,7 +431,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
           'The physics object in question was:\n'
           '  $this\n'
           'The position object in question was:\n'
-          '  $position\n'
+          '  $position'
         );
       }
       return true;
