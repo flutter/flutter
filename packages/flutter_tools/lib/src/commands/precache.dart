@@ -50,7 +50,7 @@ class PrecacheCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (FlutterVersion.instance.isStable && artifact.unstable) {
+      if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
       if (argResults[artifact.name]) {

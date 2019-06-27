@@ -93,5 +93,5 @@ class MockPlatform extends Mock implements Platform {
 }
 class MockFlutterVersion extends Mock implements FlutterVersion {
   @override
-  bool get isStable => false;
+  bool get isMaster => true;
 }

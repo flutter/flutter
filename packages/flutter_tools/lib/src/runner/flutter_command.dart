@@ -555,7 +555,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -651,17 +651,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;
