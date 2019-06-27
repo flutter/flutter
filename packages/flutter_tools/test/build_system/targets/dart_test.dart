@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
@@ -34,11 +35,14 @@ void main() {
           kernelSnapshot.name: kernelSnapshot,
           aotElf.name: aotElf,
         });
+        final String skyEngineLine = platform.isWindows
+            ? r'sky_engine:file:///C:\cache\pkg\sky_engine\lib\'
+            : 'sky_engine:file:///cache/pkg/sky_engine/lib/';
         fs.file('.packages')
           ..createSync()
           ..writeAsStringSync('''
 # Generated
-sky_engine:file:///cache/pkg/sky_engine/lib/
+$skyEngineLine
 flutter_tools:lib/''');
         fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart')).createSync(recursive: true);
         fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'sdk_ext', 'vmservice_io.dart')).createSync(recursive: true);
