@@ -325,8 +325,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateProperty.resolveOrReturn(widget.textStyle?.color, _states);
-    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveOrReturn(widget.shape, _states);
+    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
+    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
 
     final Widget result = Focus(
       focusNode: widget.focusNode,

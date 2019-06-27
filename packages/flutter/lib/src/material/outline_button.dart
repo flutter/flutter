@@ -534,7 +534,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   ShapeBorder resolve(Set<MaterialState> states) {
     return _OutlineBorder(
       shape: shape,
-      side: side.copyWith(color: MaterialStateProperty.resolveOrReturn(side.color, states),
+      side: side.copyWith(color: MaterialStateProperty.resolveAs<Color>(side.color, states),
     ));
   }
 }

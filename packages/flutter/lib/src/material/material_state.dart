@@ -195,7 +195,7 @@ abstract class MaterialStateProperty<T> {
   /// This is useful for widgets that have parameters which can optionally be a
   /// [MaterialStateProperty]. For example, [RaisedButton.textColor] can be a
   /// [Color] or a [MaterialStateProperty<Color>].
-  static T resolveOrReturn<T>(T value, Set<MaterialState> states) {
+  static T resolveAs<T>(T value, Set<MaterialState> states) {
     if (value is MaterialStateProperty<T>) {
       final MaterialStateProperty<T> property = value;
       return property.resolve(states);
