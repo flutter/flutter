@@ -3611,9 +3611,9 @@ class _SemanticsGeometry {
   }
 
   static void _applyIntermediatePaintTransforms(
-    RenderObject ancestor, 
-    RenderObject child, 
-    Matrix4 transform, 
+    RenderObject ancestor,
+    RenderObject child,
+    Matrix4 transform,
     Matrix4 clipRectTransform,
   ) {
     assert(ancestor != null);
