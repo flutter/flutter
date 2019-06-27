@@ -116,8 +116,14 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    _installerPath = _checkForCommand('ideviceinstaller');
-    _iproxyPath = _checkForCommand('iproxy');
+    if (!platform.isMacOS) {
+      printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
+      _installerPath = null;
+      _iproxyPath = null;
+    } else {
+      _installerPath = cache.getArtifactFile('ideviceinstaller', 'ideviceinstaller');
+      _iproxyPath = cache.getArtifactFile('usbmuxd', 'iproxy');
+    }
   }
 
   String _installerPath;
@@ -167,23 +173,6 @@ class IOSDevice extends Device {
       }
     }
     return devices;
-  }
-
-  static String _checkForCommand(String command) {
-    try {
-      command = runCheckedSync(
-        <String>['which', command],
-        environment: <String, String>{'PATH': cache.iosUsbExecutionPath},
-      ).trim();
-    } catch (e) {
-      if (platform.isMacOS) {
-        printError('$command not found.');
-      } else {
-        printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
-      }
-      return null;
-    }
-    return command;
   }
 
   @override
