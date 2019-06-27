@@ -160,7 +160,7 @@ class TestFlutterPlatform extends FlutterPlatform {
     enableObservatory: false,
     buildTestAssets: false,
   );
-  
+
   @override
   @protected
   Future<HttpServer> bind(InternetAddress host, int port) async => MockHttpServer();

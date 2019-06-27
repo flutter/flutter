@@ -386,7 +386,7 @@ class FlutterPlatform extends PlatformPlugin {
   }
 
   /// Binds an [HttpServer] serving from `host` on `port`.
-  /// 
+  ///
   /// Only intended to be overridden in tests for [FlutterPlatform].
   @protected
   @visibleForTesting
