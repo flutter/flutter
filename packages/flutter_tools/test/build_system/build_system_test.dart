@@ -116,14 +116,16 @@ void main() {
       expect(buildSystem.build('not_real', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
     }));
 
-    test('Throws exception if asked to build with missing inputs', () => testbed.run(() {
+    test('Throws exception if asked to build with missing inputs', () => testbed.run(() async {
       // Delete required input file.
       fs.file('foo.dart').deleteSync();
+      final BuildResult buildResult = await buildSystem.build('foo', environment, const BuildSystemConfig());
 
-      expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<MissingInputException>()));
+      expect(buildResult.hasException, true);
+      expect(buildResult.exceptions.values.single.exception, isInstanceOf<MissingInputException>());
     }));
 
-    test('Throws exception if it does not produce a specified output', () => testbed.run(() {
+    test('Throws exception if it does not produce a specified output', () => testbed.run(() async {
       final Target badTarget = Target
         (buildAction: (Map<String, ChangeType> inputs, Environment environment) {},
         inputs: const <Source>[
@@ -137,8 +139,10 @@ void main() {
       buildSystem = BuildSystem(<String, Target>{
         badTarget.name: badTarget,
       });
+      final BuildResult result = await buildSystem.build('bad', environment, const BuildSystemConfig());
 
-      expect(buildSystem.build('bad', environment, const BuildSystemConfig()), throwsA(isInstanceOf<MissingOutputException>()));
+      expect(result.hasException, true);
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingOutputException>());
     }));
 
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
@@ -204,7 +208,9 @@ void main() {
     }));
 
     test('handles a throwing build action', () => testbed.run(() async {
-      expect(buildSystem.build('fizz', environment, const BuildSystemConfig()), false);
+      final BuildResult result = await buildSystem.build('fizz', environment, const BuildSystemConfig());
+
+      expect(result.hasException, true);
     }));
 
     test('Can describe itself with JSON output', () => testbed.run(() {

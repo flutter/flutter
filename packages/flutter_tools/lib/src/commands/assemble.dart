@@ -141,10 +141,14 @@ class AssembleRun extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool passed = await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
+    final BuildResult result = await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
     ));
-    if (!passed) {
+    if (!result.success) {
+      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
+        printError('Target ${data.key} failed: ${data.value.exception}.');
+        printError('${data.value.exception}');
+      }
       throwToolExit('build failed.');
     }
     return null;

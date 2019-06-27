@@ -63,9 +63,9 @@ flutter_tools:lib/''');
     }));
 
     test('kernel_snapshot throws error if missing build mode', () => testbed.run(() async {
-      expect(buildSystem.build('kernel_snapshot', environment..defines.remove(kBuildMode), const BuildSystemConfig()),
-        throwsA(isInstanceOf<MissingDefineException>()),
-      );
+      final BuildResult result = await buildSystem.build('kernel_snapshot', environment..defines.remove(kBuildMode), const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
     }));
 
     test('aot_elf Produces correct output directory', () => testbed.run(() async {
@@ -76,10 +76,11 @@ flutter_tools:lib/''');
     }));
 
     test('aot_elf throws error if missing build mode', () => testbed.run(() async {
-      expect(buildSystem.build('aot_elf', environment..defines.remove(kBuildMode), const BuildSystemConfig()),
-        throwsA(isInstanceOf<MissingDefineException>()),
-      );
+      final BuildResult result = await buildSystem.build('aot_elf', environment..defines.remove(kBuildMode), const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
     }));
+
   });
 }
 

@@ -440,6 +440,17 @@ class Environment {
   final Directory rootBuildDir;
 }
 
+/// The result information from the build system.
+class BuildResult {
+  BuildResult(this.success, this.exceptions, this.performance);
+
+  final bool success;
+  final Map<String, ExceptionMeasurement> exceptions;
+  final Map<String, PerformanceMeasurement> performance;
+
+  bool get hasException => exceptions.isNotEmpty;
+}
+
 /// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
   const BuildSystem([this.targets]);
@@ -448,7 +459,7 @@ class BuildSystem {
   final Map<String, Target> targets;
 
   /// Build the target `name` and all of its dependencies.
-  Future<bool> build(
+  Future<BuildResult> build(
     String name,
     Environment environment,
     BuildSystemConfig buildSystemConfig,
@@ -467,18 +478,15 @@ class BuildSystem {
     bool passed = true;
     try {
       passed = await buildInstance.invokeTarget(target);
-      if (!passed) {
-        for (MapEntry<String, _ExceptionMeasurement> data in buildInstance.exceptionMeasurements.entries) {
-          printError('Target ${data.key} failed: ${data.value.exception}.');
-          printError('${data.value.exception}');
-        }
-      }
     } finally {
       // Always persist the file cache to disk.
-      // TODO(jonahwilliams): analytics reporting of timing data.
       fileCache.persist();
     }
-    return passed;
+    return BuildResult(
+      passed,
+      buildInstance.exceptionMeasurements,
+      buildInstance.stepTimings,
+    );
   }
 
   /// Describe the target `name` and all of its dependencies.
@@ -523,10 +531,10 @@ class _BuildInstance {
   final FileHashStore fileCache;
 
   // Timings collected during target invocation.
-  final Map<String, _ActionMeasurement> stepTimings = <String, _ActionMeasurement>{};
+  final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
 
   // Exceptions caught during the build process.
-  final Map<String, _ExceptionMeasurement> exceptionMeasurements = <String, _ExceptionMeasurement>{};
+  final Map<String, ExceptionMeasurement> exceptionMeasurements = <String, ExceptionMeasurement>{};
 
   Future<bool> invokeTarget(Target target) async {
     final List<bool> results = await Future.wait(target.dependencies.map(invokeTarget));
@@ -563,30 +571,30 @@ class _BuildInstance {
       target.clearStamp(environment);
       passed = false;
       skipped = false;
-      exceptionMeasurements[target.name] = _ExceptionMeasurement(
+      exceptionMeasurements[target.name] = ExceptionMeasurement(
           target.name, exception, stackTrace);
     } finally {
       resource.release();
       stopwatch.stop();
-      stepTimings[target.name] = _ActionMeasurement(
+      stepTimings[target.name] = PerformanceMeasurement(
           target.name, stopwatch.elapsedMilliseconds, skipped, passed);
     }
     return passed;
   }
 }
 
-// Helper class to collect exceptions.
-class _ExceptionMeasurement {
-  _ExceptionMeasurement(this.target, this.exception, this.stackTrace);
+/// Helper class to collect exceptions.
+class ExceptionMeasurement {
+  ExceptionMeasurement(this.target, this.exception, this.stackTrace);
 
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
 }
 
-// Helper class to collect measurement data.
-class _ActionMeasurement {
-  _ActionMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.passed);
+/// Helper class to collect measurement data.
+class PerformanceMeasurement {
+  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.passed);
   final int elapsedMilliseconds;
   final String target;
   final bool skiped;
