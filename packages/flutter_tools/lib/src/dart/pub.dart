@@ -192,7 +192,7 @@ Future<void> pubInteractively(
 
 /// The command used for running pub.
 List<String> _pubCommand(List<String> arguments) {
-  return <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+  return <String>[sdkBinaryName('pub'), ...arguments];
 }
 
 /// The full environment used when running pub.
