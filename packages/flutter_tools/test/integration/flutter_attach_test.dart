@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Integration tests which invoke flutter instead of unit testing the code
+// will not produce meaningful coverage information - we can measure coverage
+// from the isolate running the test, but not from the isolate started via
+// the command line process.
+@Tags(<String>['no_coverage'])
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
@@ -58,5 +63,5 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10), tags: <String>['integration']); // The DevFS sync takes a really long time, so these tests can be slow.
 }
