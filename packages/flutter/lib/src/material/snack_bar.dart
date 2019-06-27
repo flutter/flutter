@@ -174,6 +174,7 @@ class SnackBar extends StatelessWidget {
     this.action,
     this.duration = _snackBarDisplayDuration,
     this.animation,
+    this.dismissable,
   }) : assert(elevation == null || elevation >= 0.0),
        assert(content != null),
        assert(duration != null),
@@ -239,6 +240,9 @@ class SnackBar extends StatelessWidget {
 
   /// The animation driving the entrance and exit of the snack bar.
   final Animation<double> animation;
+
+  /// The Snackbar will be dismissable when set to true
+  final bool dismissable;
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +333,7 @@ class SnackBar extends StatelessWidget {
       onDismiss: () {
         Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
       },
-      child: Dismissible(
+      child: dismissable ? Dismissible(
         key: const Key('dismissible'),
         direction: DismissDirection.down,
         resizeDuration: null,
@@ -337,7 +341,7 @@ class SnackBar extends StatelessWidget {
           Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
         },
         child: snackBar,
-      ),
+      ): snackBar
     );
 
     Widget snackBarTransition;
