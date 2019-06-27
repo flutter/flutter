@@ -275,7 +275,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
 
   File _generatedFile(AssetId id) {
     return fs.file(
-      path.join(generatedDirectory.path, packageGraph.root.name, id.path)
+      path.joinAll(<String>[generatedDirectory.path, packageGraph.root.name, ...id.pathSegments])
     );
   }
 
