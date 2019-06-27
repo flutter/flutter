@@ -36,7 +36,7 @@ void main() {
           aotElf.name: aotElf,
         });
         final String skyEngineLine = platform.isWindows
-            ? r'sky_engine:file:///C:\cache\pkg\sky_engine\lib\'
+            ? r'sky_engine:file:///C:/cache/pkg/sky_engine/lib/'
             : 'sky_engine:file:///cache/pkg/sky_engine/lib/';
         fs.file('.packages')
           ..createSync()
