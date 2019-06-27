@@ -411,6 +411,9 @@ void FlutterPlatformViewsController::DisposeViews() {
     views_.erase(viewId);
     touch_interceptors_.erase(viewId);
     root_views_.erase(viewId);
+    if (overlays_.find(viewId) != overlays_.end()) {
+      [overlays_[viewId]->overlay_view.get() removeFromSuperview];
+    }
     overlays_.erase(viewId);
     current_composition_params_.erase(viewId);
     clip_count_.erase(viewId);
