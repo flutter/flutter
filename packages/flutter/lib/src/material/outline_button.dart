@@ -134,7 +134,7 @@ class OutlineButton extends MaterialButton {
   /// By default the border's color does not change when the button
   /// is pressed.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty].
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
@@ -142,7 +142,7 @@ class OutlineButton extends MaterialButton {
   /// By default the outline border's color does not change when the
   /// button is disabled.
   ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty].
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -154,7 +154,7 @@ class OutlineButton extends MaterialButton {
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
   ///
-  /// If [borderSide.color] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
+  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
   /// are ignored.
   final BorderSide borderSide;
@@ -534,7 +534,7 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
   ShapeBorder resolve(Set<MaterialState> states) {
     return _OutlineBorder(
       shape: shape,
-      side: side.copyWith(color: MaterialStateColor.resolveColor(side.color, states),
+      side: side.copyWith(color: MaterialStateProperty.resolveOrReturn(side.color, states),
     ));
   }
 }

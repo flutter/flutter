@@ -154,19 +154,6 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// specified state.
   @override
   Color resolve(Set<MaterialState> states);
-
-  /// Returns the color for the given set of states if `color` is a
-  /// [MaterialStateProperty], otherwise returns the color itself.
-  ///
-  /// This is useful for widgets that have parameters which can be [Color] or
-  /// `MaterialStateProperty<Color>` values.
-  static Color resolveColor(Color color, Set<MaterialState> states) {
-    final dynamic dynamicColor = color;
-    if (dynamicColor is MaterialStateProperty<Color>) {
-      return dynamicColor.resolve(states);
-    }
-    return color;
-  }
 }
 
 /// A [MaterialStateColor] created from a [MaterialStateColorResolver] callback alone.
@@ -201,4 +188,18 @@ abstract class MaterialStateProperty<T> {
   /// [MaterialState]s, and will call `resolve` with the current states at build
   /// time for specified properties (such as [RawMaterialButton.textStyle]'s color).
   T resolve(Set<MaterialState> states);
+
+  /// Returns the value resolved in the given set of states if `value` is a
+  /// [MaterialStateProperty], otherwise returns the value itself.
+  ///
+  /// This is useful for widgets that have parameters which can optionally be a
+  /// [MaterialStateProperty]. For example, [RaisedButton.textColor] can be a
+  /// [Color] or a [MaterialStateProperty<Color>].
+  static T resolveOrReturn<T>(T value, Set<MaterialState> states) {
+    if (value is MaterialStateProperty<T>) {
+      final MaterialStateProperty<T> property = value;
+      return property.resolve(states);
+    }
+    return value;
+  }
 }

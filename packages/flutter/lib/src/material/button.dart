@@ -87,7 +87,7 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [textStyle.color] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
+  /// If [textStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
@@ -200,7 +200,7 @@ class RawMaterialButton extends StatefulWidget {
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
   ///
-  /// If [shape] is a [MaterialStateProperty], [MaterialStateProperty.resolve]
+  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [MaterialStateProperty.resolve]
   /// is used for the following [MaterialState]s:
   ///
   /// * [MaterialState.pressed].
@@ -323,17 +323,10 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     return widget.elevation;
   }
 
-  ShapeBorder get _effectiveShape {
-    final dynamic widgetShape = widget.shape;
-    if (widgetShape is MaterialStateProperty<ShapeBorder>)
-      return widgetShape.resolve(_states);
-    return widget.shape;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateColor.resolveColor(widget.textStyle?.color, _states);
-    final ShapeBorder effectiveShape = _effectiveShape;
+    final Color effectiveTextColor = MaterialStateProperty.resolveOrReturn(widget.textStyle?.color, _states);
+    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveOrReturn(widget.shape, _states);
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
