@@ -39,7 +39,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: null,
           );
 
@@ -93,7 +93,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: null,
           );
           final Completer<void> stdoutDone = Completer<void>();

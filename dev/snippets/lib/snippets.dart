@@ -175,7 +175,8 @@ class SnippetGenerator {
     }
     return <_ComponentTuple>[
       _ComponentTuple('description', description),
-    ]..addAll(components);
+      ...components,
+    ];
   }
 
   String _loadFileAsUtf8(File file) {

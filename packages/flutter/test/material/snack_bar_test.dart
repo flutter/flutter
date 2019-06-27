@@ -642,6 +642,61 @@ void main() {
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
+  testWidgets('SnackBar bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+      resizeToAvoidBottomInset: false,
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.send),
+        onPressed: () {}
+      ),
+      body: Builder(
+        builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () {
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                )
+              );
+            },
+            child: const Text('X'),
+          );
+        }
+      ),
+    ));
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child
+      )
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(); // Show snackbar
+    final Offset initialPoint = tester.getCenter(find.byType(SnackBar));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    final Offset finalPoint = tester.getCenter(find.byType(SnackBar));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool actionPressed = false;
