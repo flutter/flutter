@@ -26,7 +26,7 @@ bool get flutterWebEnabled {
         .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
     return platformEnabled && FlutterVersion.instance.isMaster;
   }
-  return !FlutterVersion.instance.isMaster;
+  return FlutterVersion.instance.isMaster;
 }
 
 /// The  web workflow instance.
