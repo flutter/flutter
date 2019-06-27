@@ -83,12 +83,18 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
-      _artifacts.add(LibIMobileDeviceArtifacts(this));
-      _artifacts.add(UsbMuxdArtifacts(this));
-      _artifacts.add(LibPListArtifacts(this));
-      _artifacts.add(IDeviceInstallerArtifacts(this));
-      _artifacts.add(IosDeployArtifacts(this));
-      _artifacts.add(OpenSSLArtifacts(this));
+      const List<String> iosUsbArtifactNames = [
+        'libimobiledevice',
+        'usbmuxd',
+        'libplist',
+        'openssl',
+        'ideviceinstaller',
+        'libtasn1',
+        'ios-deploy',
+      ];
+      for (String artifactName in iosUsbArtifactNames) {
+        _artifacts.add(IosUsbArtifacts(artifactName, this));
+      }
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -923,8 +929,8 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   }
 }
 
-/// Abstract class for cached iOS/USB binary dependencies.
-abstract class IosUsbArtifacts extends CachedArtifact {
+/// Cached iOS/USB binary artifacts.
+class IosUsbArtifacts extends CachedArtifact {
   IosUsbArtifacts(String name, Cache cache) : super(
     name,
     cache,
@@ -939,36 +945,6 @@ abstract class IosUsbArtifacts extends CachedArtifact {
     final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
     return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
-}
-
-/// The cached artifact for libimobiledevice binaries for running apps on
-/// iOS devices
-class LibIMobileDeviceArtifacts extends IosUsbArtifacts {
-  LibIMobileDeviceArtifacts(Cache cache) : super('libimobiledevice', cache);
-}
-
-class UsbMuxdArtifacts extends IosUsbArtifacts {
-  UsbMuxdArtifacts(Cache cache) : super('usbmuxd', cache);
-}
-
-class LibPListArtifacts extends IosUsbArtifacts {
-  LibPListArtifacts(Cache cache) : super('libplist', cache);
-}
-
-class OpenSSLArtifacts extends IosUsbArtifacts {
-  OpenSSLArtifacts(Cache cache) : super('openssl', cache);
-}
-
-class IDeviceInstallerArtifacts extends IosUsbArtifacts {
-  IDeviceInstallerArtifacts(Cache cache) : super('ideviceinstaller', cache);
-}
-
-class LibTasn1Artifacts extends IosUsbArtifacts {
-  LibTasn1Artifacts(Cache cache) : super('libtasn1', cache);
-}
-
-class IosDeployArtifacts extends IosUsbArtifacts {
-  IosDeployArtifacts(Cache cache) : super('ios-deploy', cache);
 }
 
 // Many characters are problematic in filenames, especially on Windows.
