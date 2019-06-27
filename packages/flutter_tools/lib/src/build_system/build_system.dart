@@ -52,9 +52,9 @@ class BuildSystemConfig {
 /// The target inputs are required to be files discoverable via a combination
 /// of at least one of the environment values and zero or more local values.
 ///
-/// To determine if a target needs to be executed, the [BuildSystem] performs
-/// a  hash of the file contents. This is tracked separately in the
-/// [FileHashStore].
+/// To determine if the action for a target needs to be executed, the
+/// [BuildSystem] performs a hash of the file contents for both inputs and
+/// outputs. This is tracked separately in the [FileHashStore].
 ///
 /// A Target has both implicit and explicit inputs and outputs. Only the
 /// later are safe to evaluate before invoking the [buildAction]. For example,
@@ -62,13 +62,14 @@ class BuildSystemConfig {
 /// glob files correctly.
 ///
 /// - All listed inputs are considered explicit inputs.
-/// - Outputs of all dependencies are considered implicit inputs.
-/// - Outputs which are provided as [Source.pattern] or [Source.version]
-///  without wildcards are considered explicit.
+/// - Outputs which are provided as [Source.pattern].
+///   without wildcards are considered explicit.
 /// - The remaining outputs are considered implicit.
 ///
-/// The name of each stamp is the target name with a .stamp extension. The
-/// output files are also stored to protect against deleted files.
+/// For each target, executing its action creates a corresponding stamp file
+/// which records both the input and output files. This file is read by
+/// subsequent builds to determine which file hashes need to be checked. If the
+/// stamp file is missing, the target's action is always rerun.
 ///
 ///  file: `example_target.stamp`
 ///
@@ -104,7 +105,6 @@ class Target {
   final List<Source> inputs;
 
   /// The output [Source]s which we attempt to verify are correctly produced.
-  // TODO(jonahwilliams): track outputs to allow more surgical flutter clean.
   final List<Source> outputs;
 
   /// The action which performs this build step.
@@ -448,7 +448,7 @@ class BuildSystem {
   final Map<String, Target> targets;
 
   /// Build the target `name` and all of its dependencies.
-  Future<void> build(
+  Future<bool> build(
     String name,
     Environment environment,
     BuildSystemConfig buildSystemConfig,
@@ -464,13 +464,21 @@ class BuildSystem {
     checkCycles(target);
 
     final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
+    bool passed = true;
     try {
-      await buildInstance.invokeTarget(target);
+      passed = await buildInstance.invokeTarget(target);
+      if (!passed) {
+        for (MapEntry<String, _ExceptionMeasurement> data in buildInstance.exceptionMeasurements.entries) {
+          printError('Target ${data.key} failed: ${data.value.exception}.');
+          printError('${data.value.exception}');
+        }
+      }
     } finally {
       // Always persist the file cache to disk.
       // TODO(jonahwilliams): analytics reporting of timing data.
       fileCache.persist();
     }
+    return passed;
   }
 
   /// Describe the target `name` and all of its dependencies.
@@ -517,16 +525,22 @@ class _BuildInstance {
   // Timings collected during target invocation.
   final Map<String, _ActionMeasurement> stepTimings = <String, _ActionMeasurement>{};
 
-  Future<void> invokeTarget(Target target) async {
-    await Future.wait(target.dependencies.map(invokeTarget));
-    final AsyncMemoizer<void> memoizer = pending[target.name] ??= AsyncMemoizer<void>();
-    await memoizer.runOnce(() => _invokeInternal(target));
+  // Exceptions caught during the build process.
+  final Map<String, _ExceptionMeasurement> exceptionMeasurements = <String, _ExceptionMeasurement>{};
+
+  Future<bool> invokeTarget(Target target) async {
+    final List<bool> results = await Future.wait(target.dependencies.map(invokeTarget));
+    if (results.any((bool result) => !result)) {
+      return false;
+    }
+    final AsyncMemoizer<bool> memoizer = pending[target.name] ??= AsyncMemoizer<bool>();
+    return memoizer.runOnce(() => _invokeInternal(target));
   }
 
-  Future<void> _invokeInternal(Target target) async {
+  Future<bool> _invokeInternal(Target target) async {
     final PoolResource resource = await resourcePool.request();
     final Stopwatch stopwatch = Stopwatch()..start();
-    bool failed = false;
+    bool passed = true;
     bool skipped = false;
     try {
       final List<File> inputs = target.resolveInputs(environment);
@@ -544,28 +558,39 @@ class _BuildInstance {
         await fileCache.hashFiles(outputs);
         target._writeStamp(inputs, outputs, environment);
       }
-    } catch (_) {
+    } catch (exception, stackTrace) {
       // TODO(jonahwilliams): test
       target.clearStamp(environment);
-      failed = true;
+      passed = false;
       skipped = false;
-      rethrow;
+      exceptionMeasurements[target.name] = _ExceptionMeasurement(
+          target.name, exception, stackTrace);
     } finally {
       resource.release();
       stopwatch.stop();
       stepTimings[target.name] = _ActionMeasurement(
-          target.name, stopwatch.elapsedMilliseconds, skipped, failed);
+          target.name, stopwatch.elapsedMilliseconds, skipped, passed);
     }
+    return passed;
   }
+}
+
+// Helper class to collect exceptions.
+class _ExceptionMeasurement {
+  _ExceptionMeasurement(this.target, this.exception, this.stackTrace);
+
+  final String target;
+  final dynamic exception;
+  final StackTrace stackTrace;
 }
 
 // Helper class to collect measurement data.
 class _ActionMeasurement {
-  _ActionMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.failed);
+  _ActionMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.passed);
   final int elapsedMilliseconds;
   final String target;
   final bool skiped;
-  final bool failed;
+  final bool passed;
 }
 
 /// Check if there are any dependency cycles in the target.

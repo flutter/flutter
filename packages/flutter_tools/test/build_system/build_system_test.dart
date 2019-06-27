@@ -204,7 +204,7 @@ void main() {
     }));
 
     test('handles a throwing build action', () => testbed.run(() async {
-      expect(buildSystem.build('fizz', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
+      expect(buildSystem.build('fizz', environment, const BuildSystemConfig()), false);
     }));
 
     test('Can describe itself with JSON output', () => testbed.run(() {

@@ -65,12 +65,11 @@ void main() {
 
     test('Detects changes in input cache files', () => testbed.run(() async {
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
-      final DateTime modified = fs.file('linux/flutter/libflutter_linux.so').statSync().modified;
       fs.file('cache/artifacts/engine/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
 
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 
-      expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, isNot(modified));
+      expect(fs.file('linux/flutter/libflutter_linux.so').readAsStringSync(), 'asd');
     }));
   });
 }

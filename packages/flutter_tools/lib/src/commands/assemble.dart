@@ -128,7 +128,7 @@ abstract class AssembleBase extends FlutterCommand {
   }
 }
 
-/// Execute a particular target.
+/// Execute a build starting from a target action.
 class AssembleRun extends AssembleBase {
   @override
   String get description => 'Execute the stages for a specified target.';
@@ -141,13 +141,11 @@ class AssembleRun extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    try {
-      await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
-        resourcePoolSize: argResults['resource-pool-size'],
-      ));
-    } on Exception catch (err, stackTrace) {
-      printTrace(stackTrace.toString());
-      throwToolExit(err.toString());
+    final bool passed = await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
+      resourcePoolSize: argResults['resource-pool-size'],
+    ));
+    if (!passed) {
+      throwToolExit('build failed.');
     }
     return null;
   }
