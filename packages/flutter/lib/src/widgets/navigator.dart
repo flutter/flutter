@@ -1154,14 +1154,16 @@ class Navigator extends StatefulWidget {
   /// The removed routes are removed without being completed, so this method
   /// does not take a return value argument.
   ///
-  /// The new route and the route below the bottommost removed route (which
-  /// becomes the route below the new route) are notified (see [Route.didPush]
-  /// and [Route.didChangeNext]). If the [Navigator] has any
-  /// [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObservers.didPush] and [NavigatorObservers.didRemove]). The
-  /// removed routes are disposed, without being notified, once the new route
-  /// has finished animating. The futures that had been returned from pushing
-  /// those routes will not complete.
+  /// The new route and its previous antecedent (which has been removed) are
+  /// notified for [Route.didPush]. The new route and its new antecedent, (the
+  /// route below the bottommost removed route) are notified through
+  /// [Route.didChangeNext]). If the [Navigator] has any [Navigator.observers],
+  /// they will be notified as well (see [NavigatorObservers.didPush] and
+  /// [NavigatorObservers.didRemove]). The removed routes are disposed without
+  /// being notified, with the exception of the aforementioned original
+  /// antecedent to the new route, once the new route has finished animating.
+  /// The futures that had been returned from pushing those routes will not
+  /// complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -1195,7 +1197,7 @@ class Navigator extends StatefulWidget {
   /// context with a new route.
   ///
   /// {@template flutter.widgets.navigator.replace}
-  /// The old route must not be current visible, as this method skips the
+  /// The old route must not be currently visible, as this method skips the
   /// animations and therefore the removal would be jarring if it was visible.
   /// To replace the top-most route, consider [pushReplacement] instead, which
   /// _does_ animate the new route, and delays removing the old route until the
@@ -1881,30 +1883,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushAndRemoveUntil<T extends Object>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
-    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
-    while (_history.isNotEmpty && !predicate(_history.last)) {
-      final Route<dynamic> removedRoute = _history.removeLast();
-      assert(removedRoute != null && removedRoute._navigator == this);
-      assert(removedRoute.overlayEntries.isNotEmpty);
-      removedRoutes.add(removedRoute);
-    }
+    final Route<dynamic> precedingRoute = _history.last;
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
-    final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
     newRoute._navigator = this;
     newRoute.install(_currentOverlayEntry);
     _history.add(newRoute);
+
+    Route<dynamic> oldRoute;
+    int removalIndex = 0;
+    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
+
+    for (Route<dynamic> route in _history) {
+      if (predicate(route)) {
+        oldRoute = route;
+        removalIndex = _history.indexOf(route) + 1;
+        break;
+      }
+    }
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-        for (Route<dynamic> route in removedRoutes)
-          route.dispose();
+        while (_history[removalIndex] != newRoute) {
+          final Route<dynamic> removedRoute = _history.removeAt(removalIndex);
+          assert(removedRoute != null && removedRoute._navigator == this);
+          assert(removedRoute.overlayEntries.isNotEmpty);
+          removedRoute.dispose();
+        }
       }
     });
     newRoute.didChangeNext(null);
     if (oldRoute != null)
       oldRoute.didChangeNext(newRoute);
+
     for (NavigatorObserver observer in widget.observers) {
-      observer.didPush(newRoute, oldRoute);
+      observer.didPush(newRoute, precedingRoute);
       for (Route<dynamic> removedRoute in removedRoutes)
         observer.didRemove(removedRoute, oldRoute);
     }
