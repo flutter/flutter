@@ -82,15 +82,24 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         }
       });
 
+      // This will keep reference to [debugNetworkImageHttpClientProvider] tree-shaken
+      // out of release build.
+      HttpClientProvider httpClientProvider;
+      assert(() { httpClientProvider = debugNetworkImageHttpClientProvider; return true; }());
+
       final _DownloadRequest downloadRequest = _DownloadRequest(port.sendPort,
-          resolved, headers, debugNetworkImageHttpClientProvider);
+          resolved, headers, httpClientProvider);
       if (_requestPort != null) {
+        // If worker isolate is properly set up([_requestPort] is holding
+        // initialized [SendPort], then just send download request down to it.
         _requestPort.send(downloadRequest);
       } else {
         if (_pendingLoader == null) {
+          // If worker isolate creation was not started, start creation now.
           _pendingLoaderUsers = <Function>[];
           _pendingLoader = _setupIsolate(completer);
         }
+        // Add closure that sends donwload request to list of pending requests.
         _pendingLoaderUsers.add((SendPort sendPort) {
           sendPort.send(downloadRequest);
         });
@@ -110,11 +119,28 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   Future<Isolate> _setupIsolate(Completer<TransferableTypedData> completer) {
+    // This is used to get _requestPort [SendPort] that can be used to
+    // communicate with worker isolate: when isolate is spawned it will send
+    // it's [SendPort] over via this [RawReceivePort].
+    // Received [sendPort] can also be [null], which indicates that worker
+    // isolate exited after being idle.
     final RawReceivePort receivePort = RawReceivePort((SendPort sendPort) {
       _requestPort = sendPort;
-      for (Function function in _pendingLoaderUsers) {
-        function(sendPort);
-      }});
+      if (sendPort == null) {
+        _pendingLoader = null;
+      }
+
+      // When we received [SendPort] for the worker isolate, we send all
+      // pending requests that were accumulated before worker isolate provided
+      // it's port(before [_requestPort] was populated).
+      for (Function sendPendingDownloadRequest in _pendingLoaderUsers) {
+        // [sendPort] being null indicates that worker has been idle and exited.
+        // That should not happen if there are pending download requests.
+        assert(sendPort != null);
+        sendPendingDownloadRequest(sendPort);
+      }
+      _pendingLoaderUsers.clear();
+    });
 
     final Future<Isolate> isolate = Isolate.spawn<_HttpClientIsolateParameters>(
         _handleHttpClientGet, _HttpClientIsolateParameters(receivePort.sendPort)
@@ -158,21 +184,24 @@ class _HttpClientIsolateParameters {
 // the `Content-Length` HTTP header. We automatically uncompress the content
 // in our call to [consolidateHttpClientResponseBytes].
 final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
+const Duration idleTime = Duration(seconds: 60);
 
 void _handleHttpClientGet(_HttpClientIsolateParameters params) {
-  final RawReceivePort receivePort =
-      RawReceivePort((_DownloadRequest downloadRequest) async {
+  int ongoingRequests = 0;
+  Timer idleTimer;
+  RawReceivePort receivePort;
 
-    HttpClient _httpClient = _sharedHttpClient;
-    assert(() {
-      if (downloadRequest.debugNetworkImageHttpClientProvider != null) {
-        _httpClient = downloadRequest.debugNetworkImageHttpClientProvider();
-      }
-      return true;
-    }());
+  // Sets up a handler that processes download requests messages.
+  receivePort = RawReceivePort((_DownloadRequest downloadRequest) async {
+    ongoingRequests++;
+    idleTimer?.cancel();
+    final HttpClient httpClient =
+      downloadRequest.debugNetworkImageHttpClientProvider != null
+          ? downloadRequest.debugNetworkImageHttpClientProvider()
+          : _sharedHttpClient;
 
     try {
-      final HttpClientRequest request = await _httpClient.getUrl(downloadRequest.uri);
+      final HttpClientRequest request = await httpClient.getUrl(downloadRequest.uri);
       downloadRequest.headers?.forEach((String name, String value) {
         request.headers.add(name, value);
       });
@@ -192,6 +221,13 @@ void _handleHttpClientGet(_HttpClientIsolateParameters params) {
       downloadRequest.sendPort.send(transferable);
     } catch (error) {
       downloadRequest.sendPort.send(error.toString());
+    }
+    ongoingRequests--;
+    if (ongoingRequests == 0) {
+      idleTimer = Timer(idleTime, () {
+        params.sendPort.send(null);
+        receivePort?.close();
+      });
     }
   });
 
