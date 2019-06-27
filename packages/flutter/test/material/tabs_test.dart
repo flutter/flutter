@@ -2400,7 +2400,7 @@ void main() {
               appBar: AppBar(
                 actions: <Widget>[
                   IconButton(
-                    icon: Icon(Icons.remove),
+                    icon: const Icon(Icons.remove),
                     onPressed: _removeLastTab,
                   ),
                 ],
