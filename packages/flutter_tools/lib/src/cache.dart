@@ -83,22 +83,24 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
-      const List<String> iosUsbArtifactNames = [
-        'libimobiledevice',
-        'usbmuxd',
-        'libplist',
-        'openssl',
-        'ideviceinstaller',
-        'libtasn1',
-        'ios-deploy',
-      ];
-      for (String artifactName in iosUsbArtifactNames) {
+      for (String artifactName in _iosUsbArtifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
     } else {
       _artifacts.addAll(artifacts);
     }
   }
+
+  /// The names of iOS/USB utility artifacts in the cache.
+  static const List<String> _iosUsbArtifactNames = <String>[
+    'libimobiledevice',
+    'usbmuxd',
+    'libplist',
+    'openssl',
+    'ideviceinstaller',
+    'libtasn1',
+    'ios-deploy',
+  ];
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
