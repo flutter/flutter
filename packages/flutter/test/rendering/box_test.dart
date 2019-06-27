@@ -25,7 +25,7 @@ class FakeMissingSizeRenderBox extends RenderBox {
   }
 
   @override
-  bool get hasSize => fakeMissingSize ? false : super.hasSize;
+  bool get hasSize => !fakeMissingSize && super.hasSize;
 
   bool fakeMissingSize = false;
 }

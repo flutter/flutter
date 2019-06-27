@@ -59,8 +59,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   // \S matches non-whitespace characters.
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \S+\(flutter\): ');
 
-  FuchsiaDevice _device;
-  ApplicationPackage _app;
+  final FuchsiaDevice _device;
+  final ApplicationPackage _app;
 
   @override
   String get name => _device.name;
@@ -196,6 +196,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool get supportsStartPaused => false;
