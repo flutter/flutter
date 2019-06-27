@@ -170,7 +170,7 @@ void main() {
     expect(tester.widget<Material>(find.byType(Material)).shape, shape);
     expect(tester.widget<Material>(find.byType(Material)).color, disabledColor);
     expect(tester.getSize(find.byType(Material)), const Size(88.0, 48.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Theme buttonTheme ButtonTheme overrides', (WidgetTester tester) async {
     ButtonTextTheme textTheme;
@@ -331,10 +331,10 @@ void main() {
   testWidgets('button theme with stateful color changes color in states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {

@@ -11,11 +11,9 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals.dart';
 import '../project.dart';
-import '../web/compile.dart';
-import '../web/workflow.dart';
 import 'chrome.dart';
+import 'workflow.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
@@ -29,11 +27,13 @@ class WebApplicationPackage extends ApplicationPackage {
   Directory get webSourcePath => flutterProject.directory.childDirectory('web');
 }
 
-class WebDevice extends Device {
-  WebDevice() : super('web');
-
-  HttpServer _server;
-  WebApplicationPackage _package;
+class ChromeDevice extends Device {
+  ChromeDevice() : super(
+      'chrome',
+      category: Category.web,
+      platformType: PlatformType.web,
+      ephemeral: false,
+  );
 
   @override
   bool get supportsHotReload => true;
@@ -71,10 +71,13 @@ class WebDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override
-  String get name => 'web';
+  String get name => 'Chrome';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -120,26 +123,13 @@ class WebDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    await buildWeb(
-      package.flutterProject,
-      fs.path.relative(mainPath, from: package.flutterProject.directory.path),
-      debuggingOptions.buildInfo,
-    );
-    _package = package;
-    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    _server.listen(_basicAssetServer);
-    printStatus('Serving assets from http:localhost:${_server.port}');
-    await chromeLauncher.launch('http://localhost:${_server.port}');
+    // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
+    // for the web initialization and server logic.
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
-  // Note: we don't currently have a way to track which chrome processes
-  // belong to the flutter tool, so we'll err on the side of caution by
-  // keeping these open.
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
-    await _server?.close();
-    _server = null;
     return true;
   }
 
@@ -149,39 +139,6 @@ class WebDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
-  Future<void> _basicAssetServer(HttpRequest request) async {
-    if (request.method != 'GET') {
-      request.response.statusCode = HttpStatus.forbidden;
-      await request.response.close();
-      return;
-    }
-    // Resolve all get requests to the build/web/ or build/flutter_assets directory.
-    final Uri uri = request.uri;
-    File file;
-    String contentType;
-    if (uri.path == '/') {
-      file = _package.webSourcePath.childFile('index.html');
-      contentType = 'text/html';
-    } else if (uri.path == '/main.dart.js') {
-      file = fs.file(fs.path.join(getWebBuildDirectory(), 'main.dart.js'));
-      contentType = 'text/javascript';
-    } else {
-      file = fs.file(fs.path.join(getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
-    }
-
-    if (!file.existsSync()) {
-      request.response.statusCode = HttpStatus.notFound;
-      await request.response.close();
-      return;
-    }
-    request.response.statusCode = HttpStatus.ok;
-    if (contentType != null) {
-      request.response.headers.add(HttpHeaders.contentTypeHeader, contentType);
-    }
-    await request.response.addStream(file.openRead());
-    await request.response.close();
-  }
-
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.web.existsSync();
@@ -189,9 +146,9 @@ class WebDevice extends Device {
 }
 
 class WebDevices extends PollingDeviceDiscovery {
-  WebDevices() : super('web');
+  WebDevices() : super('chrome');
 
-  final WebDevice _webDevice = WebDevice();
+  final ChromeDevice _webDevice = ChromeDevice();
 
   @override
   bool get canListAnything => flutterWebEnabled;

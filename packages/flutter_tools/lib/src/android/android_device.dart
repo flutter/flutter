@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 
 import 'adb.dart';
 import 'android.dart';
+import 'android_console.dart';
 import 'android_sdk.dart';
 
 enum _HardwareType { emulator, physical }
@@ -72,7 +73,12 @@ class AndroidDevice extends Device {
     this.productID,
     this.modelID,
     this.deviceCodeName,
-  }) : super(id);
+  }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.android,
+      ephemeral: true,
+  );
 
   final String productID;
   final String modelID;
@@ -127,6 +133,55 @@ class AndroidDevice extends Device {
       }
     }
     return _isLocalEmulator;
+  }
+
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  @override
+  Future<String> get emulatorId async {
+    if (!(await isLocalEmulator))
+      return null;
+
+    // Emulators always have IDs in the format emulator-(port) where port is the
+    // Android Console port number.
+    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
+
+    final Match portMatch = emulatorPortRegex.firstMatch(id);
+    if (portMatch == null || portMatch.groupCount < 1) {
+      return null;
+    }
+
+    const String host = 'localhost';
+    final int port = int.parse(portMatch.group(1));
+    printTrace('Fetching avd name for $name via Android console on $host:$port');
+
+    try {
+      final Socket socket = await androidConsoleSocketFactory(host, port);
+      final AndroidConsole console = AndroidConsole(socket);
+
+      try {
+        await console
+            .connect()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('Connection timed out'));
+
+        return await console
+            .getAvdName()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('"avd name" timed out'));
+      } finally {
+        console.destroy();
+      }
+    } catch (e) {
+      printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
+      // If we fail to connect to the device, we should not fail so just return
+      // an empty name. This data is best-effort.
+      return null;
+    }
   }
 
   @override
@@ -391,15 +446,29 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !(debuggingOptions.buildInfo.isDebug ||
-          debuggingOptions.buildInfo.isDynamic)) {
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
 
-    BuildInfo buildInfo = debuggingOptions.buildInfo;
-    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
-      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
+    AndroidArch androidArch;
+    switch (devicePlatform) {
+      case TargetPlatform.android_arm:
+        androidArch = AndroidArch.armeabi_v7a;
+        break;
+      case TargetPlatform.android_arm64:
+        androidArch = AndroidArch.arm64_v8a;
+        break;
+      case TargetPlatform.android_x64:
+        androidArch = AndroidArch.x86_64;
+        break;
+      case TargetPlatform.android_x86:
+        androidArch = AndroidArch.x86;
+        break;
+      default:
+        printError('Android platforms are only supported.');
+        return LaunchResult.failed();
+    }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
@@ -407,7 +476,9 @@ class AndroidDevice extends Device {
       await buildApk(
           project: project,
           target: mainPath,
-          buildInfo: buildInfo,
+          androidBuildInfo: AndroidBuildInfo(debuggingOptions.buildInfo,
+            targetArchs: <AndroidArch>[androidArch]
+          ),
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
@@ -474,6 +545,8 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.disableServiceAuthCodes)
         cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
+      if (debuggingOptions.dartFlags.isNotEmpty)
+        cmd.addAll(<String>['--es', 'dart-flags', debuggingOptions.dartFlags]);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {

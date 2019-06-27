@@ -518,6 +518,8 @@ class RenderTable extends RenderBox {
   /// the table, unlike decorations for individual cells, which might not fill
   /// either.
   List<Decoration> get rowDecorations => List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  // _rowDecorations and _rowDecorationPainters need to be in sync. They have to
+  // either both be null or have same length.
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
   set rowDecorations(List<Decoration> value) {
@@ -703,7 +705,7 @@ class RenderTable extends RenderBox {
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
-      _rowDecorationPainters = null;
+      _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
     for (RenderBox child in _children)
       child?.detach();
@@ -1137,6 +1139,7 @@ class RenderTable extends RenderBox {
     }
     assert(_rowTops.length == rows + 1);
     if (_rowDecorations != null) {
+      assert(_rowDecorations.length == _rowDecorationPainters.length);
       final Canvas canvas = context.canvas;
       for (int y = 0; y < rows; y += 1) {
         if (_rowDecorations.length <= y)

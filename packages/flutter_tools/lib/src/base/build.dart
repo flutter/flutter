@@ -63,7 +63,17 @@ class GenSnapshot {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
       return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
     }
-    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
+
+    StringConverter outputFilter;
+    if (additionalArgs.contains('--strip')) {
+      // Filter out gen_snapshot's warning message about stripping debug symbols
+      // from ELF library snapshots.
+      const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
+      outputFilter = (String line) => line != kStripWarning ? line : null;
+    }
+
+    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args),
+                                     mapFunction: outputFilter);
   }
 }
 
@@ -82,7 +92,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
@@ -96,10 +105,6 @@ class AOTSnapshotter {
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || iosArch != null);
-
-    // buildSharedLibrary is ignored for iOS builds.
-    if (platform == TargetPlatform.ios)
-      buildSharedLibrary = false;
 
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -133,25 +138,12 @@ class AOTSnapshotter {
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
-    } else if (buildSharedLibrary) {
+    } else {
       final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
-      genSnapshotArgs.add('--assembly=$aotSharedLibrary');
-    } else {
-      // Blob AOT snapshot.
-      final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-      final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-      final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-      final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
-      genSnapshotArgs.addAll(<String>[
-        '--snapshot_kind=app-aot-blobs',
-        '--vm_snapshot_data=$vmSnapshotData',
-        '--isolate_snapshot_data=$isolateSnapshotData',
-        '--vm_snapshot_instructions=$vmSnapshotInstructions',
-        '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-      ]);
+      genSnapshotArgs.add('--elf=$aotSharedLibrary');
+      genSnapshotArgs.add('--strip');
     }
 
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
@@ -181,10 +173,9 @@ class AOTSnapshotter {
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': Cache.instance.engineRevision,
-        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+        'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
       },
       depfilePaths: <String>[],
     );

@@ -73,13 +73,13 @@ Future<int> runTests(
       .absolute
       .uri
       .toFilePath();
-    await webCompilationProxy.initialize(
+    final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
-      targets: testFiles.map((String testFile) {
-        return fs.path.relative(testFile, from: flutterProject.directory.path);
-      }).toList(),
     );
+    if (!result) {
+      throwToolExit('Failed to compile tests');
+    }
     testArgs.add('--platform=chrome');
     testArgs.add('--precompiled=$tempBuildDir');
     testArgs.add('--');
@@ -105,7 +105,7 @@ Future<int> runTests(
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  loader.installHook(
+  final loader.FlutterPlatform platform = loader.installHook(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -145,5 +145,6 @@ Future<int> runTests(
     return exitCode;
   } finally {
     fs.currentDirectory = saved;
+    await platform.close();
   }
 }

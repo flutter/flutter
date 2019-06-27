@@ -85,6 +85,7 @@ class TestCompiler {
 
   Future<void> dispose() async {
     await compilerController.close();
+    await _shutdown();
   }
 
   /// Create the resident compiler used to compile the test.
