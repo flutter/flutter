@@ -260,7 +260,9 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
 Future<void> _runFlutterAnalyze(String workingDirectory, {
   List<String> options = const <String>[],
 }) {
-  return runCommand(flutter, <String>['analyze', '--dartdocs']..addAll(options),
+  return runCommand(
+    flutter,
+    <String>['analyze', '--dartdocs', ...options],
     workingDirectory: workingDirectory,
   );
 }
@@ -456,7 +458,10 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
     final List<T> result = _deepSearch<T>(
       map,
       key,
-      (seen == null ? <T>{start} : Set<T>.from(seen))..add(key),
+      <T>{
+        if (seen == null) start else ...seen,
+        key,
+      },
     );
     if (result != null) {
       result.insert(0, start);

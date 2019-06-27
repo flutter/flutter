@@ -2010,13 +2010,13 @@ abstract class RenderBox extends RenderObject {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
-            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:') // should this be tagged as an error or not?
-          ]..addAll(failures)
-           ..add(ErrorHint(
+            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:'), // should this be tagged as an error or not?
+            ...failures,
+            ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
               'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
-            ))
-          );
+            ),
+          ]);
         }
       }
       return true;
