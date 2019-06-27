@@ -200,6 +200,8 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('all demos', () async {
+      // Wait for the first frame to be rasterized.
+      await driver.waitUntilFirstFrameRasterized();
 
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(

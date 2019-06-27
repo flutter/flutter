@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
@@ -114,6 +115,7 @@ class FlutterDriverExtension {
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
+      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -135,6 +137,7 @@ class FlutterDriverExtension {
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
+      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -218,6 +221,12 @@ class FlutterDriverExtension {
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
+  }
+
+  // This can be used to wait for the first frame being rasterized during app launch.
+  Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
+    await WidgetsBinding.instance.firstFrameRasterized;
+    return null;
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
