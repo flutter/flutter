@@ -20,6 +20,7 @@
 #include "render_test.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
 #include "third_party/skia/include/core/SkColor.h"
+#include "third_party/skia/include/core/SkPath.h"
 #include "txt/font_style.h"
 #include "txt/font_weight.h"
 #include "txt/paragraph.h"
@@ -1900,6 +1901,144 @@ TEST_F(ParagraphTest, DecorationsParagraph) {
             3.0);
   ASSERT_EQ(paragraph->records_[5].style().decoration_thickness_multiplier,
             1.0);
+}
+
+TEST_F(ParagraphTest, WavyDecorationParagraph) {
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.max_lines = 14;
+  paragraph_style.text_align = TextAlign::left;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Roboto");
+  text_style.font_size = 26;
+  text_style.letter_spacing = 0;
+  text_style.word_spacing = 5;
+  text_style.color = SK_ColorBLACK;
+  text_style.height = 2;
+  text_style.decoration = TextDecoration::kUnderline |
+                          TextDecoration::kOverline |
+                          TextDecoration::kLineThrough;
+
+  text_style.decoration_style = txt::TextDecorationStyle::kWavy;
+  text_style.decoration_color = SK_ColorRED;
+  text_style.decoration_thickness_multiplier = 1.0;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u" Otherwise, bad things happen.");
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth() - 100);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  ASSERT_TRUE(Snapshot());
+  ASSERT_EQ(paragraph->runs_.size(), 1ull);
+  ASSERT_EQ(paragraph->records_.size(), 1ull);
+
+  for (size_t i = 0; i < 1; ++i) {
+    ASSERT_EQ(paragraph->records_[i].style().decoration,
+              TextDecoration::kUnderline | TextDecoration::kOverline |
+                  TextDecoration::kLineThrough);
+  }
+
+  ASSERT_EQ(paragraph->records_[0].style().decoration_style,
+            txt::TextDecorationStyle::kWavy);
+
+  ASSERT_EQ(paragraph->records_[0].style().decoration_color, SK_ColorRED);
+
+  ASSERT_EQ(paragraph->records_[0].style().decoration_thickness_multiplier,
+            1.0);
+
+  SkPath path0;
+  SkPath canonical_path0;
+  paragraph->ComputeWavyDecoration(path0, 1, 1, 9.56, 1);
+
+  canonical_path0.moveTo(1, 1);
+  canonical_path0.rQuadTo(1, -1, 2, 0);
+  canonical_path0.rQuadTo(1, 1, 2, 0);
+  canonical_path0.rQuadTo(1, -1, 2, 0);
+  canonical_path0.rQuadTo(1, 1, 2, 0);
+  canonical_path0.rQuadTo(0.78, -0.78, 1.56, -0.3432);
+
+  ASSERT_EQ(path0.countPoints(), canonical_path0.countPoints());
+  for (int i = 0; i < canonical_path0.countPoints(); ++i) {
+    ASSERT_EQ(path0.getPoint(i).x(), canonical_path0.getPoint(i).x());
+    ASSERT_EQ(path0.getPoint(i).y(), canonical_path0.getPoint(i).y());
+  }
+
+  SkPath path1;
+  SkPath canonical_path1;
+  paragraph->ComputeWavyDecoration(path1, 1, 1, 8.35, 1);
+
+  canonical_path1.moveTo(1, 1);
+  canonical_path1.rQuadTo(1, -1, 2, 0);
+  canonical_path1.rQuadTo(1, 1, 2, 0);
+  canonical_path1.rQuadTo(1, -1, 2, 0);
+  canonical_path1.rQuadTo(1, 1, 2, 0);
+  canonical_path1.rQuadTo(0.175, -0.175, 0.35, -0.28875);
+
+  ASSERT_EQ(path1.countPoints(), canonical_path1.countPoints());
+  for (int i = 0; i < canonical_path1.countPoints(); ++i) {
+    ASSERT_EQ(path1.getPoint(i).x(), canonical_path1.getPoint(i).x());
+    ASSERT_EQ(path1.getPoint(i).y(), canonical_path1.getPoint(i).y());
+  }
+
+  SkPath path2;
+  SkPath canonical_path2;
+  paragraph->ComputeWavyDecoration(path2, 1, 1, 10.59, 1);
+
+  canonical_path2.moveTo(1, 1);
+  canonical_path2.rQuadTo(1, -1, 2, 0);
+  canonical_path2.rQuadTo(1, 1, 2, 0);
+  canonical_path2.rQuadTo(1, -1, 2, 0);
+  canonical_path2.rQuadTo(1, 1, 2, 0);
+  canonical_path2.rQuadTo(1, -1, 2, 0);
+  canonical_path2.rQuadTo(0.295, 0.295, 0.59, 0.41595);
+
+  ASSERT_EQ(path2.countPoints(), canonical_path2.countPoints());
+  for (int i = 0; i < canonical_path2.countPoints(); ++i) {
+    ASSERT_EQ(path2.getPoint(i).x(), canonical_path2.getPoint(i).x());
+    ASSERT_EQ(path2.getPoint(i).y(), canonical_path2.getPoint(i).y());
+  }
+
+  SkPath path3;
+  SkPath canonical_path3;
+  paragraph->ComputeWavyDecoration(path3, 1, 1, 11.2, 1);
+
+  canonical_path3.moveTo(1, 1);
+  canonical_path3.rQuadTo(1, -1, 2, 0);
+  canonical_path3.rQuadTo(1, 1, 2, 0);
+  canonical_path3.rQuadTo(1, -1, 2, 0);
+  canonical_path3.rQuadTo(1, 1, 2, 0);
+  canonical_path3.rQuadTo(1, -1, 2, 0);
+  canonical_path3.rQuadTo(0.6, 0.6, 1.2, 0.48);
+
+  ASSERT_EQ(path3.countPoints(), canonical_path3.countPoints());
+  for (int i = 0; i < canonical_path3.countPoints(); ++i) {
+    ASSERT_EQ(path3.getPoint(i).x(), canonical_path3.getPoint(i).x());
+    ASSERT_EQ(path3.getPoint(i).y(), canonical_path3.getPoint(i).y());
+  }
+
+  SkPath path4;
+  SkPath canonical_path4;
+  paragraph->ComputeWavyDecoration(path4, 1, 1, 12, 1);
+
+  canonical_path4.moveTo(1, 1);
+  canonical_path4.rQuadTo(1, -1, 2, 0);
+  canonical_path4.rQuadTo(1, 1, 2, 0);
+  canonical_path4.rQuadTo(1, -1, 2, 0);
+  canonical_path4.rQuadTo(1, 1, 2, 0);
+  canonical_path4.rQuadTo(1, -1, 2, 0);
+  canonical_path4.rQuadTo(1, 1, 2, 0);
+
+  ASSERT_EQ(path4.countPoints(), canonical_path4.countPoints());
+  for (int i = 0; i < canonical_path4.countPoints(); ++i) {
+    ASSERT_EQ(path4.getPoint(i).x(), canonical_path4.getPoint(i).x());
+    ASSERT_EQ(path4.getPoint(i).y(), canonical_path4.getPoint(i).y());
+  }
 }
 
 TEST_F(ParagraphTest, ItalicsParagraph) {
