@@ -1019,7 +1019,10 @@ class _NavigationBarStaticComponents {
       route.fullscreenDialog
     ) {
       leadingContent = CupertinoButton(
-        child: const Text('Close'),
+        child: const Text(
+          'Close',
+          textScaleFactor: 1.0,
+        ),
         padding: EdgeInsets.zero,
         onPressed: () { route.navigator.maybePop(); },
       );
