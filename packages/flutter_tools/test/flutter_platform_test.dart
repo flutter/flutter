@@ -148,7 +148,7 @@ class MockHttpServer extends Mock implements HttpServer {}
 
 // A FlutterPlatform with enough fields set to load and start a test.
 //
-// Uses a mock HttpServer.
+// Uses a mock HttpServer. We don't want to bind random ports in our CI hosts.
 class TestFlutterPlatform extends FlutterPlatform {
   TestFlutterPlatform() : super(
     shellPath: '/',
