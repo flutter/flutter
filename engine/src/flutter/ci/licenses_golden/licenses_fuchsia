@@ -1,4 +1,4 @@
-Signature: 222370f3932b5018ed6023a77be4a443
+Signature: b95cef132ba4a5ae45255a949093bd43
 
 UNUSED LICENSES:
 
@@ -1951,8 +1951,10 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_ref_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/view_token_pair.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_ref_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/internal/mutex-internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
