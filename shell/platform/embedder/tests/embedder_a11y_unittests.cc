@@ -21,7 +21,10 @@ namespace testing {
 
 using Embedder11yTest = testing::EmbedderTest;
 
-TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
+// TODO: This test has been disabled as it is flaky (more reproducible in
+// profile more). Multiple calls to a11y changed handler in Dart code is
+// suspected. https://github.com/flutter/flutter/issues/35218
+TEST_F(Embedder11yTest, DISABLED_A11yTreeIsConsistent) {
   auto& context = GetEmbedderContext();
 
   fml::AutoResetWaitableEvent latch;
@@ -51,7 +54,8 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
   // Wait for initial NotifySemanticsEnabled(false).
   callback = [&](Dart_NativeArguments args) {
     bool enabled = true;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    ASSERT_FALSE(Dart_IsError(handle));
     ASSERT_FALSE(enabled);
     latch.Signal();
   };
@@ -60,7 +64,8 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
   // Enable semantics. Wait for NotifySemanticsEnabled(true).
   callback = [&](Dart_NativeArguments args) {
     bool enabled = false;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    ASSERT_FALSE(Dart_IsError(handle));
     ASSERT_TRUE(enabled);
     latch.Signal();
   };
@@ -71,7 +76,8 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
   // Wait for initial accessibility features (reduce_motion == false)
   callback = [&](Dart_NativeArguments args) {
     bool enabled = true;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    ASSERT_FALSE(Dart_IsError(handle));
     ASSERT_FALSE(enabled);
     latch.Signal();
   };
@@ -80,7 +86,8 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
   // Set accessibility features: (reduce_motion == true)
   callback = [&](Dart_NativeArguments args) {
     bool enabled = false;
-    Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    auto handle = Dart_GetNativeBooleanArgument(args, 0, &enabled);
+    ASSERT_FALSE(Dart_IsError(handle));
     ASSERT_TRUE(enabled);
     latch.Signal();
   };
@@ -136,7 +143,8 @@ TEST_F(Embedder11yTest, A11yTreeIsConsistent) {
     ASSERT_EQ(42, node_id);
 
     int64_t action_id;
-    Dart_GetNativeIntegerArgument(args, 1, &action_id);
+    auto handle = Dart_GetNativeIntegerArgument(args, 1, &action_id);
+    ASSERT_FALSE(Dart_IsError(handle));
     ASSERT_EQ(static_cast<int32_t>(flutter::SemanticsAction::kTap), action_id);
 
     Dart_Handle semantic_args = Dart_GetNativeArgument(args, 2);

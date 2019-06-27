@@ -24,8 +24,9 @@ fi
 # Switch to buildroot dir. Some tests assume paths relative to buildroot.
 cd "$BUILDROOT_DIR"
 
-# TODO(dnfield): Re-enable this when the upstream Dart changes that make it not be flaky land.
-# $HOST_DIR/embedder_unittests
+echo "Running embedder_unittests..."
+"$HOST_DIR/embedder_unittests"
+
 echo "Running flow_unittests..."
 "$HOST_DIR/flow_unittests"
 
