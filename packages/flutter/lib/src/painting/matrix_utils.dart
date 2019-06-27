@@ -129,6 +129,9 @@ class MatrixUtils {
     return Offset(transformed3.x, transformed3.y);
   }
 
+  // Used to store temporary matrices in [transformRect].
+  static final Matrix4 _temporaryPointMatrix = Matrix4.zero();
+
   /// Returns a rect that bounds the result of applying the given matrix as a
   /// perspective transform to the given rect.
   ///
@@ -136,16 +139,88 @@ class MatrixUtils {
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
   static Rect transformRect(Matrix4 transform, Rect rect) {
-    final Offset point1 = transformPoint(transform, rect.topLeft);
-    final Offset point2 = transformPoint(transform, rect.topRight);
-    final Offset point3 = transformPoint(transform, rect.bottomLeft);
-    final Offset point4 = transformPoint(transform, rect.bottomRight);
-    return Rect.fromLTRB(
-        _min4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _min4(point1.dy, point2.dy, point3.dy, point4.dy),
-        _max4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _max4(point1.dy, point2.dy, point3.dy, point4.dy),
-    );
+    // Put the coordinates of the four corners of the rect in a matrix in a
+    // row-major fashion:
+    //
+    // R = [
+    //       [ TLx TLy 0 1]
+    //       [ TRx TRy 0 1]
+    //       [ BLx BLy 0 1]
+    //       [ BRx BRy 0 1]
+    //     ]
+    // T = transpose(transform)
+    // S = R x T
+    // U = normalize(S)
+    //
+    // The U matrix contains all the transformed corners. The bounding rect is
+    // then Rect(min(x), min(y), max(x), max(y)) across all the transformed x
+    // and y coordinates.
+    //
+    // Explanation:
+    //
+    // Semantically we transform each corner of the input rect and then pick
+    // the min/max values to get the bounding rect. However, doing that
+    // directly would require that we allocate four vectors (one for each)
+    // corner, and perform four perspective transforms. Each vector allocates
+    // a Float64List(3).
+    //
+    // This implementation constructs does not allocate any objects at all.
+    // It uses a temporary matrix (allocated statically once) to store all
+    // point data. The transformation is a single matrix multiplication.
+    // Row-major order and transpose multiplication are used to avoid temporary
+    // matrices during multiplication (see [Matrix4.multiplyTranspose]).
+    // Otherwise, we would have to copy the `transform` matrix to avoid
+    // mutating it.
+
+    final Matrix4 pointMatrix = _temporaryPointMatrix;
+    pointMatrix.setZero();
+    final Float64List pointData = pointMatrix.storage;
+
+    // Row 0: top-left
+    pointData[0] = rect.left;
+    pointData[4] = rect.top;
+    pointData[12] = 1;
+
+    // Row 1: top-right
+    pointData[1] = rect.right;
+    pointData[5] = rect.top;
+    pointData[13] = 1;
+
+    // Row 2: bottom-left
+    pointData[2] = rect.left;
+    pointData[6] = rect.bottom;
+    pointData[14] = 1;
+
+    // Row 3: bottom-right
+    pointData[3] = rect.right;
+    pointData[7] = rect.bottom;
+    pointData[15] = 1;
+
+    pointMatrix.multiplyTranspose(transform);
+
+    // If a matrix' bottom row is [0 0 0 1] then the resulting w is always 1, so there's no need to normalize.
+    final bool hasW = transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 || transform[15] != 1.0;
+
+    if (hasW) {
+      // Has a potentially non-1 w component, so we need to normalize the results
+      final double wTopLeft = 1 / pointData[12];
+      final double wTopRight = 1 / pointData[13];
+      final double wBottomLeft = 1 / pointData[14];
+      final double wBottomRight = 1 / pointData[15];
+      return Rect.fromLTRB(
+        _min4(pointData[0] * wTopLeft, pointData[1] * wTopRight, pointData[2] * wBottomLeft, pointData[3] * wBottomRight),
+        _min4(pointData[4] * wTopLeft, pointData[5] * wTopRight, pointData[6] * wBottomLeft, pointData[7] * wBottomRight),
+        _max4(pointData[0] * wTopLeft, pointData[1] * wTopRight, pointData[2] * wBottomLeft, pointData[3] * wBottomRight),
+        _max4(pointData[4] * wTopLeft, pointData[5] * wTopRight, pointData[6] * wBottomLeft, pointData[7] * wBottomRight),
+      );
+    } else {
+      return Rect.fromLTRB(
+        _min4(pointData[0], pointData[1], pointData[2], pointData[3]),
+        _min4(pointData[4], pointData[5], pointData[6], pointData[7]),
+        _max4(pointData[0], pointData[1], pointData[2], pointData[3]),
+        _max4(pointData[4], pointData[5], pointData[6], pointData[7]),
+      );
+    }
   }
 
   static double _min4(double a, double b, double c, double d) {
