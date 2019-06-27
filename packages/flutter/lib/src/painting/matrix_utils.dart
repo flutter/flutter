@@ -160,13 +160,13 @@ class MatrixUtils {
     //
     // Semantically we transform each corner of the input rect and then pick
     // the min/max values to get the bounding rect. However, doing that
-    // directly would require that we allocate four vectors (one for each)
-    // corner, and perform four perspective transforms. Each vector allocates
-    // a Float64List(3).
+    // directly would require that we allocate four vectors (one for each
+    // corner), four Offset objects, and perform four perspective vector
+    // transforms. Additionally each vector allocates a Float64List(3).
     //
-    // This implementation constructs does not allocate any objects at all.
-    // It uses a temporary matrix (allocated statically once) to store all
-    // point data. The transformation is a single matrix multiplication.
+    // This implementation does not allocate any objects at all. It uses a
+    // temporary matrix (allocated statically once) to store all point
+    // data. The transformation is a single matrix multiplication.
     // Row-major order and transpose multiplication are used to avoid temporary
     // matrices during multiplication (see [Matrix4.multiplyTranspose]).
     // Otherwise, we would have to copy the `transform` matrix to avoid
