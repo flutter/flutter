@@ -100,6 +100,18 @@ void main() {
       );
     });
 
+    test('can describe build rules', () => testbed.run(() {
+      expect(buildSystem.describe('foo', environment), <Object>[
+        <String, Object>{
+          'name': 'foo',
+          'dependencies': <String>[],
+          'inputs': <String>['/foo.dart'],
+          'outputs': <String>[fs.path.join(environment.buildDir.path, 'out')],
+          'stamp': fs.path.join(environment.buildDir.path, 'foo.stamp'),
+        }
+      ]);
+    }));
+
     test('Throws exception if asked to build non-existent target', () => testbed.run(() {
       expect(buildSystem.build('not_real', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
     }));
@@ -109,6 +121,24 @@ void main() {
       fs.file('foo.dart').deleteSync();
 
       expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<MissingInputException>()));
+    }));
+
+    test('Throws exception if it does not produce a specified output', () => testbed.run(() {
+      final Target badTarget = Target
+        (buildAction: (Map<String, ChangeType> inputs, Environment environment) {},
+        inputs: const <Source>[
+          Source.pattern('{PROJECT_DIR}/foo.dart'),
+        ],
+        outputs: const <Source>[
+          Source.pattern('{BUILD_DIR}/out')
+        ],
+        name: 'bad'
+      );
+      buildSystem = BuildSystem(<String, Target>{
+        badTarget.name: badTarget,
+      });
+
+      expect(buildSystem.build('bad', environment, const BuildSystemConfig()), throwsA(isInstanceOf<MissingOutputException>()));
     }));
 
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {

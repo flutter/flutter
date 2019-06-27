@@ -16,8 +16,7 @@ class AssetBehavior extends SourceBehavior {
   const AssetBehavior();
 
   @override
-  List<File
-  > inputs(Environment environment) {
+  List<File> inputs(Environment environment) {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     assetBundle.build(
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
@@ -52,9 +51,10 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
   final Directory output = environment
     .buildDir
     .childDirectory('flutter_assets');
-  if (!output.existsSync()) {
-    output.createSync(recursive: true);
+  if (output.existsSync()) {
+    output.deleteSync(recursive: true);
   }
+  output.createSync(recursive: true);
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
   await assetBundle.build(
     manifestPath: environment.projectDir.childFile('pubspec.yaml').path,

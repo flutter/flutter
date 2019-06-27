@@ -230,16 +230,8 @@ class Target {
       inputPaths.add(input.resolveSymbolicLinksSync());
     }
     final List<String> outputPaths = <String>[];
-    final List<File> missingOutputs = <File>[];
     for (File output in outputs) {
-      if (!output.existsSync()) {
-        missingOutputs.add(output);
-      } else {
-        outputPaths.add(output.resolveSymbolicLinksSync());
-      }
-    }
-    if (missingOutputs.isNotEmpty) {
-      throw MissingOutputException(missingOutputs, name);
+      outputPaths.add(output.resolveSymbolicLinksSync());
     }
     final Map<String, Object> result = <String, Object>{
       'inputs': inputPaths,
@@ -316,24 +308,6 @@ class Target {
   }
 }
 
-
-/// Command line configuration passed to a specific target.
-///
-/// These defines allow arbitrary configuration to be safely used in a build
-/// target.
-///
-/// Example:
-///   flutter assemble foo -d=foo=value -d=foo=value2
-class TargetDefines {
-  TargetDefines(this.defines, this.target);
-
-  /// The rule these defines are for.
-  final String target;
-
-  /// The key value pairs for this specific target.
-  final Map<String, String> defines;
-}
-
 /// The [Environment] defines several constants for use during the build.
 ///
 /// The environment contains configuration and file paths that are safe to
@@ -384,8 +358,6 @@ class Environment {
     Directory flutterRootDir,
     Map<String, String> defines = const <String, String>{},
   }) {
-    assert(projectDir != null);
-
     // Compute a unique hash of this build's particular environment.
     // Sort the keys by key so that the result is stable. We always
     // include the engine and dart versions.
@@ -507,6 +479,7 @@ class BuildSystem {
     Environment environment,
   ) {
     final Target target = _getNamedTarget(name);
+    environment.buildDir.createSync(recursive: true);
     checkCycles(target);
     // Cheat a bit and re-use the same map.
     Map<String, Map<String, Object>> fold(Map<String, Map<String, Object>> accumulation, Target current) {
@@ -616,14 +589,22 @@ void checkCycles(Target initial) {
   checkInternal(initial, <Target>{}, <Target>{});
 }
 
-/// Verifies that all files are in a subdirectory of [Environment.buildDir].
+/// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].
 void verifyOutputDirectories(List<File> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
+  final List<File> missingOutputs = <File>[];
   for (File sourceFile in outputs) {
+    if (!sourceFile.existsSync()) {
+      missingOutputs.add(sourceFile);
+      continue;
+    }
     final String path = sourceFile.resolveSymbolicLinksSync();
     if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
-      throw MisplacedOutputException(path, target);
+      throw MisplacedOutputException(path, target.name);
     }
+  }
+  if (missingOutputs.isNotEmpty) {
+    throw MissingOutputException(missingOutputs, target.name);
   }
 }

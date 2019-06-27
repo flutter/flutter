@@ -253,32 +253,6 @@ String getNameForHostPlatform(HostPlatform platform) {
   return null;
 }
 
-/// Returns the host folder name for a particular target platform.
-String getHostFolderForTargetPlaltform(TargetPlatform targetPlatform) {
-  switch (targetPlatform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      return 'android';
-    case TargetPlatform.ios:
-      return 'ios';
-    case TargetPlatform.darwin_x64:
-      return 'macos';
-    case TargetPlatform.linux_x64:
-      return 'linux';
-    case TargetPlatform.windows_x64:
-      return 'windows';
-    case TargetPlatform.fuchsia:
-      return 'fuchsia';
-    case TargetPlatform.web_javascript:
-      return 'web_javascript';
-    case TargetPlatform.tester:
-      throw UnsupportedError('tester is not a support platform for building.');
-  }
-  return 'any';
-}
-
 enum TargetPlatform {
   android_arm,
   android_arm64,
