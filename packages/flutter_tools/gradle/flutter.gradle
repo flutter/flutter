@@ -223,7 +223,6 @@ class FlutterPlugin implements Plugin<Project> {
                             initWith debug
                         }
                     }
-                    
                     pluginProject.android.buildTypes.each {
                         def buildMode = buildModeFor(it)
                         addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))

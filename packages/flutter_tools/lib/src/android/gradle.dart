@@ -30,7 +30,8 @@ import 'android_studio.dart';
 const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
-GradleProject _cachedGradleProject;
+GradleProject _cachedGradleAppProject;
+GradleProject _cachedGradleLibraryProject;
 String _cachedGradleExecutable;
 
 enum FlutterPluginVersion {
@@ -102,14 +103,19 @@ Future<File> getGradleAppOut(AndroidProject androidProject) async {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return fs.file((await _gradleProject()).apkDirectory.childFile('app.apk'));
+      return fs.file((await _gradleAppProject()).apkDirectory.childFile('app.apk'));
   }
   return null;
 }
 
-Future<GradleProject> _gradleProject() async {
-  _cachedGradleProject ??= await _readGradleProject();
-  return _cachedGradleProject;
+Future<GradleProject> _gradleAppProject() async {
+  _cachedGradleAppProject ??= await _readGradleProject(isLibrary: false);
+  return _cachedGradleAppProject;
+}
+
+Future<GradleProject> _gradleLibraryProject() async {
+  _cachedGradleLibraryProject ??= await _readGradleProject(isLibrary: true);
+  return _cachedGradleLibraryProject;
 }
 
 /// Runs `gradlew dependencies`, ensuring that dependencies are resolved and
@@ -129,7 +135,7 @@ Future<void> checkGradleDependencies() async {
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
-Future<GradleProject> _readGradleProject() async {
+Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
@@ -137,12 +143,12 @@ Future<GradleProject> _readGradleProject() async {
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:properties'],
+      <String>[gradle, isLibrary ? 'properties' : 'app:properties'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
-      <String>[gradle, 'app:tasks', '--all', '--console=auto'],
+      <String>[gradle, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
       workingDirectory: flutterProject.android.hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
@@ -161,6 +167,7 @@ Future<GradleProject> _readGradleProject() async {
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], flutterProject.android.gradleAppOutV1Directory,
+        flutterProject.android.gradleAppBundleOutV1Directory,
         flutterProject.android.gradleAppBundleOutV1Directory,
     );
   }
@@ -347,6 +354,72 @@ Future<void> buildGradleProject({
   }
 }
 
+Future<void> buildGradleAar({
+  @required FlutterProject flutterProject,
+  @required AndroidBuildInfo androidBuildInfo,
+  @required String target,
+}) async {
+  final GradleProject gradleProject = await _gradleLibraryProject();
+  final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
+
+  if (aarTask == null) {
+    _printUndefinedTask(gradleProject, androidBuildInfo.buildInfo);
+    throwToolExit('Gradle build aborted.');
+  }
+  final Status status = logger.startProgress(
+    'Running Gradle task \'$aarTask\'...',
+    timeout: timeoutConfiguration.slowOperation,
+    multilineOutput: true,
+  );
+
+  final String gradle = await _ensureGradle(flutterProject);
+  final String gradlePath = fs.file(gradle).absolute.path;
+  final List<String> command = <String>[gradlePath];
+  final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+  final String initScript = '$flutterRoot/packages/flutter_tools/gradle/aar_init_script.gradle';
+
+  command.add('-I=$initScript');
+
+  if (target != null) {
+    command.add('-Ptarget=$target');
+  }
+
+  if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
+  }
+  command.add(aarTask);
+
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
+
+  try {
+    exitCode = await runCommandAndStreamOutput(
+      command,
+      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      allowReentrantFlutter: true,
+      mapFunction: (String line) {
+        // Always print the full line in verbose mode.
+        if (logger.isVerbose) {
+          return line;
+        }
+        return null;
+      },
+    );
+  } finally {
+    status.stop();
+  }
+
+  if (exitCode != 0) {
+    throwToolExit('Gradle task $aarTask failed with exit code $exitCode', exitCode: exitCode);
+  }
+  flutterUsage.sendTiming('build', 'gradle-aar', Duration(milliseconds: sw.elapsedMilliseconds));
+
+  printStatus('Built AAR and POM file at path ${fs.path.relative(gradleProject.repoDirectory.path)}.',
+      color: TerminalColor.green);
+}
+
 Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {
   // Run 'gradlew build'.
   final Status status = logger.startProgress(
@@ -389,6 +462,22 @@ String _calculateSha(File file) {
   return sha;
 }
 
+void _printUndefinedTask(GradleProject project, BuildInfo buildInfo) {
+  printError('');
+  printError('The Gradle project does not define a task suitable for the requested build.');
+  if (!project.buildTypes.contains(buildInfo.modeName)) {
+    printError('Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
+  } else {
+    if (project.productFlavors.isEmpty) {
+      printError('The android/app/build.gradle file does not define any custom product flavors.');
+      printError('You cannot use the --flavor option.');
+    } else {
+      printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
+      printError('You must specify a --flavor option to select one of them.');
+    }
+  }
+}
+
 Future<void> _buildGradleProjectV2(
   FlutterProject flutterProject,
   String gradle,
@@ -396,7 +485,7 @@ Future<void> _buildGradleProjectV2(
   String target,
   bool isBuildingBundle,
 ) async {
-  final GradleProject project = await _gradleProject();
+  final GradleProject project = await _gradleAppProject();
   final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
@@ -406,22 +495,9 @@ Future<void> _buildGradleProjectV2(
   } else {
     assembleTask = project.assembleTaskFor(buildInfo);
   }
-
   if (assembleTask == null) {
-    printError('');
-    printError('The Gradle project does not define a task suitable for the requested build.');
-    if (!project.buildTypes.contains(buildInfo.modeName)) {
-      printError('Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
-    } else {
-      if (project.productFlavors.isEmpty) {
-        printError('The android/app/build.gradle file does not define any custom product flavors.');
-        printError('You cannot use the --flavor option.');
-      } else {
-        printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
-        printError('You must specify a --flavor option to select one of them.');
-      }
-      throwToolExit('Gradle build aborted.');
-    }
+    _printUndefinedTask(project, buildInfo);
+    throwToolExit('Gradle build aborted.');
   }
   final Status status = logger.startProgress(
     'Running Gradle task \'$assembleTask\'...',
@@ -612,7 +688,13 @@ Map<String, String> get _gradleEnv {
 }
 
 class GradleProject {
-  GradleProject(this.buildTypes, this.productFlavors, this.apkDirectory, this.bundleDirectory);
+  GradleProject(
+    this.buildTypes,
+    this.productFlavors,
+    this.apkDirectory,
+    this.bundleDirectory,
+    this.repoDirectory,
+  );
 
   factory GradleProject.fromAppProperties(String properties, String tasks) {
     // Extract build directory.
@@ -648,17 +730,19 @@ class GradleProject {
     if (productFlavors.isEmpty)
       buildTypes.addAll(variants);
     return GradleProject(
-      buildTypes.toList(),
-      productFlavors.toList(),
-      fs.directory(fs.path.join(buildDir, 'outputs', 'apk')),
-      fs.directory(fs.path.join(buildDir, 'outputs', 'bundle')),
-    );
+        buildTypes.toList(),
+        productFlavors.toList(),
+        fs.directory(fs.path.join(buildDir, 'outputs', 'apk')),
+        fs.directory(fs.path.join(buildDir, 'outputs', 'bundle')),
+        fs.directory(fs.path.join(buildDir, 'repo')),
+      );
   }
 
   final List<String> buildTypes;
   final List<String> productFlavors;
   final Directory apkDirectory;
   final Directory bundleDirectory;
+  final Directory repoDirectory;
 
   String _buildTypeFor(BuildInfo buildInfo) {
     final String modeName = camelCase(buildInfo.modeName);
@@ -706,6 +790,14 @@ class GradleProject {
     if (buildType == null || productFlavor == null)
       return null;
     return 'bundle${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+  }
+
+  String aarTaskFor(BuildInfo buildInfo) {
+    final String buildType = _buildTypeFor(buildInfo);
+    final String productFlavor = _productFlavorFor(buildInfo);
+    if (buildType == null || productFlavor == null)
+      return null;
+    return 'aar${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
   String bundleFileFor(BuildInfo buildInfo) {

@@ -1,0 +1,88 @@
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.maven.MavenDeployer
+import org.gradle.api.plugins.MavenPlugin
+import org.gradle.api.tasks.Upload
+
+void configureProject(final Project project) {
+    if (!project.hasProperty('android')) {
+        throw new GradleException("Android property not found.")
+    }
+    if (!project.android.hasProperty("libraryVariants")) {
+        throw new GradleException("Can't generate AAR on a non Android library project.");
+    }
+
+    project.apply plugin: 'maven'
+
+    project.android.libraryVariants.all { variant ->
+        setupLibraryVariant(project, variant)
+    }
+
+    project.uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file://${project.buildDir}/repo")
+            }
+        }
+    }
+
+    project.dependencies {
+        compileOnly project.files('/Users/egarciad/p/flutter/bin/cache/artifacts/engine/android-arm-release/flutter.jar')
+    }
+}
+
+void setupLibraryVariant(Project project, variant) {
+    String variantName = variant.name.capitalize()
+    Task aarTask = project.tasks.create(name: "aar${variantName}") {
+        // Remove the existing repo directory, so we don't duplicate the artifacts.
+        delete "${project.buildDir}/repo"
+
+        // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
+        // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
+        // `defaultPublishConfig` at this point. Therefore, the code below ensures that the
+        // default build config uses the artifacts produced for the specific build variant.
+        Task bundle = project.tasks.findByName("bundle${variantName}Aar")
+        if (bundle == null) {
+            throw new GradleException("Can't generate AAR for variant ${variantName}.");
+        }
+        project.artifacts.add("default", bundle)
+        setupDefaultPomConfig(project, variant.variantData.scope.variantDependencies.runtimeClasspath)
+    }
+    aarTask.finalizedBy "uploadArchives"
+}
+
+void setupDefaultPomConfig(Project project, Configuration configuration) {
+    // The library artifact is published (inter-project( for the "default" configuration so
+    // we make sure "default" extends from the actual configuration used for building.
+    Configuration defaultConfig = project.configurations["default"]
+    defaultConfig.setExtendsFrom(Collections.singleton(configuration))
+    // for the maven publication (for now), we need to manually include all the configuration
+    // object in a special mapping.
+    // It's not possible to put the top level config object as extended from config won't
+    // be included.
+    Set<Configuration> flattenedConfigs = flattenConfigurations(configuration)
+    project.plugins.withType(MavenPlugin) {
+        project.tasks.withType(Upload) { task ->
+            task.repositories.withType(MavenDeployer) { repo ->
+                for (Configuration config : flattenedConfigs) {
+                    repo.pom.scopeMappings.addMapping(300,
+                            project.configurations[config.name],
+                            "compile")
+                }
+            }
+        }
+    }
+}
+
+Set<Configuration> flattenConfigurations(Configuration configuration) {
+    Set<Configuration> configs = []
+    configs.add(configuration)
+    for (Configuration extend : configuration.getExtendsFrom()) {
+        configs.addAll(flattenConfigurations(extend))
+    }
+    return configs
+}
+
+projectsEvaluated {
+    configureProject(rootProject)
+}
