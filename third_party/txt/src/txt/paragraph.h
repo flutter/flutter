@@ -253,6 +253,7 @@ class Paragraph {
   FRIEND_TEST(ParagraphTest, RepeatLayoutParagraph);
   FRIEND_TEST(ParagraphTest, Ellipsize);
   FRIEND_TEST(ParagraphTest, UnderlineShiftParagraph);
+  FRIEND_TEST(ParagraphTest, WavyDecorationParagraph);
   FRIEND_TEST(ParagraphTest, SimpleShadow);
   FRIEND_TEST(ParagraphTest, ComplexShadow);
   FRIEND_TEST(ParagraphTest, FontFallbackParagraph);
@@ -477,6 +478,14 @@ class Paragraph {
   void PaintDecorations(SkCanvas* canvas,
                         const PaintRecord& record,
                         SkPoint base_offset);
+
+  // Computes the beziers for a wavy decoration. The results will be
+  // applied to path.
+  void ComputeWavyDecoration(SkPath& path,
+                             double x,
+                             double y,
+                             double width,
+                             double thickness);
 
   // Draws the background onto the canvas.
   void PaintBackground(SkCanvas* canvas,
