@@ -110,8 +110,6 @@ import 'constants.dart';
 /// ```dart
 /// import 'dart:math' as math;
 ///
-/// // import 'package:flutter/material.dart'; // uncomment
-///
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatelessWidget {
