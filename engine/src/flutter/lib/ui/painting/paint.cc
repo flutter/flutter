@@ -5,8 +5,10 @@
 #include "flutter/lib/ui/painting/paint.h"
 
 #include "flutter/fml/logging.h"
+#include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
+#include "third_party/skia/include/core/SkImageFilter.h"
 #include "third_party/skia/include/core/SkMaskFilter.h"
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
@@ -37,7 +39,8 @@ constexpr size_t kDataByteCount = 75;  // 4 * (last index + 1)
 // Indices for objects.
 constexpr int kShaderIndex = 0;
 constexpr int kColorFilterMatrixIndex = 1;
-constexpr int kObjectCount = 2;  // One larger than largest object index.
+constexpr int kImageFilterIndex = 2;
+constexpr int kObjectCount = 3;  // One larger than largest object index.
 
 // Must be kept in sync with the default in painting.dart.
 constexpr uint32_t kColorDefault = 0xFF000000;
@@ -140,6 +143,13 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
     if (!Dart_IsNull(shader)) {
       Shader* decoded = tonic::DartConverter<Shader*>::FromDart(shader);
       paint_.setShader(decoded->shader());
+    }
+
+    Dart_Handle image_filter = values[kImageFilterIndex];
+    if (!Dart_IsNull(image_filter)) {
+      ImageFilter* decoded =
+          tonic::DartConverter<ImageFilter*>::FromDart(image_filter);
+      paint_.setImageFilter(decoded->filter());
     }
   }
 
