@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -2349,5 +2350,127 @@ void main() {
     expect(find.text('Tab0'), findsOneWidget);
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
+  });
+
+  testWidgets('TabController copyWith allows dynamic tab creation with single Ticker', (WidgetTester tester) async {
+    const TestVSync vsync = TestVSync();
+    TabController controller = TabController(vsync: vsync, length: 2);
+    List<Tab> myTabs = const <Tab>[
+      Tab(text: '1'),
+      Tab(text: '2'),
+    ];
+
+    void _updateTabController() {
+      int newIndex;
+      int previousIndex = controller.previousIndex;
+      if (controller.index >= myTabs.length) {
+        newIndex = math.max(0, myTabs.length - 1);
+        previousIndex = controller.index;
+      }
+      if (controller.length != myTabs.length) {
+        controller = controller.copyWith(
+          index: newIndex,
+          length: myTabs.length,
+          previousIndex: previousIndex,
+        );
+      }
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            void _addNewTab() {
+              setState(() {
+                myTabs = myTabs.toList()
+                  ..add(Tab(text: '${myTabs.length + 1}'));
+                _updateTabController();
+              });
+            }
+
+            void _removeLastTab() {
+              setState(() {
+                myTabs = myTabs.toList()
+                  ..removeLast();
+                _updateTabController();
+              });
+            }
+
+            return Scaffold(
+              appBar: AppBar(
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.remove),
+                    onPressed: _removeLastTab,
+                  ),
+                ],
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: myTabs,
+                ),
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: myTabs.map((Tab tab) {
+                  final String label = tab.text.toLowerCase();
+                  return Center(
+                    child: Text(
+                      'View $label',
+                      style: const TextStyle(fontSize: 36),
+                    ),
+                  );
+                }).toList(),
+              ),
+              floatingActionButton: FloatingActionButton(
+                onPressed: _addNewTab,
+                child: const Icon(Icons.add),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.index, 0);
+    expect(controller.length, 2);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsNothing);
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(controller.index, 0);
+    expect(controller.length, 3);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.text('View 1'), findsOneWidget);
+    expect(find.text('View 2'), findsNothing);
+    expect(find.text('View 3'), findsNothing);
+
+    await tester.tap(find.text('3'));
+    await tester.pumpAndSettle();
+    expect(find.text('View 1'), findsNothing);
+    expect(find.text('View 2'), findsNothing);
+    expect(find.text('View 3'), findsOneWidget);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    expect(controller.index, 1);
+    expect(controller.length, 2);
+    expect(find.text('View 1'), findsNothing);
+    expect(find.text('View 2'), findsOneWidget);
+    expect(find.text('View 3'), findsNothing);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pumpAndSettle();
+    expect(controller.index, 0);
+    expect(controller.length, 1);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('2'), findsNothing);
+    expect(find.text('3'), findsNothing);
+    expect(find.text('View 1'), findsOneWidget);
+    expect(find.text('View 2'), findsNothing);
+    expect(find.text('View 3'), findsNothing);
   });
 }
