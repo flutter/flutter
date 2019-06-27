@@ -34,7 +34,8 @@ class FlutterVersion {
 
   /// Whether we are currently on the master branch.
   bool get isMaster {
-    return getBranchName() == 'master';
+    final String branchName = getBranchName();
+    return branchName != 'stable' && branchName != 'dev' && branchName != 'beta';
   }
 
   static const Set<String> officialChannels = <String>{
