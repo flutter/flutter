@@ -98,6 +98,7 @@ class TextFormField extends FormField<String> {
     int minLines,
     bool expands = false,
     int maxLength,
+    ValueChanged<String> onChanged,
     VoidCallback onEditingComplete,
     ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
@@ -144,6 +145,12 @@ class TextFormField extends FormField<String> {
       final _TextFormFieldState state = field;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
+      void onChangedHandler(String value) {
+        if (onChanged != null) {
+          onChanged(value);
+        }
+        field.didChange(value);
+      }
       return TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
@@ -165,7 +172,7 @@ class TextFormField extends FormField<String> {
         minLines: minLines,
         expands: expands,
         maxLength: maxLength,
-        onChanged: field.didChange,
+        onChanged: onChangedHandler,
         onEditingComplete: onEditingComplete,
         onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
