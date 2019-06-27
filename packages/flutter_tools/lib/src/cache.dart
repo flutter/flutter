@@ -943,9 +943,7 @@ class IosUsbArtifacts extends CachedArtifact {
 
   @override
   String get dyLdLibPath {
-    return Cache.iosUsbArtifactNames
-      .map((String path) => cache.getArtifactDirectory(path).path)
-      .join(':');
+    return cache.getArtifactDirectory(name).path;
   }
 
   @override
