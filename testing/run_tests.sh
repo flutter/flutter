@@ -32,11 +32,17 @@ echo "Running flow_unittests..."
 echo "Running fml_unittests..."
 "$HOST_DIR/fml_unittests" --gtest_filter="-*TimeSensitiveTest*"
 
+echo "Running fml_benchmarks..."
+"$HOST_DIR/fml_benchmarks"
+
 echo "Running runtime_unittests..."
 "$HOST_DIR/runtime_unittests"
 
 echo "Running shell_unittests..."
 "$HOST_DIR/shell_unittests"
+
+echo "Running shell_benchmarks..."
+"$HOST_DIR/shell_benchmarks"
 
 echo "Running client_wrapper_unittests..."
 "$HOST_DIR/client_wrapper_unittests"
@@ -46,6 +52,9 @@ echo "Running client_wrapper_glfw_unittests..."
 
 echo "Running txt_unittests..."
 "$HOST_DIR/txt_unittests" --font-directory="$BUILDROOT_DIR/flutter/third_party/txt/third_party/fonts"
+
+echo "Running txt_benchmarks..."
+"$HOST_DIR/txt_benchmarks" --font-directory="$BUILDROOT_DIR/flutter/third_party/txt/third_party/fonts"
 
 # Build flutter/sky/packages.
 #

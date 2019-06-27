@@ -173,6 +173,8 @@ shell_host_executable("shell_benchmarks") {
   ]
 
   deps = [
+    ":shell_unittests_fixtures",
     "$flutter_root/benchmarking",
+    "$flutter_root/testing:testing_lib",
   ]
 }
