@@ -3584,10 +3584,10 @@ class _SemanticsGeometry {
       } else {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
-      final Matrix4 clipRectTransform = Matrix4.identity();
-      _applyIntermediatePaintTransforms(parent, child, _transform, clipRectTransform);
-      _semanticsClipRect = _transformRect(_semanticsClipRect, clipRectTransform.clone());
-      _paintClipRect = _transformRect(_paintClipRect, clipRectTransform.clone());
+      _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+      _applyIntermediatePaintTransforms(parent, child, _transform, _temporaryTransformHolder);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _temporaryTransformHolder);
+      _paintClipRect = _transformRect(_paintClipRect, _temporaryTransformHolder);
     }
 
     final RenderObject owner = ancestors.first;
