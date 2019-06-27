@@ -116,9 +116,8 @@ class Ink extends StatefulWidget {
   /// `color` and a `decoration`, you can pass the color as the `color`
   /// argument to the `BoxDecoration`.
   ///
-  /// The `child` argument must not be null. If there is no
-  /// intention to render anything on this decoration, consider using a
-  /// [Container] with a [BoxDecoration] instead.
+  /// If there is no intention to render anything on this decoration, consider
+  /// using a [Container] with a [BoxDecoration] instead.
   Ink({
     Key key,
     this.padding,
@@ -126,14 +125,13 @@ class Ink extends StatefulWidget {
     Decoration decoration,
     this.width,
     this.height,
-    @required this.child,
+    this.child,
   }) : assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
        ),
-       assert(child != null),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        super(key: key);
 
@@ -145,7 +143,7 @@ class Ink extends StatefulWidget {
   /// properties of the [DecorationImage] of that [BoxDecoration] are set
   /// according to the arguments passed to this method.
   ///
-  /// The `image` and `child` argument must not be null. If there is no
+  /// The `image` argument must not be null. If there is no
   /// intention to render anything on this image, consider using a
   /// [Container] with a [BoxDecoration.image] instead.
   ///
@@ -165,13 +163,12 @@ class Ink extends StatefulWidget {
     bool matchTextDirection = false,
     this.width,
     this.height,
-    @required this.child,
+    this.child,
   }) : assert(padding == null || padding.isNonNegative),
        assert(image != null),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       assert(child != null),
        decoration = BoxDecoration(
          image: DecorationImage(
            image: image,
