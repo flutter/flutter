@@ -280,7 +280,7 @@ class ToggleButtonsTheme extends InheritedWidget {
 /// ```
 ///
 /// ## ToggleButton Borders
-/// The toggle buttons, by default, have a solid, 1 dp pixel surrounding itself
+/// The toggle buttons, by default, have a solid, 1 dp border surrounding itself
 /// and separating each button. The toggle button borders' color, width, and
 /// corner radii are configurable.
 ///
@@ -331,7 +331,8 @@ class ToggleButtons extends StatelessWidget {
 
   /// The corresponding widget values in the toggle buttons.
   ///
-  /// The selection state corresponds to its state in the [isSelected] list.
+  /// These are typically [Icon] or [Text] widgets. The selection state
+  /// corresponds to its state in the [isSelected] list.
   final List<Widget> children;
 
   /// The corresponding selection state of each toggle button.
@@ -343,14 +344,14 @@ class ToggleButtons extends StatelessWidget {
   /// The callback that is called when a button is tapped.
   ///
   /// When set to null, all toggle buttons will be disabled.
-  final Function onPressed;
+  final void Function(int index) onPressed;
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color will be used.
   final Color activeColor;
@@ -627,12 +628,12 @@ class _ToggleButton extends StatelessWidget {
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color will be used.
   final Color activeColor;
@@ -705,8 +706,7 @@ class _ToggleButton extends StatelessWidget {
         ?? toggleButtonsTheme.activeColor
         ?? theme.colorScheme.onSurface;
     } else {
-      currentColor =
-      disabledColor
+      currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.disabledColor;
     }
