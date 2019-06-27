@@ -59,7 +59,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   static Future<Isolate> _pendingLoader;
-  static List<Function> _pendingLoaderUsers;
+  static List<_PendingLoadRequest> _pendingLoadRequests;
   static SendPort _requestPort;
 
   Future<ui.Codec> _loadAsyncOnDesignatedIsolate(
@@ -96,13 +96,23 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       } else {
         if (_pendingLoader == null) {
           // If worker isolate creation was not started, start creation now.
-          _pendingLoaderUsers = <Function>[];
-          _pendingLoader = _setupIsolate(completer);
+          _pendingLoadRequests = <_PendingLoadRequest>[];
+
+          _pendingLoader = _setupIsolate()..then((Isolate isolate) {
+              isolate.addErrorListener(RawReceivePort(
+                  (List<dynamic> errorAndStacktrace) {
+                    _cleanupDueToError(errorAndStacktrace[0]);
+                  }).sendPort);
+              isolate.resume(isolate.pauseCapability);
+            }).catchError((dynamic error, StackTrace stackTrace) {
+              _cleanupDueToError(error);
+            });
         }
-        // Add closure that sends donwload request to list of pending requests.
-        _pendingLoaderUsers.add((SendPort sendPort) {
-          sendPort.send(downloadRequest);
-        });
+        // Record donwload request so it can either send a request when isolate is ready or handle errors.
+        _pendingLoadRequests.add(_PendingLoadRequest(
+            (SendPort sendPort) { sendPort.send(downloadRequest); },
+            (dynamic error) { downloadRequest.sendPort.send(error); }
+        ));
       }
 
       final TransferableTypedData transferable = await completer.future;
@@ -118,7 +128,16 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     }
   }
 
-  Future<Isolate> _setupIsolate(Completer<TransferableTypedData> completer) {
+  void _cleanupDueToError(dynamic error) {
+    for (_PendingLoadRequest request in _pendingLoadRequests) {
+      request.handleError(error);
+    }
+    _pendingLoadRequests = null;
+    _pendingLoader = null;
+  }
+
+
+  Future<Isolate> _setupIsolate() {
     // This is used to get _requestPort [SendPort] that can be used to
     // communicate with worker isolate: when isolate is spawned it will send
     // it's [SendPort] over via this [RawReceivePort].
@@ -132,22 +151,20 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       // When we received [SendPort] for the worker isolate, we send all
       // pending requests that were accumulated before worker isolate provided
-      // it's port(before [_requestPort] was populated).
-      for (Function sendPendingDownloadRequest in _pendingLoaderUsers) {
+      // it's port (before [_requestPort] was populated).
+      for (_PendingLoadRequest pendingRequest in _pendingLoadRequests) {
         // [sendPort] being null indicates that worker has been idle and exited.
         // That should not happen if there are pending download requests.
         assert(sendPort != null);
-        sendPendingDownloadRequest(sendPort);
+        pendingRequest.sendRequest(sendPort);
       }
-      _pendingLoaderUsers.clear();
+      _pendingLoadRequests.clear();
     });
 
-    final Future<Isolate> isolate = Isolate.spawn<_HttpClientIsolateParameters>(
-        _handleHttpClientGet, _HttpClientIsolateParameters(receivePort.sendPort)
-        )..catchError((dynamic error, StackTrace stackTrace) {
-          completer.completeError(error, stackTrace);
-        });
-    return isolate;
+    return Isolate.spawn<_HttpClientIsolateParameters>(
+        _handleHttpClientGet,
+        _HttpClientIsolateParameters(receivePort.sendPort),
+        paused: true);
   }
 
   @override
@@ -164,6 +181,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
 }
+
+class _PendingLoadRequest {
+  _PendingLoadRequest(this.sendRequest, this.handleError);
+
+  Function sendRequest;
+  Function handleError;
+}
+
 
 class _DownloadRequest {
   _DownloadRequest(this.sendPort, this.uri, this.headers, this.debugNetworkImageHttpClientProvider);
@@ -184,7 +209,7 @@ class _HttpClientIsolateParameters {
 // the `Content-Length` HTTP header. We automatically uncompress the content
 // in our call to [consolidateHttpClientResponseBytes].
 final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
-const Duration idleTime = Duration(seconds: 60);
+const Duration _idleDuration = Duration(seconds: 60);
 
 void _handleHttpClientGet(_HttpClientIsolateParameters params) {
   int ongoingRequests = 0;
@@ -224,7 +249,8 @@ void _handleHttpClientGet(_HttpClientIsolateParameters params) {
     }
     ongoingRequests--;
     if (ongoingRequests == 0) {
-      idleTimer = Timer(idleTime, () {
+      idleTimer = Timer(_idleDuration, () {
+        // [null] indicates that worker is going down.
         params.sendPort.send(null);
         receivePort?.close();
       });
