@@ -23,7 +23,7 @@ class ToggleButtonsTheme extends InheritedWidget {
   const ToggleButtonsTheme({
     Key key,
     this.color,
-    this.activeColor,
+    this.selectedColor,
     this.disabledColor,
     this.fillColor,
     this.focusColor,
@@ -31,7 +31,7 @@ class ToggleButtonsTheme extends InheritedWidget {
     this.hoverColor,
     this.splashColor,
     this.borderColor,
-    this.activeBorderColor,
+    this.selectedBorderColor,
     this.disabledBorderColor,
     this.borderRadius = BorderRadius.zero,
     this.borderWidth = 1.0,
@@ -46,7 +46,7 @@ class ToggleButtonsTheme extends InheritedWidget {
   static Widget merge({
     Key key,
     Color color,
-    Color activeColor,
+    Color selectedColor,
     Color disabledColor,
     Color fillColor,
     Color focusColor,
@@ -54,7 +54,7 @@ class ToggleButtonsTheme extends InheritedWidget {
     Color hoverColor,
     Color splashColor,
     Color borderColor,
-    Color activeBorderColor,
+    Color selectedBorderColor,
     Color disabledBorderColor,
     BorderRadius borderRadius = BorderRadius.zero,
     double borderWidth = 1.0,
@@ -67,7 +67,7 @@ class ToggleButtonsTheme extends InheritedWidget {
         return ToggleButtonsTheme(
           key: key,
           color: color ?? parent.color,
-          activeColor: activeColor ?? parent.activeColor,
+          selectedColor: selectedColor ?? parent.selectedColor,
           disabledColor: disabledColor ?? parent.disabledColor,
           fillColor: fillColor ?? parent.fillColor,
           focusColor: focusColor ?? parent.focusColor,
@@ -75,7 +75,7 @@ class ToggleButtonsTheme extends InheritedWidget {
           hoverColor: hoverColor ?? parent.hoverColor,
           splashColor: splashColor ?? parent.splashColor,
           borderColor: borderColor ?? parent.borderColor,
-          activeBorderColor: activeBorderColor ?? parent.activeBorderColor,
+          selectedBorderColor: selectedBorderColor ?? parent.selectedBorderColor,
           disabledBorderColor: disabledBorderColor ?? parent.disabledBorderColor,
           borderRadius: borderRadius ?? parent.borderRadius,
           borderWidth: borderWidth ?? parent.borderWidth,
@@ -85,15 +85,15 @@ class ToggleButtonsTheme extends InheritedWidget {
     );
   }
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets.
+  /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color will be used.
-  final Color activeColor;
+  final Color selectedColor;
 
   /// The color for [Text] and [Icon] widgets if the button is disabled.
   ///
@@ -115,11 +115,11 @@ class ToggleButtonsTheme extends InheritedWidget {
   /// The color to use for filling the button when the button has a pointer hovering over it.
   final Color hoverColor;
 
-  /// The border color to display when the toggle button is selected.
+  /// The border color to display when the toggle button is enabled.
   final Color borderColor;
 
-  /// The border color to display when the toggle button is active/selectable.
-  final Color activeBorderColor;
+  /// The border color to display when the toggle button is selected.
+  final Color selectedBorderColor;
 
   /// The border color to display when the toggle button is disabled.
   final Color disabledBorderColor;
@@ -155,7 +155,7 @@ class ToggleButtonsTheme extends InheritedWidget {
   @override
   bool updateShouldNotify(ToggleButtonsTheme oldWidget) {
     return color != oldWidget.color
-        || activeColor != oldWidget.activeColor
+        || selectedColor != oldWidget.selectedColor
         || disabledColor != oldWidget.disabledColor
         || fillColor != oldWidget.fillColor
         || focusColor != oldWidget.focusColor
@@ -163,7 +163,7 @@ class ToggleButtonsTheme extends InheritedWidget {
         || hoverColor != oldWidget.hoverColor
         || splashColor != oldWidget.splashColor
         || borderColor != oldWidget.borderColor
-        || activeBorderColor != oldWidget.activeBorderColor
+        || selectedBorderColor != oldWidget.selectedBorderColor
         || disabledBorderColor != oldWidget.disabledBorderColor
         || borderRadius != oldWidget.borderRadius
         || borderWidth != oldWidget.borderWidth;
@@ -284,10 +284,9 @@ class ToggleButtonsTheme extends InheritedWidget {
 /// and separating each button. The toggle button borders' color, width, and
 /// corner radii are configurable.
 ///
-/// The [activeBorderColor] determines the border's color when the button is
-/// enabled, while [disabledBorderColor] determines the border's color when
-/// the button is disabled. [borderColor] is used when the button is selected
-/// and enabled.
+/// The [selectedBorderColor] determines the border's color when the button is
+/// selected, while [disabledBorderColor] determines the border's color when
+/// the button is disabled. [borderColor] is used when the button is enabled.
 ///
 /// To remove the border, set [borderWidth] to null. Setting [borderWidth] to
 /// 0.0 results in a hairline border. For more information on hairline borders,
@@ -311,7 +310,7 @@ class ToggleButtons extends StatelessWidget {
     @required this.isSelected,
     this.onPressed,
     this.color,
-    this.activeColor,
+    this.selectedColor,
     this.disabledColor,
     this.fillColor,
     this.focusColor,
@@ -320,7 +319,7 @@ class ToggleButtons extends StatelessWidget {
     this.splashColor,
     this.renderBorder = true,
     this.borderColor,
-    this.activeBorderColor,
+    this.selectedBorderColor,
     this.disabledBorderColor,
     this.borderRadius,
     this.borderWidth,
@@ -346,15 +345,15 @@ class ToggleButtons extends StatelessWidget {
   /// When set to null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
 
-  /// The color for [Text] and [Icon] widgets if the button is selected.
+  /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets if the button is enabled.
+  /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color will be used.
-  final Color activeColor;
+  final Color selectedColor;
 
   /// The color for [Text] and [Icon] widgets if the button is disabled.
   ///
@@ -387,11 +386,11 @@ class ToggleButtons extends StatelessWidget {
   /// rendered.
   final bool renderBorder;
 
-  /// The border color to display when the toggle button is selected.
+  /// The border color to display when the toggle button is enabled.
   final Color borderColor;
 
-  /// The border color to display when the toggle button is active/selectable.
-  final Color activeBorderColor;
+  /// The border color to display when the toggle button is selected.
+  final Color selectedBorderColor;
 
   /// The border color to display when the toggle button is disabled.
   final Color disabledBorderColor;
@@ -468,12 +467,12 @@ class ToggleButtons extends StatelessWidget {
 
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
@@ -494,12 +493,12 @@ class ToggleButtons extends StatelessWidget {
 
     if (onPressed != null && isSelected[index]) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
@@ -528,7 +527,7 @@ class ToggleButtons extends StatelessWidget {
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: activeBorderColor ?? toggleButtonsTheme.activeBorderColor ?? theme.colorScheme.onSurface,
+        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.onSurface,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
@@ -564,7 +563,7 @@ class ToggleButtons extends StatelessWidget {
           return _ToggleButton(
             selected: isSelected[index],
             color: color,
-            activeColor: activeColor,
+            selectedColor: selectedColor,
             disabledColor: disabledColor,
             fillColor: fillColor,
             focusColor: focusColor,
@@ -607,7 +606,7 @@ class _ToggleButton extends StatelessWidget {
     Key key,
     this.selected = false,
     this.color,
-    this.activeColor,
+    this.selectedColor,
     this.disabledColor,
     this.fillColor,
     this.focusColor,
@@ -628,15 +627,15 @@ class _ToggleButton extends StatelessWidget {
   /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
 
-  /// The color for [Text] and [Icon] widgets if the button is selected.
+  /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets if the button is enabled.
+  /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color will be used.
-  final Color activeColor;
+  final Color selectedColor;
 
   /// The color for [Text] and [Icon] widgets if the button is disabled.
   ///
@@ -698,12 +697,12 @@ class _ToggleButton extends StatelessWidget {
     final ToggleButtonsTheme toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
     if (onPressed != null && selected) {
-      currentColor = activeColor
-        ?? toggleButtonsTheme.color
+      currentColor = selectedColor
+        ?? toggleButtonsTheme.selectedColor
         ?? theme.colorScheme.primary;
     } else if (onPressed != null && !selected) {
       currentColor = color
-        ?? toggleButtonsTheme.activeColor
+        ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface;
     } else {
       currentColor = disabledColor
