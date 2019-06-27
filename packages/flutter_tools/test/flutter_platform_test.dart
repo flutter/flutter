@@ -6,6 +6,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
+import 'package:meta/meta.dart';
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -40,16 +41,7 @@ void main() {
       setUp(() {
         mockPlatform = MockPlatform();
         mockProcessManager = MockProcessManager();
-        flutterPlatform = FlutterPlatform(
-          shellPath: '/',
-          precompiledDillPath: 'example.dill',
-          host: InternetAddress.loopbackIPv6,
-          port: 0,
-          updateGoldens: false,
-          startPaused: false,
-          enableObservatory: false,
-          buildTestAssets: false,
-        );
+        flutterPlatform = TestFlutterPlatform();
       });
 
       Future<Map<String, String>> captureEnvironment() async {
@@ -151,3 +143,25 @@ class MockSuitePlatform extends Mock implements SuitePlatform {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockPlatform extends Mock implements Platform {}
+
+class MockHttpServer extends Mock implements HttpServer {}
+
+// A FlutterPlatform with enough fields set to load and start a test.
+//
+// Uses a mock HttpServer.
+class TestFlutterPlatform extends FlutterPlatform {
+  TestFlutterPlatform() : super(
+    shellPath: '/',
+    precompiledDillPath: 'example.dill',
+    host: InternetAddress.loopbackIPv6,
+    port: 0,
+    updateGoldens: false,
+    startPaused: false,
+    enableObservatory: false,
+    buildTestAssets: false,
+  );
+  
+  @override
+  @protected
+  Future<HttpServer> bind(InternetAddress host, int port) async => MockHttpServer();
+}

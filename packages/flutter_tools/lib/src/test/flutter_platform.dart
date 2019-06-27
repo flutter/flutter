@@ -385,6 +385,13 @@ class FlutterPlatform extends PlatformPlugin {
     throw 'Failed to compile $expression';
   }
 
+  /// Binds an [HttpServer] serving from `host` on `port`.
+  /// 
+  /// Only intended to be overridden in tests for [FlutterPlatform].
+  @protected
+  @visibleForTesting
+  Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -404,7 +411,7 @@ class FlutterPlatform extends PlatformPlugin {
       }));
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      final HttpServer server = await HttpServer.bind(host, port);
+      final HttpServer server = await bind(host, port);
       finalizers.add(() async {
         printTrace('test $ourTestCount: shutting down test harness socket server');
         await server.close(force: true);
