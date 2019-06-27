@@ -300,10 +300,8 @@ RawMaterialButton _getSnackBarButton(WidgetTester tester) {
 }
 
 RenderParagraph _getSnackBarTextRenderObject(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(
-    find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.text(text),
-    ),
-  ).renderObject;
+  return tester.renderObject(find.descendant(
+    of: find.byType(SnackBar),
+    matching: find.text(text),
+  ));
 }
