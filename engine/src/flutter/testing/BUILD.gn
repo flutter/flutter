@@ -2,23 +2,33 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-source_set("testing") {
+source_set("testing_lib") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/run_all_unittests.cc",
     "$flutter_root/testing/testing.cc",
     "$flutter_root/testing/testing.h",
-    "$flutter_root/testing/thread_test.cc",
-    "$flutter_root/testing/thread_test.h",
   ]
 
   public_deps = [
     "$flutter_root/fml",
     "//third_party/googletest:gtest",
   ]
-
   public_configs = [ "$flutter_root:config" ]
+}
+
+source_set("testing") {
+  testonly = true
+
+  sources = [
+    "$flutter_root/testing/run_all_unittests.cc",
+    "$flutter_root/testing/thread_test.cc",
+    "$flutter_root/testing/thread_test.h",
+  ]
+
+  public_deps = [
+    ":testing_lib",
+  ]
 }
 
 source_set("dart") {

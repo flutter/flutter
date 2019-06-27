@@ -4,14 +4,18 @@
 
 #include "flutter/benchmarking/benchmarking.h"
 #include "flutter/fml/logging.h"
+#include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
+#include "flutter/testing/testing.h"
 
 namespace flutter {
 
 static void StartupAndShutdownShell(benchmark::State& state,
                                     bool measure_startup,
                                     bool measure_shutdown) {
+  auto assets_dir = fml::OpenDirectory(testing::GetFixturesPath(), false,
+                                       fml::FilePermission::kRead);
   std::unique_ptr<Shell> shell;
   std::unique_ptr<ThreadHost> thread_host;
   {
@@ -20,7 +24,35 @@ static void StartupAndShutdownShell(benchmark::State& state,
     settings.task_observer_add = [](intptr_t, fml::closure) {};
     settings.task_observer_remove = [](intptr_t) {};
 
-    // Measure the time it takes to setup the threads as well.
+    if (DartVM::IsRunningPrecompiledCode()) {
+      settings.vm_snapshot_data = [&]() {
+        return fml::FileMapping::CreateReadOnly(assets_dir, "vm_snapshot_data");
+      };
+
+      settings.isolate_snapshot_data = [&]() {
+        return fml::FileMapping::CreateReadOnly(assets_dir,
+                                                "isolate_snapshot_data");
+      };
+
+      settings.vm_snapshot_instr = [&]() {
+        return fml::FileMapping::CreateReadExecute(assets_dir,
+                                                   "vm_snapshot_instr");
+      };
+
+      settings.isolate_snapshot_instr = [&]() {
+        return fml::FileMapping::CreateReadExecute(assets_dir,
+                                                   "isolate_snapshot_instr");
+      };
+
+    } else {
+      settings.application_kernels = [&]() {
+        std::vector<std::unique_ptr<const fml::Mapping>> kernel_mappings;
+        kernel_mappings.emplace_back(
+            fml::FileMapping::CreateReadOnly(assets_dir, "kernel_blob.bin"));
+        return kernel_mappings;
+      };
+    }
+
     thread_host = std::make_unique<ThreadHost>(
         "io.flutter.bench.", ThreadHost::Type::Platform |
                                  ThreadHost::Type::GPU | ThreadHost::Type::IO |
