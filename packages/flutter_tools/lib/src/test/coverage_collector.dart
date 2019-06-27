@@ -188,7 +188,8 @@ Future<VMService> _defaultConnect(Uri serviceUri) {
   return VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, [Future<VMService> Function(Uri) connector = _defaultConnect]) async {
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate,
+    [Future<VMService> Function(Uri) connector = _defaultConnect]) async {
   final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
   return _getAllCoverage(vmService, libraryPredicate);
