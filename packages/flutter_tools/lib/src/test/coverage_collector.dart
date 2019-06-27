@@ -200,8 +200,9 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
   if (!waitPaused) {
     return _getAllCoverage(vmService, libraryPredicate);
   }
+  const int kPollAttempts = 20;
   int i = 0;
-  while (i < 20) {
+  while (i < kPollAttempts) {
     await isolate.load();
     if (isolate.pauseEvent?.kind == ServiceEvent.kPauseStart) {
       break;
@@ -209,7 +210,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
     await Future<void>.delayed(const Duration(milliseconds: 50));
     i += 1;
   }
-  if (i == 20) {
+  if (i == kPollAttempts) {
     print('Isolate $debugName was never paused, refusing to collect coverage');
     return const <String, dynamic>{
       'type': 'CodeCoverage',
