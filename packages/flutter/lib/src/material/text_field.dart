@@ -775,6 +775,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
     _requestKeyboard();
     _confirmCurrentSplash();
+    _editableTextKey.currentState.hideToolbar();
     if (widget.onTap != null)
       widget.onTap();
   }
