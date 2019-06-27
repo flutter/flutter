@@ -501,6 +501,7 @@ class CupertinoTextField extends StatefulWidget {
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticKeepAliveClientMixin {
+  final GlobalKey _clearGlobalKey = GlobalKey();
   final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
@@ -508,9 +509,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
-
-  // Keep track of whether the text has just been cleared.
-  bool _clearing = false;
 
   // The selection overlay should only be shown when the user is interacting
   // through a touch screen (via either a finger or a stylus). A mouse shouldn't
@@ -596,9 +594,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the clear button will also trigger this
     // handler here. If this is the case, return.
-    if (_clearing) {
-      _clearing = false;
-      return;
+    if (_clearGlobalKey.currentContext != null) {
+      final RenderBox clearRenderBox = _clearGlobalKey.currentContext.findRenderObject();
+      final Rect clearRect = clearRenderBox.localToGlobal(Offset.zero) & clearRenderBox.size;
+      if (clearRect.contains(details.globalPosition)) {
+        return;
+      }
     }
 
     if (widget.selectionEnabled) {
@@ -806,8 +807,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
+              key: _clearGlobalKey,
               onTap: widget.enabled ?? true ? () {
-                _clearing = true;
                 // Special handle onChanged for ClearButton
                 // Also call onChanged when the clear button is tapped.
                 final bool textChanged = _effectiveController.text.isNotEmpty;
