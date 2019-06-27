@@ -77,6 +77,8 @@ class VMPlatform extends PlatformPlugin {
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
         .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
       try {
+        // Pause the isolate so it is ready for coverage collection.
+        isolate.pause();
         // this will throw if collection fails.
         await coverageCollector.collectCoverageIsolate(info.serverUri);
       } finally {

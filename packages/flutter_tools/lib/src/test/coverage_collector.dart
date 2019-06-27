@@ -56,7 +56,7 @@ class CoverageCollector extends TestWatcher {
       return (coverageDirectory != null)
           || (flutterProject == null)
           || libraryName.contains(flutterProject.manifest.appName);
-    });
+    }, waitPaused: true);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -184,9 +184,27 @@ class CoverageCollector extends TestWatcher {
   }
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate) async {
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, { bool waitPaused = false }) async {
+  const int _kPausePollLimit = 5;
   final VMService vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
   await vmService.getVM();
+  if (waitPaused) {
+    int i = 0;
+    Duration waitDuration = const Duration(seconds: 0);
+    while (i < _kPausePollLimit) {
+      await Future<void>.delayed(waitDuration);
+      for (Isolate isolateRef in vmService.vm.isolates) {
+        await isolateRef.load();
+        if (isolateRef.pauseEvent?.kind != ServiceEvent.kPauseStart) {
+          i += 1;
+          waitDuration = const Duration(milliseconds: 100);
+          break;
+        }
+      }
+      print('isolate is paused, collecting coverage...');
+      break;
+    }
+  }
   return _getAllCoverage(vmService, libraryPredicate);
 }
 
