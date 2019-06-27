@@ -3599,15 +3599,24 @@ class _SemanticsGeometry {
     }
   }
 
+  // A matrix used to store transient transform data.
+  //
+  // Reusing this matrix avoids allocating a new matrix every time a temporary
+  // matrix is needed.
+  //
+  // This instance should never be returned to the caller. Otherwise, the data
+  // stored in it will be overwritten unpredictably by subsequent reuses.
+  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
+
   /// From parent to child coordinate system.
   static Rect _transformRect(Rect rect, RenderObject parent, RenderObject child) {
     if (rect == null)
       return null;
     if (rect.isEmpty)
       return Rect.zero;
-    final Matrix4 transform = Matrix4.identity();
-    parent.applyPaintTransform(child, transform);
-    return MatrixUtils.inverseTransformRect(transform, rect);
+    _temporaryTransformHolder.setIdentity();  // clears data from a previous call
+    parent.applyPaintTransform(child, _temporaryTransformHolder);
+    return MatrixUtils.inverseTransformRect(_temporaryTransformHolder, rect);
   }
 
   static Rect _intersectRects(Rect a, Rect b) {
