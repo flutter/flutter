@@ -293,7 +293,7 @@ void PlatformView::OnScenicEvent(
       case fuchsia::ui::scenic::Event::Tag::kGfx:
         switch (event.gfx().Which()) {
           case fuchsia::ui::gfx::Event::Tag::kMetrics: {
-            if (event.gfx().metrics().metrics != scenic_metrics_) {
+            if (!fidl::Equals(event.gfx().metrics().metrics, scenic_metrics_)) {
               scenic_metrics_ = std::move(event.gfx().metrics().metrics);
               metrics_changed_callback_(scenic_metrics_);
               UpdateViewportMetrics(scenic_metrics_);
