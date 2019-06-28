@@ -35,7 +35,7 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final List<String> launchCommand = <String>[
-      artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios),
+      artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios) ?? 'ios-deploy', // TODO(fujino): remove fallback once g3 updated
       '--id',
       deviceId,
       '--bundle',
@@ -57,7 +57,7 @@ class IOSDeploy {
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibPath;
+    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibPath ?? ''; // TODO(fujino): remove fallback once g3 updated
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -122,8 +122,8 @@ class IOSDevice extends Device {
       _installerPath = null;
       _iproxyPath = null;
     } else {
-      _installerPath = artifacts.getArtifactPath(Artifact.ideviceinstaller, platform: TargetPlatform.ios);
-      _iproxyPath = artifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios);
+      _installerPath = artifacts.getArtifactPath(Artifact.ideviceinstaller, platform: TargetPlatform.ios) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
+      _iproxyPath = artifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
     }
   }
 
@@ -582,7 +582,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
           devicePort.toString(),
           device.id,
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath ?? ''}, // TODO(fujino): remove fallback once g3 updated
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);

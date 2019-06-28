@@ -47,8 +47,11 @@ class IMobileDevice {
 
   bool get isInstalled {
     return exitsHappy(
-      <String>[artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios), '-h'],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+      <String>[
+        artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios) ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
+        '-h'
+      ],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath ?? ''}, // TODO(fujino): remove fallback once g3 updated
     );
   }
 
@@ -60,10 +63,10 @@ class IMobileDevice {
       return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath};
+    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath ?? ''}; // TODO(fujino): remove fallback once g3 updated
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
-        artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+        artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios) ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
         '-u',
         fakeIphoneId
       ],
@@ -76,7 +79,7 @@ class IMobileDevice {
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(
       <String>[
-        artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
+        artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios) ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
         '-l',
       ],
       environment: executionEnv,
@@ -86,7 +89,7 @@ class IMobileDevice {
 
     // Check that we can look up the names of any attached devices.
     return await exitsHappyAsync(
-      <String>[artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)],
+      <String>[artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios) ?? 'idevicename'], // TODO(fujino): remove fallback once g3 updated
       environment: executionEnv,
     );
   }
@@ -94,7 +97,10 @@ class IMobileDevice {
   Future<String> getAvailableDeviceIDs() async {
     try {
       final ProcessResult result = await processManager.run(
-        <String>[artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios), '-l'],
+        <String>[
+          artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios) ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
+          '-l'
+        ],
         environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       if (result.exitCode != 0)
@@ -109,7 +115,7 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(
         <String>[
-          artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
+          artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios) ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
           '-u',
           deviceID,
           '-k',
@@ -130,7 +136,7 @@ class IMobileDevice {
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
     return runCommand(
-      <String>[artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios), '-u', deviceID],
+      <String>[artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios), '-u', deviceID] ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
       environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
@@ -138,7 +144,10 @@ class IMobileDevice {
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
     return runCheckedAsync(
-      <String>[artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios), outputFile.path],
+      <String>[
+        artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios) ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
+        outputFile.path
+      ],
       environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
