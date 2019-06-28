@@ -70,7 +70,7 @@ struct MouseState {
 /**
  * Private interface declaration for FLEViewController.
  */
-@interface FLEViewController ()
+@interface FLEViewController () <FlutterBinaryMessenger>
 
 /**
  * A list of additional responders to keyboard events. Keybord events are forwarded to all of them.
@@ -669,6 +669,11 @@ static void CommonInit(FLEViewController* controller) {
       .pixel_ratio = scaledBounds.size.width / view.bounds.size.width,
   };
   FlutterEngineSendWindowMetricsEvent(_engine, &event);
+}
+
+#pragma mark - FlutterBinaryMessengerContainer
+- (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
+  return self;
 }
 
 #pragma mark - FlutterBinaryMessenger

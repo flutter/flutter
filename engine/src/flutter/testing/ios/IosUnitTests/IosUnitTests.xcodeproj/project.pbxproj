@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		0D6AB6B622BB05E100EEE540 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6B522BB05E100EEE540 /* AppDelegate.m */; };
 		0D6AB6B922BB05E100EEE540 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0D6AB6B822BB05E100EEE540 /* ViewController.m */; };
 		0D6AB6BC22BB05E100EEE540 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0D6AB6BA22BB05E100EEE540 /* Main.storyboard */; };
@@ -71,6 +72,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = FlutterBinaryMessengerRelayTest.mm; sourceTree = "<group>"; };
 		0D6AB6B122BB05E100EEE540 /* IosUnitTests.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = IosUnitTests.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D6AB6B422BB05E100EEE540 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0D6AB6B522BB05E100EEE540 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 		0D6AB6E622BB409F00EEE540 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				0D52D3B622C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm */,
 				0D6AB6E722BB40CF00EEE540 /* FlutterEngineTest.mm */,
 			);
 			name = Source;
@@ -366,6 +369,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0D6AB6EB22BB40E700EEE540 /* FlutterEngineTest.mm in Sources */,
+				0D52D3BD22C566D50011DEBD /* FlutterBinaryMessengerRelayTest.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
