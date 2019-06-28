@@ -196,10 +196,10 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 }) async {
   final VMService vmService = await connector(serviceUri);
   await vmService.getVM();
-  final Isolate isolate = vmService.vm.isolates.firstWhere((Isolate isolate) => isolate.name == debugName);
   if (!waitPaused) {
     return _getAllCoverage(vmService, libraryPredicate);
   }
+  final Isolate isolate = vmService.vm.isolates.firstWhere((Isolate isolate) => isolate.name == debugName);
   const int kPollAttempts = 20;
   int i = 0;
   while (i < kPollAttempts) {
