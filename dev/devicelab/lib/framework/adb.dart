@@ -392,8 +392,8 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
-  // Return path to cached binaries, hard-coded relative to devicelab directory
-  String get _artifactDirName {
+  // Returns the path to cached binaries relative to devicelab directory
+  String get _artifactDirPath {
     return path.normalize(
       path.join(
         path.current,
@@ -402,7 +402,8 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     );
   }
 
-  // Return the path to all dynamically linked libraries
+  // Returns a colon-separated environment variable that contains the paths
+  // of linked libraries for idevice_id
   Map<String, String> get _ideviceIdEnvironment {
     final String libPath = const <String>[
       'libimobiledevice',
@@ -412,13 +413,13 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'ideviceinstaller',
       'libtasn1',
       'ios-deploy',
-    ].map((String packageName) => path.join(_artifactDirName, packageName)).join(':');
+    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
     return <String, String>{'DYLD_LIBRARY_PATH': libPath};
   }
 
   @override
   Future<List<String>> discoverDevices() async {
-    final String ideviceIdPath = path.join(_artifactDirName, 'libimobiledevice', 'idevice_id');
+    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
     final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)

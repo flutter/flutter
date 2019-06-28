@@ -229,9 +229,8 @@ class Cache {
       return _dyLdLibPath;
     }
     final List<String> paths = <String>[];
-    String currentPath;
     for (CachedArtifact artifact in _artifacts) {
-      currentPath = artifact.dyLdLibPath;
+      final String currentPath = artifact.dyLdLibPath;
       if (currentPath.isNotEmpty) {
         paths.add(currentPath);
       }
