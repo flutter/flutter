@@ -38,13 +38,13 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// then perform the comparison against the files therein.
 ///
 /// For testing across all platforms, the [SkiaGoldClient] is used to upload
-/// widgets for framework-related golden tests and process results. Currently
+/// images for framework-related golden tests and process results. Currently
 /// these tests are designed to be run post-submit on Cirrus CI, informed by the
 /// environment. When running test pre-submit or locally, they are executed via
 /// the [GoldensClient].
 ///
 /// This comparator will instantiate [GoldensClient] and [SkiaGoldClient].
-class FlutterGoldenFileComparator implements GoldenFileComparator {
+abstract class FlutterGoldenFileComparator implements GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir].
   ///
@@ -54,8 +54,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     this.basedir, {
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
-  }) : assert(basedir != null),
-       _platform = platform;
+  }) : assert(basedir != null);
 
   /// The directory to which golden file URIs will be resolved in [compare] and [update].
   final Uri basedir;
@@ -70,8 +69,6 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   /// be replaced by mock platform instance.
   @visibleForTesting
   final Platform platform;
-
-  Platform _platform;
 
   /// Instance of the [SkiaGoldClient] for executing tests with the goldctl
   /// tool.
@@ -109,7 +106,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    if (_testingWithSkiaGold(_platform)) {
+    if (_testingWithSkiaGold(platform)) {
       golden = _addPrefix(golden);
       await update(golden, imageBytes);
     }
@@ -119,19 +116,19 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
 
-    if (_testingWithSkiaGold(_platform)) {
-      if(!_skiaClient.hasBeenAuthorized) {
-        final bool authorized = await _skiaClient.auth(fs.directory(basedir));
-        if (!authorized) {
-          throw TestFailure('Could not authorize goldctl.');
-        }
+    if (_testingWithSkiaGold(platform)) {
+      // TODO(Piinks) authorize at init
+      final bool authorized = await _skiaClient.auth(fs.directory(basedir));
+      if (!authorized) {
+        throw TestFailure('Could not authorize goldctl.');
       }
+
 
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
     }
 
-    if (_platform.isLinux) {
+    if (platform.isLinux) {
       final List<int> goldenBytes = await goldenFile.readAsBytes();
       if (goldenBytes.length != imageBytes.length) {
         return false;
@@ -143,7 +140,6 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       }
       return true;
     }
-
     print('Skipping "$golden" : Skia Gold unavailable && !isLinux');
     return true;
   }
@@ -157,7 +153,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Uri getTestUri(Uri key, int version) {
-    return _testingWithSkiaGold(_platform)
+    return _testingWithSkiaGold(platform)
       ? key
       : _addVersion(key, version);
   }
