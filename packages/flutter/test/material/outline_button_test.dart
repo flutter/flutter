@@ -150,10 +150,10 @@ void main() {
   testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -217,10 +217,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -282,9 +282,9 @@ void main() {
   testWidgets('OutlineButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color disabledColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color unusedDisabledTextColor = Color(3);
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color unusedDisabledTextColor = Color(0x00000003);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -321,10 +321,10 @@ void main() {
   testWidgets('OutlineButton uses stateful color for border color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getBorderColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -382,9 +382,9 @@ void main() {
   });
 
   testWidgets('OutlineButton ignores highlightBorderColor if border color is stateful', (WidgetTester tester) async {
-    const Color pressedColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color ignoredPressedColor = Color(3);
+    const Color pressedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color ignoredPressedColor = Color(0x00000003);
 
     Color getBorderColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -420,9 +420,9 @@ void main() {
   });
 
   testWidgets('OutlineButton ignores disabledBorderColor if border color is stateful', (WidgetTester tester) async {
-    const Color disabledColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color ignoredDisabledColor = Color(3);
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color ignoredDisabledColor = Color(0x00000003);
 
     Color getBorderColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -557,7 +557,7 @@ void main() {
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
     _checkPhysicalLayer(
       tester.element(outlineButton),
-      const Color(0),
+      const Color(0x00000000),
       clipPath: clipPath,
       clipRect: clipRect,
     );
