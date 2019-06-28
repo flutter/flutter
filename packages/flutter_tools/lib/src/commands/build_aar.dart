@@ -23,8 +23,8 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'The target platform for which the app is compiled.',
       )
       ..addOption('build-dir',
-        help: 'The absolute path to the directory where the `repo` is generated.'
-              'By default, this is <current-directory>android/build. ',
+        help: 'The absolute path to the directory where the \'repo\' is generated.'
+              'By default, this is \'<current-directory>android/build\'. ',
       );
   }
 
