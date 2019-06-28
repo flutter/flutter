@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 
 import 'adb.dart';
 import 'android.dart';
+import 'android_console.dart';
 import 'android_sdk.dart';
 
 enum _HardwareType { emulator, physical }
@@ -72,7 +73,12 @@ class AndroidDevice extends Device {
     this.productID,
     this.modelID,
     this.deviceCodeName,
-  }) : super(id);
+  }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.android,
+      ephemeral: true,
+  );
 
   final String productID;
   final String modelID;
@@ -129,6 +135,55 @@ class AndroidDevice extends Device {
     return _isLocalEmulator;
   }
 
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  @override
+  Future<String> get emulatorId async {
+    if (!(await isLocalEmulator))
+      return null;
+
+    // Emulators always have IDs in the format emulator-(port) where port is the
+    // Android Console port number.
+    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
+
+    final Match portMatch = emulatorPortRegex.firstMatch(id);
+    if (portMatch == null || portMatch.groupCount < 1) {
+      return null;
+    }
+
+    const String host = 'localhost';
+    final int port = int.parse(portMatch.group(1));
+    printTrace('Fetching avd name for $name via Android console on $host:$port');
+
+    try {
+      final Socket socket = await androidConsoleSocketFactory(host, port);
+      final AndroidConsole console = AndroidConsole(socket);
+
+      try {
+        await console
+            .connect()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('Connection timed out'));
+
+        return await console
+            .getAvdName()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('"avd name" timed out'));
+      } finally {
+        console.destroy();
+      }
+    } catch (e) {
+      printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
+      // If we fail to connect to the device, we should not fail so just return
+      // an empty name. This data is best-effort.
+      return null;
+    }
+  }
+
   @override
   Future<TargetPlatform> get targetPlatform async {
     if (_platform == null) {
@@ -164,7 +219,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
+    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -391,8 +446,7 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !(debuggingOptions.buildInfo.isDebug ||
-          debuggingOptions.buildInfo.isDynamic)) {
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }

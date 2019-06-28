@@ -199,8 +199,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -233,10 +233,10 @@ void main() {
   });
 
   testWidgets('color on icon theme overrides selected and unselected item colors', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
-    const Color selectedItemColor = Color(3);
-    const Color unselectedItemColor = Color(4);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const Color selectedItemColor = Color(0x00000003);
+    const Color unselectedItemColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1434,7 +1434,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.2.png'),
+        matchesGoldenFile(
+          'bottom_navigation_bar.shifting_transition.$pump.png',
+          version: 2,
+        ),
         skip: !isLinux,
       );
     }

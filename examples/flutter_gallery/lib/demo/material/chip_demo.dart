@@ -247,7 +247,7 @@ class _ChipDemoState extends State<ChipDemo> {
       return FilterChip(
         key: ValueKey<String>(name),
         label: Text(_capitalize(name)),
-        selected: _tools.contains(name) ? _selectedTools.contains(name) : false,
+        selected: _tools.contains(name) && _selectedTools.contains(name),
         onSelected: !_tools.contains(name)
             ? null
             : (bool value) {

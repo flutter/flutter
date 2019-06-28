@@ -39,7 +39,6 @@ class ResidentWebRunner extends ResidentRunner {
           target: target,
           usesTerminalUI: true,
           stayResident: true,
-          saveCompilationTrace: false,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
         );
@@ -132,8 +131,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     // Start the web compiler and build the assets.
     await webCompilationProxy.initialize(
-      projectDirectory: FlutterProject.current().directory,
-      targets: <String>[target],
+      projectDirectory: flutterProject.directory,
     );
     _lastCompiled = DateTime.now();
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
