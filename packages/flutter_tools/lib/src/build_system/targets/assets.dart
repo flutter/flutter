@@ -41,7 +41,6 @@ class AssetBehavior extends SourceBehavior {
     );
     final List<File> results = <File>[];
     for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
-      print(entry.key);
       final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
       results.add(file);
     }

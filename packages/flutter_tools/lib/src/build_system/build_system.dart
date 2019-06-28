@@ -83,6 +83,23 @@ class BuildSystemConfig {
 ///      "absolute/path/fizz"
 ///    ]
 /// }
+///
+/// Testing and review requirements:
+///
+/// ## Target should only depend on files that are provided as inputs
+///
+/// Example: gen_snapshot must be provided as an input to the aot_elf
+/// build steps, even though it isn't a source file. This ensures that changes
+/// to the gen_snapshot binary (during a local engine build) correctly
+/// trigger a corresponding build update.
+///
+/// Example: aot_elf has a dependency on the dill and packages file
+/// produced by the kernel_snapshot step.
+///
+/// ## Target should declare all outputs produced
+///
+/// If a target produces an output it should be listed, even if it is not
+/// intended to be consumed by another target.
 class Target {
   const Target({
     @required this.name,

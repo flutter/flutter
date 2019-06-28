@@ -76,12 +76,37 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   }
 }
 
+/// Find the correct gen_snapshot implemenation for the aot elf build.
+List<File> findGenSnapshotAndroidElf(Environment environment) {
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final bool use64Bit = environment.defines[kAndroid64Bit] == 'true';
+  if (buildMode == null) {
+    throw MissingDefineException(kBuildMode, 'aot_elf');
+  }
+  String platformName;
+  if (platform.isMacOS) {
+    platformName = 'darwin-x64';
+  } else if (platform.isLinux) {
+    platformName = 'linux-x64';
+  } else if (platform.isWindows) {
+    platformName = 'windows-x64';
+  } else {
+    throw Exception('Unsupported host platform ${platform.localeName}');
+  }
+  final String path = fs.path.join(environment.cacheDir.path,
+    'artifacts', 'engine',
+    'android-arm${use64Bit ? '64' : ''}-${buildMode == BuildMode.release ? 'release' : 'profile'}',
+    platformName, 'gen_snapshot'
+  );
+  return <File>[fs.file(path)];
+}
+
 /// Finds the locations of all dart files within the project.
 ///
 /// This does not attempt to determine if a file is used or imported, so it
 /// may otherwise report more files than strictly necessary.
 List<File> listDartSources(Environment environment) {
-  final Map<String, Uri> packageMap = PackageMap(PackageMap.globalPackagesPath).map;
+  final Map<String, Uri> packageMap = PackageMap(environment.projectDir.childFile('.packages').path).map;
   final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
@@ -109,7 +134,6 @@ const Target kernelSnapshot = Target(
 );
 
 /// Generate an ELF binary from a dart snapshot.
-// TODO(jonahwilliams): does this need a dependency on gen_snapshot?.
 const Target aotElf = Target(
   name: 'aot_elf',
   inputs: <Source>[
@@ -117,9 +141,12 @@ const Target aotElf = Target(
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{CACHE_DIR}/pkg/sky_engine/lib/ui/ui.dart'),
     Source.pattern('{CACHE_DIR}/pkg/sky_engine/sdk_ext/vmservice_io.dart'),
+    Source.function(findGenSnapshotAndroidElf),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/app.so'),
+    Source.pattern('{BUILD_DIR}/gen_snapshot.d'),
+    Source.pattern('{BUILD_DIR}/snapshot.d.fingerprint'),
   ],
   dependencies: <Target>[
     kernelSnapshot,

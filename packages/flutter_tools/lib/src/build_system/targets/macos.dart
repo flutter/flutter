@@ -43,47 +43,50 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
   }
 }
 
+const String _kInputPrefix = '{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework';
+const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
+
 /// Copies the macOS desktop framework to the copy directory.
 const Target unpackMacos = Target(
   name: 'unpack_macos',
   inputs: <Source>[
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
+    Source.pattern('$_kInputPrefix/FlutterMacOS'),
     // Headers
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+    Source.pattern('$_kInputPrefix/Headers/FLEOpenGLContextHandling.h'),
+    Source.pattern('$_kInputPrefix/Headers/FLEReshapeListener.h'),
+    Source.pattern('$_kInputPrefix/Headers/FLEView.h'),
+    Source.pattern('$_kInputPrefix/Headers/FLEViewController.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterBinaryMessenger.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterChannels.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterCodecs.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterMacOS.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterPluginMacOS.h'),
+    Source.pattern('$_kInputPrefix/Headers/FlutterPluginRegisrarMacOS.h'),
     // Modules
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
+    Source.pattern('$_kInputPrefix/Modules/module.modulemap'),
     // Resources
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
-    Source.pattern('{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+    Source.pattern('$_kInputPrefix/Resources/icudtl.dat'),
+    Source.pattern('$_kInputPrefix/Resources/info.plist'),
     // Ignore Versions folder for now
   ],
   outputs: <Source>[
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/FlutterMacOS'),
+    Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEView.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FLEViewController.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterChannels.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FLEOpenGLContextHandling.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FLEReshapeListener.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FLEView.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FLEViewController.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegisrarMacOS.h'),
     // Modules
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Modules/module.modulemap'),
+    Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
     // Resources
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Resources/icudtl.dat'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/Resources/info.plist'),
+    Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
+    Source.pattern('$_kOutputPrefix/Resources/info.plist'),
     // Ignore Versions folder for now
   ],
   dependencies: <Target>[],
