@@ -83,22 +83,17 @@ List<File> findGenSnapshotAndroidElf(Environment environment) {
   if (buildMode == null) {
     throw MissingDefineException(kBuildMode, 'aot_elf');
   }
-  String platformName;
-  if (platform.isMacOS) {
-    platformName = 'darwin-x64';
-  } else if (platform.isLinux) {
-    platformName = 'linux-x64';
-  } else if (platform.isWindows) {
-    platformName = 'windows-x64';
-  } else {
-    throw Exception('Unsupported host platform ${platform.localeName}');
-  }
-  final String path = fs.path.join(environment.cacheDir.path,
-    'artifacts', 'engine',
-    'android-arm${use64Bit ? '64' : ''}-${buildMode == BuildMode.release ? 'release' : 'profile'}',
-    platformName, 'gen_snapshot'
-  );
+  final String path = artifacts.getArtifactPath(Artifact.genSnapshot,
+      mode: buildMode,
+      platform: use64Bit ? TargetPlatform.android_arm64 : TargetPlatform.android_arm);
   return <File>[fs.file(path)];
+}
+
+/// Find the frontend server artifact
+List<File> frontendServer(Environment environment) {
+  return <File>[fs.file(
+    artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
+  )];
 }
 
 /// Finds the locations of all dart files within the project.
@@ -123,8 +118,10 @@ List<File> listDartSources(Environment environment) {
 const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
   inputs: <Source>[
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and .packages
+    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.pattern('{CACHE_DIR}/artifacts/engine/common/flutter_patched_sdk/platform_strong.dill'),
+    Source.pattern('{CACHE_DIR}/dart-sdk/bin/dart'),
+    Source.function(frontendServer),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
@@ -141,6 +138,7 @@ const Target aotElf = Target(
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{CACHE_DIR}/pkg/sky_engine/lib/ui/ui.dart'),
     Source.pattern('{CACHE_DIR}/pkg/sky_engine/sdk_ext/vmservice_io.dart'),
+    Source.pattern('{CACHE_DIR}/dart-sdk/bin/dart'),
     Source.function(findGenSnapshotAndroidElf),
   ],
   outputs: <Source>[

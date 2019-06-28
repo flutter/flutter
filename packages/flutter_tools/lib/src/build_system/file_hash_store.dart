@@ -21,6 +21,14 @@ import 'filecache.pb.dart' as pb;
 /// operation, and persisted to cache in the root build directory.
 ///
 /// The format of the file store is subject to change and not part of its API.
+///
+/// To regenerate the protobuf entries used to construct the cache:
+///   1. If not already installed, https://developers.google.com/protocol-buffers/docs/downloads
+///   2. pub global active `protoc-gen-dart`
+///   3. protoc -I=lib/src/build_system/  --dart_out=lib/src/build_system/  lib/src/build_system/filecache.proto
+///   4. Add licenses headers to the newly generated file and check-in.
+///
+/// See also: https://developers.google.com/protocol-buffers/docs/darttutorial
 // TODO(jonahwilliams): find a better way to clear out old entries, perhaps
 // track the last access or modification date?
 class FileHashStore {
