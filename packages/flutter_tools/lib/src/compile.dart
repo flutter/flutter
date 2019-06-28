@@ -51,6 +51,8 @@ class TargetModel {
         return flutter;
       case 'flutter_runner':
         return flutterRunner;
+      case 'vm':
+        return vm;
     }
     assert(false);
     return null;
@@ -63,6 +65,9 @@ class TargetModel {
 
   /// The fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
+
+  /// The dart vm SDK
+  static const TargetModel vm = TargetModel._('vm');
 
   final String _value;
 

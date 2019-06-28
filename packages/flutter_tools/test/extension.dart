@@ -11,9 +11,7 @@ void main() {
 
     setUp(() {
       testExtension = TestExtension();
-      toolExtensionManager = ToolExtensionManager(<ToolExtension>[
-        testExtension,
-      ], <CrossIsolateShim>[]);
+      toolExtensionManager = ToolExtensionManager(<String>[]);
     });
 
     test('handles nonsense method', () async {

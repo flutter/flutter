@@ -4,17 +4,23 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
+import 'package:yaml/yaml.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show SocketException;
+import 'base/io.dart' show ProcessResult, SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
+import 'convert.dart';
 import 'globals.dart';
+import 'project.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
 class DevelopmentArtifact {
@@ -83,6 +89,7 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
+      _artifacts.add(ToolExtensionCacheArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -893,6 +900,119 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
       return Future<void>.value();
     }
     return _doUpdate();
+  }
+}
+
+/// A manager for artifacts which are installed by the user.
+///
+/// In the initial implementation, we simplify the process by resnapshotting
+/// all extensions any time a new one is added.
+///
+/// We check that the cache is up to date by verifying that the snapshots in
+/// this directory both exist and were built with the current version of dart.
+/// If they have fallen out of date, we re-snapshot.
+///
+/// The tool may mark an extension as `failing` if it does not snapshot. These
+/// are not loaded or updated until they are manually reinstalled.
+class ToolExtensionCacheArtifacts extends CachedArtifact {
+  ToolExtensionCacheArtifacts(Cache cache) : super('tool_extensions', cache, <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  });
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  static const String _kManifestName = 'tool_api.yaml';
+
+  @override
+  Future<void> updateInner() async {
+    // Add the builtin extensions to the map.
+    final Map<String, String> extensions = <String, String>{
+      'web_extension': fs.path.join(Cache.flutterRoot, 'packages', 'web_extension'),
+      'linux_extension': fs.path.join(Cache.flutterRoot, 'packages', 'linux_extension')
+    };
+
+    // Parse additional installed extensions out of the manifest. skip
+    // extensions which have been disabled.
+    final File manifest = location.childFile('.manifest.json');
+    Map<String, Object> data = <String, Object>{};
+    if (manifest.existsSync()) {
+      data = json.decode(manifest.readAsStringSync());
+      for (String key in data.keys) {
+        final Map<String, Object> values = data[key];
+        if (values['enabled']) {
+          extensions[key] = values['path'];
+        }
+      }
+    }
+
+    // For each extension, snapshot and copy to the cache directory
+    // TODO(jonahwilliams): ensure .packages exists.
+    final Directory directory = fs.systemTempDirectory.createTempSync('flutter_api');
+    directory.createSync(recursive: true);
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(FlutterProject.current());
+    for (MapEntry<String, String> entry in extensions.entries) {
+      final String extensionPath = entry.value;
+      final YamlMap manifest = loadYaml(fs.file(fs.path.join(extensionPath, _kManifestName)).readAsStringSync());
+
+      final String className = manifest['name'];
+      final String relativefileUri = Uri.file(manifest['file']).toFilePath(windows: platform.isWindows);
+      final String entrypoint = generateEntrypoint(fs.path.join(extensionPath, 'lib', relativefileUri), className);
+      final File sourceFile = directory.childFile('main.${entry.key}.dart');
+      sourceFile
+        ..createSync()
+        ..writeAsStringSync(entrypoint);
+      printStatus('Compiling tool extension ${entry.key}');
+      final String outputFile = location.childFile('${entry.key}.dill').path;
+      final CompilerOutput compilerOutput = await kernelCompiler.compile(
+          trackWidgetCreation: false,
+          targetModel: TargetModel.vm,
+        packagesPath: fs.path.join(extensionPath, '.packages'),
+        mainPath: sourceFile.path,
+        outputFilePath: outputFile,
+      );
+      final File snapshot = fs.file(outputFile);
+      if (compilerOutput.errorCount != 0 || !snapshot.existsSync()) {
+        // If compiling fails for any reason, disable the extension.
+        printError('Failed to snapshot extension ${entry.key}');
+        data[entry.key] ??= <String, Object>{};
+        final Map<String, Object> values = data[entry.key];
+        values['enabled'] = false;
+        continue;
+      }
+    }
+    manifest.writeAsStringSync(json.encode(data));
+  }
+
+  @visibleForTesting
+  static String generateEntrypoint(String absolutePath, String className) {
+    return '''
+import 'dart:async';
+import 'dart:convert'; // ignore: dart_convert_import
+import 'dart:isolate';
+
+import 'package:flutter_tool_api/extension.dart';
+
+import '$absolutePath' as api;
+
+final api.$className instance = api.$className();
+
+void main(List<String> args, [SendPort sendPort]) {
+  if (sendPort == null) {
+    return;
+  }
+  final ReceivePort receivePort = ReceivePort();
+  sendPort.send(receivePort.sendPort);
+  receivePort.listen((dynamic message) async {
+    if (message is String) {
+      final Map<String, Object> requestRaw = json.decode(message);
+      final Request request = Request.fromJson(requestRaw);
+      final Response response = await instance.handleMessage(request);
+      sendPort.send(json.encode(response.toJson()));
+    }
+  });
+}
+''';
   }
 }
 

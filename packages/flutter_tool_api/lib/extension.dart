@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// This library contains the basic types of the extension API.
+///
+/// See also:
+///   - doctor.dart, for the `flutter doctor` tool extensions.
+library extension;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -11,12 +17,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'doctor.dart';
-
-/// This library contains the basic types of the extension API.
-///
-/// See also:
-///   - doctor.dart, for the `flutter doctor` tool extensions.
-library extension;
 
 /// A request sent to a tool extension from the host.
 class Request {

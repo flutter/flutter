@@ -70,30 +70,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<DoctorValidator> _validators;
   List<Workflow> _workflows;
 
-  final ToolExtensionManager extensionShim = ToolExtensionManager(
-    useCrossIsolateExtensions
-      ? <extension.ToolExtension>[]
-      : <extension.ToolExtension>[
-        web_extension.FlutterWebExtension()
-          ..fileSystem = fs
-          ..processManager = processManager
-          ..platform = platform,
-        linux_extension.FlutterLinuxExtension()
-          ..fileSystem = fs
-          ..processManager = processManager
-          ..platform = platform
-      ],
-    useCrossIsolateExtensions
-      ? <CrossIsolateShim>[
-        CrossIsolateShim(
-          fs.path.join(Cache.flutterRoot, 'packages', 'web_extension'),
-          'Flutter Web',
-        ),
-        CrossIsolateShim(
-          fs.path.join(Cache.flutterRoot, 'packages', 'linux_extension'),
-          'Linux Desktop',
-        ),
-      ] : <CrossIsolateShim>[]);
+  final ToolExtensionManager extensionShim = ToolExtensionManager(<String>['web_extension', 'linux_extension']);
 
   @override
   List<DoctorValidator> get validators {
@@ -111,12 +88,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         _validators.add(iosValidator);
 
       if (flutterWebEnabled)
-        _validators.add(ExtensionCompatDoctorValidation('Flutter Web', extensionShim));
+        _validators.add(ExtensionCompatDoctorValidation('web_extension', extensionShim));
 
       // Add desktop doctors to workflow if the flag is enabled.
       if (flutterDesktopEnabled) {
         if (linuxWorkflow.appliesToHostPlatform) {
-          _validators.add(ExtensionCompatDoctorValidation('Linux Desktop', extensionShim));
+          _validators.add(ExtensionCompatDoctorValidation('linux_extension', extensionShim));
         }
         if (windowsWorkflow.appliesToHostPlatform) {
           _validators.add(visualStudioValidator);
