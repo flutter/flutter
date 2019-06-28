@@ -4,6 +4,7 @@
 
 // ignore_for_file: implementation_imports
 import 'dart:async';
+import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:build/build.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
@@ -11,6 +12,7 @@ import 'package:build_runner_core/src/asset_graph/graph.dart';
 import 'package:build_runner_core/src/asset_graph/node.dart';
 import 'package:build_runner_core/src/generate/build_impl.dart';
 import 'package:build_runner_core/src/generate/options.dart';
+import 'package:glob/glob.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -21,6 +23,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../web/compile.dart';
@@ -42,6 +45,10 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
     projectDirectory.childDirectory('.dart_tool').createSync();
+    final Directory generatedDirectory = projectDirectory
+      .childDirectory('.dart_tool')
+      .childDirectory('build')
+      .childDirectory('generated');
 
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
@@ -56,7 +63,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       } else {
         printTrace(record.message);
       }
-    });
+    }, reader: MultirootFileBasedAssetReader(_packageGraph, generatedDirectory));
     final LogSubscription logSubscription = LogSubscription(
       buildEnvironment,
       verbose: false,
@@ -195,5 +202,87 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         await writer.delete(id);
       }
     }
+  }
+}
+
+/// Handles mapping a single root file scheme to a multiroot scheme.
+///
+/// This allows one build_runner build to read the output from a previous
+/// isolated build.
+class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
+  MultirootFileBasedAssetReader(
+    core.PackageGraph packageGraph,
+    this.generatedDirectory,
+  ) : super(packageGraph);
+
+  final Directory generatedDirectory;
+
+  @override
+  Future<bool> canRead(AssetId id) {
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).exists();
+    }
+    return super.canRead(id);
+  }
+
+  @override
+  Future<List<int>> readAsBytes(AssetId id) {
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).readAsBytes();
+    }
+    return super.readAsBytes(id);
+  }
+
+  @override
+  Future<String> readAsString(AssetId id, {Encoding encoding}) {
+    if (packageGraph[id.package] == packageGraph.root && _missingSource(id)) {
+      return _generatedFile(id).readAsString();
+    }
+    return super.readAsString(id, encoding: encoding);
+  }
+
+  @override
+  Stream<AssetId> findAssets(Glob glob, {String package}) async* {
+    if (package == null || packageGraph.root.name == package) {
+      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
+        if (entity is io.File && _isNotHidden(entity)) {
+          yield _fileToAssetId(entity, packageGraph.root);
+        }
+      }
+      final String generatedRoot = fs.path.join(
+        generatedDirectory.path, packageGraph.root.name
+      );
+      if (!fs.isDirectorySync(generatedRoot)) {
+        return;
+      }
+      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
+        if (entity is io.File && _isNotHidden(entity)) {
+          yield _fileToAssetId(entity, packageGraph.root, generatedRoot);
+        }
+      }
+      return;
+    }
+    yield* super.findAssets(glob, package: package);
+  }
+
+  bool _isNotHidden(io.FileSystemEntity entity) {
+    return !path.basename(entity.path).startsWith('._');
+  }
+
+  bool _missingSource(AssetId id) {
+    return !fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
+  }
+
+  File _generatedFile(AssetId id) {
+    return fs.file(
+      path.joinAll(<String>[generatedDirectory.path, packageGraph.root.name, ...id.pathSegments])
+    );
+  }
+
+  /// Creates an [AssetId] for [file], which is a part of [packageNode].
+  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root]) {
+    final String filePath = path.normalize(file.absolute.path);
+    final String relativePath = path.relative(filePath, from: root ?? packageNode.path);
+    return AssetId(packageNode.name, relativePath);
   }
 }

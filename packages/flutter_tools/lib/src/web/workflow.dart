@@ -22,9 +22,9 @@ bool get flutterWebEnabled {
   if (isRunningFromDaemon) {
     final bool platformEnabled = platform
         .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-    return platformEnabled && !FlutterVersion.instance.isStable;
+    return platformEnabled && FlutterVersion.instance.isMaster;
   }
-  return !FlutterVersion.instance.isStable;
+  return FlutterVersion.instance.isMaster;
 }
 
 /// Whether we can locate the chrome executable.

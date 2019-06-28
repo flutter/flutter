@@ -21,7 +21,7 @@ void main() {
       }
       final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(
-        <String>[dart]..addAll(options)
+        <String>[dart, ...options]
       );
       return scriptProcess;
     }
