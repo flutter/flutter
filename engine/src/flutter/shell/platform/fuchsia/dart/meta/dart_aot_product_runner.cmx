@@ -10,6 +10,8 @@
         "services": [
             "fuchsia.crash.Analyzer",
             "fuchsia.logger.LogSink",
+            "fuchsia.posix.socket.Provider",
+            "fuchsia.net.NameLookup",
             "fuchsia.net.SocketProvider",
             "fuchsia.timezone.Timezone",
             "fuchsia.tracelink.Registry",
