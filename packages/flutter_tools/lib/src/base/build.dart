@@ -51,7 +51,8 @@ class GenSnapshot {
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
-    ]..addAll(additionalArgs);
+      ...additionalArgs,
+    ];
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
 
@@ -61,7 +62,7 @@ class GenSnapshot {
     // architecture.
     if (snapshotType.platform == TargetPlatform.ios) {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
-      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath, ...args]);
     }
 
     StringConverter outputFilter;
@@ -72,8 +73,7 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args),
-                                     mapFunction: outputFilter);
+    return runCommandAndStreamOutput(<String>[snapshotterPath, ...args], mapFunction: outputFilter);
   }
 }
 
@@ -168,7 +168,7 @@ class AOTSnapshotter {
     // If inputs and outputs have not changed since last run, skip the build.
     final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
+      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
       properties: <String, String>{
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
@@ -422,7 +422,7 @@ class JITSnapshotter {
     // If inputs and outputs have not changed since last run, skip the build.
     final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
+      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
       properties: <String, String>{
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
