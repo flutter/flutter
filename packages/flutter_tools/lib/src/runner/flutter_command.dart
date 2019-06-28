@@ -649,6 +649,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
     case TargetPlatform.ios:
+    
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
       if (!FlutterVersion.instance.isStable) {
