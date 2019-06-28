@@ -681,6 +681,9 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewCo
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDelegate_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelay.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterBinaryMessengerRelayTest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCallbackCache_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject.mm

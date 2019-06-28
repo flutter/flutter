@@ -41,8 +41,7 @@ extern NSNotificationName const FlutterSemanticsUpdateNotification;
  * forth between a FlutterViewController and other `UIViewController`s.
  */
 FLUTTER_EXPORT
-@interface FlutterViewController
-    : UIViewController <FlutterBinaryMessenger, FlutterTextureRegistry, FlutterPluginRegistry>
+@interface FlutterViewController : UIViewController <FlutterTextureRegistry, FlutterPluginRegistry>
 
 /**
  * Initializes this FlutterViewController with the specified `FlutterEngine`.
@@ -164,6 +163,16 @@ FLUTTER_EXPORT
  * The `FlutterEngine` instance for this view controller.
  */
 @property(weak, nonatomic, readonly) FlutterEngine* engine;
+
+/**
+ * The `FlutterBinaryMessenger` associated with this FlutterViewController (used for communicating
+ * with channels).
+ *
+ * @deprecated Since |FlutterViewController| just forwards binary messenger calls to the
+ * |FlutterEngine|, just use the FlutterEngine.binaryMessenger.
+ */
+@property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger
+    __attribute__((deprecated));
 
 @end
 
