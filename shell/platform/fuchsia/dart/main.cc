@@ -37,14 +37,14 @@ int main(int argc, const char** argv) {
 
 #if !defined(FUCHSIA_SDK)
   syslog::InitLogger();
-  fbl::unique_ptr<trace::TraceProvider> provider;
 
+  std::unique_ptr<trace::TraceProviderWithFdio> provider;
   {
     TRACE_EVENT0("dart", "CreateTraceProvider");
     bool already_started;
     // Use CreateSynchronously to prevent loss of early events.
-    trace::TraceProvider::CreateSynchronously(loop.dispatcher(), "dart_runner",
-                                              &provider, &already_started);
+    trace::TraceProviderWithFdio::CreateSynchronously(
+        loop.dispatcher(), "dart_runner", &provider, &already_started);
   }
 #endif  //  !defined(FUCHSIA_SDK)
 
