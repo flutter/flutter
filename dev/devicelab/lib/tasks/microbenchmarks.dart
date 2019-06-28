@@ -53,7 +53,7 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/geometry/rrect_contains_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
-    allResults.addAll(await _runMicrobench('lib/gestures/raw_gesture_detector_semantics_bench.dart'));
+    allResults.addAll(await _runMicrobench('lib/gestures/gesture_detector_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
