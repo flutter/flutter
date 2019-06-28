@@ -401,6 +401,9 @@ class _LicensePageState extends State<LicensePage> {
           Priority.animation,
           debugLabel: 'License',
         );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _licenses.add(const Padding(
           padding: EdgeInsets.symmetric(vertical: 18.0),
