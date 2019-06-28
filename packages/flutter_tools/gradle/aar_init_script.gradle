@@ -94,10 +94,16 @@ Set<Configuration> flattenConfigurations(Configuration configuration) {
     return configs
 }
 
+String getBuildDir(Project project) {
+    return project.hasProperty("build-dir") ?
+            project.property("build-dir") : project.buildDir
+}
+
 projectsEvaluated {
     // In plugin projects, the Android library is the root project.
     if (rootProject.subprojects.empty) {
-        configureProject(rootProject)
+        configureProject(rootProject, getBuildDir(rootProject))
+        return
     }
     // In module projects, the Android library project is the `:flutter` subproject.
     Project androidSubproject = rootProject.subprojects.find { it.name == "flutter" }
@@ -105,9 +111,6 @@ projectsEvaluated {
     Project appSubproject = rootProject.subprojects.find { it.name == "app" }
 
     assert appSubproject != null
-    String buildDir = appSubproject.hasProperty("build-dir") ?
-            appSubproject.property("build-dir") : appSubproject.buildDir
-
     assert androidSubproject != null
-    configureProject(androidSubproject, buildDir)
+    configureProject(androidSubproject, getBuildDir(appSubproject))
 }
