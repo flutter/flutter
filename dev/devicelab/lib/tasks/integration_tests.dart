@@ -73,7 +73,7 @@ TaskFunction createCodegenerationIntegrationTest() {
 
 TaskFunction createImageLoadingIntegrationTest() {
   return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/image_list',
+    '${flutterDirectory.path}/dev/integration_tests/image_loading',
     'lib/main.dart',
   );
 }
