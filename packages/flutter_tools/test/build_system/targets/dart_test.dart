@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -35,7 +36,17 @@ void main() {
           kernelSnapshot.name: kernelSnapshot,
           aotElf.name: aotElf,
         });
-        final String skyEngineLine = platform.isWindows
+        HostPlatform hostPlatform;
+        if (platform.isWindows) {
+          hostPlatform = HostPlatform.windows_x64;
+        } else if (platform.isLinux) {
+          hostPlatform = HostPlatform.linux_x64;
+        } else if (platform.isMacOS) {
+           hostPlatform = HostPlatform.darwin_x64;
+        } else {
+          assert(false);
+        }
+         final String skyEngineLine = platform.isWindows
             ? r'sky_engine:file:///C:/cache/pkg/sky_engine/lib/'
             : 'sky_engine:file:///cache/pkg/sky_engine/lib/';
         fs.file('.packages')
@@ -46,10 +57,13 @@ $skyEngineLine
 flutter_tools:lib/''');
         fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart')).createSync(recursive: true);
         fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'sdk_ext', 'vmservice_io.dart')).createSync(recursive: true);
+        fs.file(fs.path.join(cacheDir.path, 'dart-sdk', 'bin', 'dart')).createSync(recursive: true);
+        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', getNameForHostPlatform(hostPlatform), 'frontend_server.dart.snapshot')).createSync(recursive: true);
+        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', 'android-arm-profile', getNameForHostPlatform(hostPlatform), 'gen_snapshot')).createSync(recursive: true);
+        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'bar.dart')).createSync();
         fs.file(fs.path.join('lib', 'fizz')).createSync();
-        fs.file(fs.path.join('cache', 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
       }, overrides: <Type, Generator>{
         KernelCompilerFactory: () => FakeKernelCompilerFactory(),
         GenSnapshot: () => FakeGenSnapshot(),
@@ -87,7 +101,10 @@ flutter_tools:lib/''');
 class FakeGenSnapshot implements GenSnapshot {
   @override
   Future<int> run({SnapshotType snapshotType, IOSArch iosArch, Iterable<String> additionalArgs = const <String>[]}) async {
-    fs.file(additionalArgs.last).parent.childFile('app.so').createSync();
+    final Directory out = fs.file(additionalArgs.last).parent;
+    out.childFile('app.so').createSync();
+    out.childFile('gen_snapshot.d').createSync();
+    out.childFile('snapshot.d.fingerprint').createSync();
     return 0;
   }
 }

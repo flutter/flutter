@@ -83,17 +83,50 @@ List<File> findGenSnapshotAndroidElf(Environment environment) {
   if (buildMode == null) {
     throw MissingDefineException(kBuildMode, 'aot_elf');
   }
-  final String path = artifacts.getArtifactPath(Artifact.genSnapshot,
-      mode: buildMode,
-      platform: use64Bit ? TargetPlatform.android_arm64 : TargetPlatform.android_arm);
-  return <File>[fs.file(path)];
+  HostPlatform hostPlatform;
+  if (platform.isWindows) {
+    hostPlatform = HostPlatform.windows_x64;
+  } else if (platform.isLinux) {
+    hostPlatform = HostPlatform.linux_x64;
+  } else if (platform.isMacOS) {
+    hostPlatform = HostPlatform.darwin_x64;
+  } else {
+    assert(false);
+  }
+  final TargetPlatform targetPlatform = use64Bit
+      ? TargetPlatform.android_arm64
+      : TargetPlatform.android_arm;
+  return <File>[environment
+    .cacheDir
+    .childDirectory('artifacts')
+    .childDirectory('engine')
+    .childDirectory(getNameForTargetPlatform(targetPlatform) + '-' + getNameForBuildMode(buildMode))
+    .childDirectory(getNameForHostPlatform(hostPlatform))
+    .childFile('gen_snapshot')
+  ];
 }
 
 /// Find the frontend server artifact
 List<File> frontendServer(Environment environment) {
-  return <File>[fs.file(
-    artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk),
-  )];
+  HostPlatform hostPlatform;
+  if (platform.isWindows) {
+    hostPlatform = HostPlatform.windows_x64;
+  } else if (platform.isLinux) {
+    hostPlatform = HostPlatform.linux_x64;
+  } else if (platform.isMacOS) {
+      hostPlatform = HostPlatform.darwin_x64;
+  } else {
+    assert(false);
+  }
+  return <File>[
+    fs.file(fs.path.join(
+      environment.cacheDir.path,
+      'artifacts',
+      'engine',
+      getNameForHostPlatform(hostPlatform),
+      'frontend_server.dart.snapshot'),
+    )
+  ];
 }
 
 /// Finds the locations of all dart files within the project.
@@ -144,6 +177,7 @@ const Target aotElf = Target(
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/app.so'),
     Source.pattern('{BUILD_DIR}/gen_snapshot.d'),
+    // TODO(jonahwilliams): remove
     Source.pattern('{BUILD_DIR}/snapshot.d.fingerprint'),
   ],
   dependencies: <Target>[
