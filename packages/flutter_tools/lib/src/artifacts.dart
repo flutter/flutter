@@ -31,6 +31,14 @@ enum Artifact {
   dartdevcSnapshot,
   kernelWorkerSnapshot,
   flutterWebSdk,
+  iosDeploy,
+  ideviceinfo,
+  ideviceId,
+  idevicename,
+  idevicesyslog,
+  idevicescreenshot,
+  ideviceinstaller,
+  iproxy,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -74,6 +82,22 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dartdevc.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
+    case Artifact.iosDeploy:
+      return 'ios-deploy';
+    case Artifact.ideviceinfo:
+      return 'ideviceinfo';
+    case Artifact.ideviceId:
+      return 'idevice_id';
+    case Artifact.idevicename:
+      return 'idevicename';
+    case Artifact.idevicesyslog:
+      return 'idevicesyslog';
+    case Artifact.idevicescreenshot:
+      return 'idevicescreenshot';
+    case Artifact.ideviceinstaller:
+      return 'ideviceinstaller';
+    case Artifact.iproxy:
+      return 'iproxy';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -154,13 +178,25 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+        final String engineDir = _getEngineArtifactsPath(platform, mode);
         return fs.path.join(engineDir, _artifactToFileName(artifact));
+      case Artifact.ideviceId:
+      case Artifact.ideviceinfo:
+      case Artifact.idevicescreenshot:
+      case Artifact.idevicesyslog:
+      case Artifact.idevicename:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.iosDeploy:
+        return fs.path.join(cache.getArtifactDirectory('ios-deploy').path, _artifactToFileName(artifact));
+      case Artifact.ideviceinstaller:
+        return fs.path.join(cache.getArtifactDirectory('ideviceinstaller').path, _artifactToFileName(artifact));
+      case Artifact.iproxy:
+        return fs.path.join(cache.getArtifactDirectory('usbmuxd').path, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -302,6 +338,22 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.ideviceId:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.ideviceinfo:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.ideviceinstaller:
+        return fs.path.join(cache.getArtifactDirectory('ideviceinstaller').path, _artifactToFileName(artifact));
+      case Artifact.idevicename:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.idevicescreenshot:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.idevicesyslog:
+        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
+      case Artifact.iosDeploy:
+        return fs.path.join(cache.getArtifactDirectory('ios-deploy').path, _artifactToFileName(artifact));
+      case Artifact.iproxy:
+        return fs.path.join(cache.getArtifactDirectory('usbmuxd').path, _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

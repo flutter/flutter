@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -46,7 +47,7 @@ class IMobileDevice {
 
   bool get isInstalled {
     return exitsHappy(
-      <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-h'],
+      <String>[artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios), '-h'],
       environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
@@ -62,7 +63,7 @@ class IMobileDevice {
     final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath};
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
-        cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
+        artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
         '-u',
         fakeIphoneId
       ],
@@ -75,7 +76,7 @@ class IMobileDevice {
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(
       <String>[
-        cache.getArtifactFile('libimobiledevice', 'idevice_id'),
+        artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios),
         '-l',
       ],
       environment: executionEnv,
@@ -85,7 +86,7 @@ class IMobileDevice {
 
     // Check that we can look up the names of any attached devices.
     return await exitsHappyAsync(
-      <String>[cache.getArtifactFile('libimobiledevice', 'idevicename')],
+      <String>[artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)],
       environment: executionEnv,
     );
   }
@@ -93,7 +94,7 @@ class IMobileDevice {
   Future<String> getAvailableDeviceIDs() async {
     try {
       final ProcessResult result = await processManager.run(
-        <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-l'],
+        <String>[artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios), '-l'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       if (result.exitCode != 0)
@@ -108,7 +109,7 @@ class IMobileDevice {
     try {
       final ProcessResult result = await processManager.run(
         <String>[
-          cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
+          artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios),
           '-u',
           deviceID,
           '-k',
@@ -129,7 +130,7 @@ class IMobileDevice {
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
     return runCommand(
-      <String>[cache.getArtifactFile('libimobiledevice', 'idevicesyslog'), '-u', deviceID],
+      <String>[artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios), '-u', deviceID],
       environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }
@@ -137,7 +138,7 @@ class IMobileDevice {
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
     return runCheckedAsync(
-      <String>[cache.getArtifactFile('libimobiledevice', 'idevicescreenshot'), outputFile.path],
+      <String>[artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios), outputFile.path],
       environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
     );
   }

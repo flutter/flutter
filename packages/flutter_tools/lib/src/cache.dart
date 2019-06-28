@@ -235,15 +235,6 @@ class Cache {
     return getCacheArtifacts().childDirectory(name);
   }
 
-  /// Get a file in a cached artifact directory; for example:
-  ///
-  /// `getArtifactFileName('libimobiledevice', 'idevice_id');`
-  ///
-  /// will return: `'bin/cache/artifacts/libimobiledevice/idevice_id'`
-  String getArtifactFile(String dirName, String fileName) {
-    return fs.path.join(getArtifactDirectory(dirName).path, fileName);
-  }
-
   String get dyLdLibPath {
     final List<String> paths = <String>[];
     String currentPath;

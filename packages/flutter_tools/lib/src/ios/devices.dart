@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -34,7 +35,7 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final List<String> launchCommand = <String>[
-      cache.getArtifactFile('ios-deploy', 'ios-deploy'),
+      artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios),
       '--id',
       deviceId,
       '--bundle',
@@ -121,8 +122,8 @@ class IOSDevice extends Device {
       _installerPath = null;
       _iproxyPath = null;
     } else {
-      _installerPath = cache.getArtifactFile('ideviceinstaller', 'ideviceinstaller');
-      _iproxyPath = cache.getArtifactFile('usbmuxd', 'iproxy');
+      _installerPath = artifacts.getArtifactPath(Artifact.ideviceinstaller, platform: TargetPlatform.ios);
+      _iproxyPath = artifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios);
     }
   }
 
