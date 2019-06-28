@@ -26,9 +26,12 @@ void configureProject(Project project, String buildDir) {
         }
     }
 
-    String flutterRoot = getFlutterRoot(project)
-    project.dependencies {
-        compileOnly project.files("${flutterRoot}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
+    Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
+    if (!usesFlutterPlugin) {
+        // The Flutter plugin already adds `flutter.jar`.
+        project.dependencies {
+            compileOnly project.files("${getFlutterRoot(project)}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
+        }
     }
 }
 
