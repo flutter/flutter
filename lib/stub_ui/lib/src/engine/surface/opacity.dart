@@ -5,7 +5,7 @@
 part of engine;
 
 /// A surface that makes its children transparent.
-class PersistedOpacity extends PersistedContainerSurface {
+class PersistedOpacity extends PersistedContainerSurface implements ui.OpacityEngineLayer {
   PersistedOpacity(Object paintedBy, this.alpha, this.offset)
       : super(paintedBy);
 

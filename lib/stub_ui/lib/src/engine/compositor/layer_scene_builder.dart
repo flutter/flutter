@@ -4,12 +4,6 @@
 
 part of engine;
 
-class EngineLayerImpl extends ui.EngineLayer {
-  final ContainerLayer _layer;
-
-  EngineLayerImpl(this._layer);
-}
-
 class LayerScene implements ui.Scene {
   final LayerTree layerTree;
 
@@ -60,7 +54,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   void addRetained(ui.EngineLayer retainedLayer) {
     if (currentLayer == null) return;
-    currentLayer.add((retainedLayer as EngineLayerImpl)._layer);
+    currentLayer.add(retainedLayer);
   }
 
   @override
@@ -95,80 +89,81 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  ui.EngineLayer pushBackdropFilter(ui.ImageFilter filter,
-      {Object webOnlyPaintedBy}) {
+  ui.BackdropFilterEngineLayer pushBackdropFilter(ui.ImageFilter filter,
+      {ui.BackdropFilterEngineLayer oldLayer}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.EngineLayer pushClipPath(ui.Path path,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, Object webOnlyPaintedBy}) {
+  ui.ClipPathEngineLayer pushClipPath(ui.Path path,
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipPathEngineLayer oldLayer}) {
     pushLayer(ClipPathLayer(path));
     return null;
   }
 
   @override
-  ui.EngineLayer pushClipRRect(ui.RRect rrect,
-      {ui.Clip clipBehavior, Object webOnlyPaintedBy}) {
+  ui.ClipRRectEngineLayer pushClipRRect(ui.RRect rrect,
+      {ui.Clip clipBehavior, ui.ClipRRectEngineLayer oldLayer}) {
     pushLayer(ClipRRectLayer(rrect));
     return null;
   }
 
   @override
-  ui.EngineLayer pushClipRect(ui.Rect rect,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, Object webOnlyPaintedBy}) {
+  ui.ClipRectEngineLayer pushClipRect(ui.Rect rect,
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipRectEngineLayer oldLayer}) {
     pushLayer(ClipRectLayer(rect));
     return null;
   }
 
   @override
-  ui.EngineLayer pushColorFilter(ui.Color color, ui.BlendMode blendMode,
-      {Object webOnlyPaintedBy}) {
+  ui.ColorFilterEngineLayer pushColorFilter(ui.Color color, ui.BlendMode blendMode,
+      {ui.ColorFilterEngineLayer oldLayer}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.EngineLayer pushOffset(double dx, double dy, {Object webOnlyPaintedBy}) {
+  ui.OffsetEngineLayer pushOffset(double dx, double dy, {ui.OffsetEngineLayer oldLayer}) {
     final matrix = Matrix4.translationValues(dx, dy, 0.0);
     final layer = TransformLayer(matrix);
     pushLayer(layer);
-    return EngineLayerImpl(layer);
+    return layer;
   }
 
   @override
-  ui.EngineLayer pushOpacity(int alpha,
-      {Object webOnlyPaintedBy, ui.Offset offset = ui.Offset.zero}) {
+  ui.OpacityEngineLayer pushOpacity(int alpha,
+      {ui.OpacityEngineLayer oldLayer, ui.Offset offset = ui.Offset.zero}) {
     // TODO(het): Implement opacity
     pushOffset(0.0, 0.0);
     return null;
   }
 
   @override
-  ui.EngineLayer pushPhysicalShape(
+  ui.PhysicalShapeEngineLayer pushPhysicalShape(
       {ui.Path path,
       double elevation,
       ui.Color color,
       ui.Color shadowColor,
       ui.Clip clipBehavior = ui.Clip.none,
-      Object webOnlyPaintedBy}) {
+      ui.PhysicalShapeEngineLayer oldLayer}) {
     final layer =
         PhysicalShapeLayer(elevation, color, shadowColor, path, clipBehavior);
     pushLayer(layer);
-    return EngineLayerImpl(layer);
+    return layer;
   }
 
   @override
-  ui.EngineLayer pushShaderMask(
+  ui.ShaderMaskEngineLayer pushShaderMask(
       ui.Shader shader, ui.Rect maskRect, ui.BlendMode blendMode,
-      {Object webOnlyPaintedBy}) {
+      {ui.ShaderMaskEngineLayer oldLayer}) {
     throw new UnimplementedError();
   }
 
   @override
-  ui.EngineLayer pushTransform(Float64List matrix4, {Object webOnlyPaintedBy}) {
-    final matrix = Matrix4.fromList(matrix4);
-    pushLayer(TransformLayer(matrix));
-    return null;
+  ui.TransformEngineLayer pushTransform(Float64List matrix4, {ui.TransformEngineLayer oldLayer}) {
+    final Matrix4 matrix = Matrix4.fromList(matrix4);
+    final TransformLayer layer = TransformLayer(matrix);
+    pushLayer(layer);
+    return layer;
   }
 
   @override

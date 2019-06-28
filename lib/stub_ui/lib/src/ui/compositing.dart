@@ -39,6 +39,80 @@ class Scene {
   void dispose() {}
 }
 
+/// An opaque handle to a transform engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushTransform].
+///
+/// {@template dart.ui.sceneBuilder.oldLayerCompatibility}
+/// `oldLayer` parameter in [SceneBuilder] methods only accepts objects created
+/// by the engine. [SceneBuilder] will throw an [AssertionError] if you pass it
+/// a custom implementation of this class.
+/// {@endtemplate}
+abstract class TransformEngineLayer implements EngineLayer {}
+
+/// An opaque handle to an offset engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushOffset].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class OffsetEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a clip rect engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushClipRect].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ClipRectEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a clip rounded rect engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushClipRRect].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ClipRRectEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a clip path engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushClipPath].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ClipPathEngineLayer implements EngineLayer {}
+
+/// An opaque handle to an opacity engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushOpacity].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class OpacityEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a color filter engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushColorFilter].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ColorFilterEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a backdrop filter engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushBackdropFilter].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class BackdropFilterEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a shader mask engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushShaderMask].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ShaderMaskEngineLayer implements EngineLayer {}
+
+/// An opaque handle to a physical shape engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushPhysicalShape].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class PhysicalShapeEngineLayer implements EngineLayer {}
+
 /// Builds a [Scene] containing the given visuals.
 ///
 /// A [Scene] can then be rendered using [Window.render].
@@ -108,7 +182,7 @@ class SceneBuilder {
   /// This is equivalent to [pushTransform] with a matrix with only translation.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushOffset(double dx, double dy) {
+  OffsetEngineLayer pushOffset(double dx, double dy, { OffsetEngineLayer oldLayer }) {
     return _pushSurface(engine.PersistedOffset(null, dx, dy));
   }
 
@@ -117,7 +191,7 @@ class SceneBuilder {
   /// The objects are transformed by the given matrix before rasterization.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushTransform(Float64List matrix4) {
+  TransformEngineLayer pushTransform(Float64List matrix4, { TransformEngineLayer oldLayer }) {
     if (matrix4 == null) {
       throw new ArgumentError('"matrix4" argument cannot be null');
     }
@@ -133,8 +207,8 @@ class SceneBuilder {
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
-  EngineLayer pushClipRect(Rect rect,
-      {Clip clipBehavior = Clip.antiAlias}) {
+  ClipRectEngineLayer pushClipRect(Rect rect,
+      {Clip clipBehavior = Clip.antiAlias, ClipRectEngineLayer oldLayer }) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
     return _pushSurface(engine.PersistedClipRect(null, rect));
@@ -145,8 +219,8 @@ class SceneBuilder {
   /// Rasterization outside the given rounded rectangle is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushClipRRect(RRect rrect,
-      {Clip clipBehavior}) {
+  ClipRRectEngineLayer pushClipRRect(RRect rrect,
+      {Clip clipBehavior, ClipRRectEngineLayer oldLayer }) {
     return _pushSurface(
         engine.PersistedClipRRect(null, rrect, clipBehavior));
   }
@@ -156,8 +230,8 @@ class SceneBuilder {
   /// Rasterization outside the given path is discarded.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushClipPath(Path path,
-      {Clip clipBehavior = Clip.antiAlias}) {
+  ClipPathEngineLayer pushClipPath(Path path,
+      {Clip clipBehavior = Clip.antiAlias, ClipPathEngineLayer oldLayer }) {
     assert(clipBehavior != null);
     assert(clipBehavior != Clip.none);
     return _pushSurface(
@@ -172,10 +246,9 @@ class SceneBuilder {
   /// opacity).
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushOpacity(int alpha,
-      {Offset offset = Offset.zero}) {
-    return _pushSurface(
-        engine.PersistedOpacity(null, alpha, offset));
+  OpacityEngineLayer pushOpacity(int alpha,
+      {Offset offset = Offset.zero, OpacityEngineLayer oldLayer}) {
+    return _pushSurface(engine.PersistedOpacity(null, alpha, offset));
   }
 
   /// Pushes a color filter operation onto the operation stack.
@@ -184,7 +257,7 @@ class SceneBuilder {
   /// blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushColorFilter(Color color, BlendMode blendMode) {
+  ColorFilterEngineLayer pushColorFilter(Color color, BlendMode blendMode, { ColorFilterEngineLayer oldLayer }) {
     throw new UnimplementedError();
   }
 
@@ -194,7 +267,7 @@ class SceneBuilder {
   /// rasterizing the given objects.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushBackdropFilter(ImageFilter filter) {
+  BackdropFilterEngineLayer pushBackdropFilter(ImageFilter filter, { BackdropFilterEngineLayer oldLayer }) {
     throw new UnimplementedError();
   }
 
@@ -204,7 +277,7 @@ class SceneBuilder {
   /// rectangle using the given blend mode.
   ///
   /// See [pop] for details about the operation stack.
-  EngineLayer pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode) {
+  ShaderMaskEngineLayer pushShaderMask(Shader shader, Rect maskRect, BlendMode blendMode, { ShaderMaskEngineLayer oldLayer }) {
     throw new UnimplementedError();
   }
 
@@ -220,12 +293,13 @@ class SceneBuilder {
   /// color of the layer background.
   ///
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
-  EngineLayer pushPhysicalShape({
+  PhysicalShapeEngineLayer pushPhysicalShape({
     Path path,
     double elevation,
     Color color,
     Color shadowColor,
     Clip clipBehavior = Clip.none,
+    PhysicalShapeEngineLayer oldLayer,
   }) {
     return _pushSurface(engine.PersistedPhysicalShape(
       null,

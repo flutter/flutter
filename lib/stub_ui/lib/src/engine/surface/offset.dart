@@ -5,7 +5,7 @@
 part of engine;
 
 /// A surface that translates its children using CSS transform and translate.
-class PersistedOffset extends PersistedContainerSurface {
+class PersistedOffset extends PersistedContainerSurface implements ui.OffsetEngineLayer {
   PersistedOffset(Object paintedBy, this.dx, this.dy) : super(paintedBy);
 
   /// Horizontal displacement.

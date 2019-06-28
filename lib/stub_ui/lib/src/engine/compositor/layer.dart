@@ -8,7 +8,7 @@ part of engine;
 ///
 /// A layer is the lowest-level rendering primitive. It represents an atomic
 /// painting command.
-abstract class Layer {
+abstract class Layer implements ui.EngineLayer {
   /// The layer that contains us as a child.
   ContainerLayer parent;
 
@@ -173,7 +173,7 @@ class ClipRRectLayer extends ContainerLayer {
 }
 
 /// A layer that transforms its child layers by the given transform matrix.
-class TransformLayer extends ContainerLayer {
+class TransformLayer extends ContainerLayer implements ui.OffsetEngineLayer, ui.TransformEngineLayer {
   /// The matrix with which to transform the child layers.
   final Matrix4 _transform;
 
@@ -287,7 +287,7 @@ class PictureLayer extends Layer {
 ///
 /// The shape clips its children to a given [Path], and casts a shadow based
 /// on the given elevation.
-class PhysicalShapeLayer extends ContainerLayer {
+class PhysicalShapeLayer extends ContainerLayer implements ui.PhysicalShapeEngineLayer {
   final double _elevation;
   final ui.Color _color;
   final ui.Color _shadowColor;

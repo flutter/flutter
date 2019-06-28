@@ -56,7 +56,7 @@ mixin _DomClip on PersistedContainerSurface {
 }
 
 /// A surface that creates a rectangular clip.
-class PersistedClipRect extends PersistedContainerSurface with _DomClip {
+class PersistedClipRect extends PersistedContainerSurface with _DomClip implements ui.ClipRectEngineLayer {
   PersistedClipRect(Object paintedBy, this.rect) : super(paintedBy);
 
   final ui.Rect rect;
@@ -99,7 +99,7 @@ class PersistedClipRect extends PersistedContainerSurface with _DomClip {
 }
 
 /// A surface that creates a rounded rectangular clip.
-class PersistedClipRRect extends PersistedContainerSurface with _DomClip {
+class PersistedClipRRect extends PersistedContainerSurface with _DomClip implements ui.ClipRRectEngineLayer {
   PersistedClipRRect(Object paintedBy, this.rrect, this.clipBehavior)
       : super(paintedBy);
 
@@ -148,7 +148,7 @@ class PersistedClipRRect extends PersistedContainerSurface with _DomClip {
   }
 }
 
-class PersistedPhysicalShape extends PersistedContainerSurface with _DomClip {
+class PersistedPhysicalShape extends PersistedContainerSurface with _DomClip implements ui.PhysicalShapeEngineLayer {
   PersistedPhysicalShape(Object paintedBy, this.path, this.elevation, int color,
       int shadowColor, this.clipBehavior)
       : this.color = ui.Color(color),
@@ -313,7 +313,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface with _DomClip {
 }
 
 /// A surface that clips it's children.
-class PersistedClipPath extends PersistedContainerSurface {
+class PersistedClipPath extends PersistedContainerSurface implements ui.ClipPathEngineLayer {
   PersistedClipPath(Object paintedBy, this.clipPath, this.clipBehavior)
       : super(paintedBy);
 
