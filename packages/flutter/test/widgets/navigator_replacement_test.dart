@@ -38,43 +38,53 @@ void main() {
     expect(find.text('b'), findsNothing);
     expect(find.text('home'), findsOneWidget);
   });
+  group('pushAndRemoveUntil', () {
+    // TODO(Piinks): add observers to check notifications
 
-  testWidgets('pushAndRemoveUntil', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: const Material(child: Text('home')),
-      routes: <String, WidgetBuilder>{
-        '/a': (BuildContext context) => const Material(child: Text('a')),
-        '/b': (BuildContext context) => const Material(child: Text('b')),
-      },
-    ));
+    testWidgets('basic', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: const Material(child: Text('home')),
+        routes: <String, WidgetBuilder>{
+          '/a': (BuildContext context) => const Material(child: Text('a')),
+          '/b': (BuildContext context) => const Material(child: Text('b')),
+        },
+      ));
 
-    final NavigatorState navigator = tester.state(find.byType(Navigator));
-    navigator.pushNamed('/a');
-    await tester.pumpAndSettle();
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+      navigator.pushNamed('/a');
+      await tester.pumpAndSettle();
 
-    expect(find.text('home', skipOffstage: false), findsOneWidget);
-    expect(find.text('a', skipOffstage: false), findsOneWidget);
-    expect(find.text('b', skipOffstage: false), findsNothing);
+      expect(find.text('home', skipOffstage: false), findsOneWidget);
+      expect(find.text('a', skipOffstage: false), findsOneWidget);
+      expect(find.text('b', skipOffstage: false), findsNothing);
 
-    navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
-    await tester.pumpAndSettle();
+      // Remove all routes below
+      navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
+      await tester.pumpAndSettle();
 
-    expect(find.text('home', skipOffstage: false), findsNothing);
-    expect(find.text('a', skipOffstage: false), findsNothing);
-    expect(find.text('b', skipOffstage: false), findsOneWidget);
+      expect(find.text('home', skipOffstage: false), findsNothing);
+      expect(find.text('a', skipOffstage: false), findsNothing);
+      expect(find.text('b', skipOffstage: false), findsOneWidget);
 
-    navigator.pushNamed('/');
-    await tester.pumpAndSettle();
+      navigator.pushNamed('/');
+      await tester.pumpAndSettle();
 
-    expect(find.text('home', skipOffstage: false), findsOneWidget);
-    expect(find.text('a', skipOffstage: false), findsNothing);
-    expect(find.text('b', skipOffstage: false), findsOneWidget);
+      expect(find.text('home', skipOffstage: false), findsOneWidget);
+      expect(find.text('a', skipOffstage: false), findsNothing);
+      expect(find.text('b', skipOffstage: false), findsOneWidget);
 
-    navigator.pushNamedAndRemoveUntil('/a', ModalRoute.withName('/b'));
-    await tester.pumpAndSettle();
+      navigator.pushNamedAndRemoveUntil('/a', ModalRoute.withName('/b'));
+      await tester.pumpAndSettle();
 
-    expect(find.text('home', skipOffstage: false), findsNothing);
-    expect(find.text('a', skipOffstage: false), findsOneWidget);
-    expect(find.text('b', skipOffstage: false), findsOneWidget);
+      expect(find.text('home', skipOffstage: false), findsNothing);
+      expect(find.text('a', skipOffstage: false), findsOneWidget);
+      expect(find.text('b', skipOffstage: false), findsOneWidget);
+
+      // TODO(Piinks): Remove more than one
+    });
+
+    // TODO(Piinks): Check for Hero assertion
+
+    // TODO(Piinks): Check for Page transition animation
   });
 }
