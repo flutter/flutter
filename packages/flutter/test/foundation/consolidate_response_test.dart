@@ -16,8 +16,8 @@ import '../flutter_test_alternative.dart';
 
 void main() {
   group(consolidateHttpClientResponseBytes, () {
-    final List<int> chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
-    final List<int> chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
+    final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
+    final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
     MockHttpClientResponse response;
 
     setUp(() {
@@ -34,8 +34,8 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return Stream<List<int>>.fromIterable(
-            <List<int>>[chunkOne, chunkTwo]).listen(
+        return Stream<Uint8List>.fromIterable(
+            <Uint8List>[chunkOne, chunkTwo]).listen(
           onData,
           onDone: onDone,
           onError: onError,
@@ -100,8 +100,8 @@ void main() {
         final void Function() onDone = invocation.namedArguments[#onDone];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-        return Stream<List<int>>.fromFuture(
-                Future<List<int>>.error(Exception('Test Error')))
+        return Stream<Uint8List>.fromFuture(
+                Future<Uint8List>.error(Exception('Test Error')))
             .listen(
           onData,
           onDone: onDone,
@@ -128,9 +128,9 @@ void main() {
     });
 
     group('when gzipped', () {
-      final List<int> gzipped = gzip.encode(chunkOne.followedBy(chunkTwo).toList());
-      final List<int> gzippedChunkOne = gzipped.sublist(0, gzipped.length ~/ 2);
-      final List<int> gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
+      final Uint8List gzipped = gzip.encode(chunkOne.followedBy(chunkTwo).toList());
+      final Uint8List gzippedChunkOne = gzipped.sublist(0, gzipped.length ~/ 2);
+      final Uint8List gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
 
       setUp(() {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
@@ -145,8 +145,8 @@ void main() {
           final void Function() onDone = invocation.namedArguments[#onDone];
           final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-          return Stream<List<int>>.fromIterable(
-              <List<int>>[gzippedChunkOne, gzippedChunkTwo]).listen(
+          return Stream<Uint8List>.fromIterable(
+              <Uint8List>[gzippedChunkOne, gzippedChunkTwo]).listen(
             onData,
             onDone: onDone,
             onError: onError,

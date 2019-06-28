@@ -23,7 +23,7 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return <String, Object>{'type': 'Sentinel', 'kind': 'Collected', 'valueAsString': '<collected>'};
       });
-    final Map<String, Object> result = await collect(null, (String predicate) => true, (Uri uri) async {
+    final Map<String, Object> result = await collect(null, (String predicate) => true, connector: (Uri uri) async {
       return mockVMService;
     });
 

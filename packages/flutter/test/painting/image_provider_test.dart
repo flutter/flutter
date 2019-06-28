@@ -197,7 +197,7 @@ void main() {
         debugNetworkImageHttpClientProvider = respondOnAny;
 
         const int chunkSize = 8;
-        final List<List<int>> chunks = createChunks(chunkSize);
+        final List<Uint8List> chunks = createChunks(chunkSize);
 
         final Completer<void> imageAvailable = Completer<void>();
         final ImageProvider imageProvider = NetworkImage(nonconst('foo'));
@@ -270,7 +270,7 @@ HttpClient throwErrorOnAny() {
 
 HttpClient respondOnAny() {
   const int chunkSize = 8;
-  final List<List<int>> chunks = createChunks(chunkSize);
+  final List<Uint8List> chunks = createChunks(chunkSize);
   final MockHttpClientRequest request = MockHttpClientRequest();
   final MockHttpClientResponse response = MockHttpClientResponse();
   final MockHttpClient httpClient = MockHttpClient();
@@ -284,12 +284,12 @@ HttpClient respondOnAny() {
     onError: anyNamed('onError'),
     cancelOnError: anyNamed('cancelOnError'),
   )).thenAnswer((Invocation invocation) {
-    final void Function(List<int>) onData = invocation.positionalArguments[0];
+    final void Function(Uint8List) onData = invocation.positionalArguments[0];
     final void Function(Object) onError = invocation.namedArguments[#onError];
     final void Function() onDone = invocation.namedArguments[#onDone];
     final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-    return Stream<List<int>>.fromIterable(chunks).listen(
+    return Stream<Uint8List>.fromIterable(chunks).listen(
       onData,
       onDone: onDone,
       onError: onError,
@@ -303,7 +303,7 @@ HttpClient respondOnAnyWithHeaders() {
   final List<Invocation> invocations = <Invocation>[];
 
   const int chunkSize = 8;
-  final List<List<int>> chunks = createChunks(chunkSize);
+  final List<Uint8List> chunks = createChunks(chunkSize);
   final MockHttpClientRequest request = MockHttpClientRequest();
   final MockHttpClientResponse response = MockHttpClientResponse();
   final MockHttpClient httpClient = MockHttpClient();
@@ -332,12 +332,12 @@ HttpClient respondOnAnyWithHeaders() {
     onError: anyNamed('onError'),
     cancelOnError: anyNamed('cancelOnError'),
   )).thenAnswer((Invocation invocation) {
-    final void Function(List<int>) onData = invocation.positionalArguments[0];
+    final void Function(Uint8List) onData = invocation.positionalArguments[0];
     final void Function(Object) onError = invocation.namedArguments[#onError];
     final void Function() onDone = invocation.namedArguments[#onDone];
     final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-    return Stream<List<int>>.fromIterable(chunks).listen(
+    return Stream<Uint8List>.fromIterable(chunks).listen(
       onData,
       onDone: onDone,
       onError: onError,
