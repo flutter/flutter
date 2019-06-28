@@ -607,6 +607,65 @@ class MemoryTest {
   }
 }
 
+class ReportedDurationTest {
+  ReportedDurationTest(this.project, this.test, this.package, this.durationPattern);
+
+  final String project;
+  final String test;
+  final String package;
+  final RegExp durationPattern;
+
+  final Completer<int> durationCompleter = Completer<int>();
+
+  int get iterationCount => 10;
+
+  Device get device => _device;
+  Device _device;
+
+  Future<TaskResult> run() {
+    return inDirectory<TaskResult>(project, () async {
+      // This test currently only works on Android, because device.logcat,
+      // device.getMemoryStats, etc, aren't implemented for iOS.
+
+      _device = await devices.workingDevice;
+      await device.unlock();
+      await flutter('packages', options: <String>['get']);
+
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
+        await prepareProvisioningCertificates(project);
+
+      final StreamSubscription<String> adb = device.logcat.listen(
+        (String data) {
+          if (durationPattern.hasMatch(data))
+            durationCompleter.complete(int.parse(durationPattern.firstMatch(data).group(1)));
+        },
+      );
+      print('launching $project$test on device...');
+      await flutter('run', options: <String>[
+        '--verbose',
+        '--release',
+        '--no-resident',
+        '-d', device.deviceId,
+        test,
+      ]);
+
+      final int duration = await durationCompleter.future;
+      print('terminating...');
+      await device.stop(package);
+      await adb.cancel();
+
+      _device = null;
+
+      final Map<String, dynamic> reportedDuration = <String, dynamic>{
+        'duration': duration
+      };
+      _device = null;
+
+      return TaskResult.success(reportedDuration, benchmarkScoreKeys: reportedDuration.keys.toList());
+    });
+  }
+}
+
 /// Holds simple statistics of an odd-lengthed list of integers.
 class ListStatistics {
   factory ListStatistics(Iterable<int> data) {
