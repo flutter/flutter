@@ -15,7 +15,6 @@
             "fuchsia.net.SocketProvider",
             "fuchsia.sysmem.Allocator",
             "fuchsia.timezone.Timezone",
-            "fuchsia.tracelink.Registry",
             "fuchsia.tracing.provider.Registry",
             "fuchsia.vulkan.loader.Loader"
         ]
