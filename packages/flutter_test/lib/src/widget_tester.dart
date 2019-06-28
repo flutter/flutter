@@ -173,7 +173,7 @@ void testWidgets(
 Future<void> benchmarkWidgets(
   WidgetTesterCallback callback, {
   bool mayRunWithAsserts = false,
-  bool semanticsEnabled = true,
+  bool semanticsEnabled = false,
 }) {
   assert(() {
     if (mayRunWithAsserts)
