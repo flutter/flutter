@@ -10,12 +10,20 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('The Ink widget renders a Container by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: Ink(),
+      ),
+    );
+    RenderBox container = tester.renderObject(find.byType(Container));
+    expect(container.size.height, 600.0);
+    expect(container.size.width, 800.0);
+
     const double height = 150.0;
     const double width = 200.0;
     await tester.pumpWidget(
-      Align(
-        alignment: Alignment.topLeft,
-        child: Material(
+      Material(
+        child: Center( // used to constrain to child's size
           child: Ink(
             height: height,
             width: width,
@@ -23,8 +31,9 @@ void main() {
         ),
       ),
     );
+    await tester.pumpAndSettle();
 
-    final RenderBox container = tester.renderObject(find.byType(Container));
+    container = tester.renderObject(find.byType(Container));
     expect(container.size.height, height);
     expect(container.size.width, width);
   });
