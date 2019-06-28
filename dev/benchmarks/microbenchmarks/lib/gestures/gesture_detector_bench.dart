@@ -6,7 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../common.dart';
-import './button_matrix_app.dart' as button_matrix;
+import './apps/button_matrix_app.dart' as button_matrix;
 
 const int _kNumWarmUpIters = 20;
 const int _kNumIters = 300;
@@ -22,7 +22,8 @@ Future<void> main() async {
     await tester.pump(const Duration(seconds: 1));
 
     Future<void> iter() async {
-      await tester.tapAt(const Offset(760.0, 30.0)); // Close drawer
+      // Press a button to update the screen
+      await tester.tapAt(const Offset(760.0, 30.0));
       await tester.pump();
     }
 
@@ -39,10 +40,10 @@ Future<void> main() async {
 
   final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
-    description: 'GestureDetector semantics',
+    description: 'GestureDetector',
     value: watch.elapsedMicroseconds / _kNumIters,
     unit: 'µs per iteration',
-    name: 'gesture_detector_semantics_bench',
+    name: 'gesture_detector_bench',
   );
   printer.printToStdout();
 }
