@@ -31,7 +31,6 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-
     expect(tester.getSize(find.byType(Container)).height, height);
     expect(tester.getSize(find.byType(Container)).width, width);
   });
