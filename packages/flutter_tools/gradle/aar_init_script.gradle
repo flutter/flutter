@@ -5,14 +5,14 @@ import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.tasks.Upload
 
 void configureProject(Project project, String buildDir) {
-    if (!project.hasProperty('android')) {
+    if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
     if (!project.android.hasProperty("libraryVariants")) {
         throw new GradleException("Can't generate AAR on a non Android library project.");
     }
 
-    project.apply plugin: 'maven'
+    project.apply plugin: "maven"
 
     project.android.libraryVariants.all { variant ->
         setupLibraryVariant(project, buildDir, variant)
@@ -97,9 +97,9 @@ projectsEvaluated {
         configureProject(rootProject)
     }
     // In module projects, the Android library project is the `:flutter` subproject.
-    Project androidSubproject = rootProject.subprojects.find { it.name == 'flutter' }
+    Project androidSubproject = rootProject.subprojects.find { it.name == "flutter" }
     // In module projects, the `buildDir` is defined in the `:app` subproject.
-    Project appSubproject = rootProject.subprojects.find { it.name == 'app' }
+    Project appSubproject = rootProject.subprojects.find { it.name == "app" }
 
     assert appSubproject != null
     String buildDir = appSubproject.hasProperty("build-dir") ?
