@@ -348,7 +348,7 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
   final bool _isStable;
 
   @override
-  bool get isStable => _isStable;
+  bool get isMaster => !_isStable;
 }
 
 class MockClock extends Mock implements SystemClock {}
