@@ -503,7 +503,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices().toList();
+    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -512,16 +512,6 @@ abstract class FlutterCommand extends Command<void> {
       printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      printNoConnectedDevices();
-      return null;
-    }
-
-    devices = devices.where((Device device) => device.isSupported()).toList();
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      devices = filterDevices(devices);
-    }
-
-    if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
@@ -565,7 +555,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -661,17 +651,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;
@@ -693,25 +683,4 @@ abstract class FastFlutterCommand extends FlutterCommand {
       body: runCommand,
     );
   }
-}
-
-// If the user has not specified all devices and has multiple connected
-// then filter the list by those supported in the current project and
-// remove non-ephemeral device types. If this ends up with a single
-// device we can proceed as normal.
-@visibleForTesting
-List<Device> filterDevices(List<Device> devices) {
-  final FlutterProject flutterProject = FlutterProject.current();
-  devices = devices
-      .where((Device device) => device.isSupportedForProject(flutterProject))
-      .toList();
-
-  // Note: ephemeral is nullable for device types where this is not well
-  // defined.
-  if (devices.any((Device device) => device.ephemeral == true)) {
-    devices = devices
-        .where((Device device) => device.ephemeral == true)
-        .toList();
-  }
-  return devices;
 }

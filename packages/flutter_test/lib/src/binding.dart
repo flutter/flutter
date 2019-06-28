@@ -1900,7 +1900,9 @@ class _MockHttpResponse implements HttpClientResponse {
     bool Function(Uint8List element) test, {
     List<int> Function() orElse,
   }) {
-    return _delegate.firstWhere(test, orElse: orElse);
+    return _delegate.firstWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
   }
 
   @override
@@ -1940,7 +1942,9 @@ class _MockHttpResponse implements HttpClientResponse {
     bool Function(Uint8List element) test, {
     List<int> Function() orElse,
   }) {
-    return _delegate.lastWhere(test, orElse: orElse);
+    return _delegate.lastWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
   }
 
   @override
@@ -1953,12 +1957,14 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Future<dynamic> pipe(StreamConsumer<List<int>> streamConsumer) {
-    return _delegate.pipe(streamConsumer);
+    return _delegate.cast<List<int>>().pipe(streamConsumer);
   }
 
   @override
   Future<Uint8List> reduce(List<int> Function(Uint8List previous, Uint8List element) combine) {
-    return _delegate.reduce(combine);
+    return _delegate.reduce((Uint8List previous, Uint8List element) {
+      return Uint8List.fromList(combine(previous, element));
+    });
   }
 
   @override
@@ -1966,7 +1972,9 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Future<Uint8List> singleWhere(bool Function(Uint8List element) test, {List<int> Function() orElse}) {
-    return _delegate.singleWhere(test, orElse: orElse);
+    return _delegate.singleWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
   }
 
   @override
@@ -2009,7 +2017,7 @@ class _MockHttpResponse implements HttpClientResponse {
 
   @override
   Stream<S> transform<S>(StreamTransformer<List<int>, S> streamTransformer) {
-    return _delegate.transform<S>(streamTransformer);
+    return _delegate.cast<List<int>>().transform<S>(streamTransformer);
   }
 
   @override

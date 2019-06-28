@@ -8,7 +8,9 @@ import 'dart:convert'; // ignore: dart_convert_import
 import 'dart:io'; // ignore: dart_io_import
 import 'dart:isolate';
 
-import 'package:analyzer/analyzer.dart'; // ignore: deprecated_member_use
+import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/analysis/results.dart';
+import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:build_runner/build_runner.dart' as build_runner;
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
@@ -447,11 +449,13 @@ Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
   assert(dartId.extension == '.dart');
   // Skip reporting errors here, dartdevc will report them later with nicer
   // formatting.
-  final CompilationUnit parsed = parseCompilationUnit(await reader.readAsString(dartId),
-      suppressErrors: true);
+  final ParseStringResult result = parseString(
+    content: await reader.readAsString(dartId),
+    throwIfDiagnostics: false,
+  );
   // Allow two or fewer arguments so that entrypoints intended for use with
   // [spawnUri] get counted.
-  return parsed.declarations.any((CompilationUnitMember node) {
+  return result.unit.declarations.any((CompilationUnitMember node) {
     return node is FunctionDeclaration &&
         node.name.name == 'main' &&
         node.functionExpression.parameters.parameters.length <= 2;
