@@ -29,6 +29,7 @@ struct VulkanImage {
   VulkanImage(VulkanImage&&) = default;
   VulkanImage& operator=(VulkanImage&&) = default;
 
+  VkExternalMemoryImageCreateInfo vk_external_image_create_info;
   VkImageCreateInfo vk_image_create_info;
   VkMemoryRequirements vk_memory_requirements;
   vulkan::VulkanHandle<VkImage> vk_image;

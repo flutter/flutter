@@ -36,9 +36,14 @@ bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
   // garnet/public/lib/escher/util/image_utils.cc) or else the different vulkan
   // devices may interpret the bytes differently.
   // TODO(SCN-1369): Use API to coordinate this with scenic.
+  out_vulkan_image->vk_external_image_create_info = {
+      .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+      .pNext = nullptr,
+      .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_TEMP_ZIRCON_VMO_BIT_FUCHSIA,
+  };
   out_vulkan_image->vk_image_create_info = {
       .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
-      .pNext = nullptr,
+      .pNext = &out_vulkan_image->vk_external_image_create_info,
       .flags = VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT,
       .imageType = VK_IMAGE_TYPE_2D,
       .format = VK_FORMAT_B8G8R8A8_UNORM,
