@@ -560,7 +560,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile(
         'text_golden.DecorationThickness.1.png',
-        version: 1,
+        version: 0,
       ),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
