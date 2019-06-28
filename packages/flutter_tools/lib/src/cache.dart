@@ -83,24 +83,13 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
-      for (String artifactName in iosUsbArtifactNames) {
+      for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
     } else {
       _artifacts.addAll(artifacts);
     }
   }
-
-  /// The names of iOS/USB utility artifacts in the cache.
-  static const List<String> iosUsbArtifactNames = <String>[
-    'libimobiledevice',
-    'usbmuxd',
-    'libplist',
-    'openssl',
-    'ideviceinstaller',
-    'libtasn1',
-    'ios-deploy',
-  ];
 
   static const List<String> _hostsBlockedInChina = <String> [
     'storage.googleapis.com',
@@ -236,6 +225,9 @@ class Cache {
   }
 
   String get dyLdLibPath {
+    if (_dyLdLibPath != null) {
+      return _dyLdLibPath;
+    }
     final List<String> paths = <String>[];
     String currentPath;
     for (CachedArtifact artifact in _artifacts) {
@@ -244,8 +236,10 @@ class Cache {
         paths.add(currentPath);
       }
     }
-    return paths.join(':');
+    _dyLdLibPath = paths.join(':');
+    return _dyLdLibPath;
   }
+  String _dyLdLibPath;
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.
@@ -354,6 +348,7 @@ abstract class CachedArtifact {
   // artifact name.
   String get stampName => name;
 
+  /// Returns a string to be set as environment DYLD_LIBARY_PATH variable
   String get dyLdLibPath => '';
 
   /// All development artifacts this cache provides.
@@ -931,6 +926,16 @@ class IosUsbArtifacts extends CachedArtifact {
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
+
+  static const List<String> artifactNames = <String>[
+    'libimobiledevice',
+    'usbmuxd',
+    'libplist',
+    'openssl',
+    'ideviceinstaller',
+    'libtasn1',
+    'ios-deploy',
+  ];
 
   @override
   String get dyLdLibPath {

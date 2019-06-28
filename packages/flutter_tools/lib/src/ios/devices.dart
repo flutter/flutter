@@ -34,8 +34,11 @@ class IOSDeploy {
     @required String bundlePath,
     @required List<String> launchArguments,
   }) async {
+    final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    const List<String> fallbackIosDeployPath = <String>['/usr/bin/env', 'ios-deploy']; // TODO(fujino): remove fallback once g3 updated
+    final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
     final List<String> launchCommand = <String>[
-      artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios) ?? 'ios-deploy', // TODO(fujino): remove fallback once g3 updated
+      ...commandList,
       '--id',
       deviceId,
       '--bundle',
@@ -57,7 +60,7 @@ class IOSDeploy {
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibPath ?? ''; // TODO(fujino): remove fallback once g3 updated
+    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibPath;
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -582,7 +585,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
           devicePort.toString(),
           device.id,
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath ?? ''}, // TODO(fujino): remove fallback once g3 updated
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
