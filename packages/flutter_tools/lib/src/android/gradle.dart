@@ -374,11 +374,13 @@ Future<void> buildGradleAar({
 
   final String gradle = await _ensureGradle(flutterProject);
   final String gradlePath = fs.file(gradle).absolute.path;
-  final List<String> command = <String>[gradlePath];
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
   final String initScript = '$flutterRoot/packages/flutter_tools/gradle/aar_init_script.gradle';
-
-  command.add('-I=$initScript');
+  final List<String> command = <String>[
+    gradlePath,
+    '-I=$initScript',
+    '-Pflutter-root=$flutterRoot',
+  ];
 
   if (target != null) {
     command.add('-Ptarget=$target');
