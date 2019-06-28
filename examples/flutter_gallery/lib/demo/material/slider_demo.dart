@@ -365,15 +365,19 @@ class _RangeSlidersState extends State<_RangeSliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              RangeSlider(
-                values: _continuousValues,
-                min: 0.0,
-                max: 100.0,
-                onChanged: (RangeValues values) {
-                  setState(() {
-                    _continuousValues = values;
-                  });
-                },
+              SliderTheme(
+                data: SliderThemeData(showValueIndicator: ShowValueIndicator.always),
+                child: RangeSlider(
+                  values: _continuousValues,
+                  min: 0.0,
+                  max: 100.0,
+                  labels: RangeLabels('${_continuousValues.start.round()}', '${_continuousValues.end.round()}'),
+                  onChanged: (RangeValues values) {
+                    setState(() {
+                      _continuousValues = values;
+                    });
+                  },
+                ),
               ),
               const Text('Continuous'),
             ],

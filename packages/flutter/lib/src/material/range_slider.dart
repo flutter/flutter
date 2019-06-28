@@ -1241,8 +1241,9 @@ class _RenderRangeSlider extends RenderBox {
     final TextPainter topLabelPainter = isLastThumbStart ? _startLabelPainter : _endLabelPainter;
     final double bottomValue = isLastThumbStart ? endValue : startValue;
     final double topValue = isLastThumbStart ? startValue : endValue;
+    final bool shouldPaintValueIndicators = isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator;
 
-    if (isEnabled && labels != null && !_valueIndicatorAnimation.isDismissed && showValueIndicator) {
+    if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
         context,
         bottomThumbCenter,
@@ -1257,6 +1258,21 @@ class _RenderRangeSlider extends RenderBox {
         thumb: bottomThumb,
         value: bottomValue,
       );
+    }
+
+    _sliderTheme.rangeThumbShape.paint(
+      context,
+      bottomThumbCenter,
+      activationAnimation: _valueIndicatorAnimation,
+      enableAnimation: _enableAnimation,
+      isDiscrete: isDiscrete,
+      isOnTop: false,
+      textDirection: textDirection,
+      sliderTheme: _sliderTheme,
+      thumb: bottomThumb,
+    );
+
+    if (shouldPaintValueIndicators) {
       _sliderTheme.rangeValueIndicatorShape.paint(
         context,
         topThumbCenter,
@@ -1273,17 +1289,6 @@ class _RenderRangeSlider extends RenderBox {
       );
     }
 
-    _sliderTheme.rangeThumbShape.paint(
-      context,
-      bottomThumbCenter,
-      activationAnimation: _valueIndicatorAnimation,
-      enableAnimation: _enableAnimation,
-      isDiscrete: isDiscrete,
-      isOnTop: false,
-      textDirection: textDirection,
-      sliderTheme: _sliderTheme,
-      thumb: bottomThumb,
-    );
     _sliderTheme.rangeThumbShape.paint(
       context,
       topThumbCenter,

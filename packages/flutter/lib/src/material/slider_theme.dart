@@ -2335,18 +2335,11 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
           break;
       }
 
-      final Paint strokePaint = Paint()
-        ..color = sliderTheme.overlappingShapeStrokeColor
-        ..strokeWidth = 1.0
-        ..style = PaintingStyle.stroke;
-      if (showValueIndicator && activationAnimation.value > 0) {
-        // If there is a value indicator, then it is already stroked and a gap
-        // needs to be left on the thumb where the value indicator intersects
-        // the thumb.
-        const double startAngle = -math.pi / 2 + 0.2;
-        const double sweepAngle = math.pi * 2 - 0.4;
-        canvas.drawArc(Rect.fromCircle(center: center, radius: radius), startAngle, sweepAngle, false, strokePaint);
-      } else {
+      if (!showValueIndicator || activationAnimation.value == 0) {
+        final Paint strokePaint = Paint()
+          ..color = sliderTheme.overlappingShapeStrokeColor
+          ..strokeWidth = 1.0
+          ..style = PaintingStyle.stroke;
         canvas.drawCircle(center, radius, strokePaint);
       }
     }
@@ -2551,20 +2544,13 @@ class _PaddleSliderTrackShapePathPainter {
   static const double _topLobeRadius = 16.0;
   // Designed size of the label text. This is the size that the value indicator
   // was designed to contain. We scale it from here to fit other sizes.
-  static const double _labelTextDesignSize = 14.0;
+  static const double _labelTextDesignSize = 16.0;
   // Radius of the bottom lobe of the value indicator.
-  static const double _bottomLobeRadius = 6.0;
-  // The starting angle for the bottom lobe. Picked to get the desired
-  // thickness for the neck.
-  static const double _bottomLobeStartAngle = -1.1 * math.pi / 4.0;
-  // The ending angle for the bottom lobe. Picked to get the desired
-  // thickness for the neck.
-  static const double _bottomLobeEndAngle = 1.1 * 5 * math.pi / 4.0;
-  // The padding on either side of the label.
+  static const double _bottomLobeRadius = 10.0;
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
   static const Offset _topLobeCenter = Offset(0.0, -_distanceBetweenTopBottomCenters);
-  static const double _topNeckRadius = 14.0;
+  static const double _topNeckRadius = 13.0;
   // The length of the hypotenuse of the triangle formed by the center
   // of the left top lobe arc and the center of the top left neck arc.
   // Used to calculate the position of the center of the arc.
@@ -2580,16 +2566,13 @@ class _PaddleSliderTrackShapePathPainter {
   // be checked in while set to "true".
   static const bool _debuggingLabelLocation = false;
 
-  static Path _bottomLobePath; // Initialized by _generateBottomLobe
-  static Offset _bottomLobeEnd; // Initialized by _generateBottomLobe
-
   Size getPreferredSize(
     bool isEnabled,
     bool isDiscrete,
     TextPainter labelPainter,
   ) {
     assert(labelPainter != null);
-    final double labelHalfWidth = labelPainter.width / 2.0;
+    final double labelHalfWidth = math.max(0, labelPainter.width - _labelTextDesignSize) / 2.0;
     return Size((labelHalfWidth + _topLobeRadius) * 2, _preferredHeight);
   }
 
@@ -2598,70 +2581,6 @@ class _PaddleSliderTrackShapePathPainter {
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
-  }
-
-  // Generates the bottom lobe path, which is the same for all instances of
-  // the value indicator, so we reuse it for each one.
-  static void _generateBottomLobe() {
-    const double bottomNeckRadius = 4.5;
-    const double bottomNeckStartAngle = _bottomLobeEndAngle - math.pi;
-    const double bottomNeckEndAngle = 0.0;
-
-    final Path path = Path();
-    final Offset bottomKnobStart = Offset(
-      _bottomLobeRadius * math.cos(_bottomLobeStartAngle),
-      _bottomLobeRadius * math.sin(_bottomLobeStartAngle) - 2,
-    );
-    final Offset bottomNeckRightCenter = bottomKnobStart +
-        Offset(
-          bottomNeckRadius * math.cos(bottomNeckStartAngle),
-          -bottomNeckRadius * math.sin(bottomNeckStartAngle),
-        );
-    final Offset bottomNeckLeftCenter = Offset(
-      -bottomNeckRightCenter.dx,
-      bottomNeckRightCenter.dy,
-    );
-    final Offset bottomNeckStartRight = Offset(
-      bottomNeckRightCenter.dx - bottomNeckRadius,
-      bottomNeckRightCenter.dy,
-    );
-    path.moveTo(bottomNeckStartRight.dx, bottomNeckStartRight.dy);
-    _addArc(
-      path,
-      bottomNeckRightCenter,
-      bottomNeckRadius,
-      math.pi - bottomNeckEndAngle,
-      math.pi - bottomNeckStartAngle,
-    );
-    _addArc(
-      path,
-      Offset.zero,
-      _bottomLobeRadius,
-      _bottomLobeStartAngle,
-      _bottomLobeEndAngle,
-    );
-    _addArc(
-      path,
-      bottomNeckLeftCenter,
-      bottomNeckRadius,
-      bottomNeckStartAngle,
-      bottomNeckEndAngle,
-    );
-
-    _bottomLobeEnd = Offset(
-      -bottomNeckStartRight.dx,
-      bottomNeckStartRight.dy,
-    );
-    _bottomLobePath = path;
-  }
-
-  Offset _addBottomLobe(Path path) {
-    if (_bottomLobePath == null || _bottomLobeEnd == null) {
-      // Generate this lazily so as to not slow down app startup.
-      _generateBottomLobe();
-    }
-    path.extendWithPath(_bottomLobePath, Offset.zero);
-    return _bottomLobeEnd;
   }
 
   // Determines the "best" offset to keep the bubble on the screen. The calling
@@ -2703,15 +2622,47 @@ class _PaddleSliderTrackShapePathPainter {
     TextPainter labelPainter,
     Color strokePaintColor,
   ) {
-    canvas.save();
-    canvas.translate(center.dx, center.dy);
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
     final double overallScale = scale * textScaleFactor;
-    canvas.scale(overallScale, overallScale);
     final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
     final double labelHalfWidth = labelPainter.width / 2.0;
+
+    canvas.save();
+    canvas.translate(center.dx, center.dy);
+    canvas.scale(overallScale, overallScale);
+
+    final double middleNeckWidth = 3;
+    final double bottomNeckRadius = 4.5;
+
+    final double rightBottomNeckCenterX = middleNeckWidth / 2 + bottomNeckRadius;
+    final double bottomNeckTriangleHypotenuse = bottomNeckRadius + _bottomLobeRadius / overallScale;
+    final double rightBottomNeckCenterY = -math.sqrt(math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(rightBottomNeckCenterX, 2));
+    final double rightBottomNeckAngleStart = math.pi;
+    final double rightBottomNeckAngleEnd = math.pi + math.atan(rightBottomNeckCenterY / rightBottomNeckCenterX);
+    final Path path = Path()..moveTo(middleNeckWidth / 2, rightBottomNeckCenterY);
+    _addArc(
+      path,
+      Offset(rightBottomNeckCenterX, rightBottomNeckCenterY),
+      bottomNeckRadius,
+      rightBottomNeckAngleStart,
+      rightBottomNeckAngleEnd,
+    );
+    _addArc(
+      path,
+      Offset.zero,
+      _bottomLobeRadius / overallScale,
+      rightBottomNeckAngleEnd - math.pi,
+      2 * math.pi - rightBottomNeckAngleEnd,
+    );
+    _addArc(
+      path,
+      Offset(-rightBottomNeckCenterX, rightBottomNeckCenterY),
+      bottomNeckRadius,
+      math.pi - rightBottomNeckAngleEnd,
+      0,
+    );
 
     // This is the needed extra width for the label.  It is only positive when
     // the label exceeds the minimum size contained by the round top lobe.
@@ -2733,12 +2684,9 @@ class _PaddleSliderTrackShapePathPainter {
     rightWidthNeeded = halfWidthNeeded + shift;
     leftWidthNeeded = halfWidthNeeded - shift;
 
-    final Path path = Path();
-    final Offset bottomLobeEnd = _addBottomLobe(path);
-
     // The base of the triangle between the top lobe center and the centers of
     // the two top neck arcs.
-    final double neckTriangleBase = _topNeckRadius - bottomLobeEnd.dx;
+    final double neckTriangleBase = _topNeckRadius + middleNeckWidth / 2;
     // The parameter that describes how far along the transition from round to
     // stretched we are.
     final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / neckTriangleBase));
@@ -2748,7 +2696,7 @@ class _PaddleSliderTrackShapePathPainter {
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
-    final Offset neckLeftCenter = Offset(
+    final Offset leftTopNeckCenter = Offset(
       -neckTriangleBase,
       _topLobeCenter.dy + math.cos(leftTheta) * _neckTriangleHypotenuse,
     );
@@ -2761,7 +2709,7 @@ class _PaddleSliderTrackShapePathPainter {
     // The distance between the end of the bottom neck arc and the beginning of
     // the top neck arc. We use this to shrink/expand it based on the scale
     // factor of the value indicator.
-    final double neckStretchBaseline = math.max(0.0, bottomLobeEnd.dy - math.max(neckLeftCenter.dy, neckRightCenter.dy));
+    final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
     final double t = math.pow(inverseTextScale, 3.0);
     final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
@@ -2786,7 +2734,7 @@ class _PaddleSliderTrackShapePathPainter {
 
     _addArc(
       path,
-      neckLeftCenter + neckStretch,
+      leftTopNeckCenter + neckStretch,
       _topNeckRadius,
       0.0,
       -leftNeckArcAngle,
