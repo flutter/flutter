@@ -350,6 +350,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  image_list_reported_duration:
+    description: >
+      Measures image loading performance.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 
