@@ -595,9 +595,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     // widgets in front of it, tapping the clear button will also trigger this
     // handler here. If this is the case, return.
     if (_clearGlobalKey.currentContext != null) {
-      final RenderBox clearRenderBox = _clearGlobalKey.currentContext.findRenderObject();
-      final Rect clearRect = clearRenderBox.localToGlobal(Offset.zero) & clearRenderBox.size;
-      if (clearRect.contains(details.globalPosition)) {
+      final RenderBox clearRenderBox = _clearGlobalKey
+        .currentContext.findRenderObject();
+      final Offset localPosition = clearRenderBox
+        .globalToLocal(details.globalPosition);
+      if (clearRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
         return;
       }
     }
