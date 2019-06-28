@@ -1,4 +1,4 @@
-Signature: dfbd4fcb126d463c9b2b1208b9f0f625
+Signature: cf75caa3c78ecc174726b612bb99fc1f
 
 UNUSED LICENSES:
 
@@ -1795,6 +1795,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/lib/src/outgoing.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/composed_pseudo_dir.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_flags.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/pseudo_vmo_file.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/vmo_file.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart
