@@ -47,6 +47,7 @@ flutter:
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'LICENSE')).existsSync(), true);
+      // See https://github.com/flutter/flutter/issues/35293
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
     }));
 
@@ -64,6 +65,7 @@ flutter:
 ''');
       await buildSystem.build('copy_assets', environment, const BuildSystemConfig());
 
+      // See https://github.com/flutter/flutter/issues/35293
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
     }));
   });
