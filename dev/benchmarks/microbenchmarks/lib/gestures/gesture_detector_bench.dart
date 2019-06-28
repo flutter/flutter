@@ -27,9 +27,12 @@ Future<void> main() async {
       await tester.pump();
     }
 
+    // Warm up runs get the app into steady state, making benchmark
+    // results more credible
     for (int i = 0; i < _kNumWarmUpIters; i += 1) {
       await iter();
     }
+    await tester.pumpAndSettle();
 
     watch.start();
     for (int i = 0; i < _kNumIters; i += 1) {
