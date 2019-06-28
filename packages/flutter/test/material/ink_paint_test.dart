@@ -15,9 +15,8 @@ void main() {
         child: Ink(),
       ),
     );
-    RenderBox container = tester.renderObject(find.byType(Container));
-    expect(container.size.height, 600.0);
-    expect(container.size.width, 800.0);
+    expect(tester.getSize(find.byType(Container)).height, 600.0);
+    expect(tester.getSize(find.byType(Container)).width, 800.0);
 
     const double height = 150.0;
     const double width = 200.0;
@@ -33,9 +32,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    container = tester.renderObject(find.byType(Container));
-    expect(container.size.height, height);
-    expect(container.size.width, width);
+    expect(tester.getSize(find.byType(Container)).height, height);
+    expect(tester.getSize(find.byType(Container)).width, width);
   });
 
   testWidgets('The InkWell widget renders an ink splash', (WidgetTester tester) async {
