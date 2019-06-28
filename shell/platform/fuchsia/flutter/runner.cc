@@ -137,7 +137,14 @@ void Runner::StartComponent(
     fuchsia::sys::Package package,
     fuchsia::sys::StartupInfo startup_info,
     fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
-  TRACE_EVENT0("flutter", "StartComponent");
+  // TRACE_DURATION currently requires that the string data does not change
+  // in the traced scope. Since |package| gets moved in the Application::Create
+  // call below, we cannot ensure that |package.resolved_url| does not move or
+  // change, so we make a copy to pass to TRACE_DURATION.
+  // TODO(PT-169): Remove this copy when TRACE_DURATION reads string arguments
+  // eagerly.
+  std::string url_copy = package.resolved_url;
+  TRACE_EVENT1("flutter", "StartComponent", "url", url_copy.c_str());
   // Notes on application termination: Application typically terminate on the
   // thread on which they were created. This usually means the thread was
   // specifically created to host the application. But we want to ensure that
