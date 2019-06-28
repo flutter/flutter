@@ -13,7 +13,7 @@ RunnerContext::RunnerContext(std::shared_ptr<sys::ServiceDirectory> svc,
       public_dir_(std::make_shared<vfs::PseudoDir>()),
       debug_dir_(std::make_shared<vfs::PseudoDir>()),
       ctrl_dir_(std::make_shared<vfs::PseudoDir>()) {
-  root_dir_->AddSharedEntry("public", public_dir_);
+  root_dir_->AddSharedEntry("svc", public_dir_);
   root_dir_->AddSharedEntry("debug", debug_dir_);
   root_dir_->AddSharedEntry("ctrl", ctrl_dir_);
 
