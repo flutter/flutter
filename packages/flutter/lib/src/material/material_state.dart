@@ -62,8 +62,9 @@ enum MaterialState {
   error,
 }
 
-/// Signature for the function that returns a color based on a given set of states.
-typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
+/// Signature for the function that returns a value of type `T` based on a given
+/// set of states.
+typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 
 /// Defines a [Color] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.
@@ -141,14 +142,15 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// {@end-tool}
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
-  /// Creates a [MaterialStateColor] from a [MaterialStateColorResolver] callback function.
+  /// Creates a [MaterialStateColor] from a [MaterialPropertyResolver<Color>]
+  /// callback function.
   ///
   /// If used as a regular color, the color resolved in the default state (the
   /// empty set of states) will be used.
   ///
   /// The given callback parameter must return a non-null color in the default
   /// state.
-  factory MaterialStateColor.resolveWith(MaterialStateColorResolver callback) => _MaterialStateColor(callback);
+  static MaterialStateColor resolveWith(MaterialPropertyResolver<Color> callback) => _MaterialStateColor(callback);
 
   /// Returns a [Color] that's to be used when a Material component is in the
   /// specified state.
@@ -156,7 +158,8 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   Color resolve(Set<MaterialState> states);
 }
 
-/// A [MaterialStateColor] created from a [MaterialStateColorResolver] callback alone.
+/// A [MaterialStateColor] created from a [MaterialPropertyResolver<Color>]
+/// callback alone.
 ///
 /// If used as a regular color, the color resolved in the default state will
 /// be used.
@@ -165,7 +168,7 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
 class _MaterialStateColor extends MaterialStateColor {
   _MaterialStateColor(this._resolve) : super(_resolve(_defaultStates).value);
 
-  final MaterialStateColorResolver _resolve;
+  final MaterialPropertyResolver<Color> _resolve;
 
   /// The default state for a Material component, the empty set of interaction states.
   static const Set<MaterialState> _defaultStates = <MaterialState>{};
@@ -202,4 +205,17 @@ abstract class MaterialStateProperty<T> {
     }
     return value;
   }
+
+  /// Convenience method for creating a [MaterialStateProperty] from a
+  /// [MaterialPropertyResolver] function alone.
+  static MaterialStateProperty<T> resolveWith<T>(MaterialPropertyResolver<T> callback) => _MaterialStateProperty<T>(callback);
+}
+
+class _MaterialStateProperty<T> implements MaterialStateProperty<T> {
+  _MaterialStateProperty(this._resolve);
+
+  final MaterialPropertyResolver<T> _resolve;
+
+  @override
+  T resolve(Set<MaterialState> states) => _resolve(states);
 }
