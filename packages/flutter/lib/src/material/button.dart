@@ -87,7 +87,7 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [textStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// If [textStyle.color] is a [MaterialStateColor], [MaterialStateColor.resolveColor]
   /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
@@ -199,14 +199,6 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
-  ///
-  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [MaterialStateProperty.resolve]
-  /// is used for the following [MaterialState]s:
-  ///
-  /// * [MaterialState.pressed].
-  /// * [MaterialState.hovered].
-  /// * [MaterialState.focused].
-  /// * [MaterialState.disabled].
   final ShapeBorder shape;
 
   /// Defines the duration of animated changes for [shape] and [elevation].
@@ -325,8 +317,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
-    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+    final Color effectiveTextColor = MaterialStateColor.resolveColor(widget.textStyle?.color, _states);
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
@@ -336,7 +327,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         child: Material(
           elevation: _effectiveElevation,
           textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
-          shape: effectiveShape,
+          shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
           animationDuration: widget.animationDuration,
@@ -349,7 +340,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             hoverColor: widget.hoverColor,
             onHover: _handleHoveredChanged,
             onTap: widget.onPressed,
-            customBorder: effectiveShape,
+            customBorder: widget.shape,
             child: IconTheme.merge(
               data: IconThemeData(color: effectiveTextColor),
               child: Container(
