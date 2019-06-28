@@ -29,6 +29,7 @@ void main() {
           fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
           fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
           fs.path.join('usr', 'local', 'bin', 'adb'),
+          fs.path.join('Android'),
         ];
         for (String path in paths) {
           fs.file(path).createSync(recursive: true);
