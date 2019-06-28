@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:pool/pool.dart';
+
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
@@ -39,6 +41,7 @@ class AssetBehavior extends SourceBehavior {
     );
     final List<File> results = <File>[];
     for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
+      print(entry.key);
       final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
       results.add(file);
     }
@@ -60,12 +63,19 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
     manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
   );
-  // TODO(jonahwilliams): replace with pool.
-  for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
-    final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
-    file.createSync(recursive: true);
-    await file.writeAsBytes(await entry.value.contentsAsBytes());
-  }
+  // Limit number of open files to avoid running out of file descriptors.
+  final Pool pool = Pool(64);
+  await Future.wait<void>(
+    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+      final PoolResource resource = await pool.request();
+      try {
+        final File file = fs.file(fs.path.join(output.path, entry.key));
+        file.parent.createSync(recursive: true);
+        await file.writeAsBytes(await entry.value.contentsAsBytes());
+      } finally {
+        resource.release();
+      }
+    }));
 }
 
 /// Copy the assets used in the application into a build directory.

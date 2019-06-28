@@ -17,7 +17,6 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        final String assetPath = fs.path.join('assets', 'foo', 'bar.png');
         final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
           projectDir: fs.currentDirectory,
@@ -37,7 +36,7 @@ name: example
 
 flutter:
   assets:
-    - $assetPath
+    - assets/foo/bar.png
 ''');
       });
     });
@@ -48,13 +47,13 @@ flutter:
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
       expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'LICENSE')).existsSync(), true);
-      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png')).existsSync(), true);
+      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
     }));
 
     test('Does not leave stale files in build directory', () => testbed.run(() async {
       await buildSystem.build('copy_assets', environment, const BuildSystemConfig());
 
-      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png')).existsSync(), true);
+      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
       // Modify manifest to remove asset.
       fs.file('pubspec.yaml')
         ..createSync()
@@ -65,7 +64,7 @@ flutter:
 ''');
       await buildSystem.build('copy_assets', environment, const BuildSystemConfig());
 
-      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets', 'foo', 'bar.png')).existsSync(), false);
+      expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
     }));
   });
 }
