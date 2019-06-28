@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -23,6 +24,7 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
 
+class MockArtifacts extends Mock implements Artifacts {}
 class MockCache extends Mock implements Cache {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
@@ -37,12 +39,14 @@ void main() {
     final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
     final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
+    MockArtifacts mockArtifacts;
     MockCache mockCache;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
       mockCache = MockCache();
-      when(mockCache.getArtifactFile('libimobiledevice', 'idevice_id')).thenReturn(ideviceIdPath);
+      mockArtifacts = MockArtifacts();
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceId, platform: anyNamed('platform'))).thenReturn(ideviceIdPath);
       when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
     });
 
@@ -55,6 +59,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when idevice_id returns non-zero', () async {
@@ -66,6 +71,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('getAvailableDeviceIDs returns idevice_id output when installed', () async {
@@ -77,10 +83,11 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
     });
 
     testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo returns specific error code and message', () async {
-      when(mockCache.getArtifactFile('libimobiledevice', 'ideviceinfo')).thenReturn(ideviceInfoPath);
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
         environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
@@ -89,6 +96,7 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
     });
 
     group('screenshot', () {
@@ -100,7 +108,7 @@ void main() {
       setUp(() {
         mockProcessManager = MockProcessManager();
         mockOutputFile = MockFile();
-        when(mockCache.getArtifactFile('libimobiledevice', 'idevicescreenshot')).thenReturn(binPath);
+        when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(binPath);
         when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
       });
 
@@ -133,6 +141,7 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         Cache: () => mockCache,
+        Artifacts: () => mockArtifacts,
       });
     });
   });

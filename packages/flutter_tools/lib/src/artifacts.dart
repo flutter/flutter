@@ -339,17 +339,13 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.ideviceId:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
       case Artifact.ideviceinfo:
+      case Artifact.idevicename:
+      case Artifact.idevicescreenshot:
+      case Artifact.idevicesyslog:
         return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
       case Artifact.ideviceinstaller:
         return fs.path.join(cache.getArtifactDirectory('ideviceinstaller').path, _artifactToFileName(artifact));
-      case Artifact.idevicename:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
-      case Artifact.idevicescreenshot:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
-      case Artifact.idevicesyslog:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, _artifactToFileName(artifact));
       case Artifact.iosDeploy:
         return fs.path.join(cache.getArtifactDirectory('ios-deploy').path, _artifactToFileName(artifact));
       case Artifact.iproxy:
