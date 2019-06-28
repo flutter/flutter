@@ -5,7 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-import 'navigator_test.dart';
+import 'observer_tester.dart';
 
 void main() {
 
