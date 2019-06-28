@@ -33,11 +33,11 @@ analyzer:
     # Please see https://github.com/flutter/flutter/pull/24528 for details.
     sdk_version_async_exported_from_core: ignore
   exclude:
-    - 'bin/cache/**'
+    - "bin/cache/**"
     # the following two are relative to the stocks example and the flutter package respectively
     # see https://github.com/dart-lang/sdk/issues/28463
-    - 'lib/i18n/stock_messages_*.dart'
-    - 'lib/src/http/**'
+    - "lib/i18n/stock_messages_*.dart"
+    - "lib/src/http/**"
 
 linter:
   rules:
@@ -52,7 +52,7 @@ linter:
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_as
-    # - avoid_bool_literals_in_conditional_expressions # not yet tested
+    - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly
     - avoid_classes_with_only_static_members
@@ -90,6 +90,7 @@ linter:
     # - constant_identifier_names # needs an opt-out https://github.com/dart-lang/linter/issues/204
     - control_flow_in_finally
     # - curly_braces_in_flow_control_structures # not yet tested
+    # - diagnostic_describe_all_properties # not yet tested
     - directives_ordering
     - empty_catches
     - empty_constructor_bodies
@@ -120,6 +121,7 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_asserts_in_initializer_lists
+    # - prefer_asserts_with_message # not yet tested
     - prefer_collection_literals
     - prefer_conditional_assignment
     - prefer_const_constructors
@@ -128,14 +130,20 @@ linter:
     - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
+    # - prefer_double_quotes # opposite of prefer_single_quotes
     - prefer_equal_for_default_values
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
+    # - prefer_final_in_for_each # not yet tested
     - prefer_final_locals
+    # - prefer_for_elements_to_map_fromIterable # not yet tested
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_generic_function_type_aliases
+    # - prefer_if_elements_to_conditional_expressions # not yet tested
+    # - prefer_if_null_operators # not yet tested
     - prefer_initializing_formals
+    - prefer_inlined_adds
     # - prefer_int_literals # not yet tested
     # - prefer_interpolation_to_compose_strings # not yet tested
     - prefer_is_empty
@@ -144,15 +152,17 @@ linter:
     # - prefer_mixin # https://github.com/dart-lang/language/issues/32
     # - prefer_null_aware_operators # disable until NNBD, see https://github.com/flutter/flutter/pull/32711#issuecomment-492930932
     - prefer_single_quotes
+    - prefer_spread_collections
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null
+    # - provide_deprecation_message # not yet tested
     # - public_member_api_docs # enabled on a case-by-case basis; see e.g. packages/analysis_options.yaml
     - recursive_getters
     - slash_for_doc_comments
+    # - sort_child_properties_last # not yet tested
     - sort_constructors_first
     - sort_pub_dependencies
     - sort_unnamed_constructors_first
-    # - super_goes_last # no longer needed w/ Dart 2
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
@@ -171,6 +181,8 @@ linter:
     - unnecessary_statements
     - unnecessary_this
     - unrelated_type_equality_checks
+    # - unsafe_html # not yet tested
+    - use_full_hex_values_for_flutter_colors
     # - use_function_type_syntax_for_parameters # not yet tested
     - use_rethrow_when_possible
     # - use_setters_to_change_properties # not yet tested

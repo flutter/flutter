@@ -49,7 +49,8 @@ void main() {
     await tester.pump();
     expect(values, equals(const RangeValues(0.3, 0.7)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -103,7 +104,8 @@ void main() {
     await tester.pump();
     expect(values, equals(const RangeValues(0.3, 0.7)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -160,7 +162,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(values, equals(const RangeValues(30, 70)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -219,7 +222,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(values, equals(const RangeValues(30, 70)));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -267,7 +271,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -311,7 +316,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -358,7 +364,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -405,7 +412,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
 
@@ -449,7 +457,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -499,7 +508,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -552,7 +562,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -605,7 +616,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -655,7 +667,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -705,7 +718,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -758,7 +772,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -811,7 +826,8 @@ void main() {
       ),
     );
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -831,6 +847,125 @@ void main() {
     await tester.pumpAndSettle();
     await tester.dragFrom(middle, -(bottomRight - topLeft) * 0.3);
     expect(values.end, closeTo(80, 0.01));
+  });
+
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by tap', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(30, 70);
+    RangeValues startValues;
+    RangeValues endValues;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: RangeSlider(
+                    values: values,
+                    min: 0,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {
+                      startValues = newValues;
+                    },
+                    onChangeEnd: (RangeValues newValues) {
+                      endValues = newValues;
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+
+    // Drag the start thumb towards the center.
+    final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
+    expect(startValues, null);
+    expect(endValues, null);
+    await tester.dragFrom(leftTarget, (bottomRight - topLeft) * 0.2);
+    expect(startValues.start, closeTo(30, 1));
+    expect(startValues.end, closeTo(70, 1));
+    expect(values.start, closeTo(50, 1));
+    expect(values.end, closeTo(70, 1));
+    expect(endValues.start, closeTo(50, 1));
+    expect(endValues.end, closeTo(70, 1));
+  });
+
+  testWidgets('Range Slider onChangeEnd and onChangeStart are called on an interaction initiated by drag', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(30, 70);
+    RangeValues startValues;
+    RangeValues endValues;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: RangeSlider(
+                    values: values,
+                    min: 0,
+                    max: 100,
+                    onChanged: (RangeValues newValues) {
+                      setState(() {
+                        values = newValues;
+                      });
+                    },
+                    onChangeStart: (RangeValues newValues) {
+                      startValues = newValues;
+                    },
+                    onChangeEnd: (RangeValues newValues) {
+                      endValues = newValues;
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+
+    // Drag the thumbs together.
+    final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.dragFrom(leftTarget, (bottomRight - topLeft) * 0.2);
+    await tester.pumpAndSettle();
+    final Offset rightTarget = topLeft + (bottomRight - topLeft) * 0.7;
+    await tester.dragFrom(rightTarget, (bottomRight - topLeft) * -0.2);
+    await tester.pumpAndSettle();
+    expect(values.start, closeTo(50, 1));
+    expect(values.end, closeTo(51, 1));
+
+    // Drag the end thumb to the right.
+    final Offset middleTarget = topLeft + (bottomRight - topLeft) * 0.5;
+    await tester.dragFrom(middleTarget, (bottomRight - topLeft) * 0.4);
+    await tester.pumpAndSettle();
+    expect(startValues.start, closeTo(50, 1));
+    expect(startValues.end, closeTo(51, 1));
+    expect(endValues.start, closeTo(50, 1));
+    expect(endValues.end, closeTo(90, 1));
   });
 
   ThemeData _buildTheme() {
@@ -1226,7 +1361,8 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;
@@ -1295,7 +1431,8 @@ void main() {
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
 
-    // Get the bounds of the track by shifting by the the overlay radius.
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
     final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
     final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
     final Offset middle = topLeft + bottomRight / 2;

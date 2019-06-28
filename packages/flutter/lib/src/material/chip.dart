@@ -1410,7 +1410,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   }
 
   bool _isTapping = false;
-  bool get isTapping => !canTap ? false : _isTapping;
+  bool get isTapping => canTap && _isTapping;
 
   @override
   void initState() {

@@ -554,7 +554,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile(
         'text_golden.DecorationThickness.1.png',
-        version: 0,
+        version: 1,
       ),
     );
   });
@@ -730,13 +730,13 @@ void main() {
                           child: Text.rich(
                             TextSpan(
                               text: 'inner',
-                              style: TextStyle(color: Color(0xff402f4ff)),
+                              style: TextStyle(color: Color(0xf402f4ff)),
                               children: <InlineSpan>[
                                 WidgetSpan(
                                   child: Text.rich(
                                     TextSpan(
                                       text: 'inner2',
-                                      style: TextStyle(color: Color(0xff003ffff)),
+                                      style: TextStyle(color: Color(0xf003ffff)),
                                       children: <InlineSpan>[
                                         WidgetSpan(
                                           child: SizedBox(

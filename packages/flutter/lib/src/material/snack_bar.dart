@@ -253,6 +253,7 @@ class SnackBar extends StatelessWidget {
       accentColorBrightness: theme.accentColorBrightness,
       snackBarTheme: snackBarTheme,
     );
+    final TextStyle contentTextStyle = snackBarTheme.contentTextStyle ?? darkTheme.textTheme.subhead;
     final SnackBarBehavior snackBarBehavior = behavior ?? snackBarTheme.behavior ?? SnackBarBehavior.fixed;
     final bool isFloatingSnackBar = snackBarBehavior == SnackBarBehavior.floating;
     final double snackBarPadding = isFloatingSnackBar ? 16.0 : 24.0;
@@ -263,7 +264,7 @@ class SnackBar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: _singleLineVerticalPadding),
           child: DefaultTextStyle(
-            style: darkTheme.textTheme.subhead,
+            style: contentTextStyle,
             child: content,
           ),
         ),

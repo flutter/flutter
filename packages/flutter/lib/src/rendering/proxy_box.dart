@@ -2969,7 +2969,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in

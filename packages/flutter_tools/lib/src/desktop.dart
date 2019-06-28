@@ -26,9 +26,9 @@ bool get flutterDesktopEnabled {
   if (isRunningFromDaemon) {
     final bool platformEnabled = platform
         .environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
-    return platformEnabled && !FlutterVersion.instance.isStable;
+    return platformEnabled && FlutterVersion.instance.isMaster;
   }
-  return !FlutterVersion.instance.isStable;
+  return FlutterVersion.instance.isMaster;
 }
 
 /// Kills a process on linux or macOS.

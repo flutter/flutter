@@ -1953,12 +1953,6 @@ abstract class RenderBox extends RenderObject {
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
         final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
-        errorParts.add(ErrorSummary('$runtimeType object was given an infinite size during layout.'));
-        errorParts.add(ErrorDescription(
-          'This probably means that it is a render object that tries to be '
-          'as big as possible, but it was put inside another render object '
-          'that allows its children to pick their own size.'
-        ));
         errorParts.addAll(information);
         errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
         errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
@@ -2016,13 +2010,13 @@ abstract class RenderBox extends RenderObject {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
-            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:') // should this be tagged as an error or not?
-          ]..addAll(failures)
-           ..add(ErrorHint(
+            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:'), // should this be tagged as an error or not?
+            ...failures,
+            ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
               'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
-            ))
-          );
+            ),
+          ]);
         }
       }
       return true;

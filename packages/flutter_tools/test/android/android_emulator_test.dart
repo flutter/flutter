@@ -23,24 +23,42 @@ void main() {
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, true);
     });
-    testUsingContext('stores expected metadata', () {
+    testUsingContext('reads expected metadata', () {
       const String emulatorID = '1234';
-      const String name = 'My Test Name';
       const String manufacturer = 'Me';
-      const String label = 'The best one';
+      const String displayName = 'The best one';
       final Map<String, String> properties = <String, String>{
-        'hw.device.name': name,
         'hw.device.manufacturer': manufacturer,
-        'avd.ini.displayname': label,
+        'avd.ini.displayname': displayName,
       };
       final AndroidEmulator emulator =
           AndroidEmulator(emulatorID, properties);
       expect(emulator.id, emulatorID);
-      expect(emulator.name, name);
+      expect(emulator.name, displayName);
       expect(emulator.manufacturer, manufacturer);
-      expect(emulator.label, label);
       expect(emulator.category, Category.mobile);
       expect(emulator.platformType, PlatformType.android);
+    });
+    testUsingContext('prefers displayname for name', () {
+      const String emulatorID = '1234';
+      const String displayName = 'The best one';
+      final Map<String, String> properties = <String, String>{
+        'avd.ini.displayname': displayName,
+      };
+      final AndroidEmulator emulator =
+          AndroidEmulator(emulatorID, properties);
+      expect(emulator.name, displayName);
+    });
+    testUsingContext('uses cleaned up ID if no displayname is set', () {
+      // Android Studio uses the ID with underscores replaced with spaces
+      // for the name if displayname is not set so we do the same.
+      const String emulatorID = 'This_is_my_ID';
+      final Map<String, String> properties = <String, String>{
+        'avd.ini.notadisplayname': 'this is not a display name',
+      };
+      final AndroidEmulator emulator =
+          AndroidEmulator(emulatorID, properties);
+      expect(emulator.name, 'This is my ID');
     });
     testUsingContext('parses ini files', () {
       const String iniFile = '''

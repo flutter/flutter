@@ -815,7 +815,7 @@ void main() {
       );
 
       final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
+      expect(exception, isFlutterError);
       expect(
         exception.toString(),
         contains('Insufficient horizontal space to render the CupertinoDatePicker'),
