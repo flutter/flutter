@@ -61,9 +61,11 @@
     [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
     return;
   }
+  // Grab reference to avoid retain on self.
+  NSObject<FlutterMessageCodec>* codec = _codec;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
-    handler([_codec decode:message], ^(id reply) {
-      callback([_codec encode:reply]);
+    handler([codec decode:message], ^(id reply) {
+      callback([codec encode:reply]);
     });
   };
   [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
@@ -208,15 +210,17 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
     [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
     return;
   }
+  // Make sure the block captures the codec, not self.
+  NSObject<FlutterMethodCodec>* codec = _codec;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
-    FlutterMethodCall* call = [_codec decodeMethodCall:message];
+    FlutterMethodCall* call = [codec decodeMethodCall:message];
     handler(call, ^(id result) {
       if (result == FlutterMethodNotImplemented)
         callback(nil);
       else if ([result isKindOfClass:[FlutterError class]])
-        callback([_codec encodeErrorEnvelope:(FlutterError*)result]);
+        callback([codec encodeErrorEnvelope:(FlutterError*)result]);
       else
-        callback([_codec encodeSuccessEnvelope:result]);
+        callback([codec encodeSuccessEnvelope:result]);
     });
   };
   [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
@@ -263,14 +267,13 @@ NSObject const* FlutterEndOfEventStream = [NSObject new];
   [super dealloc];
 }
 
-- (void)setStreamHandler:(NSObject<FlutterStreamHandler>*)handler {
-  if (!handler) {
-    [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
-    return;
-  }
+static void SetStreamHandlerMessageHandlerOnChannel(NSObject<FlutterStreamHandler>* handler,
+                                                    NSString* name,
+                                                    NSObject<FlutterBinaryMessenger>* messenger,
+                                                    NSObject<FlutterMethodCodec>* codec) {
   __block FlutterEventSink currentSink = nil;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
-    FlutterMethodCall* call = [_codec decodeMethodCall:message];
+    FlutterMethodCall* call = [codec decodeMethodCall:message];
     if ([call.method isEqual:@"listen"]) {
       if (currentSink) {
         FlutterError* error = [handler onCancelWithArguments:nil];
@@ -280,36 +283,43 @@ NSObject const* FlutterEndOfEventStream = [NSObject new];
       }
       currentSink = ^(id event) {
         if (event == FlutterEndOfEventStream)
-          [_messenger sendOnChannel:_name message:nil];
+          [messenger sendOnChannel:name message:nil];
         else if ([event isKindOfClass:[FlutterError class]])
-          [_messenger sendOnChannel:_name
-                            message:[_codec encodeErrorEnvelope:(FlutterError*)event]];
+          [messenger sendOnChannel:name message:[codec encodeErrorEnvelope:(FlutterError*)event]];
         else
-          [_messenger sendOnChannel:_name message:[_codec encodeSuccessEnvelope:event]];
+          [messenger sendOnChannel:name message:[codec encodeSuccessEnvelope:event]];
       };
       FlutterError* error = [handler onListenWithArguments:call.arguments eventSink:currentSink];
       if (error)
-        callback([_codec encodeErrorEnvelope:error]);
+        callback([codec encodeErrorEnvelope:error]);
       else
-        callback([_codec encodeSuccessEnvelope:nil]);
+        callback([codec encodeSuccessEnvelope:nil]);
     } else if ([call.method isEqual:@"cancel"]) {
       if (!currentSink) {
         callback(
-            [_codec encodeErrorEnvelope:[FlutterError errorWithCode:@"error"
-                                                            message:@"No active stream to cancel"
-                                                            details:nil]]);
+            [codec encodeErrorEnvelope:[FlutterError errorWithCode:@"error"
+                                                           message:@"No active stream to cancel"
+                                                           details:nil]]);
         return;
       }
       currentSink = nil;
       FlutterError* error = [handler onCancelWithArguments:call.arguments];
       if (error)
-        callback([_codec encodeErrorEnvelope:error]);
+        callback([codec encodeErrorEnvelope:error]);
       else
-        callback([_codec encodeSuccessEnvelope:nil]);
+        callback([codec encodeSuccessEnvelope:nil]);
     } else {
       callback(nil);
     }
   };
-  [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:messageHandler];
+  [messenger setMessageHandlerOnChannel:name binaryMessageHandler:messageHandler];
+}
+
+- (void)setStreamHandler:(NSObject<FlutterStreamHandler>*)handler {
+  if (!handler) {
+    [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
+    return;
+  }
+  SetStreamHandlerMessageHandlerOnChannel(handler, _name, _messenger, _codec);
 }
 @end
