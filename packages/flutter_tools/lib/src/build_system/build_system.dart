@@ -84,9 +84,9 @@ class BuildSystemConfig {
 ///    ]
 /// }
 ///
-/// Testing and review requirements:
+/// ## Code review
 ///
-/// ## Target should only depend on files that are provided as inputs
+/// ### Targes should only depend on files that are provided as inputs
 ///
 /// Example: gen_snapshot must be provided as an input to the aot_elf
 /// build steps, even though it isn't a source file. This ensures that changes
@@ -96,10 +96,20 @@ class BuildSystemConfig {
 /// Example: aot_elf has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
-/// ## Target should declare all outputs produced
+/// ### Targest should declare all outputs produced
 ///
 /// If a target produces an output it should be listed, even if it is not
 /// intended to be consumed by another target.
+///
+/// ## Unit testing
+///
+/// Most targets will invoke an external binary which makes unit testing
+/// trickier. It is recommend that for unit testing that a Fake is used and
+/// provided via the dependency injection system. a [Testbed] may be used to
+/// set up the environment before the test is run. Unit tests should fully
+/// exercise the rule, ensuring that the existing input and output verification
+/// logic can run, as well as verifying it correctly handles provided defines
+/// and meets any additional contracts present in the target.
 class Target {
   const Target({
     @required this.name,
