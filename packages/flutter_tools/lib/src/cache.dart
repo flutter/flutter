@@ -4,21 +4,21 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart';
 
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart' show ProcessResult, SocketException;
+import 'base/io.dart' show SocketException;
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'convert.dart';
+import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
@@ -959,17 +959,36 @@ class ToolExtensionCacheArtifacts extends CachedArtifact {
       final String relativefileUri = Uri.file(manifest['file']).toFilePath(windows: platform.isWindows);
       final String entrypoint = generateEntrypoint(fs.path.join(extensionPath, 'lib', relativefileUri), className);
       final File sourceFile = directory.childFile('main.${entry.key}.dart');
+      final File packagesFile = directory.childFile('${entry.key}.packages');
+      final Map<String, Uri> packages = PackageMap(fs.path.join(extensionPath, '.packages')).map;
+      packages[entry.key] = Uri.parse('org-dartlang-app:/');
+      final StringBuffer buffer = StringBuffer();
+      for (MapEntry<String, Uri> entry in packages.entries) {
+        buffer.writeln('${entry.key}:${entry.value}');
+      }
+      print(buffer);
+
       sourceFile
         ..createSync()
         ..writeAsStringSync(entrypoint);
+      packagesFile
+        ..createSync()
+        ..writeAsStringSync(buffer.toString());
       printStatus('Compiling tool extension ${entry.key}');
+
       final String outputFile = location.childFile('${entry.key}.dill').path;
       final CompilerOutput compilerOutput = await kernelCompiler.compile(
-          trackWidgetCreation: false,
-          targetModel: TargetModel.vm,
-        packagesPath: fs.path.join(extensionPath, '.packages'),
+        trackWidgetCreation: false,
+        targetModel: TargetModel.vm,
+        packagesPath: packagesFile.path,
         mainPath: sourceFile.path,
         outputFilePath: outputFile,
+        sdkRoot: artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        fileSystemScheme: 'org-dartlang-app',
+        fileSystemRoots: <String>[
+          fs.path.join(extensionPath, 'lib'),
+          directory.path,
+        ],
       );
       final File snapshot = fs.file(outputFile);
       if (compilerOutput.errorCount != 0 || !snapshot.existsSync()) {
