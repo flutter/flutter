@@ -5,7 +5,7 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterBinaryMessenger.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterMacros.h"
 
-#ifndef NDEBUG
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 FLUTTER_EXPORT
 #endif
 @interface FlutterBinaryMessengerRelay : NSObject <FlutterBinaryMessenger>
