@@ -259,7 +259,7 @@ class _InkState extends State<Ink> {
       _ink.decoration = widget.decoration;
       _ink.configuration = createLocalImageConfiguration(context);
     }
-    Widget current = widget.child;
+    Widget current = widget.child ?? Container();
     final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
     if (effectivePadding != null)
       current = Padding(padding: effectivePadding, child: current);
