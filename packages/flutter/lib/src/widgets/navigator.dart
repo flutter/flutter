@@ -1892,7 +1892,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     Route<dynamic> oldRoute;
     int removalIndex = 0;
-    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
 
     for (Route<dynamic> route in _history) {
       if (predicate(route)) {
@@ -1901,25 +1900,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         break;
       }
     }
+
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
+        // Notify for newRoute
+        newRoute.didChangeNext(null);
+        for (NavigatorObserver observer in widget.observers)
+          observer.didPush(newRoute, precedingRoute);
+
+        // Complete remove until predicate & notify
         while (_history[removalIndex] != newRoute) {
           final Route<dynamic> removedRoute = _history.removeAt(removalIndex);
           assert(removedRoute != null && removedRoute._navigator == this);
           assert(removedRoute.overlayEntries.isNotEmpty);
+          for (NavigatorObserver observer in widget.observers)
+            observer.didRemove(removedRoute, oldRoute);
           removedRoute.dispose();
         }
+
+        if (oldRoute != null)
+          oldRoute.didChangeNext(newRoute);
       }
     });
-    newRoute.didChangeNext(null);
-    if (oldRoute != null)
-      oldRoute.didChangeNext(newRoute);
 
-    for (NavigatorObserver observer in widget.observers) {
-      observer.didPush(newRoute, precedingRoute);
-      for (Route<dynamic> removedRoute in removedRoutes)
-        observer.didRemove(removedRoute, oldRoute);
-    }
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(newRoute);
     return newRoute.popped;
