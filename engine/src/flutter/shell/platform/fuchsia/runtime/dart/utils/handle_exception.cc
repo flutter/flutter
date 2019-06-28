@@ -4,16 +4,15 @@
 
 #include "runtime/dart/utils/handle_exception.h"
 
-#include <string>
-
 #include <fuchsia/crash/cpp/fidl.h>
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/syslog/global.h>
 #include <lib/zx/vmo.h>
 #include <sys/types.h>
 #include <third_party/tonic/converter/dart_converter.h>
-#include <zircon/errors.h>
 #include <zircon/status.h>
+
+#include <string>
 
 #include "runtime/dart/utils/logging.h"
 
@@ -91,11 +90,11 @@ fuchsia::crash::ManagedRuntimeException BuildException(
 
 namespace dart_utils {
 
-zx_status_t HandleIfException(std::shared_ptr<::sys::ServiceDirectory> services,
-                              const std::string& component_url,
-                              Dart_Handle result) {
+void HandleIfException(std::shared_ptr<::sys::ServiceDirectory> services,
+                       const std::string& component_url,
+                       Dart_Handle result) {
   if (!Dart_IsError(result) || !Dart_ErrorHasException(result)) {
-    return ZX_OK;
+    return;
   }
 
   const std::string error =
@@ -106,34 +105,29 @@ zx_status_t HandleIfException(std::shared_ptr<::sys::ServiceDirectory> services,
   return HandleException(services, component_url, error, stack_trace);
 }
 
-zx_status_t HandleException(std::shared_ptr<::sys::ServiceDirectory> services,
-                            const std::string& component_url,
-                            const std::string& error,
-                            const std::string& stack_trace) {
+void HandleException(std::shared_ptr<::sys::ServiceDirectory> services,
+                     const std::string& component_url,
+                     const std::string& error,
+                     const std::string& stack_trace) {
   fuchsia::crash::ManagedRuntimeException exception =
       BuildException(error, stack_trace);
 
-  fuchsia::crash::AnalyzerSyncPtr analyzer;
-  services->Connect(analyzer.NewRequest());
+  fuchsia::crash::AnalyzerPtr analyzer =
+      services->Connect<fuchsia::crash::Analyzer>();
 #ifndef NDEBUG
   if (!analyzer) {
     FX_LOG(FATAL, LOG_TAG, "Could not connect to analyzer service");
   }
 #endif
 
-  fuchsia::crash::Analyzer_OnManagedRuntimeException_Result out_result;
-  const zx_status_t status = analyzer->OnManagedRuntimeException(
-      component_url, std::move(exception), &out_result);
-  if (status != ZX_OK) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed to connect to crash analyzer: %d (%s)",
-            status, zx_status_get_string(status));
-    return ZX_ERR_INTERNAL;
-  } else if (out_result.is_err()) {
-    FX_LOGF(ERROR, LOG_TAG, "Failed to handle Dart exception: %d (%s)",
-            out_result.err(), zx_status_get_string(out_result.err()));
-    return ZX_ERR_INTERNAL;
-  }
-  return ZX_OK;
+  analyzer->OnManagedRuntimeException(
+      component_url, std::move(exception),
+      [](fuchsia::crash::Analyzer_OnManagedRuntimeException_Result result) {
+        if (result.is_err()) {
+          FX_LOGF(ERROR, LOG_TAG, "Failed to handle Dart exception: %d (%s)",
+                  result.err(), zx_status_get_string(result.err()));
+        }
+      });
 }
 
 }  // namespace dart_utils
