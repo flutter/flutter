@@ -15,8 +15,9 @@ import 'gradle.dart';
 
 Future<void> buildAar({
   @required FlutterProject project,
-  @required String target,
   @required AndroidBuildInfo androidBuildInfo,
+  @required String target,
+  @required String buildDir,
 }) async {
   if (!project.android.isUsingGradle) {
     throwToolExit(
@@ -32,9 +33,10 @@ Future<void> buildAar({
     throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
 
   await buildGradleAar(
-    flutterProject: project,
+    project: project,
     androidBuildInfo: androidBuildInfo,
     target: target,
+    buildDir: buildDir,
   );
   androidSdk.reinitialize();
 }

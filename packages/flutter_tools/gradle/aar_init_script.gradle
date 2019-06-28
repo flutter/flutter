@@ -21,7 +21,7 @@ void configureProject(final Project project) {
     project.uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: "file://${project.buildDir}/repo")
+                repository(url: "file://${getBuildDir(project)}/repo")
             }
         }
     }
@@ -32,18 +32,25 @@ void configureProject(final Project project) {
     }
 }
 
+String getBuildDir(Project project) {
+    if (!project.hasProperty("build-dir")) {
+        return project.buildDir
+    }
+    return project.property("build-dir")
+}
+
 String getFlutterRoot(Project project) {
-    if (!project.hasProperty('flutter-root')) {
+    if (!project.hasProperty("flutter-root")) {
         throw new GradleException("The `-Pflutter-root` flag must be specified.")
     }
-    return project.property('flutter-root')
+    return project.property("flutter-root")
 }
 
 void setupLibraryVariant(Project project, variant) {
     String variantName = variant.name.capitalize()
     Task aarTask = project.tasks.create(name: "aar${variantName}") {
         // Remove the existing repo directory, so we don't duplicate the artifacts.
-        delete "${project.buildDir}/repo"
+        delete "${getBuildDir(project)}/repo"
 
         // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
         // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure

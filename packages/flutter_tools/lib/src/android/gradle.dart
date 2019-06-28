@@ -355,9 +355,10 @@ Future<void> buildGradleProject({
 }
 
 Future<void> buildGradleAar({
-  @required FlutterProject flutterProject,
+  @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
+  @required String buildDir,
 }) async {
   final GradleProject gradleProject = await _gradleLibraryProject();
   final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
@@ -372,18 +373,26 @@ Future<void> buildGradleAar({
     multilineOutput: true,
   );
 
-  final String gradle = await _ensureGradle(flutterProject);
+  final String gradle = await _ensureGradle(project);
   final String gradlePath = fs.file(gradle).absolute.path;
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-  final String initScript = '$flutterRoot/packages/flutter_tools/gradle/aar_init_script.gradle';
+  final String initScript = fs.path.join(flutterRoot, 'packages','flutter_tools', 'gradle', 'aar_init_script.gradle');
   final List<String> command = <String>[
     gradlePath,
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
   ];
 
-  if (target != null) {
+  if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
+  }
+
+  Directory repoDirectory;
+  if (buildDir != null && buildDir.isNotEmpty) {
+    command.add('-Pbuild-dir=$buildDir');
+    repoDirectory = fs.directory(fs.path.join(buildDir, 'repo'));
+  } else {
+    repoDirectory = gradleProject.repoDirectory;
   }
 
   if (androidBuildInfo.targetArchs.isNotEmpty) {
@@ -399,7 +408,7 @@ Future<void> buildGradleAar({
   try {
     exitCode = await runCommandAndStreamOutput(
       command,
-      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
       mapFunction: (String line) {
         // Always print the full line in verbose mode.
@@ -412,14 +421,15 @@ Future<void> buildGradleAar({
   } finally {
     status.stop();
   }
+  flutterUsage.sendTiming('build', 'gradle-aar', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (exitCode != 0) {
     throwToolExit('Gradle task $aarTask failed with exit code $exitCode', exitCode: exitCode);
   }
-  flutterUsage.sendTiming('build', 'gradle-aar', Duration(milliseconds: sw.elapsedMilliseconds));
-
-  printStatus('Built AAR and POM file at path ${fs.path.relative(gradleProject.repoDirectory.path)}.',
-      color: TerminalColor.green);
+  if (!repoDirectory.existsSync()) {
+    throwToolExit('Gradle task $aarTask failed to produce $repoDirectory', exitCode: exitCode);
+  }
+  printStatus('Built ${fs.path.relative(repoDirectory.path)}.', color: TerminalColor.green);
 }
 
 Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async {

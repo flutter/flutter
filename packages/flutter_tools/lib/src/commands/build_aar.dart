@@ -21,6 +21,10 @@ class BuildAarCommand extends BuildSubCommand {
         defaultsTo: <String>['android-arm', 'android-arm64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
+      )
+      ..addOption('build-dir',
+        help: 'The absolute path to the directory where the `repo` is generated.'
+              'By default, this is <current-directory>android/build. ',
       );
   }
 
@@ -34,9 +38,8 @@ class BuildAarCommand extends BuildSubCommand {
   };
 
   @override
-  final String description = 'Build an Android Archive (AAR) file from your module or plugin project.\n\n'
-    'In addition, this command generates a Maven POM file, which contains the dependency list used to '
-    'resolve transitive dependencies when you import the AAR.';
+  final String description = 'Build a repo directory containing an AAR file and a POM file.\n\n'
+      'The POM file is used to include the dependencies that the AAR was compiled against.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -47,6 +50,7 @@ class BuildAarCommand extends BuildSubCommand {
     await buildAar(
       project: FlutterProject.current(),
       target: '',
+      buildDir: argResults['build-dir'],
       androidBuildInfo: androidBuildInfo,
     );
     return null;
