@@ -29,6 +29,7 @@
 
 #include "service_provider_dir.h"
 #include "task_observers.h"
+#include "task_runner_adapter.h"
 #include "thread.h"
 
 namespace flutter_runner {
@@ -80,7 +81,8 @@ Application::Application(
       debug_label_(DebugLabelForURL(startup_info.launch_info.url)),
       application_controller_(this),
       outgoing_dir_(new vfs::PseudoDir()),
-      runner_incoming_services_(runner_incoming_services) {
+      runner_incoming_services_(runner_incoming_services),
+      weak_factory_(this) {
   application_controller_.set_error_handler(
       [this](zx_status_t status) { Kill(); });
 
@@ -308,17 +310,37 @@ Application::Application(
   settings_.dart_flags.push_back("--profile_period=10000");
 #endif  // defined(__aarch64__)
 
-  auto dispatcher = async_get_default_dispatcher();
-  FML_CHECK(dispatcher);
+  auto weak_application = weak_factory_.GetWeakPtr();
+  auto platform_task_runner =
+      CreateFMLTaskRunner(async_get_default_dispatcher());
   const std::string component_url = package.resolved_url;
   settings_.unhandled_exception_callback =
-      [dispatcher, runner_incoming_services, component_url](
-          const std::string& error, const std::string& stack_trace) {
-        async::PostTask(dispatcher, [runner_incoming_services, component_url,
-                                     error, stack_trace]() {
-          dart_utils::HandleException(runner_incoming_services, component_url,
-                                      error, stack_trace);
-        });
+      [weak_application, platform_task_runner, runner_incoming_services,
+       component_url](const std::string& error,
+                      const std::string& stack_trace) {
+        if (weak_application) {
+          // TODO(cbracken): unsafe. The above check and the PostTask below are
+          // happening on the UI thread. If the Application dtor and thread
+          // termination happen (on the platform thread) between the previous
+          // line and the next line, a crash will occur since we'll be posting
+          // to a dead thread. See Runner::OnApplicationTerminate() in
+          // runner.cc.
+          platform_task_runner->PostTask([weak_application,
+                                          runner_incoming_services,
+                                          component_url, error, stack_trace]() {
+            if (weak_application) {
+              dart_utils::HandleException(runner_incoming_services,
+                                          component_url, error, stack_trace);
+            } else {
+              FML_LOG(ERROR)
+                  << "Unhandled exception after application shutdown: "
+                  << error;
+            }
+          });
+        } else {
+          FML_LOG(ERROR) << "Unhandled exception after application shutdown: "
+                         << error;
+        }
         // Ideally we would return whether HandleException returned ZX_OK, but
         // short of knowing if the exception was correctly handled, we return
         // false to have the error and stack trace printed in the logs.
