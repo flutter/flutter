@@ -3619,6 +3619,11 @@ class _SemanticsGeometry {
     return MatrixUtils.inverseTransformRect(transform, rect);
   }
 
+  // Calls applyPaintTransform on all of the render objects between [child] and
+  // [ancestor]. This method handles cases where the immediate semantic parent
+  // is not the immediate render object parent of the child.
+  //
+  // It will mutate both transform and clipRectTransform.
   static void _applyIntermediatePaintTransforms(
     RenderObject ancestor,
     RenderObject child,
@@ -3628,6 +3633,8 @@ class _SemanticsGeometry {
     assert(ancestor != null);
     assert(child != null);
     assert(transform != null);
+    assert(clipRectTransform != null);
+    assert(clipRectTransform.isIdentity());
     RenderObject intermediateParent = child.parent;
     assert(intermediateParent != null);
     while (intermediateParent != ancestor) {
