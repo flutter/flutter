@@ -27,7 +27,6 @@ void configureProject(final Project project) {
     }
 
     String flutterRoot = getFlutterRoot(project)
-
     project.dependencies {
         compileOnly project.files("${flutterRoot}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
     }
