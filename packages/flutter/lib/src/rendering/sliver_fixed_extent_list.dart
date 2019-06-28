@@ -236,7 +236,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     final int lastIndex = indexOf(lastChild);
     final double leadingScrollOffset = firstIndex == 0 ? 0 : indexToLayoutOffset(itemExtent, firstIndex - 1) + itemExtent;
-    final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex) + itemExtent;
+    final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex + 1);
 
     assert(firstIndex == 0 || childScrollOffset(firstChild) - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
