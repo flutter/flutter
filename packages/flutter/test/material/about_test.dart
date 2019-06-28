@@ -9,6 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  tearDown(() {
+    LicenseRegistry.reset();
+  });
+
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -131,7 +135,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
+    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 287.0));
   }, skip: isBrowser);
 
   testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
