@@ -360,9 +360,16 @@ Future<void> buildGradleAar({
   @required String target,
   @required String buildDir,
 }) async {
-  final GradleProject gradleProject = await _gradleLibraryProject();
-  final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
+  GradleProject gradleProject;
+  if (project.manifest.isModule) {
+    gradleProject = await _gradleAppProject();
+  } else if (project.manifest.isPlugin) {
+    gradleProject = await _gradleLibraryProject();
+  } else {
+    throwToolExit('AARs can only be built for plugin or module projects.');
+  }
 
+  final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
   if (aarTask == null) {
     _printUndefinedTask(gradleProject, androidBuildInfo.buildInfo);
     throwToolExit('Gradle build aborted.');

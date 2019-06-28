@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.maven.MavenDeployer
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.tasks.Upload
 
-void configureProject(final Project project) {
+void configureProject(Project project, String buildDir) {
     if (!project.hasProperty('android')) {
         throw new GradleException("Android property not found.")
     }
@@ -15,13 +15,13 @@ void configureProject(final Project project) {
     project.apply plugin: 'maven'
 
     project.android.libraryVariants.all { variant ->
-        setupLibraryVariant(project, variant)
+        setupLibraryVariant(project, buildDir, variant)
     }
 
     project.uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: "file://${getBuildDir(project)}/repo")
+                repository(url: "file://${buildDir}/repo")
             }
         }
     }
@@ -32,13 +32,6 @@ void configureProject(final Project project) {
     }
 }
 
-String getBuildDir(Project project) {
-    if (!project.hasProperty("build-dir")) {
-        return project.buildDir
-    }
-    return project.property("build-dir")
-}
-
 String getFlutterRoot(Project project) {
     if (!project.hasProperty("flutter-root")) {
         throw new GradleException("The `-Pflutter-root` flag must be specified.")
@@ -46,11 +39,11 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void setupLibraryVariant(Project project, variant) {
+void setupLibraryVariant(Project project, String buildDir, variant) {
     String variantName = variant.name.capitalize()
     Task aarTask = project.tasks.create(name: "aar${variantName}") {
         // Remove the existing repo directory, so we don't duplicate the artifacts.
-        delete "${getBuildDir(project)}/repo"
+        delete "${buildDir}/repo"
 
         // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
         // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
@@ -99,5 +92,19 @@ Set<Configuration> flattenConfigurations(Configuration configuration) {
 }
 
 projectsEvaluated {
-    configureProject(rootProject)
+    // In plugin projects, the Android library is the root project.
+    if (rootProject.subprojects.empty) {
+        configureProject(rootProject)
+    }
+    // In module projects, the Android library project is the `:flutter` subproject.
+    Project androidSubproject = rootProject.subprojects.find { it.name == 'flutter' }
+    // In module projects, the `buildDir` is defined in the `:app` subproject.
+    Project appSubproject = rootProject.subprojects.find { it.name == 'app' }
+
+    assert appSubproject != null
+    String buildDir = appSubproject.hasProperty("build-dir") ?
+            appSubproject.property("build-dir") : appSubproject.buildDir
+
+    assert androidSubproject != null
+    configureProject(androidSubproject, buildDir)
 }
