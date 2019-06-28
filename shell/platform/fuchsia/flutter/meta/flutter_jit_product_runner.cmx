@@ -12,6 +12,8 @@
             "fuchsia.device.manager.Administrator",
             "fuchsia.crash.Analyzer",
             "fuchsia.fonts.Provider",
+            "fuchsia.posix.socket.Provider",
+            "fuchsia.net.NameLookup",
             "fuchsia.net.SocketProvider",
             "fuchsia.sysmem.Allocator",
             "fuchsia.timezone.Timezone",
