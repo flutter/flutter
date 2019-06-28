@@ -196,7 +196,8 @@ void main() {
                       title: Text('App Bar'),
                     ),
                   ),
-                ]..addAll(slivers),
+                  ...slivers,
+                ],
               );
             },
           ),

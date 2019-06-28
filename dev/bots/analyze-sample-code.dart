@@ -286,13 +286,14 @@ class SampleChecker {
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
           path.canonicalize(_snippetsExecutable),
-        ]..addAll(args),
+          ...args,
+        ],
         workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
         _dartExecutable,
-        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
+        <String>[path.canonicalize(_snippetsSnapshotPath), ...args],
         workingDirectory: workingDirectory,
       );
     }
@@ -311,7 +312,8 @@ class SampleChecker {
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
       '--input=${inputFile.absolute.path}',
-    ]..addAll(snippet.args);
+      ...snippet.args,
+    ];
     print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
     if (process.exitCode != 0) {
@@ -854,9 +856,11 @@ class Section {
         ),
       );
     }
-    return Section(<Line>[Line(prefix)]
-      ..addAll(codeLines)
-      ..add(Line(postfix)));
+    return Section(<Line>[
+      Line(prefix),
+      ...codeLines,
+      Line(postfix),
+    ]);
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;
@@ -868,8 +872,8 @@ class Section {
 /// analyzed.
 class Snippet {
   Snippet({this.start, List<String> input, List<String> args, this.serial}) {
-    this.input = <String>[]..addAll(input);
-    this.args = <String>[]..addAll(args);
+    this.input = input.toList();
+    this.args = args.toList();
   }
   final Line start;
   final int serial;

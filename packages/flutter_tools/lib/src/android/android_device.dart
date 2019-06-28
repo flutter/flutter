@@ -219,7 +219,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
+    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(

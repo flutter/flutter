@@ -122,22 +122,22 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         Uint8List(253),
-        <int>[8, 253]..addAll(List<int>.filled(253, 0)),
+        <int>[8, 253, ...List<int>.filled(253, 0)],
       );
       _checkEncoding<dynamic>(
         standard,
         Uint8List(254),
-        <int>[8, 254, 254, 0]..addAll(List<int>.filled(254, 0)),
+        <int>[8, 254, 254, 0, ...List<int>.filled(254, 0)],
       );
       _checkEncoding<dynamic>(
         standard,
         Uint8List(0xffff),
-        <int>[8, 254, 0xff, 0xff]..addAll(List<int>.filled(0xffff, 0)),
+        <int>[8, 254, 0xff, 0xff, ...List<int>.filled(0xffff, 0)],
       );
       _checkEncoding<dynamic>(
         standard,
         Uint8List(0xffff + 1),
-        <int>[8, 255, 0, 0, 1, 0]..addAll(List<int>.filled(0xffff + 1, 0)),
+        <int>[8, 255, 0, 0, 1, 0, ...List<int>.filled(0xffff + 1, 0)],
       );
     });
     test('should encode and decode simple messages', () {
