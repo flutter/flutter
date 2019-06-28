@@ -159,7 +159,7 @@ Application::Application(
   // flutter_public_dir is only accessed once we receive OnOpen Event.
   // That will prevent FL-175 for public directory
   auto request = flutter_public_dir.NewRequest().TakeChannel();
-  fdio_service_connect_at(directory_ptr_.channel().get(), "public",
+  fdio_service_connect_at(directory_ptr_.channel().get(), "svc",
                           request.release());
 
   auto service_provider_dir = std::make_unique<ServiceProviderDir>();
@@ -209,7 +209,7 @@ Application::Application(
                           std::move(channel)));
           }));
 
-  outgoing_dir_->AddEntry("public", std::move(service_provider_dir));
+  outgoing_dir_->AddEntry("svc", std::move(service_provider_dir));
 
   // Setup the application controller binding.
   if (application_controller_request) {
