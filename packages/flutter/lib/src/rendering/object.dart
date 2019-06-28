@@ -3584,9 +3584,10 @@ class _SemanticsGeometry {
       } else {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
-      _semanticsClipRect = _transformRect(_semanticsClipRect, parent, child);
-      _paintClipRect = _transformRect(_paintClipRect, parent, child);
-      parent.applyPaintTransform(child, _transform);
+      _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+      _applyIntermediatePaintTransforms(parent, child, _transform, _temporaryTransformHolder);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _temporaryTransformHolder);
+      _paintClipRect = _transformRect(_paintClipRect, _temporaryTransformHolder);
     }
 
     final RenderObject owner = ancestors.first;
@@ -3609,14 +3610,41 @@ class _SemanticsGeometry {
   static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
 
   /// From parent to child coordinate system.
-  static Rect _transformRect(Rect rect, RenderObject parent, RenderObject child) {
+  static Rect _transformRect(Rect rect, Matrix4 transform) {
+    assert(transform != null);
     if (rect == null)
       return null;
     if (rect.isEmpty)
       return Rect.zero;
-    _temporaryTransformHolder.setIdentity();  // clears data from a previous call
-    parent.applyPaintTransform(child, _temporaryTransformHolder);
-    return MatrixUtils.inverseTransformRect(_temporaryTransformHolder, rect);
+    return MatrixUtils.inverseTransformRect(transform, rect);
+  }
+
+  // Calls applyPaintTransform on all of the render objects between [child] and
+  // [ancestor]. This method handles cases where the immediate semantic parent
+  // is not the immediate render object parent of the child.
+  //
+  // It will mutate both transform and clipRectTransform.
+  static void _applyIntermediatePaintTransforms(
+    RenderObject ancestor,
+    RenderObject child,
+    Matrix4 transform,
+    Matrix4 clipRectTransform,
+  ) {
+    assert(ancestor != null);
+    assert(child != null);
+    assert(transform != null);
+    assert(clipRectTransform != null);
+    assert(clipRectTransform.isIdentity());
+    RenderObject intermediateParent = child.parent;
+    assert(intermediateParent != null);
+    while (intermediateParent != ancestor) {
+      intermediateParent.applyPaintTransform(child, transform);
+      intermediateParent = intermediateParent.parent;
+      child = child.parent;
+      assert(intermediateParent != null);
+    }
+    ancestor.applyPaintTransform(child, transform);
+    ancestor.applyPaintTransform(child, clipRectTransform);
   }
 
   static Rect _intersectRects(Rect a, Rect b) {

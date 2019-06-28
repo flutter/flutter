@@ -71,7 +71,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
 /// passed to the `callback`, and that handle will automatically be disposed
-/// after the callback is finished.
+/// after the callback is finished. It defaults to true.
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
@@ -100,7 +100,7 @@ void testWidgets(
   bool skip = false,
   test_package.Timeout timeout,
   Duration initialTimeout,
-  bool semanticsEnabled = false,
+  bool semanticsEnabled = true,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -115,6 +115,7 @@ void testWidgets(
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () async {
+          debugResetSemanticsIdCounter();
           await callback(tester);
           semanticsHandle?.dispose();
         },
