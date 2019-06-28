@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'material_button.dart';
-import 'material_state.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 
@@ -133,16 +132,12 @@ class OutlineButton extends MaterialButton {
   ///
   /// By default the border's color does not change when the button
   /// is pressed.
-  ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
   ///
   /// By default the outline border's color does not change when the
   /// button is disabled.
-  ///
-  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -153,10 +148,6 @@ class OutlineButton extends MaterialButton {
   ///
   /// If null the default border's style is [BorderStyle.solid], its
   /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
-  ///
-  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
-  /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
-  /// are ignored.
   final BorderSide borderSide;
 
   @override
@@ -379,26 +370,18 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
-  Color get _outlineColor {
-    // If outline color is a `MaterialStateProperty`, it will be used in all
-    // states, otherwise we determine the outline color in the current state.
-    if (widget.borderSide?.color is MaterialStateProperty<Color>)
-      return widget.borderSide.color;
-    if (!widget.enabled)
-      return widget.disabledBorderColor;
-    if (_pressed)
-      return widget.highlightedBorderColor;
-    return widget.borderSide?.color;
-  }
-
   BorderSide _getOutline() {
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
+    final Color specifiedColor = widget.enabled
+      ? (_pressed ? widget.highlightedBorderColor : null) ?? widget.borderSide?.color
+      : widget.disabledBorderColor;
+
     final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
     return BorderSide(
-      color: _outlineColor ?? themeColor,
+      color: specifiedColor ?? themeColor,
       width: widget.borderSide?.width ?? 1.0,
     );
   }
@@ -450,7 +433,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
 // Render the button's outline border using using the OutlineButton's
 // border parameters and the button or buttonTheme's shape.
-class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeBorder>{
+class _OutlineBorder extends ShapeBorder {
   const _OutlineBorder({
     @required this.shape,
     @required this.side,
@@ -529,12 +512,4 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
 
   @override
   int get hashCode => hashValues(side, shape);
-
-  @override
-  ShapeBorder resolve(Set<MaterialState> states) {
-    return _OutlineBorder(
-      shape: shape,
-      side: side.copyWith(color: MaterialStateProperty.resolveAs<Color>(side.color, states),
-    ));
-  }
 }
