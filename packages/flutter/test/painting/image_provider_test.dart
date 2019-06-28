@@ -347,8 +347,8 @@ HttpClient respondOnAnyWithHeaders() {
   return httpClient;
 }
 
-List<List<int>> createChunks(int chunkSize) {
-  final List<List<int>> chunks = <List<int>>[];
+List<Uint8List> createChunks(int chunkSize) {
+  final List<Uint8List> chunks = <Uint8List>[];
   for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
     chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
   }
