@@ -10,7 +10,7 @@ TEST(MutatorsStack, Initialization) {
   ASSERT_TRUE(true);
 }
 
-TEST(MutatorsStack, CopyConstructor) {
+TEST(MutatorsStack, DISABLED_CopyConstructor) {
   flutter::MutatorsStack stack;
   SkRRect rrect;
   SkRect rect;
@@ -20,7 +20,7 @@ TEST(MutatorsStack, CopyConstructor) {
   ASSERT_TRUE(copy == stack);
 }
 
-TEST(MutatorsStack, PushClipRect) {
+TEST(MutatorsStack, DISABLED_PushClipRect) {
   flutter::MutatorsStack stack;
   SkRect rect;
   stack.pushClipRect(rect);
@@ -56,7 +56,7 @@ TEST(MutatorsStack, Pop) {
   ASSERT_TRUE(iter == stack.top());
 }
 
-TEST(MutatorsStack, Traversal) {
+TEST(MutatorsStack, DISABLED_Traversal) {
   flutter::MutatorsStack stack;
   SkMatrix matrix;
   stack.pushTransform(matrix);
