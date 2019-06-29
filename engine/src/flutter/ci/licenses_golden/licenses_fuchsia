@@ -1,4 +1,4 @@
-Signature: 5e0bd1a8ed4aaf2d1ec2cb3d04c0a7f6
+Signature: c229612b26ba875d785865635722c232
 
 UNUSED LICENSES:
 
@@ -1945,6 +1945,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/barrier.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/barrier.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/in_place_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/storage_internal.h
@@ -3241,6 +3243,11 @@ FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resour
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/session.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/context.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/fields.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/instrumentation.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/types.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/fifo.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/fifo.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/handle.h
