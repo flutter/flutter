@@ -16,7 +16,6 @@
             "fuchsia.process.Launcher",
             "fuchsia.process.Resolver",
             "fuchsia.timezone.Timezone",
-            "fuchsia.tracelink.Registry",
             "fuchsia.tracing.provider.Registry"
         ]
     }

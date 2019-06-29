@@ -14,7 +14,6 @@
             "fuchsia.net.NameLookup",
             "fuchsia.net.SocketProvider",
             "fuchsia.timezone.Timezone",
-            "fuchsia.tracelink.Registry",
             "fuchsia.tracing.provider.Registry"
         ]
     }
