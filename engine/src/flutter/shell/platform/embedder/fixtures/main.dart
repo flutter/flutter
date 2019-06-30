@@ -45,9 +45,9 @@ Float64List kTestTransform = () {
 }();
 
 void signalNativeTest() native 'SignalNativeTest';
-void notifySemanticsEnabled(bool enabled) native 'NotifyTestData';
-void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyTestData';
-void notifySemanticsAction(int nodeId, int action, List<int> data) native 'NotifyTestData';
+void notifySemanticsEnabled(bool enabled) native 'NotifySemanticsEnabled';
+void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyAccessibilityFeatures';
+void notifySemanticsAction(int nodeId, int action, List<int> data) native 'NotifySemanticsAction';
 
 /// Returns a future that completes when `window.onSemanticsEnabledChanged`
 /// fires.
