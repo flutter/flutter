@@ -15,6 +15,7 @@
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/glfw/glfw_event_loop.h"
 #include "flutter/shell/platform/glfw/key_event_handler.h"
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "flutter/shell/platform/glfw/platform_handler.h"
@@ -79,8 +80,11 @@ struct FlutterDesktopWindowControllerState {
   // Handler for the flutter/platform channel.
   std::unique_ptr<flutter::PlatformHandler> platform_handler;
 
-  // Whether or not the pointer has been added (or if tracking is enabled, has
-  // been added since it was last removed).
+  // The event loop for the main thread that allows for delayed task execution.
+  std::unique_ptr<flutter::GLFWEventLoop> event_loop;
+
+  // Whether or not the pointer has been added (or if tracking is enabled,
+  // has been added since it was last removed).
   bool pointer_currently_added = false;
 
   // The screen coordinates per inch on the primary monitor. Defaults to a sane
@@ -489,11 +493,13 @@ static void GLFWErrorCallback(int error_code, const char* description) {
 // provided).
 //
 // Returns a caller-owned pointer to the engine.
-static FlutterEngine RunFlutterEngine(GLFWwindow* window,
-                                      const char* assets_path,
-                                      const char* icu_data_path,
-                                      const char** arguments,
-                                      size_t arguments_count) {
+static FlutterEngine RunFlutterEngine(
+    GLFWwindow* window,
+    const char* assets_path,
+    const char* icu_data_path,
+    const char** arguments,
+    size_t arguments_count,
+    const FlutterCustomTaskRunners* custom_task_runners) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
@@ -528,6 +534,7 @@ static FlutterEngine RunFlutterEngine(GLFWwindow* window,
   args.command_line_argc = static_cast<int>(argv.size());
   args.command_line_argv = &argv[0];
   args.platform_message_callback = GLFWOnFlutterPlatformMessage;
+  args.custom_task_runners = custom_task_runners;
   FlutterEngine engine = nullptr;
   auto result =
       FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, window, &engine);
@@ -578,9 +585,38 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
   // GLFWMakeResourceContextCurrent immediately.
   state->resource_window = CreateShareWindowForWindow(window);
 
+  // Create an event loop for the window. It is not running yet.
+  state->event_loop = std::make_unique<flutter::GLFWEventLoop>(
+      std::this_thread::get_id(),  // main GLFW thread
+      [state = state.get()](const auto* task) {
+        if (FlutterEngineRunTask(state->engine, task) != kSuccess) {
+          std::cerr << "Could not post an engine task." << std::endl;
+        }
+      });
+
+  // Configure task runner interop.
+  FlutterTaskRunnerDescription platform_task_runner = {};
+  platform_task_runner.struct_size = sizeof(FlutterTaskRunnerDescription);
+  platform_task_runner.user_data = state.get();
+  platform_task_runner.runs_task_on_current_thread_callback =
+      [](void* state) -> bool {
+    return reinterpret_cast<FlutterDesktopWindowControllerState*>(state)
+        ->event_loop->RunsTasksOnCurrentThread();
+  };
+  platform_task_runner.post_task_callback =
+      [](FlutterTask task, uint64_t target_time_nanos, void* state) -> void {
+    reinterpret_cast<FlutterDesktopWindowControllerState*>(state)
+        ->event_loop->PostTask(task, target_time_nanos);
+  };
+
+  FlutterCustomTaskRunners custom_task_runners = {};
+  custom_task_runners.struct_size = sizeof(FlutterCustomTaskRunners);
+  custom_task_runners.platform_task_runner = &platform_task_runner;
+
   // Start the engine.
-  state->engine = RunFlutterEngine(window, assets_path, icu_data_path,
-                                   arguments, argument_count);
+  state->engine =
+      RunFlutterEngine(window, assets_path, icu_data_path, arguments,
+                       argument_count, &custom_task_runners);
   if (state->engine == nullptr) {
     return nullptr;
   }
@@ -704,15 +740,17 @@ void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
   // Necessary for GTK thread safety.
   XInitThreads();
 #endif
+
   while (!glfwWindowShouldClose(window)) {
-    glfwPollEvents();
+    auto wait_duration = std::chrono::milliseconds::max();
 #ifdef FLUTTER_USE_GTK
+    // If we are not using GTK, there is no point in waking up.
+    wait_duration = std::chrono::milliseconds(10);
     if (gtk_events_pending()) {
       gtk_main_iteration();
     }
 #endif
-    // TODO(awdavies): This will be deprecated soon.
-    __FlutterEngineFlushPendingTasksNow();
+    controller->event_loop->WaitForEvents(wait_duration);
   }
   FlutterDesktopDestroyWindow(controller);
 }
@@ -738,8 +776,9 @@ FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
                                                 const char* icu_data_path,
                                                 const char** arguments,
                                                 size_t argument_count) {
-  auto engine = RunFlutterEngine(nullptr, assets_path, icu_data_path, arguments,
-                                 argument_count);
+  auto engine =
+      RunFlutterEngine(nullptr, assets_path, icu_data_path, arguments,
+                       argument_count, nullptr /* custom task runners */);
   if (engine == nullptr) {
     return nullptr;
   }

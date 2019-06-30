@@ -918,6 +918,8 @@ FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutte
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window_controller.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/plugin_registrar_glfw.h
 FILE: ../../../flutter/shell/platform/glfw/flutter_glfw.cc
+FILE: ../../../flutter/shell/platform/glfw/glfw_event_loop.cc
+FILE: ../../../flutter/shell/platform/glfw/glfw_event_loop.h
 FILE: ../../../flutter/shell/platform/glfw/key_event_handler.cc
 FILE: ../../../flutter/shell/platform/glfw/key_event_handler.h
 FILE: ../../../flutter/shell/platform/glfw/keyboard_hook_handler.h

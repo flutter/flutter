@@ -253,6 +253,7 @@ def to_gn_args(args):
 
     if sys.platform == 'darwin':
       gn_args['mac_sdk_path'] = args.mac_sdk_path
+      gn_args['build_glfw_shell'] = args.build_glfw_shell
       if gn_args['mac_sdk_path'] == '':
         gn_args['mac_sdk_path'] = os.getenv('FLUTTER_MAC_SDK_PATH', '')
 
@@ -322,6 +323,9 @@ def parse_args(args):
   parser.add_argument('--ide', default='', type=str,
                       help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
                       ' see supported IDEs. If this flag is not specified, a platform specific default is selected.')
+
+  parser.add_argument('--build-glfw-shell', dest='build_glfw_shell', default=False, action='store_true',
+                      help='Force building the GLFW shell on desktop platforms where it is not built by default.')
 
   return parser.parse_args(args)
 
