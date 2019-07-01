@@ -627,10 +627,12 @@ void main() {
   testWidgets(
     'prefix widget is in front of the text',
     (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
         CupertinoApp(
           home: Center(
             child: CupertinoTextField(
+              focusNode: focusNode,
               prefix: const Icon(CupertinoIcons.add),
               controller: TextEditingController(text: 'input'),
             ),
@@ -649,6 +651,12 @@ void main() {
             + tester.getSize(find.byIcon(CupertinoIcons.add)).width
             + 6.0,
       );
+
+      // Tapping on the prefix isn't received by the CupertinoTextField.
+      expect(focusNode.hasFocus, false);
+      await tester.tap(find.byIcon(CupertinoIcons.add));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, false);
     },
   );
 
@@ -692,11 +700,13 @@ void main() {
   testWidgets(
     'suffix widget is after the text',
     (WidgetTester tester) async {
+      final FocusNode focusNode = FocusNode();
       await tester.pumpWidget(
-        const CupertinoApp(
+        CupertinoApp(
           home: Center(
             child: CupertinoTextField(
-              suffix: Icon(CupertinoIcons.add),
+              focusNode: focusNode,
+              suffix: const Icon(CupertinoIcons.add),
             ),
           ),
         ),
@@ -713,6 +723,12 @@ void main() {
             - tester.getSize(find.byIcon(CupertinoIcons.add)).width
             - 6.0,
       );
+
+      // Tapping on the suffix isn't received by the CupertinoTextField.
+      expect(focusNode.hasFocus, false);
+      await tester.tap(find.byIcon(CupertinoIcons.add));
+      await tester.pumpAndSettle();
+      expect(focusNode.hasFocus, false);
     },
   );
 

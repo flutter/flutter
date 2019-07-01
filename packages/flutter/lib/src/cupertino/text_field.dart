@@ -596,7 +596,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     // widgets in front of it, tapping the prefix or suffix will also trigger
     // this handler here. If this is the case, ignore the tap.
     if (_prefixGlobalKey.currentContext != null) {
-      print('justin preifx');
       final RenderBox prefixRenderBox = _prefixGlobalKey
         .currentContext.findRenderObject();
       final Offset localPosition = prefixRenderBox
