@@ -51,6 +51,10 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 /// [ExpansionPanel] needs to rebuild.
 typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
+/// Signature for the callback that's called when the expansion indicator of the
+/// [ExpansionPanel] needs to rebuild.
+typedef ExpansionPanelIndicatorBuilder = Widget Function(BuildContext context, bool isExpanded);
+
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
@@ -74,6 +78,7 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.expansionIndicator,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -81,6 +86,36 @@ class ExpansionPanel {
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
+
+  /// The widget builder that builds the expansion panels' indicator.
+  ///
+  /// If null, [ExpandIcon] will be used as the expansion icon by default.
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// ExpansionPanel(
+  ///   isExpanded: _isExpanded,
+  ///   headerBuilder: (context, isExpanded) {
+  ///     return Text("This is ExpansionPanel's header");
+  ///   },
+  ///   expansionIndicator: (context, isExpanded) {
+  ///     return Checkbox(
+  ///       value: isExpanded,
+  ///       onChanged: (bool val) {
+  ///         setState(() { _isExpanded = val; });
+  ///       },
+  ///     );
+  ///   },
+  ///   body: ListTile(
+  ///     title: Text("This is title for ExpansionPanel's body"),
+  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  final ExpansionPanelIndicatorBuilder expansionIndicator;
 
   /// The body of the expansion panel that's displayed below the header.
   ///
@@ -96,7 +131,6 @@ class ExpansionPanel {
   ///
   /// Defaults to false.
   final bool canTapOnHeader;
-
 }
 
 /// An expansion panel that allows for radio-like functionality.
@@ -119,12 +153,15 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
     bool canTapOnHeader = false,
-  }) : assert(value != null),
-      super(
-        body: body,
-        headerBuilder: headerBuilder,
-        canTapOnHeader: canTapOnHeader,
-      );
+    ExpansionPanelIndicatorBuilder expansionIndicator,
+  }) :
+    assert(value != null),
+    super(
+      body: body,
+      headerBuilder: headerBuilder,
+      canTapOnHeader: canTapOnHeader,
+      expansionIndicator: expansionIndicator,
+    );
 
   /// The value that uniquely identifies a radio panel so that the currently
   /// selected radio panel can be identified.
@@ -448,15 +485,25 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         _isChildExpanded(index),
       );
 
-      Widget expandIconContainer = Container(
-        margin: const EdgeInsetsDirectional.only(end: 8.0),
-        child: ExpandIcon(
+      Widget expansionIndicator;
+      if (child.expansionIndicator != null) {
+        expansionIndicator = child.expansionIndicator(
+          context,
+          _isChildExpanded(index),
+        );
+      } else {
+        expansionIndicator = ExpandIcon(
           isExpanded: _isChildExpanded(index),
           padding: const EdgeInsets.all(16.0),
           onPressed: !child.canTapOnHeader
-              ? (bool isExpanded) => _handlePressed(isExpanded, index)
-              : null,
-        ),
+            ? (bool isExpanded) { _handlePressed(isExpanded, index); }
+            : null,
+        );
+      }
+
+      Widget expandIconContainer = Container(
+        margin: const EdgeInsetsDirectional.only(end: 8.0),
+        child: expansionIndicator,
       );
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
