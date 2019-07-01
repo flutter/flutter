@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:meta/meta.dart' show visibleForTesting;
 
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
 typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
