@@ -1249,9 +1249,7 @@ void main() {
   });
 
   testWidgets('ExpansionPanel accepts custom expansionIndicator', (WidgetTester tester) async {
-    List<bool> _isExpanded = [true, false];
-
-    // ExpansionPanel
+    final List<bool> _isExpanded = <bool>[true, false];
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
@@ -1261,7 +1259,7 @@ void main() {
                 children: <ExpansionPanel>[
                   ExpansionPanel(
                     headerBuilder: (BuildContext context, bool isExpanded) {
-                      return const Text('A');
+                      return const Text('Header');
                     },
                     expansionIndicator: (BuildContext context, bool isExpanded) {
                       return Checkbox(
@@ -1271,12 +1269,12 @@ void main() {
                         },
                       );
                     },
-                    body: const Text('C'),
-                    isExpanded: true,
+                    body: _isExpanded[0] ? const Text('B') : const Text('A'),
+                    isExpanded: _isExpanded[0],
                   ),
                   ExpansionPanel(
                     headerBuilder: (BuildContext context, bool isExpanded) {
-                      return const Text('B');
+                      return const Text('Header');
                     },
                     expansionIndicator: (BuildContext context, bool isExpanded) {
                       return Checkbox(
@@ -1286,8 +1284,8 @@ void main() {
                         },
                       );
                     },
-                    body: const Text('D'),
-                    isExpanded: false,
+                    body: _isExpanded[1] ? const Text('D') : const Text('C'),
+                    isExpanded: _isExpanded[1],
                   ),
                 ],
               );
@@ -1296,34 +1294,86 @@ void main() {
         ),
       ),
     );
-    // build expansion panel with two checkboxes
 
-    // check to see if two checkboxes can be found
+    expect(find.byType(Checkbox), findsNWidgets(2));
+    expect(find.byType(ExpandIcon), findsNothing);
 
-    // check to see if no expandicons are present
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
 
-    // initialize with first open, second close
+    await tester.tap(find.byType(Checkbox).at(1));
+    await tester.pumpAndSettle();
 
-    // check state
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
 
-    // tap on second one
+    int _currentOpenValue = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState)  {
+              return ExpansionPanelList.radio(
+                initialOpenPanelValue: _currentOpenValue,
+                children: <ExpansionPanelRadio>[
+                  ExpansionPanelRadio(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('Header');
+                    },
+                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool val) {
+                          if (!isExpanded)
+                            setState(() { _currentOpenValue = 0; });
+                        },
+                      );
+                    },
+                    body: _currentOpenValue == 0 ? const Text('B') : const Text('A'),
+                    value: 0,
+                  ),
+                  ExpansionPanelRadio(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('Header');
+                    },
+                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool val) {
+                          if (!isExpanded)
+                            setState(() { _currentOpenValue = 1; });
+                        },
+                      );
+                    },
+                    body: _currentOpenValue == 1 ? const Text('D') : const Text('C'),
+                    value: 1,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
 
-    // check state
+    expect(find.byType(Checkbox), findsNWidgets(2));
+    expect(find.byType(ExpandIcon), findsNothing);
 
-    // ExpansionPanelRadio
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
 
-    // build expansion panel radio with two checkboxes
+    await tester.tap(find.byType(Checkbox).at(1));
+    await tester.pumpAndSettle();
 
-    // check to see if two checkboxes can be found
-
-    // check to see if no expandiconts are present
-
-    // initialize with first open, second close
-
-    // check state
-
-    // tap on second one
-
-    // check state
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
   });
 }
