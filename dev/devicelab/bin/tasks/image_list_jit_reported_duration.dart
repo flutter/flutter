@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<void> main() async {
   await task(ReportedDurationTest(
-    ReportedDurationTestFlavor.release,
+    ReportedDurationTestFlavor.debug,
     '${flutterDirectory.path}/examples/image_list',
     'lib/main.dart',
     'com.example.image_list',
