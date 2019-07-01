@@ -501,7 +501,8 @@ class CupertinoTextField extends StatefulWidget {
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticKeepAliveClientMixin {
-  final GlobalKey _clearGlobalKey = GlobalKey();
+  final GlobalKey _prefixGlobalKey = GlobalKey();
+  final GlobalKey _suffixGlobalKey = GlobalKey();
   final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
@@ -592,14 +593,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
   void _handleSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
-    // widgets in front of it, tapping the clear button will also trigger this
-    // handler here. If this is the case, return.
-    if (_clearGlobalKey.currentContext != null) {
-      final RenderBox clearRenderBox = _clearGlobalKey
+    // widgets in front of it, tapping the prefix or suffix will also trigger
+    // this handler here. If this is the case, ignore the tap.
+    if (_prefixGlobalKey.currentContext != null) {
+      print('justin preifx');
+      final RenderBox prefixRenderBox = _prefixGlobalKey
         .currentContext.findRenderObject();
-      final Offset localPosition = clearRenderBox
+      final Offset localPosition = prefixRenderBox
         .globalToLocal(details.globalPosition);
-      if (clearRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
+      if (prefixRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
+        return;
+      }
+    }
+    if (_suffixGlobalKey.currentContext != null) {
+      final RenderBox suffixRenderBox = _suffixGlobalKey
+        .currentContext.findRenderObject();
+      final Offset localPosition = suffixRenderBox
+        .globalToLocal(details.globalPosition);
+      if (suffixRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
         return;
       }
     }
@@ -775,7 +786,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         // Insert a prefix at the front if the prefix visibility mode matches
         // the current text state.
         if (_showPrefixWidget(text)) {
-          rowChildren.add(widget.prefix);
+          rowChildren.add(Container(
+            key: _prefixGlobalKey,
+            child: widget.prefix,
+          ));
         }
 
         final List<Widget> stackChildren = <Widget>[];
@@ -804,12 +818,15 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
         // First add the explicit suffix if the suffix visibility mode matches.
         if (_showSuffixWidget(text)) {
-          rowChildren.add(widget.suffix);
+          rowChildren.add(Container(
+            key: _suffixGlobalKey,
+            child: widget.suffix,
+          ));
         // Otherwise, try to show a clear button if its visibility mode matches.
         } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
-              key: _clearGlobalKey,
+              key: _suffixGlobalKey,
               onTap: widget.enabled ?? true ? () {
                 // Special handle onChanged for ClearButton
                 // Also call onChanged when the clear button is tapped.
