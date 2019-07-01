@@ -1247,4 +1247,38 @@ void main() {
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
   });
+
+  testWidgets('ExpansionPanel accepts custom expansionIndicator', (WidgetTester tester) async {
+    // ExpansionPanel
+
+    // build expansion panel with two checkboxes
+
+    // check to see if two checkboxes can be found
+
+    // check to see if no expandicons are present
+
+    // initialize with first open, second close
+
+    // check state
+
+    // tap on second one
+
+    // check state
+
+    // ExpansionPanelRadio
+
+    // build expansion panel radio with two checkboxes
+
+    // check to see if two checkboxes can be found
+
+    // check to see if no expandiconts are present
+
+    // initialize with first open, second close
+
+    // check state
+
+    // tap on second one
+
+    // check state
+  });
 }
