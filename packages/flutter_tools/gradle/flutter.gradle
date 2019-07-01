@@ -1,8 +1,9 @@
-import java.nio.file.Path
-import java.nio.file.Paths
+import static groovy.io.FileType.FILES
 
 import com.android.builder.model.AndroidProject
 import com.android.build.OutputFile
+import java.nio.file.Path
+import java.nio.file.Paths
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -87,6 +88,7 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngineSrcPath
     private Properties localProperties
     private File flutterJar
+    private List<FlutterPluginTask> pluginTasks
 
     @Override
     void apply(Project project) {
@@ -204,38 +206,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        Properties plugins = readPropertiesIfExist(pluginsFile)
-
-        plugins.each { name, _ ->
-            def pluginProject = project.rootProject.findProject(":$name")
-            if (pluginProject != null) {
-                project.dependencies {
-                    if (project.getConfigurations().findByName("implementation")) {
-                        implementation pluginProject
-                    } else {
-                        compile pluginProject
-                    }
-                }
-                pluginProject.afterEvaluate {
-                    pluginProject.android.buildTypes {
-                        profile {
-                            initWith debug
-                        }
-                    }
-                    pluginProject.android.buildTypes.each {
-                        def buildMode = buildModeFor(it)
-                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
-                    }
-                    pluginProject.android.buildTypes.whenObjectAdded {
-                        def buildMode = buildModeFor(it)
-                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
-                    }
-                }
-            } else {
-                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
-            }
-        }
+        pluginTasks = configPluginTasks(project)
     }
 
     private String resolveProperty(Project project, String name, String defaultValue) {
@@ -317,16 +288,14 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private static void addApiDependencies(Project project, String variantName, FileCollection files) {
-        project.dependencies {
-            String configuration;
-            // `compile` dependencies are now `api` dependencies.
-            if (project.getConfigurations().findByName("api")) {
-                configuration = "${variantName}Api";
-            } else {
-                configuration = "${variantName}Compile";
-            }
-            add(configuration, files)
+        String configuration;
+        // `compile` dependencies are now `api` dependencies.
+        if (project.getConfigurations().findByName("api")) {
+            configuration = "${variantName}Api";
+        } else {
+            configuration = "${variantName}Compile";
         }
+        project.dependencies.add(configuration, files)
     }
 
     /**
@@ -352,6 +321,35 @@ class FlutterPlugin implements Plugin<Project> {
             return "${targetArch}"
         }
         return "${targetArch}-release"
+    }
+
+    private List<FlutterPluginTask> configPluginTasks(Project project) {
+        String buildModeValue = "release"
+        Boolean verboseValue = false
+
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        Properties plugins = readPropertiesIfExist(pluginsFile)
+
+        return plugins.collect { name, path ->
+            String intermediateDirValue = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}"
+            List<String> taskNameParts = ["build", "plugin", buildModeValue]
+            taskNameParts.addAll(name.split("_"))
+            Task task = project.tasks.create(name: snakeToCammelCase(taskNameParts), type: FlutterPluginTask) {
+                flutterExecutable this.flutterExecutable
+                buildMode buildModeValue
+                verbose verboseValue
+                pluginDir project.file(path)
+                intermediateDir project.file(intermediateDirValue)
+            }
+            return task
+        }
+    }
+
+    private static String snakeToCammelCase(List<String> parts) {
+        if (parts.empty) {
+            return ""
+        }
+        return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
     }
 
     private void addFlutterTask(Project project) {
@@ -439,8 +437,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
 
-            def flutterTasks = []
-            targetPlatforms.each { targetArch ->
+            def compileTasks = targetPlatforms.collect { targetArch ->
                 String abiValue = PLATFORM_ARCH_MAP[targetArch]
                 String taskName = "compile${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}${targetArch.replace('android-', '').capitalize()}"
                 FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
@@ -465,8 +462,39 @@ class FlutterPlugin implements Plugin<Project> {
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
-                flutterTasks.add(compileTask)
+                compileTask.doFirst {
+                    pluginTasks.each { pluginTask ->
+                        // Execute before configurating the DSL.
+                        pluginTask.execute()
+                        project.repositories {
+                            maven {
+                                url "${pluginTask.intermediateDir}/repo"
+                            }
+                        }
+
+                        File mavenMetadataFile
+                        pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
+                            if (file.name == "maven-metadata.xml") {
+                                mavenMetadataFile = file
+                            }
+                        }
+
+                        assert mavenMetadataFile != null
+                        def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
+
+                        assert mavenMetadata != null
+                        assert mavenMetadata.groupId != null
+                        assert mavenMetadata.artifactId != null
+                        project.dependencies {
+                            implementation ("${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:+@aar"){
+                                transitive = true
+                            }
+                        }
+                    }
+                }
+                return compileTask
             }
+
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
             def libFlutterPlatforms = targetPlatforms.collect()
             // x86/x86_64 native library used for debugging only, for now.
@@ -495,13 +523,13 @@ class FlutterPlugin implements Plugin<Project> {
                         include 'lib/**'
                     }
                 }
-                dependsOn flutterTasks
+                dependsOn compileTasks
                 // Add the ELF library.
-                flutterTasks.each { flutterTask ->
-                    from(flutterTask.intermediateDir) {
+                compileTasks.each { compileTask ->
+                    from(compileTask.intermediateDir) {
                         include '*.so'
                         rename { String filename ->
-                            return "lib/${flutterTask.abi}/lib${filename}"
+                            return "lib/${compileTask.abi}/lib${filename}"
                         }
                     }
                 }
@@ -515,7 +543,7 @@ class FlutterPlugin implements Plugin<Project> {
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
             Task copyFlutterAssetsTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
-                dependsOn flutterTasks
+                dependsOn compileTasks
                 if (packageAssets && cleanPackageAssets) {
                     dependsOn packageAssets
                     dependsOn cleanPackageAssets
@@ -526,7 +554,7 @@ class FlutterPlugin implements Plugin<Project> {
                     variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
                     into variant.mergeAssets.outputDir
                 }
-                flutterTasks.each { flutterTask ->
+                compileTasks.each { flutterTask ->
                     with flutterTask.assets
                 }
             }
@@ -549,7 +577,6 @@ class FlutterPlugin implements Plugin<Project> {
                 processResources.dependsOn(copyFlutterAssetsTask)
             }
         }
-
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
         } else {
@@ -779,6 +806,40 @@ class FlutterTask extends BaseFlutterTask {
     @TaskAction
     void build() {
         buildBundle()
+    }
+}
+
+class FlutterPluginTask extends DefaultTask {
+    File flutterExecutable
+    @Optional @Input
+    Boolean verbose
+    @Input
+    String buildMode
+    @Input
+    File pluginDir
+    @Input
+    File intermediateDir
+
+    @TaskAction
+    void build() {
+        if (!pluginDir.isDirectory()) {
+            throw new GradleException("Invalid Flutter plugin directory: ${pluginDir}")
+        }
+
+        intermediateDir.mkdirs()
+
+        project.exec {
+            executable flutterExecutable.absolutePath
+            workingDir pluginDir
+            args "build", "aar"
+            args "--suppress-analytics"
+            args "--quiet"
+            args "--output-dir", "${intermediateDir}"
+            args "--${buildMode}"
+            if (verbose) {
+                args "--verbose"
+            }
+        }
     }
 }
 

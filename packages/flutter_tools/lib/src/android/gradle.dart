@@ -358,7 +358,7 @@ Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
-  @required String buildDir,
+  @required String outputDir,
 }) async {
   GradleProject gradleProject;
   if (project.manifest.isModule) {
@@ -395,9 +395,9 @@ Future<void> buildGradleAar({
   }
 
   Directory repoDirectory;
-  if (buildDir != null && buildDir.isNotEmpty) {
-    command.add('-Pbuild-dir=$buildDir');
-    repoDirectory = fs.directory(fs.path.join(buildDir, 'repo'));
+  if (outputDir != null && outputDir.isNotEmpty) {
+    command.add('-Poutput-dir=$outputDir');
+    repoDirectory = fs.directory(fs.path.join(outputDir, 'repo'));
   } else {
     repoDirectory = gradleProject.repoDirectory;
   }

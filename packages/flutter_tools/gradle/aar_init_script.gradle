@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.maven.MavenDeployer
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.tasks.Upload
 
-void configureProject(Project project, String buildDir) {
+void configureProject(Project project, String outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
@@ -15,21 +15,25 @@ void configureProject(Project project, String buildDir) {
     project.apply plugin: "maven"
 
     project.android.libraryVariants.all { variant ->
-        setupLibraryVariant(project, buildDir, variant)
+        setupLibraryVariant(project, outputDir, variant)
     }
 
     project.uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: "file://${buildDir}/repo")
+                repository(url: "file://${outputDir}/repo")
             }
         }
     }
 
+    // println project.android.compileSdkVersion
     Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
     if (!usesFlutterPlugin) {
-        // The Flutter plugin already adds `flutter.jar`.
         project.dependencies {
+            // Plugins don't include their dependencies under the assumption that the parent project adds them.
+            compileOnly "androidx.annotation:annotation:+"
+            compileOnly 'com.android.support:support-annotations:+'
+            // The Flutter plugin already adds `flutter.jar`.
             compileOnly project.files("${getFlutterRoot(project)}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
         }
     }
@@ -42,11 +46,11 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void setupLibraryVariant(Project project, String buildDir, variant) {
+void setupLibraryVariant(Project project, String outputDir, variant) {
     String variantName = variant.name.capitalize()
     Task aarTask = project.tasks.create(name: "aar${variantName}") {
         // Remove the existing repo directory, so we don't duplicate the artifacts.
-        delete "${buildDir}/repo"
+        delete "${outputDir}/repo"
 
         // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
         // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
@@ -94,15 +98,15 @@ Set<Configuration> flattenConfigurations(Configuration configuration) {
     return configs
 }
 
-String getBuildDir(Project project) {
-    return project.hasProperty("build-dir") ?
-            project.property("build-dir") : project.buildDir
+String getOutputDir(Project project) {
+    return project.hasProperty("output-dir") ?
+            project.property("output-dir") : project.buildDir
 }
 
 projectsEvaluated {
     // In plugin projects, the Android library is the root project.
     if (rootProject.subprojects.empty) {
-        configureProject(rootProject, getBuildDir(rootProject))
+        configureProject(rootProject, getOutputDir(rootProject))
         return
     }
     // In module projects, the Android library project is the `:flutter` subproject.
@@ -112,5 +116,5 @@ projectsEvaluated {
 
     assert appSubproject != null
     assert androidSubproject != null
-    configureProject(androidSubproject, getBuildDir(appSubproject))
+    configureProject(androidSubproject, getOutputDir(appSubproject))
 }

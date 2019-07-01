@@ -17,7 +17,7 @@ Future<void> buildAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
-  @required String buildDir,
+  @required String outputDir,
 }) async {
   if (!project.android.isUsingGradle) {
     throwToolExit(
@@ -36,7 +36,7 @@ Future<void> buildAar({
     project: project,
     androidBuildInfo: androidBuildInfo,
     target: target,
-    buildDir: buildDir,
+    outputDir: outputDir,
   );
   androidSdk.reinitialize();
 }

@@ -22,7 +22,7 @@ class BuildAarCommand extends BuildSubCommand {
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       )
-      ..addOption('build-dir',
+      ..addOption('output-dir',
         help: 'The absolute path to the directory where the \'repo\' is generated.'
               'By default, this is \'<current-directory>android/build\'. ',
       );
@@ -50,8 +50,8 @@ class BuildAarCommand extends BuildSubCommand {
     await buildAar(
       project: FlutterProject.current(),
       target: '',
-      buildDir: argResults['build-dir'],
       androidBuildInfo: androidBuildInfo,
+      outputDir: argResults['output-dir'],
     );
     return null;
   }
