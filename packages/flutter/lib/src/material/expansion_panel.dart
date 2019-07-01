@@ -11,6 +11,9 @@ import 'material_localizations.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
