@@ -92,19 +92,21 @@ Widget overlayWithEntry(OverlayEntry entry) {
 }
 
 Widget boilerplate({ Widget child }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Center(
-          child: Material(
-            child: child,
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
           ),
         ),
       ),
