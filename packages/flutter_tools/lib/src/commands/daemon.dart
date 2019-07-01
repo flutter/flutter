@@ -433,6 +433,7 @@ class AppDomain extends Domain {
         target: target,
         debuggingOptions: options,
         applicationBinary: applicationBinary,
+        usesTerminalUi: false,
         ipv6: ipv6,
       );
     }

@@ -451,6 +451,7 @@ class RunCommand extends RunCommandBase {
             ? null
             : fs.file(applicationBinaryPath),
         ipv6: ipv6,
+        stayResident: stayResident,
       );
     }
 

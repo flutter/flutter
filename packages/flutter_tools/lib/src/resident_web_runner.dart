@@ -39,6 +39,8 @@ class ResidentWebRunner extends ResidentRunner {
           target: target,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
+          usesTerminalUi: true,
+          stayResident: true,
         );
 
   WebAssetServer _server;

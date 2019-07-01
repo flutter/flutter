@@ -273,6 +273,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
+    usesTerminalUi: false,
   );
 
   if (!result.started) {
