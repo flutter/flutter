@@ -4,7 +4,7 @@ import org.gradle.api.artifacts.maven.MavenDeployer
 import org.gradle.api.plugins.MavenPlugin
 import org.gradle.api.tasks.Upload
 
-void configureProject(Project project, String outputDir) {
+void configureProject(Project project, File outputDir) {
     if (!project.hasProperty("android")) {
         throw new GradleException("Android property not found.")
     }
@@ -26,7 +26,6 @@ void configureProject(Project project, String outputDir) {
         }
     }
 
-    // println project.android.compileSdkVersion
     Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
     if (!usesFlutterPlugin) {
         project.dependencies {
@@ -46,7 +45,7 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void setupLibraryVariant(Project project, String outputDir, variant) {
+void setupLibraryVariant(Project project, File outputDir, variant) {
     String variantName = variant.name.capitalize()
     Task aarTask = project.tasks.create(name: "aar${variantName}") {
         // Remove the existing repo directory, so we don't duplicate the artifacts.
@@ -98,15 +97,13 @@ Set<Configuration> flattenConfigurations(Configuration configuration) {
     return configs
 }
 
-String getOutputDir(Project project) {
-    return project.hasProperty("output-dir") ?
-            project.property("output-dir") : project.buildDir
-}
-
 projectsEvaluated {
     // In plugin projects, the Android library is the root project.
     if (rootProject.subprojects.empty) {
-        configureProject(rootProject, getOutputDir(rootProject))
+        if (rootProject.hasProperty("output-dir")) {
+            rootProject.buildDir = rootProject.file(rootProject.property("output-dir"))
+        }
+        configureProject(rootProject, rootProject.buildDir)
         return
     }
     // In module projects, the Android library project is the `:flutter` subproject.
@@ -116,5 +113,9 @@ projectsEvaluated {
 
     assert appSubproject != null
     assert androidSubproject != null
-    configureProject(androidSubproject, getOutputDir(appSubproject))
+
+    if (appSubproject.hasProperty("output-dir")) {
+        appSubproject.buildDir = appSubproject.file(appSubproject.property("output-dir"))
+    }
+    configureProject(androidSubproject, appSubproject.buildDir)
 }
