@@ -1273,13 +1273,39 @@ class _RenderRangeSlider extends RenderBox {
     );
 
     if (shouldPaintValueIndicators) {
+      final double startOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: startThumbCenter,
+        labelPainter: _startLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double endOffset = sliderTheme.rangeValueIndicatorShape.getHorizontalShift(
+        parentBox: this,
+        center: endThumbCenter,
+        labelPainter: _endLabelPainter,
+        activationAnimation: _valueIndicatorAnimation,
+      );
+      final double startHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _startLabelPainter).width / 2;
+      final double endHalfWidth = sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: _endLabelPainter).width / 2;
+      double innerOverflow = startHalfWidth + endHalfWidth;
+      switch (textDirection) {
+        case TextDirection.ltr:
+          innerOverflow += startOffset;
+          innerOverflow -= endOffset;
+          break;
+        case TextDirection.rtl:
+          innerOverflow -= startOffset;
+          innerOverflow += endOffset;
+          break;
+      }
+
       _sliderTheme.rangeValueIndicatorShape.paint(
         context,
         topThumbCenter,
         activationAnimation: _valueIndicatorAnimation,
         enableAnimation: _enableAnimation,
         isDiscrete: isDiscrete,
-        isOnTop: thumbDelta < sliderTheme.rangeValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete, labelPainter: topLabelPainter).width,
+        isOnTop: thumbDelta < innerOverflow,
         labelPainter: topLabelPainter,
         parentBox: this,
         sliderTheme: _sliderTheme,

@@ -1236,6 +1236,16 @@ abstract class RangeSliderValueIndicatorShape {
   /// width because it is derived from a formatted string.
   Size getPreferredSize(bool isEnabled, bool isDiscrete, { TextPainter labelPainter });
 
+  /// Determines the best offset to keep this shape on the screen.
+  double getHorizontalShift({
+    RenderBox parentBox,
+    Offset center,
+    TextPainter labelPainter,
+    Animation<double> activationAnimation,
+  }) {
+    return 0;
+  }
+
   /// Paints the value indicator shape based on the state passed to it.
   ///
   /// {@macro flutter.material.rangeSlider.shape.context}
@@ -2493,6 +2503,21 @@ class PaddleRangeSliderValueIndicatorShape extends RangeSliderValueIndicatorShap
   }
 
   @override
+  double getHorizontalShift({
+    RenderBox parentBox,
+    Offset center,
+    TextPainter labelPainter,
+    Animation<double> activationAnimation,
+  }) {
+    return _pathPainter.getHorizontalShift(
+      parentBox: parentBox,
+      center: center,
+      labelPainter: labelPainter,
+      scale: activationAnimation.value,
+    );
+  }
+
+  @override
   void paint(
     PaintingContext context,
     Offset center, {
@@ -2572,8 +2597,14 @@ class _PaddleSliderTrackShapePathPainter {
     TextPainter labelPainter,
   ) {
     assert(labelPainter != null);
-    final double labelHalfWidth = math.max(0, labelPainter.width - _labelTextDesignSize) / 2.0;
-    return Size((labelHalfWidth + _topLobeRadius) * 2, _preferredHeight);
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
+    final double labelHalfWidth = labelPainter.width / 2.0;
+    final double halfWidthNeeded = math.max(
+      0.0,
+      inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
+    );
+    return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
   }
 
   // Adds an arc to the path that has the attributes passed in. This is
@@ -2581,6 +2612,28 @@ class _PaddleSliderTrackShapePathPainter {
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
+  }
+
+  double getHorizontalShift({
+    RenderBox parentBox,
+    Offset center,
+    TextPainter labelPainter,
+    double scale,
+  }) {
+    final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
+    final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
+    final double labelHalfWidth = labelPainter.width / 2.0;
+    final double halfWidthNeeded = math.max(
+      0.0,
+      inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
+    );
+    double shift = _getIdealOffset(parentBox, halfWidthNeeded, scale, center);
+    if (shift < 0.0) {
+      shift = math.max(shift, -halfWidthNeeded);
+    } else {
+      shift = math.min(shift, halfWidthNeeded);
+    }
+    return shift * textScaleFactor;
   }
 
   // Determines the "best" offset to keep the bubble on the screen. The calling
