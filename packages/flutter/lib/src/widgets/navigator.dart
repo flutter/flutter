@@ -1901,12 +1901,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       }
     }
 
+    // Notify for newRoute
+    newRoute.didChangeNext(null);
+    for (NavigatorObserver observer in widget.observers)
+      observer.didPush(newRoute, precedingRoute);
+
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-        // Notify for newRoute
-        newRoute.didChangeNext(null);
-        for (NavigatorObserver observer in widget.observers)
-          observer.didPush(newRoute, precedingRoute);
 
         // Complete remove until predicate & notify
         while (_history[removalIndex] != newRoute) {
