@@ -37,8 +37,6 @@ class ResidentWebRunner extends ResidentRunner {
   }) : super(
           flutterDevices,
           target: target,
-          usesTerminalUI: true,
-          stayResident: true,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
         );
@@ -54,7 +52,6 @@ class ResidentWebRunner extends ResidentRunner {
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     connectionInfoCompleter?.complete(DebugConnectionInfo());
-    setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;

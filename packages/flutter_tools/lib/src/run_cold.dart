@@ -19,17 +19,14 @@ class ColdRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI,
-             stayResident: stayResident,
+             hotMode: false,
              ipv6: ipv6);
 
   final bool traceStartup;
@@ -104,9 +101,6 @@ class ColdRunner extends ResidentRunner {
         );
       }
       appFinished();
-    } else if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
     }
 
     appStartedCompleter?.complete();
@@ -138,10 +132,6 @@ class ColdRunner extends ResidentRunner {
         printTrace('Connected to $view.');
       }
     }
-    if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
-    }
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
@@ -149,9 +139,6 @@ class ColdRunner extends ResidentRunner {
     await cleanupAtFinish();
     return 0;
   }
-
-  @override
-  Future<void> handleTerminalCommand(String code) async { }
 
   @override
   Future<void> cleanupAfterSignal() async {

@@ -450,7 +450,6 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        stayResident: stayResident,
         ipv6: ipv6,
       );
     }
@@ -463,7 +462,14 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
-      (_) { appStartedTime = systemClock.now(); }
+      (_) {
+        appStartedTime = systemClock.now();
+        if (stayResident) {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }
+      }
     ));
 
     final int result = await runner.run(
@@ -471,8 +477,9 @@ class RunCommand extends RunCommandBase {
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null, exitCode: result);
+    }
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[
