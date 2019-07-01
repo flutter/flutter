@@ -501,8 +501,7 @@ class CupertinoTextField extends StatefulWidget {
 }
 
 class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticKeepAliveClientMixin {
-  final GlobalKey _prefixGlobalKey = GlobalKey();
-  final GlobalKey _suffixGlobalKey = GlobalKey();
+  final GlobalKey _clearGlobalKey = GlobalKey();
   final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
@@ -591,26 +590,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       _editableText.showToolbar();
   }
 
-  // Returns true iff the widget at the given GlobalKey is hit by the given
-  // Offset in global space.
-  bool _isHit(GlobalKey key, Offset globalOffset) {
-    if (key.currentContext == null) {
-      return false;
-    }
-    final RenderBox renderBox = key.currentContext.findRenderObject();
-    final Offset localOffset = renderBox.globalToLocal(globalOffset);
-    return renderBox.hitTest(BoxHitTestResult(), position: localOffset);
-  }
-
   void _handleSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
-    // widgets in front of it, tapping the prefix or suffix will also trigger
-    // this handler here. If this is the case, ignore the tap.
-    if (_isHit(_prefixGlobalKey, details.globalPosition)) {
-      return;
-    }
-    if (_isHit(_suffixGlobalKey, details.globalPosition)) {
-      return;
+    // widgets in front of it, tapping the clear button will also trigger
+    // this handler. If the the clear button widget recognizes the up event,
+    // then do not handle it.
+    if (_clearGlobalKey.currentContext != null) {
+      final RenderBox renderBox = _clearGlobalKey.currentContext.findRenderObject();
+      final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
+      if(renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
+        return;
+      }
     }
 
     if (widget.selectionEnabled) {
@@ -757,6 +747,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   // Provide default behavior if widget.textAlignVertical is not set.
+  // CupertinoTextField has top alignment by default, unless it has decoration
+  // like a prefix or suffix, in which case it's aligned to the center.
   TextAlignVertical get _textAlignVertical {
     if (widget.textAlignVertical != null) {
       return widget.textAlignVertical;
@@ -784,10 +776,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         // Insert a prefix at the front if the prefix visibility mode matches
         // the current text state.
         if (_showPrefixWidget(text)) {
-          rowChildren.add(Container(
-            key: _prefixGlobalKey,
-            child: widget.prefix,
-          ));
+          rowChildren.add(widget.prefix);
         }
 
         final List<Widget> stackChildren = <Widget>[];
@@ -816,15 +805,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
 
         // First add the explicit suffix if the suffix visibility mode matches.
         if (_showSuffixWidget(text)) {
-          rowChildren.add(Container(
-            key: _suffixGlobalKey,
-            child: widget.suffix,
-          ));
+          rowChildren.add(widget.suffix);
         // Otherwise, try to show a clear button if its visibility mode matches.
         } else if (_showClearButton(text)) {
           rowChildren.add(
             GestureDetector(
-              key: _suffixGlobalKey,
+              key: _clearGlobalKey,
               onTap: widget.enabled ?? true ? () {
                 // Special handle onChanged for ClearButton
                 // Also call onChanged when the clear button is tapped.

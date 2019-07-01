@@ -651,12 +651,6 @@ void main() {
             + tester.getSize(find.byIcon(CupertinoIcons.add)).width
             + 6.0,
       );
-
-      // Tapping on the prefix isn't received by the CupertinoTextField.
-      expect(focusNode.hasFocus, false);
-      await tester.tap(find.byIcon(CupertinoIcons.add));
-      await tester.pumpAndSettle();
-      expect(focusNode.hasFocus, false);
     },
   );
 
@@ -723,12 +717,6 @@ void main() {
             - tester.getSize(find.byIcon(CupertinoIcons.add)).width
             - 6.0,
       );
-
-      // Tapping on the suffix isn't received by the CupertinoTextField.
-      expect(focusNode.hasFocus, false);
-      await tester.tap(find.byIcon(CupertinoIcons.add));
-      await tester.pumpAndSettle();
-      expect(focusNode.hasFocus, false);
     },
   );
 
@@ -3285,7 +3273,7 @@ void main() {
         // Tapping anywhere inside focuses it.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3295,6 +3283,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the top.
@@ -3332,7 +3321,7 @@ void main() {
         // Tapping anywhere inside focuses it.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3342,6 +3331,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center.
@@ -3379,7 +3369,7 @@ void main() {
         // Tapping anywhere inside focuses it.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3389,6 +3379,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the bottom.
@@ -3426,7 +3417,7 @@ void main() {
         // Tapping anywhere inside focuses it.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3436,6 +3427,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
@@ -3479,7 +3471,7 @@ void main() {
         // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3489,6 +3481,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is at the center. Same as without prefix.
@@ -3531,7 +3524,7 @@ void main() {
         // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3541,6 +3534,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The prefix is at the top, and the EditableText is centered within its
@@ -3584,7 +3578,7 @@ void main() {
         // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3594,6 +3588,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The prefix is at the bottom, and the EditableText is centered within
@@ -3637,7 +3632,7 @@ void main() {
         // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
-        await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
+        await tester.pumpAndSettle();
         expect(focusNode.hasFocus, true);
         focusNode.unfocus();
         await tester.pumpAndSettle();
@@ -3647,6 +3642,7 @@ void main() {
           .translate(0.0, -1.0);
         await tester.tapAt(justInside);
         await tester.pumpAndSettle();
+        await tester.pump(const Duration(milliseconds: 300));
         expect(focusNode.hasFocus, true);
 
         // The EditableText is near the bottom.
