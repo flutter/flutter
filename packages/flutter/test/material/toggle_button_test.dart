@@ -14,18 +14,48 @@ Widget boilerplate({ Widget child }) {
 
 void main() {
   testWidgets('Initial toggle state is reflected', (WidgetTester tester) async {
+    ThemeData theme;
+    await tester.pumpWidget(
+      Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            theme = Theme.of(context);
+            return boilerplate(
+              child: ToggleButtons(
+                children: const <Widget>[
+                  Text('First child'),
+                  Text('Second child'),
+              ],
+                onPressed: (int index) { },
+                isSelected: const <bool>[false, true],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final DefaultTextStyle textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+    final DefaultTextStyle textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    expect(textStyleTwo.style.color, theme.colorScheme.primary);
+  });
+
+  testWidgets('onPressed is triggered on button tap', (WidgetTester tester) async {
     final List<bool> _isSelected = <bool>[false, true];
+    ThemeData theme;
 
     await tester.pumpWidget(
       Material(
         child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
+            theme = Theme.of(context);
             return boilerplate(
               child: ToggleButtons(
-                children: <Widget>[
-                  _isSelected[0] ? const Text('selected') : const Text('unselected'),
-                  _isSelected[1] ? const Text('selected') : const Text('unselected'),
-              ],
+                children: const <Widget>[
+                  Text('First child'),
+                  Text('Second child'),
+                ],
                 onPressed: (int index) {
                   setState(() {
                     _isSelected[index] = !_isSelected[index];
@@ -39,38 +69,117 @@ void main() {
       ),
     );
 
-    expect(find.text('selected'), findsOneWidget);
-    expect(find.text('unselected'), findsOneWidget);
+    DefaultTextStyle textStyleOne;
+    DefaultTextStyle textStyleTwo;
 
-    await tester.tap(find.text('unselected'));
+    expect(_isSelected[0], isFalse);
+    expect(_isSelected[1], isTrue);
+    textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+    textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    expect(textStyleTwo.style.color, theme.colorScheme.primary);
+
+    await tester.tap(find.text('Second child'));
     await tester.pumpAndSettle();
 
-    expect(find.text('selected'), findsNWidgets(2));
-    expect(find.text('unselected'), findsNothing);
+    expect(_isSelected[0], isFalse);
+    expect(_isSelected[1], isFalse);
+    textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+    textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    expect(textStyleTwo.style.color, theme.colorScheme.onSurface);
   });
 
-  testWidgets('onPressed is triggered on button tap', (WidgetTester tester) async {
-
-  });
-
-  // null onPressed disables the buttons
   testWidgets('onPressed that is null disables buttons', (WidgetTester tester) async {
+    ThemeData theme;
 
+    await tester.pumpWidget(
+      Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            theme = Theme.of(context);
+            return boilerplate(
+              child: ToggleButtons(
+                children: const <Widget>[
+                  Text('First child'),
+                  Text('Second child'),
+                ],
+                isSelected: const <bool>[false, true],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final DefaultTextStyle textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    expect(textStyleOne.style.color, theme.disabledColor);
+    final DefaultTextStyle textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    expect(textStyleTwo.style.color, theme.disabledColor);
   });
 
-  // children cannot be null
   testWidgets('children property cannot be null', (WidgetTester tester) async {
-
+    try {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[false, true],
+              onPressed: (int index) {},
+            ),
+          ),
+        ),
+      );
+      fail('Should not be possible to create a toggle button with no children.');
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('children != null'));
+    }
   });
 
-  // isSelected cannot be null
   testWidgets('isSelected property cannot be null', (WidgetTester tester) async {
-
+    try {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+              onPressed: (int index) {},
+            ),
+          ),
+        ),
+      );
+      fail('Should not be possible to create a toggle button with no isSelected.');
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('isSelected != null'));
+    }
   });
 
-  // children and isSelected have to be same length
   testWidgets('children and isSelected properties have to be the same length', (WidgetTester tester) async {
-
+    try {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+              isSelected: const <bool>[false],
+            ),
+          ),
+        ),
+      );
+      fail(
+        'Should not be possible to create a toggle button with mismatching'
+        'children.length and isSelected.length.'
+      );
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('children.length'));
+      expect(e.toString(), contains('isSelected.length'));
+    }
   });
 
   // all default colors
