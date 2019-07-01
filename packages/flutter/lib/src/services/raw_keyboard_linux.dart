@@ -39,10 +39,9 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
   final KeyHelper keyHelper;
 
-  /// The name of the printable key, encoded as UTF-8. This is
-  /// typically the character that key would produce without any modifier keys.
-  /// For dead keys, it is typically the diacritic it would add to a character.
-  /// Defaults to an empty string, asserted to be not null.
+  /// The name of the printable key. This is typically the character that [keyCode] would
+  /// produce without any modifier keys. For dead keys, it is typically the diacritic
+  /// it would add to a character. Defaults to an empty string, asserted to be not null.
   final String codePoint;
 
   /// The hardware scan code id corresponding to this key event.
@@ -59,7 +58,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   final int keyCode;
 
   /// A mask of the current modifiers using the values in Modifier Flags.
-  /// This value may be different depending on the window toolkit used See [KeyHelper].
+  /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int modifiers;
 
   @override
