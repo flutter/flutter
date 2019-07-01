@@ -366,13 +366,12 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     params.vm_snapshot_data = vm_data_->GetVMSnapshot().GetDataMapping();
     params.vm_snapshot_instructions =
         vm_data_->GetVMSnapshot().GetInstructionsMapping();
-    params.create_group = reinterpret_cast<decltype(params.create_group)>(
-        DartIsolate::DartIsolateGroupCreateCallback);
-    params.shutdown_isolate =
-        reinterpret_cast<decltype(params.shutdown_isolate)>(
-            DartIsolate::DartIsolateShutdownCallback);
-    params.cleanup_group = reinterpret_cast<decltype(params.cleanup_group)>(
-        DartIsolate::DartIsolateGroupCleanupCallback);
+    params.create = reinterpret_cast<decltype(params.create)>(
+        DartIsolate::DartIsolateCreateCallback);
+    params.shutdown = reinterpret_cast<decltype(params.shutdown)>(
+        DartIsolate::DartIsolateShutdownCallback);
+    params.cleanup = reinterpret_cast<decltype(params.cleanup)>(
+        DartIsolate::DartIsolateCleanupCallback);
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     params.entropy_source = dart::bin::GetEntropy;
