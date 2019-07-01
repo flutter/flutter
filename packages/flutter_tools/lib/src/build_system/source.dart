@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/build_info.dart';
+
 import '../base/file_system.dart';
+import '../globals.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
@@ -113,6 +117,22 @@ class SourceVisitor {
       sources.addAll(sourceBehavior.outputs(environment));
     }
   }
+
+  /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
+  ///
+  /// If the [Artifact] points to a directory then all child files are included.
+  void visitArtifact(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    final String path = artifacts.getArtifactPath(artifact, platform: platform, mode: mode);
+    if (fs.isDirectorySync(path)) {
+      sources.addAll(<File>[
+        for (FileSystemEntity entity in fs.directory(path).listSync(recursive: true))
+          if (entity is File)
+            entity
+      ]);
+    } else {
+      sources.add(fs.file(path));
+    }
+  }
 }
 
 /// A description of an input or output of a [Target].
@@ -126,6 +146,12 @@ abstract class Source {
 
   /// This source is produced by the [SourceBehavior] class.
   const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
+
+  /// The source is provided by an [Artifact].
+  ///
+  /// If [artifact] points to a directory then all child files are included.
+  const factory Source.artifact(Artifact artifact, {TargetPlatform platform,
+      BuildMode mode}) = _ArtifactSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -186,4 +212,18 @@ class _PatternSource implements Source {
 
   @override
   bool get implicit => value.contains('*');
+}
+
+class _ArtifactSource implements Source {
+  const _ArtifactSource(this.artifact, { this.platform, this.mode });
+
+  final Artifact artifact;
+  final TargetPlatform platform;
+  final BuildMode mode;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
+
+  @override
+  bool get implicit => false;
 }

@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
+import '../../globals.dart';
 import '../build_system.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
@@ -17,13 +19,7 @@ import '../build_system.dart';
 // TODO(jonahwilliams): remove shell out.
 Future<void> copyFramework(Map<String, ChangeType> updates,
     Environment environment) async {
-  final Directory input = fs.directory(fs.path.join(
-    environment.cacheDir.path,
-    'artifacts',
-    'engine',
-    'darwin-x64',
-    'FlutterMacOS.framework',
-  ));
+  final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
   final Directory targetDirectory = environment
     .projectDir
     .childDirectory('macos')
@@ -34,7 +30,7 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
   }
 
   final ProcessResult result = processManager
-      .runSync(<String>['cp', '-R', input.path, targetDirectory.path]);
+      .runSync(<String>['cp', '-R', basePath, targetDirectory.path]);
   if (result.exitCode != 0) {
     throw Exception(
       'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -43,31 +39,13 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
   }
 }
 
-const String _kInputPrefix = '{CACHE_DIR}/artifacts/engine/darwin-x64/FlutterMacOS.framework';
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
 
 /// Copies the macOS desktop framework to the copy directory.
 const Target unpackMacos = Target(
   name: 'unpack_macos',
   inputs: <Source>[
-    Source.pattern('$_kInputPrefix/FlutterMacOS'),
-    // Headers
-    Source.pattern('$_kInputPrefix/Headers/FLEOpenGLContextHandling.h'),
-    Source.pattern('$_kInputPrefix/Headers/FLEReshapeListener.h'),
-    Source.pattern('$_kInputPrefix/Headers/FLEView.h'),
-    Source.pattern('$_kInputPrefix/Headers/FLEViewController.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterBinaryMessenger.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterChannels.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterCodecs.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterMacOS.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('$_kInputPrefix/Headers/FlutterPluginRegisrarMacOS.h'),
-    // Modules
-    Source.pattern('$_kInputPrefix/Modules/module.modulemap'),
-    // Resources
-    Source.pattern('$_kInputPrefix/Resources/icudtl.dat'),
-    Source.pattern('$_kInputPrefix/Resources/info.plist'),
-    // Ignore Versions folder for now
+    Source.artifact(Artifact.flutterMacOSFramework),
   ],
   outputs: <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),

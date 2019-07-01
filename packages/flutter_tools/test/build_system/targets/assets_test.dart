@@ -17,10 +17,8 @@ void main() {
 
     setUp(() {
       testbed = Testbed(setup: () {
-        final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
           projectDir: fs.currentDirectory,
-          cacheDir: cacheDir,
         );
         buildSystem = BuildSystem(<String, Target>{
           copyAssets.name: copyAssets,

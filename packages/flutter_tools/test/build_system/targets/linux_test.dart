@@ -6,6 +6,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -18,25 +19,30 @@ void main() {
     Environment environment;
     MockPlatform mockPlatform;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       mockPlatform = MockPlatform();
       when(mockPlatform.isWindows).thenReturn(false);
+      when(mockPlatform.isMacOS).thenReturn(false);
+      when(mockPlatform.isLinux).thenReturn(true);
       testbed = Testbed(setup: () {
-        final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
+        Cache.flutterRoot = '';
         environment = Environment(
           projectDir: fs.currentDirectory,
-          cacheDir: cacheDir,
         );
         buildSystem = BuildSystem(<String, Target>{
           unpackLinux.name: unpackLinux,
         });
-        fs.file('cache/artifacts/engine/linux-x64/libflutter_linux.so').createSync(recursive: true);
-        fs.file('cache/artifacts/engine/linux-x64/flutter_export.h').createSync();
-        fs.file('cache/artifacts/engine/linux-x64/flutter_messenger.h').createSync();
-        fs.file('cache/artifacts/engine/linux-x64/flutter_plugin_registrar.h').createSync();
-        fs.file('cache/artifacts/engine/linux-x64/flutter_glfw.h').createSync();
-        fs.file('cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
-        fs.file('cache/artifacts/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
+        fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').createSync(recursive: true);
+        fs.file('bin/cache/artifacts/engine/linux-x64/flutter_export.h').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/flutter_messenger.h').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/flutter_plugin_registrar.h').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/flutter_glfw.h').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
         fs.directory('linux').createSync();
       }, overrides: <Type, Generator>{
         Platform: () => mockPlatform,
@@ -44,8 +50,9 @@ void main() {
     });
 
     test('Copies files to correct cache directory', () => testbed.run(() async {
-      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
+      final BuildResult result = await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 
+      expect(result.hasException, false);
       expect(fs.file('linux/flutter/libflutter_linux.so').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_export.h').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_messenger.h').existsSync(), true);
@@ -65,7 +72,7 @@ void main() {
 
     test('Detects changes in input cache files', () => testbed.run(() async {
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
-      fs.file('cache/artifacts/engine/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
+      fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
 
       await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 

@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
 import 'package:flutter_tools/src/build_system/filecache.pb.dart' as pb;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 
@@ -16,6 +19,10 @@ import '../src/context.dart';
 import '../src/testbed.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group(Target, () {
     Testbed testbed;
     MockPlatform mockPlatform;
@@ -314,9 +321,12 @@ void main() {
 
     setUp(() {
       shared = 0;
+      Cache.flutterRoot = '';
       mockPlatform = MockPlatform();
       // Keep file paths the same.
       when(mockPlatform.isWindows).thenReturn(false);
+      when(mockPlatform.isLinux).thenReturn(true);
+      when(mockPlatform.isMacOS).thenReturn(false);
       testbed = Testbed(
           setup: () {
             environment = Environment(
@@ -398,9 +408,7 @@ void main() {
         fs.directory('cache').createSync();
         environment = Environment(
           projectDir: fs.currentDirectory,
-          cacheDir: fs.directory('cache'),
           buildDir: fs.directory('build'),
-          flutterRootDir: fs.currentDirectory,
         );
         visitor = SourceVisitor(environment);
         environment.buildDir.createSync(recursive: true);
@@ -431,13 +439,17 @@ void main() {
       expect(visitor.sources.single.path, fs.path.absolute(path));
     }));
 
-    test('can substitute {CACHE_DIR}/fizz', () => testbed.run(() {
-      final String path = fs.path.join('cache', 'fizz');
-      fs.file(path).createSync();
-      const Source fizzSource = Source.pattern('{CACHE_DIR}/fizz');
+    test('can substitute Artifact', () => testbed.run(() {
+      final String path = fs.path.join(
+        Cache.instance.getArtifactDirectory('engine').path,
+        'windows-x64',
+        'foo',
+      );
+      fs.file(path).createSync(recursive: true);
+      const Source fizzSource = Source.artifact(Artifact.windowsDesktopPath, platform: TargetPlatform.windows_x64);
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, fs.path.absolute(path));
+      expect(visitor.sources.single.resolveSymbolicLinksSync(), fs.path.absolute(path));
     }));
 
     test('can substitute {PROJECT_DIR}/*.fizz', () => testbed.run(() {

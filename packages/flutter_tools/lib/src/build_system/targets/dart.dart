@@ -65,7 +65,9 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   }
 
   final int snapshotExitCode = await snapshotter.build(
-    platform: use64Bit ? TargetPlatform.android_arm64 : TargetPlatform.android_arm,
+    platform: use64Bit
+        ? TargetPlatform.android_arm64
+        : TargetPlatform.android_arm,
     buildMode: buildMode,
     mainPath: environment.buildDir.childFile('main.app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
@@ -83,50 +85,19 @@ List<File> findGenSnapshotAndroidElf(Environment environment) {
   if (buildMode == null) {
     throw MissingDefineException(kBuildMode, 'aot_elf');
   }
-  HostPlatform hostPlatform;
-  if (platform.isWindows) {
-    hostPlatform = HostPlatform.windows_x64;
-  } else if (platform.isLinux) {
-    hostPlatform = HostPlatform.linux_x64;
-  } else if (platform.isMacOS) {
-    hostPlatform = HostPlatform.darwin_x64;
-  } else {
-    assert(false);
-  }
   final TargetPlatform targetPlatform = use64Bit
       ? TargetPlatform.android_arm64
       : TargetPlatform.android_arm;
-  return <File>[environment
-    .cacheDir
-    .childDirectory('artifacts')
-    .childDirectory('engine')
-    .childDirectory(getNameForTargetPlatform(targetPlatform) + '-' + getNameForBuildMode(buildMode))
-    .childDirectory(getNameForHostPlatform(hostPlatform))
-    .childFile('gen_snapshot')
-  ];
+  final String path= artifacts
+      .getArtifactPath(Artifact.genSnapshot, platform: targetPlatform, mode: buildMode);
+  return <File>[fs.file(path)];
 }
 
 /// Find the frontend server artifact
 List<File> frontendServer(Environment environment) {
-  HostPlatform hostPlatform;
-  if (platform.isWindows) {
-    hostPlatform = HostPlatform.windows_x64;
-  } else if (platform.isLinux) {
-    hostPlatform = HostPlatform.linux_x64;
-  } else if (platform.isMacOS) {
-      hostPlatform = HostPlatform.darwin_x64;
-  } else {
-    assert(false);
-  }
-  return <File>[
-    fs.file(fs.path.join(
-      environment.cacheDir.path,
-      'artifacts',
-      'engine',
-      getNameForHostPlatform(hostPlatform),
-      'frontend_server.dart.snapshot'),
-    )
-  ];
+  final String path = artifacts
+    .getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+  return <File>[fs.file(path)];
 }
 
 /// Finds the locations of all dart files within the project.
@@ -152,8 +123,8 @@ const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
   inputs: <Source>[
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
-    Source.pattern('{CACHE_DIR}/artifacts/engine/common/flutter_patched_sdk/platform_strong.dill'),
-    Source.pattern('{CACHE_DIR}/dart-sdk/bin/dart'),
+    Source.artifact(Artifact.platformKernelDill),
+    Source.artifact(Artifact.engineDartBinary),
     Source.function(frontendServer),
   ],
   outputs: <Source>[
@@ -169,9 +140,8 @@ const Target aotElf = Target(
   inputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.pattern('{CACHE_DIR}/pkg/sky_engine/lib/ui/ui.dart'),
-    Source.pattern('{CACHE_DIR}/pkg/sky_engine/sdk_ext/vmservice_io.dart'),
-    Source.pattern('{CACHE_DIR}/dart-sdk/bin/dart'),
+    Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.skyEnginePath),
     Source.function(findGenSnapshotAndroidElf),
   ],
   outputs: <Source>[
@@ -185,4 +155,3 @@ const Target aotElf = Target(
   ],
   buildAction: compileAotElf,
 );
-

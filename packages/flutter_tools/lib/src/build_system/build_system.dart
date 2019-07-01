@@ -381,8 +381,6 @@ class Environment {
   factory Environment({
     @required Directory projectDir,
     Directory buildDir,
-    Directory cacheDir,
-    Directory flutterRootDir,
     Map<String, String> defines = const <String, String>{},
   }) {
     // Compute a unique hash of this build's particular environment.
@@ -395,8 +393,8 @@ class Environment {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    buffer.write(Cache.instance.getStampFor('engine'));
-    buffer.write(Cache.instance.getStampFor('engine-dart-sdk'));
+    // in case there was no configuration, provide some value.
+    buffer.write('Flutter is awesome');
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
@@ -405,10 +403,9 @@ class Environment {
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
     return Environment._(
       projectDir: projectDir,
-      flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: cacheDir ?? Cache.instance.getRoot(),
+      cacheDir: Cache.instance.getRoot(),
       defines: defines,
     );
   }
@@ -418,7 +415,6 @@ class Environment {
     @required this.buildDir,
     @required this.rootBuildDir,
     @required this.cacheDir,
-    @required this.flutterRootDir,
     @required this.defines,
   });
 
@@ -451,11 +447,6 @@ class Environment {
   /// Defaults to `{FLUTTER_ROOT}/bin/cache`. The root of the artifact cache for
   /// the flutter tool.
   final Directory cacheDir;
-
-  /// The `FLUTTER_ROOT` environment variable.
-  ///
-  /// Defaults to the root of the flutter checkout for which this command is run.
-  final Directory flutterRootDir;
 
   /// Additional configuration passed to the build targets.
   ///

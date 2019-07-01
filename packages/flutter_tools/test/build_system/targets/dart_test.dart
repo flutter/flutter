@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -21,12 +22,14 @@ void main() {
     BuildSystem buildSystem;
     Environment environment;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       testbed = Testbed(setup: () {
-        final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
           projectDir: fs.currentDirectory,
-          cacheDir: cacheDir,
           defines: <String, String>{
             kBuildMode: getNameForBuildMode(BuildMode.profile),
           }
@@ -46,20 +49,20 @@ void main() {
           assert(false);
         }
          final String skyEngineLine = platform.isWindows
-            ? r'sky_engine:file:///C:/cache/pkg/sky_engine/lib/'
-            : 'sky_engine:file:///cache/pkg/sky_engine/lib/';
+            ? r'sky_engine:file:///C:/bin/cache/pkg/sky_engine/lib/'
+            : 'sky_engine:file:///bin/cache/pkg/sky_engine/lib/';
         fs.file('.packages')
           ..createSync()
           ..writeAsStringSync('''
 # Generated
 $skyEngineLine
 flutter_tools:lib/''');
-        fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart')).createSync(recursive: true);
-        fs.file(fs.path.join(cacheDir.path, 'pkg', 'sky_engine', 'sdk_ext', 'vmservice_io.dart')).createSync(recursive: true);
-        fs.file(fs.path.join(cacheDir.path, 'dart-sdk', 'bin', 'dart')).createSync(recursive: true);
-        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', getNameForHostPlatform(hostPlatform), 'frontend_server.dart.snapshot')).createSync(recursive: true);
-        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', 'android-arm-profile', getNameForHostPlatform(hostPlatform), 'gen_snapshot')).createSync(recursive: true);
-        fs.file(fs.path.join(cacheDir.path, 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'lib', 'ui', 'ui.dart')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'pkg', 'sky_engine', 'sdk_ext', 'vmservice_io.dart')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', getNameForHostPlatform(hostPlatform), 'frontend_server.dart.snapshot')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'android-arm-profile', getNameForHostPlatform(hostPlatform), 'gen_snapshot')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'bar.dart')).createSync();
         fs.file(fs.path.join('lib', 'fizz')).createSync();
@@ -93,7 +96,6 @@ flutter_tools:lib/''');
 
       expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
     }));
-
   });
 }
 

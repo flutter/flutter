@@ -24,30 +24,30 @@ void main() {
     setUp(() {
       mockPlatform = MockPlatform();
       when(mockPlatform.isWindows).thenReturn(false);
+      when(mockPlatform.isMacOS).thenReturn(true);
+      when(mockPlatform.isLinux).thenReturn(false);
       testbed = Testbed(setup: () {
-        final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
           projectDir: fs.currentDirectory,
-          cacheDir: cacheDir,
         );
         buildSystem = BuildSystem(<String, Target>{
           unpackMacos.name: unpackMacos,
         });
         final List<File> inputs = <File>[
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
-          fs.file('cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
+          fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
         ];
         for (File input in inputs) {
           input.createSync(recursive: true);
