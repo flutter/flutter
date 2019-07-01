@@ -1249,8 +1249,53 @@ void main() {
   });
 
   testWidgets('ExpansionPanel accepts custom expansionIndicator', (WidgetTester tester) async {
-    // ExpansionPanel
+    List<bool> _isExpanded = [true, false];
 
+    // ExpansionPanel
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState)  {
+              return ExpansionPanelList(
+                children: <ExpansionPanel>[
+                  ExpansionPanel(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('A');
+                    },
+                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool val) {
+                          setState(() { _isExpanded[0] = val; });
+                        },
+                      );
+                    },
+                    body: const Text('C'),
+                    isExpanded: true,
+                  ),
+                  ExpansionPanel(
+                    headerBuilder: (BuildContext context, bool isExpanded) {
+                      return const Text('B');
+                    },
+                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                      return Checkbox(
+                        value: isExpanded,
+                        onChanged: (bool val) {
+                          setState(() { _isExpanded[1] = val; });
+                        },
+                      );
+                    },
+                    body: const Text('D'),
+                    isExpanded: false,
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
     // build expansion panel with two checkboxes
 
     // check to see if two checkboxes can be found
