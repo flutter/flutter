@@ -396,9 +396,7 @@ class SampleChecker {
               if (preambleSections.isEmpty) {
                 sections.add(processed);
               } else {
-                sections.add(Section.combine(preambleSections
-                  ..toList()
-                  ..add(processed)));
+                sections.add(Section.combine(preambleSections..add(processed)));
               }
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
