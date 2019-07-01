@@ -1791,12 +1791,12 @@ class RenderEditable extends RenderBox {
     final List<TextBox> boxes = _textPainter.getBoxesForSelection(
       TextSelection(
         baseOffset: _currentPromptRectRange.start,
-        extentOffset: _currentPromptRectRange.end
-      )
+        extentOffset: _currentPromptRectRange.end,
+      ),
     );
 
-    for(Rect rect in boxes.map((TextBox box) => box.toRect())) {
-      canvas.drawRect(rect.shift(effectiveOffset), paint);
+    for (TextBox box in boxes) {
+      canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
     }
   }
 

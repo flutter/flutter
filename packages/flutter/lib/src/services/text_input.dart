@@ -349,9 +349,6 @@ enum TextCapitalization {
 
 /// Indicates what caused the text input prompt rectangle to appear.
 enum TextInputPromptRectAppearCause {
-  /// The prompt rectangle appeared because of a unknown reason.
-  unspecified,
-
   /// The prompt rectangle appeared to indicate the range of text that will be
   /// affected by autocorrection.
   autocorrection,

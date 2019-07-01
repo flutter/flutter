@@ -926,7 +926,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 }
 
-
 /// Builds a [Paint] that paints an iOS style prompt rectangle.
 ///
 /// More specifically, when the prompt rectangle is an autocorrection indicator,
