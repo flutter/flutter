@@ -59,6 +59,11 @@ void setupLibraryVariant(Project project, File outputDir, variant) {
         if (bundle == null) {
             throw new GradleException("Can't generate AAR for variant ${variantName}.");
         }
+        project.uploadArchives.repositories.mavenDeployer {
+            pom {
+                artifactId = "${project.name}_${variant.name.toLowerCase()}"
+            }
+        }
         project.artifacts.add("default", bundle)
         setupDefaultPomConfig(project, variant.variantData.scope.variantDependencies.runtimeClasspath)
     }

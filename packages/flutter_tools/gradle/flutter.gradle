@@ -88,7 +88,6 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngineSrcPath
     private Properties localProperties
     private File flutterJar
-    private List<FlutterPluginTask> pluginTasks
 
     @Override
     void apply(Project project) {
@@ -206,21 +205,57 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
+        addPluginTasks(project)
 
         List<String> tasksToExecute = project.gradle.startParameter.taskNames
-        List<FlutterPluginTask> pluginTasks = configPluginTasks(project)
-        Boolean willAssemble = tasksToExecute.find{ it.contains("assemble") }
+        Set<String> buildTypes = getBuildTypesForTasks(tasksToExecute)
 
         if (tasksToExecute.contains("clean")) {
-            if (tasksToExecute.size > 1) {
+            // Because the plugins are built during configuration, the task "clean"
+            // cannot run in conjunction with an assembly task.
+            if (!buildTypes.empty) {
                 throw new GradleException("Can't run the clean task along with other tasks")
             }
-        } else if (willAssemble) {
-            pluginTasks.each { pluginTask ->
-                // Build the plugin during configuration.
-                // This is required when Jetifier is enabled, otherwise the implementation dependency
-                // cannot be added.
+        }
+        // Build plugins when a task "assembly*" will be called later.
+        if (!buildTypes.empty) {
+            // Build the plugin during configuration.
+            // This is required when Jetifier is enabled, otherwise the implementation dependency
+            // cannot be added.
+            buildPlugins(project, buildTypes)
+        }
+    }
+
+    private void addPluginTasks(Project project) {
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, ".flutter-plugins")
+        Properties plugins = readPropertiesIfExist(pluginsFile)
+
+        project.android.buildTypes.each { buildType ->
+            def buildModeValue = buildModeFor(buildType)
+            plugins.each { name, path ->
+                String intermediateDirValue = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}"
+                List<String> taskNameParts = ["build", "plugin", buildModeValue]
+                taskNameParts.addAll(name.split("_"))
+                project.tasks.create(name: toCammelCase(taskNameParts), type: FlutterPluginTask) {
+                    flutterExecutable this.flutterExecutable
+                    buildMode buildModeValue
+                    verbose isVerbose(project)
+                    pluginDir project.file(path)
+                    intermediateDir project.file(intermediateDirValue)
+                }
+            }
+        }
+    }
+
+    private void buildPlugins(Project project, Set<String> buildTypes) {
+        buildTypes.each { buildType ->
+            project.tasks.withType(FlutterPluginTask).all { pluginTask ->
+                if (pluginTask.buildMode != buildType) {
+                    return
+                }
                 pluginTask.execute()
+                // Add the local repo, so when we add the plugin dependency,
+                // Maven can scan this directory to look for it.
                 project.repositories {
                     maven {
                         url "${pluginTask.intermediateDir}/repo"
@@ -233,7 +268,6 @@ class FlutterPlugin implements Plugin<Project> {
                         mavenMetadataFile = file
                     }
                 }
-
                 assert mavenMetadataFile != null
                 def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
 
@@ -241,13 +275,37 @@ class FlutterPlugin implements Plugin<Project> {
                 assert mavenMetadata.groupId != null
                 assert mavenMetadata.artifactId != null
                 assert mavenMetadata.version != null
-                project.dependencies {
-                    implementation ("${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:${mavenMetadata.version.text()}@aar"){
-                        transitive = true
-                    }
-                }
+                // Add the plugin dependency based on the Maven metadata.
+                addApiDependencies(project, buildType, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:${mavenMetadata.version.text()}@aar", {
+                    transitive = true
+                })
             }
         }
+    }
+
+    private Set<String> getBuildTypesForTasks(List<String> tasksToExecute) {
+        Set<String> buildTypes = []
+
+        tasksToExecute.each { task ->
+            if (!task.startsWith("assemble")) {
+                return
+            }
+            if (task == 'assemble') {
+                buildTypes.add('release')
+                buildTypes.add('debug')
+                buildTypes.add('profile')
+            }
+            if (task.endsWith('Release')) {
+                buildTypes.add('release')
+            }
+            if (task.endsWith('Debug')) {
+                buildTypes.add('debug')
+            }
+            if (task.endsWith('Profile')) {
+                buildTypes.add('profile')
+            }
+        }
+        return buildTypes
     }
 
     private static String toCammelCase(List<String> parts) {
@@ -325,24 +383,7 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
-    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
-        if (project.state.failure) {
-            return
-        }
-
-        project.dependencies {
-            String configuration;
-            if (project.getConfigurations().findByName("compileOnly")) {
-                configuration = "${variantName}CompileOnly";
-            } else {
-                configuration = "${variantName}Provided";
-            }
-
-            add(configuration, files)
-        }
-    }
-
-    private static void addApiDependencies(Project project, String variantName, FileCollection files) {
+    private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
         String configuration;
         // `compile` dependencies are now `api` dependencies.
         if (project.getConfigurations().findByName("api")) {
@@ -350,7 +391,7 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             configuration = "${variantName}Compile";
         }
-        project.dependencies.add(configuration, files)
+        project.dependencies.add(configuration, dependency, config)
     }
 
     /**
@@ -376,25 +417,6 @@ class FlutterPlugin implements Plugin<Project> {
             return "${targetArch}"
         }
         return "${targetArch}-release"
-    }
-
-    private List<FlutterPluginTask> configPluginTasks(Project project) {
-        String buildModeValue = "debug"
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        Properties plugins = readPropertiesIfExist(pluginsFile)
-
-        return plugins.collect { name, path ->
-            String intermediateDirValue = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}"
-            List<String> taskNameParts = ["build", "plugin", buildModeValue]
-            taskNameParts.addAll(name.split("_"))
-            return project.tasks.create(name: toCammelCase(taskNameParts), type: FlutterPluginTask) {
-                flutterExecutable this.flutterExecutable
-                buildMode buildModeValue
-                verbose isVerbose(project)
-                pluginDir project.file(path)
-                intermediateDir project.file(intermediateDirValue)
-            }
-        }
     }
 
     private void addFlutterTask(Project project) {
@@ -834,7 +856,6 @@ class FlutterPluginTask extends DefaultTask {
         if (!pluginDir.isDirectory()) {
             throw new GradleException("Invalid Flutter plugin directory: ${pluginDir}")
         }
-
         intermediateDir.mkdirs()
 
         project.exec {
@@ -844,7 +865,13 @@ class FlutterPluginTask extends DefaultTask {
             args "--suppress-analytics"
             args "--quiet"
             args "--output-dir", "${intermediateDir}"
-            args "--${buildMode}"
+
+            // Plugins don't have profile build mode.
+            if (buildMode == "profile") {
+                args "--debug"
+            } else {
+                args "--${buildMode}"
+            }
             if (verbose) {
                 args "--verbose"
             }
