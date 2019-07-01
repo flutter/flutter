@@ -156,5 +156,88 @@ void main() {
       expect(find.text('a'), findsNothing);
       expect(find.text('b'), findsOneWidget);
     });
+
+    testWidgets('Hero transition triggers when appropriate', (WidgetTester tester) async {
+      const String kHeroTag = 'hero';
+      final Widget myApp = MaterialApp(
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => const Material(child: Text('home')),
+          '/a': (BuildContext context) => const Material(child: Hero(
+            tag: kHeroTag,
+            child: Text('a'),
+          )),
+          '/b': (BuildContext context) => const Material(child: Padding(
+            padding: EdgeInsets.all(100.0),
+            child: Hero(
+              tag: kHeroTag,
+              child: Text('b'),
+            ),
+          )),
+        },
+      );
+
+      await tester.pumpWidget(myApp);
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+
+      navigator.pushNamed('/a');
+      await tester.pumpAndSettle();
+
+      navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+
+      expect(find.text('b'), isOnstage);
+
+      // 'b' text is heroing to its new location
+      final Offset bOffset = tester.getTopLeft(find.text('b'));
+      expect(bOffset.dx, greaterThan(0.0));
+      expect(bOffset.dx, lessThan(100.0));
+      expect(bOffset.dy, greaterThan(0.0));
+      expect(bOffset.dy, lessThan(100.0));
+
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('a'), findsNothing);
+      expect(find.text('b'), isOnstage);
+    });
+
+    testWidgets('Hero transition does not trigger when appropriate', (WidgetTester tester) async {
+      const String kHeroTag = 'hero';
+      final Widget myApp = MaterialApp(
+        initialRoute: '/',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => const Material(child: Hero(
+            tag:kHeroTag,
+            child: Text('home'),
+          )),
+          '/a': (BuildContext context) => const Material(child: Text('a')),
+          '/b': (BuildContext context) => const Material(child: Padding(
+            padding: EdgeInsets.all(100.0),
+            child: Hero(
+              tag: kHeroTag,
+              child: Text('b'),
+            ),
+          )),
+        },
+      );
+
+      await tester.pumpWidget(myApp);
+      final NavigatorState navigator = tester.state(find.byType(Navigator));
+
+      navigator.pushNamed('/a');
+      await tester.pumpAndSettle();
+
+      navigator.pushNamedAndRemoveUntil('/b', ModalRoute.withName('/'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 16));
+
+      expect(find.text('b'), isOnstage);
+
+      // 'b' text is sliding in from the right, no hero transition
+      final Offset bOffset = tester.getTopLeft(find.text('b'));
+      expect(bOffset.dx, 100.0);
+      expect(bOffset.dy, greaterThan(100.0));
+    });
   });
 }
