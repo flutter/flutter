@@ -326,6 +326,7 @@ class ToggleButtons extends StatelessWidget {
   }) :
     assert(children != null),
     assert(isSelected != null),
+    assert(children.length == isSelected.length),
     super(key: key);
 
   /// The corresponding widget values in the toggle buttons.
