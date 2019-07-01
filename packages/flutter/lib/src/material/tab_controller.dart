@@ -28,8 +28,6 @@ import 'constants.dart';
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
 /// ```dart
-/// import 'package:flutter/material.dart';
-///
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatelessWidget {
@@ -108,8 +106,6 @@ import 'constants.dart';
 /// A sample application dynamically adds and removes tabs.
 ///
 /// ```dart
-/// import 'dart:math' as math;
-///
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatelessWidget {
