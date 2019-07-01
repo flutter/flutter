@@ -214,6 +214,19 @@ void main() {
   // custom border width
 
   // themes are respected
+    // color
+    // selectedcolor
+    // disabledColor
+    // fillColor
+    // focusColor
+    // highlightColor
+    // hoverColor
+    // splashColor
+    // borderColor
+    // selectedBorderColor
+    // disabledBorderColor
+    // border radius
+    // border width
 
   // height of all buttons must match the tallest button
 
