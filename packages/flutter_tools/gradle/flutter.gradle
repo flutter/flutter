@@ -250,6 +250,13 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    private static String toCammelCase(List<String> parts) {
+        if (parts.empty) {
+            return ""
+        }
+        return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
+    }
+
     private String resolveProperty(Project project, String name, String defaultValue) {
         if (localProperties == null) {
             localProperties = readPropertiesIfExist(new File(project.projectDir.parentFile, "local.properties"))
@@ -296,6 +303,13 @@ class FlutterPlugin implements Plugin<Project> {
 
     private static Boolean useLocalEngine(Project project) {
         return project.hasProperty('localEngineOut')
+    }
+
+    private static Boolean isVerbose(Project project) {
+        if (project.hasProperty('verbose')) {
+            return project.property('verbose').toBoolean()
+        }
+        return false
     }
 
     /**
@@ -365,9 +379,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private List<FlutterPluginTask> configPluginTasks(Project project) {
-        String buildModeValue = "release"
-        Boolean verboseValue = false
-
+        String buildModeValue = "debug"
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
@@ -375,22 +387,14 @@ class FlutterPlugin implements Plugin<Project> {
             String intermediateDirValue = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}"
             List<String> taskNameParts = ["build", "plugin", buildModeValue]
             taskNameParts.addAll(name.split("_"))
-            Task task = project.tasks.create(name: snakeToCammelCase(taskNameParts), type: FlutterPluginTask) {
+            return project.tasks.create(name: toCammelCase(taskNameParts), type: FlutterPluginTask) {
                 flutterExecutable this.flutterExecutable
                 buildMode buildModeValue
-                verbose verboseValue
+                verbose isVerbose(project)
                 pluginDir project.file(path)
                 intermediateDir project.file(intermediateDirValue)
             }
-            return task
         }
-    }
-
-    private static String snakeToCammelCase(List<String> parts) {
-        if (parts.empty) {
-            return ""
-        }
-        return "${parts[0]}${parts[1..-1].collect { it.capitalize() }.join('')}"
     }
 
     private void addFlutterTask(Project project) {
@@ -408,10 +412,6 @@ class FlutterPlugin implements Plugin<Project> {
             target = project.property('target')
         }
 
-        Boolean verboseValue = null
-        if (project.hasProperty('verbose')) {
-            verboseValue = project.property('verbose').toBoolean()
-        }
         String[] fileSystemRootsValue = null
         if (project.hasProperty('filesystem-roots')) {
             fileSystemRootsValue = project.property('filesystem-roots').split('\\|')
@@ -479,7 +479,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             def compileTasks = targetPlatforms.collect { targetArch ->
                 String abiValue = PLATFORM_ARCH_MAP[targetArch]
-                String taskName = "compile${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}${targetArch.replace('android-', '').capitalize()}"
+                String taskName = toCammelCase(["compile", FLUTTER_BUILD_PREFIX, variant.name, targetArch.replace('android-', '')])
                 FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
@@ -488,7 +488,7 @@ class FlutterPlugin implements Plugin<Project> {
                     localEngineSrcPath this.localEngineSrcPath
                     abi abiValue
                     targetPath target
-                    verbose verboseValue
+                    verbose isVerbose(project)
                     fileSystemRoots fileSystemRootsValue
                     fileSystemScheme fileSystemSchemeValue
                     trackWidgetCreation trackWidgetCreationValue
