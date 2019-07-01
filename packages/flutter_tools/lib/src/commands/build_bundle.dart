@@ -20,7 +20,6 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -104,7 +103,7 @@ class BuildBundleCommand extends BuildSubCommand {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.linux_x64:
-        if (FlutterVersion.instance.isStable) {
+        if (!FlutterVersion.instance.isMaster) {
           throwToolExit('$targetPlatform is not supported on stable Flutter.');
         }
         break;

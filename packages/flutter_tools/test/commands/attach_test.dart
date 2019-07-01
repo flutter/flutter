@@ -398,7 +398,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsA(isInstanceOf<ToolExit>()),
       );
-      expect(testLogger.statusText, contains('No connected devices'));
+      expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });

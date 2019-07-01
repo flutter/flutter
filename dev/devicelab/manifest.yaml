@@ -171,6 +171,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  backdrop_filter_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of backdrop filter blurs on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -343,6 +350,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  image_list_reported_duration:
+    description: >
+      Measures image loading performance.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 

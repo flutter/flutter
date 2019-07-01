@@ -30,7 +30,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -353,7 +352,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
+    if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '
                            'channel.', null);
     }
@@ -412,7 +411,7 @@ class RunCommand extends RunCommandBase {
     }
     // Only support "web mode" on non-stable branches with a single web device
     // in a "hot mode".
-    final bool webMode = !FlutterVersion.instance.isStable
+    final bool webMode = FlutterVersion.instance.isMaster
       && devices.length == 1
       && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 

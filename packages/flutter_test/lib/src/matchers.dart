@@ -413,6 +413,7 @@ Matcher matchesSemantics({
   bool isButton = false,
   bool isFocused = false,
   bool isTextField = false,
+  bool isReadOnly = false,
   bool hasEnabledState = false,
   bool isEnabled = false,
   bool isInMutuallyExclusiveGroup = false,
@@ -464,6 +465,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isButton);
   if (isTextField)
     flags.add(SemanticsFlag.isTextField);
+  if (isReadOnly)
+    flags.add(SemanticsFlag.isReadOnly);
   if (isFocused)
     flags.add(SemanticsFlag.isFocused);
   if (hasEnabledState)

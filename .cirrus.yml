@@ -58,24 +58,80 @@ task:
     - name: analyze
       test_script:
         - dart --enable-asserts ./dev/bots/analyze.dart
-    - name: tests-linux
+    - name: tests_widgets-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
+        SUBSHARD: widgets
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
+    - name: tests_framework_other-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: framework_other
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tests_extras-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: extras
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    # all of the tests except the ones in test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-linux
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
         cpu: 4
         memory: 12G
+    - name: tool_tests_create-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-linux
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: tool_coverage-linux
+      skip: "!changesInclude('packages/flutter_tools/**/*.dart') && $CIRRUS_BRANCH != 'master'"
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        CODECOV_TOKEN: ENCRYPTED[7c76a7f8c9264f3b7f3fd63fcf186f93c62c4dfe43ec288861c2f506d456681032b89efe7b7a139c82156350ca2c752c]
+        SHARD: tool_coverage
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+        - bash <(curl -s https://codecov.io/bash) -c -s ./packages/flutter_tools/coverage/ -f '*.lcov.info' -F flutter_tool
+      container:
+        cpu: 8
+        memory: 24G
     - name: web_tests-linux
       # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
       allow_failures: true
@@ -109,11 +165,61 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: integration_tests_gradle1-linux
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle1
+      test_script:
+        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
+        # might include non-ASCII characters which makes Gradle crash.
+        # See: https://github.com/flutter/flutter/issues/24935
+        # This is a temporary workaround until we figure how to properly configure
+        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
+        # TODO(amirh): Set the locale to UTF8.
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - dart --enable-asserts ./dev/bots/test.dart
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+      container:
+        cpu: 4
+        memory: 12G
+    - name: integration_tests_gradle2-linux
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle2
+      test_script:
+        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
+        # might include non-ASCII characters which makes Gradle crash.
+        # See: https://github.com/flutter/flutter/issues/24935
+        # This is a temporary workaround until we figure how to properly configure
+        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
+        # TODO(amirh): Set the locale to UTF8.
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - dart --enable-asserts ./dev/bots/test.dart
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+      container:
+        cpu: 4
+        memory: 12G
     - name: release_smoke_tests
       env:
         CLOUDSDK_CORE_DISABLE_PROMPTS: 1
         GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
-      test_script: ./dev/bots/firebase_testlab.sh
+      test_script:
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - ./dev/bots/firebase_testlab.sh
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
+
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
@@ -145,14 +251,71 @@ task:
   test_all_script:
     - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
-    - name: tests-windows
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
+    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+        SHARD_INDEX: 1
+    # all of the tests in test/commands/create_test
+    - name: tool_tests_create-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
+  windows_container:
+    image: cirrusci/android-sdk:28-windowsservercore-2019
+    os_version: 2019
+    cpu: 4
+  env:
+    CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+  git_fetch_script:
+    - git clean -xfd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $APPDATA\Pub\Cache
+    fingerprint_script:
+      - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
+  flutter_pkg_cache:
+    folder: bin\cache\pkg
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  artifacts_cache:
+    folder: bin\cache\artifacts
+    fingerprint_script: echo %OS% & type bin\internal\engine.version
+  setup_script:
+    - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat doctor -v
+    - bin\flutter.bat update-packages
+    - git fetch origin master
+  test_all_script:
+    - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
+  matrix:
+    - name: tests_widgets-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: widgets
+    - name: tests_framework_other-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: framework_other
+    - name: tests_extras-windows
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: extras
     - name: build_tests-windows
       env:
         SHARD: build_tests
@@ -213,15 +376,74 @@ task:
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
+  print_date_script:
+    - date
+  git_fetch_script:
+    - git clean -xfd
+    - git fetch origin
+    - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
+  pub_cache:
+    folder: $HOME/.pub-cache
+    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
+  flutter_pkg_cache:
+    folder: bin/cache/pkg
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  artifacts_cache:
+    folder: bin/cache/artifacts
+    fingerprint_script: echo $OS; cat bin/internal/engine.version
+  setup_script:
+    - bin/flutter config --no-analytics
+    - bin/flutter doctor -v
+    - bin/flutter update-packages
+  test_all_script: |
+    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
-    - name: tests-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
+    # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+        SUBSHARD: tool
+        SHARD_INDEX: 1
+    # all of the tests in test/commands/create_test
+    - name: tool_tests_create-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: create
+    # all of the tests in test/integration for packages/flutter_tools
+    - name: tool_tests_integration-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tool_tests
+        SUBSHARD: integration
+
+task:
+  use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
+  osx_instance:
+    image: mojave-xcode-10.1
+  depends_on:
+    - analyze
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
+    COCOAPODS_DISABLE_STATS: true
+  matrix:
+    - name: tests_widgets-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: widgets
+    - name: tests_framework_other-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: framework_other
+    - name: tests_extras-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: extras
     - name: $SHARD-macos
       env:
         matrix:
@@ -272,10 +494,15 @@ docker_builder:
   depends_on:
     - docs
     - analyze
-    - tests-linux
+    - tests_widgets-linux
+    - tests_framework_other-linux
+    - tests_extras-linux
     - tool_tests-linux
+    - tool_tests_create-linux
+    - tool_tests_integration-linux
     - build_tests-linux
     - integration_tests-linux
+    - integration_tests_gradle-linux
   build_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_build.sh"
   login_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_login.sh"
   push_script: "$CIRRUS_WORKING_DIR/dev/ci/docker_linux/docker_push.sh"

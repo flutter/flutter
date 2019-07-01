@@ -82,10 +82,10 @@ void main() {
   testWidgets('RaisedButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -150,10 +150,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -215,9 +215,9 @@ void main() {
   testWidgets('RaisedButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color disabledColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color unusedDisabledTextColor = Color(3);
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color unusedDisabledTextColor = Color(0x00000003);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {

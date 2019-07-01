@@ -545,6 +545,31 @@ void main() {
   );
 
   testWidgets(
+    'placeholder respects textAlign',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.textAlign, TextAlign.right);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(placeholder.textAlign, inputText.textAlign);
+    },
+  );
+
+  testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -575,11 +600,11 @@ void main() {
             child: CupertinoTextField(
               placeholder: 'placeholder',
               style: TextStyle(
-                color: Color(0X00FFFFFF),
+                color: Color(0x00FFFFFF),
                 fontWeight: FontWeight.w300,
               ),
               placeholderStyle: TextStyle(
-                color: Color(0XAAFFFFFF),
+                color: Color(0xAAFFFFFF),
                 fontWeight: FontWeight.w600
               ),
             ),
@@ -588,14 +613,14 @@ void main() {
       );
 
       final Text placeholder = tester.widget(find.text('placeholder'));
-      expect(placeholder.style.color, const Color(0XAAFFFFFF));
+      expect(placeholder.style.color, const Color(0xAAFFFFFF));
       expect(placeholder.style.fontWeight, FontWeight.w600);
 
       await tester.enterText(find.byType(CupertinoTextField), 'input');
       await tester.pump();
 
       final EditableText inputText = tester.widget(find.text('input'));
-      expect(inputText.style.color, const Color(0X00FFFFFF));
+      expect(inputText.style.color, const Color(0x00FFFFFF));
       expect(inputText.style.fontWeight, FontWeight.w300);
     },
   );
@@ -2486,6 +2511,90 @@ void main() {
       await gesture.removePointer();
     },
   );
+
+  testWidgets('onTap is called upon tap', (WidgetTester tester) async {
+    int tapCount = 0;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoTextField(
+            onTap: () => tapCount++,
+          ),
+        ),
+      ),
+    );
+
+    expect(tapCount, 0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 1);
+
+    // Wait out the double tap interval so the next tap doesn't end up being
+    // recognized as a double tap.
+    await tester.pump(const Duration(seconds: 1));
+
+    // Double tap count as one single tap.
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pump();
+    expect(tapCount, 2);
+  });
+
+  testWidgets('onTap does not work when the text field is disabled',
+    (WidgetTester tester) async {
+      int tapCount = 0;
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      expect(tapCount, 0);
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 0);
+
+      // Wait out the double tap interval so the next tap doesn't end up being
+      // recognized as a double tap.
+      await tester.pump(const Duration(seconds: 1));
+
+      // Enabling the text field, now it should accept taps.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(CupertinoTextField));
+      expect(tapCount, 1);
+
+      await tester.pump(const Duration(seconds: 1));
+
+      // Disable it again.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              enabled: false,
+              onTap: () => tapCount++,
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(CupertinoTextField));
+      await tester.pump();
+      expect(tapCount, 1);
+  });
 
   testWidgets(
     'text field respects theme',

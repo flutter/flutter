@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
@@ -9,13 +12,22 @@ import '../doctor.dart';
 import '../version.dart';
 import 'chrome.dart';
 
+@visibleForTesting
+bool debugDisableWeb = false;
+
 /// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true.
+/// environment variable is set to true from the daemon.
 bool get flutterWebEnabled {
-  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
+  if (debugDisableWeb) {
+    return false;
+  }
+  if (isRunningFromDaemon) {
+    final bool platformEnabled = platform
+        .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
+    return platformEnabled && FlutterVersion.instance.isMaster;
+  }
+  return FlutterVersion.instance.isMaster;
 }
-bool _flutterWebEnabled;
 
 /// The  web workflow instance.
 WebWorkflow get webWorkflow => context.get<WebWorkflow>();

@@ -62,7 +62,7 @@ void main() {
       ignoreId: true,
     ));
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -474,6 +474,7 @@ void main() {
           selected: true,
           button: true,
           textField: true,
+          readOnly: true,
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,

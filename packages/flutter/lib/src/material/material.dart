@@ -561,7 +561,7 @@ abstract class InkFeature {
   /// Typically used by subclasses to call
   /// [MaterialInkController.markNeedsPaint] when they need to repaint.
   MaterialInkController get controller => _controller;
-  _RenderInkFeatures _controller;
+  final _RenderInkFeatures _controller;
 
   /// The render box whose visual position defines the frame of reference for this ink feature.
   final RenderBox referenceBox;
