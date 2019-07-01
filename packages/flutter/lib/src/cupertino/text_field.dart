@@ -591,27 +591,26 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       _editableText.showToolbar();
   }
 
+  // Returns true iff the widget at the given GlobalKey is hit by the given
+  // Offset in global space.
+  bool _isHit(GlobalKey key, Offset globalOffset) {
+    if (key.currentContext == null) {
+      return false;
+    }
+    final RenderBox renderBox = key.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(globalOffset);
+    return renderBox.hitTest(BoxHitTestResult(), position: localOffset);
+  }
+
   void _handleSingleTapUp(TapUpDetails details) {
     // Because TextSelectionGestureDetector listens to taps that happen on
     // widgets in front of it, tapping the prefix or suffix will also trigger
     // this handler here. If this is the case, ignore the tap.
-    if (_prefixGlobalKey.currentContext != null) {
-      final RenderBox prefixRenderBox = _prefixGlobalKey
-        .currentContext.findRenderObject();
-      final Offset localPosition = prefixRenderBox
-        .globalToLocal(details.globalPosition);
-      if (prefixRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
-        return;
-      }
+    if (_isHit(_prefixGlobalKey, details.globalPosition)) {
+      return;
     }
-    if (_suffixGlobalKey.currentContext != null) {
-      final RenderBox suffixRenderBox = _suffixGlobalKey
-        .currentContext.findRenderObject();
-      final Offset localPosition = suffixRenderBox
-        .globalToLocal(details.globalPosition);
-      if (suffixRenderBox.hitTest(BoxHitTestResult(), position: localPosition)) {
-        return;
-      }
+    if (_isHit(_suffixGlobalKey, details.globalPosition)) {
+      return;
     }
 
     if (widget.selectionEnabled) {

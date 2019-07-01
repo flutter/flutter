@@ -3462,7 +3462,6 @@ void main() {
                     expands: true,
                     maxLines: null,
                     prefix: Container(
-                      //key: pKey,
                       height: 100,
                       width: 10,
                     ),
@@ -3476,7 +3475,8 @@ void main() {
         // Fills the whole container since expands is true.
         expect(tester.getSize(find.byType(CupertinoTextField)), size);
 
-        // Tapping anywhere inside focuses it.
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
         await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
@@ -3514,7 +3514,6 @@ void main() {
                     expands: true,
                     maxLines: null,
                     prefix: Container(
-                      //key: pKey,
                       height: 100,
                       width: 10,
                     ),
@@ -3528,7 +3527,8 @@ void main() {
         // Fills the whole container since expands is true.
         expect(tester.getSize(find.byType(CupertinoTextField)), size);
 
-        // Tapping anywhere inside focuses it.
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
         await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
@@ -3567,7 +3567,6 @@ void main() {
                     expands: true,
                     maxLines: null,
                     prefix: Container(
-                      //key: pKey,
                       height: 100,
                       width: 10,
                     ),
@@ -3581,7 +3580,8 @@ void main() {
         // Fills the whole container since expands is true.
         expect(tester.getSize(find.byType(CupertinoTextField)), size);
 
-        // Tapping anywhere inside focuses it.
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
         await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
@@ -3620,7 +3620,6 @@ void main() {
                     expands: true,
                     maxLines: null,
                     prefix: Container(
-                      //key: pKey,
                       height: 100,
                       width: 10,
                     ),
@@ -3634,7 +3633,8 @@ void main() {
         // Fills the whole container since expands is true.
         expect(tester.getSize(find.byType(CupertinoTextField)), size);
 
-        // Tapping anywhere inside focuses it.
+        // Tapping anywhere inside focuses it. This includes tapping on the
+        // prefix, because in this case it is transparent.
         expect(focusNode.hasFocus, false);
         await tester.tapAt(tester.getTopLeft(find.byType(CupertinoTextField)));
         await tester.pumpAndSettle(const Duration(milliseconds: 400)); // timer error if no duration
