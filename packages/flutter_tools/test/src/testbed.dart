@@ -102,12 +102,12 @@ class Testbed {
           overrides: testOverrides,
           zoneSpecification: ZoneSpecification(
             createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void Function() timer) {
-              final Timer result = Timer(duration, timer);
+              final Timer result = parent.createTimer(zone, duration, timer);
               timers[result] = StackTrace.current;
               return result;
             },
             createPeriodicTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration period, void Function(Timer) timer) {
-              final Timer result = Timer.periodic(period, timer);
+              final Timer result = parent.createPeriodicTimer(zone, period, timer);
               timers[result] = StackTrace.current;
               return result;
             }
