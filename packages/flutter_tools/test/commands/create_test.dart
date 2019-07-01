@@ -1129,10 +1129,11 @@ Future<void> _createProject(
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  final List<String> args = <String>['create'];
-  args.addAll(createArgs);
-  args.add(dir.path);
-  await runner.run(args);
+  await runner.run(<String>[
+    'create',
+    ...createArgs,
+    dir.path,
+  ]);
 
   bool pathExists(String path) {
     final String fullPath = fs.path.join(dir.path, path);

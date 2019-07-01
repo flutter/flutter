@@ -1401,8 +1401,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     }
   }
   base ??= String.fromCharCode(randomCharacter(random));
-  final List<int> characters = <int>[];
-  characters.addAll(these);
+  final List<int> characters = these.toList();
   return base + String.fromCharCodes(characters);
 }
 
