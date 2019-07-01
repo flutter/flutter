@@ -253,7 +253,8 @@ def to_gn_args(args):
 
     if sys.platform == 'darwin':
       gn_args['mac_sdk_path'] = args.mac_sdk_path
-      gn_args['build_glfw_shell'] = args.build_glfw_shell
+      if args.build_glfw_shell:
+        gn_args['build_glfw_shell'] = True
       if gn_args['mac_sdk_path'] == '':
         gn_args['mac_sdk_path'] = os.getenv('FLUTTER_MAC_SDK_PATH', '')
 
