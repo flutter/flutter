@@ -206,7 +206,48 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        pluginTasks = configPluginTasks(project)
+
+        List<String> tasksToExecute = project.gradle.startParameter.taskNames
+        List<FlutterPluginTask> pluginTasks = configPluginTasks(project)
+        Boolean willAssemble = tasksToExecute.find{ it.contains("assemble") }
+
+        if (tasksToExecute.contains("clean")) {
+            if (tasksToExecute.size > 1) {
+                throw new GradleException("Can't run the clean task along with other tasks")
+            }
+        } else if (willAssemble) {
+            pluginTasks.each { pluginTask ->
+                // Build the plugin during configuration.
+                // This is required when Jetifier is enabled, otherwise the implementation dependency
+                // cannot be added.
+                pluginTask.execute()
+                project.repositories {
+                    maven {
+                        url "${pluginTask.intermediateDir}/repo"
+                    }
+                }
+
+                File mavenMetadataFile
+                pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
+                    if (file.name == "maven-metadata.xml") {
+                        mavenMetadataFile = file
+                    }
+                }
+
+                assert mavenMetadataFile != null
+                def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
+
+                assert mavenMetadata != null
+                assert mavenMetadata.groupId != null
+                assert mavenMetadata.artifactId != null
+                assert mavenMetadata.version != null
+                project.dependencies {
+                    implementation ("${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:${mavenMetadata.version.text()}@aar"){
+                        transitive = true
+                    }
+                }
+            }
+        }
     }
 
     private String resolveProperty(Project project, String name, String defaultValue) {
@@ -359,7 +400,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.flutter.source == null) {
             throw new GradleException("Must provide Flutter source directory")
         }
-
         String target = project.flutter.target
         if (target == null) {
             target = 'lib/main.dart'
@@ -462,38 +502,6 @@ class FlutterPlugin implements Plugin<Project> {
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
-                compileTask.doFirst {
-                    pluginTasks.each { pluginTask ->
-                        // Execute before configurating the DSL.
-                        pluginTask.execute()
-                        project.repositories {
-                            maven {
-                                url "${pluginTask.intermediateDir}/repo"
-                            }
-                        }
-
-                        File mavenMetadataFile
-                        pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
-                            if (file.name == "maven-metadata.xml") {
-                                mavenMetadataFile = file
-                            }
-                        }
-
-                        assert mavenMetadataFile != null
-                        def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
-
-                        assert mavenMetadata != null
-                        assert mavenMetadata.groupId != null
-                        assert mavenMetadata.artifactId != null
-                        assert mavenMetadata.version != null
-                        project.dependencies {
-                            implementation ("${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:${mavenMetadata.version.text()}@aar"){
-                                transitive = true
-                            }
-                        }
-                    }
-                }
-                return compileTask
             }
 
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
