@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -990,6 +991,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
         onSelectionHandleTapped: _handleSelectionHandleTapped,
+        promptRectPaintBuilder: Platform.isIOS ? cupertinoPromptPaintBuilder : null,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,

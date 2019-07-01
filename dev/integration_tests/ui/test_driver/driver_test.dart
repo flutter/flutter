@@ -105,47 +105,5 @@ void main() {
       await driver.enterText('World!');
       await driver.waitFor(find.text('World!'));
     });
-
-    test('Autocorrection highlight rect appear and disappear as expected.', () async {
-      final SerializableFinder textFieldFinder = find.byValueKey('enter-text-field');
-      final Matcher promptRectVisible = contains(getColor(0x00, 0x7A, 0xFF, 47));
-
-      Future<void> verifyScreenshot(bool hasPromptRect) async {
-        final Image image = decodePng(await driver.screenshot());
-        expect(
-          image.data,
-          hasPromptRect ? promptRectVisible : isNot(promptRectVisible),
-        );
-      }
-
-      await driver.waitFor(textFieldFinder);
-      await driver.tap(textFieldFinder);
-
-      driver.enterText('a');
-      await driver.waitFor(find.text('a'));
-      // Wait for the prompt rect to show up.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      await verifyScreenshot(false);
-
-      driver.enterText('asd');
-      // Wait for the prompt rect to show up.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      await driver.waitFor(find.text('asd'));
-      await verifyScreenshot(Platform.isIOS);
-
-      driver.enterText('asdf');
-      // Wait for the prompt rect to show up.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      await driver.waitFor(find.text('asdf'));
-      await verifyScreenshot(Platform.isIOS);
-
-      driver.enterText('asd');
-      // Wait for the prompt rect to show up.
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-      await driver.waitFor(find.text('asd'));
-      // Should not show up since we deleted the last character.
-      await verifyScreenshot(false);
-    });
-
   });
 }
