@@ -317,6 +317,7 @@ class ToggleButtons extends StatelessWidget {
     this.highlightColor,
     this.hoverColor,
     this.splashColor,
+    this.focusNodes,
     this.renderBorder = true,
     this.borderColor,
     this.selectedBorderColor,
@@ -379,6 +380,9 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
+
+
+  final List<FocusNode> focusNodes;
 
   /// Whether or not to render a border around each toggle button.
   ///
@@ -545,6 +549,13 @@ class ToggleButtons extends StatelessWidget {
       !isSelected.any((bool val) => val == null),
       'There is a null value in isSelected: $isSelected'
     );
+    assert(() {
+      if (focusNodes != null)
+        return focusNodes.length == children.length;
+      return true;
+    }(),
+      'FocusNodes.length must match children.length'
+    );
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsTheme toggleButtonsTheme = ToggleButtonsTheme.of(context);
     final TextDirection textDirection = Directionality.of(context);
@@ -571,6 +582,7 @@ class ToggleButtons extends StatelessWidget {
             highlightColor: highlightColor,
             hoverColor: hoverColor,
             splashColor: splashColor,
+            focusNode: focusNodes != null ? focusNodes[index] : null,
             onPressed: onPressed != null
               ? () { onPressed(index); }
               : null,
@@ -635,6 +647,7 @@ class _ToggleButton extends StatelessWidget {
     this.highlightColor,
     this.hoverColor,
     this.splashColor,
+    this.focusNode,
     this.onPressed,
     this.leadingBorderSide,
     this.horizontalBorderSide,
@@ -678,6 +691,9 @@ class _ToggleButton extends StatelessWidget {
 
   /// The splash color for the button's [InkWell].
   final Color splashColor;
+
+
+  final FocusNode focusNode;
 
   /// Called when the button is tapped or otherwise activated.
   ///
@@ -749,6 +765,7 @@ class _ToggleButton extends StatelessWidget {
           highlightColor: highlightColor,
           hoverColor: hoverColor,
           splashColor: splashColor,
+          focusNode: focusNode,
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           onPressed: onPressed,
           child: child,

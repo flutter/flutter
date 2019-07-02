@@ -610,13 +610,14 @@ void main() {
 
   testWidgets('Default InkWell colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
-    // final FocusNode focusNode = FocusNode();
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Material(
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
             onPressed: (int index) {},
+            focusNodes: <FocusNode>[focusNode],
             children: const <Widget>[
               Text('First child'),
             ],
@@ -626,6 +627,7 @@ void main() {
     );
 
     final Offset center = tester.getCenter(find.text('First child'));
+
     // highlightColor
     // splashColor
     final TestGesture touchGesture = await tester.createGesture();
@@ -661,14 +663,12 @@ void main() {
     await hoverGesture.removePointer();
 
     // focusColor
-    // TODO(shihaohong): need to add focusNode property to ToggleButtons
-    // focusNode.requestFocus();
-    // await tester.pumpAndSettle();
-
-    // inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
-    //   return object.runtimeType.toString() == '_RenderInkFeatures';
-    // });
-    // expect(inkFeatures, paints..rect(color: theme.focusColor));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: theme.focusColor));
   });
 
   // custom colors
