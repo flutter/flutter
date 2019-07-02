@@ -477,12 +477,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// using [ErrorHint]s or other [DiagnosticsNode]s.
   factory FlutterError(String message) {
     final List<String> lines = message.split('\n');
-    final List<DiagnosticsNode> parts = <DiagnosticsNode>[];
-    parts.add(ErrorSummary(lines.first));
-    if (lines.length > 1)  {
-      parts.addAll(lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)));
-    }
-    return FlutterError.fromParts(parts);
+    return FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(lines.first),
+      ...lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)),
+    ]);
   }
 
   /// Create an error message from a list of [DiagnosticsNode]s.

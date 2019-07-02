@@ -77,15 +77,13 @@ class Testbed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   FutureOr<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
-    final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
-    // Add the initial setUp overrides
-    if (_overrides != null) {
-      testOverrides.addAll(_overrides);
-    }
-    // Add the test-specific overrides
-    if (overrides != null) {
-      testOverrides.addAll(overrides);
-    }
+    final Map<Type, Generator> testOverrides = <Type, Generator>{
+      ..._testbedDefaults,
+      // Add the initial setUp overrides
+      ...?_overrides,
+      // Add the test-specific overrides
+      ...?overrides,
+    };
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     return runInContext<T>(() {

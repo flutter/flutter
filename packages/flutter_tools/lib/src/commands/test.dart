@@ -179,15 +179,13 @@ class TestCommand extends FastFlutterCommand {
         );
       }
     } else {
-      final List<String> fileCopy = <String>[];
-      for (String file in files) {
-        if (file.endsWith(platform.pathSeparator)) {
-          fileCopy.addAll(_findTests(fs.directory(file)));
-        } else {
-          fileCopy.add(file);
-        }
-      }
-      files = fileCopy;
+      files = <String>[
+        for (String file in files)
+          if (file.endsWith(platform.pathSeparator))
+            ..._findTests(fs.directory(file))
+          else
+            file
+      ];
     }
 
     CoverageCollector collector;

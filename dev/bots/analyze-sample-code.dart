@@ -531,10 +531,12 @@ linter:
   File _writeSection(Section section) {
     final String sectionId = _createNameFromSource('sample', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
-    final List<Line> mainContents = headers.toList();
-    mainContents.add(const Line(''));
-    mainContents.add(Line('// From: ${section.start.filename}:${section.start.line}'));
-    mainContents.addAll(section.code);
+    final List<Line> mainContents = <Line>[
+      ...headers,
+      const Line(''),
+      Line('// From: ${section.start.filename}:${section.start.line}'),
+      ...section.code,
+    ];
     outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
     return outputFile;
   }
@@ -820,10 +822,9 @@ class Line {
 class Section {
   const Section(this.code);
   factory Section.combine(List<Section> sections) {
-    final List<Line> code = <Line>[];
-    for (Section section in sections) {
-      code.addAll(section.code);
-    }
+    final List<Line> code = sections
+      .expand((Section section) => section.code)
+      .toList();
     return Section(code);
   }
   factory Section.fromStrings(Line firstLine, List<String> code) {
