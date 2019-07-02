@@ -326,6 +326,7 @@ class ToggleButtons extends StatelessWidget {
   }) :
     assert(children != null),
     assert(isSelected != null),
+    assert(children.length == isSelected.length),
     super(key: key);
 
   /// The corresponding widget values in the toggle buttons.
@@ -587,7 +588,28 @@ class ToggleButtons extends StatelessWidget {
     );
   }
 
-  // TODO(WIP): include debugFillProperties method
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('disabled',
+      value: onPressed == null,
+      ifTrue: 'Buttons are disabled',
+      ifFalse: 'Buttons are enabled',
+    ));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('fillColor', fillColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
+    properties.add(ColorProperty('borderColor', borderColor, defaultValue: null));
+    properties.add(ColorProperty('selectedBorderColor', selectedBorderColor, defaultValue: null));
+    properties.add(ColorProperty('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
+    properties.add(DoubleProperty('borderWidth', borderWidth, defaultValue: null));
+  }
 }
 
 /// An individual toggle button, otherwise known as a segmented button.
@@ -746,7 +768,15 @@ class _ToggleButton extends StatelessWidget {
     );
   }
 
-  // TODO(WIP): include debugFillProperties method
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('selected',
+      value: selected,
+      ifTrue: 'Button is selected',
+      ifFalse: 'Button is unselected',
+    ));
+  }
 }
 
 class _SelectToggleButton extends SingleChildRenderObjectWidget {
