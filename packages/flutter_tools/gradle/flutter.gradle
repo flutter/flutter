@@ -604,7 +604,7 @@ class FlutterPlugin implements Plugin<Project> {
             // Because the plugins are built during configuration, the task "clean"
             // cannot run in conjunction with an assembly task.
             if (!buildTypes.empty) {
-                throw new GradleException("Can't run the clean task along with other tasks")
+                throw new GradleException("Can't run the clean task along with other assemble tasks")
             }
         }
         // Build plugins when a task "assembly*" will be called later.
