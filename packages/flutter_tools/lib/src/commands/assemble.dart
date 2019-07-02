@@ -3,18 +3,17 @@
 // found in the LICENSE file.
 
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/assets.dart';
-import '../build_system/targets/dart.dart';
-import '../build_system/targets/linux.dart';
-import '../build_system/targets/macos.dart';
-import '../build_system/targets/windows.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
@@ -23,6 +22,7 @@ class AssembleCommand extends FlutterCommand {
     addSubcommand(AssembleRun());
     addSubcommand(AssembleDescribe());
     addSubcommand(AssembleListInputs());
+    addSubcommand(AssembleBuildDirectory());
   }
   @override
   String get description => 'Assemble and build flutter resources.';
@@ -59,16 +59,6 @@ abstract class AssembleBase extends FlutterCommand {
       help: 'The maximum number of concurrent tasks the build system will run.'
     );
   }
-
-  // TODO(jonahwilliams): create a namepsaced registry system for targets.
-  static final BuildSystem buildSystem = BuildSystem(<String, Target>{
-    unpackMacos.name: unpackMacos,
-    unpackLinux.name: unpackLinux,
-    unpackWindows.name: unpackWindows,
-    copyAssets.name: copyAssets,
-    kernelSnapshot.name: kernelSnapshot,
-    aotElf.name: aotElf,
-  });
 
   /// Returns the provided target platform.
   ///
@@ -141,15 +131,17 @@ class AssembleRun extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildResult result = await AssembleBase.buildSystem.build(targetName, environment, BuildSystemConfig(
+    final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
     ));
     if (!result.success) {
       for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}.');
+        printError('Target ${data.key} failed: ${data.value.exception}');
         printError('${data.value.exception}');
       }
-      throwToolExit('build failed.');
+      throwToolExit('build failed');
+    } else {
+      printStatus('build succeeded');
     }
     return null;
   }
@@ -169,8 +161,8 @@ class AssembleDescribe extends AssembleBase {
   @override
   Future<FlutterCommandResult> runCommand() {
     try {
-      print(
-        json.encode(AssembleBase.buildSystem.describe(targetName, environment))
+      printStatus(
+        json.encode(buildSystem.describe(targetName, environment))
       );
     } on Exception catch (err, stackTrace) {
       printTrace(stackTrace.toString());
@@ -194,18 +186,35 @@ class AssembleListInputs extends AssembleBase {
   @override
   Future<FlutterCommandResult> runCommand() {
     try {
-      final List<Map<String, Object>> results = AssembleBase
-          .buildSystem.describe(targetName, environment);
+      final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
       for (Map<String, Object> result in results) {
         if (result['name'] == targetName) {
           final List<String> inputs = result['inputs'];
-          inputs.forEach(print);
+          inputs.forEach(printStatus);
         }
       }
     } on Exception catch (err, stackTrace) {
       printTrace(stackTrace.toString());
       throwToolExit(err.toString());
     }
+    return null;
+  }
+}
+
+/// Return the build directory for a configuiration.
+class AssembleBuildDirectory extends AssembleBase {
+  @override
+  String get description => 'List the inputs for a particular target.';
+
+  @override
+  String get name => 'build-dir';
+
+  @override
+  bool get isExperimental => true;
+
+  @override
+  Future<FlutterCommandResult> runCommand() {
+    printStatus(environment.buildDir.path);
     return null;
   }
 }
