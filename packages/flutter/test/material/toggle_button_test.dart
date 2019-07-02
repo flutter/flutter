@@ -17,8 +17,8 @@ void main() {
     ThemeData theme;
     await tester.pumpWidget(
       Material(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+        child: Builder(
+          builder: (BuildContext context) {
             theme = Theme.of(context);
             return boilerplate(
               child: ToggleButtons(
@@ -91,12 +91,13 @@ void main() {
   });
 
   testWidgets('onPressed that is null disables buttons', (WidgetTester tester) async {
+    final List<bool> _isSelected = <bool>[false, true];
     ThemeData theme;
 
     await tester.pumpWidget(
       Material(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+        child: Builder(
+          builder: (BuildContext context) {
             theme = Theme.of(context);
             return boilerplate(
               child: ToggleButtons(
@@ -104,7 +105,7 @@ void main() {
                   Text('First child'),
                   Text('Second child'),
                 ],
-                isSelected: const <bool>[false, true],
+                isSelected: _isSelected,
               ),
             );
           },
@@ -112,9 +113,25 @@ void main() {
       ),
     );
 
-    final DefaultTextStyle textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    DefaultTextStyle textStyleOne;
+    DefaultTextStyle textStyleTwo;
+
+    expect(_isSelected[0], isFalse);
+    expect(_isSelected[1], isTrue);
+    textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
     expect(textStyleOne.style.color, theme.disabledColor);
-    final DefaultTextStyle textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
+    expect(textStyleTwo.style.color, theme.disabledColor);
+
+    await tester.tap(find.text('Second child'));
+    await tester.pumpAndSettle();
+
+    // nothing should change
+    expect(_isSelected[0], isFalse);
+    expect(_isSelected[1], isTrue);
+    textStyleOne = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+    expect(textStyleOne.style.color, theme.disabledColor);
+    textStyleTwo = tester.widget(find.widgetWithText(DefaultTextStyle, 'Second child').first);
     expect(textStyleTwo.style.color, theme.disabledColor);
   });
 
@@ -182,18 +199,114 @@ void main() {
     }
   });
 
-  // all default colors
-    // color
-    // selectedcolor
-    // disabledColor
+  testWidgets(
+    'Default text/icon colors for enabled, selected and disabled states',
+    (WidgetTester tester) async {
+      ThemeData theme;
+      await tester.pumpWidget(
+        Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              theme = Theme.of(context);
+              return boilerplate(
+                child: ToggleButtons(
+                  children: <Widget>[
+                    Row(children: const <Widget>[
+                      Text('First child'),
+                      Icon(Icons.check),
+                    ]),
+                  ],
+                  isSelected: const <bool>[false],
+                  onPressed: (int index) { },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+
+      DefaultTextStyle textStyle;
+      IconTheme iconTheme;
+
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+      expect(textStyle.style.color, theme.colorScheme.onSurface);
+      iconTheme = tester.widget(find.widgetWithIcon(IconTheme, Icons.check).first);
+      expect(iconTheme.data.color, theme.colorScheme.onSurface);
+
+      await tester.pumpWidget(
+        Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              theme = Theme.of(context);
+              return boilerplate(
+                child: ToggleButtons(
+                  children: <Widget>[
+                    Row(children: const <Widget>[
+                      Text('First child'),
+                      Icon(Icons.check),
+                    ]),
+                  ],
+                  isSelected: const <bool>[true],
+                  onPressed: (int index) { },
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+      expect(textStyle.style.color, theme.colorScheme.primary);
+      iconTheme = tester.widget(find.widgetWithIcon(IconTheme, Icons.check).first);
+      expect(iconTheme.data.color, theme.colorScheme.primary);
+
+      await tester.pumpWidget(
+        Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              theme = Theme.of(context);
+              return boilerplate(
+                child: ToggleButtons(
+                  children: <Widget>[
+                    Row(children: const <Widget>[
+                      Text('First child'),
+                      Icon(Icons.check),
+                    ]),
+                  ],
+                  isSelected: const <bool>[true],
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      textStyle = tester.widget(find.widgetWithText(DefaultTextStyle, 'First child').first);
+      expect(textStyle.style.color, theme.disabledColor);
+      iconTheme = tester.widget(find.widgetWithIcon(IconTheme, Icons.check).first);
+      expect(iconTheme.data.color, theme.disabledColor);
+    },
+  );
+
+  testWidgets('Default button fillColor', (WidgetTester tester) async {
     // fillColor
+  });
+
+  testWidgets('Default InkWell colors', (WidgetTester tester) async {
     // focusColor
     // highlightColor
     // hoverColor
     // splashColor
-    // borderColor
-    // selectedBorderColor
-    // disabledBorderColor
+  });
+
+  testWidgets(
+    'Default border colors for enabled, selected and disabled states',
+    (WidgetTester tester) async {
+      // borderColor
+      // selectedBorderColor
+      // disabledBorderColor
+    },
+  );
 
   // custom colors
     // color
