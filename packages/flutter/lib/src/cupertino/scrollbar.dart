@@ -10,12 +10,14 @@ import 'package:flutter/widgets.dart';
 const Color _kScrollbarColor = Color(0x99777777);
 const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
-const Radius _kScrollbarRadius = Radius.circular(1.25);
+const Radius _kScrollbarRadius = Radius.circular(1.5);
+const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 50);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 
-// These values are measured using screenshots from an iPhone XR 12.1 simulator.
+// These values are measured using screenshots from an iPhone XR 13.0 simulator.
 const double _kScrollbarThickness = 2.5;
+const double _kScrollbarThicknessDragging = 8.0;
 // This is the amount of space from the top of a vertical scrollbar to the
 // top edge of the scrollable, measured when the vertical scrollbar overscrolls
 // to the top.
@@ -65,6 +67,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   AnimationController _fadeoutAnimationController;
   Animation<double> _fadeoutOpacityAnimation;
   Timer _fadeoutTimer;
+  bool _isDragging = false;
 
   @override
   void initState() {
@@ -88,18 +91,27 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
   ScrollbarPainter _buildCupertinoScrollbarPainter() {
+    print('justin build painter $_isDragging');
     return ScrollbarPainter(
       color: _kScrollbarColor,
       textDirection: _textDirection,
-      thickness: _kScrollbarThickness,
+      thickness: _isDragging || true ? _kScrollbarThicknessDragging : _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
-      radius: _kScrollbarRadius,
+      radius: _isDragging || true ? _kScrollbarRadiusDragging : _kScrollbarRadius,
       padding: MediaQuery.of(context).padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );
+  }
+
+  void _handleLongPress() {
+    print('justin long press');
+    setState(() {
+      _isDragging = true;
+      _buildCupertinoScrollbarPainter();
+    });
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -139,13 +151,17 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: RepaintBoundary(
-        child: CustomPaint(
-          foregroundPainter: _painter,
-          child: RepaintBoundary(
-            child: widget.child,
+    print('justin build it $_isDragging');
+    return GestureDetector(
+      onLongPress: _handleLongPress,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: RepaintBoundary(
+          child: CustomPaint(
+            foregroundPainter: _painter,
+            child: RepaintBoundary(
+              child: widget.child,
+            ),
           ),
         ),
       ),
