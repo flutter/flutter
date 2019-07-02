@@ -61,7 +61,8 @@ class IOSSurfaceGL final : public IOSSurface,
   std::vector<SkCanvas*> GetCurrentCanvases() override;
 
   // |flutter::ExternalViewEmbedder|
-  SkCanvas* CompositeEmbeddedView(int view_id, const flutter::EmbeddedViewParams& params) override;
+  SkCanvas* CompositeEmbeddedView(int view_id,
+                                  std::unique_ptr<flutter::EmbeddedViewParams> params) override;
 
   // |flutter::ExternalViewEmbedder|
   bool SubmitFrame(GrContext* context) override;

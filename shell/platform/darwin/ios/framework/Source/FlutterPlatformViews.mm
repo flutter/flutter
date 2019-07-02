@@ -231,7 +231,6 @@ UIView* FlutterPlatformViewsController::ReconstructClipViewsChain(int number_of_
 void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators_stack,
                                                    UIView* embedded_view) {
   FML_DCHECK(CATransform3DEqualToTransform(embedded_view.layer.transform, CATransform3DIdentity));
-
   UIView* head = embedded_view;
   head.clipsToBounds = YES;
   ResetAnchor(head.layer);
@@ -275,13 +274,13 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
 
 void FlutterPlatformViewsController::CompositeWithParams(
     int view_id,
-    const flutter::EmbeddedViewParams& params) {
-  CGRect frame = CGRectMake(0, 0, params.sizePoints.width(), params.sizePoints.height());
+    std::unique_ptr<flutter::EmbeddedViewParams> params) {
+  CGRect frame = CGRectMake(0, 0, params->sizePoints.width(), params->sizePoints.height());
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
   touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
 
-  int currentClippingCount = CountClips(params.mutatorsStack);
+  int currentClippingCount = CountClips(params->mutatorsStack);
   int previousClippingCount = clip_count_[view_id];
   if (currentClippingCount != previousClippingCount) {
     clip_count_[view_id] = currentClippingCount;
@@ -292,22 +291,22 @@ void FlutterPlatformViewsController::CompositeWithParams(
         ReconstructClipViewsChain(currentClippingCount, touchInterceptor, oldPlatformViewRoot);
     root_views_[view_id] = fml::scoped_nsobject<UIView>([newPlatformViewRoot retain]);
   }
-  ApplyMutators(params.mutatorsStack, touchInterceptor);
+  ApplyMutators(params->mutatorsStack, touchInterceptor);
 }
 
 SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
     int view_id,
-    const flutter::EmbeddedViewParams& params) {
+    std::unique_ptr<flutter::EmbeddedViewParams> params) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
 
   // Do nothing if the params didn't change.
   if (current_composition_params_.count(view_id) == 1 &&
-      current_composition_params_[view_id] == params) {
+      current_composition_params_[view_id] == *params.get()) {
     return picture_recorders_[view_id]->getRecordingCanvas();
   }
-  current_composition_params_[view_id] = EmbeddedViewParams(params);
-  CompositeWithParams(view_id, params);
+  current_composition_params_[view_id] = EmbeddedViewParams(*params.get());
+  CompositeWithParams(view_id, std::move(params));
 
   return picture_recorders_[view_id]->getRecordingCanvas();
 }

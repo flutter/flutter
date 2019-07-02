@@ -190,8 +190,9 @@ class ExternalViewEmbedder {
   virtual std::vector<SkCanvas*> GetCurrentCanvases() = 0;
 
   // Must be called on the UI thread.
-  virtual SkCanvas* CompositeEmbeddedView(int view_id,
-                                          const EmbeddedViewParams& params) = 0;
+  virtual SkCanvas* CompositeEmbeddedView(
+      int view_id,
+      std::unique_ptr<flutter::EmbeddedViewParams> params) = 0;
 
   virtual bool SubmitFrame(GrContext* context);
 
