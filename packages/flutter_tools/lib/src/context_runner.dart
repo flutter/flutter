@@ -75,6 +75,8 @@ Future<T> runInContext<T>(
       BotDetector: () => const BotDetector(),
       BuildSystem: () => BuildSystem(<String, Target>{
         unpackMacos.name: unpackMacos,
+        macosApplication.name: macosApplication,
+        macoReleaseApplication.name: macoReleaseApplication,
         unpackLinux.name: unpackLinux,
         unpackWindows.name: unpackWindows,
         copyAssets.name: copyAssets,

@@ -18,7 +18,7 @@ import '../exceptions.dart';
 const String kBuildMode= 'BuildMode';
 
 /// The define to pass whether we compile 64-bit android-arm code.
-const String kAndroid64Bit = 'Android64bit';
+const String kTargetPlatform = 'TargetPlatform';
 
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
@@ -58,16 +58,17 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
 Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environment) async {
   final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
   final String outputPath = environment.buildDir.path;
-  final bool use64Bit = environment.defines[kAndroid64Bit] == 'true';
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
   if (buildMode == null) {
-    throw MissingDefineException(kBuildMode, 'kernel_snapshot');
+    throw MissingDefineException(kBuildMode, 'aot_elf');
+  }
+  if (targetPlatform == null) {
+    throw MissingDefineException(kTargetPlatform, 'aot_elf');
   }
 
   final int snapshotExitCode = await snapshotter.build(
-    platform: use64Bit
-        ? TargetPlatform.android_arm64
-        : TargetPlatform.android_arm,
+    platform: targetPlatform,
     buildMode: buildMode,
     mainPath: environment.buildDir.childFile('main.app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
@@ -81,13 +82,13 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
 /// Find the correct gen_snapshot implemenation for the aot elf build.
 List<File> findGenSnapshotAndroidElf(Environment environment) {
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-  final bool use64Bit = environment.defines[kAndroid64Bit] == 'true';
+  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
   if (buildMode == null) {
     throw MissingDefineException(kBuildMode, 'aot_elf');
   }
-  final TargetPlatform targetPlatform = use64Bit
-      ? TargetPlatform.android_arm64
-      : TargetPlatform.android_arm;
+  if (targetPlatform == null) {
+    throw MissingDefineException(kTargetPlatform, 'aot_elf');
+  }
   final String path= artifacts
       .getArtifactPath(Artifact.genSnapshot, platform: targetPlatform, mode: buildMode);
   return <File>[fs.file(path)];

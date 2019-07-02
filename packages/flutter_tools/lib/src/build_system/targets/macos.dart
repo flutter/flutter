@@ -8,6 +8,8 @@ import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../globals.dart';
 import '../build_system.dart';
+import 'assets.dart';
+import 'dart.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -59,7 +61,7 @@ const Target unpackMacos = Target(
     Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegisrarMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
     // Modules
     Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
     // Resources
@@ -69,4 +71,37 @@ const Target unpackMacos = Target(
   ],
   dependencies: <Target>[],
   buildAction: copyFramework,
+);
+
+
+Future<void> buildMacOSApplication(Map<String, ChangeType> updates,
+    Environment environment) async {
+
+}
+
+/// Build a macOS application.
+const Target macosApplication = Target(
+  name: 'macos_application',
+  buildAction: buildMacOSApplication,
+  inputs: <Source>[],
+  outputs: <Source>[],
+  dependencies: <Target>[
+    unpackMacos,
+    kernelSnapshot,
+    copyAssets,
+  ]
+);
+
+
+/// Build a macOS release application.
+const Target macoReleaseApplication = Target(
+  name: 'macos_release_application',
+  buildAction: buildMacOSApplication,
+  inputs: <Source>[],
+  outputs: <Source>[],
+  dependencies: <Target>[
+    unpackMacos,
+    aotElf,
+    copyAssets,
+  ]
 );

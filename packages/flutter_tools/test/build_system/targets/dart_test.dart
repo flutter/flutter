@@ -32,6 +32,7 @@ void main() {
           projectDir: fs.currentDirectory,
           defines: <String, String>{
             kBuildMode: getNameForBuildMode(BuildMode.profile),
+            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
           }
         );
         buildSystem = BuildSystem(<String, Target>{
