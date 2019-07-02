@@ -1165,6 +1165,39 @@ void main() {
   );
 
   // height of all buttons must match the tallest button
+  testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[
+      Container(
+        constraints: const BoxConstraints.tightFor(height: 100.0),
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(height: 400.0), // tallest widget
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(height: 200.0),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true, false],
+            children: children,
+          ),
+        ),
+      ),
+    );
+
+    final List<Widget> toggleButtons = tester.allWidgets.where((Widget widget) {
+      return widget.runtimeType.toString() == '_SelectToggleButton';
+    }).toList();
+
+    for (int i = 0; i < toggleButtons.length; i++) {
+      final Rect rect = tester.getRect(find.byWidget(toggleButtons[i]));
+      expect(rect.height, 400.0);
+    }
+  });
 
   // RTL and LTR
 
@@ -1172,5 +1205,4 @@ void main() {
   // default border radius
   // custom border radius
   // theme border radius
-
 }
