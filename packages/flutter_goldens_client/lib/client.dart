@@ -10,6 +10,8 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'skia_client.dart';
+
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
@@ -26,6 +28,12 @@ class GoldensClient {
     this.platform = const LocalPlatform(),
     this.process = const LocalProcessManager(),
   });
+
+  factory GoldensClient.fromPlatform(Platform platform) {
+    return testingWithSkiaGold(platform)
+      ? SkiaGoldClient()
+      : GoldensRepositoryClient();
+  }
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -46,8 +54,6 @@ class GoldensClient {
   /// subprocesses.
   final ProcessManager process;
 
-  RandomAccessFile _lock;
-
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
@@ -57,6 +63,23 @@ class GoldensClient {
   ///
   /// Uses the [fs] file system.
   Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+
+  Future<String> getCurrentCommit() async {
+    if (!comparisonRoot.existsSync()) {
+      return null;
+    } else {
+      final io.ProcessResult revParse = await process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: comparisonRoot.path,
+      );
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    }
+  }
+}
+
+class GoldensRepositoryClient  extends GoldensClient {
+
+  RandomAccessFile _lock;
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
   /// file testing.
@@ -70,12 +93,12 @@ class GoldensClient {
   /// duplicate the work that this is doing.
   Future<void> prepare() async {
     final String goldensCommit = await _getGoldensCommit();
-    String currentCommit = await _getCurrentCommit();
+    String currentCommit = await getCurrentCommit();
     if (currentCommit != goldensCommit) {
       await _obtainLock();
       try {
         // Check the current commit again now that we have the lock.
-        currentCommit = await _getCurrentCommit();
+        currentCommit = await getCurrentCommit();
         if (currentCommit != goldensCommit) {
           if (currentCommit == null) {
             await _initRepository();
@@ -92,18 +115,6 @@ class GoldensClient {
   Future<String> _getGoldensCommit() async {
     final File versionFile = flutterRoot.childFile(fs.path.join('bin', 'internal', 'goldens.version'));
     return (await versionFile.readAsString()).trim();
-  }
-
-  Future<String> _getCurrentCommit() async {
-    if (!comparisonRoot.existsSync()) {
-      return null;
-    } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: comparisonRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-    }
   }
 
   Future<void> _initRepository() async {
@@ -194,4 +205,11 @@ class NonZeroExitCode implements Exception {
   String toString() {
     return 'Exit code $exitCode: $stderr';
   }
+}
+
+bool testingWithSkiaGold(Platform platform) {
+  final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
+  final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+  final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
+  return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
 }
