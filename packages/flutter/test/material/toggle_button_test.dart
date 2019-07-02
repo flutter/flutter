@@ -628,8 +628,8 @@ void main() {
 
     final Offset center = tester.getCenter(find.text('First child'));
 
-    // highlightColor
     // splashColor
+    // highlightColor
     final TestGesture touchGesture = await tester.createGesture();
     await touchGesture.down(center);
     await tester.pumpAndSettle();
@@ -671,17 +671,153 @@ void main() {
     expect(inkFeatures, paints..rect(color: theme.focusColor));
   });
 
-  // custom colors
-  // splashColor
-  // highlightColor
-  // hoverColor
-  // focusColor
+  testWidgets('Custom InkWell colors', (WidgetTester tester) async {
+    const Color splashColor = Color(0xff4caf50);
+    const Color highlightColor = Color(0xffcddc39);
+    const Color hoverColor = Color(0xffffeb3b);
+    const Color focusColor = Color(0xffffff00);
+    final FocusNode focusNode = FocusNode();
 
-  // themes
-  // splashColor
-  // highlightColor
-  // hoverColor
-  // focusColor
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            splashColor: splashColor,
+            highlightColor: highlightColor,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            focusNodes: <FocusNode>[focusNode],
+            children: const <Widget>[
+              Text('First child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('First child'));
+
+    // splashColor
+    // highlightColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center);
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures;
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints
+        ..circle(color: splashColor)
+        ..rect(color: highlightColor),
+    );
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: hoverColor));
+    await hoverGesture.removePointer();
+
+    // focusColor
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
+  testWidgets('Theme InkWell colors', (WidgetTester tester) async {
+    const Color splashColor = Color(0xff4caf50);
+    const Color highlightColor = Color(0xffcddc39);
+    const Color hoverColor = Color(0xffffeb3b);
+    const Color focusColor = Color(0xffffff00);
+    final FocusNode focusNode = FocusNode();
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            splashColor: splashColor,
+            highlightColor: highlightColor,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            child: ToggleButtons(
+              splashColor: splashColor,
+              highlightColor: highlightColor,
+              hoverColor: hoverColor,
+              focusColor: focusColor,
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              focusNodes: <FocusNode>[focusNode],
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('First child'));
+
+    // splashColor
+    // highlightColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center);
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures;
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints
+        ..circle(color: splashColor)
+        ..rect(color: highlightColor),
+    );
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: hoverColor));
+    await hoverGesture.removePointer();
+
+    // focusColor
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
 
   testWidgets(
     'Default border colors for enabled, selected and disabled states',
