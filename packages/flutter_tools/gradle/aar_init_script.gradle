@@ -55,7 +55,10 @@ void setupLibraryVariant(Project project, File outputDir, variant) {
         // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
         // `defaultPublishConfig` at this point. Therefore, the code below ensures that the
         // default build config uses the artifacts produced for the specific build variant.
-        Task bundle = project.tasks.findByName("bundle${variantName}Aar")
+        Task bundle = project.tasks.findByName("bundle${variantName}Aar") // gradle:3.2.0
+        if (bundle == null) {
+            bundle = project.tasks.findByName("bundle${variantName}") // gradle:3.1.0
+        }
         if (bundle == null) {
             throw new GradleException("Can't generate AAR for variant ${variantName}.");
         }
