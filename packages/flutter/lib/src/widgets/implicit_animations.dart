@@ -525,53 +525,48 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
 ///
-/// {@tool sample}
+/// {@tool sample --template=stateful_widget_scaffold}
+///
+/// ```dart preamble
+/// enum BoxState { small, large }
+/// ```
 ///
 /// ```dart
-/// enum BoxState { small, large }
+/// BoxState state = BoxState.small;
 ///
-/// class GrowingBox extends StatefulWidget {
-///   @override
-///   createState() => GrowingBoxState();
+/// void _changeSize() {
+///   setState(() {
+///     state = state == BoxState.small ? BoxState.large : BoxState.small;
+///   });
 /// }
 ///
-/// class GrowingBoxState extends State<GrowingBox> {
-///   BoxState state = BoxState.small;
-///
-///   void _changeSize() {
-///     setState(() {
-///       state = state == BoxState.small ? BoxState.large : BoxState.small;
-///     });
-///   }
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Column(
-///       mainAxisAlignment: MainAxisAlignment.center,
-///       children: [
-///         AnimatedContainer(
-///           duration: Duration(seconds: 1),
-///           width: state == BoxState.small ? 192 : 256,
-///           height: state == BoxState.small ? 192 : 256,
-///           color: state == BoxState.small ? Colors.blue : Colors.indigo,
-///           transform: Matrix4.rotationZ(state == BoxState.small ? 0.0 : 0.1),
-///           child: Center(
-///             child: Text(
-///               "Hello, World!",
-///               style: Theme.of(context)
-///                   .textTheme
-///                   .display1
-///                   .copyWith(color: Colors.white),
-///             ),
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     mainAxisAlignment: MainAxisAlignment.center,
+///     children: [
+///       AnimatedContainer(
+///         duration: Duration(seconds: 1),
+///         width: state == BoxState.small ? 192 : 256,
+///         height: state == BoxState.small ? 192 : 256,
+///         color: state == BoxState.small ? Colors.blue : Colors.indigo,
+///         transform: Matrix4.rotationZ(state == BoxState.small ? 0.0 : 0.1),
+///         child: Center(
+///           child: Text(
+///             "Hello, World!",
+///             style: Theme.of(context)
+///                 .textTheme
+///                 .display1
+///                 .copyWith(color: Colors.white),
 ///           ),
 ///         ),
-///         RaisedButton(
-///           child: Text('Animate'),
-///           onPressed: _changeSize,
-///         ),
-///       ],
-///     );
-///   }
+///       ),
+///       RaisedButton(
+///         child: Text('Animate'),
+///         onPressed: _changeSize,
+///       ),
+///     ],
+///   );
 /// }
 /// ```
 /// {@end-tool}
