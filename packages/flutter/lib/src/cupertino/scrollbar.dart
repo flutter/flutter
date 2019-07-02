@@ -12,7 +12,7 @@ const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
 const Radius _kScrollbarRadius = Radius.circular(1.5);
 const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
-const Duration _kScrollbarTimeToFade = Duration(milliseconds: 50);
+const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 
 // These values are measured using screenshots from an iPhone XR 13.0 simulator.
@@ -24,7 +24,6 @@ const double _kScrollbarThicknessDragging = 8.0;
 // TODO(LongCatIsLooong): fix https://github.com/flutter/flutter/issues/32175
 const double _kScrollbarMainAxisMargin = 3.0;
 const double _kScrollbarCrossAxisMargin = 3.0;
-
 
 /// An iOS style scrollbar.
 ///
@@ -68,6 +67,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Animation<double> _fadeoutOpacityAnimation;
   Timer _fadeoutTimer;
   bool _isDragging = false;
+  ScrollMetrics lastMetrics;
+  AxisDirection lastAxisDirection;
 
   @override
   void initState() {
@@ -91,26 +92,45 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
   ScrollbarPainter _buildCupertinoScrollbarPainter() {
-    print('justin build painter $_isDragging');
     return ScrollbarPainter(
       color: _kScrollbarColor,
       textDirection: _textDirection,
-      thickness: _isDragging || true ? _kScrollbarThicknessDragging : _kScrollbarThickness,
+      thickness: _isDragging ? _kScrollbarThicknessDragging : _kScrollbarThickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
-      radius: _isDragging || true ? _kScrollbarRadiusDragging : _kScrollbarRadius,
+      radius: _isDragging ? _kScrollbarRadiusDragging : _kScrollbarRadius,
       padding: MediaQuery.of(context).padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
     );
   }
 
+  void _handleLongPressStart(LongPressStartDetails details) {
+    _fadeoutTimer?.cancel();
+  }
+
+  void _handleLongPressUp() {
+    _startFadeoutTimer();
+    setState(() {
+      _isDragging = false;
+      _painter = _buildCupertinoScrollbarPainter();
+      _painter.update(lastMetrics, lastAxisDirection);
+    });
+  }
+
   void _handleLongPress() {
-    print('justin long press');
     setState(() {
       _isDragging = true;
-      _buildCupertinoScrollbarPainter();
+      _painter = _buildCupertinoScrollbarPainter();
+      _painter.update(lastMetrics, lastAxisDirection);
+    });
+  }
+
+  void _startFadeoutTimer() {
+    _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
+      _fadeoutAnimationController.reverse();
+      _fadeoutTimer = null;
     });
   }
 
@@ -129,14 +149,13 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
       _fadeoutTimer?.cancel();
       _painter.update(notification.metrics, notification.metrics.axisDirection);
+      lastMetrics = notification.metrics;
+      lastAxisDirection = notification.metrics.axisDirection;
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
 
       _fadeoutTimer?.cancel();
-      _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
-        _fadeoutAnimationController.reverse();
-        _fadeoutTimer = null;
-      });
+      _startFadeoutTimer();
     }
     return false;
   }
@@ -151,8 +170,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    print('justin build it $_isDragging');
     return GestureDetector(
+      // TODO(justinmc): Setting any of these longpress callbacks makes it not
+      // scroll after a long press.
+      onLongPressUp: _handleLongPressUp,
+      onLongPressStart: _handleLongPressStart,
       onLongPress: _handleLongPress,
       child: NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
