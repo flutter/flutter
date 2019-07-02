@@ -113,7 +113,7 @@ export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
 export 'src/material/time.dart';
 export 'src/material/time_picker.dart';
-export 'src/material/toggle_button.dart';
+export 'src/material/toggle_buttons.dart';
 export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';
 export 'src/material/typography.dart';
