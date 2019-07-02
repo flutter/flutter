@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 Widget boilerplate({Widget child}) {
   return Directionality(
@@ -322,10 +325,6 @@ void main() {
       ),
     );
 
-    final Offset center = tester.getCenter(find.text('First child'));
-    await tester.startGesture(center);
-    await tester.pumpAndSettle();
-
     final Material material = tester.firstWidget<Material>(
       find.descendant(
         of: find.byType(RawMaterialButton),
@@ -338,10 +337,57 @@ void main() {
   });
 
   testWidgets('Default InkWell colors', (WidgetTester tester) async {
-    // focusColor
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('First child'));
     // highlightColor
-    // hoverColor
     // splashColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center);
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures;
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints
+      ..circle(color: theme.splashColor)
+      ..rect(color: theme.highlightColor)
+    );
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints
+      ..rect(color: theme.hoverColor)
+    );
+    hoverGesture.removePointer();
+
+    // focusColor
   });
 
   testWidgets(
