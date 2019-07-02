@@ -417,29 +417,15 @@ void main() {
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
       const Color enabledColor = Colors.lime;
       const Color selectedColor = Colors.green;
       const Color disabledColor = Colors.yellow;
-      final ThemeData theme = ThemeData();
-      final ThemeData customTheme = theme.copyWith(
-        disabledColor: disabledColor,
-        colorScheme: ColorScheme.fromSwatch().copyWith(
-          onSurface: enabledColor,
-          primary: selectedColor,
-        ),
-      );
-
-      // tests are ineffective if the custom theme are the same as the default
-      // theme's colors
-      expect(theme.colorScheme.onSurface, isNot(customTheme.colorScheme.onSurface));
-      expect(theme.colorScheme.primary, isNot(customTheme.colorScheme.primary));
-      expect(theme.disabledColor, isNot(customTheme.disabledColor));
 
       await tester.pumpWidget(
         Material(
           child: boilerplate(
-            child: Theme(
-              data: customTheme,
+            child: ToggleButtonsTheme(
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
@@ -460,6 +446,7 @@ void main() {
       IconTheme iconTheme;
 
       // custom theme enabled color
+      expect(theme.colorScheme.onSurface, isNot(enabledColor));
       textStyle = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
@@ -472,8 +459,8 @@ void main() {
       await tester.pumpWidget(
         Material(
           child: boilerplate(
-            child: Theme(
-              data: customTheme,
+            child: ToggleButtonsTheme(
+              selectedColor: selectedColor,
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[true],
@@ -491,6 +478,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       // custom theme selected color
+      expect(theme.colorScheme.primary, isNot(selectedColor));
       textStyle = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
@@ -503,8 +491,8 @@ void main() {
       await tester.pumpWidget(
         Material(
           child: boilerplate(
-            child: Theme(
-              data: customTheme,
+            child: ToggleButtonsTheme(
+              disabledColor: disabledColor,
               child: ToggleButtons(
                 color: enabledColor,
                 isSelected: const <bool>[false],
@@ -521,6 +509,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       // custom theme disabled color
+      expect(theme.disabledColor, isNot(disabledColor));
       textStyle = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
@@ -555,16 +544,69 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-
     expect(material.color, isNull);
     expect(material.type, MaterialType.transparency);
   });
 
-  // custom colors
-  // fillColor
+  testWidgets('Custom button fillColor', (WidgetTester tester) async {
+    const Color customFillColor = Colors.green;
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            fillColor: customFillColor,
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
 
-  // themes
-  // fillColor
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(RawMaterialButton),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, customFillColor);
+    expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Theme button fillColor', (WidgetTester tester) async {
+    const Color customFillColor = Colors.green;
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtonsTheme(
+            fillColor: customFillColor,
+            child: ToggleButtons(
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: <Widget>[
+                Row(children: const <Widget>[
+                  Text('First child'),
+                ]),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(RawMaterialButton),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(material.color, customFillColor);
+    expect(material.type, MaterialType.button);
+  });
 
   testWidgets('Default InkWell colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
@@ -594,16 +636,20 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints
-      ..circle(color: theme.splashColor)
-      ..rect(color: theme.highlightColor)
+    expect(
+      inkFeatures,
+      paints
+        ..circle(color: theme.splashColor)
+        ..rect(color: theme.highlightColor),
     );
 
     await touchGesture.up();
     await tester.pumpAndSettle();
 
     // hoverColor
-    final TestGesture hoverGesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
     await hoverGesture.addPointer();
     await hoverGesture.moveTo(center);
     await tester.pumpAndSettle();
@@ -611,9 +657,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints
-      ..rect(color: theme.hoverColor)
-    );
+    expect(inkFeatures, paints..rect(color: theme.hoverColor));
     await hoverGesture.removePointer();
 
     // focusColor

@@ -566,7 +566,7 @@ class ToggleButtons extends StatelessWidget {
             color: color,
             selectedColor: selectedColor,
             disabledColor: disabledColor,
-            fillColor: fillColor,
+            fillColor: fillColor ?? toggleButtonsTheme.fillColor,
             focusColor: focusColor,
             highlightColor: highlightColor,
             hoverColor: hoverColor,
