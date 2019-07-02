@@ -11,6 +11,9 @@ import 'package:flutter/rendering.dart';
 import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
+// TODO(justinmc): We already have this in text_selection.dart, is there
+// somewhere I can put it to reuse?
+const double _kMinInteractiveSize = 48.0;
 
 /// A [CustomPainter] for painting scrollbars.
 ///
@@ -138,6 +141,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
+  Rect _thumbRect;
 
   /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
   /// based on these new metrics.
@@ -195,11 +199,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
         break;
     }
 
-    final Rect thumbRect = Offset(x, y) & thumbSize;
+    _thumbRect = Offset(x, y) & thumbSize;
     if (radius == null)
-      canvas.drawRect(thumbRect, _paint);
+      canvas.drawRect(_thumbRect, _paint);
     else
-      canvas.drawRRect(RRect.fromRectAndRadius(thumbRect, radius), _paint);
+      canvas.drawRRect(RRect.fromRectAndRadius(_thumbRect, radius), _paint);
   }
 
   double _thumbExtent(
@@ -292,9 +296,26 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     return _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, _lastAxisDirection);
   }
 
-  // Scrollbars are (currently) not interactive.
+  /// Same as hitTest, but includes some padding to make sure that the region
+  /// isn't too small to be interacted with by the user.
+  bool hitTestInteractive(Offset position) {
+    if (_thumbRect == null) {
+      return null;
+    }
+    final Rect interactiveThumbRect = _thumbRect.expandToInclude(
+      Rect.fromCircle(center: _thumbRect.center, radius: _kMinInteractiveSize / 2),
+    );
+    return interactiveThumbRect.contains(position);
+  }
+
+  // Scrollbars can be interactive in Cupertino.
   @override
-  bool hitTest(Offset position) => null;
+  bool hitTest(Offset position) {
+    if (_thumbRect == null) {
+      return null;
+    }
+    return _thumbRect.contains(position);
+  }
 
   @override
   bool shouldRepaint(ScrollbarPainter old) {

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 // All values eyeballed.
@@ -61,6 +62,8 @@ class CupertinoScrollbar extends StatefulWidget {
 }
 
 class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
+  final GlobalKey _customPaintKey = GlobalKey();
+  bool _longPressDidHit = false;
   ScrollbarPainter _painter;
   TextDirection _textDirection;
 
@@ -130,10 +133,27 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
+    // foregroundPainter also hit tests its children by default, but the
+    // scrollbar should only respond to a longpress directly on its thumb, so
+    // manually check for a hit on the thumb here.
+    if (_customPaintKey.currentContext == null) {
+      return;
+    }
+    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
+    if (!_painter.hitTestInteractive(localOffset)) {
+      return;
+    }
+
+    _longPressDidHit = true;
     _fadeoutTimer?.cancel();
   }
 
   void _handleLongPressUp() {
+    if (!_longPressDidHit) {
+      return;
+    }
+    _longPressDidHit = false;
     _startFadeoutTimer();
     setState(() {
       _thicknessAnimationController.reverse();
@@ -141,6 +161,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPress() {
+    if (!_longPressDidHit) {
+      return;
+    }
     _thicknessAnimationController.forward();
   }
 
@@ -187,16 +210,17 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      // TODO(justinmc): Setting any of these longpress callbacks makes it not
-      // scroll after a long press.
-      onLongPressUp: _handleLongPressUp,
-      onLongPressStart: _handleLongPressStart,
-      onLongPress: _handleLongPress,
-      child: NotificationListener<ScrollNotification>(
-        onNotification: _handleScrollNotification,
-        child: RepaintBoundary(
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: RepaintBoundary(
+        child: GestureDetector(
+          // TODO(justinmc): Setting any of these longpress callbacks makes it not
+          // scroll after a long press.
+          onLongPressUp: _handleLongPressUp,
+          onLongPressStart: _handleLongPressStart,
+          onLongPress: _handleLongPress,
           child: CustomPaint(
+            key: _customPaintKey,
             foregroundPainter: _painter,
             child: RepaintBoundary(
               child: widget.child,
