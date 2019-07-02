@@ -714,7 +714,7 @@ class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
 class _RenderTestLayoutPerformer extends RenderBox {
   _RenderTestLayoutPerformer({VoidCallback performLayout}) : _performLayout = performLayout;
 
-  VoidCallback _performLayout;
+  final VoidCallback _performLayout;
 
   @override
   void performLayout() {
