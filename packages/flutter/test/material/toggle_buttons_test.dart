@@ -1200,6 +1200,53 @@ void main() {
   });
 
   // RTL and LTR
+  testWidgets('Directionality test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: ToggleButtons(
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopRight(find.text('First child')).dx < tester.getTopRight(find.text('Second child')).dx,
+      isTrue,
+    );
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(
+            child: ToggleButtons(
+              onPressed: (int index) {},
+              isSelected: const <bool>[false, true],
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      tester.getTopRight(find.text('First child')).dx > tester.getTopRight(find.text('Second child')).dx,
+      isTrue,
+    );
+  });
 
   // proper paints based on state
   // default border radius
