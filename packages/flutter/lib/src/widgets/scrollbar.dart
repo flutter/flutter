@@ -77,7 +77,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final TextDirection textDirection;
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
-  final double thickness;
+  double thickness;
 
   /// An opacity [Animation] that dictates the opacity of the thumb.
   /// Changes in value of this [Listenable] will automatically trigger repaints.
@@ -98,7 +98,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null.
-  final Radius radius;
+  Radius radius;
 
   /// The amount of space by which to inset the scrollbar's start and end, as
   /// well as its side to the nearest edge, in logical pixels.
@@ -149,6 +149,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
+    notifyListeners();
+  }
+
+  /// Update and redraw with new scrollbar thickness and radius.
+  void updateThickness(double nextThickness, Radius nextRadius) {
+    thickness = nextThickness;
+    radius = nextRadius;
     notifyListeners();
   }
 

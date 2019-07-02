@@ -14,6 +14,7 @@ const Radius _kScrollbarRadius = Radius.circular(1.5);
 const Radius _kScrollbarRadiusDragging = Radius.circular(4.0);
 const Duration _kScrollbarTimeToFade = Duration(milliseconds: 1200);
 const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
+const Duration _kScrollbarResizeDuration = Duration(milliseconds: 150);
 
 // These values are measured using screenshots from an iPhone XR 13.0 simulator.
 const double _kScrollbarThickness = 2.5;
@@ -65,10 +66,19 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   AnimationController _fadeoutAnimationController;
   Animation<double> _fadeoutOpacityAnimation;
+  AnimationController _thicknessAnimationController;
+  Animation<double> _thicknessAnimation;
   Timer _fadeoutTimer;
-  bool _isDragging = false;
   ScrollMetrics lastMetrics;
   AxisDirection lastAxisDirection;
+
+  double get _thickness {
+    return _kScrollbarThickness + _thicknessAnimation.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
+  }
+
+  Radius get _radius {
+    return Radius.lerp(_kScrollbarRadius, _kScrollbarRadiusDragging, _thicknessAnimation.value);
+  }
 
   @override
   void initState() {
@@ -81,6 +91,19 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       parent: _fadeoutAnimationController,
       curve: Curves.fastOutSlowIn,
     );
+    _thicknessAnimationController = AnimationController(
+      vsync: this,
+      duration: _kScrollbarResizeDuration,
+    );
+    _thicknessAnimation = _thicknessAnimationController.drive(
+      Tween<double>(
+        begin: 0.0,
+        end: 1.0,
+      ),
+    );
+    _thicknessAnimation.addListener(() {
+      _painter.updateThickness(_thickness, _radius);
+    });
   }
 
   @override
@@ -95,11 +118,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     return ScrollbarPainter(
       color: _kScrollbarColor,
       textDirection: _textDirection,
-      thickness: _isDragging ? _kScrollbarThicknessDragging : _kScrollbarThickness,
+      thickness: _thickness,
       fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
       mainAxisMargin: _kScrollbarMainAxisMargin,
       crossAxisMargin: _kScrollbarCrossAxisMargin,
-      radius: _isDragging ? _kScrollbarRadiusDragging : _kScrollbarRadius,
+      radius: _radius,
       padding: MediaQuery.of(context).padding,
       minLength: _kScrollbarMinLength,
       minOverscrollLength: _kScrollbarMinOverscrollLength,
@@ -113,18 +136,12 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void _handleLongPressUp() {
     _startFadeoutTimer();
     setState(() {
-      _isDragging = false;
-      _painter = _buildCupertinoScrollbarPainter();
-      _painter.update(lastMetrics, lastAxisDirection);
+      _thicknessAnimationController.reverse();
     });
   }
 
   void _handleLongPress() {
-    setState(() {
-      _isDragging = true;
-      _painter = _buildCupertinoScrollbarPainter();
-      _painter.update(lastMetrics, lastAxisDirection);
-    });
+    _thicknessAnimationController.forward();
   }
 
   void _startFadeoutTimer() {
