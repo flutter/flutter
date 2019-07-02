@@ -816,7 +816,7 @@ class GradleProject {
     final String productFlavor = _productFlavorFor(buildInfo);
     if (buildType == null || productFlavor == null)
       return null;
-    return 'aar${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
+    return 'assembleAar${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
   String bundleFileFor(BuildInfo buildInfo) {

@@ -235,14 +235,24 @@ class FlutterPlugin implements Plugin<Project> {
                     return
                 }
                 pluginTask.execute()
-                // Add the local repo, so when we add the plugin dependency,
-                // Maven can scan this directory to look for it.
+                // Add the local repos.
+                // Module projects set the `hostProjects` extra property in `include_flutter.groovy`,
+                // so we can configure the local repository in each the host app project.
+                if (project.ext.has("hostProjects")) {
+                    List<Project> hostProjects = project.ext.get("hostProjects")
+                    hostProjects.each { hostProject ->
+                        hostProject.repositories {
+                            maven {
+                                url "${pluginTask.intermediateDir}/repo"
+                            }
+                        }
+                    }
+                }
                 project.repositories {
                     maven {
                         url "${pluginTask.intermediateDir}/repo"
                     }
                 }
-
                 File mavenMetadataFile
                 pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
                     if (file.name == "maven-metadata.xml") {
@@ -268,10 +278,10 @@ class FlutterPlugin implements Plugin<Project> {
         Set<String> buildTypes = []
 
         tasksToExecute.each { task ->
-            if (!task.startsWith("assemble")) {
+            if (!task.contains("assemble")) {
                 return
             }
-            if (task == 'assemble') {
+            if (task.endsWith('assemble')) {
                 buildTypes.add('release')
                 buildTypes.add('debug')
                 buildTypes.add('profile')
@@ -599,7 +609,6 @@ class FlutterPlugin implements Plugin<Project> {
 
         List<String> tasksToExecute = project.gradle.startParameter.taskNames
         Set<String> buildTypes = getBuildTypesForTasks(tasksToExecute)
-
         if (tasksToExecute.contains("clean")) {
             // Because the plugins are built during configuration, the task "clean"
             // cannot run in conjunction with an assembly task.

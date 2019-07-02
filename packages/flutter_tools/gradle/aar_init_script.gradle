@@ -15,7 +15,7 @@ void configureProject(Project project, File outputDir) {
     project.apply plugin: "maven"
 
     project.android.libraryVariants.all { variant ->
-        setupLibraryVariant(project, outputDir, variant)
+        addAarTask(project, outputDir, variant)
     }
 
     project.uploadArchives {
@@ -45,9 +45,14 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void setupLibraryVariant(Project project, File outputDir, variant) {
+void addAarTask(Project project, File outputDir, variant) {
     String variantName = variant.name.capitalize()
-    Task aarTask = project.tasks.create(name: "aar${variantName}") {
+    String taskName = "assembleAar${variantName}"
+    project.tasks.create(name: taskName) {
+        // This check is required to be able to configure the archives before `uploadArchives` runs.
+        if (!project.gradle.startParameter.taskNames.contains(taskName)) {
+            return
+        }
         // Remove the existing repo directory, so we don't duplicate the artifacts.
         delete "${outputDir}/repo"
 
@@ -67,42 +72,14 @@ void setupLibraryVariant(Project project, File outputDir, variant) {
                 artifactId = "${project.name}_${variant.name.toLowerCase()}"
             }
         }
-        project.artifacts.add("default", bundle)
-        setupDefaultPomConfig(project, variant.variantData.scope.variantDependencies.runtimeClasspath)
+        // Clear the current archives since the current one is assigned based on
+        // `android.defaultPublishConfig` which defaults to `release`.
+        project.configurations["archives"].artifacts.clear()
+        // Add the artifact that will be published.
+        project.artifacts.add("archives", bundle)
+        // Generate the Maven artifacts.
+        finalizedBy "uploadArchives"
     }
-    aarTask.finalizedBy "uploadArchives"
-}
-
-void setupDefaultPomConfig(Project project, Configuration configuration) {
-    // The library artifact is published (inter-project( for the "default" configuration so
-    // we make sure "default" extends from the actual configuration used for building.
-    Configuration defaultConfig = project.configurations["default"]
-    defaultConfig.setExtendsFrom(Collections.singleton(configuration))
-    // for the maven publication (for now), we need to manually include all the configuration
-    // object in a special mapping.
-    // It's not possible to put the top level config object as extended from config won't
-    // be included.
-    Set<Configuration> flattenedConfigs = flattenConfigurations(configuration)
-    project.plugins.withType(MavenPlugin) {
-        project.tasks.withType(Upload) { task ->
-            task.repositories.withType(MavenDeployer) { repo ->
-                for (Configuration config : flattenedConfigs) {
-                    repo.pom.scopeMappings.addMapping(300,
-                            project.configurations[config.name],
-                            "compile")
-                }
-            }
-        }
-    }
-}
-
-Set<Configuration> flattenConfigurations(Configuration configuration) {
-    Set<Configuration> configs = []
-    configs.add(configuration)
-    for (Configuration extend : configuration.getExtendsFrom()) {
-        configs.addAll(flattenConfigurations(extend))
-    }
-    return configs
 }
 
 projectsEvaluated {
@@ -115,15 +92,15 @@ projectsEvaluated {
         return
     }
     // In module projects, the Android library project is the `:flutter` subproject.
-    Project androidSubproject = rootProject.subprojects.find { it.name == "flutter" }
+    Project androidLibrarySubproject = rootProject.subprojects.find { it.name == "flutter" }
     // In module projects, the `buildDir` is defined in the `:app` subproject.
     Project appSubproject = rootProject.subprojects.find { it.name == "app" }
 
     assert appSubproject != null
-    assert androidSubproject != null
+    assert androidLibrarySubproject != null
 
     if (appSubproject.hasProperty("output-dir")) {
         appSubproject.buildDir = appSubproject.file(appSubproject.property("output-dir"))
     }
-    configureProject(androidSubproject, appSubproject.buildDir)
+    configureProject(androidLibrarySubproject, appSubproject.buildDir)
 }
