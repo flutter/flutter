@@ -816,8 +816,43 @@ void main() {
   });
 
   testWidgets(
-    'Default border colors for enabled, selected and disabled states',
+    'Default border width and border colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      RenderObject toggleButtonRenderObject;
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff000000), // enabled borderColor
+            strokeWidth: 1.0, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff000000), // enabled borderColor
+            strokeWidth: 1.0, // default borderWidth
+          ),
+      );
+
       await tester.pumpWidget(
         Material(
           child: boilerplate(
@@ -832,28 +867,71 @@ void main() {
         ),
       );
 
-      // borderColor
-      // selectedBorderColor
-      // disabledBorderColor
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff2196f3), // selected borderColor
+            strokeWidth: 1.0, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff2196f3), // selected borderColor
+            strokeWidth: 1.0, // default borderWidth
+          ),
+      );
+
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[false],
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0x61000000), // disabled borderColor
+            strokeWidth: 1.0, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0x61000000), // disabled borderColor
+            strokeWidth: 1.0, // default borderWidth
+          ),
+      );
     },
   );
 
-  // custom colors
+  // custom
   // borderColor
   // selectedBorderColor
   // disabledBorderColor
+  // border width
 
   // themes
   // borderColor
   // selectedBorderColor
   // disabledBorderColor
-
-  // default border radius
-  // custom border radius
-  // theme border radius
-
-  // default border width
-  // custom border width
   // theme border width
 
   // height of all buttons must match the tallest button
@@ -861,4 +939,8 @@ void main() {
   // RTL and LTR
 
   // proper paints based on state
+  // default border radius
+  // custom border radius
+  // theme border radius
+
 }
