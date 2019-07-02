@@ -3614,7 +3614,7 @@ class _SemanticsGeometry {
     assert(transform != null);
     if (rect == null)
       return null;
-    if (rect.isEmpty)
+    if (rect.isEmpty || transform.isZero())
       return Rect.zero;
     return MatrixUtils.inverseTransformRect(transform, rect);
   }
