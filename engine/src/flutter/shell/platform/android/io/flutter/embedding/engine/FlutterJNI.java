@@ -419,6 +419,7 @@ public class FlutterJNI {
    * See {@link AccessibilityBridge} for an example of an {@link AccessibilityDelegate} and the
    * surrounding responsibilities.
    */
+  // TODO(mattcarroll): move AccessibilityDelegate definition into FlutterJNI. FlutterJNI should be the basis of dependencies, not the other way round.
   @UiThread
   public void setAccessibilityDelegate(@Nullable AccessibilityDelegate accessibilityDelegate) {
     ensureRunningOnMainThread();

@@ -4,7 +4,6 @@
 
 package io.flutter.embedding.engine.plugins.shim;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 
 import java.util.HashMap;
@@ -18,8 +17,6 @@ import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugin.platform.PlatformViewsController;
-import io.flutter.view.FlutterView;
 
 /**
  * A {@link PluginRegistry} that is shimmed to use the new Android embedding and plugin API behind
@@ -41,24 +38,11 @@ public class ShimPluginRegistry implements PluginRegistry {
   private static final String TAG = "ShimPluginRegistry";
 
   private final FlutterEngine flutterEngine;
-  private final PlatformViewsController platformViewsController;
   private final Map<String, Object> pluginMap = new HashMap<>();
   private final ShimRegistrarAggregate shimRegistrarAggregate;
-  private final FlutterEngine.EngineLifecycleListener engineLifecycleListener = new FlutterEngine.EngineLifecycleListener() {
-    @Override
-    public void onPreEngineRestart() {
-      Log.v(TAG, "onPreEngineRestart()");
-      ShimPluginRegistry.this.onPreEngineRestart();
-    }
-  };
 
-  public ShimPluginRegistry(
-      @NonNull FlutterEngine flutterEngine,
-      @NonNull PlatformViewsController platformViewsController
-  ) {
+  public ShimPluginRegistry(@NonNull FlutterEngine flutterEngine) {
     this.flutterEngine = flutterEngine;
-    this.flutterEngine.addEngineLifecycleListener(engineLifecycleListener);
-    this.platformViewsController = platformViewsController;
     this.shimRegistrarAggregate = new ShimRegistrarAggregate();
     this.flutterEngine.getPlugins().add(shimRegistrarAggregate);
   }
@@ -84,26 +68,6 @@ public class ShimPluginRegistry implements PluginRegistry {
   @SuppressWarnings("unchecked")
   public <T> T valuePublishedByPlugin(String pluginKey) {
     return (T) pluginMap.get(pluginKey);
-  }
-
-  //----- From FlutterPluginRegistry that aren't in the PluginRegistry interface ----//
-  public void attach(FlutterView flutterView, Activity activity) {
-    Log.v(TAG, "Attaching to a FlutterView and an Activity.");
-    platformViewsController.attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
-  }
-
-  public void detach() {
-    Log.v(TAG, "Detaching from a FlutterView and an Activity.");
-    platformViewsController.detach();
-    platformViewsController.onFlutterViewDestroyed();
-  }
-
-  private void onPreEngineRestart() {
-    platformViewsController.onPreEngineRestart();
-  }
-
-  public PlatformViewsController getPlatformViewsController() {
-    return platformViewsController;
   }
 
   /**

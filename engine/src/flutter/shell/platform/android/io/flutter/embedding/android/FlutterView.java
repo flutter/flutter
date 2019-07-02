@@ -18,6 +18,7 @@ import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -36,6 +37,7 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.editing.TextInputPlugin;
+import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.AccessibilityBridge;
 
 /**
@@ -117,6 +119,8 @@ public class FlutterView extends FrameLayout {
    *   <li>{@link #renderMode} defaults to {@link RenderMode#surface}.</li>
    *   <li>{@link #transparencyMode} defaults to {@link TransparencyMode#opaque}.</li>
    * </ul>
+   * {@code FlutterView} requires an {@code Activity} instead of a generic {@code Context}
+   * to be compatible with {@link PlatformViewsController}.
    */
   public FlutterView(@NonNull Context context) {
     this(context, null, null, null);
@@ -127,6 +131,9 @@ public class FlutterView extends FrameLayout {
    * and allows selection of a {@link #renderMode}.
    * <p>
    * {@link #transparencyMode} defaults to {@link TransparencyMode#opaque}.
+   * <p>
+   * {@code FlutterView} requires an {@code Activity} instead of a generic {@code Context}
+   * to be compatible with {@link PlatformViewsController}.
    */
   public FlutterView(@NonNull Context context, @NonNull RenderMode renderMode) {
     this(context, null, renderMode, null);
@@ -135,6 +142,9 @@ public class FlutterView extends FrameLayout {
   /**
    * Constructs a {@code FlutterView} programmatically, without any XML attributes,
    * assumes the use of {@link RenderMode#surface}, and allows selection of a {@link #transparencyMode}.
+   * <p>
+   * {@code FlutterView} requires an {@code Activity} instead of a generic {@code Context}
+   * to be compatible with {@link PlatformViewsController}.
    */
   public FlutterView(@NonNull Context context, @NonNull TransparencyMode transparencyMode) {
     this(context, null, RenderMode.surface, transparencyMode);
@@ -143,6 +153,9 @@ public class FlutterView extends FrameLayout {
   /**
    * Constructs a {@code FlutterView} programmatically, without any XML attributes, and allows
    * a selection of {@link #renderMode} and {@link #transparencyMode}.
+   * <p>
+   * {@code FlutterView} requires an {@code Activity} instead of a generic {@code Context}
+   * to be compatible with {@link PlatformViewsController}.
    */
   public FlutterView(@NonNull Context context, @NonNull RenderMode renderMode, @NonNull TransparencyMode transparencyMode) {
     this(context, null, renderMode, transparencyMode);
@@ -150,9 +163,11 @@ public class FlutterView extends FrameLayout {
 
   /**
    * Constructs a {@code FlutterSurfaceView} in an XML-inflation-compliant manner.
-   *
-   * // TODO(mattcarroll): expose renderMode in XML when build system supports R.attr
+   * <p>
+   * {@code FlutterView} requires an {@code Activity} instead of a generic {@code Context}
+   * to be compatible with {@link PlatformViewsController}.
    */
+   // TODO(mattcarroll): expose renderMode in XML when build system supports R.attr
   public FlutterView(@NonNull Context context, @Nullable AttributeSet attrs) {
     this(context, attrs, null, null);
   }
@@ -368,6 +383,21 @@ public class FlutterView extends FrameLayout {
   }
 
   /**
+   * Allows a {@code View} that is not currently the input connection target to invoke commands on
+   * the {@link android.view.inputmethod.InputMethodManager}, which is otherwise disallowed.
+   * <p>
+   * Returns true to allow non-input-connection-targets to invoke methods on
+   * {@code InputMethodManager}, or false to exclusively allow the input connection target to invoke
+   * such methods.
+   */
+  @Override
+  public boolean checkInputConnectionProxy(View view) {
+    return flutterEngine != null
+        ? flutterEngine.getPlatformViewsController().checkInputConnectionProxy(view)
+        : super.checkInputConnectionProxy(view);
+  }
+
+  /**
    * Invoked when key is released.
    *
    * This method is typically invoked in response to the release of a physical
@@ -511,7 +541,9 @@ public class FlutterView extends FrameLayout {
    * See {@link #detachFromFlutterEngine()} for information on how to detach from a
    * {@link FlutterEngine}.
    */
-  public void attachToFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+  public void attachToFlutterEngine(
+      @NonNull FlutterEngine flutterEngine
+  ) {
     Log.d(TAG, "Attaching to a FlutterEngine: " + flutterEngine);
     if (isAttachedToFlutterEngine()) {
       if (flutterEngine == this.flutterEngine) {
@@ -537,7 +569,7 @@ public class FlutterView extends FrameLayout {
     textInputPlugin = new TextInputPlugin(
         this,
         this.flutterEngine.getDartExecutor(),
-        null
+        this.flutterEngine.getPlatformViewsController()
     );
     androidKeyProcessor = new AndroidKeyProcessor(
         this.flutterEngine.getKeyEventChannel(),
@@ -549,15 +581,17 @@ public class FlutterView extends FrameLayout {
         flutterEngine.getAccessibilityChannel(),
         (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE),
         getContext().getContentResolver(),
-        // TODO(mattcaroll): plumb the platform views controller to the accessibility bridge.
-        // https://github.com/flutter/flutter/issues/29618
-        null
+        this.flutterEngine.getPlatformViewsController()
     );
     accessibilityBridge.setOnAccessibilityChangeListener(onAccessibilityChangeListener);
     resetWillNotDraw(
         accessibilityBridge.isAccessibilityEnabled(),
         accessibilityBridge.isTouchExplorationEnabled()
     );
+
+    // Connect AccessibilityBridge to the PlatformViewsController within the FlutterEngine.
+    // This allows platform Views to hook into Flutter's overall accessibility system.
+    this.flutterEngine.getPlatformViewsController().attachAccessibilityBridge(accessibilityBridge);
 
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that an engine is attached.
@@ -596,6 +630,9 @@ public class FlutterView extends FrameLayout {
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineDetachedFromFlutterView();
     }
+
+    // Disconnect the FlutterEngine's PlatformViewsController from the AccessibilityBridge.
+    flutterEngine.getPlatformViewsController().detachAccessibiltyBridge();
 
     // Disconnect and clean up the AccessibilityBridge.
     accessibilityBridge.release();

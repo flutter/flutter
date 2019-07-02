@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.TypedValue;
@@ -66,7 +67,10 @@ import io.flutter.view.FlutterMain;
  * {@code Fragment}.
  */
 // TODO(mattcarroll): explain each call forwarded to Fragment (first requires resolution of PluginRegistry API).
-public class FlutterActivity extends FragmentActivity implements OnFirstFrameRenderedListener {
+public class FlutterActivity extends FragmentActivity
+    implements FlutterFragment.FlutterEngineProvider,
+    FlutterFragment.FlutterEngineConfigurator,
+    OnFirstFrameRenderedListener {
   private static final String TAG = "FlutterActivity";
 
   // Meta-data arguments, processed from manifest XML.
@@ -363,6 +367,27 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
    */
   protected boolean shouldAttachEngineToActivity() {
     return true;
+  }
+
+  /**
+   * Hook for subclasses to easily provide a custom {@code FlutterEngine}.
+   */
+  @Nullable
+  @Override
+  public FlutterEngine provideFlutterEngine(@NonNull Context context) {
+    // No-op. Hook for subclasses.
+    return null;
+  }
+
+  /**
+   * Hook for subclasses to easily configure a {@code FlutterEngine}, e.g., register
+   * plugins.
+   * <p>
+   * This method is called after {@link #provideFlutterEngine(Context)}.
+   */
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    // No-op. Hook for subclasses.
   }
 
   @Override
