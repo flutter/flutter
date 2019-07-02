@@ -6,6 +6,8 @@
 
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 
+static int kMaxPointsInVerb = 4;
+
 namespace flutter {
 
 FlutterPlatformViewLayer::FlutterPlatformViewLayer(fml::scoped_nsobject<UIView> overlay_view,
@@ -129,6 +131,76 @@ void ResetAnchor(CALayer* layer) {
   CGPathRelease(pathRef);
 }
 
+- (void)clipPath:(const SkPath&)path {
+  CGMutablePathRef pathRef = CGPathCreateMutable();
+  if (!path.isValid()) {
+    return;
+  }
+  if (path.isEmpty()) {
+    CAShapeLayer* clip = [[CAShapeLayer alloc] init];
+    clip.path = pathRef;
+    self.layer.mask = clip;
+    CGPathRelease(pathRef);
+    return;
+  }
+
+  // Loop through all verbs and translate them into CGPath
+  SkPath::Iter iter(path, true);
+  SkPoint pts[kMaxPointsInVerb];
+  SkPath::Verb verb = iter.next(pts);
+  SkPoint last_pt_from_last_verb;
+  while (verb != SkPath::kDone_Verb) {
+    if (verb == SkPath::kLine_Verb || verb == SkPath::kQuad_Verb || verb == SkPath::kConic_Verb ||
+        verb == SkPath::kCubic_Verb) {
+      FML_DCHECK(last_pt_from_last_verb == pts[0]);
+    }
+    switch (verb) {
+      case SkPath::kMove_Verb: {
+        CGPathMoveToPoint(pathRef, nil, pts[0].x(), pts[0].y());
+        last_pt_from_last_verb = pts[0];
+        break;
+      }
+      case SkPath::kLine_Verb: {
+        CGPathAddLineToPoint(pathRef, nil, pts[1].x(), pts[1].y());
+        last_pt_from_last_verb = pts[1];
+        break;
+      }
+      case SkPath::kQuad_Verb: {
+        CGPathAddQuadCurveToPoint(pathRef, nil, pts[1].x(), pts[1].y(), pts[2].x(), pts[2].y());
+        last_pt_from_last_verb = pts[2];
+        break;
+      }
+      case SkPath::kConic_Verb: {
+        // Conic is not available in quartz, we use quad to approximate.
+        // TODO(cyanglaz): Better approximate the conic path.
+        // https://github.com/flutter/flutter/issues/35062
+        CGPathAddQuadCurveToPoint(pathRef, nil, pts[1].x(), pts[1].y(), pts[2].x(), pts[2].y());
+        last_pt_from_last_verb = pts[2];
+        break;
+      }
+      case SkPath::kCubic_Verb: {
+        CGPathAddCurveToPoint(pathRef, nil, pts[1].x(), pts[1].y(), pts[2].x(), pts[2].y(),
+                              pts[3].x(), pts[3].y());
+        last_pt_from_last_verb = pts[3];
+        break;
+      }
+      case SkPath::kClose_Verb: {
+        CGPathCloseSubpath(pathRef);
+        break;
+      }
+      case SkPath::kDone_Verb: {
+        break;
+      }
+    }
+    verb = iter.next(pts);
+  }
+
+  CAShapeLayer* clip = [[CAShapeLayer alloc] init];
+  clip.path = pathRef;
+  self.layer.mask = clip;
+  CGPathRelease(pathRef);
+}
+
 - (void)setClip:(flutter::MutatorType)type
            rect:(const SkRect&)rect
           rrect:(const SkRRect&)rrect
@@ -143,7 +215,7 @@ void ResetAnchor(CALayer* layer) {
       [self clipRRect:rrect];
       break;
     case flutter::clip_path:
-      // TODO(cyanglaz): Add clip path
+      [self clipPath:path];
       break;
     default:
       break;

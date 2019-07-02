@@ -20,6 +20,11 @@ void MutatorsStack::pushClipRRect(const SkRRect& rrect) {
   vector_.push_back(element);
 };
 
+void MutatorsStack::pushClipPath(const SkPath& path) {
+  std::shared_ptr<Mutator> element = std::make_shared<Mutator>(path);
+  vector_.push_back(element);
+};
+
 void MutatorsStack::pushTransform(const SkMatrix& matrix) {
   std::shared_ptr<Mutator> element = std::make_shared<Mutator>(matrix);
   vector_.push_back(element);

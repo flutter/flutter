@@ -120,7 +120,6 @@ class MutatorsStack {
   void pushClipRect(const SkRect& rect);
   void pushClipRRect(const SkRRect& rrect);
   void pushClipPath(const SkPath& path);
-
   void pushTransform(const SkMatrix& matrix);
 
   // Removes the `Mutator` on the top of the stack
