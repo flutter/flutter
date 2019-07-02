@@ -160,11 +160,21 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
   frame_size_ = frame_size;
 }
 
-void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(int view_id) {
+void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
+    int view_id,
+    std::unique_ptr<EmbeddedViewParams> params) {
   picture_recorders_[view_id] = std::make_unique<SkPictureRecorder>();
   picture_recorders_[view_id]->beginRecording(SkRect::Make(frame_size_));
   picture_recorders_[view_id]->getRecordingCanvas()->clear(SK_ColorTRANSPARENT);
   composition_order_.push_back(view_id);
+
+  if (current_composition_params_.count(view_id) == 1 &&
+      current_composition_params_[view_id] == *params.get()) {
+    // Do nothing if the params didn't change.
+    return;
+  }
+  current_composition_params_[view_id] = EmbeddedViewParams(*params.get());
+  views_to_recomposite_.insert(view_id);
 }
 
 NSObject<FlutterPlatformView>* FlutterPlatformViewsController::GetPlatformViewByID(int view_id) {
@@ -272,15 +282,14 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       head.layer.transform, CATransform3DMakeScale(1 / screenScale, 1 / screenScale, 1));
 }
 
-void FlutterPlatformViewsController::CompositeWithParams(
-    int view_id,
-    std::unique_ptr<flutter::EmbeddedViewParams> params) {
-  CGRect frame = CGRectMake(0, 0, params->sizePoints.width(), params->sizePoints.height());
+void FlutterPlatformViewsController::CompositeWithParams(int view_id,
+                                                         const EmbeddedViewParams& params) {
+  CGRect frame = CGRectMake(0, 0, params.sizePoints.width(), params.sizePoints.height());
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
   touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
 
-  int currentClippingCount = CountClips(params->mutatorsStack);
+  int currentClippingCount = CountClips(params.mutatorsStack);
   int previousClippingCount = clip_count_[view_id];
   if (currentClippingCount != previousClippingCount) {
     clip_count_[view_id] = currentClippingCount;
@@ -291,23 +300,19 @@ void FlutterPlatformViewsController::CompositeWithParams(
         ReconstructClipViewsChain(currentClippingCount, touchInterceptor, oldPlatformViewRoot);
     root_views_[view_id] = fml::scoped_nsobject<UIView>([newPlatformViewRoot retain]);
   }
-  ApplyMutators(params->mutatorsStack, touchInterceptor);
+  ApplyMutators(params.mutatorsStack, touchInterceptor);
 }
 
-SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(
-    int view_id,
-    std::unique_ptr<flutter::EmbeddedViewParams> params) {
+SkCanvas* FlutterPlatformViewsController::CompositeEmbeddedView(int view_id) {
   // TODO(amirh): assert that this is running on the platform thread once we support the iOS
   // embedded views thread configuration.
 
-  // Do nothing if the params didn't change.
-  if (current_composition_params_.count(view_id) == 1 &&
-      current_composition_params_[view_id] == *params.get()) {
+  // Do nothing if the view doesn't need to be composited.
+  if (views_to_recomposite_.count(view_id) == 0) {
     return picture_recorders_[view_id]->getRecordingCanvas();
   }
-  current_composition_params_[view_id] = EmbeddedViewParams(*params.get());
-  CompositeWithParams(view_id, std::move(params));
-
+  CompositeWithParams(view_id, current_composition_params_[view_id]);
+  views_to_recomposite_.erase(view_id);
   return picture_recorders_[view_id]->getRecordingCanvas();
 }
 
@@ -323,6 +328,7 @@ void FlutterPlatformViewsController::Reset() {
   picture_recorders_.clear();
   current_composition_params_.clear();
   clip_count_.clear();
+  views_to_recomposite_.clear();
 }
 
 bool FlutterPlatformViewsController::SubmitFrame(bool gl_rendering,
@@ -414,6 +420,7 @@ void FlutterPlatformViewsController::DisposeViews() {
     overlays_.erase(viewId);
     current_composition_params_.erase(viewId);
     clip_count_.erase(viewId);
+    views_to_recomposite_.erase(viewId);
   }
   views_to_dispose_.clear();
 }

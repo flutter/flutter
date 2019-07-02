@@ -79,7 +79,8 @@ class FlutterPlatformViewsController {
 
   void SetFrameSize(SkISize frame_size);
 
-  void PrerollCompositeEmbeddedView(int view_id);
+  void PrerollCompositeEmbeddedView(int view_id,
+                                    std::unique_ptr<flutter::EmbeddedViewParams> params);
 
   // Returns the `FlutterPlatformView` object associated with the view_id.
   //
@@ -90,7 +91,7 @@ class FlutterPlatformViewsController {
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
-  SkCanvas* CompositeEmbeddedView(int view_id, std::unique_ptr<flutter::EmbeddedViewParams> params);
+  SkCanvas* CompositeEmbeddedView(int view_id);
 
   // Discards all platform views instances and auxiliary resources.
   void Reset();
@@ -136,6 +137,9 @@ class FlutterPlatformViewsController {
 
   // The latest composition order that was presented in Present().
   std::vector<int64_t> active_composition_order_;
+
+  // Only compoiste platform views in this set.
+  std::unordered_set<int64_t> views_to_recomposite_;
 
   std::map<int64_t, std::unique_ptr<SkPictureRecorder>> picture_recorders_;
 
@@ -184,7 +188,7 @@ class FlutterPlatformViewsController {
   //
   // After each clip operation, we update the head to the super view of the current head.
   void ApplyMutators(const MutatorsStack& mutators_stack, UIView* embedded_view);
-  void CompositeWithParams(int view_id, std::unique_ptr<flutter::EmbeddedViewParams> params);
+  void CompositeWithParams(int view_id, const EmbeddedViewParams& params);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };

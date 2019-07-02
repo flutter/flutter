@@ -48,6 +48,7 @@ struct PrerollContext {
   RasterCache* raster_cache;
   GrContext* gr_context;
   ExternalViewEmbedder* view_embedder;
+  MutatorsStack& mutators_stack;
   SkColorSpace* dst_color_space;
   SkRect cull_rect;
 
@@ -83,7 +84,6 @@ class Layer {
     SkCanvas* leaf_nodes_canvas;
     GrContext* gr_context;
     ExternalViewEmbedder* view_embedder;
-    MutatorsStack& mutators_stack;
     const Stopwatch& raster_time;
     const Stopwatch& ui_time;
     TextureRegistry& texture_registry;
