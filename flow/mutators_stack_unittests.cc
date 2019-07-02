@@ -41,6 +41,15 @@ TEST(MutatorsStack, PushClipRRect) {
   ASSERT_TRUE(iter->get()->rrect() == rrect);
 }
 
+TEST(MutatorsStack, PushClipPath) {
+  flutter::MutatorsStack stack;
+  SkPath path;
+  stack.pushClipPath(path);
+  auto iter = stack.bottom();
+  ASSERT_TRUE(iter->get()->type() == flutter::MutatorType::clip_path);
+  ASSERT_TRUE(iter->get()->path() == path);
+}
+
 TEST(MutatorsStack, PushTransform) {
   MutatorsStack stack;
   SkMatrix matrix;
@@ -102,6 +111,8 @@ TEST(MutatorsStack, Equality) {
   stack.pushClipRect(rect);
   SkRRect rrect = SkRRect::MakeEmpty();
   stack.pushClipRRect(rrect);
+  SkPath path;
+  stack.pushClipPath(path);
 
   MutatorsStack stackOther;
   SkMatrix matrixOther = SkMatrix::MakeScale(1, 1);
@@ -110,6 +121,8 @@ TEST(MutatorsStack, Equality) {
   stackOther.pushClipRect(rectOther);
   SkRRect rrectOther = SkRRect::MakeEmpty();
   stackOther.pushClipRRect(rrectOther);
+  SkPath otherPath;
+  stackOther.pushClipPath(otherPath);
 
   ASSERT_TRUE(stack == stackOther);
 }
@@ -177,6 +190,10 @@ TEST(Mutator, Equality) {
   Mutator otherMutator3 = Mutator(rrect);
   ASSERT_TRUE(mutator3 == otherMutator3);
 
+  SkPath path;
+  flutter::Mutator mutator4 = flutter::Mutator(path);
+  flutter::Mutator otherMutator4 = flutter::Mutator(path);
+  ASSERT_TRUE(mutator4 == otherMutator4);
   ASSERT_FALSE(mutator2 == mutator);
 }
 
