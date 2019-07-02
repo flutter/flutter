@@ -4,13 +4,13 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/src/material/debug.dart';
-import 'package:flutter/src/material/theme_data.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'debug.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 /// An inherited widget that defines color and border parameters for
 /// [ToggleButtons] in this widget's subtree.
