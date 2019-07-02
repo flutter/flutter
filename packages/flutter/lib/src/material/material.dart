@@ -155,9 +155,9 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [shadowColor], [borderOnForeground] and
-  /// [animationDuration] arguments must not be null. Additionally, [elevation]
-  /// must be non-negative.
+  /// The [type], [elevation], [darkThemeOverlay], [shadowColor],
+  /// [borderOnForeground] and [animationDuration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -169,6 +169,7 @@ class Material extends StatefulWidget {
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
+    this.darkThemeOverlay = true,
     this.shadowColor = const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
@@ -179,6 +180,7 @@ class Material extends StatefulWidget {
     this.child,
   }) : assert(type != null),
        assert(elevation != null && elevation >= 0.0),
+       assert(darkThemeOverlay != null),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
@@ -200,15 +202,17 @@ class Material extends StatefulWidget {
   /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material relative to its parent.
   ///
-  /// This controls the size of the shadow below the material.
+  /// This controls the size of the shadow below the material and the dark
+  /// theme overlay color if inside a dark theme.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
-  /// Defaults to 0. Changing this value will cause the shadow to animate over
-  /// [animationDuration].
+  /// Defaults to 0. Changing this value will cause the shadow and dark theme
+  /// overlay to animate over [animationDuration].
   ///
   /// The value is non-negative.
+  ///
   /// {@endtemplate}
   final double elevation;
 
@@ -217,8 +221,28 @@ class Material extends StatefulWidget {
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
   ///
+  /// If inside a dark theme and [darkThemeOverlay] is [true], a semi-transparent
+  /// white will be composited on top this color to indicated the elevation.
+  ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
+
+  /// Apply a semi-transparent white overlay on top of [color] for dark themes.
+  ///
+  /// If [true] a semi-transparent white overlay will be applied to the [color]
+  /// property when the surrounding theme's brightness is dark. The transparency
+  /// is based off of [elevation] as per the Material Dark theme specification.
+  ///
+  /// If [false] the [color] will be used unmodified.
+  ///
+  /// Defaults to [true].
+  ///
+  /// See also:
+  ///   * [Material.color]
+  ///   * [Material.elevation]
+  ///   * [ThemeData.brightness]
+  ///   * <https://material.io/design/color/dark-theme.html>
+  final bool darkThemeOverlay;
 
   /// The color to paint the shadow below the material.
   ///
@@ -252,7 +276,7 @@ class Material extends StatefulWidget {
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
-  /// and [shadowColor].
+  /// [shadowColor] and the dark theme overlay if in a dark theme.
   ///
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
@@ -290,6 +314,7 @@ class Material extends StatefulWidget {
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(FlagProperty('darkThemeOverlay', value: true, ifFalse: 'no dark overlay'));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
@@ -305,16 +330,42 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   Color _getBackgroundColor(BuildContext context) {
-    if (widget.color != null)
-      return widget.color;
-    switch (widget.type) {
-      case MaterialType.canvas:
-        return Theme.of(context).canvasColor;
-      case MaterialType.card:
-        return Theme.of(context).cardColor;
-      default:
-        return null;
+    Color color = widget.color;
+    if (color == null) {
+      if (widget.type == MaterialType.canvas) {
+        color = Theme.of(context).canvasColor;
+      } else if (widget.type == MaterialType.card) {
+        color = Theme.of(context).cardColor;
+      }
     }
+
+    if (color != null &&
+        widget.darkThemeOverlay &&
+        Theme.of(context).brightness == Brightness.dark) {
+      color = _darkThemeOverlayColor(color, widget.elevation);
+    }
+    return color;
+  }
+
+  // Lighten a color based on elevation by applying a transparent white overlay.
+  Color _darkThemeOverlayColor(Color color, double elevation) {
+    if (elevation <= 0)
+      return color;
+
+    // Compute the opacity for the given elevation according to the spec:
+    // https://material.io/design/color/dark-theme.html#properties
+    final double opacity =
+          elevation <=  1.0 ? 0.05
+        : elevation <=  2.0 ? 0.07
+        : elevation <=  3.0 ? 0.08
+        : elevation <=  4.0 ? 0.09
+        : elevation <=  6.0 ? 0.11
+        : elevation <=  8.0 ? 0.12
+        : elevation <= 12.0 ? 0.14
+        : elevation <= 16.0 ? 0.15
+        : 0.16;
+    final Color whiteOverlay = Color.fromRGBO(255, 255, 255, opacity);
+    return Color.alphaBlend(whiteOverlay, color);
   }
 
   @override
@@ -698,12 +749,14 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
 class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
   Tween<double> _elevation;
+  ColorTween _color;
   ColorTween _shadowColor;
   ShapeBorderTween _border;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value));
+    _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value));
     _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value));
     _border = visitor(_border, widget.shape, (dynamic value) => ShapeBorderTween(begin: value));
   }
@@ -723,7 +776,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipBehavior: widget.clipBehavior,
       elevation: _elevation.evaluate(animation),
-      color: widget.color,
+      color: _color.evaluate(animation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

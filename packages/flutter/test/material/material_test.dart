@@ -21,12 +21,16 @@ class NotifyMaterial extends StatelessWidget {
 Widget buildMaterial({
   double elevation = 0.0,
   Color shadowColor = const Color(0xFF00FF00),
+  Color color = const Color(0xFF0000FF),
+  bool darkThemeOverlay = true,
 }) {
   return Center(
     child: SizedBox(
       height: 100.0,
       width: 100.0,
       child: Material(
+        color: color,
+        darkThemeOverlay: darkThemeOverlay,
         shadowColor: shadowColor,
         elevation: elevation,
         shape: const CircleBorder(),
@@ -53,6 +57,12 @@ class PaintRecorder extends CustomPainter {
 
   @override
   bool shouldRepaint(PaintRecorder oldDelegate) => false;
+}
+
+class ElevationColor {
+  const ElevationColor(this.elevation, this.color);
+  final double elevation;
+  final Color color;
 }
 
 void main() {
@@ -206,6 +216,56 @@ void main() {
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalShape modelE = getShadow(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
+  });
+
+  group('Dark Theme', () {
+    testWidgets('Light theme does not change background color', (WidgetTester tester) async {
+      await tester.pumpWidget(buildMaterial(color: const Color(0xFFFFFFFF)));
+      final RenderPhysicalShape model = getShadow(tester);
+      expect(model.color, equals(const Color(0xFFFFFFFF)));
+    });
+
+    testWidgets('Dark theme overlays a transparent white on background color', (WidgetTester tester) async {
+      // The colors we should get with a base background of 0xFF121212 for
+      // a given elevation
+      const List<ElevationColor> elevationColors = <ElevationColor>[
+        ElevationColor(0.0, Color(0xFF121212)),
+        ElevationColor(1.0, Color(0xFF1D1D1D)),
+        ElevationColor(2.0, Color(0xFF212121)),
+        ElevationColor(3.0, Color(0xFF242424)),
+        ElevationColor(4.0, Color(0xFF262626)),
+        ElevationColor(6.0, Color(0xFF2C2C2C)),
+        ElevationColor(8.0, Color(0xFF2D2D2D)),
+        ElevationColor(12.0, Color(0xFF323232)),
+        ElevationColor(16.0, Color(0xFF353535)),
+        ElevationColor(24.0, Color(0xFF373737)),
+      ];
+
+      for (ElevationColor test in elevationColors) {
+        await tester.pumpWidget(
+            Theme(
+              data: ThemeData(brightness: Brightness.dark),
+              child: buildMaterial(color: const Color(0xFF121212), elevation: test.elevation),
+            )
+        );
+        final RenderPhysicalShape model = getShadow(tester);
+        expect(model.color, equals(test.color));
+      }
+    });
+
+    testWidgets('Dark theme with darkThemeOverlay not set will not apply overlay', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          Theme(
+            data: ThemeData(brightness: Brightness.dark),
+            child: buildMaterial(
+              color: const Color(0xFF121212),
+              darkThemeOverlay: false,
+              elevation: 8.0),
+          )
+      );
+      final RenderPhysicalShape model = getShadow(tester);
+      expect(model.color, equals(const Color(0xFF121212)));
+    });
   });
 
   group('Transparency clipping', () {
