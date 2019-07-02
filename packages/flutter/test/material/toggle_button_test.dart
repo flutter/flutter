@@ -19,23 +19,23 @@ void main() {
       Material(
         child: boilerplate(
           child: ToggleButtons(
+            onPressed: (int index) {},
+            isSelected: const <bool>[false, true],
             children: const <Widget>[
               Text('First child'),
               Text('Second child'),
             ],
-            onPressed: (int index) {},
-            isSelected: const <bool>[false, true],
           ),
         ),
       ),
     );
 
-    final DefaultTextStyle textStyleOne = tester.widget(
-      find.widgetWithText(DefaultTextStyle, 'First child').first,
+    final DefaultTextStyle textStyleOne = tester.firstWidget(
+      find.widgetWithText(DefaultTextStyle, 'First child'),
     );
     expect(textStyleOne.style.color, theme.colorScheme.onSurface);
-    final DefaultTextStyle textStyleTwo = tester.widget(
-      find.widgetWithText(DefaultTextStyle, 'Second child').first,
+    final DefaultTextStyle textStyleTwo = tester.firstWidget(
+      find.widgetWithText(DefaultTextStyle, 'Second child'),
     );
     expect(textStyleTwo.style.color, theme.colorScheme.primary);
   });
@@ -51,16 +51,16 @@ void main() {
             builder: (BuildContext context, StateSetter setState) {
               return boilerplate(
                 child: ToggleButtons(
-                  children: const <Widget>[
-                    Text('First child'),
-                    Text('Second child'),
-                  ],
                   onPressed: (int index) {
                     setState(() {
                       _isSelected[index] = !_isSelected[index];
                     });
                   },
                   isSelected: _isSelected,
+                  children: const <Widget>[
+                    Text('First child'),
+                    Text('Second child'),
+                  ],
                 ),
               );
             },
@@ -73,12 +73,12 @@ void main() {
 
       expect(_isSelected[0], isFalse);
       expect(_isSelected[1], isTrue);
-      textStyleOne = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyleOne = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyleOne.style.color, theme.colorScheme.onSurface);
-      textStyleTwo = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'Second child').first,
+      textStyleTwo = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
       expect(textStyleTwo.style.color, theme.colorScheme.primary);
 
@@ -87,12 +87,12 @@ void main() {
 
       expect(_isSelected[0], isFalse);
       expect(_isSelected[1], isFalse);
-      textStyleOne = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyleOne = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyleOne.style.color, theme.colorScheme.onSurface);
-      textStyleTwo = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'Second child').first,
+      textStyleTwo = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
       expect(textStyleTwo.style.color, theme.colorScheme.onSurface);
     },
@@ -108,11 +108,11 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtons(
+              isSelected: _isSelected,
               children: const <Widget>[
                 Text('First child'),
                 Text('Second child'),
               ],
-              isSelected: _isSelected,
             ),
           ),
         ),
@@ -123,12 +123,12 @@ void main() {
 
       expect(_isSelected[0], isFalse);
       expect(_isSelected[1], isTrue);
-      textStyleOne = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyleOne = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyleOne.style.color, theme.disabledColor);
-      textStyleTwo = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'Second child').first,
+      textStyleTwo = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
       expect(textStyleTwo.style.color, theme.disabledColor);
 
@@ -138,12 +138,12 @@ void main() {
       // nothing should change
       expect(_isSelected[0], isFalse);
       expect(_isSelected[1], isTrue);
-      textStyleOne = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyleOne = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyleOne.style.color, theme.disabledColor);
-      textStyleTwo = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'Second child').first,
+      textStyleTwo = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
       expect(textStyleTwo.style.color, theme.disabledColor);
     },
@@ -176,11 +176,11 @@ void main() {
           Material(
             child: boilerplate(
               child: ToggleButtons(
+                onPressed: (int index) {},
                 children: const <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],
-                onPressed: (int index) {},
               ),
             ),
           ),
@@ -201,11 +201,11 @@ void main() {
           Material(
             child: boilerplate(
               child: ToggleButtons(
+                isSelected: const <bool>[false],
                 children: const <Widget>[
                   Text('First child'),
                   Text('Second child'),
                 ],
-                isSelected: const <bool>[false],
               ),
             ),
           ),
@@ -227,14 +227,14 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtons(
+              isSelected: const <bool>[false],
+              onPressed: (int index) {},
               children: <Widget>[
                 Row(children: const <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
               ],
-              isSelected: const <bool>[false],
-              onPressed: (int index) {},
             ),
           ),
         ),
@@ -243,12 +243,12 @@ void main() {
       DefaultTextStyle textStyle;
       IconTheme iconTheme;
 
-      textStyle = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyle = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, theme.colorScheme.onSurface);
-      iconTheme = tester.widget(
-        find.widgetWithIcon(IconTheme, Icons.check).first,
+      iconTheme = tester.firstWidget(
+        find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, theme.colorScheme.onSurface);
 
@@ -256,25 +256,25 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtons(
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
               children: <Widget>[
                 Row(children: const <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
               ],
-              isSelected: const <bool>[true],
-              onPressed: (int index) {},
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      textStyle = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyle = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, theme.colorScheme.primary);
-      iconTheme = tester.widget(
-        find.widgetWithIcon(IconTheme, Icons.check).first,
+      iconTheme = tester.firstWidget(
+        find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, theme.colorScheme.primary);
 
@@ -282,31 +282,59 @@ void main() {
         Material(
           child: boilerplate(
             child: ToggleButtons(
+              isSelected: const <bool>[true],
               children: <Widget>[
                 Row(children: const <Widget>[
                   Text('First child'),
                   Icon(Icons.check),
                 ]),
               ],
-              isSelected: const <bool>[true],
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
-      textStyle = tester.widget(
-        find.widgetWithText(DefaultTextStyle, 'First child').first,
+      textStyle = tester.firstWidget(
+        find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, theme.disabledColor);
-      iconTheme = tester.widget(
-        find.widgetWithIcon(IconTheme, Icons.check).first,
+      iconTheme = tester.firstWidget(
+        find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, theme.disabledColor);
     },
   );
 
   testWidgets('Default button fillColor', (WidgetTester tester) async {
-    // fillColor
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            onPressed: (int index) {},
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('First child'));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(RawMaterialButton),
+        matching: find.byType(Material),
+      ),
+    );
+
+    expect(material.color, isNull);
+    expect(material.type, MaterialType.transparency);
   });
 
   testWidgets('Default InkWell colors', (WidgetTester tester) async {
