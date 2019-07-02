@@ -90,7 +90,7 @@ class FlutterPlatformViewsController {
 
   std::vector<SkCanvas*> GetCurrentCanvases();
 
-  SkCanvas* CompositeEmbeddedView(int view_id, const flutter::EmbeddedViewParams& params);
+  SkCanvas* CompositeEmbeddedView(int view_id, std::unique_ptr<flutter::EmbeddedViewParams> params);
 
   // Discards all platform views instances and auxiliary resources.
   void Reset();
@@ -184,7 +184,7 @@ class FlutterPlatformViewsController {
   //
   // After each clip operation, we update the head to the super view of the current head.
   void ApplyMutators(const MutatorsStack& mutators_stack, UIView* embedded_view);
-  void CompositeWithParams(int view_id, const flutter::EmbeddedViewParams& params);
+  void CompositeWithParams(int view_id, std::unique_ptr<flutter::EmbeddedViewParams> params);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterPlatformViewsController);
 };

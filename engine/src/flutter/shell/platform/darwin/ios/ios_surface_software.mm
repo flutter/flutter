@@ -153,11 +153,12 @@ std::vector<SkCanvas*> IOSSurfaceSoftware::GetCurrentCanvases() {
   return platform_views_controller->GetCurrentCanvases();
 }
 
-SkCanvas* IOSSurfaceSoftware::CompositeEmbeddedView(int view_id,
-                                                    const flutter::EmbeddedViewParams& params) {
+SkCanvas* IOSSurfaceSoftware::CompositeEmbeddedView(
+    int view_id,
+    std::unique_ptr<flutter::EmbeddedViewParams> params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
-  return platform_views_controller->CompositeEmbeddedView(view_id, params);
+  return platform_views_controller->CompositeEmbeddedView(view_id, std::move(params));
 }
 
 bool IOSSurfaceSoftware::SubmitFrame(GrContext* context) {
