@@ -338,16 +338,15 @@ void main() {
 
   testWidgets('Default InkWell colors', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Material(
         child: boilerplate(
           child: ToggleButtons(
             isSelected: const <bool>[true],
             onPressed: (int index) {},
-            children: <Widget>[
-              Row(children: const <Widget>[
-                Text('First child'),
-              ]),
+            children: const <Widget>[
+              Text('First child'),
             ],
           ),
         ),
@@ -388,6 +387,14 @@ void main() {
     hoverGesture.removePointer();
 
     // focusColor
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: theme.focusColor));
+    // TODO: need to add focusNode property to ToggleButtons
   });
 
   testWidgets(
