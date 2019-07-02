@@ -29,6 +29,7 @@ import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.plugin.platform.PlatformViewsController;
 
 /**
  * A single Flutter execution environment.
@@ -88,6 +89,11 @@ public class FlutterEngine implements LifecycleOwner {
   @NonNull
   private final TextInputChannel textInputChannel;
 
+  // Platform Views.
+  @NonNull
+  private final PlatformViewsController platformViewsController;
+
+  // Engine Lifecycle.
   @NonNull
   private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
   @NonNull
@@ -137,6 +143,8 @@ public class FlutterEngine implements LifecycleOwner {
     settingsChannel = new SettingsChannel(dartExecutor);
     systemChannel = new SystemChannel(dartExecutor);
     textInputChannel = new TextInputChannel(dartExecutor);
+
+    platformViewsController = new PlatformViewsController();
 
     androidLifecycle = new FlutterEngineAndroidLifecycle(this);
     this.pluginRegistry = new FlutterEnginePluginRegistry(
@@ -298,6 +306,15 @@ public class FlutterEngine implements LifecycleOwner {
   @NonNull
   public PluginRegistry getPlugins() {
     return pluginRegistry;
+  }
+
+  /**
+   * {@code PlatformViewsController}, which controls all platform views running within
+   * this {@code FlutterEngine}.
+   */
+  @NonNull
+  public PlatformViewsController getPlatformViewsController() {
+    return platformViewsController;
   }
 
   @NonNull

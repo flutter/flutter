@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.support.annotation.NonNull;
 
 import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugin.platform.PlatformViewsController;
 
 /**
  * Binding that gives {@link ActivityAware} plugins access to an associated {@link Activity} and
