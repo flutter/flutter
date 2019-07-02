@@ -818,6 +818,7 @@ void main() {
   testWidgets(
     'Default border width and border colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      const double defaultBorderWidth = 1.0;
       await tester.pumpWidget(
         Material(
           child: boilerplate(
@@ -842,14 +843,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000), // enabled borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0xff000000),
+            strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000), // enabled borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0xff000000),
+            strokeWidth: defaultBorderWidth,
           ),
       );
 
@@ -876,14 +877,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3), // selected borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0xff2196f3),
+            strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3), // selected borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0xff2196f3),
+            strokeWidth: defaultBorderWidth,
           ),
       );
 
@@ -909,14 +910,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0x61000000), // disabled borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0x61000000),
+            strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0x61000000), // disabled borderColor
-            strokeWidth: 1.0, // default borderWidth
+            color: const Color(0x61000000),
+            strokeWidth: defaultBorderWidth,
           ),
       );
     },
@@ -956,14 +957,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: borderColor, // enabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: borderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: borderColor, // enabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: borderColor,
+            strokeWidth: customWidth,
           ),
       );
 
@@ -992,14 +993,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: selectedBorderColor, // selected borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: selectedBorderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: selectedBorderColor, // selected borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: selectedBorderColor,
+            strokeWidth: customWidth,
           ),
       );
 
@@ -1027,14 +1028,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: disabledBorderColor, // disabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: disabledBorderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: disabledBorderColor, // disabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: disabledBorderColor,
+            strokeWidth: customWidth,
           ),
       );
     },
@@ -1076,14 +1077,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: borderColor, // enabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: borderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: borderColor, // enabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: borderColor,
+            strokeWidth: customWidth,
           ),
       );
 
@@ -1114,14 +1115,14 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: selectedBorderColor, // selected borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: selectedBorderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: selectedBorderColor, // selected borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: selectedBorderColor,
+            strokeWidth: customWidth,
           ),
       );
 
@@ -1151,20 +1152,19 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: disabledBorderColor, // disabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: disabledBorderColor,
+            strokeWidth: customWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: disabledBorderColor, // disabled borderColor
-            strokeWidth: customWidth, // default borderWidth
+            color: disabledBorderColor,
+            strokeWidth: customWidth,
           ),
       );
     },
   );
 
-  // height of all buttons must match the tallest button
   testWidgets('Height of segmented control is determined by tallest widget', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
       Container(
@@ -1247,8 +1247,79 @@ void main() {
     );
   });
 
-  // proper paints based on state
-  // default border radius
-  // custom border radius
-  // theme border radius
+  testWidgets(
+    'Properly draws borders based on state',
+    (WidgetTester tester) async {
+      const double defaultBorderWidth = 1.0;
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[false, true, false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+                Text('Second child'),
+                Text('Third child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final List<RenderObject> toggleButtonRenderObject = tester.allRenderObjects.where((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      }).toSet().toList();
+
+      // The first button paints the leading, top and bottom sides with a path
+      expect(
+        toggleButtonRenderObject[0],
+        paints
+          // leading side, top and bottom - enabled
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff000000),
+            strokeWidth: defaultBorderWidth,
+          ),
+      );
+
+      // The middle buttons paint a leading side path first, followed by a
+      // top and bottom side path
+      expect(
+        toggleButtonRenderObject[1],
+        paints
+          // leading side - selected
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff2196f3),
+            strokeWidth: defaultBorderWidth,
+          )
+          // top and bottom - selected
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff2196f3),
+            strokeWidth: defaultBorderWidth,
+          ),
+      );
+
+      // The last button paints a leading side path first, followed by
+      // a trailing, top and bottom side path
+      expect(
+        toggleButtonRenderObject[2],
+        paints
+          // leading side - selected, since previous button is selected
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff2196f3),
+            strokeWidth: defaultBorderWidth,
+          )
+          // trailing side, top and bottom - enabled
+          ..path(
+            style: PaintingStyle.stroke,
+            color: const Color(0xff000000),
+            strokeWidth: defaultBorderWidth,
+          ),
+      );
+    },
+  );
 }
