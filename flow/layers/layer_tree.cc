@@ -31,10 +31,12 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       frame.canvas() ? frame.canvas()->imageInfo().colorSpace() : nullptr;
   frame.context().raster_cache().SetCheckboardCacheImages(
       checkerboard_raster_cache_images_);
+  MutatorsStack stack;
   PrerollContext context = {
       ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
       frame.gr_context(),
       frame.view_embedder(),
+      stack,
       color_space,
       kGiantRect,
       frame.context().raster_time(),
@@ -83,13 +85,11 @@ void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
     }
   }
 
-  MutatorsStack stack;
   Layer::PaintContext context = {
       (SkCanvas*)&internal_nodes_canvas,
       frame.canvas(),
       frame.gr_context(),
       frame.view_embedder(),
-      stack,
       frame.context().raster_time(),
       frame.context().ui_time(),
       frame.context().texture_registry(),
@@ -121,6 +121,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       nullptr,                  // raster_cache (don't consult the cache)
       nullptr,                  // gr_context  (used for the raster cache)
       nullptr,                  // external view embedder
+      unused_stack,             // mutator stack
       nullptr,                  // SkColorSpace* dst_color_space
       kGiantRect,               // SkRect cull_rect
       unused_stopwatch,         // frame time (dont care)
@@ -138,7 +139,6 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       canvas,  // canvas
       nullptr,
       nullptr,
-      unused_stack,
       unused_stopwatch,         // frame time (dont care)
       unused_stopwatch,         // engine time (dont care)
       unused_texture_registry,  // texture registry (not supported)

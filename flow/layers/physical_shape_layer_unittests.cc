@@ -28,10 +28,12 @@ TEST(PhysicalShapeLayer, TotalElevation) {
 
   const Stopwatch unused_stopwatch;
   TextureRegistry unused_texture_registry;
+  MutatorsStack unused_stack;
   PrerollContext preroll_context{
       nullptr,                  // raster_cache (don't consult the cache)
       nullptr,                  // gr_context  (used for the raster cache)
       nullptr,                  // external view embedder
+      unused_stack,             // mutator stack
       nullptr,                  // SkColorSpace* dst_color_space
       kGiantRect,               // SkRect cull_rect
       unused_stopwatch,         // frame time (dont care)

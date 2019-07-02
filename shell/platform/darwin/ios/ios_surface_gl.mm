@@ -89,10 +89,12 @@ void IOSSurfaceGL::BeginFrame(SkISize frame_size) {
   [CATransaction begin];
 }
 
-void IOSSurfaceGL::PrerollCompositeEmbeddedView(int view_id) {
+void IOSSurfaceGL::PrerollCompositeEmbeddedView(
+    int view_id,
+    std::unique_ptr<flutter::EmbeddedViewParams> params) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
-  platform_views_controller->PrerollCompositeEmbeddedView(view_id);
+  platform_views_controller->PrerollCompositeEmbeddedView(view_id, std::move(params));
 }
 
 std::vector<SkCanvas*> IOSSurfaceGL::GetCurrentCanvases() {
@@ -101,11 +103,10 @@ std::vector<SkCanvas*> IOSSurfaceGL::GetCurrentCanvases() {
   return platform_views_controller->GetCurrentCanvases();
 }
 
-SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id,
-                                              std::unique_ptr<flutter::EmbeddedViewParams> params) {
+SkCanvas* IOSSurfaceGL::CompositeEmbeddedView(int view_id) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
-  return platform_views_controller->CompositeEmbeddedView(view_id, std::move(params));
+  return platform_views_controller->CompositeEmbeddedView(view_id);
 }
 
 bool IOSSurfaceGL::SubmitFrame(GrContext* context) {
