@@ -2569,11 +2569,18 @@ class _PaddleSliderTrackShapePathPainter {
   static const double _topLobeRadius = 16.0;
   // Designed size of the label text. This is the size that the value indicator
   // was designed to contain. We scale it from here to fit other sizes.
-  static const double _labelTextDesignSize = 16.0;
+  static const double _labelTextDesignSize = 14.0;
   // Radius of the bottom lobe of the value indicator.
   static const double _bottomLobeRadius = 10.0;
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
+  static const double _middleNeckWidth = 3;
+  static const double _bottomNeckRadius = 4.5;
+  // The base of the triangle between the top lobe center and the centers of
+  // the two top neck arcs.
+  static const double _neckTriangleBase = _topNeckRadius + _middleNeckWidth / 2;
+  static const double _rightBottomNeckCenterX = _middleNeckWidth / 2 + _bottomNeckRadius;
+  static const double _rightBottomNeckAngleStart = math.pi;
   static const Offset _topLobeCenter = Offset(0.0, -_distanceBetweenTopBottomCenters);
   static const double _topNeckRadius = 13.0;
   // The length of the hypotenuse of the triangle formed by the center
@@ -2598,12 +2605,6 @@ class _PaddleSliderTrackShapePathPainter {
   ) {
     assert(labelPainter != null);
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
-    final double inverseTextScale = textScaleFactor != 0 ? 1.0 / textScaleFactor : 0.0;
-    final double labelHalfWidth = labelPainter.width / 2.0;
-    final double halfWidthNeeded = math.max(
-      0.0,
-      inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
-    );
     return Size(labelPainter.width + 2 * _labelPadding * textScaleFactor, _preferredHeight * textScaleFactor);
   }
 
@@ -2627,17 +2628,12 @@ class _PaddleSliderTrackShapePathPainter {
       0.0,
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
-    double shift = _getIdealOffset(parentBox, halfWidthNeeded, scale, center);
-    if (shift < 0.0) {
-      shift = math.max(shift, -halfWidthNeeded);
-    } else {
-      shift = math.min(shift, halfWidthNeeded);
-    }
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, textScaleFactor * scale, center);
     return shift * textScaleFactor;
   }
 
-  // Determines the "best" offset to keep the bubble on the screen. The calling
-  // code will bound that with the available movement in the paddle shape.
+  // Determines the "best" offset to keep the bubble within the slider. The
+  // calling code will bound that with the available movement in the paddle shape.
   double _getIdealOffset(
     RenderBox parentBox,
     double halfWidthNeeded,
@@ -2656,13 +2652,25 @@ class _PaddleSliderTrackShapePathPainter {
     final Offset topLeft = (topLobeRect.topLeft * scale) + center;
     final Offset bottomRight = (topLobeRect.bottomRight * scale) + center;
     double shift = 0.0;
-    if (topLeft.dx < edgeMargin) {
-      shift = edgeMargin - topLeft.dx;
+
+    final double startGlobal = parentBox.localToGlobal(Offset.zero).dx;
+    if (topLeft.dx < startGlobal + edgeMargin) {
+      shift = startGlobal + edgeMargin - topLeft.dx;
     }
-    if (bottomRight.dx > parentBox.size.width - edgeMargin) {
-      shift = parentBox.size.width - bottomRight.dx - edgeMargin;
+
+    final double endGlobal = parentBox.localToGlobal(Offset(parentBox.size.width, parentBox.size.height)).dx;
+    if (bottomRight.dx > endGlobal - edgeMargin) {
+      shift = endGlobal - edgeMargin - bottomRight.dx;
     }
+
     shift = scale == 0.0 ? 0.0 : shift / scale;
+    if (shift < 0.0) {
+      // shifting to the left
+      shift = math.max(shift, -halfWidthNeeded);
+    } else {
+      // shifting to the right
+      shift = math.min(shift, halfWidthNeeded);
+    }
     return shift;
   }
 
@@ -2686,20 +2694,15 @@ class _PaddleSliderTrackShapePathPainter {
     canvas.translate(center.dx, center.dy);
     canvas.scale(overallScale, overallScale);
 
-    final double middleNeckWidth = 3;
-    final double bottomNeckRadius = 4.5;
-
-    final double rightBottomNeckCenterX = middleNeckWidth / 2 + bottomNeckRadius;
-    final double bottomNeckTriangleHypotenuse = bottomNeckRadius + _bottomLobeRadius / overallScale;
-    final double rightBottomNeckCenterY = -math.sqrt(math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(rightBottomNeckCenterX, 2));
-    final double rightBottomNeckAngleStart = math.pi;
-    final double rightBottomNeckAngleEnd = math.pi + math.atan(rightBottomNeckCenterY / rightBottomNeckCenterX);
-    final Path path = Path()..moveTo(middleNeckWidth / 2, rightBottomNeckCenterY);
+    final double bottomNeckTriangleHypotenuse = _bottomNeckRadius + _bottomLobeRadius / overallScale;
+    final double rightBottomNeckCenterY = -math.sqrt(math.pow(bottomNeckTriangleHypotenuse, 2) - math.pow(_rightBottomNeckCenterX, 2));
+    final double rightBottomNeckAngleEnd = math.pi + math.atan(rightBottomNeckCenterY / _rightBottomNeckCenterX);
+    final Path path = Path()..moveTo(_middleNeckWidth / 2, rightBottomNeckCenterY);
     _addArc(
       path,
-      Offset(rightBottomNeckCenterX, rightBottomNeckCenterY),
-      bottomNeckRadius,
-      rightBottomNeckAngleStart,
+      Offset(_rightBottomNeckCenterX, rightBottomNeckCenterY),
+      _bottomNeckRadius,
+      _rightBottomNeckAngleStart,
       rightBottomNeckAngleEnd,
     );
     _addArc(
@@ -2711,8 +2714,8 @@ class _PaddleSliderTrackShapePathPainter {
     );
     _addArc(
       path,
-      Offset(-rightBottomNeckCenterX, rightBottomNeckCenterY),
-      bottomNeckRadius,
+      Offset(-_rightBottomNeckCenterX, rightBottomNeckCenterY),
+      _bottomNeckRadius,
       math.pi - rightBottomNeckAngleEnd,
       0,
     );
@@ -2724,37 +2727,25 @@ class _PaddleSliderTrackShapePathPainter {
       inverseTextScale * labelHalfWidth - (_topLobeRadius - _labelPadding),
     );
 
-    double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center);
-    double leftWidthNeeded;
-    double rightWidthNeeded;
-    if (shift < 0.0) {
-      // shifting to the left
-      shift = math.max(shift, -halfWidthNeeded);
-    } else {
-      // shifting to the right
-      shift = math.min(shift, halfWidthNeeded);
-    }
-    rightWidthNeeded = halfWidthNeeded + shift;
-    leftWidthNeeded = halfWidthNeeded - shift;
+    final double shift = _getIdealOffset(parentBox, halfWidthNeeded, overallScale, center);
+    final double leftWidthNeeded = halfWidthNeeded - shift;
+    final double rightWidthNeeded = halfWidthNeeded + shift;
 
-    // The base of the triangle between the top lobe center and the centers of
-    // the two top neck arcs.
-    final double neckTriangleBase = _topNeckRadius + middleNeckWidth / 2;
     // The parameter that describes how far along the transition from round to
     // stretched we are.
-    final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / neckTriangleBase));
-    final double rightAmount = math.max(0.0, math.min(1.0, rightWidthNeeded / neckTriangleBase));
+    final double leftAmount = math.max(0.0, math.min(1.0, leftWidthNeeded / _neckTriangleBase));
+    final double rightAmount = math.max(0.0, math.min(1.0, rightWidthNeeded / _neckTriangleBase));
     // The angle between the top neck arc's center and the top lobe's center
     // and vertical.
     final double leftTheta = (1.0 - leftAmount) * _thirtyDegrees;
     final double rightTheta = (1.0 - rightAmount) * _thirtyDegrees;
     // The center of the top left neck arc.
     final Offset leftTopNeckCenter = Offset(
-      -neckTriangleBase,
+      -_neckTriangleBase,
       _topLobeCenter.dy + math.cos(leftTheta) * _neckTriangleHypotenuse,
     );
     final Offset neckRightCenter = Offset(
-      neckTriangleBase,
+      _neckTriangleBase,
       _topLobeCenter.dy + math.cos(rightTheta) * _neckTriangleHypotenuse,
     );
     final double leftNeckArcAngle = _ninetyDegrees - leftTheta;
