@@ -318,7 +318,11 @@ class RenderParagraph extends RenderBox
     assert(constraints != null);
     assert(constraints.debugAssertIsValid());
     _layoutTextWithConstraints(constraints);
-    return _textPainter.computeDistanceToActualBaseline(baseline);
+    // TODO(garyq): Since our metric for ideographic baseline is currently inacurrate
+    // and the non-alphabetic baselines are based off of the alphabetic baseline, we
+    // use the alphabetic for now to produce correct layouts. We should eventually change
+    // this back to pass the `baseline` property in.
+    return _textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   // Intrinsics cannot be calculated without a full layout for
