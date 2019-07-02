@@ -1199,7 +1199,6 @@ void main() {
     }
   });
 
-  // RTL and LTR
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
