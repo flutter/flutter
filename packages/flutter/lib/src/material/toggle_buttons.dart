@@ -334,12 +334,18 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// These are typically [Icon] or [Text] widgets. The selection state
   /// corresponds to its state in the [isSelected] list.
+  ///
+  /// The length of children has to match the length of [isSelected]. If
+  /// [focusNodes] is not null, the length of children has to also match
+  /// the length of [focusNodes].
   final List<Widget> children;
 
   /// The corresponding selection state of each toggle button.
   ///
   /// The boolean values in the list map directly to [children] by its index.
   /// The values in the list cannot be null.
+  ///
+  /// The length of [isSelected] has to match the length of [children].
   final List<bool> isSelected;
 
   /// The callback that is called when a button is tapped.
@@ -381,7 +387,15 @@ class ToggleButtons extends StatelessWidget {
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
 
-
+  /// The list of [FocusNode]s, corresponding to each toggle button.
+  ///
+  /// Focus is used to determine which widget should be affected by keyboard
+  /// events. The focus tree keeps track of which widget is currently focused
+  /// on by the user.
+  ///
+  /// If not null, the length of focusNodes has to match the length of [children].
+  ///
+  /// See [FocusNode] for more information about how focus nodes are used.
   final List<FocusNode> focusNodes;
 
   /// Whether or not to render a border around each toggle button.
@@ -692,7 +706,13 @@ class _ToggleButton extends StatelessWidget {
   /// The splash color for the button's [InkWell].
   final Color splashColor;
 
-
+  /// A leaf node in the focus tree for this button.
+  ///
+  /// Focus is used to determine which widget should be affected by keyboard
+  /// events. The focus tree keeps track of which widget is currently focused
+  /// on by the user.
+  ///
+  /// See [FocusNode] for more information about how focus nodes are used.
   final FocusNode focusNode;
 
   /// Called when the button is tapped or otherwise activated.
