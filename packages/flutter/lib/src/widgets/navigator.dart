@@ -1883,23 +1883,29 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushAndRemoveUntil<T extends Object>(Route<T> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
-    final Route<dynamic> precedingRoute = _history.last;
+
+    // The route that is being pushed on top of
+    final Route<dynamic> precedingRoute = _history.isNotEmpty ? _history.last : null;
+    final OverlayEntry precedingRouteOverlay = precedingRoute != null
+      ? (precedingRoute.overlayEntries.isNotEmpty ? precedingRoute.overlayEntries.last : null)
+      : null;
+
+    // Routes to remove
+    final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
+    while (_history.isNotEmpty && !predicate(_history.last)) {
+      final Route<dynamic> removedRoute = _history.removeLast();
+      assert(removedRoute != null && removedRoute._navigator == this);
+      assert(removedRoute.overlayEntries.isNotEmpty);
+      removedRoutes.add(removedRoute);
+    }
+
+    // Push new route
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
+    final Route<dynamic> newPrecedingRoute = _history.isNotEmpty ? _history.last : null;
     newRoute._navigator = this;
-    newRoute.install(_currentOverlayEntry);
+    newRoute.install(precedingRouteOverlay);
     _history.add(newRoute);
-
-    Route<dynamic> oldRoute;
-    int removalIndex = 0;
-
-    for (Route<dynamic> route in _history) {
-      if (predicate(route)) {
-        oldRoute = route;
-        removalIndex = _history.indexOf(route) + 1;
-        break;
-      }
-    }
 
     // Notify for newRoute
     newRoute.didChangeNext(null);
@@ -1908,19 +1914,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-
         // Complete remove until predicate & notify
-        while (_history[removalIndex] != newRoute) {
-          final Route<dynamic> removedRoute = _history.removeAt(removalIndex);
-          assert(removedRoute != null && removedRoute._navigator == this);
-          assert(removedRoute.overlayEntries.isNotEmpty);
+        for (Route<dynamic> removedRoute in removedRoutes) {
           for (NavigatorObserver observer in widget.observers)
-            observer.didRemove(removedRoute, oldRoute);
+            observer.didRemove(removedRoute, newPrecedingRoute);
           removedRoute.dispose();
         }
 
-        if (oldRoute != null)
-          oldRoute.didChangeNext(newRoute);
+        if (newPrecedingRoute != null)
+          newPrecedingRoute.didChangeNext(newRoute);
       }
     });
 
