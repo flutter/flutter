@@ -3326,15 +3326,16 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
     node.rect = owner.semanticBounds;
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      assert(fragment.config == null);
-      children.addAll(fragment.compileChildren(
-        parentSemanticsClipRect: parentSemanticsClipRect,
-        parentPaintClipRect: parentPaintClipRect,
-        elevationAdjustment: 0.0,
-      ));
-    }
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) {
+        assert(fragment.config == null);
+        return fragment.compileChildren(
+          parentSemanticsClipRect: parentSemanticsClipRect,
+          parentPaintClipRect: parentPaintClipRect,
+          elevationAdjustment: 0.0,
+        );
+      })
+      .toList();
     node.updateWith(config: null, childrenInInversePaintOrder: children);
 
     // The root node is the only semantics node allowed to be invisible. This
@@ -3447,14 +3448,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       }
     }
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      children.addAll(fragment.compileChildren(
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) => fragment.compileChildren(
         parentSemanticsClipRect: node.parentSemanticsClipRect,
         parentPaintClipRect: node.parentPaintClipRect,
         elevationAdjustment: 0.0,
-      ));
-    }
+      ))
+      .toList();
 
     if (_config.isSemanticBoundary) {
       owner.assembleSemanticsNode(node, _config, children);

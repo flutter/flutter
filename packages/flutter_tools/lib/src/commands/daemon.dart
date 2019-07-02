@@ -618,10 +618,10 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [ Map<String, dynamic> args ]) {
-    final Map<String, dynamic> eventArgs = <String, dynamic>{'appId': app.id};
-    if (args != null)
-      eventArgs.addAll(args);
-    sendEvent('app.$name', eventArgs);
+    sendEvent('app.$name', <String, dynamic>{
+      'appId': app.id,
+      ...?args,
+    });
   }
 }
 

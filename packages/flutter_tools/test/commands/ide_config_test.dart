@@ -85,9 +85,11 @@ void main() {
       dir ??= tempDir;
       final IdeConfigCommand command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<String> finalArgs = <String>['--flutter-root=${tempDir.absolute.path}', 'ide-config'];
-      finalArgs.addAll(args);
-      await runner.run(finalArgs);
+      await runner.run(<String>[
+        '--flutter-root=${tempDir.absolute.path}',
+        'ide-config',
+        ...args,
+      ]);
 
       for (String path in expectedContents.keys) {
         final String absPath = fs.path.join(tempDir.absolute.path, path);
@@ -148,8 +150,10 @@ void main() {
         'template',
       );
       _populateDir(templateManifest);
-      final Map<String, String> expectedContents = templateManifest;
-      expectedContents.addAll(flutterManifest);
+      final Map<String, String> expectedContents = <String, String>{
+        ...templateManifest,
+        ...flutterManifest,
+      };
       return _updateIdeConfig(
         expectedContents: expectedContents,
       );
@@ -171,8 +175,10 @@ void main() {
         tempDir,
         'template',
       );
-      final Map<String, String> expectedContents = templateManifest;
-      expectedContents.addAll(overwrittenManifest);
+      final Map<String, String> expectedContents = <String, String>{
+        ...templateManifest,
+        ...overwrittenManifest,
+      };
       return _updateIdeConfig(
         args: <String>['--overwrite'],
         expectedContents: expectedContents,
@@ -200,8 +206,10 @@ void main() {
         'existing',
       );
       _populateDir(flutterManifest);
-      final Map<String, String> expectedContents = flutterManifest;
-      expectedContents.addAll(templateManifest);
+      final Map<String, String> expectedContents = <String, String>{
+        ...flutterManifest,
+        ...templateManifest,
+      };
       return _updateIdeConfig(
         args: <String>['--update-templates'],
         expectedContents: expectedContents,
@@ -225,8 +233,10 @@ void main() {
         'existing',
         isTemplate: true,
       );
-      final Map<String, String> expectedContents = flutterManifest;
-      expectedContents.addAll(updatedTemplates);
+      final Map<String, String> expectedContents = <String, String>{
+        ...flutterManifest,
+        ...updatedTemplates,
+      };
       return _updateIdeConfig(
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
@@ -259,8 +269,10 @@ void main() {
         'flutter.iml${Template.copyTemplateExtension}',
       );
       updatedTemplates.remove(flutterIml);
-      final Map<String, String> expectedContents = flutterManifest;
-      expectedContents.addAll(updatedTemplates);
+      final Map<String, String> expectedContents = <String, String>{
+        ...flutterManifest,
+        ...updatedTemplates,
+      };
       return _updateIdeConfig(
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
@@ -298,8 +310,10 @@ void main() {
       updatedTemplates.remove(deepIml);
       deepIml = fs.path.join(deepIml, 'deep.iml');
       updatedTemplates.remove(deepIml);
-      final Map<String, String> expectedContents = flutterManifest;
-      expectedContents.addAll(updatedTemplates);
+      final Map<String, String> expectedContents = <String, String>{
+        ...flutterManifest,
+        ...updatedTemplates,
+      };
       return _updateIdeConfig(
         args: <String>['--update-templates', '--overwrite'],
         expectedContents: expectedContents,
