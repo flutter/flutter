@@ -22,11 +22,6 @@ import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'build_system/build_system.dart';
-import 'build_system/targets/assets.dart';
-import 'build_system/targets/dart.dart';
-import 'build_system/targets/linux.dart';
-import 'build_system/targets/macos.dart';
-import 'build_system/targets/windows.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
@@ -73,16 +68,7 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      BuildSystem: () => BuildSystem(<String, Target>{
-        unpackMacos.name: unpackMacos,
-        macosApplication.name: macosApplication,
-        macoReleaseApplication.name: macoReleaseApplication,
-        unpackLinux.name: unpackLinux,
-        unpackWindows.name: unpackWindows,
-        copyAssets.name: copyAssets,
-        kernelSnapshot.name: kernelSnapshot,
-        aotElf.name: aotElf,
-      }),
+      BuildSystem: () => BuildSystem(),
       Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),

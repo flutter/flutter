@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -22,6 +25,14 @@ const String kTargetPlatform = 'TargetPlatform';
 
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
+
+/// The define to control what iOS architectures are built for.
+///
+/// This is expected to be a comma-separated list of architectures. If not
+/// provided, defaults to arm64.
+///
+/// The other supported value is armv7, the 32-bit iOS architecture.
+const String kIosArchs = 'IosArchs';
 
 /// Supports compiling dart source to kernel with a subset of flags.
 ///
@@ -66,7 +77,6 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   if (targetPlatform == null) {
     throw MissingDefineException(kTargetPlatform, 'aot_elf');
   }
-
   final int snapshotExitCode = await snapshotter.build(
     platform: targetPlatform,
     buildMode: buildMode,
@@ -119,6 +129,67 @@ List<File> listDartSources(Environment environment) {
   return dartFiles;
 }
 
+/// Supports compiling a dart kernel file to an assembly file.
+///
+/// If more than one iOS arch is provided, then this rule will
+/// produce a univeral binary.
+Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment environment) async {
+  final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+  final String outputPath = environment.buildDir.path;
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+  final List<IOSArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
+      ?? <IOSArch>[IOSArch.arm64];
+  if (buildMode == null) {
+    throw MissingDefineException(kBuildMode, 'aot_assembly');
+  }
+  if (targetPlatform == null) {
+    throw MissingDefineException(kTargetPlatform, 'aot_assembly');
+  }
+  if (targetPlatform != TargetPlatform.ios) {
+    throw Exception('aot_assembly is only supported for iOS applications');
+  }
+  int snapshotExitCode;
+  if (iosArchs.length == 1) {
+    snapshotExitCode = await snapshotter.build(
+      platform: targetPlatform,
+      buildMode: buildMode,
+      mainPath: environment.buildDir.childFile('main.app.dill').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+      outputPath: outputPath,
+      iosArch: iosArchs.single,
+    );
+  } else {
+    // If we're building multiple iOS archs the binaries need to be lipo'd
+    // together.
+    final List<Future<int>> pending = <Future<int>>[];
+    for (IOSArch iosArch in iosArchs) {
+      pending.add(snapshotter.build(
+        platform: targetPlatform,
+        buildMode: buildMode,
+        mainPath: environment.buildDir.childFile('main.app.dill').path,
+        packagesPath: environment.projectDir.childFile('.packages').path,
+        outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
+        iosArch: iosArch,
+      ));
+    }
+    final List<int> results = await Future.wait(pending);
+    if (results.any((int result) => result != 0)) {
+      throw Exception('AOT snapshotter exited with code ${results.join()}');
+    }
+    final ProcessResult result = await processManager.run(<String>[
+      'lipo',
+      ...iosArchs.map((IOSArch iosArch) => fs.path.join(outputPath, getNameForIOSArch(iosArch))),
+      '-create',
+        '-output',
+        fs.path.join(outputPath, 'App.framework', 'App'),
+    ]);
+  }
+  if (snapshotExitCode != 0) {
+    throw Exception('AOT snapshotter exited with code $snapshotExitCode');
+  }
+}
+
 /// Generate a snapshot of the dart code used in the program.
 const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
@@ -135,7 +206,7 @@ const Target kernelSnapshot = Target(
   buildAction: compileKernel,
 );
 
-/// Generate an ELF binary from a dart snapshot.
+/// Generate an ELF binary from a dart kernel files.
 const Target aotElf = Target(
   name: 'aot_elf',
   inputs: <Source>[
@@ -155,4 +226,28 @@ const Target aotElf = Target(
     kernelSnapshot,
   ],
   buildAction: compileAotElf,
+);
+
+/// Generate an assembly target from a dart kernel file.
+const Target aotAssembly = Target(
+  name: 'aot_assembly',
+  inputs: <Source>[
+    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.skyEnginePath),
+    Source.function(findGenSnapshotAndroidElf),
+  ],
+  outputs: <Source>[
+    Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
+    Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
+    Source.pattern('{BUILD_DIR}/gen_snapshot.d'),
+    // TODO(jonahwilliams): remove
+    Source.pattern('{BUILD_DIR}/snapshot.d.fingerprint'),
+  ],
+  dependencies: <Target>[
+    kernelSnapshot,
+  ],
+  buildAction: compileAotAssembly,
 );

@@ -18,6 +18,12 @@ import '../globals.dart';
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
+import 'targets/assets.dart';
+import 'targets/dart.dart';
+import 'targets/ios.dart';
+import 'targets/linux.dart';
+import 'targets/macos.dart';
+import 'targets/windows.dart';
 
 export 'source.dart';
 
@@ -471,9 +477,24 @@ class BuildResult {
 
 /// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
-  const BuildSystem([this.targets]);
+  BuildSystem([Map<String, Target> targets])
+    : targets = targets ?? _defaultTargets;
 
   /// All currently registered targets.
+  static final Map<String, Target> _defaultTargets = <String, Target>{
+    unpackMacos.name: unpackMacos,
+    macosApplication.name: macosApplication,
+    macoReleaseApplication.name: macoReleaseApplication,
+    unpackLinux.name: unpackLinux,
+    unpackWindows.name: unpackWindows,
+    copyAssets.name: copyAssets,
+    kernelSnapshot.name: kernelSnapshot,
+    aotElf.name: aotElf,
+    aotAssembly.name: aotAssembly,
+    iosApplication.name: iosApplication,
+    iosReleaseApplication.name: iosReleaseApplication,
+  };
+
   final Map<String, Target> targets;
 
   /// Build the target `name` and all of its dependencies.
@@ -576,7 +597,8 @@ class _BuildInstance {
         printStatus('Skipping target: ${target.name}');
       } else {
         printStatus('${target.name}: Starting');
-        await target.buildAction(updates, environment);
+        // build actions may be null.
+        await target?.buildAction(updates, environment);
         printStatus('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment);

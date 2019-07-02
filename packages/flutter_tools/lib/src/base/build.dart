@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -95,10 +94,6 @@ class AOTSnapshotter {
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
-    FlutterProject flutterProject;
-    if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = FlutterProject.current();
-    }
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -122,8 +117,6 @@ class AOTSnapshotter {
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = <String>{};
-
-    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
@@ -165,26 +158,6 @@ class AOTSnapshotter {
       return 1;
     }
 
-    // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
-      properties: <String, String>{
-        'buildMode': buildMode.toString(),
-        'targetPlatform': platform.toString(),
-        'entryPoint': mainPath,
-        'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-        'engineHash': Cache.instance.engineRevision,
-        'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
-      },
-      depfilePaths: <String>[],
-    );
-    // TODO(jonahwilliams): re-enable once this can be proved correct.
-    // if (await fingerprinter.doesFingerprintMatch()) {
-    //   printTrace('Skipping AOT snapshot build. Fingerprint match.');
-    //   return 0;
-    // }
-
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode =
       await _timedStep('snapshot(CompileTime)', 'aot-snapshot',
@@ -210,9 +183,6 @@ class AOTSnapshotter {
       if (result.exitCode != 0)
         return result.exitCode;
     }
-
-    // Compute and record build fingerprint.
-    await fingerprinter.writeFingerprint();
     return 0;
   }
 
