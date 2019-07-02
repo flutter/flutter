@@ -758,10 +758,6 @@ void main() {
             hoverColor: hoverColor,
             focusColor: focusColor,
             child: ToggleButtons(
-              splashColor: splashColor,
-              highlightColor: highlightColor,
-              hoverColor: hoverColor,
-              focusColor: focusColor,
               isSelected: const <bool>[true],
               onPressed: (int index) {},
               focusNodes: <FocusNode>[focusNode],
@@ -822,6 +818,20 @@ void main() {
   testWidgets(
     'Default border colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
       // borderColor
       // selectedBorderColor
       // disabledBorderColor
