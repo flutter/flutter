@@ -922,11 +922,123 @@ void main() {
     },
   );
 
-  // custom
-  // borderColor
-  // selectedBorderColor
-  // disabledBorderColor
-  // border width
+  testWidgets(
+    'Custom border width and border colors for enabled, selected and disabled states',
+    (WidgetTester tester) async {
+      const Color borderColor = Color(0xff4caf50);
+      const Color selectedBorderColor = Color(0xffcddc39);
+      const Color disabledBorderColor = Color(0xffffeb3b);
+      const double customWidth = 2.0;
+
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              borderColor: borderColor,
+              borderWidth: customWidth,
+              isSelected: const <bool>[false],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      RenderObject toggleButtonRenderObject;
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: borderColor, // enabled borderColor
+            strokeWidth: customWidth, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: borderColor, // enabled borderColor
+            strokeWidth: customWidth, // default borderWidth
+          ),
+      );
+
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              selectedBorderColor: selectedBorderColor,
+              borderWidth: customWidth,
+              isSelected: const <bool>[true],
+              onPressed: (int index) {},
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: selectedBorderColor, // selected borderColor
+            strokeWidth: customWidth, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: selectedBorderColor, // selected borderColor
+            strokeWidth: customWidth, // default borderWidth
+          ),
+      );
+
+      await tester.pumpWidget(
+        Material(
+          child: boilerplate(
+            child: ToggleButtons(
+              disabledBorderColor: disabledBorderColor,
+              borderWidth: customWidth,
+              isSelected: const <bool>[false],
+              children: const <Widget>[
+                Text('First child'),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      toggleButtonRenderObject = tester.allRenderObjects.firstWhere((RenderObject object) {
+        return object.runtimeType.toString() == '_SelectToggleButtonRenderObject';
+      });
+      expect(
+        toggleButtonRenderObject,
+        paints
+          // trailing side
+          ..path(
+            style: PaintingStyle.stroke,
+            color: disabledBorderColor, // disabled borderColor
+            strokeWidth: customWidth, // default borderWidth
+          )
+          // leading side, top and bottom
+          ..path(
+            style: PaintingStyle.stroke,
+            color: disabledBorderColor, // disabled borderColor
+            strokeWidth: customWidth, // default borderWidth
+          ),
+      );
+    },
+  );
 
   // themes
   // borderColor

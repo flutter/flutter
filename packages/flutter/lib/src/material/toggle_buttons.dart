@@ -541,12 +541,12 @@ class ToggleButtons extends StatelessWidget {
 
     if (onPressed != null && (isSelected[index])) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.onSurface,
+        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
         width: borderWidth ?? toggleButtonsTheme.borderWidth,
       );
     } else {
