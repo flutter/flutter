@@ -369,7 +369,7 @@ void main() {
     group('clearTimeline', () {
       test('clears timeline', () async {
         bool clearWasCalled = false;
-        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+        when(mockPeer.sendRequest('clearVMTimeline', argThat(equals(<String, dynamic>{}))))
           .thenAnswer((Invocation invocation) async {
             clearWasCalled = true;
             return null;
