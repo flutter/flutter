@@ -357,6 +357,13 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  build_benchmark:
+    description: >
+      Measures APK build performance.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   # iOS on-device tests
 
   flavors_test_ios:
