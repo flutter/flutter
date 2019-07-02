@@ -22,6 +22,7 @@ import 'transitions.dart';
 //   @override
 //   MyWidgetState createState() => MyWidgetState();
 // }
+// void setState(VoidCallback fn) { }
 
 /// An interpolation between two [BoxConstraints].
 ///
