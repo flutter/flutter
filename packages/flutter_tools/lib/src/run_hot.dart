@@ -619,6 +619,7 @@ class HotRunner extends ResidentRunner {
     final List<FlutterView> reassembleViews = <FlutterView>[];
     String serviceEventKind;
     int pausedIsolatesFound = 0;
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
@@ -632,7 +633,7 @@ class HotRunner extends ResidentRunner {
             serviceEventKind = ''; // many kinds
           }
         } else {
-          unawaited(view.uiIsolate.flutterReassemble());
+          futures.add(view.uiIsolate.flutterReassemble());
           reassembleViews.add(view);
         }
       }
@@ -757,7 +758,6 @@ class HotRunner extends ResidentRunner {
     assert(reassembleViews.isNotEmpty);
     printTrace('Reassembling application');
     bool failedReassemble = false;
-    final List<Future<void>> futures = <Future<void>>[];
     // Resume the isolates we paused earlier.
     for (FlutterView view in reassembleViews) {
       futures.add(() async {
