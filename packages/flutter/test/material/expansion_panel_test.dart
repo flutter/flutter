@@ -1248,7 +1248,7 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('ExpansionPanel accepts custom expansionIndicator', (WidgetTester tester) async {
+  testWidgets('ExpansionPanel accepts custom expandIconBuilder', (WidgetTester tester) async {
     final List<bool> _isExpanded = <bool>[true, false];
     await tester.pumpWidget(
       MaterialApp(
@@ -1261,7 +1261,7 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (BuildContext context, bool isExpanded) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
@@ -1276,7 +1276,7 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (BuildContext context, bool isExpanded) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
@@ -1324,7 +1324,7 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (BuildContext context, bool isExpanded) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
@@ -1340,7 +1340,7 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expansionIndicator: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (BuildContext context, bool isExpanded) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
