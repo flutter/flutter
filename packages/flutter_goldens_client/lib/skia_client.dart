@@ -99,7 +99,7 @@ class SkiaGoldClient extends GoldensClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
-    final String commitHash = await getCurrentCommit();
+    final String commitHash = await _getCurrentCommit();
     final File keys = _workDirectory.childFile('keys.json');
     final File failures = _workDirectory.childFile('failures.json');
 
@@ -164,6 +164,18 @@ class SkiaGoldClient extends GoldensClient {
     // The ProcessResult that returns from line 157 contains the result of the
     // test & links to the dashboard and diffs.
     return true;
+  }
+
+  Future<String> _getCurrentCommit() async {
+    if (!flutterRoot.existsSync()) {
+      return null;
+    } else {
+      final io.ProcessResult revParse = await process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: flutterRoot.path,
+      );
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    }
   }
 
   String _getKeysJSON() {

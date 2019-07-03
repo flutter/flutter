@@ -24,7 +24,7 @@ export 'package:flutter_goldens_client/skia_client.dart';
 Future<void> main(FutureOr<void> testMain()) async {
   goldenFileComparator = //testingWithSkiaGold(const LocalPlatform())
     //? await FlutterSkiaGoldFileComparator.fromDefaultComparator()
-    await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
+     await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
   await testMain();
 }
 

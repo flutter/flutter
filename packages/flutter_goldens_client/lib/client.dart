@@ -17,8 +17,6 @@ import 'skia_client.dart';
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
-const String _kGoldctlKey = 'GOLDCTL';
-const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// A class that represents a clone of the https://github.com/flutter/goldens
 /// repository, nested within the `bin/cache` directory of the caller's Flutter
@@ -65,18 +63,6 @@ class GoldensClient {
   ///
   /// Uses the [fs] file system.
   Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
-
-  Future<String> getCurrentCommit() async {
-    if (!comparisonRoot.existsSync()) {
-      return null;
-    } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: comparisonRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-    }
-  }
 }
 
 class GoldensRepositoryClient  extends GoldensClient {
@@ -106,13 +92,16 @@ class GoldensRepositoryClient  extends GoldensClient {
   /// [GoldensClient] instances in other processes or isolates will not
   /// duplicate the work that this is doing.
   Future<void> prepare() async {
+    print('in prepare');
     final String goldensCommit = await _getGoldensCommit();
-    String currentCommit = await getCurrentCommit();
+    print('goldensCommit $goldensCommit');
+    String currentCommit = await _getCurrentCommit();
+    print('currentCommit $currentCommit');
     if (currentCommit != goldensCommit) {
       await _obtainLock();
       try {
         // Check the current commit again now that we have the lock.
-        currentCommit = await getCurrentCommit();
+        currentCommit = await _getCurrentCommit();
         if (currentCommit != goldensCommit) {
           if (currentCommit == null) {
             await _initRepository();
@@ -123,6 +112,18 @@ class GoldensRepositoryClient  extends GoldensClient {
       } finally {
         await _releaseLock();
       }
+    }
+  }
+
+  Future<String> _getCurrentCommit() async {
+    if (!comparisonRoot.existsSync()) {
+      return null;
+    } else {
+      final io.ProcessResult revParse = await process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: comparisonRoot.path,
+      );
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
   }
 
