@@ -12,6 +12,7 @@ export 'dart:ui' show
   Color,
   ColorFilter,
   FilterQuality,
+  FontFeature,
   FontStyle,
   FontWeight,
   ImageShader,
