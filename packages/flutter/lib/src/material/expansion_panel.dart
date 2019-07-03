@@ -497,6 +497,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               _isChildExpanded(index),
             )
           : IgnorePointer(
+              ignoringSemantics: true,
               child: child.expandIconBuilder(
                 context,
                 _isChildExpanded(index),
