@@ -90,11 +90,25 @@ class ExpansionPanel {
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
 
-  /// The widget builder that builds the expansion panels' indicator.
+  /// The widget builder that builds a custom expansion icon to expand
+  /// the panel.
+  ///
+  /// If the widget builder is used, some form of custom gesture detection is
+  /// necessary to handle state updates.
   ///
   /// If null, [ExpandIcon] will be used as the expansion icon by default.
   ///
+  /// If [canTapOnHeader] is set to true, the expansion icon will be invisible
+  /// to hit testing. Since the entire header should semantically behave as a
+  /// single button, the button's gesture detection and semantics should be
+  /// ignored. This is done by wrapping the widget with [IgnorePointer]
+  /// with [IgnorePointer.ignoringSemantics] set to true.
+  ///
   /// {@tool sample}
+  ///
+  /// Here is a custom expansion icon that uses a [Checkbox], which has its own
+  /// gesture detection out of the box.
+  ///
   /// ```dart
   /// bool _isExpanded = false;
   ///
@@ -490,7 +504,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
       Widget expansionIndicator;
       if (child.expandIconBuilder != null) {
-
         expansionIndicator = !child.canTapOnHeader
           ? child.expandIconBuilder(
               context,
