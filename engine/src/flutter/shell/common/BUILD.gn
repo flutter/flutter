@@ -152,6 +152,7 @@ test_fixtures("shell_unittests_fixtures") {
 
 shell_host_executable("shell_unittests") {
   sources = [
+    "pipeline_unittests.cc",
     "shell_test.cc",
     "shell_test.h",
     "shell_unittests.cc",
