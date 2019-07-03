@@ -1,4 +1,4 @@
-Signature: 73da88e4a052ac5b59c42e4d3ef3aa2f
+Signature: 0cfcae910e2ae69c21698d1991f997ae
 
 UNUSED LICENSES:
 
@@ -3674,7 +3674,6 @@ FILE: ../../../third_party/skia/samplecode/SampleChart.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClock.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLua.cpp
 FILE: ../../../third_party/skia/samplecode/SampleManyRects.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePdfFileViewer.cpp
 FILE: ../../../third_party/skia/samplecode/SampleStringArt.cpp
 FILE: ../../../third_party/skia/samplecode/SampleUnpremul.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapDevice.cpp
