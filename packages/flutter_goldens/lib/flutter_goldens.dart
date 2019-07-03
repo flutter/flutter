@@ -210,7 +210,9 @@ class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
     final FileSystem fs = goldens.fs;
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
     final String testDirectoryRelativePath = fs.path.relative(testDirectory.path, from: goldens.flutterRoot.path);
-    return FlutterSkiaGoldFileComparator(goldens.comparisonRoot.childDirectory(testDirectoryRelativePath).uri);
+    final Uri baseDirectory = goldens.comparisonRoot.childDirectory(testDirectoryRelativePath).uri;
+    goldens.auth(fs.directory(baseDirectory));
+    return FlutterSkiaGoldFileComparator(baseDirectory);
   }
 
   @override
@@ -222,9 +224,6 @@ class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
     if (!goldenFile.existsSync()) {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
-
-    if(!_skiaClient.hasBeenAuthorized)
-      _skiaClient.auth(basedir);
 
     await _skiaClient.imgtestInit();
     return await _skiaClient.imgtestAdd(golden.path, goldenFile);

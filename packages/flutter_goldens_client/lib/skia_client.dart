@@ -23,14 +23,6 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 /// A class that represents the Skia Gold client for golden file testing.
 class SkiaGoldClient extends GoldensClient {
 
-//  static Future<SkiaGoldClient> preAuthorized(
-//  Directory basedir
-//  ) async {
-//    final SkiaGoldClient client = SkiaGoldClient();
-//    await client.auth(basedir);
-//    return client;
-//  }
-
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and json files
   /// for the goldctl tool to use.
@@ -39,8 +31,6 @@ class SkiaGoldClient extends GoldensClient {
   /// method. It cannot be null.
   Directory _workDirectory;
 
-  /// Doc
-  bool hasBeenAuthorized = false;
 
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
@@ -59,14 +49,11 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<void> auth(Directory workDirectory) async {
-    if (hasBeenAuthorized)
-      return;
-
     _workDirectory = workDirectory;
     assert(_workDirectory != null);
 
-//    if (_serviceAccount == null)
-//      return;
+    if (clientIsAuthorized())
+      return;
 
     final File authorization = _workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
@@ -89,7 +76,6 @@ class SkiaGoldClient extends GoldensClient {
         ..writeln('stderr: ${authResults.stderr}');
       throw NonZeroExitCode(authResults.exitCode, buf.toString());
     }
-    hasBeenAuthorized = true;
   }
 
   /// Executes the `imgtest init` command in the goldctl tool.
@@ -169,5 +155,13 @@ class SkiaGoldClient extends GoldensClient {
         'Platform' : platform.operatingSystem,
       }
     );
+  }
+
+  bool clientIsAuthorized() {
+    final File authFile = _workDirectory.childFile(fs.path.join(
+      'temp',
+      'auth_opt.json',
+    ));
+    return authFile.existsSync();
   }
 }

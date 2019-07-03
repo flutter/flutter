@@ -79,6 +79,8 @@ class GoldensClient {
 
 class GoldensRepositoryClient  extends GoldensClient {
 
+  GoldensRepositoryClient({ProcessManager testProcess}) : super(process: testProcess);
+
   RandomAccessFile _lock;
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
