@@ -56,7 +56,7 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 
 /// Signature for the callback that's called when the expansion indicator of the
 /// [ExpansionPanel] needs to rebuild.
-typedef ExpansionPanelIndicatorBuilder = Widget Function(BuildContext context, bool isExpanded);
+typedef ExpansionPanelIconBuilder = Widget Function(BuildContext context, bool isExpanded);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -81,7 +81,7 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
-    this.expansionIndicator,
+    this.expandIconBuilder,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -103,7 +103,7 @@ class ExpansionPanel {
   ///   headerBuilder: (context, isExpanded) {
   ///     return Text("This is ExpansionPanel's header");
   ///   },
-  ///   expansionIndicator: (context, isExpanded) {
+  ///   expandIconBuilder: (context, isExpanded) {
   ///     return Checkbox(
   ///       value: isExpanded,
   ///       onChanged: (bool val) {
@@ -118,7 +118,7 @@ class ExpansionPanel {
   /// )
   /// ```
   /// {@end-tool}
-  final ExpansionPanelIndicatorBuilder expansionIndicator;
+  final ExpansionPanelIconBuilder expandIconBuilder;
 
   /// The body of the expansion panel that's displayed below the header.
   ///
@@ -156,14 +156,14 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
     bool canTapOnHeader = false,
-    ExpansionPanelIndicatorBuilder expansionIndicator,
+    ExpansionPanelIconBuilder expandIconBuilder,
   }) :
     assert(value != null),
     super(
       body: body,
       headerBuilder: headerBuilder,
       canTapOnHeader: canTapOnHeader,
-      expansionIndicator: expansionIndicator,
+      expandIconBuilder: expandIconBuilder,
     );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -489,11 +489,19 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
 
       Widget expansionIndicator;
-      if (child.expansionIndicator != null) {
-        expansionIndicator = child.expansionIndicator(
-          context,
-          _isChildExpanded(index),
-        );
+      if (child.expandIconBuilder != null) {
+
+        expansionIndicator = !child.canTapOnHeader
+          ? child.expandIconBuilder(
+              context,
+              _isChildExpanded(index),
+            )
+          : IgnorePointer(
+              child: child.expandIconBuilder(
+                context,
+                _isChildExpanded(index),
+              ),
+            );
       } else {
         expansionIndicator = ExpandIcon(
           isExpanded: _isChildExpanded(index),
