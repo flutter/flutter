@@ -2574,7 +2574,7 @@ class _PaddleSliderTrackShapePathPainter {
   static const double _bottomLobeRadius = 10.0;
   static const double _labelPadding = 8.0;
   static const double _distanceBetweenTopBottomCenters = 40.0;
-  static const double _middleNeckWidth = 3;
+  static const double _middleNeckWidth = 2.0;
   static const double _bottomNeckRadius = 4.5;
   // The base of the triangle between the top lobe center and the centers of
   // the two top neck arcs.
