@@ -72,7 +72,7 @@ void main() {
     group('auth', () {
       test('performs minimal work if already authorized', () async {
         final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
-        final File authFile = fs.file('/workDirectory/temp/auth_opt.json')..createSync(recursive: true);
+        fs.file('/workDirectory/temp/auth_opt.json')..createSync(recursive: true);
         when(process.run(any)).thenAnswer((_) => Future<io.ProcessResult>.value(io.ProcessResult(123, 0, '', '')));
         await goldens.auth(workDirectory);
 
