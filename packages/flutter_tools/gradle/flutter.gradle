@@ -209,29 +209,33 @@ class FlutterPlugin implements Plugin<Project> {
     private void addPluginTasks(Project project) {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, ".flutter-plugins")
         Properties plugins = readPropertiesIfExist(pluginsFile)
-
         project.android.buildTypes.each { buildType ->
-            def buildModeValue = buildModeFor(buildType)
             plugins.each { name, path ->
-                String intermediateDirValue = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}"
+                String buildModeValue = buildType.debuggable ? "debug" : "release"
                 List<String> taskNameParts = ["build", "plugin", buildModeValue]
                 taskNameParts.addAll(name.split("_"))
-                project.tasks.create(name: toCammelCase(taskNameParts), type: FlutterPluginTask) {
-                    flutterExecutable this.flutterExecutable
-                    buildMode buildModeValue
-                    verbose isVerbose(project)
-                    pluginDir project.file(path)
-                    sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file(intermediateDirValue)
+                String taskName = toCammelCase(taskNameParts)
+                // Build types can be extended. For example, a build type can extend the `debug` mode.
+                // In such cases, prevent creating the same task.
+                if (project.tasks.findByName(taskName) == null) {
+                    project.tasks.create(name: taskName, type: FlutterPluginTask) {
+                        flutterExecutable this.flutterExecutable
+                        buildMode buildModeValue
+                        verbose isVerbose(project)
+                        pluginDir project.file(path)
+                        sourceDir project.file(project.flutter.source)
+                        intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}")
+                    }
                 }
             }
         }
     }
 
-    private void buildPlugins(Project project, Set<String> buildTypes) {
+    private void buildPlugins(Project project, Set buildTypes) {
         buildTypes.each { buildType ->
             project.tasks.withType(FlutterPluginTask).all { pluginTask ->
-                if (pluginTask.buildMode != buildType) {
+                String buildMode = buildType.debuggable ? "debug" : "release"
+                if (pluginTask.buildMode != buildMode) {
                     return
                 }
                 pluginTask.execute()
@@ -266,33 +270,25 @@ class FlutterPlugin implements Plugin<Project> {
                 assert !mavenMetadata.groupId.text().empty
                 assert !mavenMetadata.artifactId.text().empty
                 // Add the plugin dependency based on the Maven metadata.
-                addApiDependencies(project, buildType, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:+@aar", {
+                addApiDependencies(project, buildType.name, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:+@aar", {
                     transitive = true
                 })
             }
         }
     }
 
-    private Set<String> getBuildTypesForTasks(List<String> tasksToExecute) {
-        Set<String> buildTypes = []
-
+    private Set getBuildTypesForTasks(Project project, List<String> tasksToExecute) {
+        Set buildTypes = []
         tasksToExecute.each { task ->
             if (!task.contains("assemble")) {
                 return
             }
-            if (task.endsWith('assemble')) {
-                buildTypes.add('release')
-                buildTypes.add('debug')
-                buildTypes.add('profile')
-            }
-            if (task.endsWith('Release')) {
-                buildTypes.add('release')
-            }
-            if (task.endsWith('Debug')) {
-                buildTypes.add('debug')
-            }
-            if (task.endsWith('Profile')) {
-                buildTypes.add('profile')
+            project.android.buildTypes.each {
+                if (task.endsWith('assemble')) {
+                    buildTypes.add(it)
+                } else if (task.endsWith(it.name.capitalize())) {
+                    buildTypes.add(it)
+                }
             }
         }
         return buildTypes
@@ -607,7 +603,7 @@ class FlutterPlugin implements Plugin<Project> {
         addPluginTasks(project)
 
         List<String> tasksToExecute = project.gradle.startParameter.taskNames
-        Set<String> buildTypes = getBuildTypesForTasks(tasksToExecute)
+        Set buildTypes = getBuildTypesForTasks(project, tasksToExecute)
         if (tasksToExecute.contains("clean")) {
             // Because the plugins are built during configuration, the task "clean"
             // cannot run in conjunction with an assembly task.
@@ -885,11 +881,15 @@ class FlutterPluginTask extends DefaultTask {
             args "--quiet"
             args "--suppress-analytics"
             args "--output-dir", "${intermediateDir}"
-            // Plugins don't have a "profile" build mode.
-            if (buildMode == "profile") {
-                args "--debug"
-            } else {
-                args "--${buildMode}"
+            switch (buildMode) {
+                case 'release':
+                    args "--release"
+                    break
+                case 'debug':
+                    args "--debug"
+                    break
+                default:
+                    assert false
             }
             if (verbose) {
                 args "--verbose"
