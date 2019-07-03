@@ -59,17 +59,17 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset center, {
-    @required Animation<double> activationAnimation,
-    @required Animation<double> enableAnimation,
-    bool isDiscrete = false,
-    bool isEnabled = false,
-    bool isOnTop,
-    @required SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    Thumb thumb,
-  }) {
+      PaintingContext context,
+      Offset center, {
+        @required Animation<double> activationAnimation,
+        @required Animation<double> enableAnimation,
+        bool isDiscrete = false,
+        bool isEnabled = false,
+        bool isOnTop,
+        @required SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        Thumb thumb,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -120,17 +120,17 @@ class _CustomThumbShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isDiscrete,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -159,17 +159,17 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 
   @override
   void paint(
-    PaintingContext context,
-    Offset thumbCenter, {
-    Animation<double> activationAnimation,
-    Animation<double> enableAnimation,
-    bool isDiscrete,
-    TextPainter labelPainter,
-    RenderBox parentBox,
-    SliderThemeData sliderTheme,
-    TextDirection textDirection,
-    double value,
-  }) {
+      PaintingContext context,
+      Offset thumbCenter, {
+        Animation<double> activationAnimation,
+        Animation<double> enableAnimation,
+        bool isDiscrete,
+        TextPainter labelPainter,
+        RenderBox parentBox,
+        SliderThemeData sliderTheme,
+        TextDirection textDirection,
+        double value,
+      }) {
     final Canvas canvas = context.canvas;
     final ColorTween enableColor = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -365,19 +365,15 @@ class _RangeSlidersState extends State<_RangeSliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SliderTheme(
-                data: SliderThemeData(showValueIndicator: ShowValueIndicator.always),
-                child: RangeSlider(
-                  values: _continuousValues,
-                  min: 0.0,
-                  max: 100.0,
-                  labels: RangeLabels('${_continuousValues.start.round()}', '${_continuousValues.end.round()}'),
-                  onChanged: (RangeValues values) {
-                    setState(() {
-                      _continuousValues = values;
-                    });
-                  },
-                ),
+              RangeSlider(
+                values: _continuousValues,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (RangeValues values) {
+                  setState(() {
+                    _continuousValues = values;
+                  });
+                },
               ),
               const Text('Continuous'),
             ],
