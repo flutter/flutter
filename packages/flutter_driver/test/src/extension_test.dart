@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:flutter_driver/src/common/find.dart';
 import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
@@ -102,7 +103,7 @@ void main() {
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
       final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
@@ -266,5 +267,70 @@ void main() {
     result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
     await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
+  });
+
+  testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0, bool properties = true }) async {
+      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
+      final DiagnosticsTreeResult result = DiagnosticsTreeResult((await extension.call(arguments))['response']);
+      return result.json;
+    }
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+            child: const Text('Hello World', key: ValueKey<String>('Text'))
+        ),
+      ),
+    );
+
+    // Widget
+    Map<String, Object> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0);
+    expect(result['children'], isNull); // depth: 0
+    expect(result['widgetRuntimeType'], 'Text');
+
+    List<Map<String, Object>> properties = result['properties'];
+    Map<String, Object> stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'data');
+    expect(stringProperty['description'], '"Hello World"');
+    expect(stringProperty['propertyType'], 'String');
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['widgetRuntimeType'], 'Text');
+    expect(result['properties'], isNull); // properties: false
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 1);
+    List<Map<String, Object>> children = result['children'];
+    expect(children.single['children'], isNull);
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 100);
+    children = result['children'];
+    expect(children.single['children'], isEmpty);
+
+    // RenderObject
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0);
+    expect(result['children'], isNull); // depth: 0
+    expect(result['properties'], isNotNull);
+    expect(result['description'], startsWith('RenderParagraph'));
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['properties'], isNull); // properties: false
+    expect(result['description'], startsWith('RenderParagraph'));
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 1);
+    children = result['children'];
+    final Map<String, Object> textSpan = children.single;
+    expect(textSpan['description'], 'TextSpan');
+    properties = textSpan['properties'];
+    stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'text');
+    expect(stringProperty['description'], '"Hello World"');
+    expect(stringProperty['propertyType'], 'String');
+    expect(children.single['children'], isNull);
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
+    children = result['children'];
+    expect(children.single['children'], isEmpty);
   });
 }

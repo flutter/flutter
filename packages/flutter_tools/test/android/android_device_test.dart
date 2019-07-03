@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -57,6 +60,7 @@ List of devices attached
 ''', devices: devices);
       expect(devices, hasLength(1));
       expect(devices.first.name, 'Nexus 7');
+      expect(devices.first.category, Category.mobile);
     });
 
     testUsingContext('emulators and short listings', () {
@@ -105,6 +109,84 @@ Use the 'android' tool to install them:
       expect(properties['ro.build.version.sdk'], '23');
     });
   });
+
+  group('adb.exe exiting with heap corruption on windows', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    String hardware;
+    String buildCharacteristics;
+
+    setUp(() {
+      hardware = 'goldfish';
+      buildCharacteristics = 'unused';
+      exitCode = -1;
+      when(mockProcessManager.run(argThat(contains('getprop')),
+          stderrEncoding: anyNamed('stderrEncoding'),
+          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.hardware]: [$hardware]')..writeln(
+              '[ro.build.characteristics]: [$buildCharacteristics]');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('nonHeapCorruptionErrorOnWindows', () async {
+      exitCode = -1073740941;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('heapCorruptionOnWindows', () async {
+      exitCode = -1073740940;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('heapCorruptionExitCodeOnLinux', () async {
+      exitCode = -1073740940;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('noErrorOnLinux', () async {
+      exitCode = 0;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+  });
+
 
   group('isLocalEmulator', () {
     final ProcessManager mockProcessManager = MockProcessManager();
@@ -196,6 +278,83 @@ flutter:
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+  });
+
+  group('emulatorId', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    const String dummyEmulatorId = 'dummyEmulatorId';
+    final Future<Socket> Function(String host, int port) unresponsiveSocket =
+        (String host, int port) async => MockUnresponsiveAndroidConsoleSocket();
+    final Future<Socket> Function(String host, int port) workingSocket =
+        (String host, int port) async => MockWorkingAndroidConsoleSocket(dummyEmulatorId);
+    String hardware;
+    bool socketWasCreated;
+
+    setUp(() {
+      hardware = 'goldfish'; // Known emulator
+      socketWasCreated = false;
+      when(mockProcessManager.run(argThat(contains('getprop')),
+          stderrEncoding: anyNamed('stderrEncoding'),
+          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.hardware]: [$hardware]');
+        final ProcessResult result = ProcessResult(1, 0, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('returns correct ID for responsive emulator', () async {
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, equals(dummyEmulatorId));
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => workingSocket,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not create socket for non-emulator devices', () async {
+      hardware = 'samsungexynos7420';
+
+      // Still use an emulator-looking ID so we can be sure the failure is due
+      // to the isLocalEmulator field and not because the ID doesn't contain a
+      // port.
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, isNull);
+      expect(socketWasCreated, isFalse);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => (String host, int port) async {
+        socketWasCreated = true;
+        throw 'Socket was created for non-emulator';
+      },
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not create socket for emulators with no port', () async {
+      final AndroidDevice device = AndroidDevice('emulator-noport');
+      expect(await device.emulatorId, isNull);
+      expect(socketWasCreated, isFalse);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => (String host, int port) async {
+        socketWasCreated = true;
+        throw 'Socket was created for emulator without port in ID';
+      },
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns null for connection error', () async {
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, isNull);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => (String host, int port) => throw 'Fake socket error',
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns null for unresponsive device', () async {
+      final AndroidDevice device = AndroidDevice('emulator-5555');
+      expect(await device.emulatorId, isNull);
+    }, overrides: <Type, Generator>{
+      AndroidConsoleSocketFactory: () => unresponsiveSocket,
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('portForwarder', () {
@@ -400,3 +559,44 @@ const String kAdbShellGetprop = '''
 [wlan.driver.status]: [unloaded]
 [xmpp.auto-presence]: [true]
 ''';
+
+/// A mock Android Console that presents a connection banner and responds to
+/// "avd name" requests with the supplied name.
+class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
+  MockWorkingAndroidConsoleSocket(this.avdName) {
+    _controller.add('Android Console: Welcome!\n');
+    // Include OK in the same packet here. In the response to "avd name"
+    // it's sent alone to ensure both are handled.
+    _controller.add('Android Console: Some intro text\nOK\n');
+  }
+
+  final String avdName;
+  final StreamController<String> _controller = StreamController<String>();
+
+  @override
+  Stream<E> asyncMap<E>(FutureOr<E> convert(List<int> event)) => _controller.stream as Stream<E>;
+
+  @override
+  void add(List<int> data) {
+    final String text = ascii.decode(data);
+    if (text == 'avd name\n') {
+      _controller.add('$avdName\n');
+      // Include OK in its own packet here. In welcome banner it's included
+      // as part of the previous text to ensure both are handled.
+      _controller.add('OK\n');
+    } else {
+      throw 'Unexpected command $text';
+    }
+  }
+}
+
+/// An Android console socket that drops all input and returns no output.
+class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
+  final StreamController<String> _controller = StreamController<String>();
+
+  @override
+  Stream<E> asyncMap<E>(FutureOr<E> convert(List<int> event)) => _controller.stream as Stream<E>;
+
+  @override
+  void add(List<int> data) {}
+}

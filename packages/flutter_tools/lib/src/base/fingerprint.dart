@@ -94,9 +94,11 @@ class Fingerprinter {
   }
 
   Future<List<String>> _getPaths() async {
-    final Set<String> paths = _paths.toSet();
-    for (String depfilePath in _depfilePaths)
-      paths.addAll(await readDepfile(depfilePath));
+    final Set<String> paths = <String>{
+      ..._paths,
+      for (String depfilePath in _depfilePaths)
+        ...await readDepfile(depfilePath),
+    };
     final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
     return paths.where(filter).toList()..sort();
   }
@@ -118,7 +120,7 @@ class Fingerprint {
       final List<int> bytes = file.readAsBytesSync();
       _checksums[file.path] = md5.convert(bytes).toString();
     }
-    _properties = <String, String>{}..addAll(properties);
+    _properties = <String, String>{...properties};
   }
 
   /// Creates a Fingerprint from serialized JSON.

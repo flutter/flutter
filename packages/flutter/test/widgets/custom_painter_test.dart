@@ -315,7 +315,7 @@ void _defineTests() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -412,6 +412,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             textField: true,
+            readOnly: true,
             focused: true,
             inMutuallyExclusiveGroup: true,
             header: true,
@@ -458,6 +459,7 @@ void _defineTests() {
             hidden: true,
             button: true,
             textField: true,
+            readOnly: true,
             focused: true,
             inMutuallyExclusiveGroup: true,
             header: true,
@@ -493,7 +495,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {

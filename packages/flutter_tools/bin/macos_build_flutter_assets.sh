@@ -41,7 +41,7 @@ fi
 
 # Copy the framework and handle local engine builds.
 framework_name="FlutterMacOS.framework"
-derived_dir="${SOURCE_ROOT}/Flutter"
+ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
 framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
 flutter_framework="${framework_path}/${framework_name}"
 
@@ -66,9 +66,9 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
   flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/${framework_name}"
 fi
 
-RunCommand mkdir -p -- "$derived_dir"
-RunCommand rm -rf -- "${derived_dir}/${framework_name}"
-RunCommand cp -Rp -- "${flutter_framework}" "${derived_dir}"
+RunCommand mkdir -p -- "$ephemeral_dir"
+RunCommand rm -rf -- "${ephemeral_dir}/${framework_name}"
+RunCommand cp -Rp -- "${flutter_framework}" "${ephemeral_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"

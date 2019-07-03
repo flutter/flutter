@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test performs too poorly to run with coverage enabled.
+@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -14,7 +17,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import 'package:mockito/mockito.dart';
@@ -378,6 +380,125 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
+
+  testUsingContext('androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      true,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--no-androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      false,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -388,8 +509,8 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    void expectExists(String relPath, [bool expectation = true]) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
@@ -430,6 +551,9 @@ void main() {
     final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    // Xcode build system
+    final String xcodeWorkspaceSettingsPath = fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
+    expectExists(xcodeWorkspaceSettingsPath, false);
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
@@ -930,68 +1054,6 @@ void main() {
     HttpClientFactory: () =>
         () => MockHttpClient(404, result: 'not found'),
   });
-
-  group('usageValues', () {
-    testUsingContext('set template type as usage value', () async {
-      Cache.flutterRoot = '../..';
-
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'module'));
-
-      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'app'));
-
-      await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'package'));
-
-      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'plugin'));
-
-    }, timeout: allowForCreateFlutterProject);
-
-    testUsingContext('set iOS host language type as usage value', () async {
-      Cache.flutterRoot = '../..';
-
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'objc'));
-
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=app',
-        '--ios-language=swift',
-        projectDir.path,
-      ]);
-      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'swift'));
-
-    }, timeout: allowForCreateFlutterProject);
-
-    testUsingContext('set Android host language type as usage value', () async {
-      Cache.flutterRoot = '../..';
-
-      final CreateCommand command = CreateCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
-      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'java'));
-
-      await runner.run(<String>[
-        'create',
-        '--no-pub',
-        '--template=app',
-        '--android-language=kotlin',
-        projectDir.path,
-      ]);
-      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'kotlin'));
-
-    }, timeout: allowForCreateFlutterProject);
-  });
 }
 
 
@@ -1004,10 +1066,11 @@ Future<void> _createProject(
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  final List<String> args = <String>['create'];
-  args.addAll(createArgs);
-  args.add(dir.path);
-  await runner.run(args);
+  await runner.run(<String>[
+    'create',
+    ...createArgs,
+    dir.path,
+  ]);
 
   bool pathExists(String path) {
     final String fullPath = fs.path.join(dir.path, path);
@@ -1044,10 +1107,11 @@ Future<void> _analyzeProject(String workingDir) async {
     'flutter_tools.dart',
   ));
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..add('analyze');
+  final List<String> args = <String>[
+    ...dartVmFlags,
+    flutterToolsPath,
+    'analyze',
+  ];
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -1071,21 +1135,22 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // files anymore.
   await Process.run(
     '$dartSdkPath/bin/dart',
-    <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..addAll(<String>['packages', 'get']),
+    <String>[
+      ...dartVmFlags,
+      flutterToolsPath,
+      'packages',
+      'get',
+    ],
     workingDirectory: workingDir.path,
   );
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..add('test')
-    ..add('--no-color');
-  if (target != null) {
-    args.add(target);
-  }
+  final List<String> args = <String>[
+    ...dartVmFlags,
+    flutterToolsPath,
+    'test',
+    '--no-color',
+    if (target != null) target,
+  ];
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -1161,7 +1226,7 @@ class MockHttpClientRequest implements HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+class MockHttpClientResponse implements HttpClientResponse {
   MockHttpClientResponse(this.statusCode, {this.result});
 
   @override
@@ -1173,14 +1238,25 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+
+  @override
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
+    action(Uint8List.fromList(result.codeUnits));
+    return Future<void>.value();
   }
 
   @override

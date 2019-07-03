@@ -48,12 +48,14 @@ TaskFunction createMicrobenchmarkTask() {
       return _run();
     }
 
-    final Map<String, double> allResults = <String, double>{};
-    allResults.addAll(await _runMicrobench('lib/stocks/layout_bench.dart'));
-    allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
-    allResults.addAll(await _runMicrobench('lib/geometry/rrect_contains_bench.dart'));
-    allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
-    allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
+    final Map<String, double> allResults = <String, double>{
+      ...await _runMicrobench('lib/stocks/layout_bench.dart'),
+      ...await _runMicrobench('lib/stocks/build_bench.dart'),
+      ...await _runMicrobench('lib/geometry/rrect_contains_bench.dart'),
+      ...await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
+      ...await _runMicrobench('lib/gestures/gesture_detector_bench.dart'),
+      ...await _runMicrobench('lib/stocks/animation_bench.dart'),
+    };
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
@@ -65,7 +67,7 @@ Future<Process> _startFlutter({
   bool canFail = false,
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>['run']..addAll(options);
+  final List<String> args = <String>['run', ...options];
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 

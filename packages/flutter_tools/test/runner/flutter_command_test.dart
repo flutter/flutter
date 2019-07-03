@@ -49,6 +49,114 @@ void main() {
       Cache: () => cache,
     });
 
+    testUsingContext('reports command that results in success', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'dummy',
+          const <String, String>{'cd26': 'success'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in warning', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.warning);
+        }
+      );
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'dummy',
+          const <String, String>{'cd26': 'warning'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in failure', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.fail);
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+      } on ToolExit {
+        expect(
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'dummy',
+            const <String, String>{'cd26': 'fail'}
+          ],
+        );
+      }
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in error', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+        fail('Mock should make this fail');
+      } on ToolExit {
+        expect(
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'dummy',
+            const <String, String>{'cd26': 'fail'}
+          ],
+        );
+      }
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
     testUsingContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
@@ -61,7 +169,12 @@ void main() {
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
+        <dynamic>[
+          'flutter',
+          'dummy',
+          const Duration(milliseconds: 1000),
+          null
+        ],
       );
     },
     overrides: <Type, Generator>{
@@ -161,8 +274,8 @@ void main() {
     final MockVersion stableVersion = MockVersion();
     final MockVersion betaVersion = MockVersion();
     final FakeCommand fakeCommand = FakeCommand();
-    when(stableVersion.isStable).thenReturn(true);
-    when(betaVersion.isStable).thenReturn(false);
+    when(stableVersion.isMaster).thenReturn(false);
+    when(betaVersion.isMaster).thenReturn(true);
 
     testUsingContext('Can be disabled on stable branch', () async {
       expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));

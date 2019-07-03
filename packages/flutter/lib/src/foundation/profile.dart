@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show VoidCallback;
-
+import 'basic_types.dart';
 import 'constants.dart';
 
 /// DEPRECATED. `function` cannot be treeshaken out of release builds.

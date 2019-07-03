@@ -129,7 +129,7 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -161,7 +161,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -185,7 +185,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -193,7 +193,7 @@ void main() {
       action: TextInputAction.next,
       serializedActionName: 'TextInputAction.next',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -201,7 +201,7 @@ void main() {
       action: TextInputAction.previous,
       serializedActionName: 'TextInputAction.previous',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -209,7 +209,7 @@ void main() {
       action: TextInputAction.continueAction,
       serializedActionName: 'TextInputAction.continueAction',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -217,7 +217,7 @@ void main() {
       action: TextInputAction.join,
       serializedActionName: 'TextInputAction.join',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -266,6 +266,66 @@ void main() {
         equals('TextInputType.multiline'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.newline'));
+  });
+
+  testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(
+          text: 'initial value',
+        )
+    );
+    Future<void> pumpEditableTextWithTextStyle(TextStyle style) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: style,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
+          ),
+        ),
+      );
+    }
+
+    await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 18));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.longPress,
+    );
+    await tester.pumpAndSettle();
+    await tester.idle();
+
+    List<RenderBox> handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
+
+    expect(handles[0].localToGlobal(Offset.zero), const Offset(-35.0, 5.0));
+    expect(handles[1].localToGlobal(Offset.zero), const Offset(113.0, 5.0));
+
+    await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 30));
+    await tester.pumpAndSettle();
+
+    // Handles should be updated with bigger font size.
+    handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
+    // First handle should have the same dx but bigger dy.
+    expect(handles[0].localToGlobal(Offset.zero), const Offset(-35.0, 17.0));
+    expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
   });
 
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
@@ -1170,7 +1230,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1271,7 +1331,7 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1373,7 +1433,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1546,7 +1606,7 @@ void main() {
 
       controls = MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any, any))
+      when(controls.buildToolbar(any, any, any, any, any, any))
           .thenReturn(Container());
     });
 
@@ -1870,8 +1930,9 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    expect(renderEditable.text.children[1].text, 'composing');
-    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+    final TextSpan textSpan = renderEditable.text.children[1];
+    expect(textSpan.text, 'composing');
+    expect(textSpan.style.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
     await tester.pump();
@@ -1893,6 +1954,7 @@ void main() {
         child: SizedBox(
           width: 100,
           child: EditableText(
+            showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -1906,7 +1968,7 @@ void main() {
     ));
 
     final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
+      tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
     final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
@@ -1961,12 +2023,14 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<CompositedTransformFollower> container =
-        find.byType(CompositedTransformFollower)
-          .evaluate()
-          .map((Element e) => e.widget)
-          .cast<CompositedTransformFollower>()
-          .toList();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(GestureDetector),
+          ),
+        ),
+      );
 
       final Size viewport = renderEditable.size;
 
@@ -2003,15 +2067,14 @@ void main() {
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
-      testPosition(container[0].offset.dx, leftPosition);
-      testPosition(container[1].offset.dx, rightPosition);
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
+      testPosition(handles[0].localToGlobal(Offset.zero).dx, leftPosition);
+      testPosition(handles[1].localToGlobal(Offset.zero).dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2033,7 +2096,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2046,7 +2108,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  });
+  }, skip: isBrowser);
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -2060,6 +2122,7 @@ void main() {
           width: 100,
           child: EditableText(
             controller: controller,
+            showSelectionHandles: true,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
@@ -2078,31 +2141,33 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
-    final List<CompositedTransformFollower> container =
-      find.byType(CompositedTransformFollower)
-        .evaluate()
-        .map((Element e) => e.widget)
-        .cast<CompositedTransformFollower>()
-        .toList();
+    final List<RenderBox> handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
     expect(
-      container[0].offset.dx,
+      handles[0].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
         -kMinInteractiveSize,
         kMinInteractiveSize,
       ),
     );
     expect(
-      container[1].offset.dx,
+      handles[1].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
         70.0 - kMinInteractiveSize,
         70.0 + kMinInteractiveSize,
       ),
     );
+    expect(state.selectionOverlay.handlesAreVisible, isTrue);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
-  });
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
@@ -2119,6 +2184,7 @@ void main() {
           child: SizedBox(
             width: 100,
             child: EditableText(
+              showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
               style: Typography(platform: TargetPlatform.iOS).black.subhead,
@@ -2186,12 +2252,14 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<CompositedTransformFollower> container =
-        find.byType(CompositedTransformFollower)
-          .evaluate()
-          .map((Element e) => e.widget)
-          .cast<CompositedTransformFollower>()
-          .toList();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(GestureDetector),
+          ),
+        ),
+      );
 
       final Size viewport = renderEditable.size;
 
@@ -2228,15 +2296,14 @@ void main() {
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
-      testPosition(container[0].offset.dx, leftPosition);
-      testPosition(container[1].offset.dx, rightPosition);
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
+      testPosition(handles[0].localToGlobal(Offset.zero).dx, leftPosition);
+      testPosition(handles[1].localToGlobal(Offset.zero).dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2258,7 +2325,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2273,7 +2339,7 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, skip: isBrowser);
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {

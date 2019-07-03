@@ -103,6 +103,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      return false;
+    }
+
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification) {
       // Any movements always makes the scrollbar start showing up.

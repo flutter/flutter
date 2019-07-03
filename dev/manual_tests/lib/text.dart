@@ -145,7 +145,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((TextSpan child) => _fiddleWith(child))?.toList() ?? <TextSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
     );
   }
 
@@ -1401,8 +1401,7 @@ String zalgo(math.Random random, int targetLength, { bool includeSpacingCombinin
     }
   }
   base ??= String.fromCharCode(randomCharacter(random));
-  final List<int> characters = <int>[];
-  characters.addAll(these);
+  final List<int> characters = these.toList();
   return base + String.fromCharCodes(characters);
 }
 

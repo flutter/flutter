@@ -18,6 +18,13 @@ import 'adb.dart';
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
+/// The local engine to use for [flutter] and [evalFlutter], if any.
+String get localEngine => const String.fromEnvironment('localEngine');
+
+/// The local engine source path to use if a local engine is used for [flutter]
+/// and [evalFlutter].
+String get localEngineSrcPath => const String.fromEnvironment('localEngineSrcPath');
+
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
 
@@ -228,7 +235,7 @@ Future<Process> startProcess(
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
-    <String>[executable]..addAll(arguments),
+    <String>[executable, ...arguments],
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
@@ -339,7 +346,12 @@ Future<int> flutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>[command]..addAll(options);
+  final List<String> args = <String>[
+    command,
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    ...options,
+  ];
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -351,7 +363,12 @@ Future<String> evalFlutter(String command, {
   Map<String, String> environment,
   StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
-  final List<String> args = <String>[command]..addAll(options);
+  final List<String> args = <String>[
+    command,
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    ...options,
+  ];
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
 }
