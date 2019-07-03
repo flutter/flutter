@@ -22,9 +22,9 @@ export 'package:flutter_goldens_client/skia_client.dart';
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
 /// works for the current test.
 Future<void> main(FutureOr<void> testMain()) async {
-  goldenFileComparator = //testingWithSkiaGold(const LocalPlatform())
-    //? await FlutterSkiaGoldFileComparator.fromDefaultComparator()
-     await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
+  goldenFileComparator = testingWithSkiaGold(const LocalPlatform())
+    ? await FlutterSkiaGoldFileComparator.fromDefaultComparator()
+    : await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
   await testMain();
 }
 
