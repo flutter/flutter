@@ -49,6 +49,9 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
     Key key,
+    // TODO(justinmc): When drag-in-from-side is implemented, might have to
+    // change the type of this callback.
+    GestureLongPressMoveUpdateCallback this.onDragScroll,
     @required this.child,
   }) : super(key: key);
 
@@ -57,6 +60,18 @@ class CupertinoScrollbar extends StatefulWidget {
   /// This should include a source of [ScrollNotification] notifications,
   /// typically a [Scrollable] widget.
   final Widget child;
+
+  /// Called when the user scrolls by dragging the scrollbar.
+  ///
+  /// Starting in iOS13, a long press on the scroll bar or a drag in from the
+  /// side enlarges the scrollbar thumb and makes it interactive. Dragging it
+  /// then causes the view to scroll.
+  ///
+  /// See also:
+  ///
+  ///   * [CupertinoPageScaffold], which uses the callback to implement the
+  ///     scrolling.
+  final GestureLongPressMoveUpdateCallback onDragScroll;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -144,7 +159,13 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPress() {
-    _thicknessAnimationController.forward();
+    setState(() {
+      _thicknessAnimationController.forward();
+    });
+  }
+
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    widget.onDragScroll(details);
   }
 
   void _startFadeoutTimer() {
@@ -203,9 +224,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
           instance
             ..onLongPress = _handleLongPress
             ..onLongPressStart = _handleLongPressStart
-            // TODO(justinmc): Longpress then drag to scroll works, but
-            // longpress on the thumb then drag to scroll does not.
-            //..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
             ..onLongPressUp = _handleLongPressUp;
         },
       );

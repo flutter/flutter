@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'scrollbar.dart';
 
 import 'theme.dart';
 
@@ -137,6 +138,19 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           ),
         );
       }
+    }
+
+    // TODO(justinmc): Take a new param to enable this?
+    if (true) {
+      paddedContent = CupertinoScrollbar(
+        // TODO(justinmc): Calculate position properly, not just localPosition.
+        onDragScroll: (LongPressMoveUpdateDetails details) {
+          _primaryScrollController.jumpTo(
+            details.localPosition.dy,
+          );
+        },
+        child: paddedContent,
+      );
     }
 
     // The main content being at the bottom is added to the stack first.
