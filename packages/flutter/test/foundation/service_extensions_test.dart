@@ -564,6 +564,7 @@ void main() {
 
     completed = false;
     expect(binding.reassembled, 0);
+    expect(binding.inBreakpoint, false);
     pendingResult = binding.testExtension('reassemble', <String, String>{});
     expect(binding.inBreakpoint, true);
     pendingResult.whenComplete(() { completed = true; binding.inBreakpoint = false; });
