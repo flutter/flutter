@@ -1252,7 +1252,7 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    // Lock height to maxLines if needed
+    // Lock height to maxLines if needed.
     final bool lockedMax = maxLines != null && minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
     final bool singleLine = maxLines == 1;
@@ -1260,7 +1260,7 @@ class RenderEditable extends RenderBox {
       return preferredLineHeight * maxLines;
     }
 
-    // Clamp height to minLines or maxLines if needed
+    // Clamp height to minLines or maxLines if needed.
     final bool minLimited = minLines != null && minLines > 1;
     final bool maxLimited = maxLines != null;
     if (minLimited || maxLimited) {
@@ -1273,7 +1273,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    // Set the height based on the content
+    // Set the height based on the content.
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
