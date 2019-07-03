@@ -16,6 +16,7 @@ import 'build.dart';
 /// A command to build a windows desktop target through a build shell script.
 class BuildWindowsCommand extends BuildSubCommand {
   BuildWindowsCommand() {
+    usesTargetOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app.',
@@ -59,7 +60,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!flutterProject.windows.existsSync()) {
       throwToolExit('No Windows desktop project configured.');
     }
-    await buildWindows(flutterProject.windows, buildInfo);
+    await buildWindows(flutterProject.windows, buildInfo, target: targetFile);
     return null;
   }
 }

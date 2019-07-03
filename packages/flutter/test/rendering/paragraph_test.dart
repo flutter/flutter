@@ -260,13 +260,13 @@ void main() {
     expect(paragraph.size.height, 26.0);
 
     // Test the sizes of nested spans.
-    final List<ui.TextBox> boxes = <ui.TextBox>[];
     final String text = testSpan.toStringDeep();
-    for (int i = 0; i < text.length; ++i) {
-      boxes.addAll(paragraph.getBoxesForSelection(
+    final List<ui.TextBox> boxes = <ui.TextBox>[
+      for (int i = 0; i < text.length; ++i)
+        ...paragraph.getBoxesForSelection(
           TextSelection(baseOffset: i, extentOffset: i + 1)
-      ));
-    }
+        ),
+    ];
     expect(boxes.length, equals(4));
 
     // anyOf is needed here and below because Linux and Mac have different text
