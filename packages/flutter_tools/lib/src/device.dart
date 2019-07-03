@@ -161,11 +161,10 @@ class DeviceManager {
 
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
-    }
-    return diagnostics;
+    return <String>[
+      for (DeviceDiscovery discoverer in _platformDiscoverers)
+        ...await discoverer.getDiagnostics(),
+    ];
   }
 
   /// Find and return a list of devices based on the current project and environment.

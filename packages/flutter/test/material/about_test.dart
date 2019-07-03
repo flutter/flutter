@@ -9,6 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  tearDown(() {
+    LicenseRegistry.reset();
+  });
+
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -131,6 +135,72 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
+    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 287.0));
   }, skip: isBrowser);
+
+  testWidgets('LicensePage returns early if unmounted', (WidgetTester tester) async {
+    final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LicensePage(),
+      ),
+    );
+    await tester.pump();
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Placeholder(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
+    licenseCompleter.complete(licenseEntry);
+    expect(licenseEntry.paragraphsCalled, false);
+  }, skip: isBrowser);
+
+  testWidgets('LicensePage returns late if unmounted', (WidgetTester tester) async {
+    final Completer<LicenseEntry> licenseCompleter = Completer<LicenseEntry>();
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromFuture(licenseCompleter.future);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: LicensePage(),
+      ),
+    );
+    await tester.pump();
+    final FakeLicenseEntry licenseEntry = FakeLicenseEntry();
+    licenseCompleter.complete(licenseEntry);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Placeholder(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(licenseEntry.paragraphsCalled, true);
+  }, skip: isBrowser);
+}
+
+class FakeLicenseEntry extends LicenseEntry {
+  FakeLicenseEntry();
+
+  bool get paragraphsCalled => _paragraphsCalled;
+  bool _paragraphsCalled = false;
+
+  @override
+  Iterable<String> packages = <String>[];
+
+  @override
+  Iterable<LicenseParagraph> get paragraphs {
+    _paragraphsCalled = true;
+    return <LicenseParagraph>[];
+  }
 }

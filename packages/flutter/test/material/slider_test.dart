@@ -1260,7 +1260,7 @@ void main() {
       hasSemantics(
         TestSemantics.root(children: <TestSemantics>[
           TestSemantics.rootChild(
-            id: 2,
+            id: 1,
             value: '50%',
             increasedValue: '60%',
             decreasedValue: '40%',
@@ -1299,7 +1299,7 @@ void main() {
         hasSemantics(
           TestSemantics.root(children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 3,
+              id: 1,
               value: '40',
               increasedValue: '60',
               decreasedValue: '20',

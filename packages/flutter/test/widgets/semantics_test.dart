@@ -62,7 +62,7 @@ void main() {
       ignoreId: true,
     ));
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
