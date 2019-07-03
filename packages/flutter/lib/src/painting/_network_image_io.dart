@@ -71,52 +71,56 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       final Uri resolved = Uri.base.resolve(key.url);
 
-      final Completer<TransferableTypedData> completer = Completer<TransferableTypedData>();
-      final RawReceivePort port = RawReceivePort((dynamic message) {
-        if (message is TransferableTypedData) {
-          completer.complete(message);
-        } else if (message is ImageChunkEvent) {
-          chunkEvents.add(message);
+      final Completer<TransferableTypedData> bytesCompleter = Completer<TransferableTypedData>();
+      final RawReceivePort downloadResponseHandler = RawReceivePort((_DownloadResponse response) {
+        if (response.bytes != null) {
+          bytesCompleter.complete(response.bytes);
+        } else if (response.chunkEvent != null) {
+          chunkEvents.add(response.chunkEvent);
+        } else if (response.error != null) {
+          bytesCompleter.completeError(response.error);
         } else {
-          completer.completeError(message);
+          assert(false);
         }
       });
 
       // This will keep reference to [debugNetworkImageHttpClientProvider] tree-shaken
-      // out of release build.
+      // out of release builds.
       HttpClientProvider httpClientProvider;
       assert(() { httpClientProvider = debugNetworkImageHttpClientProvider; return true; }());
 
-      final _DownloadRequest downloadRequest = _DownloadRequest(port.sendPort,
+      final _DownloadRequest downloadRequest = _DownloadRequest(downloadResponseHandler.sendPort,
           resolved, headers, httpClientProvider);
       if (_requestPort != null) {
-        // If worker isolate is properly set up([_requestPort] is holding
-        // initialized [SendPort], then just send download request down to it.
+        // If worker isolate is properly set up ([_requestPort] is holding
+        // initialized [SendPort]), then just send download request down to it.
         _requestPort.send(downloadRequest);
       } else {
         if (_pendingLoader == null) {
           // If worker isolate creation was not started, start creation now.
           _pendingLoadRequests = <_PendingLoadRequest>[];
 
+
+
           _pendingLoader = _setupIsolate()..then((Isolate isolate) {
-              isolate.addErrorListener(RawReceivePort(
-                  (List<dynamic> errorAndStacktrace) {
-                    _cleanupDueToError(errorAndStacktrace[0]);
-                  }).sendPort);
+              final RawReceivePort handleError = RawReceivePort((List<String> errorAndStackTrace) {
+                _cleanupDueToError(errorAndStackTrace[0]);
+              });
+              isolate.addErrorListener(handleError.sendPort);
               isolate.resume(isolate.pauseCapability);
             }).catchError((dynamic error, StackTrace stackTrace) {
               _cleanupDueToError(error);
             });
         }
-        // Record donwload request so it can either send a request when isolate is ready or handle errors.
+        // Record download request so it can either send a request when isolate is ready or handle errors.
         _pendingLoadRequests.add(_PendingLoadRequest(
             (SendPort sendPort) { sendPort.send(downloadRequest); },
             (dynamic error) { downloadRequest.sendPort.send(error); }
         ));
       }
 
-      final TransferableTypedData transferable = await completer.future;
-      port.close();
+      final TransferableTypedData transferable = await bytesCompleter.future;
+      downloadResponseHandler.close();
 
       final Uint8List bytes = transferable.materialize().asUint8List();
       if (bytes.isEmpty)
@@ -181,21 +185,35 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   String toString() => '$runtimeType("$url", scale: $scale)';
 }
 
-class _PendingLoadRequest {
-  _PendingLoadRequest(this.sendRequest, this.handleError);
+@immutable
+class _DownloadResponse {
+  const _DownloadResponse({this.bytes, this.chunkEvent, this.error}) :
+    assert(bytes != null || chunkEvent != null || error != null);
 
-  Function sendRequest;
-  Function handleError;
+  final TransferableTypedData bytes;
+  final ImageChunkEvent chunkEvent;
+  final String error;
 }
 
+typedef _RequestHandler = void Function(SendPort sendPort);
+typedef _ErrorHandler = void Function(dynamic error);
 
+@immutable
+class _PendingLoadRequest {
+  const _PendingLoadRequest(this.sendRequest, this.handleError);
+
+  final _RequestHandler sendRequest;
+  final _ErrorHandler handleError;
+}
+
+@immutable
 class _DownloadRequest {
-  _DownloadRequest(this.sendPort, this.uri, this.headers, this.debugNetworkImageHttpClientProvider);
+  const _DownloadRequest(this.sendPort, this.uri, this.headers, this.httpClientProvider);
 
   final SendPort sendPort;
   final Uri uri;
   final Map<String, String> headers;
-  final HttpClientProvider debugNetworkImageHttpClientProvider;
+  final HttpClientProvider httpClientProvider;
 }
 
 // We set `autoUncompress` to false to ensure that we can trust the value of
@@ -214,8 +232,8 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
     ongoingRequests++;
     idleTimer?.cancel();
     final HttpClient httpClient =
-      downloadRequest.debugNetworkImageHttpClientProvider != null
-          ? downloadRequest.debugNetworkImageHttpClientProvider()
+      downloadRequest.httpClientProvider != null
+          ? downloadRequest.httpClientProvider()
           : _sharedHttpClient;
 
     try {
@@ -231,14 +249,15 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
       final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int total) {
-             downloadRequest.sendPort.send(ImageChunkEvent(
-               cumulativeBytesLoaded: cumulative,
-               expectedTotalBytes: total,
-             ));
+             downloadRequest.sendPort.send(_DownloadResponse(
+                 chunkEvent: ImageChunkEvent(
+                     cumulativeBytesLoaded: cumulative,
+                     expectedTotalBytes: total,
+                 )));
           });
-      downloadRequest.sendPort.send(transferable);
+      downloadRequest.sendPort.send(_DownloadResponse(bytes: transferable));
     } catch (error) {
-      downloadRequest.sendPort.send(error.toString());
+      downloadRequest.sendPort.send(_DownloadResponse(error: error.toString()));
     }
     ongoingRequests--;
     if (ongoingRequests == 0) {
