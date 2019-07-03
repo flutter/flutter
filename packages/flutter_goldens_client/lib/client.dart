@@ -92,11 +92,8 @@ class GoldensRepositoryClient  extends GoldensClient {
   /// [GoldensClient] instances in other processes or isolates will not
   /// duplicate the work that this is doing.
   Future<void> prepare() async {
-    print('in prepare');
     final String goldensCommit = await _getGoldensCommit();
-    print('goldensCommit $goldensCommit');
     String currentCommit = await _getCurrentCommit();
-    print('currentCommit $currentCommit');
     if (currentCommit != goldensCommit) {
       await _obtainLock();
       try {
@@ -152,7 +149,6 @@ class GoldensRepositoryClient  extends GoldensClient {
     if (result.stdout.trim().isNotEmpty) {
       final StringBuffer buf = StringBuffer();
       buf
-        ..writeln(result.stdout.trim())
         ..writeln('flutter_goldens git checkout at ${comparisonRoot.path} has local changes and cannot be synced.')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
         ..writeln('cd ${comparisonRoot.path}')

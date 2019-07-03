@@ -63,7 +63,6 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<void> auth(Directory workDirectory) async {
-    print('In auth');
     _workDirectory = workDirectory;
     assert(_workDirectory != null);
 
@@ -72,7 +71,6 @@ class SkiaGoldClient extends GoldensClient {
 
     final File authorization = _workDirectory.childFile('serviceAccount.json');//..createSync(recursive: true);
     await authorization.writeAsString(_serviceAccount);
-    print('post write');
 
     final List<String> authArguments = <String>[
       'auth',
