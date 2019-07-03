@@ -144,3 +144,12 @@ void a11y_main() async { // ignore: non_constant_identifier_names
   await semanticsChanged;
   notifySemanticsEnabled(window.semanticsEnabled);
 }
+
+
+@pragma('vm:entry-point')
+void platform_messages_response() {
+  window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
+    callback(data);
+  };
+  signalNativeTest();
+}
