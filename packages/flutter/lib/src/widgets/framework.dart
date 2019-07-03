@@ -2666,16 +2666,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// the `ext.flutter.reassemble` hook is not available, and so this code will
   /// never execute.
   ///
-  /// Implementers should not rely on any ordering for hot reload source update,
-  /// reassemble, and build methods after a hot reload has been initiated. It is
-  /// possible that a [Timer] (e.g. an [Animation]) or a debugging session
-  /// attached to the isolate could trigger a build with reloaded code _before_
-  /// reassemble is called. Code that expects preconditions to be set by
-  /// reassemble after a hot reload must be resilient to being called out of
-  /// order, e.g. by fizzling instead of throwing. That said, once reassemble is
-  /// called, build will be called after it at least once.
-  /// {@endtemplate}
-  ///
   /// See also:
   ///
   ///  * [State.reassemble]
