@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Text baseline with CJK locale', (WidgetTester tester) async {
     // This test in combination with 'Text baseline with EN locale' verify the baselines
-    // used to align text with ideographic baselines is reasonable. We are currently
+    // used to align text with ideographic baselines are reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
     // properly implemented. When the ideographic baseline is better defined and implemented,
     // the values of this test should change very slightly. See the issue this is based off
@@ -68,8 +68,7 @@ void main() {
     );
 
     await tester.tap(find.byKey(targetKey));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    await tester.pumpAndSettle();
 
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
@@ -97,7 +96,7 @@ void main() {
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
     // This test in combination with 'Text baseline with CJK locale' verify the baselines
-    // used to align text with ideographic baselines is reasonable. We are currently
+    // used to align text with ideographic baselines are reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
     // properly implemented. When the ideographic baseline is better defined and implemented,
     // the values of this test should change very slightly. See the issue this is based off
@@ -155,8 +154,7 @@ void main() {
     );
 
     await tester.tap(find.byKey(targetKey));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+    await tester.pumpAndSettle();
 
     expect(find.text('hello, world'), findsOneWidget);
     expect(find.text('你好，世界'), findsOneWidget);
