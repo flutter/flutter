@@ -173,6 +173,8 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
 }
 
 void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
+  FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
+
   if (!layer_tree || !surface_) {
     return;
   }
