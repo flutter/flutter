@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/version.dart';
 
 import 'context.dart';
 
@@ -28,6 +29,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
+  FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -140,4 +142,68 @@ class NoOpUsage implements Usage {
 
   @override
   void sendTiming(String category, String variableName, Duration duration, {String label}) {}
+}
+
+class FakeFlutterVersion implements FlutterVersion {
+  @override
+  String get channel => 'master';
+
+  @override
+  Future<void> checkFlutterVersionFreshness() async { }
+
+  @override
+  bool checkRevisionAncestry({String tentativeDescendantRevision, String tentativeAncestorRevision}) {
+    throw UnimplementedError();
+  }
+
+  @override
+  String get dartSdkVersion => '12';
+
+  @override
+  String get engineRevision => '42.2';
+
+  @override
+  String get engineRevisionShort => '42';
+
+  @override
+  Future<void> ensureVersionFile() async { }
+
+  @override
+  String get frameworkAge => null;
+
+  @override
+  String get frameworkCommitDate => null;
+
+  @override
+  String get frameworkDate => null;
+
+  @override
+  String get frameworkRevision => null;
+
+  @override
+  String get frameworkRevisionShort => null;
+
+  @override
+  String get frameworkVersion => null;
+
+  @override
+  String getBranchName({bool redactUnknownBranches = false}) {
+    return 'master';
+  }
+
+  @override
+  String getVersionString({bool redactUnknownBranches = false}) {
+    return 'v0.0.0';
+  }
+
+  @override
+  bool get isMaster => true;
+
+  @override
+  String get repositoryUrl => null;
+
+  @override
+  Map<String, Object> toJson() {
+    return null;
+  }
 }
