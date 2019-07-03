@@ -7,14 +7,12 @@
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEEngine.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEReshapeListener.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEView.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FLEEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputPlugin.h"
 #import "flutter/shell/platform/embedder/embedder.h"
-
-static NSString* const kICUBundlePath = @"icudtl.dat";
-
-static const int kDefaultWindowFramebuffer = 0;
 
 namespace {
 
@@ -70,7 +68,7 @@ struct MouseState {
 /**
  * Private interface declaration for FLEViewController.
  */
-@interface FLEViewController () <FlutterBinaryMessenger>
+@interface FLEViewController ()
 
 /**
  * A list of additional responders to keyboard events. Keybord events are forwarded to all of them.
@@ -99,33 +97,9 @@ struct MouseState {
 - (void)addInternalPlugins;
 
 /**
- * Shared implementation of the regular and headless public APIs.
- */
-- (BOOL)launchEngineInternalWithAssetsPath:(nonnull NSURL*)assets
-                                  headless:(BOOL)headless
-                      commandLineArguments:(nullable NSArray<NSString*>*)arguments;
-
-/**
- * Creates a render config with callbacks based on whether the embedder is being run as a headless
- * server.
- */
-+ (FlutterRendererConfig)createRenderConfigHeadless:(BOOL)headless;
-
-/**
  * Creates the OpenGL context used as the resource context by the engine.
  */
 - (void)createResourceContext;
-
-/**
- * Makes the OpenGL context used by the engine for rendering optimization the
- * current context.
- */
-- (void)makeResourceContextCurrent;
-
-/**
- * Responds to system messages sent to this controller from the Flutter engine.
- */
-- (void)handlePlatformMessage:(const FlutterPlatformMessage*)message;
 
 /**
  * Calls dispatchMouseEvent:phase: with a phase determined by self.mouseState.
@@ -173,87 +147,11 @@ struct MouseState {
 
 @end
 
-#pragma mark - Static methods provided to engine configuration
-
-/**
- * Makes the owned FlutterView the current context.
- */
-static bool OnMakeCurrent(FLEViewController* controller) {
-  [controller.view makeCurrentContext];
-  return true;
-}
-
-/**
- * Clears the current context.
- */
-static bool OnClearCurrent(FLEViewController* controller) {
-  [NSOpenGLContext clearCurrentContext];
-  return true;
-}
-
-/**
- * Flushes the GL context as part of the Flutter rendering pipeline.
- */
-static bool OnPresent(FLEViewController* controller) {
-  [controller.view onPresent];
-  return true;
-}
-
-/**
- * Returns the framebuffer object whose color attachment the engine should render into.
- */
-static uint32_t OnFBO(FLEViewController* controller) {
-  return kDefaultWindowFramebuffer;
-}
-
-/**
- * Handles the given platform message by dispatching to the controller.
- */
-static void OnPlatformMessage(const FlutterPlatformMessage* message,
-                              FLEViewController* controller) {
-  [controller handlePlatformMessage:message];
-}
-
-/**
- * Makes the resource context the current context.
- */
-static bool OnMakeResourceCurrent(FLEViewController* controller) {
-  [controller makeResourceContextCurrent];
-  return true;
-}
-
-#pragma mark Static methods provided for headless engine configuration
-
-static bool HeadlessOnMakeCurrent(FLEViewController* controller) {
-  return false;
-}
-
-static bool HeadlessOnClearCurrent(FLEViewController* controller) {
-  return false;
-}
-
-static bool HeadlessOnPresent(FLEViewController* controller) {
-  return false;
-}
-
-static uint32_t HeadlessOnFBO(FLEViewController* controller) {
-  return kDefaultWindowFramebuffer;
-}
-
-static bool HeadlessOnMakeResourceCurrent(FLEViewController* controller) {
-  return false;
-}
-
 #pragma mark - FLEViewController implementation.
 
 @implementation FLEViewController {
-  FlutterEngine _engine;
-
   // The additional context provided to the Flutter engine for resource loading.
   NSOpenGLContext* _resourceContext;
-
-  // A mapping of channel names to the registered handlers for those channels.
-  NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
 
   // The plugin used to handle text input. This is not an FlutterPlugin, so must be owned
   // separately.
@@ -276,7 +174,7 @@ static bool HeadlessOnMakeResourceCurrent(FLEViewController* controller) {
  * Performs initialization that's common between the different init paths.
  */
 static void CommonInit(FLEViewController* controller) {
-  controller->_messageHandlers = [[NSMutableDictionary alloc] init];
+  controller->_engine = [[FLEEngine alloc] initWithViewController:controller];
   controller->_additionalKeyResponders = [[NSMutableOrderedSet alloc] init];
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
 }
@@ -295,12 +193,6 @@ static void CommonInit(FLEViewController* controller) {
     CommonInit(self);
   }
   return self;
-}
-
-- (void)dealloc {
-  if (FlutterEngineShutdown(_engine) == kSuccess) {
-    _engine = NULL;
-  }
 }
 
 - (void)setView:(NSView*)view {
@@ -327,16 +219,21 @@ static void CommonInit(FLEViewController* controller) {
 
 - (BOOL)launchEngineWithAssetsPath:(NSURL*)assets
               commandLineArguments:(NSArray<NSString*>*)arguments {
-  return [self launchEngineInternalWithAssetsPath:assets
-                                         headless:NO
-                             commandLineArguments:arguments];
-}
+  // Set up the resource context. This is done here rather than in viewDidLoad as there's no
+  // guarantee that viewDidLoad will be called before the engine is started, and the context must
+  // be valid by that point.
+  [self createResourceContext];
 
-- (BOOL)launchHeadlessEngineWithAssetsPath:(NSURL*)assets
-                      commandLineArguments:(NSArray<NSString*>*)arguments {
-  return [self launchEngineInternalWithAssetsPath:assets
-                                         headless:YES
-                             commandLineArguments:arguments];
+  // Register internal plugins before starting the engine.
+  [self addInternalPlugins];
+
+  if (![_engine launchEngineWithAssetsPath:assets commandLineArguments:arguments]) {
+    return NO;
+  }
+  // Send the initial user settings such as brightness and text scale factor
+  // to the engine.
+  [self sendInitialSettings];
+  return YES;
 }
 
 #pragma mark - Framework-internal methods
@@ -347,6 +244,10 @@ static void CommonInit(FLEViewController* controller) {
 
 - (void)removeKeyResponder:(NSResponder*)responder {
   [self.additionalKeyResponders removeObject:responder];
+}
+
+- (void)makeResourceContextCurrent {
+  [_resourceContext makeCurrentContext];
 }
 
 #pragma mark - Private methods
@@ -384,15 +285,15 @@ static void CommonInit(FLEViewController* controller) {
   _textInputPlugin = [[FLETextInputPlugin alloc] initWithViewController:self];
   _keyEventChannel =
       [FlutterBasicMessageChannel messageChannelWithName:@"flutter/keyevent"
-                                         binaryMessenger:self
+                                         binaryMessenger:_engine.binaryMessenger
                                                    codec:[FlutterJSONMessageCodec sharedInstance]];
   _settingsChannel =
       [FlutterBasicMessageChannel messageChannelWithName:@"flutter/settings"
-                                         binaryMessenger:self
+                                         binaryMessenger:_engine.binaryMessenger
                                                    codec:[FlutterJSONMessageCodec sharedInstance]];
   _platformChannel =
       [FlutterMethodChannel methodChannelWithName:@"flutter/platform"
-                                  binaryMessenger:self
+                                  binaryMessenger:_engine.binaryMessenger
                                             codec:[FlutterJSONMethodCodec sharedInstance]];
   __weak FLEViewController* weakSelf = self;
   [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
@@ -400,117 +301,10 @@ static void CommonInit(FLEViewController* controller) {
   }];
 }
 
-- (BOOL)launchEngineInternalWithAssetsPath:(NSURL*)assets
-                                  headless:(BOOL)headless
-                      commandLineArguments:(NSArray<NSString*>*)arguments {
-  if (_engine != NULL) {
-    return NO;
-  }
-
-  // Set up the resource context. This is done here rather than in viewDidLoad as there's no
-  // guarantee that viewDidLoad will be called before the engine is started, and the context must
-  // be valid by that point.
-  [self createResourceContext];
-
-  const FlutterRendererConfig config = [FLEViewController createRenderConfigHeadless:headless];
-
-  // Register internal plugins before starting the engine.
-  [self addInternalPlugins];
-
-  // FlutterProjectArgs is expecting a full argv, so when processing it for flags the first
-  // item is treated as the executable and ignored. Add a dummy value so that all provided arguments
-  // are used.
-  const unsigned long argc = arguments.count + 1;
-  const char** argv = (const char**)malloc(argc * sizeof(const char*));
-  argv[0] = "placeholder";
-  for (NSUInteger i = 0; i < arguments.count; ++i) {
-    argv[i + 1] = [arguments[i] UTF8String];
-  }
-
-  NSString* icuData = [[NSBundle bundleForClass:[self class]] pathForResource:kICUBundlePath
-                                                                       ofType:nil];
-
-  FlutterProjectArgs flutterArguments = {};
-  flutterArguments.struct_size = sizeof(FlutterProjectArgs);
-  flutterArguments.assets_path = assets.fileSystemRepresentation;
-  flutterArguments.icu_data_path = icuData.UTF8String;
-  flutterArguments.command_line_argc = (int)(argc);
-  flutterArguments.command_line_argv = argv;
-  flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
-
-  FlutterEngineResult result = FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &flutterArguments,
-                                                (__bridge void*)(self), &_engine);
-  free(argv);
-  if (result != kSuccess) {
-    NSLog(@"Failed to start Flutter engine: error %d", result);
-    return NO;
-  }
-  // Send the initial user settings such as brightness and text scale factor
-  // to the engine.
-  [self sendInitialSettings];
-  return YES;
-}
-
-+ (FlutterRendererConfig)createRenderConfigHeadless:(BOOL)headless {
-  if (headless) {
-    const FlutterRendererConfig config = {
-        .type = kOpenGL,
-        .open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig),
-        .open_gl.make_current = (BoolCallback)HeadlessOnMakeCurrent,
-        .open_gl.clear_current = (BoolCallback)HeadlessOnClearCurrent,
-        .open_gl.present = (BoolCallback)HeadlessOnPresent,
-        .open_gl.fbo_callback = (UIntCallback)HeadlessOnFBO,
-        .open_gl.make_resource_current = (BoolCallback)HeadlessOnMakeResourceCurrent};
-    return config;
-  } else {
-    const FlutterRendererConfig config = {
-        .type = kOpenGL,
-        .open_gl.struct_size = sizeof(FlutterOpenGLRendererConfig),
-        .open_gl.make_current = (BoolCallback)OnMakeCurrent,
-        .open_gl.clear_current = (BoolCallback)OnClearCurrent,
-        .open_gl.present = (BoolCallback)OnPresent,
-        .open_gl.fbo_callback = (UIntCallback)OnFBO,
-        .open_gl.make_resource_current = (BoolCallback)OnMakeResourceCurrent};
-    return config;
-  }
-}
-
 - (void)createResourceContext {
   NSOpenGLContext* viewContext = ((NSOpenGLView*)self.view).openGLContext;
   _resourceContext = [[NSOpenGLContext alloc] initWithFormat:viewContext.pixelFormat
                                                 shareContext:viewContext];
-}
-
-- (void)makeResourceContextCurrent {
-  [_resourceContext makeCurrentContext];
-}
-
-- (void)handlePlatformMessage:(const FlutterPlatformMessage*)message {
-  NSData* messageData = [NSData dataWithBytesNoCopy:(void*)message->message
-                                             length:message->message_size
-                                       freeWhenDone:NO];
-  NSString* channel = @(message->channel);
-  __block const FlutterPlatformMessageResponseHandle* responseHandle = message->response_handle;
-
-  FlutterBinaryReply binaryResponseHandler = ^(NSData* response) {
-    if (responseHandle) {
-      FlutterEngineSendPlatformMessageResponse(self->_engine, responseHandle,
-                                               static_cast<const uint8_t*>(response.bytes),
-                                               response.length);
-      responseHandle = NULL;
-    } else {
-      NSLog(@"Error: Message responses can be sent only once. Ignoring duplicate response "
-             "on channel '%@'.",
-            channel);
-    }
-  };
-
-  FlutterBinaryMessageHandler channelHandler = _messageHandlers[channel];
-  if (channelHandler) {
-    channelHandler(messageData, binaryResponseHandler);
-  } else {
-    binaryResponseHandler(nil);
-  }
 }
 
 - (void)dispatchMouseEvent:(nonnull NSEvent*)event {
@@ -572,7 +366,7 @@ static void CommonInit(FLEViewController* controller) {
     flutterEvent.scroll_delta_x = -event.scrollingDeltaX * pixelsPerLine * scaleFactor;
     flutterEvent.scroll_delta_y = -event.scrollingDeltaY * pixelsPerLine * scaleFactor;
   }
-  FlutterEngineSendPointerEvent(_engine, &flutterEvent, 1);
+  [_engine sendPointerEvent:flutterEvent];
 
   // Update tracking of state as reported to Flutter.
   if (phase == kDown) {
@@ -661,61 +455,15 @@ static void CommonInit(FLEViewController* controller) {
  * Responds to view reshape by notifying the engine of the change in dimensions.
  */
 - (void)viewDidReshape:(NSOpenGLView*)view {
-  CGRect scaledBounds = [view convertRectToBacking:view.bounds];
-  const FlutterWindowMetricsEvent event = {
-      .struct_size = sizeof(event),
-      .width = static_cast<size_t>(scaledBounds.size.width),
-      .height = static_cast<size_t>(scaledBounds.size.height),
-      .pixel_ratio = scaledBounds.size.width / view.bounds.size.width,
-  };
-  FlutterEngineSendWindowMetricsEvent(_engine, &event);
-}
-
-#pragma mark - FlutterBinaryMessengerContainer
-- (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
-  return self;
-}
-
-#pragma mark - FlutterBinaryMessenger
-
-- (void)sendOnChannel:(nonnull NSString*)channel message:(nullable NSData*)message {
-  FlutterPlatformMessage platformMessage = {
-      .struct_size = sizeof(FlutterPlatformMessage),
-      .channel = [channel UTF8String],
-      .message = static_cast<const uint8_t*>(message.bytes),
-      .message_size = message.length,
-  };
-
-  FlutterEngineResult result = FlutterEngineSendPlatformMessage(_engine, &platformMessage);
-  if (result != kSuccess) {
-    NSLog(@"Failed to send message to Flutter engine on channel '%@' (%d).", channel, result);
-  }
-}
-
-- (void)setMessageHandlerOnChannel:(nonnull NSString*)channel
-              binaryMessageHandler:(nullable FlutterBinaryMessageHandler)handler {
-  _messageHandlers[channel] = [handler copy];
-}
-
-#pragma mark - FlutterPluginRegistrar
-
-- (id<FlutterBinaryMessenger>)messenger {
-  return self;
-}
-
-- (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
-                      channel:(nonnull FlutterMethodChannel*)channel {
-  [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
-    [delegate handleMethodCall:call result:result];
-  }];
+  CGSize scaledSize = [view convertRectToBacking:view.bounds].size;
+  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+  [_engine updateWindowMetricsWithSize:scaledSize pixelRatio:pixelRatio];
 }
 
 #pragma mark - FlutterPluginRegistry
 
 - (id<FlutterPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
-  // Currently, the view controller acts as the registrar for all plugins, so the
-  // name is ignored.
-  return self;
+  return [_engine registrarForPlugin:pluginName];
 }
 
 #pragma mark - NSResponder

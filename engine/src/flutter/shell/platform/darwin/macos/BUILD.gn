@@ -33,6 +33,7 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterMacOS.h",
   "framework/Headers/FlutterPluginMacOS.h",
   "framework/Headers/FlutterPluginRegistrarMacOS.h",
+  "framework/Headers/FLEEngine.h",
   "framework/Headers/FLEOpenGLContextHandling.h",
   "framework/Headers/FLEReshapeListener.h",
   "framework/Headers/FLEView.h",
@@ -48,6 +49,8 @@ shared_library("create_flutter_framework_dylib") {
   output_name = "$_flutter_framework_name"
 
   sources = [
+    "framework/Source/FLEEngine.mm",
+    "framework/Source/FLEEngine_Internal.h",
     "framework/Source/FLETextInputModel.h",
     "framework/Source/FLETextInputModel.mm",
     "framework/Source/FLETextInputPlugin.h",
