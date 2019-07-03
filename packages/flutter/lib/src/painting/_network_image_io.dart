@@ -187,8 +187,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
 @immutable
 class _DownloadResponse {
-  const _DownloadResponse({this.bytes, this.chunkEvent, this.error}) :
-    assert(bytes != null || chunkEvent != null || error != null);
+  const _DownloadResponse.bytes(this.bytes) : assert(bytes != null), chunkEvent = null, error = null;
+  const _DownloadResponse.chunkEvent(this.chunkEvent) : assert(chunkEvent != null), bytes = null, error = null;
+  const _DownloadResponse.error(this.error) : assert(error != null), bytes = null, chunkEvent = null;
 
   final TransferableTypedData bytes;
   final ImageChunkEvent chunkEvent;
@@ -249,15 +250,15 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
       final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int total) {
-             downloadRequest.sendPort.send(_DownloadResponse(
-                 chunkEvent: ImageChunkEvent(
+             downloadRequest.sendPort.send(_DownloadResponse.chunkEvent(
+                 ImageChunkEvent(
                      cumulativeBytesLoaded: cumulative,
                      expectedTotalBytes: total,
                  )));
           });
-      downloadRequest.sendPort.send(_DownloadResponse(bytes: transferable));
+      downloadRequest.sendPort.send(_DownloadResponse.bytes(transferable));
     } catch (error) {
-      downloadRequest.sendPort.send(_DownloadResponse(error: error.toString()));
+      downloadRequest.sendPort.send(_DownloadResponse.error(error.toString()));
     }
     ongoingRequests--;
     if (ongoingRequests == 0) {
