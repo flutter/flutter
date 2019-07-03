@@ -30,6 +30,12 @@ class TestServiceExtensionsBinding extends BindingBase
 
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
+  bool inBreakpoint = false;
+  @override
+  void setBreakpoint() {
+    inBreakpoint = true;
+  }
+
   @override
   void registerServiceExtension({
     @required String name,
@@ -559,7 +565,8 @@ void main() {
     completed = false;
     expect(binding.reassembled, 0);
     pendingResult = binding.testExtension('reassemble', <String, String>{});
-    pendingResult.whenComplete(() { completed = true; });
+    expect(binding.inBreakpoint, true);
+    pendingResult.whenComplete(() { completed = true; binding.inBreakpoint = false; });
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);

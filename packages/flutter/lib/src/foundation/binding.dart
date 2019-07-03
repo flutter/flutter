@@ -65,6 +65,15 @@ abstract class BindingBase {
     developer.Timeline.finishSync();
   }
 
+  /// Used by ext.flutter.reassemble to set a breakpoint before reloading.
+  ///
+  /// Test bindings may override this to avoid actually setting a breakpoint.
+  @protected
+  @visibleForTesting
+  void setBreakpoint() {
+    developer.debugger();
+  }
+
   static bool _debugInitialized = false;
   static bool _debugServiceExtensionsRegistered = false;
 
@@ -128,7 +137,7 @@ abstract class BindingBase {
       registerSignalServiceExtension(
         name: 'reassemble',
         callback: () {
-          developer.debugger();
+          setBreakpoint();
           return reassembleApplication();
         },
       );
