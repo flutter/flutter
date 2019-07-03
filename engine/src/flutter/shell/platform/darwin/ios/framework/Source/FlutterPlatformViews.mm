@@ -160,6 +160,13 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
   frame_size_ = frame_size;
 }
 
+bool FlutterPlatformViewsController::HasPendingViewOperations() {
+  if (!views_to_recomposite_.empty()) {
+    return true;
+  }
+  return active_composition_order_ != composition_order_;
+}
+
 void FlutterPlatformViewsController::PrerollCompositeEmbeddedView(
     int view_id,
     std::unique_ptr<EmbeddedViewParams> params) {
