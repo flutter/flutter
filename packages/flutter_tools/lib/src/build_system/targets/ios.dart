@@ -7,8 +7,8 @@ import 'assets.dart';
 import 'dart.dart';
 
 /// Create an iOS debug application.
-const Target iosApplication = Target(
-  name: 'ios_application',
+const Target debugIosApplication = Target(
+  name: 'debug_ios_application',
   buildAction: null,
   inputs: <Source>[],
   outputs: <Source>[],
@@ -18,14 +18,26 @@ const Target iosApplication = Target(
   ]
 );
 
-/// Create an iOS debug application.
-const Target iosReleaseApplication = Target(
-  name: 'ios_release_application',
+/// Create an iOS profile application.
+const Target profileIosApplication = Target(
+  name: 'profile_ios_application',
   buildAction: null,
   inputs: <Source>[],
   outputs: <Source>[],
   dependencies: <Target>[
     copyAssets,
-    aotAssembly,
+    aotAssemblyProfile,
+  ]
+);
+
+/// Create an iOS debug application.
+const Target releaseIosApplication = Target(
+  name: 'release_ios_application',
+  buildAction: null,
+  inputs: <Source>[],
+  outputs: <Source>[],
+  dependencies: <Target>[
+    copyAssets,
+    aotAssemblyRelease,
   ]
 );

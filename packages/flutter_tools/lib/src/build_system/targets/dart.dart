@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
-
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
+import '../../base/io.dart';
 import '../../base/platform.dart';
+import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
@@ -41,10 +40,10 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   final KernelCompiler compiler = await kernelCompilerFactory.create(
     FlutterProject.fromDirectory(environment.projectDir),
   );
-  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-  if (buildMode == null) {
+  if (environment.defines[kBuildMode] == null) {
     throw MissingDefineException(kBuildMode, 'kernel_snapshot');
   }
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
   final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
 
   final CompilerOutput output = await compiler.compile(
@@ -69,14 +68,14 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
 Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environment) async {
   final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
   final String outputPath = environment.buildDir.path;
-  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-  if (buildMode == null) {
+  if (environment.defines[kBuildMode] == null) {
     throw MissingDefineException(kBuildMode, 'aot_elf');
   }
-  if (targetPlatform == null) {
+  if (environment.defines[kTargetPlatform] == null) {
     throw MissingDefineException(kTargetPlatform, 'aot_elf');
   }
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
   final int snapshotExitCode = await snapshotter.build(
     platform: targetPlatform,
     buildMode: buildMode,
@@ -87,28 +86,6 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   if (snapshotExitCode != 0) {
     throw Exception('AOT snapshotter exited with code $snapshotExitCode');
   }
-}
-
-/// Find the correct gen_snapshot implemenation for the aot elf build.
-List<File> findGenSnapshotAndroidElf(Environment environment) {
-  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-  final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-  if (buildMode == null) {
-    throw MissingDefineException(kBuildMode, 'aot_elf');
-  }
-  if (targetPlatform == null) {
-    throw MissingDefineException(kTargetPlatform, 'aot_elf');
-  }
-  final String path= artifacts
-      .getArtifactPath(Artifact.genSnapshot, platform: targetPlatform, mode: buildMode);
-  return <File>[fs.file(path)];
-}
-
-/// Find the frontend server artifact
-List<File> frontendServer(Environment environment) {
-  final String path = artifacts
-    .getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-  return <File>[fs.file(path)];
 }
 
 /// Finds the locations of all dart files within the project.
@@ -136,22 +113,23 @@ List<File> listDartSources(Environment environment) {
 Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment environment) async {
   final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
   final String outputPath = environment.buildDir.path;
+  if (environment.defines[kBuildMode] == null) {
+    throw MissingDefineException(kBuildMode, 'aot_assembly');
+  }
+  if (environment.defines[kTargetPlatform] == null) {
+    throw MissingDefineException(kTargetPlatform, 'aot_assembly');
+  }
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
   final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
   final List<IOSArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
       ?? <IOSArch>[IOSArch.arm64];
-  if (buildMode == null) {
-    throw MissingDefineException(kBuildMode, 'aot_assembly');
-  }
-  if (targetPlatform == null) {
-    throw MissingDefineException(kTargetPlatform, 'aot_assembly');
-  }
   if (targetPlatform != TargetPlatform.ios) {
     throw Exception('aot_assembly is only supported for iOS applications');
   }
-  int snapshotExitCode;
+
+  // If we're building for a single architecture (common), then skip the lipo.
   if (iosArchs.length == 1) {
-    snapshotExitCode = await snapshotter.build(
+    final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
       mainPath: environment.buildDir.childFile('main.app.dill').path,
@@ -159,6 +137,9 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       outputPath: outputPath,
       iosArch: iosArchs.single,
     );
+    if (snapshotExitCode != 0) {
+      throw Exception('AOT snapshotter exited with code $snapshotExitCode');
+    }
   } else {
     // If we're building multiple iOS archs the binaries need to be lipo'd
     // together.
@@ -179,14 +160,15 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
     }
     final ProcessResult result = await processManager.run(<String>[
       'lipo',
-      ...iosArchs.map((IOSArch iosArch) => fs.path.join(outputPath, getNameForIOSArch(iosArch))),
+      ...iosArchs.map((IOSArch iosArch) =>
+          fs.path.join(outputPath, getNameForIOSArch(iosArch), 'App.framework', 'App')),
       '-create',
-        '-output',
-        fs.path.join(outputPath, 'App.framework', 'App'),
+      '-output',
+      fs.path.join(outputPath, 'App.framework', 'App'),
     ]);
-  }
-  if (snapshotExitCode != 0) {
-    throw Exception('AOT snapshotter exited with code $snapshotExitCode');
+    if (result.exitCode != 0) {
+      throw Exception('lipo exited with code ${result.exitCode}');
+    }
   }
 }
 
@@ -197,7 +179,7 @@ const Target kernelSnapshot = Target(
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
-    Source.function(frontendServer),
+    Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
@@ -206,21 +188,21 @@ const Target kernelSnapshot = Target(
   buildAction: compileKernel,
 );
 
-/// Generate an ELF binary from a dart kernel files.
-const Target aotElf = Target(
-  name: 'aot_elf',
+/// Generate an ELF binary from a dart kernel file in profile mode.
+const Target aotElfProfile = Target(
+  name: 'aot_elf_profile',
   inputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    Source.function(findGenSnapshotAndroidElf),
+    Source.artifact(Artifact.genSnapshot,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.profile,
+    ),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/app.so'),
-    Source.pattern('{BUILD_DIR}/gen_snapshot.d'),
-    // TODO(jonahwilliams): remove
-    Source.pattern('{BUILD_DIR}/snapshot.d.fingerprint'),
   ],
   dependencies: <Target>[
     kernelSnapshot,
@@ -228,23 +210,71 @@ const Target aotElf = Target(
   buildAction: compileAotElf,
 );
 
-/// Generate an assembly target from a dart kernel file.
-const Target aotAssembly = Target(
-  name: 'aot_assembly',
+/// Generate an ELF binary from a dart kernel file in release mode.
+const Target aotElfRelease= Target(
+  name: 'aot_elf_release',
   inputs: <Source>[
     Source.pattern('{BUILD_DIR}/main.app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
-    Source.function(findGenSnapshotAndroidElf),
+    Source.artifact(Artifact.genSnapshot,
+      platform: TargetPlatform.android_arm,
+      mode: BuildMode.release,
+    ),
   ],
   outputs: <Source>[
-    Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
-    Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
+    Source.pattern('{BUILD_DIR}/app.so'),
+  ],
+  dependencies: <Target>[
+    kernelSnapshot,
+  ],
+  buildAction: compileAotElf,
+);
+
+/// Generate an assembly target from a dart kernel file in profile mode.
+const Target aotAssemblyProfile = Target(
+  name: 'aot_assembly_profile',
+  inputs: <Source>[
+    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot,
+      platform: TargetPlatform.ios,
+      mode: BuildMode.profile,
+    ),
+  ],
+  outputs: <Source>[
+    // TODO(jonahwilliams): are these used or just a side effect?
+    // Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
+    // Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
     Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.pattern('{BUILD_DIR}/gen_snapshot.d'),
-    // TODO(jonahwilliams): remove
-    Source.pattern('{BUILD_DIR}/snapshot.d.fingerprint'),
+  ],
+  dependencies: <Target>[
+    kernelSnapshot,
+  ],
+  buildAction: compileAotAssembly,
+);
+
+/// Generate an assembly target from a dart kernel file in release mode.
+const Target aotAssemblyRelease = Target(
+  name: 'aot_assembly_release',
+  inputs: <Source>[
+    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{PROJECT_DIR}/.packages'),
+    Source.artifact(Artifact.engineDartBinary),
+    Source.artifact(Artifact.skyEnginePath),
+    Source.artifact(Artifact.genSnapshot,
+      platform: TargetPlatform.ios,
+      mode: BuildMode.release,
+    ),
+  ],
+  outputs: <Source>[
+    // TODO(jonahwilliams): are these used or just a side effect?
+    // Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
+    // Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
+    Source.pattern('{BUILD_DIR}/App.framework/App'),
   ],
   dependencies: <Target>[
     kernelSnapshot,

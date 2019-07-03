@@ -12,33 +12,43 @@ import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
+import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
   group('dart rules', () {
     Testbed testbed;
     BuildSystem buildSystem;
-    Environment environment;
+    Environment androidEnvironment;
+    Environment iosEnvironment;
+    MockProcessManager mockProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
     });
 
     setUp(() {
+      mockProcessManager = MockProcessManager();
       testbed = Testbed(setup: () {
-        environment = Environment(
+        androidEnvironment = Environment(
           projectDir: fs.currentDirectory,
           defines: <String, String>{
             kBuildMode: getNameForBuildMode(BuildMode.profile),
             kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
           }
         );
-        buildSystem = BuildSystem(<String, Target>{
-          kernelSnapshot.name: kernelSnapshot,
-          aotElf.name: aotElf,
-        });
+        iosEnvironment = Environment(
+          projectDir: fs.currentDirectory,
+          defines: <String, String>{
+            kBuildMode: getNameForBuildMode(BuildMode.profile),
+            kTargetPlatform: getNameForTargetPlatform(TargetPlatform.ios),
+          }
+        );
+        buildSystem = BuildSystem();
         HostPlatform hostPlatform;
         if (platform.isWindows) {
           hostPlatform = HostPlatform.windows_x64;
@@ -63,6 +73,7 @@ flutter_tools:lib/''');
         fs.file(fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart')).createSync(recursive: true);
         fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', getNameForHostPlatform(hostPlatform), 'frontend_server.dart.snapshot')).createSync(recursive: true);
         fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'android-arm-profile', getNameForHostPlatform(hostPlatform), 'gen_snapshot')).createSync(recursive: true);
+        fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'ios-profile', 'gen_snapshot')).createSync(recursive: true);
         fs.file(fs.path.join('bin', 'cache', 'artifacts', 'engine', 'common', 'flutter_patched_sdk', 'platform_strong.dill')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'bar.dart')).createSync();
@@ -74,39 +85,88 @@ flutter_tools:lib/''');
     });
 
     test('kernel_snapshot Produces correct output directory', () => testbed.run(() async {
-      await buildSystem.build('kernel_snapshot', environment, const BuildSystemConfig());
+      await buildSystem.build('kernel_snapshot', androidEnvironment, const BuildSystemConfig());
 
-      expect(fs.file(fs.path.join(environment.buildDir.path,'main.app.dill')).existsSync(), true);
+      expect(fs.file(fs.path.join(androidEnvironment.buildDir.path,'main.app.dill')).existsSync(), true);
     }));
 
     test('kernel_snapshot throws error if missing build mode', () => testbed.run(() async {
-      final BuildResult result = await buildSystem.build('kernel_snapshot', environment..defines.remove(kBuildMode), const BuildSystemConfig());
+      final BuildResult result = await buildSystem.build('kernel_snapshot', androidEnvironment..defines.remove(kBuildMode), const BuildSystemConfig());
 
       expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
     }));
 
-    test('aot_elf Produces correct output directory', () => testbed.run(() async {
-      await buildSystem.build('aot_elf', environment, const BuildSystemConfig());
+    test('aot_elf_profile Produces correct output directory', () => testbed.run(() async {
+      await buildSystem.build('aot_elf_profile', androidEnvironment, const BuildSystemConfig());
 
-      expect(fs.file(fs.path.join(environment.buildDir.path, 'main.app.dill')).existsSync(), true);
-      expect(fs.file(fs.path.join(environment.buildDir.path, 'app.so')).existsSync(), true);
+      expect(fs.file(fs.path.join(androidEnvironment.buildDir.path, 'main.app.dill')).existsSync(), true);
+      expect(fs.file(fs.path.join(androidEnvironment.buildDir.path, 'app.so')).existsSync(), true);
     }));
 
-    test('aot_elf throws error if missing build mode', () => testbed.run(() async {
-      final BuildResult result = await buildSystem.build('aot_elf', environment..defines.remove(kBuildMode), const BuildSystemConfig());
+    test('aot_elf_profile throws error if missing build mode', () => testbed.run(() async {
+      final BuildResult result = await buildSystem.build('aot_elf_profile', androidEnvironment..defines.remove(kBuildMode), const BuildSystemConfig());
 
       expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+    }));
+
+
+    test('aot_elf_profile throws error if missing target platform', () => testbed.run(() async {
+      final BuildResult result = await buildSystem.build('aot_elf_profile', androidEnvironment..defines.remove(kTargetPlatform), const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+    }));
+
+
+    test('aot_assembly_profile throws error if missing build mode', () => testbed.run(() async {
+      final BuildResult result = await buildSystem.build('aot_assembly_profile', iosEnvironment..defines.remove(kBuildMode), const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+    }));
+
+    test('aot_assembly_profile throws error if missing target platform', () => testbed.run(() async {
+      final BuildResult result = await buildSystem.build('aot_assembly_profile', iosEnvironment..defines.remove(kTargetPlatform), const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
+    }));
+
+    test('aot_assembly_profile throws error if built for non-iOS platform', () => testbed.run(() async {
+      final BuildResult result = await buildSystem.build('aot_assembly_profile', androidEnvironment, const BuildSystemConfig());
+
+      expect(result.exceptions.values.single.exception, isInstanceOf<Exception>());
+    }));
+
+    test('aot_assembly_profile will lipo binaries together when multiple archs are requested', () => testbed.run(() async {
+      iosEnvironment.defines[kIosArchs] ='armv7,arm64';
+      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+        fs.file(fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App')).createSync(recursive: true);
+        return FakeProcessResult(
+          stdout: '',
+          stderr: '',
+        );
+      });
+      final BuildResult result = await buildSystem.build('aot_assembly_profile', iosEnvironment, const BuildSystemConfig());
+
+      expect(result.success, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     }));
   });
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}
 
 class FakeGenSnapshot implements GenSnapshot {
   @override
   Future<int> run({SnapshotType snapshotType, IOSArch iosArch, Iterable<String> additionalArgs = const <String>[]}) async {
     final Directory out = fs.file(additionalArgs.last).parent;
-    out.childFile('app.so').createSync();
-    out.childFile('gen_snapshot.d').createSync();
-    out.childFile('snapshot.d.fingerprint').createSync();
+    if (iosArch == null) {
+      out.childFile('app.so').createSync();
+      out.childFile('gen_snapshot.d').createSync();
+      return 0;
+    }
+    out.childDirectory('App.framework').childFile('App').createSync(recursive: true);
+    out.childFile('snapshot_assembly.S').createSync();
+    out.childFile('snapshot_assembly.o').createSync();
     return 0;
   }
 }

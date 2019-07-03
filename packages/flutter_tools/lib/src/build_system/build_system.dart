@@ -489,10 +489,13 @@ class BuildSystem {
     unpackWindows.name: unpackWindows,
     copyAssets.name: copyAssets,
     kernelSnapshot.name: kernelSnapshot,
-    aotElf.name: aotElf,
-    aotAssembly.name: aotAssembly,
-    iosApplication.name: iosApplication,
-    iosReleaseApplication.name: iosReleaseApplication,
+    aotElfProfile.name: aotElfProfile,
+    aotElfRelease.name: aotElfRelease,
+    aotAssemblyProfile.name: aotAssemblyProfile,
+    aotAssemblyRelease.name: aotAssemblyRelease,
+    releaseIosApplication.name: releaseIosApplication,
+    profileIosApplication.name: profileIosApplication,
+    debugIosApplication.name: debugIosApplication,
   };
 
   final Map<String, Target> targets;

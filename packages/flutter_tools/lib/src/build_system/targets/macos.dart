@@ -73,16 +73,10 @@ const Target unpackMacos = Target(
   buildAction: copyFramework,
 );
 
-
-Future<void> buildMacOSApplication(Map<String, ChangeType> updates,
-    Environment environment) async {
-
-}
-
 /// Build a macOS application.
 const Target macosApplication = Target(
-  name: 'macos_application',
-  buildAction: buildMacOSApplication,
+  name: 'debug_macos_application',
+  buildAction: null,
   inputs: <Source>[],
   outputs: <Source>[],
   dependencies: <Target>[
@@ -92,16 +86,15 @@ const Target macosApplication = Target(
   ]
 );
 
-
 /// Build a macOS release application.
 const Target macoReleaseApplication = Target(
-  name: 'macos_release_application',
-  buildAction: buildMacOSApplication,
+  name: 'release_macos_application',
+  buildAction: null,
   inputs: <Source>[],
   outputs: <Source>[],
   dependencies: <Target>[
     unpackMacos,
-    aotElf,
+    aotElfRelease,
     copyAssets,
   ]
 );
