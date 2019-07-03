@@ -26,6 +26,8 @@ void main() {
       Cache.flutterRoot = '';
       testbed = Testbed(overrides: <Type, Generator>{
         BuildSystem: ()  => mockBuildSystem,
+      }, setup: () {
+        fs.directory('tmp').createSync();
       });
     });
 
