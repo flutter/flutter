@@ -1469,7 +1469,7 @@ abstract class DiagnosticsNode {
   ///
   /// If `minLevel` is [DiagnosticLevel.hidden] no diagnostics will be filtered.
   /// If `minLevel` is [DiagnosticLevel.off] all diagnostics will be filtered.
-  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode ? true : level.index < minLevel.index;
+  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode || level.index < minLevel.index;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -1541,61 +1541,46 @@ abstract class DiagnosticsNode {
     if (kReleaseMode) {
       return <String, Object>{};
     }
-    final Map<String, Object> data = <String, Object>{
+    final bool hasChildren = getChildren().isNotEmpty;
+    return <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
+      if (name != null)
+        'name': name,
+      if (!showSeparator)
+        'showSeparator': showSeparator,
+      if (level != DiagnosticLevel.info)
+        'level': describeEnum(level),
+      if (showName == false)
+        'showName': showName,
+      if (emptyBodyDescription != null)
+        'emptyBodyDescription': emptyBodyDescription,
+      if (style != DiagnosticsTreeStyle.sparse)
+        'style': describeEnum(style),
+      if (allowTruncate)
+        'allowTruncate': allowTruncate,
+      if (hasChildren)
+        'hasChildren': hasChildren,
+      if (linePrefix?.isNotEmpty == true)
+        'linePrefix': linePrefix,
+      if (!allowWrap)
+        'allowWrap': allowWrap,
+      if (allowNameWrap)
+        'allowNameWrap': allowNameWrap,
+      ...delegate.additionalNodeProperties(this),
+      if (delegate.includeProperties)
+        'properties': toJsonList(
+          delegate.filterProperties(getProperties(), this),
+          this,
+          delegate,
+        ),
+      if (delegate.subtreeDepth > 0)
+        'children': toJsonList(
+          delegate.filterChildren(getChildren(), this),
+          this,
+          delegate,
+        ),
     };
-    if (name != null)
-      data['name'] = name;
-
-    if (!showSeparator)
-      data['showSeparator'] = showSeparator;
-    if (level != DiagnosticLevel.info)
-      data['level'] = describeEnum(level);
-    if (showName == false)
-      data['showName'] = showName;
-    if (emptyBodyDescription != null)
-      data['emptyBodyDescription'] = emptyBodyDescription;
-    if (style != DiagnosticsTreeStyle.sparse)
-      data['style'] = describeEnum(style);
-
-    if (allowTruncate)
-      data['allowTruncate'] = allowTruncate;
-
-    final bool hasChildren = getChildren().isNotEmpty;
-    if (hasChildren)
-      data['hasChildren'] = hasChildren;
-
-    if (linePrefix?.isNotEmpty == true)
-      data['linePrefix'] = linePrefix;
-
-    if (!allowWrap)
-      data['allowWrap'] = allowWrap;
-
-    if (allowNameWrap)
-      data['allowNameWrap'] = allowNameWrap;
-
-    data.addAll(delegate.additionalNodeProperties(this));
-
-    if (delegate.includeProperties) {
-      final List<DiagnosticsNode> properties = getProperties();
-      data['properties'] = toJsonList(
-        delegate.filterProperties(properties, this),
-        this,
-        delegate,
-      );
-    }
-
-    if (delegate.subtreeDepth > 0) {
-      final List<DiagnosticsNode> children = getChildren();
-      data['children'] = toJsonList(
-        delegate.filterChildren(children, this),
-        this,
-        delegate,
-      );
-    }
-
-    return data;
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -2707,7 +2692,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
-  DiagnosticLevel _defaultLevel;
+  final DiagnosticLevel _defaultLevel;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.

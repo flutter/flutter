@@ -721,7 +721,7 @@ class _RenderRangeSlider extends RenderBox {
 
   static const Duration _minimumInteractionTime = Duration(milliseconds: 500);
 
-  _RangeSliderState _state;
+  final _RangeSliderState _state;
   Animation<double> _overlayAnimation;
   Animation<double> _valueIndicatorAnimation;
   Animation<double> _enableAnimation;

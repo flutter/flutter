@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -22,7 +23,8 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 //      [BufferLogger], [MemoryFileSystem].
 //    - More TBD.
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
-  FileSystem: () => MemoryFileSystem(), // Keeps tests fast by avoid actual file system.
+  // Keeps tests fast by avoid actual file system.
+  FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
@@ -75,15 +77,13 @@ class Testbed {
   /// `overrides` may be used to provide new context values for the single test
   /// case or override any context values from the setup.
   FutureOr<T> run<T>(FutureOr<T> Function() test, {Map<Type, Generator> overrides}) {
-    final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
-    // Add the initial setUp overrides
-    if (_overrides != null) {
-      testOverrides.addAll(_overrides);
-    }
-    // Add the test-specific overrides
-    if (overrides != null) {
-      testOverrides.addAll(overrides);
-    }
+    final Map<Type, Generator> testOverrides = <Type, Generator>{
+      ..._testbedDefaults,
+      // Add the initial setUp overrides
+      ...?_overrides,
+      // Add the test-specific overrides
+      ...?overrides,
+    };
     // Cache the original flutter root to restore after the test case.
     final String originalFlutterRoot = Cache.flutterRoot;
     return runInContext<T>(() {

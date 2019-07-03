@@ -202,10 +202,10 @@ void main() {
       });
 
       test('Notifies listeners of chunk events', () async {
-        final List<List<int>> chunks = <List<int>>[];
+        final List<Uint8List> chunks = <Uint8List>[];
         const int chunkSize = 8;
         for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
-          chunks.add(kTransparentImage.skip(offset).take(chunkSize).toList());
+          chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
         }
         final Completer<void> imageAvailable = Completer<void>();
         final MockHttpClientRequest request = MockHttpClientRequest();
@@ -225,7 +225,7 @@ void main() {
           final void Function() onDone = invocation.namedArguments[#onDone];
           final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-          return Stream<List<int>>.fromIterable(chunks).listen(
+          return Stream<Uint8List>.fromIterable(chunks).listen(
             onData,
             onDone: onDone,
             onError: onError,

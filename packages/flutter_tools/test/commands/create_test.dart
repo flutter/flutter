@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// This test performs too poorly to run with coverage enabled.
+@Tags(<String>['create', 'no_coverage'])
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -1127,10 +1129,11 @@ Future<void> _createProject(
   Cache.flutterRoot = '../..';
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  final List<String> args = <String>['create'];
-  args.addAll(createArgs);
-  args.add(dir.path);
-  await runner.run(args);
+  await runner.run(<String>[
+    'create',
+    ...createArgs,
+    dir.path,
+  ]);
 
   bool pathExists(String path) {
     final String fullPath = fs.path.join(dir.path, path);
@@ -1167,10 +1170,11 @@ Future<void> _analyzeProject(String workingDir) async {
     'flutter_tools.dart',
   ));
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..add('analyze');
+  final List<String> args = <String>[
+    ...dartVmFlags,
+    flutterToolsPath,
+    'analyze',
+  ];
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -1194,21 +1198,22 @@ Future<void> _runFlutterTest(Directory workingDir, { String target }) async {
   // files anymore.
   await Process.run(
     '$dartSdkPath/bin/dart',
-    <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..addAll(<String>['packages', 'get']),
+    <String>[
+      ...dartVmFlags,
+      flutterToolsPath,
+      'packages',
+      'get',
+    ],
     workingDirectory: workingDir.path,
   );
 
-  final List<String> args = <String>[]
-    ..addAll(dartVmFlags)
-    ..add(flutterToolsPath)
-    ..add('test')
-    ..add('--no-color');
-  if (target != null) {
-    args.add(target);
-  }
+  final List<String> args = <String>[
+    ...dartVmFlags,
+    flutterToolsPath,
+    'test',
+    '--no-color',
+    if (target != null) target,
+  ];
 
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
@@ -1284,7 +1289,7 @@ class MockHttpClientRequest implements HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
+class MockHttpClientResponse implements HttpClientResponse {
   MockHttpClientResponse(this.statusCode, {this.result});
 
   @override
@@ -1309,6 +1314,12 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   }) {
     return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
+    action(Uint8List.fromList(result.codeUnits));
+    return Future<void>.value();
   }
 
   @override

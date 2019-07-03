@@ -434,7 +434,8 @@ class CupertinoDemoTab2 extends StatelessWidget {
         child: ListView(
           children: <Widget>[
             Tab2Header(),
-          ]..addAll(buildTab2Conversation()),
+            ...buildTab2Conversation(),
+          ],
         ),
       ),
     );
