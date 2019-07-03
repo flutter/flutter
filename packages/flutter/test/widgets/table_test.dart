@@ -843,7 +843,7 @@ void main() {
 
   // Regression test for https://github.com/flutter/flutter/issues/31473.
   testWidgets(
-    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type ',
+    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         Directionality(
