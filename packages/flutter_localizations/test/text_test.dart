@@ -42,15 +42,15 @@ void main() {
                     Navigator.pushNamed(context, '/next');
                   },
                   itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
+                    return <PopupMenuItem<int>>[
+                      PopupMenuItem<int>(
                         value: 1,
                         child: Text(
                           'hello, world',
                           style: TextStyle(color: Colors.blue),
                         ),
                       ),
-                      PopupMenuItem(
+                      PopupMenuItem<int>(
                         value: 2,
                         child: Text(
                           '你好，世界',
@@ -79,20 +79,20 @@ void main() {
     Offset bottomLeft = tester.getBottomLeft(find.text('hello, world'));
     Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
 
-    expect(topLeft, Offset(392.0, 298.3999996185303));
-    expect(topRight, Offset(596.0, 298.3999996185303));
-    expect(bottomLeft, Offset(392.0, 315.3999996185303));
-    expect(bottomRight, Offset(596.0, 315.3999996185303));
+    expect(topLeft, const Offset(392.0, 298.3999996185303));
+    expect(topRight, const Offset(596.0, 298.3999996185303));
+    expect(bottomLeft, const Offset(392.0, 315.3999996185303));
+    expect(bottomRight, const Offset(596.0, 315.3999996185303));
 
     topLeft = tester.getTopLeft(find.text('你好，世界'));
     topRight = tester.getTopRight(find.text('你好，世界'));
     bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
     bottomRight = tester.getBottomRight(find.text('你好，世界'));
 
-    expect(topLeft, Offset(392.0, 346.3999996185303));
-    expect(topRight, Offset(477.0, 346.3999996185303));
-    expect(bottomLeft, Offset(392.0, 363.3999996185303));
-    expect(bottomRight, Offset(477.0, 363.3999996185303));
+    expect(topLeft, const Offset(392.0, 346.3999996185303));
+    expect(topRight, const Offset(477.0, 346.3999996185303));
+    expect(bottomLeft, const Offset(392.0, 363.3999996185303));
+    expect(bottomRight, const Offset(477.0, 363.3999996185303));
   });
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
@@ -129,15 +129,15 @@ void main() {
                     Navigator.pushNamed(context, '/next');
                   },
                   itemBuilder: (BuildContext context) {
-                    return [
-                      PopupMenuItem(
+                    return <PopupMenuItem<int>>[
+                      PopupMenuItem<int>(
                         value: 1,
                         child: Text(
                           'hello, world',
                           style: TextStyle(color: Colors.blue),
                         ),
                       ),
-                      PopupMenuItem(
+                      PopupMenuItem<int>(
                         value: 2,
                         child: Text(
                           '你好，世界',
@@ -167,19 +167,19 @@ void main() {
     Offset bottomRight = tester.getBottomRight(find.text('hello, world'));
 
 
-    expect(topLeft, Offset(392.0, 299.19999980926514));
-    expect(topRight, Offset(584.0, 299.19999980926514));
-    expect(bottomLeft, Offset(392.0, 315.19999980926514));
-    expect(bottomRight, Offset(584.0, 315.19999980926514));
+    expect(topLeft, const Offset(392.0, 299.19999980926514));
+    expect(topRight, const Offset(584.0, 299.19999980926514));
+    expect(bottomLeft, const Offset(392.0, 315.19999980926514));
+    expect(bottomRight, const Offset(584.0, 315.19999980926514));
 
     topLeft = tester.getTopLeft(find.text('你好，世界'));
     topRight = tester.getTopRight(find.text('你好，世界'));
     bottomLeft = tester.getBottomLeft(find.text('你好，世界'));
     bottomRight = tester.getBottomRight(find.text('你好，世界'));
 
-    expect(topLeft, Offset(392.0, 347.19999980926514));
-    expect(topRight, Offset(472.0, 347.19999980926514));
-    expect(bottomLeft, Offset(392.0, 363.19999980926514));
-    expect(bottomRight, Offset(472.0, 363.19999980926514));
+    expect(topLeft, const Offset(392.0, 347.19999980926514));
+    expect(topRight, const Offset(472.0, 347.19999980926514));
+    expect(bottomLeft, const Offset(392.0, 363.19999980926514));
+    expect(bottomRight, const Offset(472.0, 363.19999980926514));
   });
 }
