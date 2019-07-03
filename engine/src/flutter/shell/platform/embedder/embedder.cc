@@ -34,6 +34,7 @@ extern const intptr_t kPlatformStrongDillSize;
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/embedder/embedder_engine.h"
+#include "flutter/shell/platform/embedder/embedder_platform_message_response.h"
 #include "flutter/shell/platform/embedder/embedder_safe_access.h"
 #include "flutter/shell/platform/embedder/embedder_task_runner.h"
 #include "flutter/shell/platform/embedder/embedder_thread_host.h"
@@ -818,17 +819,66 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
+  const FlutterPlatformMessageResponseHandle* response_handle =
+      SAFE_ACCESS(flutter_message, response_handle, nullptr);
+
+  fml::RefPtr<flutter::PlatformMessageResponse> response;
+  if (response_handle->message) {
+    response = response_handle->message->response();
+  }
+
   auto message = fml::MakeRefCounted<flutter::PlatformMessage>(
       flutter_message->channel,
       std::vector<uint8_t>(
           flutter_message->message,
           flutter_message->message + flutter_message->message_size),
-      nullptr);
+      response);
 
   return reinterpret_cast<flutter::EmbedderEngine*>(engine)
                  ->SendPlatformMessage(std::move(message))
              ? kSuccess
              : LOG_EMBEDDER_ERROR(kInvalidArguments);
+}
+
+FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
+    FlutterEngine engine,
+    FlutterDataCallback data_callback,
+    void* user_data,
+    FlutterPlatformMessageResponseHandle** response_out) {
+  if (engine == nullptr || data_callback == nullptr ||
+      response_out == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  }
+
+  flutter::EmbedderPlatformMessageResponse::Callback response_callback =
+      [user_data, data_callback](const uint8_t* data, size_t size) {
+        data_callback(data, size, user_data);
+      };
+
+  auto platform_task_runner = reinterpret_cast<flutter::EmbedderEngine*>(engine)
+                                  ->GetTaskRunners()
+                                  .GetPlatformTaskRunner();
+
+  auto handle = new FlutterPlatformMessageResponseHandle();
+
+  handle->message = fml::MakeRefCounted<flutter::PlatformMessage>(
+      "",  // The channel is empty and unused as the response handle is going to
+           // referenced directly in the |FlutterEngineSendPlatformMessage| with
+           // the container message discarded.
+      fml::MakeRefCounted<flutter::EmbedderPlatformMessageResponse>(
+          std::move(platform_task_runner), response_callback));
+  *response_out = handle;
+  return kSuccess;
+}
+
+FlutterEngineResult FlutterPlatformMessageReleaseResponseHandle(
+    FlutterEngine engine,
+    FlutterPlatformMessageResponseHandle* response) {
+  if (engine == nullptr || response == nullptr) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments);
+  }
+  delete response;
+  return kSuccess;
 }
 
 FlutterEngineResult FlutterEngineSendPlatformMessageResponse(

@@ -261,5 +261,96 @@ TEST_F(EmbedderTest, IsolateServiceIdSent) {
   kill_latch.Wait();
 }
 
+//------------------------------------------------------------------------------
+/// Creates a platform message response callbacks, does NOT send them, and
+/// immediately collects the same.
+///
+TEST_F(EmbedderTest, CanCreateAndCollectCallbacks) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  builder.SetDartEntrypoint("platform_messages_response");
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY([](Dart_NativeArguments args) {}));
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+  auto callback = [](const uint8_t* data, size_t size,
+                     void* user_data) -> void {};
+  auto result = FlutterPlatformMessageCreateResponseHandle(
+      engine.get(), callback, nullptr, &response_handle);
+  ASSERT_EQ(result, kSuccess);
+  ASSERT_NE(response_handle, nullptr);
+
+  result = FlutterPlatformMessageReleaseResponseHandle(engine.get(),
+                                                       response_handle);
+  ASSERT_EQ(result, kSuccess);
+}
+
+//------------------------------------------------------------------------------
+/// Sends platform messages to Dart code than simply echoes the contents of the
+/// message back to the embedder. The embedder registers a native callback to
+/// intercept that message.
+///
+TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
+  struct Captures {
+    fml::AutoResetWaitableEvent latch;
+    std::thread::id thread_id;
+  };
+  Captures captures;
+
+  GetThreadTaskRunner()->PostTask([&]() {
+    captures.thread_id = std::this_thread::get_id();
+    auto& context = GetEmbedderContext();
+    EmbedderConfigBuilder builder(context);
+    builder.SetDartEntrypoint("platform_messages_response");
+
+    fml::AutoResetWaitableEvent ready;
+    context.AddNativeCallback(
+        "SignalNativeTest",
+        CREATE_NATIVE_ENTRY(
+            [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+
+    auto engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+
+    static std::string kMessageData = "Hello from embedder.";
+
+    FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+    auto callback = [](const uint8_t* data, size_t size,
+                       void* user_data) -> void {
+      ASSERT_EQ(size, kMessageData.size());
+      ASSERT_EQ(strncmp(reinterpret_cast<const char*>(kMessageData.data()),
+                        reinterpret_cast<const char*>(data), size),
+                0);
+      auto captures = reinterpret_cast<Captures*>(user_data);
+      ASSERT_EQ(captures->thread_id, std::this_thread::get_id());
+      captures->latch.Signal();
+    };
+    auto result = FlutterPlatformMessageCreateResponseHandle(
+        engine.get(), callback, &captures, &response_handle);
+    ASSERT_EQ(result, kSuccess);
+
+    FlutterPlatformMessage message = {};
+    message.struct_size = sizeof(FlutterPlatformMessage);
+    message.channel = "test_channel";
+    message.message = reinterpret_cast<const uint8_t*>(kMessageData.data());
+    message.message_size = kMessageData.size();
+    message.response_handle = response_handle;
+
+    ready.Wait();
+    result = FlutterEngineSendPlatformMessage(engine.get(), &message);
+    ASSERT_EQ(result, kSuccess);
+
+    result = FlutterPlatformMessageReleaseResponseHandle(engine.get(),
+                                                         response_handle);
+    ASSERT_EQ(result, kSuccess);
+  });
+
+  captures.latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
