@@ -81,6 +81,8 @@ class FlutterPlatformViewsController {
 
   bool HasPendingViewOperations();
 
+  void CancelFrame();
+
   void PrerollCompositeEmbeddedView(int view_id,
                                     std::unique_ptr<flutter::EmbeddedViewParams> params);
 

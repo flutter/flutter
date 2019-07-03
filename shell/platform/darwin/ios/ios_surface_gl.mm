@@ -82,6 +82,15 @@ flutter::ExternalViewEmbedder* IOSSurfaceGL::GetExternalViewEmbedder() {
   }
 }
 
+void IOSSurfaceGL::CancelFrame() {
+  FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
+  FML_CHECK(platform_views_controller != nullptr);
+  platform_views_controller->CancelFrame();
+  // Committing the current transaction as |BeginFrame| will create a nested
+  // CATransaction otherwise.
+  [CATransaction commit];
+}
+
 bool IOSSurfaceGL::HasPendingViewOperations() {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);

@@ -52,6 +52,9 @@ class IOSSurfaceGL final : public IOSSurface,
   flutter::ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |flutter::ExternalViewEmbedder|
+  void CancelFrame() override;
+
+  // |flutter::ExternalViewEmbedder|
   bool HasPendingViewOperations() override;
 
   // |flutter::ExternalViewEmbedder|

@@ -160,6 +160,10 @@ void FlutterPlatformViewsController::SetFrameSize(SkISize frame_size) {
   frame_size_ = frame_size;
 }
 
+void FlutterPlatformViewsController::CancelFrame() {
+  composition_order_.clear();
+}
+
 bool FlutterPlatformViewsController::HasPendingViewOperations() {
   if (!views_to_recomposite_.empty()) {
     return true;
