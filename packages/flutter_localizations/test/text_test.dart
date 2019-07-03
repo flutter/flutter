@@ -13,7 +13,8 @@ void main() {
     // used to align text with ideographic baselines is reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
     // properly implemented. When the ideographic baseline is better defined and implemented,
-    // the values of this test should change very slightly.
+    // the values of this test should change very slightly. See the issue this is based off
+    // of: https://github.com/flutter/flutter/issues/25782.
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
@@ -99,7 +100,8 @@ void main() {
     // used to align text with ideographic baselines is reasonable. We are currently
     // using the alphabetic baseline to lay out as the ideographic baseline is not yet
     // properly implemented. When the ideographic baseline is better defined and implemented,
-    // the values of this test should change very slightly.
+    // the values of this test should change very slightly. See the issue this is based off
+    // of: https://github.com/flutter/flutter/issues/25782.
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
