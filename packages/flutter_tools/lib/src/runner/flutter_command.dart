@@ -479,12 +479,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  /// Defaults to [DevelopmentArtifact.universal].
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
   };
 
   /// Subclasses must implement this to execute the command.
