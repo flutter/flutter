@@ -92,7 +92,7 @@ void main() {
     expect(topRight, const Offset(477.0, 346.3999996185303));
     expect(bottomLeft, const Offset(392.0, 363.3999996185303));
     expect(bottomRight, const Offset(477.0, 363.3999996185303));
-  });
+  }, skip: !isLinux);
 
   testWidgets('Text baseline with EN locale', (WidgetTester tester) async {
     // This test in combination with 'Text baseline with CJK locale' verify the baselines
@@ -179,5 +179,5 @@ void main() {
     expect(topRight, const Offset(472.0, 347.19999980926514));
     expect(bottomLeft, const Offset(392.0, 363.19999980926514));
     expect(bottomRight, const Offset(472.0, 363.19999980926514));
-  });
+  }, skip: !isLinux);
 }
