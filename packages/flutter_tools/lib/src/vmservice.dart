@@ -1239,7 +1239,12 @@ class Isolate extends ServiceObjectOwner {
 
   /// Resumes the isolate.
   Future<Map<String, dynamic>> resume() {
-    return invokeRpcRaw('resume');
+    return invokeRpcRaw('resume').then((Map<String, dynamic> result) {
+      if (result['type'] == 'Success') {
+        pauseEvent = ServiceEvent._empty(this).._kind = ServiceEvent.kResume;
+      }
+      return result;
+    });
   }
 
   // Flutter extension methods.

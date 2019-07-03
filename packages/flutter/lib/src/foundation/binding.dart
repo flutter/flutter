@@ -127,7 +127,10 @@ abstract class BindingBase {
     assert(() {
       registerSignalServiceExtension(
         name: 'reassemble',
-        callback: reassembleApplication,
+        callback: () {
+          developer.debugger();
+          return reassembleApplication();
+        },
       );
       return true;
     }());

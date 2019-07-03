@@ -615,6 +615,29 @@ class HotRunner extends ResidentRunner {
       await refreshViews();
     }
 
+    // Check if any isolates are paused.
+    final List<FlutterView> reassembleViews = <FlutterView>[];
+    String serviceEventKind;
+    int pausedIsolatesFound = 0;
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
+        // PostPauseEvent event - the client requesting the pause will resume the app.
+        final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
+          pausedIsolatesFound += 1;
+          if (serviceEventKind == null) {
+            serviceEventKind = pauseEvent.kind;
+          } else if (serviceEventKind != pauseEvent.kind) {
+            serviceEventKind = ''; // many kinds
+          }
+        } else {
+          unawaited(view.uiIsolate.flutterReassemble());
+          reassembleViews.add(view);
+        }
+      }
+    }
+
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
@@ -720,27 +743,7 @@ class HotRunner extends ResidentRunner {
     await Future.wait(allDevices);
     // We are now running from source.
     _runningFromSnapshot = false;
-    // Check if any isolates are paused.
-    final List<FlutterView> reassembleViews = <FlutterView>[];
-    String serviceEventKind;
-    int pausedIsolatesFound = 0;
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
-        // PostPauseEvent event - the client requesting the pause will resume the app.
-        final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
-          pausedIsolatesFound += 1;
-          if (serviceEventKind == null) {
-            serviceEventKind = pauseEvent.kind;
-          } else if (serviceEventKind != pauseEvent.kind) {
-            serviceEventKind = ''; // many kinds
-          }
-        } else {
-          reassembleViews.add(view);
-        }
-      }
-    }
+
     if (pausedIsolatesFound > 0) {
       if (onSlow != null)
         onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
@@ -755,10 +758,11 @@ class HotRunner extends ResidentRunner {
     printTrace('Reassembling application');
     bool failedReassemble = false;
     final List<Future<void>> futures = <Future<void>>[];
+    // Resume the isolates we paused earlier.
     for (FlutterView view in reassembleViews) {
       futures.add(() async {
         try {
-          await view.uiIsolate.flutterReassemble();
+          await view.uiIsolate.resume();
         } catch (error) {
           failedReassemble = true;
           printError('Reassembling ${view.uiIsolate.name} failed: $error');
