@@ -155,9 +155,9 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type], [elevation], [darkThemeOverlay], [shadowColor],
-  /// [borderOnForeground] and [animationDuration] arguments must not be null.
-  /// Additionally, [elevation] must be non-negative.
+  /// The [type], [elevation], [shadowColor], [borderOnForeground] and
+  /// [animationDuration] arguments must not be null. Additionally, [elevation]
+  /// must be non-negative.
   ///
   /// If a [shape] is specified, then the [borderRadius] property must be
   /// null and the [type] property must not be [MaterialType.circle]. If the
@@ -169,7 +169,7 @@ class Material extends StatefulWidget {
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
-    this.darkThemeOverlay = true,
+    this.applyDarkThemeElevationOverlay,
     this.shadowColor = const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
@@ -180,7 +180,6 @@ class Material extends StatefulWidget {
     this.child,
   }) : assert(type != null),
        assert(elevation != null && elevation >= 0.0),
-       assert(darkThemeOverlay != null),
        assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
@@ -221,8 +220,9 @@ class Material extends StatefulWidget {
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
   ///
-  /// If inside a dark theme and [darkThemeOverlay] is [true], a semi-transparent
-  /// white will be composited on top this color to indicated the elevation.
+  /// If inside a dark theme and [applyDarkThemeElevationOverlay] is [true],
+  /// a semi-transparent white will be composited on top this color to
+  /// indicated the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
@@ -235,14 +235,15 @@ class Material extends StatefulWidget {
   ///
   /// If [false] the [color] will be used unmodified.
   ///
-  /// Defaults to [true].
+  /// If [null] then it will use the value of the surrounding
+  /// [ThemeData.applyDarkThemeElevationOverlay] which defaults to [false].
   ///
   /// See also:
   ///   * [Material.color]
   ///   * [Material.elevation]
   ///   * [ThemeData.brightness]
   ///   * <https://material.io/design/color/dark-theme.html>
-  final bool darkThemeOverlay;
+  final bool applyDarkThemeElevationOverlay;
 
   /// The color to paint the shadow below the material.
   ///
@@ -314,7 +315,7 @@ class Material extends StatefulWidget {
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(ColorProperty('color', color, defaultValue: null));
-    properties.add(FlagProperty('darkThemeOverlay', value: true, ifFalse: 'no dark overlay'));
+    properties.add(FlagProperty('applyDarkThemeElevationOverlay', value: true, ifFalse: 'no elevation overlay'));
     properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
@@ -339,10 +340,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       }
     }
 
-    if (color != null &&
-        widget.darkThemeOverlay &&
-        Theme.of(context).brightness == Brightness.dark) {
-      color = _darkThemeOverlayColor(color, widget.elevation);
+    if (color != null && Theme.of(context).brightness == Brightness.dark) {
+      final bool applyOverlay = widget.applyDarkThemeElevationOverlay ??
+        Theme.of(context).applyDarkThemeElevationOverlay;
+      if (applyOverlay) {
+        color = _darkThemeOverlayColor(color, widget.elevation);
+      }
     }
     return color;
   }
