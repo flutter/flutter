@@ -263,11 +263,10 @@ class FlutterPlugin implements Plugin<Project> {
                 def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
 
                 assert mavenMetadata != null
-                assert mavenMetadata.groupId != null
-                assert mavenMetadata.artifactId != null
-                assert mavenMetadata.version != null
+                assert !mavenMetadata.groupId.text().empty
+                assert !mavenMetadata.artifactId.text().empty
                 // Add the plugin dependency based on the Maven metadata.
-                addApiDependencies(project, buildType, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:${mavenMetadata.version.text()}@aar", {
+                addApiDependencies(project, buildType, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:+@aar", {
                     transitive = true
                 })
             }
