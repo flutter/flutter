@@ -36,7 +36,11 @@ void main() {
   group('GoldensClient', () {
     GoldensRepositoryClient goldens;
 
-    setUp(() => goldens = GoldensRepositoryClient(testProcess: process));
+    setUp(() => goldens = GoldensRepositoryClient.test(
+      testFileSystem: fs,
+      testProcess: process,
+      testPlatform: platform,
+    ));
 
     group('prepare', () {
       test('performs minimal work if versions match', () async {
@@ -54,19 +58,31 @@ void main() {
     });
   });
 
-//  group('SkiaGoldClient', () {
-//    SkiaGoldClient goldens;
-//
-//    setUp(() => goldens = SkiaGoldClient(testProcess));
-//
-//    group('auth', () {
-//      // 'performs minimal work if already authorized' ?
-//      test('auth returns false when service account is unavailable', () async {
-//        final bool result = await goldens.auth(fs.directory(fs.directory(_kFlutterRoot)));
-//        expect(result, isFalse);
-//      });
-//    });
-//  });
+  group('SkiaGoldClient', () {
+    SkiaGoldClient goldens;
+
+    setUp(() {
+      goldens = SkiaGoldClient.test(
+        testFileSystem: fs,
+        testProcess: process,
+        testPlatform: platform,
+      );
+    });
+
+    group('auth', () {
+      test('performs minimal work if already authorized', () async {
+        final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
+        final File authFile = fs.file('/workDirectory/temp/auth_opt.json')..createSync(recursive: true);
+        when(process.run(any)).thenAnswer((_) => Future<io.ProcessResult>.value(io.ProcessResult(123, 0, '', '')));
+        await goldens.auth(workDirectory);
+
+        // Verify that we spawned no process calls
+        final VerificationResult verifyProcessRun =
+          verifyNever(process.run(captureAny, workingDirectory: captureAnyNamed('workingDirectory')));
+        expect(verifyProcessRun.callCount, 0);
+      });
+    });
+  });
 
   group('FlutterGoldensRepositoryFileComparator', () {
     MemoryFileSystem fs;

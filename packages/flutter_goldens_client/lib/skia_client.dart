@@ -8,6 +8,8 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 import 'package:flutter_goldens_client/client.dart';
 
@@ -22,6 +24,18 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// A class that represents the Skia Gold client for golden file testing.
 class SkiaGoldClient extends GoldensClient {
+
+  SkiaGoldClient() : super();
+
+  SkiaGoldClient.test({
+    FileSystem testFileSystem,
+    ProcessManager testProcess,
+    Platform testPlatform,
+  }) : super(
+    fs: testFileSystem,
+    process: testProcess,
+    platform: testPlatform,
+  );
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and json files
@@ -49,14 +63,16 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// This ensures that the goldctl tool is authorized and ready for testing.
   Future<void> auth(Directory workDirectory) async {
+    print('In auth');
     _workDirectory = workDirectory;
     assert(_workDirectory != null);
 
-    if (clientIsAuthorized())
+    if (_clientIsAuthorized())
       return;
 
-    final File authorization = _workDirectory.childFile('serviceAccount.json');
+    final File authorization = _workDirectory.childFile('serviceAccount.json');//..createSync(recursive: true);
     await authorization.writeAsString(_serviceAccount);
+    print('post write');
 
     final List<String> authArguments = <String>[
       'auth',
@@ -138,7 +154,6 @@ class SkiaGoldClient extends GoldensClient {
       '--png-file', goldenFile.path,
     ];
 
-
     await io.Process.run(
       _goldctl,
       imgtestArguments,
@@ -146,6 +161,8 @@ class SkiaGoldClient extends GoldensClient {
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // Will not turn the tree red in this implementation.
+    // The ProcessResult that returns from line 157 contains the result of the
+    // test & links to the dashboard and diffs.
     return true;
   }
 
@@ -157,7 +174,7 @@ class SkiaGoldClient extends GoldensClient {
     );
   }
 
-  bool clientIsAuthorized() {
+  bool _clientIsAuthorized() {
     final File authFile = _workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json',

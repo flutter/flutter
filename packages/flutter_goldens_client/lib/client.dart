@@ -17,6 +17,8 @@ import 'skia_client.dart';
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
+const String _kGoldctlKey = 'GOLDCTL';
+const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// A class that represents a clone of the https://github.com/flutter/goldens
 /// repository, nested within the `bin/cache` directory of the caller's Flutter
@@ -79,7 +81,17 @@ class GoldensClient {
 
 class GoldensRepositoryClient  extends GoldensClient {
 
-  GoldensRepositoryClient({ProcessManager testProcess}) : super(process: testProcess);
+  GoldensRepositoryClient() : super();
+
+  GoldensRepositoryClient.test({
+    FileSystem testFileSystem,
+    ProcessManager testProcess,
+    Platform testPlatform,
+  }) : super(
+    fs: testFileSystem,
+    process: testProcess,
+    platform: testPlatform,
+  );
 
   RandomAccessFile _lock;
 
@@ -139,6 +151,7 @@ class GoldensRepositoryClient  extends GoldensClient {
     if (result.stdout.trim().isNotEmpty) {
       final StringBuffer buf = StringBuffer();
       buf
+        ..writeln(result.stdout.trim())
         ..writeln('flutter_goldens git checkout at ${comparisonRoot.path} has local changes and cannot be synced.')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
         ..writeln('cd ${comparisonRoot.path}')
