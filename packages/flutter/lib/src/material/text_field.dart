@@ -762,6 +762,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
+    _editableTextKey.currentState.hideToolbar();
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
@@ -775,7 +776,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
     _requestKeyboard();
     _confirmCurrentSplash();
-    _editableTextKey.currentState.hideToolbar();
     if (widget.onTap != null)
       widget.onTap();
   }
