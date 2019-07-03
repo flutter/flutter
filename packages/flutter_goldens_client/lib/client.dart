@@ -18,22 +18,14 @@ import 'skia_client.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// A class that represents a clone of the https://github.com/flutter/goldens
-/// repository, nested within the `bin/cache` directory of the caller's Flutter
-/// repository.
+/// A base class that provides shared information to the [SkiaGoldClient] and
+/// [GoldensRepositoryClient].
 class GoldensClient {
-  /// Create a handle to a local clone of the goldens repository.
   GoldensClient({
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
     this.process = const LocalProcessManager(),
   });
-
-  factory GoldensClient.fromPlatform(Platform platform) {
-    return testingWithSkiaGold(platform)
-      ? SkiaGoldClient()
-      : GoldensRepositoryClient();
-  }
 
   /// The file system to use for storing the local clone of the repository.
   ///
@@ -59,16 +51,20 @@ class GoldensClient {
   /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
-  /// The local [Directory] where the goldens repository is hosted.
+  /// The local [Directory] where the goldens files are located.
   ///
   /// Uses the [fs] file system.
   Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 }
 
+/// A class that represents a clone of the https://github.com/flutter/goldens
+/// repository, nested within the `bin/cache` directory of the caller's Flutter
+/// repository.
 class GoldensRepositoryClient  extends GoldensClient {
 
   GoldensRepositoryClient() : super();
 
+  /// Constructor used specifically for testing.
   GoldensRepositoryClient.test({
     FileSystem testFileSystem,
     ProcessManager testProcess,
@@ -217,11 +213,4 @@ class NonZeroExitCode implements Exception {
   String toString() {
     return 'Exit code $exitCode: $stderr';
   }
-}
-
-bool testingWithSkiaGold(Platform platform) {
-  final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
-  final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-  final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
-  return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
 }

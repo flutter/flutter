@@ -22,11 +22,13 @@ import 'package:flutter_goldens_client/client.dart';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
-/// A class that represents the Skia Gold client for golden file testing.
+/// An extension of the [GoldensClient] class that interfaces with Skia Gold
+/// for golden file testing
 class SkiaGoldClient extends GoldensClient {
 
   SkiaGoldClient() : super();
 
+  /// Constructor used specifically for testing.
   SkiaGoldClient.test({
     FileSystem testFileSystem,
     ProcessManager testProcess,
@@ -58,10 +60,15 @@ class SkiaGoldClient extends GoldensClient {
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
   /// Prepares the local work space for golden file testing and calls the
-  /// goldctl `auth` command, will return a Future of true if successful, or
-  /// throw an error.
+  /// goldctl `auth` command.
   ///
-  /// This ensures that the goldctl tool is authorized and ready for testing.
+  /// This ensures that the goldctl tool is authorized and ready for testing. It
+  /// will only be called once for each instance of
+  /// [FlutterSkiaGoldFileComparator].
+  ///
+  /// The workDirectory parameter specifies the current directory that golden
+  /// tests are executing in, relative to the library of the given test. It is
+  /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
   Future<void> auth(Directory workDirectory) async {
     _workDirectory = workDirectory;
     assert(_workDirectory != null);
@@ -69,7 +76,7 @@ class SkiaGoldClient extends GoldensClient {
     if (_clientIsAuthorized())
       return;
 
-    final File authorization = _workDirectory.childFile('serviceAccount.json');//..createSync(recursive: true);
+    final File authorization = _workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
@@ -141,6 +148,9 @@ class SkiaGoldClient extends GoldensClient {
   /// backend, the `add` argument uploads the current image test. A response is
   /// returned from the invocation of this command that indicates a pass or fail
   /// result.
+  ///
+  /// The testName and goldenFile parameters reference the current comparison
+  /// being evaluated by the [FlutterSkiaGoldFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
@@ -166,7 +176,9 @@ class SkiaGoldClient extends GoldensClient {
 
   Future<String> _getCurrentCommit() async {
     if (!flutterRoot.existsSync()) {
-      return null;
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Flutter root could not be found: $flutterRoot')
+      throw NonZeroExitCode(1, buf.toString());
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],

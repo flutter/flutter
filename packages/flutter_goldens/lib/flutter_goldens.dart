@@ -20,32 +20,17 @@ export 'package:flutter_goldens_client/skia_client.dart';
 
 /// Main method that can be used in a `flutter_test_config.dart` file to set
 /// [goldenFileComparator] to an instance of [FlutterGoldenFileComparator] that
-/// works for the current test.
+/// works for the current test. _Which_ FlutterGoldenFileComparator is
+/// instantiated is based on the current testing environment.
 Future<void> main(FutureOr<void> testMain()) async {
-  goldenFileComparator = testingWithSkiaGold(const LocalPlatform())
+  goldenFileComparator = _testingWithSkiaGold(const LocalPlatform())
     ? await FlutterSkiaGoldFileComparator.fromDefaultComparator()
     : await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
   await testMain();
 }
 
-/// A golden file comparator specific to the `flutter/flutter` repository.
-///
-/// Within the https://github.com/flutter/flutter repository, it's important
-/// not to check-in binaries in order to keep the size of the repository to a
-/// minimum. To satisfy this requirement, this comparator retrieves the golden
-/// files from a sibling repository, `flutter/goldens`.
-///
-/// This comparator will locally clone the `flutter/goldens` repository into
-/// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder using the [GoldensClient],
-/// then perform the comparison against the files therein.
-///
-/// For testing across all platforms, the [SkiaGoldClient] is used to upload
-/// images for framework-related golden tests and process results. Currently
-/// these tests are designed to be run post-submit on Cirrus CI, informed by the
-/// environment. When running test pre-submit or locally, they are executed via
-/// the [GoldensClient].
-///
-/// This comparator will instantiate [GoldensClient] and [SkiaGoldClient].
+/// Abstract base class golden file comparator specific to the `flutter/flutter`
+/// repository.
 abstract class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
@@ -61,6 +46,18 @@ abstract class FlutterGoldenFileComparator implements GoldenFileComparator {
   File getGoldenFile(Uri uri);
 }
 
+/// Implementation of the abstract base class [FlutterGoldenFileComparator] for
+/// testing against the `flutter/goldens` repository.
+///
+/// Within the https://github.com/flutter/flutter repository, it's important
+/// not to check-in binaries in order to keep the size of the repository to a
+/// minimum. To satisfy this requirement, this comparator retrieves the golden
+/// files from a sibling repository, `flutter/goldens`.
+///
+/// This comparator will locally clone the `flutter/goldens` repository into
+/// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder using the
+/// [GoldensRepositoryClient], then perform the comparison against the files
+/// therein.
 class FlutterGoldensRepositoryFileComparator implements FlutterGoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir].
@@ -73,7 +70,8 @@ class FlutterGoldensRepositoryFileComparator implements FlutterGoldenFileCompara
     this.platform = const LocalPlatform(),
   }) : assert(basedir != null);
 
-  /// The directory to which golden file URIs will be resolved in [compare] and [update].
+  /// The directory to which golden file URIs will be resolved in [compare] and
+  /// [update].
   final Uri basedir;
 
   /// The file system used to perform file access.
@@ -87,8 +85,8 @@ class FlutterGoldensRepositoryFileComparator implements FlutterGoldenFileCompara
   @visibleForTesting
   final Platform platform;
 
-  /// Creates a new [FlutterGoldensRespositoryFileComparator] that mirrors the relative
-  /// path resolution of the default [goldenFileComparator].
+  /// Creates a new [FlutterGoldensRespositoryFileComparator] that mirrors the
+  /// relative path resolution of the default [goldenFileComparator].
   ///
   /// By the time the future completes, the clone of the `flutter/goldens`
   /// repository is guaranteed to be ready use.
@@ -163,8 +161,15 @@ class FlutterGoldensRepositoryFileComparator implements FlutterGoldenFileCompara
   }
 }
 
+/// Implementation of the abstract base class [FlutterGoldenFileComparator] for
+/// testing against with Skia Gold.
+///
+/// For testing across all platforms, the [SkiaGoldClient] is used to upload
+/// images for framework-related golden tests and process results. Currently
+/// these tests are designed to be run post-submit on Cirrus CI, informed by the
+/// environment.
 class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
-  /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
+  /// Creates a [FlutterSkiaGoldFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir].
   ///
   /// The [fs] parameter exists for testing purposes only.
@@ -250,4 +255,11 @@ class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
     return Uri.parse(prefix + '.' + golden.toString());
   }
+}
+
+bool _testingWithSkiaGold(Platform platform) {
+  final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
+  final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+  final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
+  return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
 }
