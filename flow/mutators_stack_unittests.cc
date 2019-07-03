@@ -17,8 +17,8 @@ TEST(MutatorsStack, CopyConstructor) {
   MutatorsStack stack;
   auto rrect = SkRRect::MakeEmpty();
   auto rect = SkRect::MakeEmpty();
-  stack.pushClipRect(rect);
-  stack.pushClipRRect(rrect);
+  stack.PushClipRect(rect);
+  stack.PushClipRRect(rrect);
   MutatorsStack copy = MutatorsStack(stack);
   ASSERT_TRUE(copy == stack);
 }
@@ -26,74 +26,74 @@ TEST(MutatorsStack, CopyConstructor) {
 TEST(MutatorsStack, PushClipRect) {
   MutatorsStack stack;
   auto rect = SkRect::MakeEmpty();
-  stack.pushClipRect(rect);
-  auto iter = stack.bottom();
-  ASSERT_TRUE(iter->get()->type() == MutatorType::clip_rect);
-  ASSERT_TRUE(iter->get()->rect() == rect);
+  stack.PushClipRect(rect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::clip_rect);
+  ASSERT_TRUE(iter->get()->GetRect() == rect);
 }
 
 TEST(MutatorsStack, PushClipRRect) {
   MutatorsStack stack;
   auto rrect = SkRRect::MakeEmpty();
-  stack.pushClipRRect(rrect);
-  auto iter = stack.bottom();
-  ASSERT_TRUE(iter->get()->type() == MutatorType::clip_rrect);
-  ASSERT_TRUE(iter->get()->rrect() == rrect);
+  stack.PushClipRRect(rrect);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::clip_rrect);
+  ASSERT_TRUE(iter->get()->GetRRect() == rrect);
 }
 
 TEST(MutatorsStack, PushClipPath) {
   flutter::MutatorsStack stack;
   SkPath path;
-  stack.pushClipPath(path);
-  auto iter = stack.bottom();
-  ASSERT_TRUE(iter->get()->type() == flutter::MutatorType::clip_path);
-  ASSERT_TRUE(iter->get()->path() == path);
+  stack.PushClipPath(path);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == flutter::MutatorType::clip_path);
+  ASSERT_TRUE(iter->get()->GetPath() == path);
 }
 
 TEST(MutatorsStack, PushTransform) {
   MutatorsStack stack;
   SkMatrix matrix;
   matrix.setIdentity();
-  stack.pushTransform(matrix);
-  auto iter = stack.bottom();
-  ASSERT_TRUE(iter->get()->type() == MutatorType::transform);
-  ASSERT_TRUE(iter->get()->matrix() == matrix);
+  stack.PushTransform(matrix);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::transform);
+  ASSERT_TRUE(iter->get()->GetMatrix() == matrix);
 }
 
 TEST(MutatorsStack, Pop) {
   MutatorsStack stack;
   SkMatrix matrix;
   matrix.setIdentity();
-  stack.pushTransform(matrix);
-  stack.pop();
-  auto iter = stack.bottom();
-  ASSERT_TRUE(iter == stack.top());
+  stack.PushTransform(matrix);
+  stack.Pop();
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter == stack.Top());
 }
 
 TEST(MutatorsStack, Traversal) {
   MutatorsStack stack;
   SkMatrix matrix;
   matrix.setIdentity();
-  stack.pushTransform(matrix);
+  stack.PushTransform(matrix);
   auto rect = SkRect::MakeEmpty();
-  stack.pushClipRect(rect);
+  stack.PushClipRect(rect);
   auto rrect = SkRRect::MakeEmpty();
-  stack.pushClipRRect(rrect);
-  auto iter = stack.bottom();
+  stack.PushClipRRect(rrect);
+  auto iter = stack.Bottom();
   int index = 0;
-  while (iter != stack.top()) {
+  while (iter != stack.Top()) {
     switch (index) {
       case 0:
-        ASSERT_TRUE(iter->get()->type() == MutatorType::clip_rrect);
-        ASSERT_TRUE(iter->get()->rrect() == rrect);
+        ASSERT_TRUE(iter->get()->GetType() == MutatorType::clip_rrect);
+        ASSERT_TRUE(iter->get()->GetRRect() == rrect);
         break;
       case 1:
-        ASSERT_TRUE(iter->get()->type() == MutatorType::clip_rect);
-        ASSERT_TRUE(iter->get()->rect() == rect);
+        ASSERT_TRUE(iter->get()->GetType() == MutatorType::clip_rect);
+        ASSERT_TRUE(iter->get()->GetRect() == rect);
         break;
       case 2:
-        ASSERT_TRUE(iter->get()->type() == MutatorType::transform);
-        ASSERT_TRUE(iter->get()->matrix() == matrix);
+        ASSERT_TRUE(iter->get()->GetType() == MutatorType::transform);
+        ASSERT_TRUE(iter->get()->GetMatrix() == matrix);
         break;
       default:
         break;
@@ -106,23 +106,23 @@ TEST(MutatorsStack, Traversal) {
 TEST(MutatorsStack, Equality) {
   MutatorsStack stack;
   SkMatrix matrix = SkMatrix::MakeScale(1, 1);
-  stack.pushTransform(matrix);
+  stack.PushTransform(matrix);
   SkRect rect = SkRect::MakeEmpty();
-  stack.pushClipRect(rect);
+  stack.PushClipRect(rect);
   SkRRect rrect = SkRRect::MakeEmpty();
-  stack.pushClipRRect(rrect);
+  stack.PushClipRRect(rrect);
   SkPath path;
-  stack.pushClipPath(path);
+  stack.PushClipPath(path);
 
   MutatorsStack stackOther;
   SkMatrix matrixOther = SkMatrix::MakeScale(1, 1);
-  stackOther.pushTransform(matrixOther);
+  stackOther.PushTransform(matrixOther);
   SkRect rectOther = SkRect::MakeEmpty();
-  stackOther.pushClipRect(rectOther);
+  stackOther.PushClipRect(rectOther);
   SkRRect rrectOther = SkRRect::MakeEmpty();
-  stackOther.pushClipRRect(rrectOther);
+  stackOther.PushClipRRect(rrectOther);
   SkPath otherPath;
-  stackOther.pushClipPath(otherPath);
+  stackOther.PushClipPath(otherPath);
 
   ASSERT_TRUE(stack == stackOther);
 }
@@ -130,24 +130,24 @@ TEST(MutatorsStack, Equality) {
 TEST(Mutator, Initialization) {
   SkRect rect = SkRect::MakeEmpty();
   Mutator mutator = Mutator(rect);
-  ASSERT_TRUE(mutator.type() == MutatorType::clip_rect);
-  ASSERT_TRUE(mutator.rect() == rect);
+  ASSERT_TRUE(mutator.GetType() == MutatorType::clip_rect);
+  ASSERT_TRUE(mutator.GetRect() == rect);
 
   SkRRect rrect = SkRRect::MakeEmpty();
   Mutator mutator2 = Mutator(rrect);
-  ASSERT_TRUE(mutator2.type() == MutatorType::clip_rrect);
-  ASSERT_TRUE(mutator2.rrect() == rrect);
+  ASSERT_TRUE(mutator2.GetType() == MutatorType::clip_rrect);
+  ASSERT_TRUE(mutator2.GetRRect() == rrect);
 
   SkPath path;
   Mutator mutator3 = Mutator(path);
-  ASSERT_TRUE(mutator3.type() == MutatorType::clip_path);
-  ASSERT_TRUE(mutator3.path() == path);
+  ASSERT_TRUE(mutator3.GetType() == MutatorType::clip_path);
+  ASSERT_TRUE(mutator3.GetPath() == path);
 
   SkMatrix matrix;
   matrix.setIdentity();
   Mutator mutator4 = Mutator(matrix);
-  ASSERT_TRUE(mutator4.type() == MutatorType::transform);
-  ASSERT_TRUE(mutator4.matrix() == matrix);
+  ASSERT_TRUE(mutator4.GetType() == MutatorType::transform);
+  ASSERT_TRUE(mutator4.GetMatrix() == matrix);
 }
 
 TEST(Mutator, CopyConstructor) {

@@ -205,10 +205,10 @@ std::vector<SkCanvas*> FlutterPlatformViewsController::GetCurrentCanvases() {
 }
 
 int FlutterPlatformViewsController::CountClips(const MutatorsStack& mutators_stack) {
-  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.bottom();
+  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
   int clipCount = 0;
-  while (iter != mutators_stack.top()) {
-    if ((*iter)->isClipType()) {
+  while (iter != mutators_stack.Top()) {
+    if ((*iter)->IsClipType()) {
       clipCount++;
     }
     ++iter;
@@ -256,11 +256,11 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
   head.clipsToBounds = YES;
   ResetAnchor(head.layer);
 
-  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.bottom();
-  while (iter != mutators_stack.top()) {
-    switch ((*iter)->type()) {
+  std::vector<std::shared_ptr<Mutator>>::const_reverse_iterator iter = mutators_stack.Bottom();
+  while (iter != mutators_stack.Top()) {
+    switch ((*iter)->GetType()) {
       case transform: {
-        CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->matrix());
+        CATransform3D transform = GetCATransform3DFromSkMatrix((*iter)->GetMatrix());
         head.layer.transform = CATransform3DConcat(head.layer.transform, transform);
         break;
       }
@@ -269,10 +269,10 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
       case clip_path: {
         ChildClippingView* clipView = (ChildClippingView*)head.superview;
         clipView.layer.transform = CATransform3DIdentity;
-        [clipView setClip:(*iter)->type()
-                     rect:(*iter)->rect()
-                    rrect:(*iter)->rrect()
-                     path:(*iter)->path()];
+        [clipView setClip:(*iter)->GetType()
+                     rect:(*iter)->GetRect()
+                    rrect:(*iter)->GetRRect()
+                     path:(*iter)->GetPath()];
         head.clipsToBounds = YES;
         ResetAnchor(clipView.layer);
         head = clipView;
