@@ -284,10 +284,7 @@ class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObje
   }
 }
 
-// This class exists to work around https://github.com/dart-lang/sdk/issues/31543
-abstract class _RenderSliverScrollingPersistentHeader extends RenderSliverScrollingPersistentHeader { }
-
-class _RenderSliverScrollingPersistentHeaderForWidgets extends _RenderSliverScrollingPersistentHeader
+class _RenderSliverScrollingPersistentHeaderForWidgets extends RenderSliverScrollingPersistentHeader
   with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
@@ -302,10 +299,7 @@ class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectW
   }
 }
 
-// This class exists to work around https://github.com/dart-lang/sdk/issues/31543
-abstract class _RenderSliverPinnedPersistentHeader extends RenderSliverPinnedPersistentHeader { }
-
-class _RenderSliverPinnedPersistentHeaderForWidgets extends _RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverPinnedPersistentHeaderForWidgets extends RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
   const _SliverFloatingPersistentHeader({
@@ -327,10 +321,7 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
   }
 }
 
-// This class exists to work around https://github.com/dart-lang/sdk/issues/31543
-abstract class _RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPinnedPersistentHeader { }
-
-class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends _RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
   const _SliverFloatingPinnedPersistentHeader({
@@ -352,7 +343,4 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
   }
 }
 
-// This class exists to work around https://github.com/dart-lang/sdk/issues/31543
-abstract class _RenderSliverFloatingPersistentHeader extends RenderSliverFloatingPersistentHeader { }
-
-class _RenderSliverFloatingPersistentHeaderForWidgets extends _RenderSliverFloatingPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloatingPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
