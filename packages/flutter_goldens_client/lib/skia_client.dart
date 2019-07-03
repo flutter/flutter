@@ -23,13 +23,13 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 /// A class that represents the Skia Gold client for golden file testing.
 class SkiaGoldClient extends GoldensClient {
 
-  static Future<SkiaGoldClient> preAuthorized({
-  Directory basedir
-  }) async {
-    final SkiaGoldClient client = SkiaGoldClient();
-    await client.auth(basedir);
-    return client;
-  }
+//  static Future<SkiaGoldClient> preAuthorized(
+//  Directory basedir
+//  ) async {
+//    final SkiaGoldClient client = SkiaGoldClient();
+//    await client.auth(basedir);
+//    return client;
+//  }
 
   /// The local [Directory] within the [comparisonRoot] for the current test
   /// context. In this directory, the client will create image and json files

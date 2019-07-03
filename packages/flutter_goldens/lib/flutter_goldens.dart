@@ -189,7 +189,7 @@ class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
   @visibleForTesting
   final Platform platform;
 
-  final SkiaGoldClient _skiaClient = SkiaGoldClient.preAuthorized(basedir);
+  final SkiaGoldClient _skiaClient = SkiaGoldClient();
 
   /// Creates a new [FlutterSkiaGoldFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
@@ -222,6 +222,9 @@ class FlutterSkiaGoldFileComparator implements FlutterGoldenFileComparator {
     if (!goldenFile.existsSync()) {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
+
+    if(!_skiaClient.hasBeenAuthorized)
+      _skiaClient.auth(basedir);
 
     await _skiaClient.imgtestInit();
     return await _skiaClient.imgtestAdd(golden.path, goldenFile);
