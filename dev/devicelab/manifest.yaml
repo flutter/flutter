@@ -359,7 +359,7 @@ tasks:
 
   build_benchmark:
     description: >
-      Measures APK build performance.
+      Measures APK build performance across config changes.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
