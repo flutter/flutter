@@ -97,15 +97,13 @@ Future<TransferableTypedData> consolidateHttpClientResponseBytes(
 }
 
 class _OutputBuffer extends ByteConversionSinkBase {
-  final List<Uint8List> _chunks = <Uint8List>[];
+  final List<Uint8List> chunks = <Uint8List>[];
 
   @override
   void add(List<int> chunk) {
-    _chunks.add(chunk);
+    chunks.add(chunk);
   }
 
   @override
   void close() {}
-
-  List<Uint8List> get chunks => _chunks;
 }

@@ -46,7 +46,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsyncOnDesignatedIsolate(key, chunkEvents),
+      codec: _loadAsync(key, chunkEvents),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () {
@@ -62,7 +62,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   static List<_PendingLoadRequest> _pendingLoadRequests;
   static SendPort _requestPort;
 
-  Future<ui.Codec> _loadAsyncOnDesignatedIsolate(
+  Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
@@ -147,6 +147,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       _requestPort = sendPort;
       if (sendPort == null) {
         _pendingLoader = null;
+        assert(_pendingLoadRequests.isEmpty);
+        return;
       }
 
       // When we received [SendPort] for the worker isolate, we send all
@@ -161,10 +163,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       _pendingLoadRequests.clear();
     });
 
-    return Isolate.spawn<_HttpClientIsolateParameters>(
-        _handleHttpClientGet,
-        _HttpClientIsolateParameters(receivePort.sendPort),
-        paused: true);
+    return Isolate.spawn<SendPort>(_initializeWorkerIsolate, receivePort.sendPort, paused: true);
   }
 
   @override
@@ -199,25 +198,19 @@ class _DownloadRequest {
   final HttpClientProvider debugNetworkImageHttpClientProvider;
 }
 
-class _HttpClientIsolateParameters {
-  _HttpClientIsolateParameters(this.sendPort);
-
-  final SendPort sendPort;
-}
-
 // We set `autoUncompress` to false to ensure that we can trust the value of
 // the `Content-Length` HTTP header. We automatically uncompress the content
 // in our call to [consolidateHttpClientResponseBytes].
 final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 const Duration _idleDuration = Duration(seconds: 60);
 
-void _handleHttpClientGet(_HttpClientIsolateParameters params) {
+void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
   int ongoingRequests = 0;
   Timer idleTimer;
-  RawReceivePort receivePort;
+  RawReceivePort downloadRequestHandler;
 
   // Sets up a handler that processes download requests messages.
-  receivePort = RawReceivePort((_DownloadRequest downloadRequest) async {
+  downloadRequestHandler = RawReceivePort((_DownloadRequest downloadRequest) async {
     ongoingRequests++;
     idleTimer?.cancel();
     final HttpClient httpClient =
@@ -251,11 +244,11 @@ void _handleHttpClientGet(_HttpClientIsolateParameters params) {
     if (ongoingRequests == 0) {
       idleTimer = Timer(_idleDuration, () {
         // [null] indicates that worker is going down.
-        params.sendPort.send(null);
-        receivePort?.close();
+        mainIsolateSendPort.send(null);
+        downloadRequestHandler?.close();
       });
     }
   });
 
-  params.sendPort.send(receivePort.sendPort);
+  mainIsolateSendPort.send(downloadRequestHandler.sendPort);
 }
