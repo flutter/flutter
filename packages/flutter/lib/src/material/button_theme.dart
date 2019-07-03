@@ -468,18 +468,12 @@ class ButtonThemeData extends Diagnosticable {
     return button.textTheme ?? textTheme;
   }
 
-  Color _getDisabledColor(MaterialButton button) {
-    return getBrightness(button) == Brightness.dark
-      ? colorScheme.onSurface.withOpacity(0.38)  // default == Colors.white38
-      : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
-  }
-
   /// The foreground color of the [button]'s text and icon when
   /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
   ///
   /// If [MaterialButton.textColor] is a [MaterialStateColor], it will be used
   /// as the `disabledTextColor`. It will be resolved in the
@@ -489,7 +483,7 @@ class ButtonThemeData extends Diagnosticable {
       return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -501,13 +495,13 @@ class ButtonThemeData extends Diagnosticable {
   /// is returned, if it is non-null.
   ///
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
       return button.disabledColor;
     if (_disabledColor != null)
       return _disabledColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
