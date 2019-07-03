@@ -52,10 +52,9 @@ class KeyData {
 
   /// Parses the given JSON data and populates the data structure from it.
   KeyData.fromJson(Map<String, dynamic> contentMap) {
-    data = <Key>[];
-    for (String key in contentMap.keys) {
-      data.add(Key.fromJsonMapEntry(key, contentMap[key]));
-    }
+    data = <Key>[
+      for (String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key]),
+    ];
   }
 
   /// Converts the data structure into a JSON structure that can be parsed by

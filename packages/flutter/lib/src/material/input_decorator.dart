@@ -3145,79 +3145,44 @@ class InputDecoration {
 
   @override
   String toString() {
-    final List<String> description = <String>[];
-    if (icon != null)
-      description.add('icon: $icon');
-    if (labelText != null)
-      description.add('labelText: "$labelText"');
-    if (helperText != null)
-      description.add('helperText: "$helperText"');
-    if (hintText != null)
-      description.add('hintText: "$hintText"');
-    if (hintMaxLines != null)
-      description.add('hintMaxLines: "$hintMaxLines"');
-    if (errorText != null)
-      description.add('errorText: "$errorText"');
-    if (errorStyle != null)
-      description.add('errorStyle: "$errorStyle"');
-    if (errorMaxLines != null)
-      description.add('errorMaxLines: "$errorMaxLines"');
-    if (hasFloatingPlaceholder == false)
-      description.add('hasFloatingPlaceholder: false');
-    if (isDense ?? false)
-      description.add('isDense: $isDense');
-    if (contentPadding != null)
-      description.add('contentPadding: $contentPadding');
-    if (isCollapsed)
-      description.add('isCollapsed: $isCollapsed');
-    if (prefixIcon != null)
-      description.add('prefixIcon: $prefixIcon');
-    if (prefix != null)
-      description.add('prefix: $prefix');
-    if (prefixText != null)
-      description.add('prefixText: $prefixText');
-    if (prefixStyle != null)
-      description.add('prefixStyle: $prefixStyle');
-    if (suffixIcon != null)
-      description.add('suffixIcon: $suffixIcon');
-    if (suffix != null)
-      description.add('suffix: $suffix');
-    if (suffixText != null)
-      description.add('suffixText: $suffixText');
-    if (suffixStyle != null)
-      description.add('suffixStyle: $suffixStyle');
-    if (counter != null)
-      description.add('counter: $counter');
-    if (counterText != null)
-      description.add('counterText: $counterText');
-    if (counterStyle != null)
-      description.add('counterStyle: $counterStyle');
-    if (filled == true) // filled == null same as filled == false
-      description.add('filled: true');
-    if (fillColor != null)
-      description.add('fillColor: $fillColor');
-    if (focusColor != null)
-      description.add('focusColor: $focusColor');
-    if (hoverColor != null)
-      description.add('hoverColor: $hoverColor');
-    if (errorBorder != null)
-      description.add('errorBorder: $errorBorder');
-    if (focusedBorder != null)
-      description.add('focusedBorder: $focusedBorder');
-    if (focusedErrorBorder != null)
-      description.add('focusedErrorBorder: $focusedErrorBorder');
-    if (disabledBorder != null)
-      description.add('disabledBorder: $disabledBorder');
-    if (enabledBorder != null)
-      description.add('enabledBorder: $enabledBorder');
-    if (border != null)
-      description.add('border: $border');
-    if (!enabled)
-      description.add('enabled: false');
-    if (semanticCounterText != null)
-      description.add('semanticCounterText: $semanticCounterText');
-    if (alignLabelWithHint != null)
-      description.add('alignLabelWithHint: $alignLabelWithHint');
+    final List<String> description = <String>[
+      if (icon != null) 'icon: $icon',
+      if (labelText != null) 'labelText: "$labelText"',
+      if (helperText != null) 'helperText: "$helperText"',
+      if (hintText != null) 'hintText: "$hintText"',
+      if (hintMaxLines != null) 'hintMaxLines: "$hintMaxLines"',
+      if (errorText != null) 'errorText: "$errorText"',
+      if (errorStyle != null) 'errorStyle: "$errorStyle"',
+      if (errorMaxLines != null) 'errorMaxLines: "$errorMaxLines"',
+      if (hasFloatingPlaceholder == false) 'hasFloatingPlaceholder: false',
+      if (isDense ?? false) 'isDense: $isDense',
+      if (contentPadding != null) 'contentPadding: $contentPadding',
+      if (isCollapsed) 'isCollapsed: $isCollapsed',
+      if (prefixIcon != null) 'prefixIcon: $prefixIcon',
+      if (prefix != null) 'prefix: $prefix',
+      if (prefixText != null) 'prefixText: $prefixText',
+      if (prefixStyle != null) 'prefixStyle: $prefixStyle',
+      if (suffixIcon != null) 'suffixIcon: $suffixIcon',
+      if (suffix != null) 'suffix: $suffix',
+      if (suffixText != null) 'suffixText: $suffixText',
+      if (suffixStyle != null) 'suffixStyle: $suffixStyle',
+      if (counter != null) 'counter: $counter',
+      if (counterText != null) 'counterText: $counterText',
+      if (counterStyle != null) 'counterStyle: $counterStyle',
+      if (filled == true) 'filled: true', // filled == null same as filled == false
+      if (fillColor != null) 'fillColor: $fillColor',
+      if (focusColor != null) 'focusColor: $focusColor',
+      if (hoverColor != null) 'hoverColor: $hoverColor',
+      if (errorBorder != null) 'errorBorder: $errorBorder',
+      if (focusedBorder != null) 'focusedBorder: $focusedBorder',
+      if (focusedErrorBorder != null) 'focusedErrorBorder: $focusedErrorBorder',
+      if (disabledBorder != null) 'disabledBorder: $disabledBorder',
+      if (enabledBorder != null) 'enabledBorder: $enabledBorder',
+      if (border != null) 'border: $border',
+      if (!enabled) 'enabled: false',
+      if (semanticCounterText != null) 'semanticCounterText: $semanticCounterText',
+      if (alignLabelWithHint != null) 'alignLabelWithHint: $alignLabelWithHint',
+    ];
     return 'InputDecoration(${description.join(', ')})';
   }
 }

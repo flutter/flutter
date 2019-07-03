@@ -47,11 +47,11 @@ class IOSDeploy {
       bundlePath,
       '--no-wifi',
       '--justlaunch',
+      if (launchArguments.isNotEmpty) ...<String>[
+        '--args',
+        '${launchArguments.join(" ")}',
+      ],
     ];
-    if (launchArguments.isNotEmpty) {
-      launchCommand.add('--args');
-      launchCommand.add('${launchArguments.join(" ")}');
-    }
 
     // Push /usr/bin to the front of PATH to pick up default system python, package 'six'.
     //
@@ -303,59 +303,29 @@ class IOSDevice extends Device {
     }
 
     // Step 3: Attempt to install the application on the device.
-    final List<String> launchArguments = <String>['--enable-dart-profiling'];
-
-    if (debuggingOptions.startPaused) {
-      launchArguments.add('--start-paused');
-    }
-
-    if (debuggingOptions.disableServiceAuthCodes) {
-      launchArguments.add('--disable-service-auth-codes');
-    }
-
-    if (debuggingOptions.dartFlags.isNotEmpty) {
-      final String dartFlags = debuggingOptions.dartFlags;
-      launchArguments.add('--dart-flags="$dartFlags"');
-    }
-
-    if (debuggingOptions.useTestFonts) {
-      launchArguments.add('--use-test-fonts');
-    }
-
-    // "--enable-checked-mode" and "--verify-entry-points" should always be
-    // passed when we launch debug build via "ios-deploy". However, we don't
-    // pass them if a certain environment variable is set to enable the
-    // "system_debug_ios" integration test in the CI, which simulates a
-    // home-screen launch.
-    if (debuggingOptions.debuggingEnabled &&
-        platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') {
-      launchArguments.add('--enable-checked-mode');
-      launchArguments.add('--verify-entry-points');
-    }
-
-    if (debuggingOptions.enableSoftwareRendering) {
-      launchArguments.add('--enable-software-rendering');
-    }
-
-    if (debuggingOptions.skiaDeterministicRendering) {
-      launchArguments.add('--skia-deterministic-rendering');
-    }
-
-    if (debuggingOptions.traceSkia) {
-      launchArguments.add('--trace-skia');
-    }
-
-    if (debuggingOptions.dumpSkpOnShaderCompilation) {
-      launchArguments.add('--dump-skp-on-shader-compilation');
-    }
-
-    if (debuggingOptions.verboseSystemLogs) {
-      launchArguments.add('--verbose-logging');
-    }
-
-    if (platformArgs['trace-startup'] ?? false) {
-      launchArguments.add('--trace-startup');
-    }
+    final List<String> launchArguments = <String>[
+      '--enable-dart-profiling',
+      if (debuggingOptions.startPaused) '--start-paused',
+      if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
+      if (debuggingOptions.dartFlags.isNotEmpty) '--dart-flags="${debuggingOptions.dartFlags}"',
+      if (debuggingOptions.useTestFonts) '--use-test-fonts',
+      // "--enable-checked-mode" and "--verify-entry-points" should always be
+      // passed when we launch debug build via "ios-deploy". However, we don't
+      // pass them if a certain environment variable is set to enable the
+      // "system_debug_ios" integration test in the CI, which simulates a
+      // home-screen launch.
+      if (debuggingOptions.debuggingEnabled &&
+          platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+        '--enable-checked-mode',
+        '--verify-entry-points',
+      ],
+      if (debuggingOptions.enableSoftwareRendering) '--enable-software-rendering',
+      if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
+      if (debuggingOptions.traceSkia) '--trace-skia',
+      if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
+      if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
+      if (platformArgs['trace-startup'] ?? false) '--trace-startup',
+    ];
 
     final Status installStatus = logger.startProgress(
         'Installing and launching...',

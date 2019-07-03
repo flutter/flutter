@@ -73,11 +73,10 @@ String getAvdPath() {
 
   final List<String> searchPaths = <String>[
     platform.environment['ANDROID_AVD_HOME'],
+    if (platform.environment['HOME'] != null)
+      fs.path.join(platform.environment['HOME'], '.android', 'avd'),
   ];
 
-  if (platform.environment['HOME'] != null) {
-    searchPaths.add(fs.path.join(platform.environment['HOME'], '.android', 'avd'));
-  }
 
   if (platform.isWindows) {
     final String homeDrive = platform.environment['HOMEDRIVE'];

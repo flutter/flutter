@@ -346,8 +346,6 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> stacked = <Widget>[];
-
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
@@ -397,36 +395,33 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ),
     );
 
-    // The main content being at the bottom is added to the stack first.
-    stacked.add(content);
-
-    stacked.add(
-      MediaQuery(
-        data: existingMediaQuery.copyWith(textScaleFactor: 1),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          // Override the tab bar's currentIndex to the current tab and hook in
-          // our own listener to update the [_controller.currentIndex] on top of a possibly user
-          // provided callback.
-          child: widget.tabBar.copyWith(
-            currentIndex: _controller.index,
-            onTap: (int newIndex) {
-              _controller.index = newIndex;
-              // Chain the user's original callback.
-              if (widget.tabBar.onTap != null)
-              widget.tabBar.onTap(newIndex);
-            },
-          ),
-        ),
-      ),
-    );
-
     return DecoratedBox(
       decoration: BoxDecoration(
         color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
-        children: stacked,
+        children: <Widget>[
+          // The main content being at the bottom is added to the stack first.
+          content,
+          MediaQuery(
+            data: existingMediaQuery.copyWith(textScaleFactor: 1),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              // Override the tab bar's currentIndex to the current tab and hook in
+              // our own listener to update the [_controller.currentIndex] on top of a possibly user
+              // provided callback.
+              child: widget.tabBar.copyWith(
+                currentIndex: _controller.index,
+                onTap: (int newIndex) {
+                  _controller.index = newIndex;
+                  // Chain the user's original callback.
+                  if (widget.tabBar.onTap != null)
+                    widget.tabBar.onTap(newIndex);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

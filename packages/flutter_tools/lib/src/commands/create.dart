@@ -191,7 +191,7 @@ class CreateCommand extends FlutterCommand {
     }
 
     bool exists(List<String> path) {
-      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path] + path)).existsSync();
+      return fs.directory(fs.path.joinAll(<String>[projectDir.absolute.path, ...path])).existsSync();
     }
 
     // If it exists, the project type in the metadata is definitive.

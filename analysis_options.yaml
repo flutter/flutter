@@ -140,7 +140,7 @@ linter:
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_generic_function_type_aliases
-    # - prefer_if_elements_to_conditional_expressions # not yet tested
+    - prefer_if_elements_to_conditional_expressions
     - prefer_if_null_operators
     - prefer_initializing_formals
     - prefer_inlined_adds

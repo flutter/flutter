@@ -217,15 +217,12 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       ));
     }
 
-    final List<String> overflows = <String>[];
-    if (overflow.left > 0.0)
-      overflows.add('${_formatPixels(overflow.left)} pixels on the left');
-    if (overflow.top > 0.0)
-      overflows.add('${_formatPixels(overflow.top)} pixels on the top');
-    if (overflow.bottom > 0.0)
-      overflows.add('${_formatPixels(overflow.bottom)} pixels on the bottom');
-    if (overflow.right > 0.0)
-      overflows.add('${_formatPixels(overflow.right)} pixels on the right');
+    final List<String> overflows = <String>[
+      if (overflow.left > 0.0) '${_formatPixels(overflow.left)} pixels on the left',
+      if (overflow.top > 0.0) '${_formatPixels(overflow.top)} pixels on the top',
+      if (overflow.bottom > 0.0) '${_formatPixels(overflow.bottom)} pixels on the bottom',
+      if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
+    ];
     String overflowText = '';
     assert(overflows.isNotEmpty,
         "Somehow $runtimeType didn't actually overflow like it thought it did.");
