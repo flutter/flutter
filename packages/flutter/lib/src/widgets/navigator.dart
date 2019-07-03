@@ -755,7 +755,7 @@ class Navigator extends StatefulWidget {
     this.onUnknownRoute,
     this.observers = const <NavigatorObserver>[],
   }) : assert(onGenerateRoute != null),
-        super(key: key);
+       super(key: key);
 
   /// The name of the first route to show.
   ///
@@ -884,8 +884,8 @@ class Navigator extends StatefulWidget {
   static Future<T> pushNamed<T extends Object>(
       BuildContext context,
       String routeName, {
-        Object arguments,
-      }) {
+      Object arguments,
+    }) {
     return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
@@ -938,9 +938,9 @@ class Navigator extends StatefulWidget {
   static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
       BuildContext context,
       String routeName, {
-        TO result,
-        Object arguments,
-      }) {
+      TO result,
+      Object arguments,
+    }) {
     return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -993,9 +993,9 @@ class Navigator extends StatefulWidget {
   static Future<T> popAndPushNamed<T extends Object, TO extends Object>(
       BuildContext context,
       String routeName, {
-        TO result,
-        Object arguments,
-      }) {
+      TO result,
+      Object arguments,
+    }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -1055,8 +1055,8 @@ class Navigator extends StatefulWidget {
       BuildContext context,
       String newRouteName,
       RoutePredicate predicate, {
-        Object arguments,
-      }) {
+      Object arguments,
+    }) {
     return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
@@ -1450,18 +1450,18 @@ class Navigator extends StatefulWidget {
   /// instances of [Navigator].
   static NavigatorState of(
       BuildContext context, {
-        bool rootNavigator = false,
-        bool nullOk = false,
-      }) {
+      bool rootNavigator = false,
+      bool nullOk = false,
+    }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
-            'Navigator operation requested with a context that does not include a Navigator.\n'
-                'The context used to push or pop routes from the Navigator must be that of a '
-                'widget that is a descendant of a Navigator widget.'
+          'Navigator operation requested with a context that does not include a Navigator.\n'
+          'The context used to push or pop routes from the Navigator must be that of a '
+          'widget that is a descendant of a Navigator widget.'
         );
       }
       return true;
@@ -1514,15 +1514,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         assert(() {
           FlutterError.reportError(
             FlutterErrorDetails(
-                exception:
-                'Could not navigate to initial route.\n'
-                    'The requested route name was: "/$initialRouteName"\n'
-                    'The following routes were therefore attempted:\n'
-                    ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-                    'This resulted in the following objects:\n'
-                    ' * ${plannedInitialRoutes.join("\n * ")}\n'
-                    'One or more of those objects was null, and therefore the initial route specified will be '
-                    'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+              exception:
+              'Could not navigate to initial route.\n'
+               'The requested route name was: "/$initialRouteName"\n'
+               'The following routes were therefore attempted:\n'
+               ' * ${plannedInitialRouteNames.join("\n * ")}\n'
+               'This resulted in the following objects:\n'
+               ' * ${plannedInitialRoutes.join("\n * ")}\n'
+               'One or more of those objects was null, and therefore the initial route specified will be '
+               'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
           return true;
@@ -1599,11 +1599,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(() {
         if (widget.onUnknownRoute == null) {
           throw FlutterError(
-              'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
-                  'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
-                  'onUnknownRoute callback specified.\n'
-                  'The Navigator was:\n'
-                  '  $this'
+            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
+            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+            'onUnknownRoute callback specified.\n'
+            'The Navigator was:\n'
+            '  $this'
           );
         }
         return true;
@@ -1612,11 +1612,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(() {
         if (route == null) {
           throw FlutterError(
-              'A Navigator\'s onUnknownRoute returned null.\n'
-                  'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
-                  'null. The onUnknownRoute callback should never return null.\n'
-                  'The Navigator was:\n'
-                  '  $this'
+            'A Navigator\'s onUnknownRoute returned null.\n'
+            'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
+            'null. The onUnknownRoute callback should never return null.\n'
+            'The Navigator was:\n'
+            '  $this'
           );
         }
         return true;
@@ -1670,9 +1670,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @optionalTypeArgs
   Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
       String routeName, {
-        TO result,
-        Object arguments,
-      }) {
+      TO result,
+      Object arguments,
+    }) {
     return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments), result: result);
   }
 
@@ -1696,9 +1696,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @optionalTypeArgs
   Future<T> popAndPushNamed<T extends Object, TO extends Object>(
       String routeName, {
-        TO result,
-        Object arguments,
-      }) {
+      TO result,
+      Object arguments,
+    }) {
     pop<TO>(result);
     return pushNamed<T>(routeName, arguments: arguments);
   }
@@ -1724,8 +1724,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushNamedAndRemoveUntil<T extends Object>(
       String newRouteName,
       RoutePredicate predicate, {
-        Object arguments,
-      }) {
+      Object arguments,
+    }) {
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments), predicate);
   }
 
@@ -2270,4 +2270,3 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     );
   }
 }
-
