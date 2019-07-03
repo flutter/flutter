@@ -3228,5 +3228,28 @@ void main() {
         ),
       );
     });
+
+    testWidgets(
+      'Long press on an autofocused field shows the selection menu',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints.loose(const Size(200, 200)),
+                child: const CupertinoTextField(
+                  autofocus: true,
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // Long press shows the selection menu.
+        await tester.longPressAt(textOffsetToPosition(tester, 0));
+        await tester.pump();
+        expect(find.text('Paste'), findsOneWidget);
+      },
+    );
   });
 }
