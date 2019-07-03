@@ -1886,9 +1886,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     // The route that is being pushed on top of
     final Route<dynamic> precedingRoute = _history.isNotEmpty ? _history.last : null;
-    final OverlayEntry precedingRouteOverlay = precedingRoute != null
-      ? (precedingRoute.overlayEntries.isNotEmpty ? precedingRoute.overlayEntries.last : null)
-      : null;
+    final OverlayEntry precedingRouteOverlay = _currentOverlayEntry;
 
     // Routes to remove
     final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
