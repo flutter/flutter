@@ -72,7 +72,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
   if (self != nil) {
     _flutterViewController = viewController;
     _channel = [FlutterMethodChannel methodChannelWithName:kTextInputChannel
-                                           binaryMessenger:viewController.binaryMessenger
+                                           binaryMessenger:viewController.engine.binaryMessenger
                                                      codec:[FlutterJSONMethodCodec sharedInstance]];
     __weak FLETextInputPlugin* weakSelf = self;
     [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
