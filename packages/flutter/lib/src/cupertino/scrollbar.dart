@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -63,7 +64,6 @@ class CupertinoScrollbar extends StatefulWidget {
 
 class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
   final GlobalKey _customPaintKey = GlobalKey();
-  bool _longPressDidHit = false;
   ScrollbarPainter _painter;
   TextDirection _textDirection;
 
@@ -133,27 +133,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPressStart(LongPressStartDetails details) {
-    // foregroundPainter also hit tests its children by default, but the
-    // scrollbar should only respond to a longpress directly on its thumb, so
-    // manually check for a hit on the thumb here.
-    if (_customPaintKey.currentContext == null) {
-      return;
-    }
-    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
-    final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
-    if (!_painter.hitTestInteractive(localOffset)) {
-      return;
-    }
-
-    _longPressDidHit = true;
     _fadeoutTimer?.cancel();
   }
 
   void _handleLongPressUp() {
-    if (!_longPressDidHit) {
-      return;
-    }
-    _longPressDidHit = false;
     _startFadeoutTimer();
     setState(() {
       _thicknessAnimationController.reverse();
@@ -161,9 +144,6 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleLongPress() {
-    if (!_longPressDidHit) {
-      return;
-    }
     _thicknessAnimationController.forward();
   }
 
@@ -210,15 +190,30 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   @override
   Widget build(BuildContext context) {
+    final Map<Type, GestureRecognizerFactory> gestures =
+      <Type, GestureRecognizerFactory>{};
+    gestures[_ThumbLongPressGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_ThumbLongPressGestureRecognizer>(
+        () => _ThumbLongPressGestureRecognizer(
+          debugOwner: this,
+          kind: PointerDeviceKind.touch,
+          customPaintKey: _customPaintKey,
+        ),
+        (_ThumbLongPressGestureRecognizer instance) {
+          instance
+            ..onLongPress = _handleLongPress
+            ..onLongPressStart = _handleLongPressStart
+            // TODO(justinmc): Longpress then drag to scroll works, but
+            // longpress on the thumb then drag to scroll does not.
+            //..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+            ..onLongPressUp = _handleLongPressUp;
+        },
+      );
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
-        child: GestureDetector(
-          // TODO(justinmc): Setting any of these longpress callbacks makes it not
-          // scroll after a long press.
-          onLongPressUp: _handleLongPressUp,
-          onLongPressStart: _handleLongPressStart,
-          onLongPress: _handleLongPress,
+        child: RawGestureDetector(
+          gestures: gestures,
           child: CustomPaint(
             key: _customPaintKey,
             foregroundPainter: _painter,
@@ -229,5 +224,41 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         ),
       ),
     );
+  }
+}
+
+// A longpress gesture detector that only responds to events on the scrollbar's
+// thumb and ignores everything else.
+class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
+  _ThumbLongPressGestureRecognizer({
+    double postAcceptSlopTolerance,
+    PointerDeviceKind kind,
+    Object debugOwner,
+    GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+        super(
+          postAcceptSlopTolerance: postAcceptSlopTolerance,
+          kind: kind,
+          debugOwner: debugOwner,
+        );
+
+  final GlobalKey _customPaintKey;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) {
+    // foregroundPainter also hit tests its children by default, but the
+    // scrollbar should only respond to a longpress directly on its thumb, so
+    // manually check for a hit on the thumb here.
+    if (_customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
+    final ScrollbarPainter painter = customPaint.foregroundPainter;
+    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(event.position);
+    if (!painter.hitTestInteractive(localOffset)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
   }
 }

@@ -300,7 +300,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// isn't too small to be interacted with by the user.
   bool hitTestInteractive(Offset position) {
     if (_thumbRect == null) {
-      return null;
+      return false;
     }
     final Rect interactiveThumbRect = _thumbRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect.center, radius: _kMinInteractiveSize / 2),
