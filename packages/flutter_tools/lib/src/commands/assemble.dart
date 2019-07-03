@@ -47,12 +47,15 @@ abstract class AssembleBase extends FlutterCommand {
       help: 'Allows passing configuration to a target with --define=target=key=value.'
     );
     argParser.addOption(
-      'build-mode',
-      allowed: const <String>[
-        'debug',
-        'profile',
-        'release',
-      ],
+      'output-dir',
+      help: 'Override output directory for builds.',
+      hide: true,
+    );
+    argParser.addFlag(
+      'skip-build-prefix',
+      help: 'Write builds into a single directory. May cause configuration '
+          'changes to perform additional work.',
+      hide: true,
     );
     argParser.addOption(
       'resource-pool-size',
@@ -96,9 +99,10 @@ abstract class AssembleBase extends FlutterCommand {
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
     final Environment result = Environment(
-      buildDir: fs.directory(getBuildDirectory()),
+      buildDir: fs.directory(argResults['output-dir'] ?? getBuildDirectory()),
       projectDir: flutterProject.directory,
       defines: _parseDefines(argResults['define']),
+      skipBuildPrefix: argResults['skip-build-prefix'],
     );
     return result;
   }

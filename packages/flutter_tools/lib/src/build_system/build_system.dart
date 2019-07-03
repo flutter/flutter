@@ -388,22 +388,26 @@ class Environment {
     @required Directory projectDir,
     Directory buildDir,
     Map<String, String> defines = const <String, String>{},
+    // TODO(jonahwilliams): remove.
+    bool skipBuildPrefix = false,
   }) {
     // Compute a unique hash of this build's particular environment.
     // Sort the keys by key so that the result is stable. We always
     // include the engine and dart versions.
-    String buildPrefix;
-    final List<String> keys = defines.keys.toList()..sort();
-    final StringBuffer buffer = StringBuffer();
-    for (String key in keys) {
-      buffer.write(key);
-      buffer.write(defines[key]);
+    String buildPrefix = '';
+    if (!skipBuildPrefix) {
+      final List<String> keys = defines.keys.toList()..sort();
+      final StringBuffer buffer = StringBuffer();
+      for (String key in keys) {
+        buffer.write(key);
+        buffer.write(defines[key]);
+      }
+      // in case there was no configuration, provide some value.
+      buffer.write('Flutter is awesome');
+      final String output = buffer.toString();
+      final Digest digest = md5.convert(utf8.encode(output));
+      buildPrefix = hex.encode(digest.bytes);
     }
-    // in case there was no configuration, provide some value.
-    buffer.write('Flutter is awesome');
-    final String output = buffer.toString();
-    final Digest digest = md5.convert(utf8.encode(output));
-    buildPrefix = hex.encode(digest.bytes);
 
     final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
     final Directory buildDirectory = rootBuildDir.childDirectory(buildPrefix);
