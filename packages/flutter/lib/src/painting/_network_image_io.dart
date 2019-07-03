@@ -115,7 +115,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         // Record download request so it can either send a request when isolate is ready or handle errors.
         _pendingLoadRequests.add(_PendingLoadRequest(
             (SendPort sendPort) { sendPort.send(downloadRequest); },
-            (dynamic error) { downloadRequest.sendPort.send(error); }
+            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error.toString())); }
         ));
       }
 
