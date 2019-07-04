@@ -1,4 +1,4 @@
-Signature: f1e40299965f80773c3d4983274e6c46
+Signature: d2373d09889ca9af4d6e79393ce5b0cb
 
 UNUSED LICENSES:
 
@@ -4614,6 +4614,7 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline_arm64.S
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline_x64_linux_mac.S
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
@@ -5824,14 +5825,15 @@ FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/bindings/types.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/collections/closable_iterator.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
-FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/cstring.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
+FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/utf8.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/rti.dart
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
+FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -5874,8 +5876,6 @@ FILE: ../../../third_party/dart/runtime/lib/math.cc
 FILE: ../../../third_party/dart/runtime/lib/mirrors.h
 FILE: ../../../third_party/dart/runtime/lib/object.cc
 FILE: ../../../third_party/dart/runtime/lib/string.cc
-FILE: ../../../third_party/dart/runtime/platform/c99_support_win.h
-FILE: ../../../third_party/dart/runtime/platform/inttypes_support_win.h
 FILE: ../../../third_party/dart/runtime/vm/bitfield.h
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/code_patcher_x64_test.cc
@@ -6530,7 +6530,6 @@ FILE: ../../../third_party/dart/runtime/observatory/lib/src/service/object.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/utils.dart
 FILE: ../../../third_party/dart/runtime/observatory/web/main.dart
 FILE: ../../../third_party/dart/runtime/platform/address_sanitizer.h
-FILE: ../../../third_party/dart/runtime/platform/math.h
 FILE: ../../../third_party/dart/runtime/platform/memory_sanitizer.h
 FILE: ../../../third_party/dart/runtime/platform/safe_stack.h
 FILE: ../../../third_party/dart/runtime/tools/verbose_gc_to_bmu.dart
@@ -6600,7 +6599,6 @@ FILE: ../../../third_party/dart/runtime/vm/tags.cc
 FILE: ../../../third_party/dart/runtime/vm/unibrow-inl.h
 FILE: ../../../third_party/dart/runtime/vm/unibrow.cc
 FILE: ../../../third_party/dart/runtime/vm/unibrow.h
-FILE: ../../../third_party/dart/runtime/vm/verified_memory_test.cc
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/d8.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/private/preambles/jsshell.js
 FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/linked_hash_map.dart
