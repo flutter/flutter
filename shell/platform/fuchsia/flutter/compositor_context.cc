@@ -25,10 +25,10 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
  private:
   SessionConnection& session_connection_;
 
-  bool Raster(flutter::LayerTree& layer_tree,
-              bool ignore_raster_cache) override {
+  flutter::RasterStatus Raster(flutter::LayerTree& layer_tree,
+                               bool ignore_raster_cache) override {
     if (!session_connection_.has_metrics()) {
-      return true;
+      return flutter::RasterStatus::kSuccess;
     }
 
     {
@@ -52,7 +52,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
       session_connection_.Present(*this);
     }
 
-    return true;
+    return flutter::RasterStatus::kSuccess;
   }
 
   FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);

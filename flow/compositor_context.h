@@ -20,6 +20,8 @@ namespace flutter {
 
 class LayerTree;
 
+enum class RasterStatus { kSuccess, kFailed };
+
 class CompositorContext {
  public:
   class ScopedFrame {
@@ -45,7 +47,8 @@ class CompositorContext {
 
     GrContext* gr_context() const { return gr_context_; }
 
-    virtual bool Raster(LayerTree& layer_tree, bool ignore_raster_cache);
+    virtual RasterStatus Raster(LayerTree& layer_tree,
+                                bool ignore_raster_cache);
 
    private:
     CompositorContext& context_;

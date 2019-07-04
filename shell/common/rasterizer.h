@@ -116,7 +116,7 @@ class Rasterizer final : public SnapshotDelegate {
 
   void DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
 
-  bool DrawToSurface(flutter::LayerTree& layer_tree);
+  RasterStatus DrawToSurface(flutter::LayerTree& layer_tree);
 
   void FireNextFrameCallbackIfPresent();
 
