@@ -133,23 +133,65 @@ Future<void> checkGradleDependencies() async {
   progress.stop();
 }
 
+/// Tries to migrate [settings.gradle] by removing the code that load plugins as
+/// Gradle subprojects. If this file was modified by the developer, then prints
+/// an error message indicating how to migrate the file manually.
+Future<void> _removePluginsFromSettingsGradle(Directory androidDirectory) async {
+  final File currentFile = androidDirectory.childFile('settings.gradle');
+  if (!await currentFile.exists()) {
+    return;
+  }
+  final String currentFileContent = await currentFile.readAsString();
+  if (!currentFileContent.contains('.flutter-plugins')) {
+    return;
+  }
+  final String relativeFile = fs.path.relative(currentFile.path);
+  final Status status = logger.startProgress('Updating `$relativeFile`...',
+      timeout: timeoutConfiguration.fastOperation);
+
+  final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+  final File deprecatedFile = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+      'gradle', 'deprecated_settings.gradle'));
+  assert(await deprecatedFile.exists());
+
+  final String deprecatedFileContent = await deprecatedFile.readAsString();
+  if (currentFileContent.trimRight() != deprecatedFileContent.trimRight()) {
+    status.cancel();
+    printError('*******************************************************************************************');
+    printError('Flutter tried to update the file `$relativeFile`, but failed due to local edits.');
+    // Print how to manually update the file.
+    printError(await fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+        'gradle', 'manual_migration_settings.gradle.md')).readAsString());
+    printError('*******************************************************************************************');
+    throwToolExit('Please update the file and run this command again.');
+  }
+
+  await fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+        'gradle', 'new_settings.gradle')).copy(currentFile.path);
+  status.stop();
+}
+
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
+
+  final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
+  await _removePluginsFromSettingsGradle(hostAppGradleRoot);
+
   final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
       <String>[gradle, isLibrary ? 'properties' : 'app:properties'],
-      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     final RunResult tasksRunResult = await runCheckedAsync(
       <String>[gradle, isLibrary ? 'tasks': 'app:tasks', '--all', '--console=auto'],
-      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      workingDirectory: hostAppGradleRoot.path,
       environment: _gradleEnv,
     );
     project = GradleProject.fromAppProperties(propertiesRunResult.stdout, tasksRunResult.stdout);
