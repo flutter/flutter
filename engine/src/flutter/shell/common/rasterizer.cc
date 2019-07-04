@@ -187,7 +187,7 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   persistent_cache->ResetStoredNewShaders();
 
-  if (DrawToSurface(*layer_tree)) {
+  if (DrawToSurface(*layer_tree) == RasterStatus::kSuccess) {
     last_layer_tree_ = std::move(layer_tree);
   }
 
@@ -205,13 +205,13 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
   delegate_.OnFrameRasterized(timing);
 }
 
-bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
+RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   FML_DCHECK(surface_);
 
   auto frame = surface_->AcquireFrame(layer_tree.frame_size());
 
   if (frame == nullptr) {
-    return false;
+    return RasterStatus::kFailed;
   }
 
   // There is no way for the compositor to know how long the layer tree
@@ -231,7 +231,11 @@ bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
       surface_->GetContext(), canvas, external_view_embedder,
       surface_->GetRootTransformation(), true);
 
-  if (compositor_frame && compositor_frame->Raster(layer_tree, false)) {
+  if (compositor_frame) {
+    RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
+    if (raster_status == RasterStatus::kFailed) {
+      return raster_status;
+    }
     frame->Submit();
     if (external_view_embedder != nullptr) {
       external_view_embedder->SubmitFrame(surface_->GetContext());
@@ -241,10 +245,10 @@ bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
     if (surface_->GetContext())
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
 
-    return true;
+    return raster_status;
   }
 
-  return false;
+  return RasterStatus::kFailed;
 }
 
 static sk_sp<SkData> SerializeTypeface(SkTypeface* typeface, void* ctx) {
