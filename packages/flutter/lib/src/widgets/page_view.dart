@@ -659,12 +659,12 @@ class PageView extends StatefulWidget {
 }
 
 class _PageViewState extends State<PageView> {
-  /// A flag to record last index reported by [PageView.onPageChanged] and to decide
-  /// whether to call [PageView.onPageChanged];
+  /// A flag to record the last index reported by [PageView.onPageChanged] and to decide
+  /// whether to call [PageView.onPageChanged].
   int _lastOnPageChangedIndex = 0;
 
-  /// A flag to record last index reported by [PageView.pageDidChange] and to decide
-  /// whether to call [PageView.pageDidChange];
+  /// A flag to record the last index reported by [PageView.pageDidChange] and to decide
+  /// whether to call [PageView.pageDidChange].
   int _lastPageDidChangeIndex = 0;
 
   @override
@@ -705,7 +705,7 @@ class _PageViewState extends State<PageView> {
           }
         } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
           final PageMetrics metrics = notification.metrics;
-          final int currentPage = metrics.page.round();
+          final int currentPage = metrics.page.toInt();
           if (currentPage != _lastPageDidChangeIndex) {
             _lastPageDidChangeIndex = currentPage;
             widget.pageDidChange(currentPage);

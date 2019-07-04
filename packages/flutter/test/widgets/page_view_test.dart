@@ -339,8 +339,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    final TestGesture gesture =
-    await tester.startGesture(const Offset(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     // The page view is 800.0 wide, so this move is beyond halfway.
     await gesture.moveBy(const Offset(-420.0, 0.0));
 
@@ -483,7 +482,7 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // Check if [PageView.pageDidChange] is triggered.
+    // PageDidChange should be fired.
     expect(log, equals(const <String>['pageDidChange 1']));
     log.clear();
 
@@ -496,7 +495,7 @@ void main() {
     // Move just beyond halfway, again.
     await gesture.moveBy(const Offset(-420.0, 0.0));
 
-    // [PageView.onPageChanged] still get sent.
+    // OnPageChanged should be fired.
     expect(log, equals(const <String>['onPageChanged 2']));
     log.clear();
 
@@ -509,11 +508,14 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
     expect(find.text('Arkansas'), findsNothing);
 
+    // PageDidChange should not trigger before turning snapping back on.
+    expect(log, isEmpty);
+
     // Now re-enable snapping, confirm that we've settled on a page.
     await tester.pumpWidget(build(pageSnapping: true));
     await tester.pumpAndSettle();
 
-    // [PageView.pageDidChange] should be triggered.
+    // PageDidChange should be fired.
     expect(log, equals(const <String>['pageDidChange 2']));
 
     expect(find.text('Alaska'), findsNothing);
