@@ -123,14 +123,14 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
 #endif
 
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
-  Dart_Isolate isolate = Dart_CreateIsolate(
+  Dart_Isolate isolate = Dart_CreateIsolateGroup(
       uri, DART_VM_SERVICE_ISOLATE_NAME, mapped_isolate_snapshot_data.address(),
       mapped_isolate_snapshot_instructions.address(),
       mapped_shared_snapshot_data.address(),
-      mapped_shared_snapshot_instructions.address(), nullptr /* flags */, state,
-      error);
+      mapped_shared_snapshot_instructions.address(), nullptr /* flags */,
+      state /* isolate_group_data */, state /* isolate_data */, error);
   if (!isolate) {
-    FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolate failed: %s", *error);
+    FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", *error);
     return nullptr;
   }
 
