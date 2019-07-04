@@ -114,7 +114,6 @@ class FlutterPlugin implements Plugin<Project> {
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 packagingOptions {
-                    pickFirst "lib/${abiValue}/libflutter.so"
                     // Prevent the ELF library from getting corrupted.
                     doNotStrip "*/${abiValue}/libapp.so"
                 }
@@ -131,18 +130,6 @@ class FlutterPlugin implements Plugin<Project> {
         // Add custom build types
         project.android.buildTypes {
             profile {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
-            dynamicProfile {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
-            dynamicRelease {
                 initWith debug
                 if (it.hasProperty('matchingFallbacks')) {
                     matchingFallbacks = ['debug', 'release']
@@ -178,28 +165,16 @@ class FlutterPlugin implements Plugin<Project> {
             // The local engine is built for one of the build type.
             // However, we use the same engine for each of the build types.
             project.android.buildTypes.each {
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     flutterJar
                 })
             }
         } else {
-            // x86/x86_64 native library used for debugging only, for now.
-            File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-            Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
-                destinationDir flutterX86Jar.parentFile
-                archiveName flutterX86Jar.name
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
-                    into 'lib/x86'
-                }
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
-                    into 'lib/x86_64'
-                }
-            }
             String basePlatformArch = getBasePlatform(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             File debugJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            baseJar["debug"] = [debugX86JarTask, debugJar]
+            baseJar["debug"] = debugJar
             if (!debugJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -212,20 +187,18 @@ class FlutterPlugin implements Plugin<Project> {
             }
             baseJar["profile"] = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
             baseJar["release"] = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
-            baseJar["dynamicProfile"] = baseEnginePath.resolve("${basePlatformArch}-dynamic-profile").resolve("flutter.jar").toFile()
-            baseJar["dynamicRelease"] = baseEnginePath.resolve("${basePlatformArch}-dynamic-release").resolve("flutter.jar").toFile()
 
             // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
             // added after applying the Flutter plugin.
             project.android.buildTypes.each {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     baseJar[buildMode]
                 })
             }
             project.android.buildTypes.whenObjectAdded {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     baseJar[buildMode]
                 })
             }
@@ -250,8 +223,16 @@ class FlutterPlugin implements Plugin<Project> {
                             initWith debug
                         }
                     }
+                    
+                    pluginProject.android.buildTypes.each {
+                        def buildMode = buildModeFor(it)
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                    }
+                    pluginProject.android.buildTypes.whenObjectAdded {
+                        def buildMode = buildModeFor(it)
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                    }
                 }
-                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
@@ -295,13 +276,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static Boolean getBuildShareLibrary(Project project) {
-        if (project.hasProperty('build-shared-library')) {
-            return project.property('build-shared-library').toBoolean()
-        }
-        return false;
-    }
-
     private static Boolean splitPerAbi(Project project) {
         if (project.hasProperty('split-per-abi')) {
             return project.property('split-per-abi').toBoolean()
@@ -326,44 +300,31 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
-    // TODO(blasten): Clean this up.
-    private void addFlutterJarCompileOnlyDependency(Project project) {
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
         if (project.state.failure) {
             return
         }
-        project.dependencies {
-            if (flutterJar != null) {
-                if (project.getConfigurations().findByName("compileOnly")) {
-                    compileOnly project.files(flutterJar)
-                } else {
-                    provided project.files(flutterJar)
-                }
-            } else {
-                assert baseJar["debug"].last().isFile()
-                assert baseJar["profile"].isFile()
-                assert baseJar["release"].isFile()
 
-                if (project.getConfigurations().findByName("debugCompileOnly")) {
-                    debugCompileOnly project.files(baseJar["debug"])
-                    profileCompileOnly project.files(baseJar["profile"])
-                    releaseCompileOnly project.files(baseJar["release"])
-                } else {
-                    debugProvided project.files(baseJar["debug"])
-                    profileProvided project.files(baseJar["profile"])
-                    releaseProvided project.files(baseJar["release"])
-                }
+        project.dependencies {
+            String configuration;
+            if (project.getConfigurations().findByName("compileOnly")) {
+                configuration = "${variantName}CompileOnly";
+            } else {
+                configuration = "${variantName}Provided";
             }
+
+            add(configuration, files)
         }
     }
 
-    private static void addApiDependencies(Project project, buildType, FileCollection files) {
+    private static void addApiDependencies(Project project, String variantName, FileCollection files) {
         project.dependencies {
             String configuration;
             // `compile` dependencies are now `api` dependencies.
             if (project.getConfigurations().findByName("api")) {
-                configuration = buildType.name + "Api";
+                configuration = "${variantName}Api";
             } else {
-                configuration = buildType.name + "Compile";
+                configuration = "${variantName}Compile";
             }
             add(configuration, files)
         }
@@ -374,15 +335,11 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
-     * @return "debug", "profile", "dynamicProfile", "dynamicRelease", or "release" (fall-back).
+     * @return "debug", "profile", or "release" (fall-back).
      */
     private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
-        } else if (buildType.name == "dynamicProfile") {
-            return "dynamicProfile"
-        } else if (buildType.name == "dynamicRelease") {
-            return "dynamicRelease"
         } else if (buildType.debuggable) {
             return "debug"
         }
@@ -392,10 +349,6 @@ class FlutterPlugin implements Plugin<Project> {
     private static String getEngineArtifactDirName(buildType, targetArch) {
         if (buildType.name == "profile") {
             return "${targetArch}-profile"
-        } else if (buildType.name == "dynamicProfile") {
-            return "${targetArch}-dynamic-profile"
-        } else if (buildType.name == "dynamicRelease") {
-            return "${targetArch}-dynamic-release"
         } else if (buildType.debuggable) {
             return "${targetArch}"
         }
@@ -516,10 +469,16 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.add(compileTask)
             }
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            def libFlutterPlatforms = targetPlatforms.collect()
+            // x86/x86_64 native library used for debugging only, for now.
+            if (flutterBuildMode == 'debug') {
+                libFlutterPlatforms.add('android-x86')
+                libFlutterPlatforms.add('android-x64')
+            }
             Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                targetPlatforms.each { targetArch ->
+                libFlutterPlatforms.each { targetArch ->
                     // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
@@ -549,7 +508,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             // Include the snapshots and libflutter.so in `lib/`.
-            addApiDependencies(project, buildType, project.files {
+            addApiDependencies(project, variant.name, project.files {
                 packFlutterSnapshotsAndLibsTask
             })
 
@@ -674,7 +633,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "build", "aot"
                 args "--suppress-analytics"
                 args "--quiet"
-                args "--build-shared-library"
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
                 args "--target-platform", "${targetPlatform}"
@@ -743,14 +701,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (buildMode == "debug") {
                 args "--debug"
             }
-            if (buildMode == "profile" || buildMode == "dynamicProfile") {
+            if (buildMode == "profile") {
                 args "--profile"
             }
-            if (buildMode == "release" || buildMode == "dynamicRelease") {
+            if (buildMode == "release") {
                 args "--release"
-            }
-            if (buildMode == "dynamicProfile" || buildMode == "dynamicRelease") {
-                args "--dynamic"
             }
         }
     }

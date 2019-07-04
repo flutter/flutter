@@ -64,7 +64,6 @@ class HotRunner extends ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     this.dillOutputPath,
-    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
@@ -73,7 +72,6 @@ class HotRunner extends ResidentRunner {
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
-             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 

@@ -637,30 +637,22 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[
+    return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
+      if (cache.includeAllPlatforms)
+        ...<List<String>>[
+          <String>['windows-x64', 'windows-x64/artifacts.zip'],
+          <String>['linux-x64', 'linux-x64/artifacts.zip'],
+          <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        ]
+      else if (platform.isWindows)
+        <String>['windows-x64', 'windows-x64/artifacts.zip']
+      else if (platform.isMacOS)
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+      else if (platform.isLinux)
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
     ];
-    if (cache.includeAllPlatforms) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isWindows) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isMacOS) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isLinux) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-      ]);
-    }
-    return binaryDirs;
   }
 
   @override
@@ -745,28 +737,31 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[];
-    if (cache.includeAllPlatforms) {
-      binaryDirs
-        ..addAll(_osxBinaryDirs)
-        ..addAll(_linuxBinaryDirs)
-        ..addAll(_windowsBinaryDirs)
-        ..addAll(_androidBinaryDirs)
-        ..addAll(_dartSdks);
-    } else if (platform.isWindows) {
-      binaryDirs
-        ..addAll(_windowsBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    } else if (platform.isMacOS) {
-      binaryDirs
-        ..addAll(_osxBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    } else if (platform.isLinux) {
-      binaryDirs
-        ..addAll(_linuxBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    }
-    return binaryDirs;
+    return <List<String>>[
+      if (cache.includeAllPlatforms)
+        ...<List<String>>[
+          ..._osxBinaryDirs,
+          ..._linuxBinaryDirs,
+          ..._windowsBinaryDirs,
+          ..._androidBinaryDirs,
+          ..._dartSdks,
+        ]
+      else if (platform.isWindows)
+        ...<List<String>>[
+          ..._windowsBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+      else if (platform.isMacOS)
+        ...<List<String>>[
+          ..._osxBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+      else if (platform.isLinux)
+        ...<List<String>>[
+          ..._linuxBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+    ];
   }
 
   @override
@@ -782,11 +777,10 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[];
-    if (platform.isMacOS || cache.includeAllPlatforms) {
-      binaryDirs.addAll(_iosBinaryDirs);
-    }
-    return binaryDirs;
+    return <List<String>>[
+      if (platform.isMacOS || cache.includeAllPlatforms)
+        ..._iosBinaryDirs,
+    ];
   }
 
   @override
@@ -914,16 +908,16 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
 String _flattenNameNoSubdirs(String fileName) {
-  final List<int> replacedCodeUnits = <int>[];
-  for (int codeUnit in fileName.codeUnits) {
-    replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
-  }
+  final List<int> replacedCodeUnits = <int>[
+    for (int codeUnit in fileName.codeUnits)
+      ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
+  ];
   return String.fromCharCodes(replacedCodeUnits);
 }
 
 @visibleForTesting
 String flattenNameSubdirs(Uri url) {
-  final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
+  final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fs.path.joinAll(convertedPieces);
 }

@@ -42,13 +42,21 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(String deviceId) : super(deviceId);
+  FlutterTesterDevice(String deviceId) : super(
+      deviceId,
+      platformType: null,
+      category: null,
+      ephemeral: false,
+  );
 
   Process _process;
   final DevicePortForwarder _portForwarder = _NoopPortForwarder();
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   String get name => 'Flutter test device';

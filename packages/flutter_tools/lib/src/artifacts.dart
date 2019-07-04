@@ -49,19 +49,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.flutterMacOSFramework:
       return 'FlutterMacOS.framework';
     case Artifact.vmSnapshotData:
-      // Flutter 'debug' and 'dynamic profile' modes for all target platforms use Dart
-      // RELEASE VM snapshot that comes from host debug build and has the metadata
-      // related to development tools. Flutter 'dynamic release' mode uses Dart PRODUCT
-      // VM snapshot from host dynamic release build that strips out the metadata
-      // related to development tools.
-      if (mode == BuildMode.dynamicRelease) {
-        return 'product_vm_isolate_snapshot.bin';
-      }
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
-      if (mode == BuildMode.dynamicRelease) {
-        return 'product_isolate_snapshot.bin';
-      }
       return 'isolate_snapshot.bin';
     case Artifact.platformKernelDill:
       return 'platform_strong.dill';
@@ -271,7 +260,7 @@ class LocalEngineArtifacts extends Artifacts {
 
   final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
-  String _hostEngineOutPath;
+  final String _hostEngineOutPath;
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {

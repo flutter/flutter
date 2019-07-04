@@ -59,8 +59,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   // \S matches non-whitespace characters.
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \S+\(flutter\): ');
 
-  FuchsiaDevice _device;
-  ApplicationPackage _app;
+  final FuchsiaDevice _device;
+  final ApplicationPackage _app;
 
   @override
   String get name => _device.name;
@@ -175,7 +175,12 @@ List<FuchsiaDevice> parseListDevices(String text) {
 }
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {this.name}) : super(id);
+  FuchsiaDevice(String id, {this.name}) : super(
+      id,
+      platformType: PlatformType.fuchsia,
+      category: null,
+      ephemeral: false,
+  );
 
   @override
   bool get supportsHotReload => true;
@@ -191,6 +196,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool get supportsStartPaused => false;
@@ -350,7 +358,20 @@ class FuchsiaDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'Fuchsia';
+  Future<String> get sdkNameAndVersion async {
+    const String versionPath = '/pkgfs/packages/build-info/0/data/version';
+    final RunResult catResult = await shell('cat $versionPath');
+    if (catResult.exitCode != 0) {
+      printTrace('Failed to cat $versionPath: ${catResult.stderr}');
+      return 'Fuchsia';
+    }
+    final String version = catResult.stdout.trim();
+    if (version.isEmpty) {
+      printTrace('$versionPath was empty');
+      return 'Fuchsia';
+    }
+    return 'Fuchsia $version';
+  }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) =>

@@ -274,8 +274,8 @@ void main() {
     final MockVersion stableVersion = MockVersion();
     final MockVersion betaVersion = MockVersion();
     final FakeCommand fakeCommand = FakeCommand();
-    when(stableVersion.isStable).thenReturn(true);
-    when(betaVersion.isStable).thenReturn(false);
+    when(stableVersion.isMaster).thenReturn(false);
+    when(betaVersion.isMaster).thenReturn(true);
 
     testUsingContext('Can be disabled on stable branch', () async {
       expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));

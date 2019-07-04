@@ -42,7 +42,7 @@ class TestCommand extends FastFlutterCommand {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the '
+              'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
       ..addFlag('disable-service-auth-codes',
@@ -179,15 +179,13 @@ class TestCommand extends FastFlutterCommand {
         );
       }
     } else {
-      final List<String> fileCopy = <String>[];
-      for (String file in files) {
-        if (file.endsWith(platform.pathSeparator)) {
-          fileCopy.addAll(_findTests(fs.directory(file)));
-        } else {
-          fileCopy.add(file);
-        }
-      }
-      files = fileCopy;
+      files = <String>[
+        for (String file in files)
+          if (file.endsWith(platform.pathSeparator))
+            ..._findTests(fs.directory(file))
+          else
+            file
+      ];
     }
 
     CoverageCollector collector;

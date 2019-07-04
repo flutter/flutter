@@ -130,6 +130,7 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
+    flaky: true
 
   # Android on-device tests
 
@@ -170,6 +171,13 @@ tasks:
       Measures the runtime performance of cubic bezier animations on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  backdrop_filter_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of backdrop filter blurs on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   flavors_test:
     description: >
@@ -343,6 +351,19 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  image_list_reported_duration:
+    description: >
+      Measures image loading performance.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  build_benchmark:
+    description: >
+      Measures APK build performance across config changes.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   # iOS on-device tests
 
@@ -445,6 +466,7 @@ tasks:
       Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   # Tests running on Windows host
 

@@ -41,6 +41,32 @@ class CoverageCollector extends TestWatcher {
     }
   }
 
+  /// Collects coverage for an isolate using the given `port`.
+  ///
+  /// This should be called when the code whose coverage data is being collected
+  /// has been run to completion so that all coverage data has been recorded.
+  ///
+  /// The returned [Future] completes when the coverage is collected.
+  Future<void> collectCoverageIsolate(Uri observatoryUri, String debugName) async {
+    assert(observatoryUri != null);
+    print('collecting coverage data from $observatoryUri...');
+    final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
+      // If we have a specified coverage directory or could not find the package name, then
+      // accept all libraries.
+      return (coverageDirectory != null)
+          || (flutterProject == null)
+          || libraryName.contains(flutterProject.manifest.appName);
+    }, waitPaused: true, debugName: debugName);
+    if (data == null) {
+      throw Exception('Failed to collect coverage.');
+    }
+    assert(data != null);
+
+    print('($observatoryUri): collected coverage data; merging...');
+    _addHitmap(coverage.createHitmap(data['coverage']));
+    print('($observatoryUri): done merging coverage data into global coverage map.');
+  }
+
   /// Collects coverage for the given [Process] using the given `port`.
   ///
   /// This should be called when the code whose coverage data is being collected
@@ -91,7 +117,6 @@ class CoverageCollector extends TestWatcher {
     coverage.Formatter formatter,
     Directory coverageDirectory,
   }) async {
-    printTrace('formating coverage data');
     if (_globalHitmap == null) {
       return null;
     }
@@ -159,12 +184,42 @@ class CoverageCollector extends TestWatcher {
   }
 }
 
-Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate) async {
-  final VMService vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
-  await vmService.getVM();
-  return _getAllCoverage(vmService, libraryPredicate);
+Future<VMService> _defaultConnect(Uri serviceUri) {
+  return VMService.connect(
+      serviceUri, compression: CompressionOptions.compressionOff);
 }
 
+Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate, {
+  bool waitPaused = false,
+  String debugName,
+  Future<VMService> Function(Uri) connector = _defaultConnect,
+}) async {
+  final VMService vmService = await connector(serviceUri);
+  await vmService.getVM();
+  if (!waitPaused) {
+    return _getAllCoverage(vmService, libraryPredicate);
+  }
+  final Isolate isolate = vmService.vm.isolates.firstWhere((Isolate isolate) => isolate.name == debugName);
+  const int kPollAttempts = 20;
+  int i = 0;
+  while (i < kPollAttempts) {
+    await isolate.load();
+    if (isolate.pauseEvent?.kind == ServiceEvent.kPauseStart) {
+      break;
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    i += 1;
+  }
+  if (i == kPollAttempts) {
+    print('Isolate $debugName was never paused, refusing to collect coverage');
+    return const <String, dynamic>{
+      'type': 'CodeCoverage',
+      'coverage': <Object>[]
+    };
+  }
+  print('isolate is paused, collecting coverage...');
+  return _getAllCoverage(vmService, libraryPredicate);
+}
 
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
   await service.getVM();
@@ -178,6 +233,13 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     final Map<String, Map<String, dynamic>> sourceReports = <String, Map<String, dynamic>>{};
     // For each ScriptRef loaded into the VM, load the corresponding Script and
     // SourceReport object.
+
+    // We may receive such objects as
+    // {type: Sentinel, kind: Collected, valueAsString: <collected>}
+    // that need to be skipped.
+    if (scriptList['scripts'] == null) {
+      continue;
+    }
     for (Map<String, dynamic> script in scriptList['scripts']) {
       if (!libraryPredicate(script['uri'])) {
         continue;

@@ -348,7 +348,29 @@ void main() {
     expect(controller.repeat, throwsFlutterError);
 
     controller.dispose();
-    expect(controller.dispose, throwsFlutterError);
+    FlutterError result;
+    try {
+      controller.dispose();
+    } on FlutterError catch (e) {
+      result = e;
+    }
+    expect(result, isNotNull);
+    expect(
+      result.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   AnimationController.dispose() called more than once.\n'
+        '   A given AnimationController cannot be disposed more than once.\n'
+        '   The following AnimationController object was disposed multiple\n'
+        '   times:\n'
+        '     AnimationController#00000(⏮ 0.000; paused; DISPOSED)\n'
+      ),
+    );
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    result.debugFillProperties(builder);
+    final DiagnosticsNode controllerProperty = builder.properties.last;
+    expect(controllerProperty.name, 'The following AnimationController object was disposed multiple times');
+    expect(controllerProperty.value, controller);
   });
 
   test('AnimationController repeat() throws if period is not specified', () {
