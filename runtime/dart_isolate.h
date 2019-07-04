@@ -156,8 +156,8 @@ class DartIsolate : public UIDartState {
 
   void OnShutdownCallback();
 
-  // |Dart_IsolateCreateCallback|
-  static Dart_Isolate DartIsolateCreateCallback(
+  // |Dart_IsolateGroupCreateCallback|
+  static Dart_Isolate DartIsolateGroupCreateCallback(
       const char* advisory_script_uri,
       const char* advisory_script_entrypoint,
       const char* package_root,
@@ -189,9 +189,9 @@ class DartIsolate : public UIDartState {
       std::shared_ptr<DartIsolate>* isolate_group_data,
       std::shared_ptr<DartIsolate>* isolate_data);
 
-  // |Dart_IsolateCleanupCallback|
-  static void DartIsolateCleanupCallback(
-      std::shared_ptr<DartIsolate>* embedder_isolate);
+  // |Dart_IsolateGroupCleanupCallback|
+  static void DartIsolateGroupCleanupCallback(
+      std::shared_ptr<DartIsolate>* isolate_group_data);
 
   FML_DISALLOW_COPY_AND_ASSIGN(DartIsolate);
 };
