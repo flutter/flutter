@@ -15,6 +15,43 @@ import '../../globals.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
+import 'ios.dart';
+
+// TODO(jonahwilliams): what tf does this do. This output will conflit with
+// the AOT output.
+// Build stub for all requested architectures.
+/**
+ * final Directory tempDir = fs.systemTempDirectory.createTempSync();
+  final File tempInput = tempDir.childFile('test_input')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('static const int Moo = 88;');
+  final ProcessResult result = await processManager.run(<String>[
+    'xcrun',
+    'clang',
+    '-x',
+    'c',
+    for (IOSArch iosArch in iosArchs)
+      '${getNameForIOSArch(iosArch)}-arch',
+    '-dynamiclib',
+    '-Xlinker',
+    '-rpath',
+    '-Xlinker',
+    '@executable_path/Frameworks',
+    '-Xlinker',
+    '-rpath',
+    '-Xlinker',
+    '@loader_path/Frameworks',
+    '-install_name',
+    '@rpath/App.framework/App',
+    '-o',
+    frameworkDir.path,
+    tempInput.path,
+  ]);
+  if (result.exitCode != 0) {
+    printError(result.stderr);
+    throw Exception('xcrun exited with code ${result.exitCode}');
+  }
+ */
 
 /// The define to pass a [BuildMode].
 const String kBuildMode= 'BuildMode';
@@ -54,7 +91,7 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
     targetProductVm: buildMode == BuildMode.release,
     outputFilePath: environment
       .buildDir
-      .childFile('main.app.dill')
+      .childFile('app.dill')
       .path,
     depFilePath: null,
     mainPath: targetFile,
@@ -79,7 +116,7 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   final int snapshotExitCode = await snapshotter.build(
     platform: targetPlatform,
     buildMode: buildMode,
-    mainPath: environment.buildDir.childFile('main.app.dill').path,
+    mainPath: environment.buildDir.childFile('app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     outputPath: outputPath,
   );
@@ -126,13 +163,16 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
   if (targetPlatform != TargetPlatform.ios) {
     throw Exception('aot_assembly is only supported for iOS applications');
   }
+  final Directory frameworkDir = fs.directory(
+    fs.path.join(environment.projectDir.path, 'ios', 'Flutter')
+  );
 
   // If we're building for a single architecture (common), then skip the lipo.
   if (iosArchs.length == 1) {
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('main.app.dill').path,
+      mainPath: environment.buildDir.childFile('app.dill').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       iosArch: iosArchs.single,
@@ -148,7 +188,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
-        mainPath: environment.buildDir.childFile('main.app.dill').path,
+        mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
         iosArch: iosArch,
@@ -170,6 +210,13 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       throw Exception('lipo exited with code ${result.exitCode}');
     }
   }
+  // TODO(jonahwilliams): replace shell out.
+  final ProcessResult copyResult = await processManager.run(<String>[
+    'cp', '-r', '--', fs.path.join(outputPath, 'App.framework'), frameworkDir.path,
+  ]);
+  if (copyResult.exitCode != 0) {
+    throw Exception('cp exited with code ${copyResult.exitCode}');
+  }
 }
 
 /// Generate a snapshot of the dart code used in the program.
@@ -182,7 +229,7 @@ const Target kernelSnapshot = Target(
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ],
   outputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
   ],
   dependencies: <Target>[],
   buildAction: compileKernel,
@@ -192,7 +239,7 @@ const Target kernelSnapshot = Target(
 const Target aotElfProfile = Target(
   name: 'aot_elf_profile',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -214,7 +261,7 @@ const Target aotElfProfile = Target(
 const Target aotElfRelease= Target(
   name: 'aot_elf_release',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -236,7 +283,7 @@ const Target aotElfRelease= Target(
 const Target aotAssemblyProfile = Target(
   name: 'aot_assembly_profile',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -253,6 +300,7 @@ const Target aotAssemblyProfile = Target(
   ],
   dependencies: <Target>[
     kernelSnapshot,
+    unpackIos,
   ],
   buildAction: compileAotAssembly,
 );
@@ -261,7 +309,7 @@ const Target aotAssemblyProfile = Target(
 const Target aotAssemblyRelease = Target(
   name: 'aot_assembly_release',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -278,6 +326,7 @@ const Target aotAssemblyRelease = Target(
   ],
   dependencies: <Target>[
     kernelSnapshot,
+    unpackIos,
   ],
   buildAction: compileAotAssembly,
 );

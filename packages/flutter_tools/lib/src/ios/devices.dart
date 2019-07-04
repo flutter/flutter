@@ -255,6 +255,7 @@ class IOSDevice extends Device {
       final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
+      print('HERE!!!!');
       final XcodeBuildResult buildResult = await buildXcodeProject(
           app: package,
           buildInfo: debuggingOptions.buildInfo,
@@ -262,6 +263,7 @@ class IOSDevice extends Device {
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
           activeArch: iosArch,
+          superBuild: true,
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');

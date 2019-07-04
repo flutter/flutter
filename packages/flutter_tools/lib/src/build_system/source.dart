@@ -161,8 +161,8 @@ abstract class Source {
   /// evaluated before the build.
   ///
   /// For example, [Source.pattern] and [Source.version] are not implicit
-  /// provided they do not use any wildcards. [Source.behavior] and
-  /// [Source.function] are always implicit.
+  /// provided they do not use any wildcards or reference the build directory.
+  /// [Source.behavior] and [Source.function] are always implicit.
   bool get implicit;
 }
 
@@ -210,7 +210,7 @@ class _PatternSource implements Source {
   void accept(SourceVisitor visitor) => visitor.visitPattern(value);
 
   @override
-  bool get implicit => value.contains('*');
+  bool get implicit => value.contains('*') || value.contains('{BUILD_DIR}');
 }
 
 class _ArtifactSource implements Source {

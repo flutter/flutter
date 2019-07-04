@@ -18,6 +18,8 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/output_formats.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
@@ -109,6 +111,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   IOSArch activeArch,
   bool codesign = true,
   bool usesTerminalUi = true,
+  bool superBuild = false,
 }) async {
   if (!await upgradePbxProjWithFlutterAssets(app.project))
     return XcodeBuildResult(success: false);
@@ -177,7 +180,29 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  if (!superBuild) {
+    await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
+  } else {
+    /// HACK PERFORM INITIAL BUILD
+    final Environment environment = Environment(
+      projectDir: FlutterProject.current().directory,
+      defines: <String, String>{
+        'BuildMode': 'debug',
+        'TargetPlatform': 'ios',
+      },
+    );
+    final BuildResult buildResult = await buildSystem.build('debug_ios_application', environment, const BuildSystemConfig());
+    if (!buildResult.success) {
+      for (MapEntry<String, ExceptionMeasurement> data in buildResult.exceptions.entries) {
+        printError('Target ${data.key} failed: ${data.value.exception}');
+        printError('${data.value.exception}');
+      }
+      throwToolExit('build failed');
+    } else {
+      printStatus('build succeeded');
+      generateXcFileList('debug_ios_application', environment, 'ios/FlutterInputs.xcfilelist', 'ios/FlutterOutputs.xcfilelist');
+    }
+  }
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',

@@ -404,6 +404,7 @@ class IOSSimulator extends Device {
       targetOverride: mainPath,
       buildForDevice: false,
       usesTerminalUi: usesTerminalUi,
+      superBuild: true,
     );
     if (!buildResult.success)
       throwToolExit('Could not build the application for the simulator.');

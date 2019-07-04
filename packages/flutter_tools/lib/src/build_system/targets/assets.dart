@@ -77,6 +77,38 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
     }));
 }
 
+/// Copies the asset files from the [copyAssets] rule into place.
+Future<void> copyAssetsFrameworkInvocation(Map<String, ChangeType> updates, Environment environment) async {
+  final Directory output = environment
+    .projectDir
+    .childDirectory('ios')
+    .childDirectory('Flutter')
+    .childDirectory('App.framework')
+    .childDirectory('flutter_assets');
+  if (output.existsSync()) {
+    output.deleteSync(recursive: true);
+  }
+  output.createSync(recursive: true);
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  await assetBundle.build(
+    manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+    packagesPath: environment.projectDir.childFile('.packages').path,
+  );
+  // Limit number of open files to avoid running out of file descriptors.
+  final Pool pool = Pool(64);
+  await Future.wait<void>(
+    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+      final PoolResource resource = await pool.request();
+      try {
+        final File file = fs.file(fs.path.join(output.path, entry.key));
+        file.parent.createSync(recursive: true);
+        await file.writeAsBytes(await entry.value.contentsAsBytes());
+      } finally {
+        resource.release();
+      }
+    }));
+}
+
 /// Copy the assets used in the application into a build directory.
 const Target copyAssets = Target(
   name: 'copy_assets',
@@ -92,4 +124,21 @@ const Target copyAssets = Target(
   ],
   dependencies: <Target>[],
   buildAction: copyAssetsInvocation,
+);
+
+// Copy the assets used in the application into a Framework
+const Target copyAssetsFramework = Target(
+  name: 'copy_assets_framework',
+  inputs: <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.behavior(AssetBehavior()),
+  ],
+  outputs: <Source>[
+    Source.pattern('{PROJECT_DIR}/ios/Flutter/App.framework/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/ios/Flutter/App.framework/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/ios/Flutter/App.framework/flutter_assets/LICENSE'),
+    //Source.behavior(AssetBehavior()), // <- everything in this subdirectory.
+  ],
+  dependencies: <Target>[],
+  buildAction: copyAssetsFrameworkInvocation,
 );

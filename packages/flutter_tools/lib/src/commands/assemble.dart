@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_system/output_formats.dart';
+
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
@@ -11,9 +12,6 @@ import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
-
-/// The [BuildSystem] instance.
-BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
@@ -146,6 +144,7 @@ class AssembleRun extends AssembleBase {
       throwToolExit('build failed');
     } else {
       printStatus('build succeeded');
+      generateXcFileList(targetName, environment, 'ios/FlutterInputs.xcfilelist', 'ios/FlutterOutputs.xcfilelist');
     }
     return null;
   }

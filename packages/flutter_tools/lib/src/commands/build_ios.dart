@@ -87,6 +87,7 @@ class BuildIOSCommand extends BuildSubCommand {
       targetOverride: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
+      superBuild: true,
     );
 
     if (!result.success) {

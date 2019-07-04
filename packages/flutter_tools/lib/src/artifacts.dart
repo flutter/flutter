@@ -19,8 +19,11 @@ enum Artifact {
   /// The flutter tester binary.
   flutterTester,
   snapshotDart,
+  /// The framework directory of the iOS engine.
   flutterFramework,
-  /// The framework directory of the macOS desktop.
+  /// The podspec for the iOS engine.
+  flutterIosPodspec,
+  /// The framework directory of the macOS engine.
   flutterMacOSFramework,
   vmSnapshotData,
   isolateSnapshotData,
@@ -107,6 +110,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
+    case Artifact.flutterIosPodspec:
+      return 'Flutter.podspec';
+      break;
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -193,6 +199,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+      case Artifact.flutterIosPodspec:
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -317,6 +324,8 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.platformLibrariesJson:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
+        return fs.path.join(engineOutPath, _artifactToFileName(artifact));
+      case Artifact.flutterIosPodspec:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.flutterMacOSFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));

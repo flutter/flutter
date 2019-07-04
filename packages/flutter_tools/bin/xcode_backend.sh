@@ -95,20 +95,20 @@ BuildApp() {
     exit -1
   fi
 
-  local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
+  # local framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
 
-  AssertExists "${framework_path}"
-  AssertExists "${project_path}"
+  # AssertExists "${framework_path}"
+  # AssertExists "${project_path}"
 
-  RunCommand mkdir -p -- "$derived_dir"
-  AssertExists "$derived_dir"
+  # RunCommand mkdir -p -- "$derived_dir"
+  # AssertExists "$derived_dir"
 
-  RunCommand rm -rf -- "${derived_dir}/App.framework"
+  # RunCommand rm -rf -- "${derived_dir}/App.framework"
 
   local flutter_engine_flag=""
   local local_engine_flag=""
-  local flutter_framework="${framework_path}/Flutter.framework"
-  local flutter_podspec="${framework_path}/Flutter.podspec"
+  # local flutter_framework="${framework_path}/Flutter.framework"
+  # local flutter_podspec="${framework_path}/Flutter.podspec"
 
   if [[ -n "$FLUTTER_ENGINE" ]]; then
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -138,15 +138,16 @@ BuildApp() {
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
     RunCommand find "${derived_dir}/engine/Flutter.framework" -type f -exec chmod a-w "{}" \;
-  else
-    RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
-    RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   fi
+  #else
+    # RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
+    # RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
+    # RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
+  #fi
 
   RunCommand pushd "${project_path}" > /dev/null
 
-  AssertExists "${target_path}"
+  # AssertExists "${target_path}"
 
   local verbose_flag=""
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
@@ -155,10 +156,10 @@ BuildApp() {
 
   local build_dir="${FLUTTER_BUILD_DIR:-build}"
 
-  local track_widget_creation_flag=""
-  if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-    track_widget_creation_flag="--track-widget-creation"
-  fi
+  # local track_widget_creation_flag=""
+  # if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
+  #   track_widget_creation_flag="--track-widget-creation"
+  # fi
 
   if [[ "${build_mode}" != "debug" ]]; then
     StreamOutput " ├─Building Dart code..."
@@ -236,38 +237,34 @@ BuildApp() {
         -o "${derived_dir}/App.framework/App" -)"
   fi
 
-  local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
-  if [[ -e "${project_path}/.ios" ]]; then
-    plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
-  fi
+  # local plistPath="${project_path}/ios/Flutter/AppFrameworkInfo.plist"
+  # if [[ -e "${project_path}/.ios" ]]; then
+  #   plistPath="${project_path}/.ios/Flutter/AppFrameworkInfo.plist"
+  # fi
 
-  RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
+  # RunCommand cp -- "$plistPath" "${derived_dir}/App.framework/Info.plist"
 
-  local precompilation_flag=""
-  if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
-    precompilation_flag="--precompiled"
-  fi
+  # local precompilation_flag=""
+  # if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
+  #   precompilation_flag="--precompiled"
+  # fi
 
   StreamOutput " ├─Assembling Flutter resources..."
   RunCommand "${FLUTTER_ROOT}/bin/flutter"                                  \
     ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=ios                                                   \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
-    --depfile="${build_dir}/snapshot_blob.bin.d"                            \
-    --asset-dir="${derived_dir}/App.framework/${assets_path}"               \
-    ${precompilation_flag}                                                  \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
-    ${track_widget_creation_flag}
+    assemble run                                                            \
+    -dTargetPlatform=ios                                                    \
+    -dBuildMode="${build_mode}"                                             \
+    debug_ios_application
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
     exit -1
   fi
   StreamOutput "done"
-  StreamOutput " └─Compiling, linking and signing..."
+  # StreamOutput " └─Compiling, linking and signing..."
 
   RunCommand popd > /dev/null
 
