@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
@@ -574,7 +575,7 @@ class MockWorkingAndroidConsoleSocket extends Mock implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(List<int> event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {
@@ -595,7 +596,7 @@ class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
   final StreamController<String> _controller = StreamController<String>();
 
   @override
-  Stream<E> asyncMap<E>(FutureOr<E> convert(List<int> event)) => _controller.stream as Stream<E>;
+  Stream<E> asyncMap<E>(FutureOr<E> convert(Uint8List event)) => _controller.stream as Stream<E>;
 
   @override
   void add(List<int> data) {}
