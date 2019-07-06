@@ -148,6 +148,15 @@ void main() {
               '${uiParam.identifier.name} is named, but not in lib/stub_ui/ui.dart.');
         }
       }
+      // check return type.
+      if (uiMethod.returnType?.toString() != webMethod.returnType?.toString()) {
+        // allow dynamic in web implementation.
+        if (webMethod.returnType?.toString() != 'dynamic') {
+          failed = true;
+          print('Warning: lib/ui/ui.dart $className.$methodName return type'
+              '${uiMethod.returnType?.toString()} is not the same as in lib/stub_ui/ui.dart.');
+        }
+      }
     }
   }
   if (failed) {
@@ -157,8 +166,6 @@ void main() {
   print('Success!');
   exit(0);
 }
-
-void _checkParameters() {}
 
 // Collects all public classes defined by the part files of [unit].
 void _collectPublicClasses(CompilationUnit unit,

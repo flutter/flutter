@@ -978,7 +978,7 @@ class Picture {
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
-  Image toImage(int width, int height) => null;
+  Future<Image> toImage(int width, int height) => null;
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
