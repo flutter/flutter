@@ -823,7 +823,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
       SAFE_ACCESS(flutter_message, response_handle, nullptr);
 
   fml::RefPtr<flutter::PlatformMessageResponse> response;
-  if (response_handle->message) {
+  if (response_handle && response_handle->message) {
     response = response_handle->message->response();
   }
 

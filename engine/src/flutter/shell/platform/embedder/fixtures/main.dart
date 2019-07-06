@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:convert';
 
 void main() {}
 
@@ -45,6 +46,7 @@ Float64List kTestTransform = () {
 }();
 
 void signalNativeTest() native 'SignalNativeTest';
+void signalNativeMessage(String message) native 'SignalNativeMessage';
 void notifySemanticsEnabled(bool enabled) native 'NotifySemanticsEnabled';
 void notifyAccessibilityFeatures(bool reduceMotion) native 'NotifyAccessibilityFeatures';
 void notifySemanticsAction(int nodeId, int action, List<int> data) native 'NotifySemanticsAction';
@@ -149,6 +151,18 @@ void a11y_main() async { // ignore: non_constant_identifier_names
 @pragma('vm:entry-point')
 void platform_messages_response() {
   window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
+    callback(data);
+  };
+  signalNativeTest();
+}
+
+@pragma('vm:entry-point')
+void platform_messages_no_response() {
+  window.onPlatformMessage = (String name, ByteData data, PlatformMessageResponseCallback callback) {
+    var list = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    signalNativeMessage(utf8.decode(list));
+    // This does nothing because no one is listening on the other side. But complete the loop anyway
+    // to make sure all null checking on response handles in the engine is in place.
     callback(data);
   };
   signalNativeTest();
