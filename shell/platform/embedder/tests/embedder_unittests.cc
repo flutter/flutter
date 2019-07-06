@@ -16,6 +16,7 @@
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
 #include "flutter/testing/testing.h"
+#include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
 namespace testing {
@@ -350,6 +351,53 @@ TEST_F(EmbedderTest, PlatformMessagesCanReceiveResponse) {
   });
 
   captures.latch.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Tests that a platform message can be sent with no response handle. Instead
+/// of the platform message integrity checked via a response handle, a native
+/// callback with the response is invoked to assert integrity.
+///
+TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("platform_messages_no_response");
+
+  const std::string message_data = "Hello but don't call me back.";
+
+  fml::AutoResetWaitableEvent ready, message;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+  context.AddNativeCallback(
+      "SignalNativeMessage",
+      CREATE_NATIVE_ENTRY(
+          ([&message, &message_data](Dart_NativeArguments args) {
+            auto received_message = tonic::DartConverter<std::string>::FromDart(
+                Dart_GetNativeArgument(args, 0));
+            ASSERT_EQ(received_message, message_data);
+            message.Signal();
+          })));
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+  ready.Wait();
+
+  FlutterPlatformMessage platform_message = {};
+  platform_message.struct_size = sizeof(FlutterPlatformMessage);
+  platform_message.channel = "test_channel";
+  platform_message.message =
+      reinterpret_cast<const uint8_t*>(message_data.data());
+  platform_message.message_size = message_data.size();
+  platform_message.response_handle = nullptr;  // No response needed.
+
+  auto result =
+      FlutterEngineSendPlatformMessage(engine.get(), &platform_message);
+  ASSERT_EQ(result, kSuccess);
+  message.Wait();
 }
 
 }  // namespace testing
