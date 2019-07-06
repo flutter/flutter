@@ -30,8 +30,6 @@ import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:scratch_space/scratch_space.dart';
 import 'package:test_core/backend.dart';
 
-import '../base/file_system.dart';
-
 const String ddcBootstrapExtension = '.dart.bootstrap.js';
 const String jsEntrypointExtension = '.dart.js';
 const String jsEntrypointSourceMapExtension = '.dart.js.map';
@@ -121,16 +119,16 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
         (BuilderOptions builderOptions) => KernelBuilder(
               platformSdk: builderOptions.config['flutterWebSdk'],
               summaryOnly: true,
-              sdkKernelPath: fs.path.join('kernel', 'flutter_ddc_sdk.dill'),
+              sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
               librariesPath: 'libraries.json',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
-              useIncrementalCompiler: true,
+              useIncrementalCompiler: false,
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
-              sdkKernelPath: fs.path.join('kernel', 'flutter_ddc_sdk.dill'),
+              sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
             ),
       ],
       core.toAllPackages(),
@@ -385,7 +383,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
       '${path.withoutExtension(dartPath.replaceFirst('package:', 'packages/'))}'
       '$jsEntrypointExtension';
   final String flutterWebSdkPath = flutterWebSdk;
-  final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
+  final String librariesPath = path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
     '--libraries-spec="$librariesPath"',
     '-O4',
