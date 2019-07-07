@@ -24,15 +24,18 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  final StreamLogger logger = StreamLogger();
   group('attach', () {
-    final FileSystem testFileSystem = MemoryFileSystem(
-      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle
-          .posix,
-    );
+    StreamLogger logger;
+    FileSystem testFileSystem;
 
     setUp(() {
       Cache.disableLocking();
+      logger = StreamLogger();
+      testFileSystem = MemoryFileSystem(
+      style: platform.isWindows
+          ? FileSystemStyle.windows
+          : FileSystemStyle.posix,
+      );
       testFileSystem.directory('lib').createSync();
       testFileSystem.file('lib/main.dart').createSync();
     });
@@ -108,7 +111,8 @@ void main() {
         const String outputDill = '/tmp/output.dill';
 
         final MockHotRunner mockHotRunner = MockHotRunner();
-        when(mockHotRunner.attach()).thenAnswer((_) async => 0);
+        when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+            .thenAnswer((_) async => 0);
 
         final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
@@ -219,8 +223,8 @@ void main() {
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async => null);
-      when(mockHotRunner.attach())
-        .thenAnswer((_) async => 0);
+      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+          .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
