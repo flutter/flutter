@@ -11,6 +11,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'viewport_offset.dart';
 
@@ -143,6 +144,8 @@ class RenderEditable extends RenderBox {
     Color backgroundCursorColor,
     ValueNotifier<bool> showCursor,
     bool hasFocus,
+    @required LayerLink startHandleLayerLink,
+    @required LayerLink endHandleLayerLink,
     int maxLines = 1,
     int minLines,
     bool expands = false,
@@ -168,6 +171,8 @@ class RenderEditable extends RenderBox {
        assert(textDirection != null, 'RenderEditable created without a textDirection.'),
        assert(maxLines == null || maxLines > 0),
        assert(minLines == null || minLines > 0),
+       assert(startHandleLayerLink != null),
+       assert(endHandleLayerLink != null),
        assert(
          (maxLines == null) || (minLines == null) || (maxLines >= minLines),
          'minLines can\'t be greater than maxLines',
@@ -209,6 +214,8 @@ class RenderEditable extends RenderBox {
        _floatingCursorAddedMargin = floatingCursorAddedMargin,
        _enableInteractiveSelection = enableInteractiveSelection,
        _devicePixelRatio = devicePixelRatio,
+       _startHandleLayerLink = startHandleLayerLink,
+       _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -903,6 +910,32 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// The [LayerLink] of start selection handle.
+  ///
+  /// [RenderEditable] is responsible for calculating the [Offset] of this
+  /// [LayerLink], which will be used as [CompositedTransformTarget] of start handle.
+  LayerLink get startHandleLayerLink => _startHandleLayerLink;
+  LayerLink _startHandleLayerLink;
+  set startHandleLayerLink(LayerLink value) {
+    if (_startHandleLayerLink == value)
+      return;
+    _startHandleLayerLink = value;
+    markNeedsPaint();
+  }
+
+  /// The [LayerLink] of end selection handle.
+  ///
+  /// [RenderEditable] is responsible for calculating the [Offset] of this
+  /// [LayerLink], which will be used as [CompositedTransformTarget] of end handle.
+  LayerLink get endHandleLayerLink => _endHandleLayerLink;
+  LayerLink _endHandleLayerLink;
+  set endHandleLayerLink(LayerLink value) {
+    if (_endHandleLayerLink == value)
+      return;
+    _endHandleLayerLink = value;
+    markNeedsPaint();
+  }
+
   /// The padding applied to text field. Used to determine the bounds when
   /// moving the floating cursor.
   ///
@@ -1252,7 +1285,7 @@ class RenderEditable extends RenderBox {
   double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
-    // Lock height to maxLines if needed
+    // Lock height to maxLines if needed.
     final bool lockedMax = maxLines != null && minLines == null;
     final bool lockedBoth = minLines != null && minLines == maxLines;
     final bool singleLine = maxLines == 1;
@@ -1260,7 +1293,7 @@ class RenderEditable extends RenderBox {
       return preferredLineHeight * maxLines;
     }
 
-    // Clamp height to minLines or maxLines if needed
+    // Clamp height to minLines or maxLines if needed.
     final bool minLimited = minLines != null && minLines > 1;
     final bool maxLimited = maxLines != null;
     if (minLimited || maxLimited) {
@@ -1273,7 +1306,7 @@ class RenderEditable extends RenderBox {
       }
     }
 
-    // Set the height based on the content
+    // Set the height based on the content.
     if (width == double.infinity) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -1765,6 +1798,30 @@ class RenderEditable extends RenderBox {
     }
   }
 
+  void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
+    Offset startPoint = endpoints[0].point;
+    startPoint = Offset(
+      startPoint.dx.clamp(0.0, size.width),
+      startPoint.dy.clamp(0.0, size.height),
+    );
+    context.pushLayer(
+      LeaderLayer(link: startHandleLayerLink, offset: startPoint),
+      super.paint,
+      Offset.zero,
+    );
+    if (endpoints.length == 2) {
+      Offset endPoint = endpoints[1].point;
+      endPoint = Offset(
+        endPoint.dx.clamp(0.0, size.width),
+        endPoint.dy.clamp(0.0, size.height),
+      );
+      context.pushLayer(
+        LeaderLayer(link: endHandleLayerLink, offset: endPoint),
+        super.paint,
+        Offset.zero,
+      );
+    }
+  }
   @override
   void paint(PaintingContext context, Offset offset) {
     _layoutText(constraints.maxWidth);
@@ -1772,6 +1829,7 @@ class RenderEditable extends RenderBox {
       context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     else
       _paintContents(context, offset);
+    _paintHandleLayers(context, getEndpointsForSelection(selection));
   }
 
   @override

@@ -174,11 +174,7 @@ void main() {
       final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(TestDiagnosticsSerializationDelegate(
           subtreeDepth: 1,
           childFilter: (List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
-            final List<DiagnosticsNode> result = <DiagnosticsNode>[];
-            for (DiagnosticsNode node in nodes) {
-              result.addAll(node.getChildren());
-            }
-            return result;
+            return nodes.expand((DiagnosticsNode node) => node.getChildren()).toList();
           }
       ));
       final List<Map<String, Object>> children = result['children'];
