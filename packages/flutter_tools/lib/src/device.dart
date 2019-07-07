@@ -175,11 +175,27 @@ class DeviceManager {
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
     List<Device> devices = await getDevices().toList();
 
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      devices = devices
-          .where((Device device) => isDeviceSupportedForProject(device, flutterProject))
-          .toList();
+    // Always remove web and fuchsia devices from `--all`.
+    if (hasSpecifiedAllDevices) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (await device.targetPlatform != TargetPlatform.fuchsia
+          && await device.targetPlatform != TargetPlatform.web_javascript)
+            device
+      ];
+    }
 
+    // Remove unsupported devices for project.
+    if (devices.length > 1 && !hasSpecifiedDeviceId) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (device.isSupportedForProject(flutterProject))
+            device
+      ];
+    }
+
+    // If we did not specify all devices, prefer ephemeral devices.
+    if (devices.length > 1 && !hasSpecifiedAllDevices) {
       // Note: ephemeral is nullable for device types where this is not well
       // defined.
       if (devices.any((Device device) => device.ephemeral == true)) {
