@@ -64,5 +64,5 @@ void main() {
 
     await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
     await expectXcodeBackendFails(localEngineProfileBuildeModeRelease);
-  }, skip: !platform.isMacOS);
+  }, skip: true); // #35707 non-hermetic test requires precache to have run.
 }
