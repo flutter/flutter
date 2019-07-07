@@ -44,8 +44,10 @@ void main() {
     expect(find.text('About Pirate app'), findsNothing);
     expect(find.text('0.1.2'), findsNothing);
     expect(find.byWidget(logo), findsNothing);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsNothing);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsNothing,
+    );
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
@@ -54,8 +56,10 @@ void main() {
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsNothing);
     expect(find.byWidget(logo), findsNothing);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsNothing);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsNothing,
+    );
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.text('About Pirate app'));
@@ -64,8 +68,10 @@ void main() {
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
     expect(find.byWidget(logo), findsOneWidget);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsOneWidget);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsOneWidget,
+    );
     expect(find.text('About box'), findsOneWidget);
 
     LicenseRegistry.addLicense(() {
@@ -80,8 +86,10 @@ void main() {
     expect(find.text('Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
     expect(find.byWidget(logo), findsOneWidget);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsOneWidget);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsOneWidget,
+    );
     expect(find.text('Pirate license'), findsOneWidget);
   }, skip: isBrowser);
 
@@ -105,7 +113,9 @@ void main() {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(
-            <String>['Another package'], 'Another license'),
+          <String>['Another package'],
+          'Another license',
+        ),
       ]);
     });
 
@@ -142,7 +152,9 @@ void main() {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
         const LicenseEntryWithLineBreaks(
-            <String>['Another package'], 'Another license'),
+          <String>['Another package'],
+          'Another license',
+        ),
       ]);
     });
 
@@ -154,8 +166,7 @@ void main() {
             applicationName: 'LicensePage test app',
             applicationVersion: '0.1.2',
             applicationIcon: logo,
-            applicationLegalese:
-                'I am the very model of a modern major general.',
+            applicationLegalese: 'I am the very model of a modern major general.',
           ),
         ),
       ),
@@ -165,8 +176,10 @@ void main() {
     expect(find.text('LicensePage test app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
     expect(find.byWidget(logo), findsOneWidget);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsOneWidget);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsOneWidget,
+    );
     expect(find.text('AAA'), findsNothing);
     expect(find.text('BBB'), findsNothing);
     expect(find.text('Another package'), findsNothing);
@@ -178,8 +191,10 @@ void main() {
     expect(find.text('LicensePage test app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
     expect(find.byWidget(logo), findsOneWidget);
-    expect(find.text('I am the very model of a modern major general.'),
-        findsOneWidget);
+    expect(
+      find.text('I am the very model of a modern major general.'),
+      findsOneWidget,
+    );
     expect(find.text('AAA'), findsOneWidget);
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
