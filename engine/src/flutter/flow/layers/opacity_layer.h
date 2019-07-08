@@ -15,6 +15,16 @@ namespace flutter {
 // |EnsureSingleChild| will assert if there are no children.
 class OpacityLayer : public ContainerLayer {
  public:
+  // An offset is provided here because OpacityLayer.addToScene method in the
+  // Flutter framework can take an optional offset argument.
+  //
+  // By default, that offset is always zero, and all the offsets are handled by
+  // some parent TransformLayers. But we allow the offset to be non-zero for
+  // backward compatibility. If it's non-zero, the old behavior is to propage
+  // that offset to all the leaf layers (e.g., PictureLayer). That will make
+  // the retained rendering inefficient as a small offset change could propagate
+  // to many leaf layers. Therefore we try to capture that offset here to stop
+  // the propagation as repainting the OpacityLayer is expensive.
   OpacityLayer(int alpha, const SkPoint& offset);
   ~OpacityLayer() override;
 
