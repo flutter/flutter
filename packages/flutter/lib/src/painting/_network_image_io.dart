@@ -87,7 +87,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       });
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok)
-        throw NetworkImageLoadException(code: response?.statusCode, uri: resolved);
+        throw NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
@@ -123,24 +123,24 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   String toString() => '$runtimeType("$url", scale: $scale)';
 }
 
-/// Thrown to indicate that loading a network image failed
-///
+/// The exception thrown when the HTTP request to load a network image fails.
 class NetworkImageLoadException implements Exception {
   /// Creates a [NetworkImageLoadException] with the specified http status
   /// [code] and the [uri]
-  NetworkImageLoadException({@required this.code, @required this.uri})
+  NetworkImageLoadException({@required this.statusCode, @required this.uri})
     : assert(uri != null),
-      message = 'HTTP request failed, statusCode: $code, $uri';
+      assert(statusCode != null),
+      _message = 'HTTP request failed, statusCode: $statusCode, $uri';
 
-  /// An http status code.
-  final int code;
+  /// The HTTP status code from the server.
+  final int statusCode;
 
   /// A human-readable error message.
-  final String message;
+  final String _message;
 
   /// Resolved URI of the requested image.
   final Uri uri;
 
   @override
-  String toString() => message;
+  String toString() => _message;
 }
