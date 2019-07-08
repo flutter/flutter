@@ -20,20 +20,20 @@ void main() {
     Testbed testbed;
     MockBuildSystem mockBuildSystem;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       mockBuildSystem = MockBuildSystem();
-      Cache.disableLocking();
-      Cache.flutterRoot = '';
       testbed = Testbed(overrides: <Type, Generator>{
         BuildSystem: ()  => mockBuildSystem,
-      }, setup: () {
-        fs.directory('tmp').createSync();
       });
     });
 
     test('Can list the output directory relative to project root', () => testbed.run(() async {
       final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', 'build-dir', '-dBuildMode=debug']);
+      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'build-dir', '-dBuildMode=debug']);
       final BufferLogger bufferLogger = logger;
       final Environment environment = Environment(
         defines: <String, String>{
@@ -51,7 +51,7 @@ void main() {
         <String, Object>{'fizz': 'bar'},
       ]);
       final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', 'describe', 'foobar']);
+      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'describe', 'foobar']);
       final BufferLogger bufferLogger = logger;
 
       expect(bufferLogger.statusText.trim(), '[{"fizz":"bar"}]');
@@ -62,7 +62,7 @@ void main() {
         <String, Object>{'name': 'foobar', 'inputs': <String>['bar', 'baz']},
       ]);
       final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
-      await commandRunner.run(<String>['assemble', 'inputs', 'foobar']);
+      await commandRunner.run(<String>['assemble', '--flutter-root=.', 'inputs', 'foobar']);
       final BufferLogger bufferLogger = logger;
 
       expect(bufferLogger.statusText.trim(), 'bar\nbaz');
