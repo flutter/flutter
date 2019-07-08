@@ -177,7 +177,7 @@ class DeviceManager {
   /// * If the user specified a device id, then do nothing as the list is already
   /// filtered by [getDevices].
   ///
-  /// * If the user did not specify a device id and there is more than oned
+  /// * If the user did not specify a device id and there is more than one
   /// device connected, then filter out unsupported devices and prioritize
   /// ephemeral devices.
   Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
