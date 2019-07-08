@@ -130,6 +130,14 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
+/// {@tool sample}
+///
+/// Examples of the resulting heights from different values of `TextStyle.height`:
+///
+/// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+///
+/// {@end-tool}
+///
 /// ### Wavy red underline with black text
 ///
 /// {@tool sample}
@@ -465,6 +473,14 @@ class TextStyle extends Diagnosticable {
   /// (which forms the upper and lower edges of the EM-square):
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+  ///
+  /// {@tool sample}
+  ///
+  /// Examples of the resulting line heights from different values of `TextStyle.height`:
+  ///
+  /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+  ///
+  /// {@end-tool}
   final double height;
 
   /// The locale used to select region-specific glyphs.

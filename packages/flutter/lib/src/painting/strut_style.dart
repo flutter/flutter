@@ -441,6 +441,8 @@ class StrutStyle extends Diagnosticable {
   /// The ratio of ascent:descent with [height] specified is the same as the
   /// font metrics defined ascent:descent ratio when [height] is null or omitted.
   ///
+  /// See [TextStyle.height], which works in a similar manner.
+  ///
   /// The default height is null.
   final double height;
 
