@@ -184,6 +184,7 @@ class AndroidView extends StatefulWidget {
 }
 
 // TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
 /// {@macro flutter.rendering.platformView.preview}
@@ -199,6 +200,9 @@ class AndroidView extends StatefulWidget {
 ///
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
+///
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
