@@ -52,7 +52,7 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'anyTap';
+  String get debugDescription => 'any tap';
 }
 
 class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
