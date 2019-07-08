@@ -95,13 +95,14 @@ class ExpansionPanel {
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
 
-  /// The widget builder that builds a custom expansion icon to expand
-  /// the panel.
+  /// A callback that returns a widget which shows if the panel is expanded or
+  /// not.
   ///
-  /// If the widget builder is used, some form of custom gesture detection is
-  /// necessary to handle state updates. [ExpansionPanelList.expansionCallback]
-  /// should still be used to update state correctly. A callback is passed as
-  /// a parameter of [ExpansionPanel.expandIconBuilder] to properly trigger
+  /// If [expandIconBuilder] is specified, then the widget it returns must
+  /// rebuild the expansion panel with a new [isExpanded] value.
+  /// [ExpansionPanelList.expansionCallback] should still be used to update
+  /// state correctly. A callback is passed as a parameter of
+  /// [ExpansionPanel.expandIconBuilder] to properly trigger
   /// [ExpansionPanelList.expansionCallback].
   ///
   /// If null, [ExpandIcon] will be used as the expansion icon.
@@ -184,14 +185,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required Widget body,
     bool canTapOnHeader = false,
     ExpansionPanelIconBuilder expandIconBuilder,
-  }) :
-    assert(value != null),
-    super(
-      body: body,
-      headerBuilder: headerBuilder,
-      canTapOnHeader: canTapOnHeader,
-      expandIconBuilder: expandIconBuilder,
-    );
+  }) : assert(value != null),
+       super(
+         body: body,
+         headerBuilder: headerBuilder,
+         canTapOnHeader: canTapOnHeader,
+         expandIconBuilder: expandIconBuilder,
+       );
 
   /// The value that uniquely identifies a radio panel so that the currently
   /// selected radio panel can be identified.

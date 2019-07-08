@@ -1315,6 +1315,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
 
     await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
@@ -1323,6 +1331,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isTrue,
+    );
   });
 
   testWidgets('Custom expandIconBuilder - ExpansionListRadio', (WidgetTester tester) async {
@@ -1396,6 +1412,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
 
     await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
@@ -1404,6 +1428,14 @@ void main() {
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isFalse,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isTrue,
+    );
   });
 
   testWidgets('ExpansionPanel - Custom expansion icon hit testing ignored if canTapOnHeader set to true', (WidgetTester tester) async {
@@ -1477,6 +1509,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
 
     // should not trigger onChanged, but should expand
     await tester.tap(find.byType(Checkbox).at(1));
@@ -1487,6 +1527,14 @@ void main() {
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
     expect(isTriggered, isFalse);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isTrue,
+    );
 
     // should expand second panel by tapping on header
     await tester.tap(find.byKey(secondPanelKey));
@@ -1496,6 +1544,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
   });
 
   testWidgets('ExpansionPanelRadio - Custom expansion icon hit testing ignored if canTapOnHeader set to true', (WidgetTester tester) async {
@@ -1575,6 +1631,14 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
 
     // should not trigger onChanged, but should expand
     await tester.tap(find.byType(Checkbox).at(1));
@@ -1585,6 +1649,14 @@ void main() {
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
     expect(isTriggered, isFalse);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isFalse,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isTrue,
+    );
 
     // should expand first panel by tapping on header
     await tester.tap(find.byKey(firstPanelKey));
@@ -1594,5 +1666,13 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(0)).value,
+      isTrue,
+    );
+    expect(
+      tester.widget<Checkbox>(find.byType(Checkbox).at(1)).value,
+      isFalse,
+    );
   });
 }
