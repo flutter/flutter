@@ -15,6 +15,7 @@
  */
 
 #include "text_style.h"
+
 #include "font_style.h"
 #include "font_weight.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -45,6 +46,8 @@ bool TextStyle::equals(const TextStyle& other) const {
   if (word_spacing != other.word_spacing)
     return false;
   if (height != other.height)
+    return false;
+  if (has_height_override != other.has_height_override)
     return false;
   if (locale != other.locale)
     return false;

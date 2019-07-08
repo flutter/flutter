@@ -51,6 +51,7 @@ class TextStyle {
   double letter_spacing = 0.0;
   double word_spacing = 0.0;
   double height = 1.0;
+  bool has_height_override = false;
   std::string locale;
   bool has_background = false;
   SkPaint background;
