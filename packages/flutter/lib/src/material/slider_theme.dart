@@ -2668,10 +2668,10 @@ class _PaddleSliderTrackShapePathPainter {
 
     shift = scale == 0.0 ? 0.0 : shift / scale;
     if (shift < 0.0) {
-      // shifting to the left
+      // Shifting to the left.
       shift = math.max(shift, -halfWidthNeeded);
     } else {
-      // shifting to the right
+      // Shifting to the right.
       shift = math.min(shift, halfWidthNeeded);
     }
     return shift;
