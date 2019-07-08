@@ -147,6 +147,20 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  tiles_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["mac/ios"]
+
+  tiles_scroll_perf_iphonexs__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
+    stage: devicelab
+    flaky: true
+    required_agent_capabilities: ["mac/iphonexs"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -376,31 +390,31 @@ tasks:
 
   flavors_test_ios:
     description: >
-      Checks that flavored builds work on iOS.
+      Checks that flavored builds work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   external_ui_integration_test_ios:
     description: >
-      Checks that external UIs work on iOS.
+      Checks that external UIs work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   channels_integration_test_ios:
     description: >
-      Checks that platform channels work on iOS.
+      Checks that platform channels work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   platform_interaction_test_ios:
     description: >
-      Checks platform interaction on iOS.
+      Checks platform interaction on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   platform_channel_sample_test_ios:
     description: >
-      Runs a driver test on the Platform Channel sample app on iOS.
+      Runs a driver test on the Platform Channel sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -419,13 +433,13 @@ tasks:
 
   flutter_gallery_ios__start_up:
     description: >
-      Measures the startup time of the Flutter Gallery app on iOS.
+      Measures the startup time of the Flutter Gallery app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   complex_layout_ios__start_up:
     description: >
-      Measures the startup time of the Complex Layout sample app on iOS.
+      Measures the startup time of the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -444,7 +458,7 @@ tasks:
 
   microbenchmarks_ios:
     description: >
-      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+      Runs benchmarks from dev/benchmarks/microbenchmarks on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 30
@@ -457,7 +471,7 @@ tasks:
 
   integration_ui_ios:
     description: >
-      Runs end-to-end Flutter tests on iOS.
+      Runs end-to-end Flutter tests on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
@@ -581,14 +595,14 @@ tasks:
 
   flutter_gallery_ios32__start_up:
     description: >
-      Measures the startup time of the Flutter Gallery app on 32-bit iOS.
+      Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery_ios32__transition_perf:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
-      32-bit iOS.
+      32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
