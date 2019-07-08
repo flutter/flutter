@@ -198,6 +198,9 @@ class FuchsiaDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool get supportsStartPaused => false;
 
   @override
@@ -355,7 +358,20 @@ class FuchsiaDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'Fuchsia';
+  Future<String> get sdkNameAndVersion async {
+    const String versionPath = '/pkgfs/packages/build-info/0/data/version';
+    final RunResult catResult = await shell('cat $versionPath');
+    if (catResult.exitCode != 0) {
+      printTrace('Failed to cat $versionPath: ${catResult.stderr}');
+      return 'Fuchsia';
+    }
+    final String version = catResult.stdout.trim();
+    if (version.isEmpty) {
+      printTrace('$versionPath was empty');
+      return 'Fuchsia';
+    }
+    return 'Fuchsia $version';
+  }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) =>

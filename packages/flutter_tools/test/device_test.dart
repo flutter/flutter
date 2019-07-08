@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -36,6 +37,49 @@ void main() {
       await expectDevice('Nexus', <Device>[device1, device2]);
     });
   });
+
+  group('Filter devices', () {
+    _MockDevice ephemeral;
+    _MockDevice nonEphemeralOne;
+    _MockDevice nonEphemeralTwo;
+    _MockDevice unsupported;
+
+    setUp(() {
+      ephemeral = _MockDevice('ephemeral', 'ephemeral', true);
+      nonEphemeralOne = _MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
+      nonEphemeralTwo = _MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
+      unsupported = _MockDevice('unsupported', 'unsupported', true, false);
+    });
+
+    testUsingContext('chooses ephemeral device', () async {
+      final List<Device> devices = <Device>[
+        ephemeral,
+        nonEphemeralOne,
+        nonEphemeralTwo,
+        unsupported,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered.single, ephemeral);
+    });
+
+    testUsingContext('does not remove all non-ephemeral', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ];
+
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    });
+  });
 }
 
 class TestDeviceManager extends DeviceManager {
@@ -50,16 +94,21 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class _MockDevice extends Device {
-  _MockDevice(this.name, String id) : super(
+  _MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(
       id,
       platformType: PlatformType.web,
       category: Category.mobile,
-      ephemeral: true,
+      ephemeral: ephemeral,
   );
+
+  final bool _isSupported;
 
   @override
   final String name;
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => _isSupported;
 }

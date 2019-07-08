@@ -1,4 +1,4 @@
-package com.example.cullopacity;
+package com.example.macrobenchmarks;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
