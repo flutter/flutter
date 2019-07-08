@@ -3,16 +3,14 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This script generates .packages file for frontend_server and
-# flutter_kernel_transformers from Dart SDKs .packages file located in
-# third_party/dart/.packages
+# This script generates .packages file for frontend_server from Dart SDKs
+# .packages file located in  third_party/dart/.packages
 
 import os
 import shutil
 
 ALL_PACKAGES = {
-  'frontend_server': ['flutter_kernel_transformers'],
-  'flutter_kernel_transformers': [],
+  'frontend_server': [],
 }
 
 SRC_DIR = os.getcwd()
