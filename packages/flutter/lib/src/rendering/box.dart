@@ -498,13 +498,11 @@ class BoxConstraints extends Constraints {
   }) {
     assert(() {
       void throwError(DiagnosticsNode message) {
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[message];
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-
-        information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          message,
+          if (informationCollector != null) ...informationCollector(),
+          DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty),
+        ]);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
         final List<String> affectedFieldsList = <String>[];
@@ -1952,12 +1950,12 @@ abstract class RenderBox extends RenderObject {
 
           information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
-        final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
-        errorParts.addAll(information);
-        errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
-        errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
-        errorParts.add(ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'));
-        throw FlutterError.fromParts(errorParts);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ...information,
+          DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'),
+        ]);
      }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size)) {
@@ -2010,13 +2008,13 @@ abstract class RenderBox extends RenderObject {
           // TODO(jacobr): consider nesting the failures object so it is collapsible.
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
-            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:') // should this be tagged as an error or not?
-          ]..addAll(failures)
-           ..add(ErrorHint(
+            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:'), // should this be tagged as an error or not?
+            ...failures,
+            ErrorHint(
               'If you are not writing your own RenderBox subclass, then this is not\n'
               'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
-            ))
-          );
+            ),
+          ]);
         }
       }
       return true;

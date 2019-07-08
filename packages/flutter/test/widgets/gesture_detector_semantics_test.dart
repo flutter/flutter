@@ -245,6 +245,42 @@ void main() {
       semantics.dispose();
     });
 
+    testWidgets('should update semantics notations when switching from a different custom delegate', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final Map<Type, GestureRecognizerFactory> gestures =
+        _buildGestureMap(() => LongPressGestureRecognizer(), null)
+        ..addAll( _buildGestureMap(() => TapGestureRecognizer(), null));
+      await tester.pumpWidget(
+        Center(
+          child: RawGestureDetector(
+            gestures: gestures,
+            semantics: _TestSemanticsGestureDelegate(onTap: () {}),
+            child: Container(),
+          ),
+        )
+      );
+
+      expect(semantics, includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.tap]),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: RawGestureDetector(
+            gestures: gestures,
+            semantics: _TestSemanticsGestureDelegate(onLongPress: () {}),
+            child: Container(),
+          ),
+        )
+      );
+
+      expect(semantics, includesNodeWith(
+        actions: <SemanticsAction>[SemanticsAction.longPress]),
+      );
+
+      semantics.dispose();
+    });
+
     testWidgets('should correctly call callbacks', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
       final List<String> logs = <String>[];
@@ -678,7 +714,7 @@ class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
 class _RenderTestLayoutPerformer extends RenderBox {
   _RenderTestLayoutPerformer({VoidCallback performLayout}) : _performLayout = performLayout;
 
-  VoidCallback _performLayout;
+  final VoidCallback _performLayout;
 
   @override
   void performLayout() {

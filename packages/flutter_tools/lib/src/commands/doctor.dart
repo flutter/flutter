@@ -31,6 +31,17 @@ class DoctorCommand extends FlutterCommand {
   final String description = 'Show information about the installed tooling.';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    return <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+      // This is required because we use gen_snapshot to check if the host
+      // machine can execute the provided artifacts. See `_genSnapshotRuns`
+      // in `doctor.dart`.
+      DevelopmentArtifact.android,
+    };
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.wasParsed('check-for-remote-artifacts')) {
       final String engineRevision = argResults['check-for-remote-artifacts'];

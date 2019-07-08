@@ -64,8 +64,8 @@ class GalleryTransitionTest {
     final Map<String, dynamic> data = <String, dynamic>{
       'transitions': transitions,
       'missed_transition_count': _countMissedTransitions(transitions),
+      ...summary,
     };
-    data.addAll(summary);
 
     return TaskResult.success(data, benchmarkScoreKeys: <String>[
       'missed_transition_count',

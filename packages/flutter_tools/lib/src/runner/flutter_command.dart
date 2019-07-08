@@ -407,12 +407,10 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Send screen.
-    final Map<String, String> additionalUsageValues = <String, String>{};
     final Map<String, String> currentUsageValues = await usageValues;
-
-    if (currentUsageValues != null) {
-      additionalUsageValues.addAll(currentUsageValues);
-    }
+    final Map<String, String> additionalUsageValues = <String, String>{
+      ...?currentUsageValues,
+    };
     if (commandResult != null) {
       switch (commandResult.exitStatus) {
         case ExitStatus.success:
@@ -429,11 +427,12 @@ abstract class FlutterCommand extends Command<void> {
     flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
 
     // Send timing.
-    final List<String> labels = <String>[];
-    if (commandResult?.exitStatus != null)
-      labels.add(getEnumName(commandResult.exitStatus));
-    if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-      labels.addAll(commandResult.timingLabelParts);
+    final List<String> labels = <String>[
+      if (commandResult?.exitStatus != null)
+        getEnumName(commandResult.exitStatus),
+      if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+        ...commandResult.timingLabelParts,
+    ];
 
     final String label = labels
         .where((String label) => !isBlank(label))
@@ -480,12 +479,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  /// Defaults to [DevelopmentArtifact.universal].
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
   };
 
   /// Subclasses must implement this to execute the command.
@@ -555,7 +551,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -651,17 +647,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;

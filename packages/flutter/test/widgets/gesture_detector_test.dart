@@ -522,4 +522,90 @@ void main() {
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
   });
+
+  group('RawGestureDetectorState\'s debugFillProperties', () {
+    testWidgets('when default', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+      ]);
+    });
+
+    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        behavior: HitTestBehavior.deferToChild,
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+            (TapGestureRecognizer recognizer) {
+              recognizer.onTap = () {};
+            },
+          ),
+          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(),
+            (LongPressGestureRecognizer recognizer) {
+              recognizer.onLongPress = () {};
+            },
+          ),
+        },
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: tap, long press',
+        'semantics: _EmptySemanticsGestureDelegate()',
+        'behavior: deferToChild',
+      ]);
+    });
+
+    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        gestures: const <Type, GestureRecognizerFactory>{},
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+        excludeFromSemantics: true,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+        'excludeFromSemantics: true',
+      ]);
+    });
+  });
+}
+
+class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
 }

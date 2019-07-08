@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Integration tests which invoke flutter instead of unit testing the code
+// will not produce meaningful coverage information - we can measure coverage
+// from the isolate running the test, but not from the isolate started via
+// the command line process.
+@Tags(<String>['no_coverage'])
 import 'dart:async';
 
 import 'package:file/file.dart';

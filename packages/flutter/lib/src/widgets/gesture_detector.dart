@@ -1025,7 +1025,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
       properties.add(DiagnosticsProperty<bool>('excludeFromSemantics', widget.excludeFromSemantics, defaultValue: false));
-      properties.add(DiagnosticsProperty<SemanticsGestureDelegate>('semantics', widget.semantics));
+      if (!widget.excludeFromSemantics) {
+        properties.add(DiagnosticsProperty<SemanticsGestureDelegate>('semantics', widget.semantics, defaultValue: null));
+      }
     }
     properties.add(EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -1070,6 +1072,9 @@ abstract class SemanticsGestureDelegate {
   /// This method is called when the widget is created, updated, or during
   /// [RawGestureDetector.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
+
+  @override
+  String toString() => '$runtimeType()';
 }
 
 // The default semantics delegate of [RawGestureDetector]. Its behavior is
