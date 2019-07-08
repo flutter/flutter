@@ -99,9 +99,12 @@ class ExpansionPanel {
   /// the panel.
   ///
   /// If the widget builder is used, some form of custom gesture detection is
-  /// necessary to handle state updates.
+  /// necessary to handle state updates. [ExpansionPanelList.expansionCallback]
+  /// should still be used to update state correctly. A callback is passed as
+  /// a parameter of [ExpansionPanel.expandIconBuilder] to properly trigger
+  /// [ExpansionPanelList.expansionCallback].
   ///
-  /// If null, [ExpandIcon] will be used as the expansion icon by default.
+  /// If null, [ExpandIcon] will be used as the expansion icon.
   ///
   /// If [canTapOnHeader] is set to true, the expansion icon will be invisible
   /// to hit testing. Since the entire header should semantically behave as a
@@ -122,11 +125,16 @@ class ExpansionPanel {
   ///   headerBuilder: (context, isExpanded) {
   ///     return Text("This is ExpansionPanel's header");
   ///   },
-  ///   expandIconBuilder: (context, isExpanded) {
+  ///   expandIconBuilder: (
+  ///     BuildContext context,
+  ///     bool isExpanded,
+  ///     VoidCallback handlePressed,
+  ///     Duration animationDuration,
+  ///   ) {
   ///     return Checkbox(
   ///       value: isExpanded,
   ///       onChanged: (bool val) {
-  ///         setState(() { _isExpanded = val; });
+  ///         handlePressed();
   ///       },
   ///     );
   ///   },
