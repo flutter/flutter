@@ -59,17 +59,17 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
 
   @override
   void paint(
-      PaintingContext context,
-      Offset center, {
-        @required Animation<double> activationAnimation,
-        @required Animation<double> enableAnimation,
-        bool isDiscrete = false,
-        bool isEnabled = false,
-        bool isOnTop,
-        @required SliderThemeData sliderTheme,
-        TextDirection textDirection,
-        Thumb thumb,
-      }) {
+    PaintingContext context,
+    Offset center, {
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    bool isOnTop,
+    @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
+    Thumb thumb,
+  }) {
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
