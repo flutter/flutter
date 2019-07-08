@@ -309,10 +309,7 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    // Not passing this snapConfiguration as a constructor parameter to avoid the
-    // additional layers added due to https://github.com/dart-lang/sdk/issues/31543
-    return _RenderSliverFloatingPersistentHeaderForWidgets()
-      ..snapConfiguration = delegate.snapConfiguration;
+    return _RenderSliverFloatingPersistentHeaderForWidgets(snapConfiguration: delegate.snapConfiguration);
   }
 
   @override
@@ -321,7 +318,12 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
   }
 }
 
-class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin {
+  _RenderSliverFloatingPinnedPersistentHeaderForWidgets({
+    RenderBox child,
+    FloatingHeaderSnapConfiguration snapConfiguration,
+  }) : super(child: child, snapConfiguration: snapConfiguration);
+}
 
 class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
   const _SliverFloatingPinnedPersistentHeader({
@@ -331,10 +333,7 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    // Not passing this snapConfiguration as a constructor parameter to avoid the
-    // additional layers added due to https://github.com/dart-lang/sdk/issues/31543
-    return _RenderSliverFloatingPinnedPersistentHeaderForWidgets()
-      ..snapConfiguration = delegate.snapConfiguration;
+    return _RenderSliverFloatingPinnedPersistentHeaderForWidgets(snapConfiguration: delegate.snapConfiguration);
   }
 
   @override
@@ -343,4 +342,9 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
   }
 }
 
-class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloatingPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+class _RenderSliverFloatingPersistentHeaderForWidgets extends RenderSliverFloatingPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin {
+  _RenderSliverFloatingPersistentHeaderForWidgets({
+    RenderBox child,
+    FloatingHeaderSnapConfiguration snapConfiguration,
+  }) : super(child: child, snapConfiguration: snapConfiguration);
+}
