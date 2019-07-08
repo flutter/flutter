@@ -1524,11 +1524,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-        sliderBox,
-        paints
-          ..path(color: sliderTheme.valueIndicatorColor)
-          ..path(color: sliderTheme.overlappingShapeStrokeColor)
-          ..path(color: sliderTheme.valueIndicatorColor)
+      sliderBox,
+      paints
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..path(color: sliderTheme.overlappingShapeStrokeColor)
+        ..path(color: sliderTheme.valueIndicatorColor),
     );
 
     await gesture.up();

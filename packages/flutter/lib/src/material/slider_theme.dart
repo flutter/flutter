@@ -1237,6 +1237,9 @@ abstract class RangeSliderValueIndicatorShape {
   Size getPreferredSize(bool isEnabled, bool isDiscrete, { TextPainter labelPainter });
 
   /// Determines the best offset to keep this shape on the screen.
+  ///
+  /// Override this method when the center of the value indicator should be
+  /// shifted from the vertical center of the thumb.
   double getHorizontalShift({
     RenderBox parentBox,
     Offset center,
