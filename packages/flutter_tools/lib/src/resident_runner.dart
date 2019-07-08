@@ -817,14 +817,17 @@ abstract class ResidentRunner {
         }
         return false;
       case 'd':
+      case 'D':
         await detach();
         return true;
       case 'h':
+      case 'H':
       case '?':
         // help
         printHelp(details: true);
         return true;
       case 'i':
+      case 'I':
         if (supportsServiceProtocol) {
           await _debugToggleWidgetInspector();
           return true;
@@ -837,6 +840,7 @@ abstract class ResidentRunner {
         }
         return false;
       case 'o':
+      case 'O':
         if (supportsServiceProtocol && isRunningDebug) {
           await _debugTogglePlatform();
           return true;
@@ -855,6 +859,7 @@ abstract class ResidentRunner {
         }
         return false;
       case 'q':
+      case 'Q':
         // exit
         await exit();
         return true;
@@ -871,6 +876,7 @@ abstract class ResidentRunner {
         }
         return false;
       case 't':
+      case 'T':
         if (supportsServiceProtocol) {
           await _debugDumpRenderTree();
           return true;
@@ -883,12 +889,14 @@ abstract class ResidentRunner {
         }
         return false;
       case 'w':
+      case 'W':
         if (supportsServiceProtocol) {
           await _debugDumpApp();
           return true;
         }
         return false;
       case 'z':
+      case 'Z':
         await _debugToggleDebugCheckElevationsEnabled();
         return true;
     }
