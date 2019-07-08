@@ -48,7 +48,7 @@ void main() {
       mockCache = MockCache();
       mockArtifacts = MockArtifacts();
       when(mockArtifacts.getArtifactPath(Artifact.ideviceId, platform: anyNamed('platform'))).thenReturn(ideviceIdPath);
-      when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
+      when(mockCache.dyLdLibEnv).thenReturn(<String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath});
     });
 
     testUsingContext('getAvailableDeviceIDs throws ToolExit when libimobiledevice is not installed', () async {

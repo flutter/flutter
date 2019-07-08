@@ -107,7 +107,7 @@ void main() {
       verifyNever(artifact1.update(<DevelopmentArtifact>{}));
       verify(artifact2.update(<DevelopmentArtifact>{}));
     });
-    testUsingContext('getter dyLdLibPath concatenates the output of each artifact\'s dyLdLibPath getter', () async {
+    testUsingContext('getter dyLdLibEnv concatenates the output of each artifact\'s dyLdLibEnv getter', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
       final CachedArtifact artifact2 = MockCachedArtifact();
       final CachedArtifact artifact3 = MockCachedArtifact();
@@ -116,8 +116,10 @@ void main() {
       when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
       expect(
-        cache.dyLdLibPath,
-        '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon',
+        cache.dyLdLibEnv,
+        <String, String>{
+          'DYLD_LIBARY_PATH': '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon'
+        },
       );
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,

@@ -62,7 +62,7 @@ class IMobileDevice {
         _ideviceIdPath,
         '-h'
       ],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+      environment: cache.dyLdLibEnv,
     );
     return _isInstalled;
   }
@@ -81,7 +81,7 @@ class IMobileDevice {
     }
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath};
+    final Map<String, String> executionEnv = cache.dyLdLibEnv;
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
         _ideviceinfoPath,
@@ -123,7 +123,7 @@ class IMobileDevice {
           _ideviceIdPath,
           '-l'
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+        environment: cache.dyLdLibEnv,
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
@@ -143,7 +143,7 @@ class IMobileDevice {
           '-k',
           key
         ],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+        environment: cache.dyLdLibEnv,
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
@@ -163,7 +163,7 @@ class IMobileDevice {
         '-u',
         deviceID,
       ],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+      environment: cache.dyLdLibEnv,
     );
   }
 
@@ -174,7 +174,7 @@ class IMobileDevice {
         _idevicescreenshotPath,
         outputFile.path
       ],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cache.dyLdLibPath},
+      environment: cache.dyLdLibEnv,
     );
   }
 }
