@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/install.dart';
 import 'package:mockito/mockito.dart';
 
@@ -11,6 +12,10 @@ import '../src/mocks.dart';
 
 void main() {
   group('install', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
       applyMocksToCommand(command);
@@ -21,6 +26,8 @@ void main() {
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
+    }, overrides: <Type, Generator>{
+      Cache: () => MockCache(),
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
@@ -33,6 +40,10 @@ void main() {
       testDeviceManager.addDevice(device);
 
       await createTestCommandRunner(command).run(<String>['install']);
+    }, overrides: <Type, Generator>{
+      Cache: () => MockCache(),
     });
   });
 }
+
+class MockCache extends Mock implements Cache {}

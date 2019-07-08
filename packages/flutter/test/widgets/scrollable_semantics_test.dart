@@ -406,7 +406,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   group('showOnScreen', () {
 

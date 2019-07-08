@@ -173,11 +173,29 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This function will use [AutomatedTestWidgetsFlutterBinding] if
   /// the test was run using `flutter test`, and
   /// [LiveTestWidgetsFlutterBinding] otherwise (e.g. if it was run
-  /// using `flutter run`). (This is determined by looking at the
-  /// environment variables for a variable called `FLUTTER_TEST`.)
-  static WidgetsBinding ensureInitialized() {
+  /// using `flutter run`). This is determined by looking at the
+  /// environment variables for a variable called `FLUTTER_TEST`.
+  ///
+  /// If `FLUTTER_TEST` is set with a value of 'true', then this test was
+  /// invoked by `flutter test`. If `FLUTTER_TEST` is not set, or if it is set
+  /// to 'false', then this test was invoked by `flutter run`.
+  ///
+  /// Browser environments do not currently support the
+  /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
+  /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
+  ///
+  /// The parameter `environment` is exposed to test different environment
+  /// variable values, and should not be used.
+  static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
+    if (!isBrowser) {
+      // Accessing Platform may throw from a browser, so we guard this.
+      environment ??= Platform.environment;
+    }
     if (WidgetsBinding.instance == null) {
-      if (isBrowser || Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (isBrowser) {
+        // Browser environments do not support the LiveTestWidgetsFlutterBinding.
+        AutomatedTestWidgetsFlutterBinding();
+      } else if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
         AutomatedTestWidgetsFlutterBinding();
       } else {
         LiveTestWidgetsFlutterBinding();
@@ -818,15 +836,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _allowedAssetKeys = <String>{};
       return;
     }
-    final Map<String, dynamic> manifest = json.decode(
-        manifestFile.readAsStringSync());
+    final Map<String, dynamic> manifest = json.decode(manifestFile.readAsStringSync());
     _allowedAssetKeys = <String>{
       'AssetManifest.json',
+      ...manifest.values.cast<List<dynamic>>().expand<dynamic>((List<dynamic> e) => e).cast<String>(),
     };
-    for (List<dynamic> value in manifest.values) {
-      final List<String> strList = List<String>.from(value);
-      _allowedAssetKeys.addAll(strList);
-    }
   }
 
   @override
