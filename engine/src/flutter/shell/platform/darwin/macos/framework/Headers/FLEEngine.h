@@ -7,6 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
+#include "FLEDartProject.h"
 #include "FlutterBinaryMessenger.h"
 #include "FlutterMacros.h"
 #include "FlutterPluginRegistrarMacOS.h"
@@ -27,22 +28,27 @@ FLUTTER_EXPORT
  *
  * @param viewController The view controller associated with this engine. If nil, the engine
  *                       will be run headless.
+ * @param project The project configuration. If nil, a default FLEDartProject will be used.
  */
-- (nonnull instancetype)initWithViewController:(nullable FLEViewController*)viewController;
+- (nonnull instancetype)initWithViewController:(nullable FLEViewController*)viewController
+                                       project:(nullable FLEDartProject*)project
+    NS_DESIGNATED_INITIALIZER;
 
 /**
- * Launches the Flutter engine with the provided configuration.
+ * Runs `main()` from this engine's project.
  *
- * @param assets The path to the flutter_assets folder for the Flutter application to be run.
- * @param arguments Arguments to pass to the Flutter engine. See
- *                  https://github.com/flutter/engine/blob/master/shell/common/switches.h
- *                  for details. Not all arguments will apply to embedding mode.
- *                  Note: This API layer will abstract arguments in the future, instead of
- *                  providing a direct passthrough.
  * @return YES if the engine launched successfully.
  */
-- (BOOL)launchEngineWithAssetsPath:(nonnull NSURL*)assets
-              commandLineArguments:(nullable NSArray<NSString*>*)arguments;
+- (BOOL)run;
+
+/**
+ * The `FLEDartProject` associated with this engine. If nil, a default will be used for `run`.
+ *
+ * TODO(stuartmorgan): Remove this once FLEViewController takes the project as an initializer
+ * argument. Blocked on currently needing to create it from a XIB due to the view issues
+ * described in https://github.com/google/flutter-desktop-embedding/issues/10.
+ */
+@property(nonatomic, nullable) FLEDartProject* project;
 
 /**
  * The `FLEViewController` associated with this engine, if any.

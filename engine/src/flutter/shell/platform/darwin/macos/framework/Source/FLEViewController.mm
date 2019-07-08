@@ -174,7 +174,7 @@ struct MouseState {
  * Performs initialization that's common between the different init paths.
  */
 static void CommonInit(FLEViewController* controller) {
-  controller->_engine = [[FLEEngine alloc] initWithViewController:controller];
+  controller->_engine = [[FLEEngine alloc] initWithViewController:controller project:nil];
   controller->_additionalKeyResponders = [[NSMutableOrderedSet alloc] init];
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
 }
@@ -217,8 +217,7 @@ static void CommonInit(FLEViewController* controller) {
   [self configureTrackingArea];
 }
 
-- (BOOL)launchEngineWithAssetsPath:(NSURL*)assets
-              commandLineArguments:(NSArray<NSString*>*)arguments {
+- (BOOL)launchEngineWithProject:(nullable FLEDartProject*)project {
   // Set up the resource context. This is done here rather than in viewDidLoad as there's no
   // guarantee that viewDidLoad will be called before the engine is started, and the context must
   // be valid by that point.
@@ -227,7 +226,8 @@ static void CommonInit(FLEViewController* controller) {
   // Register internal plugins before starting the engine.
   [self addInternalPlugins];
 
-  if (![_engine launchEngineWithAssetsPath:assets commandLineArguments:arguments]) {
+  _engine.project = project;
+  if (![_engine run]) {
     return NO;
   }
   // Send the initial user settings such as brightness and text scale factor
