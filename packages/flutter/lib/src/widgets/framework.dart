@@ -83,8 +83,8 @@ class ObjectKey extends LocalKey {
 /// A key that is unique across the entire app.
 ///
 /// Global keys uniquely identify elements. Global keys provide access to other
-/// objects that are associated with elements, such as the a [BuildContext] and,
-/// for [StatefulWidget]s, a [State].
+/// objects that are associated with those elements, such as [BuildContext].
+/// For [StatefulWidget]s, global keys also provide access to [State].
 ///
 /// Widgets that have global keys reparent their subtrees when they are moved
 /// from one location in the tree to another location in the tree. In order to
