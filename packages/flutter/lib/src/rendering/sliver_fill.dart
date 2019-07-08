@@ -128,7 +128,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    print(constraints);
+    //print(constraints);
     double extent;
     if (hasScrollBody) {
       extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
@@ -141,6 +141,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
       // so it will stretch to fill on overscroll.
       // + constraints.scrollOffset;
       if (child != null) {
+        print('extent: $extent');
         extent > 0.0 
           ? child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true)
           : child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
