@@ -19,6 +19,7 @@ import 'package:test_core/src/runner/environment.dart'; // ignore: implementatio
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../compile.dart';
 import '../convert.dart';
@@ -209,7 +210,7 @@ void main() {
   print('$_kStartTimeoutTimerMessage');
   String serverPort = Platform.environment['SERVER_PORT'];
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
-  StreamChannel channel = serializeSuite(() {
+  StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
     goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
     autoUpdateGoldenFiles = $updateGoldens;
@@ -384,6 +385,13 @@ class FlutterPlatform extends PlatformPlugin {
     throw 'Failed to compile $expression';
   }
 
+  /// Binds an [HttpServer] serving from `host` on `port`.
+  ///
+  /// Only intended to be overridden in tests for [FlutterPlatform].
+  @protected
+  @visibleForTesting
+  Future<HttpServer> bind(InternetAddress host, int port) => HttpServer.bind(host, port);
+
   Future<_AsyncError> _startTest(
     String testPath,
     StreamChannel<dynamic> controller,
@@ -403,7 +411,7 @@ class FlutterPlatform extends PlatformPlugin {
       }));
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      final HttpServer server = await HttpServer.bind(host, port);
+      final HttpServer server = await bind(host, port);
       finalizers.add(() async {
         printTrace('test $ourTestCount: shutting down test harness socket server');
         await server.close(force: true);
@@ -846,14 +854,22 @@ class FlutterPlatform extends PlatformPlugin {
       testPath,
     ]);
     printTrace(command.join(' '));
+    // If the FLUTTER_TEST environment variable has been set, then pass it on
+    // for package:flutter_test to handle the value.
+    //
+    // If FLUTTER_TEST has not been set, assume from this context that this
+    // call was invoked by the command 'flutter test'.
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
+        ? platform.environment['FLUTTER_TEST']
+        : 'true';
     final Map<String, String> environment = <String, String>{
-      'FLUTTER_TEST': 'true',
+      'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
     if (buildTestAssets) {
       environment['UNIT_TEST_ASSETS'] = fs.path.join(
-        flutterProject.directory.path, 'build', 'unit_test_assets');
+        flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
     }
     return processManager.start(command, environment: environment);
   }

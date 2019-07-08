@@ -233,7 +233,7 @@ class MockHttpClientRequest implements io.HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientResponse {
+class MockHttpClientResponse implements io.HttpClientResponse {
   MockHttpClientResponse(this.statusCode);
 
   @override
@@ -251,6 +251,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientR
   }) {
     return Stream<Uint8List>.fromFuture(Future<Uint8List>.error(const io.SocketException('test')))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  }
+
+  @override
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
+    return Future<void>.error(const io.SocketException('test'));
   }
 
   @override

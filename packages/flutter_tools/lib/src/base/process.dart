@@ -148,7 +148,7 @@ Future<int> runCommandAndStreamOutput(
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
@@ -163,7 +163,7 @@ Future<int> runCommandAndStreamOutput(
   final StreamSubscription<String> stderrSubscription = process.stderr
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .where((String line) => filter == null ? true : filter.hasMatch(line))
+    .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);

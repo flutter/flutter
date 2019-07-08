@@ -96,8 +96,10 @@ void main() {
 class MockFlutterVersion extends Mock implements FlutterVersion {
   MockFlutterVersion(this.isStable);
 
-  @override
   final bool isStable;
+
+  @override
+  bool get isMaster => !isStable;
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

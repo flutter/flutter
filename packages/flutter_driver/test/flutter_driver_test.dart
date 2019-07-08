@@ -369,7 +369,7 @@ void main() {
     group('clearTimeline', () {
       test('clears timeline', () async {
         bool clearWasCalled = false;
-        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+        when(mockPeer.sendRequest('clearVMTimeline', argThat(equals(<String, dynamic>{}))))
           .thenAnswer((Invocation invocation) async {
             clearWasCalled = true;
             return null;
@@ -385,25 +385,25 @@ void main() {
       setUp(() async {
         log = <String>[];
 
-        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+        when(mockPeer.sendRequest('clearVMTimeline', argThat(equals(<String, dynamic>{}))))
           .thenAnswer((Invocation invocation) async {
             log.add('clear');
             return null;
           });
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
+        when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
           .thenAnswer((Invocation invocation) async {
             log.add('startTracing');
             return null;
           });
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
+        when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
           .thenAnswer((Invocation invocation) async {
             log.add('stopTracing');
             return null;
           });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
+        when(mockPeer.sendRequest('getVMTimeline')).thenAnswer((Invocation invocation) async {
           log.add('download');
           return <String, dynamic>{
             'traceEvents': <dynamic>[
@@ -451,19 +451,19 @@ void main() {
         bool startTracingCalled = false;
         bool stopTracingCalled = false;
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
+        when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
           .thenAnswer((Invocation invocation) async {
             startTracingCalled = true;
             return null;
           });
 
-        when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
+        when(mockPeer.sendRequest('setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
           .thenAnswer((Invocation invocation) async {
             stopTracingCalled = true;
             return null;
           });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((Invocation invocation) async {
+        when(mockPeer.sendRequest('getVMTimeline')).thenAnswer((Invocation invocation) async {
           return <String, dynamic>{
             'traceEvents': <dynamic>[
               <String, String>{

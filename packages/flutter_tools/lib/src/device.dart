@@ -161,11 +161,39 @@ class DeviceManager {
 
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
+    return <String>[
+      for (DeviceDiscovery discoverer in _platformDiscoverers)
+        ...await discoverer.getDiagnostics(),
+    ];
+  }
+
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user. If the user has not specified
+  /// all devices and has multiple connected then filter the list by those supported
+  /// in the current project and remove non-ephemeral device types.
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    List<Device> devices = await getDevices().toList();
+
+    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
+      devices = devices
+          .where((Device device) => isDeviceSupportedForProject(device, flutterProject))
+          .toList();
+
+      // Note: ephemeral is nullable for device types where this is not well
+      // defined.
+      if (devices.any((Device device) => device.ephemeral == true)) {
+        devices = devices
+            .where((Device device) => device.ephemeral == true)
+            .toList();
+      }
     }
-    return diagnostics;
+    return devices;
+  }
+
+  /// Returns whether the device is supported for the project.
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
   }
 }
 
@@ -261,6 +289,14 @@ abstract class Device {
 
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
+
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  Future<String> get emulatorId;
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
   Future<bool> get supportsHardwareRendering async {

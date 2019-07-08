@@ -44,7 +44,7 @@ void main() {
     });
 
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
-    when(flutterVersion.isStable).thenReturn(true);
+    when(flutterVersion.isMaster).thenReturn(false);
 
     testUsingContext('Adds artifact flags to requested artifacts on stable', () async {
       // Release lock between test cases.

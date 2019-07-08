@@ -1534,14 +1534,13 @@ mixin WidgetInspectorService {
     List<DiagnosticsNode> nodes,
     _SerializationDelegate delegate,
   ) {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (DiagnosticsNode child in nodes) {
-      if (!delegate.summaryTree || _shouldShowInSummaryTree(child)) {
-        children.add(child);
-      } else {
-        children.addAll(_getChildrenFiltered(child, delegate));
-      }
-    }
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[
+      for (DiagnosticsNode child in nodes)
+        if (!delegate.summaryTree || _shouldShowInSummaryTree(child))
+          child
+        else
+          ..._getChildrenFiltered(child, delegate),
+    ];
     return children;
   }
 
@@ -2154,8 +2153,10 @@ class _WidgetInspectorState extends State<WidgetInspector>
       return size == null ? double.maxFinite : size.width * size.height;
     }
     regularHits.sort((RenderObject a, RenderObject b) => _area(a).compareTo(_area(b)));
-    final Set<RenderObject> hits = <RenderObject>{};
-    hits..addAll(edgeHits)..addAll(regularHits);
+    final Set<RenderObject> hits = <RenderObject>{
+      ...edgeHits,
+      ...regularHits,
+    };
     return hits.toList();
   }
 

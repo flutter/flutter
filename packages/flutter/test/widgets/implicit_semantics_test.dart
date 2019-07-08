@@ -217,30 +217,30 @@ void main() {
     );
 
     // SemanticsNode#0()
-    //  └SemanticsNode#8()
-    //   ├SemanticsNode#5(selected, label: "node 1", textDirection: ltr)
-    //   ├SemanticsNode#6(selected, label: "node 2", textDirection: ltr)
-    //   └SemanticsNode#7(selected, label: "node 3", textDirection: ltr)
+    //  └SemanticsNode#1()
+    //   ├SemanticsNode#2(selected, label: "node 1", textDirection: ltr)
+    //   ├SemanticsNode#3(selected, label: "node 2", textDirection: ltr)
+    //   └SemanticsNode#4(selected, label: "node 3", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(
         TestSemantics.root(
           children: <TestSemantics>[
             TestSemantics.rootChild(
-              id: 5,
+              id: 1,
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 6,
+                  id: 2,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 1',
                 ),
                 TestSemantics(
-                  id: 7,
+                  id: 3,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 2',
                 ),
                 TestSemantics(
-                  id: 8,
+                  id: 4,
                   flags: SemanticsFlag.isSelected.index,
                   label: 'node 3',
                 ),

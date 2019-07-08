@@ -84,9 +84,10 @@ class FuchsiaKernelCompiler {
     ];
 
     final List<String> command = <String>[
-          artifacts.getArtifactPath(Artifact.engineDartBinary),
-          fuchsiaArtifacts.kernelCompiler.path,
-        ]..addAll(flags);
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      fuchsiaArtifacts.kernelCompiler.path,
+      ...flags,
+    ];
     final Process process = await runCommand(command);
     final Status status = logger.startProgress(
       'Building Fuchsia application...',

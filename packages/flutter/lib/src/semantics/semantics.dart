@@ -2082,6 +2082,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
+    properties.add(IterableProperty<String>('tags', tags?.map((SemanticsTag tag) => tag.name), defaultValue: null));
     final List<String> actions = _actions.keys.map<String>((SemanticsAction action) => describeEnum(action)).toList()..sort();
     final List<String> customSemanticsActions = _customSemanticsActions.keys
       .map<String>((CustomSemanticsAction action) => action.label)
@@ -2280,12 +2281,9 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
       horizontalGroups = horizontalGroups.reversed.toList();
     }
 
-    final List<SemanticsNode> result = <SemanticsNode>[];
-    for (_SemanticsSortGroup group in horizontalGroups) {
-      final List<SemanticsNode> sortedKnotNodes = group.sortedWithinKnot();
-      result.addAll(sortedKnotNodes);
-    }
-    return result;
+    return horizontalGroups
+      .expand((_SemanticsSortGroup group) => group.sortedWithinKnot())
+      .toList();
   }
 
   /// Sorts [nodes] where nodes intersect both vertically and horizontally.
@@ -2423,12 +2421,9 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   }
   verticalGroups.sort();
 
-  final List<SemanticsNode> result = <SemanticsNode>[];
-  for (_SemanticsSortGroup group in verticalGroups) {
-    final List<SemanticsNode> sortedGroupNodes = group.sortedWithinVerticalGroup();
-    result.addAll(sortedGroupNodes);
-  }
-  return result;
+  return verticalGroups
+    .expand((_SemanticsSortGroup group) => group.sortedWithinVerticalGroup())
+    .toList();
 }
 
 /// The implementation of [Comparable] that implements the ordering of

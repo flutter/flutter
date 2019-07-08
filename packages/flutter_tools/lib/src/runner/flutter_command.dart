@@ -407,12 +407,10 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Send screen.
-    final Map<String, String> additionalUsageValues = <String, String>{};
     final Map<String, String> currentUsageValues = await usageValues;
-
-    if (currentUsageValues != null) {
-      additionalUsageValues.addAll(currentUsageValues);
-    }
+    final Map<String, String> additionalUsageValues = <String, String>{
+      ...?currentUsageValues,
+    };
     if (commandResult != null) {
       switch (commandResult.exitStatus) {
         case ExitStatus.success:
@@ -429,11 +427,12 @@ abstract class FlutterCommand extends Command<void> {
     flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
 
     // Send timing.
-    final List<String> labels = <String>[];
-    if (commandResult?.exitStatus != null)
-      labels.add(getEnumName(commandResult.exitStatus));
-    if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-      labels.addAll(commandResult.timingLabelParts);
+    final List<String> labels = <String>[
+      if (commandResult?.exitStatus != null)
+        getEnumName(commandResult.exitStatus),
+      if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+        ...commandResult.timingLabelParts,
+    ];
 
     final String label = labels
         .where((String label) => !isBlank(label))
@@ -480,12 +479,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  /// Defaults to [DevelopmentArtifact.universal].
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
   };
 
   /// Subclasses must implement this to execute the command.
@@ -503,7 +499,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices().toList();
+    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -512,16 +508,6 @@ abstract class FlutterCommand extends Command<void> {
       printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      printNoConnectedDevices();
-      return null;
-    }
-
-    devices = devices.where((Device device) => device.isSupported()).toList();
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      devices = filterDevices(devices);
-    }
-
-    if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
@@ -565,7 +551,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -661,17 +647,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;
@@ -693,25 +679,4 @@ abstract class FastFlutterCommand extends FlutterCommand {
       body: runCommand,
     );
   }
-}
-
-// If the user has not specified all devices and has multiple connected
-// then filter the list by those supported in the current project and
-// remove non-ephemeral device types. If this ends up with a single
-// device we can proceed as normal.
-@visibleForTesting
-List<Device> filterDevices(List<Device> devices) {
-  final FlutterProject flutterProject = FlutterProject.current();
-  devices = devices
-      .where((Device device) => device.isSupportedForProject(flutterProject))
-      .toList();
-
-  // Note: ephemeral is nullable for device types where this is not well
-  // defined.
-  if (devices.any((Device device) => device.ephemeral == true)) {
-    devices = devices
-        .where((Device device) => device.ephemeral == true)
-        .toList();
-  }
-  return devices;
 }
