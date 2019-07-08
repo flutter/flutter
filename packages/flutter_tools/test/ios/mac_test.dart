@@ -39,6 +39,7 @@ void main() {
     final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
     final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
     final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
+    final String idevicescreenshotPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
 
@@ -101,22 +102,20 @@ void main() {
 
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
-      final String binPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
       MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 
       setUp(() {
         mockProcessManager = MockProcessManager();
         mockOutputFile = MockFile();
-        when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(binPath);
-        when(mockCache.dyLdLibPath).thenReturn(libimobiledevicePath);
+        when(mockArtifacts.getArtifactPath(Artifact.idevicescreenshot, platform: anyNamed('platform'))).thenReturn(idevicescreenshotPath);
       });
 
       testUsingContext('error if idevicescreenshot is not installed', () async {
         when(mockOutputFile.path).thenReturn(outputPath);
 
         // Let `idevicescreenshot` fail with exit code 1.
-        when(mockProcessManager.run(<String>[binPath, outputPath],
+        when(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
@@ -134,7 +133,7 @@ void main() {
             (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(4, 0, '', '')));
 
         await iMobileDevice.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.run(<String>[binPath, outputPath],
+        verify(mockProcessManager.run(<String>[idevicescreenshotPath, outputPath],
             environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
             workingDirectory: null,
         ));
