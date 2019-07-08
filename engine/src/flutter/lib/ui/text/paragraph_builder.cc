@@ -204,6 +204,7 @@ void decodeStrut(Dart_Handle strut_data,
   }
   if (mask & sHeightMask) {
     paragraph_style.strut_height = float_data[float_count++];
+    paragraph_style.strut_has_height_override = true;
   }
   if (mask & sLeadingMask) {
     paragraph_style.strut_leading = float_data[float_count++];
@@ -261,6 +262,7 @@ ParagraphBuilder::ParagraphBuilder(
 
   if (mask & psHeightMask) {
     style.height = height;
+    style.has_height_override = true;
   }
 
   if (mask & psStrutStyleMask) {
@@ -401,6 +403,7 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
 
   if (mask & tsHeightMask) {
     style.height = height;
+    style.has_height_override = true;
   }
 
   if (mask & tsLocaleMask) {
