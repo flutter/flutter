@@ -83,6 +83,71 @@ bool hasMultipleOccurrences(String text, Pattern pattern) {
   return text.indexOf(pattern) != text.lastIndexOf(pattern);
 }
 
+
+/// Utility class to analyze the content inside an APK.
+class ApkExtractor {
+  ApkExtractor(this.apkFile);
+
+  /// The APK.
+  final File apkFile;
+
+  bool _extracted = false;
+
+  Directory _outputDir;
+
+  Future<void> _extractApk() async {
+    if (_extracted) {
+      return;
+    }
+    _outputDir = await apkFile.parent.createTemp('apk');
+    await eval('unzip', <String>[apkFile.path, '-d', _outputDir.path]);
+    _extracted = true;
+  }
+
+  Future<String> _findDexDump() async {
+    final String androidHome = Platform.environment['ANDROID_HOME'] ??
+        Platform.environment['ANDROID_SDK_ROOT'];
+
+    if (androidHome == null || androidHome.isEmpty) {
+      throw TaskResult.failure('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+    }
+
+    final String dexdumps = await eval('find', <String>[androidHome, '-name', 'dexdump']);
+
+    if (dexdumps.isEmpty) {
+      throw TaskResult.failure('Couldn\'t find a dexdump executable.');
+    }
+    return dexdumps.split('\n').first;
+  }
+
+  // Removes any temporary directory.
+  void dispose() {
+    if (!_extracted) {
+      return;
+    }
+    rmTree(_outputDir);
+    _extracted = true;
+  }
+
+  /// Returns true if the APK contains a given class.
+  Future<bool> containsClass(String className) async {
+    await _extractApk();
+
+    final String dexDump = await _findDexDump();
+    final String classesDex = path.join(_outputDir.path, 'classes.dex');
+
+    if (!File(classesDex).existsSync()) {
+      throw TaskResult.failure('Couldn\'t find classes.dex in the APK.');
+    }
+    final String classDescriptors = await eval(dexDump, <String>[classesDex]);
+
+    if (classDescriptors.isEmpty) {
+      throw TaskResult.failure('No descriptors found in classes.dex.');
+    }
+    return classDescriptors.contains(className.replaceAll('.', '/'));
+  }
+}
+
 class FlutterProject {
   FlutterProject(this.parent, this.name);
 
