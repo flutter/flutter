@@ -1154,16 +1154,14 @@ class Navigator extends StatefulWidget {
   /// The removed routes are removed without being completed, so this method
   /// does not take a return value argument.
   ///
-  /// The new route and its previous antecedent (which has been removed) are
-  /// notified for [Route.didPush]. The new route and its new antecedent, (the
-  /// route below the bottommost removed route) are notified through
+  /// The newly pushed route and its preceding route are notified for
+  /// [Route.didPush]. After removal, the new route and its new preceding route,
+  /// (the route below the bottommost removed route) are notified through
   /// [Route.didChangeNext]). If the [Navigator] has any [Navigator.observers],
   /// they will be notified as well (see [NavigatorObservers.didPush] and
-  /// [NavigatorObservers.didRemove]). The removed routes are disposed without
-  /// being notified, with the exception of the aforementioned original
-  /// antecedent to the new route, once the new route has finished animating.
-  /// The futures that had been returned from pushing those routes will not
-  /// complete.
+  /// [NavigatorObservers.didRemove]). The removed routes are disposed of and
+  /// notified, once the new route has finished animating. The futures that had\
+  /// been returned from pushing those routes will not complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -1905,14 +1903,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     newRoute.install(precedingRouteOverlay);
     _history.add(newRoute);
 
-    // Notify for newRoute
-    newRoute.didChangeNext(null);
-    for (NavigatorObserver observer in widget.observers)
-      observer.didPush(newRoute, precedingRoute);
-
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-        // Complete remove until predicate & notify
         for (Route<dynamic> removedRoute in removedRoutes) {
           for (NavigatorObserver observer in widget.observers)
             observer.didRemove(removedRoute, newPrecedingRoute);
@@ -1923,6 +1915,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           newPrecedingRoute.didChangeNext(newRoute);
       }
     });
+
+    // Notify for newRoute
+    newRoute.didChangeNext(null);
+    for (NavigatorObserver observer in widget.observers)
+      observer.didPush(newRoute, precedingRoute);
 
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(newRoute);

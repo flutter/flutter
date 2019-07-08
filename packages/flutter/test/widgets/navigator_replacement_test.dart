@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'observer_tester.dart';
 
 void main() {
-
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const Material(child: Text('home')),
@@ -43,7 +42,6 @@ void main() {
   });
 
   group('pushAndRemoveUntil', () {
-
     testWidgets('notifies appropriately', (WidgetTester tester) async {
       final TestObserver observer = TestObserver();
       final Widget myApp = MaterialApp(
@@ -58,29 +56,22 @@ void main() {
       await tester.pumpWidget(myApp);
 
       final NavigatorState navigator = tester.state(find.byType(Navigator));
+      final List<String> log = <String>[];
+      observer
+        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+          log.add('${route.settings.name} pushed, previous route: ${previousRoute.settings.name}');
+        }
+        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
+          log.add('${route.settings.name} removed, previous route: ${previousRoute?.settings?.name}');
+        };
+
+
       navigator.pushNamed('/a');
       await tester.pumpAndSettle();
 
       expect(find.text('home', skipOffstage: false), findsOneWidget);
       expect(find.text('a', skipOffstage: false), findsOneWidget);
       expect(find.text('b', skipOffstage: false), findsNothing);
-
-      final List<String> log = <String>[];
-      observer
-        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          expectSync(route is PageRoute && route.settings.name == '/b', isTrue);
-          expectSync(previousRoute is PageRoute && previousRoute.settings.name == '/a', isTrue);
-          log.add('/b pushed, previous route: /a');
-        }
-        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          if (route.settings.name == '/a') {
-            expectSync(previousRoute, null);
-            log.add('/a removed, previous route: null');
-          } else if (route.settings.name == '/') {
-            expectSync(previousRoute, null);
-            log.add('/ removed, previous route: null');
-          }
-        };
 
       // Remove all routes below
       navigator.pushNamedAndRemoveUntil('/b', (Route<dynamic> route) => false);
@@ -89,13 +80,14 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsNothing);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(log, contains('/b pushed, previous route: /a'));
-      expect(log, contains('/a removed, previous route: null'));
-      expect(log, contains('/ removed, previous route: null'));
+      expect(log, equals(<String>[
+        '/a pushed, previous route: /',
+        '/b pushed, previous route: /a',
+        '/a removed, previous route: null',
+        '/ removed, previous route: null',
+      ]));
 
-      observer.onPushed = null;
       log.clear();
-
 
       navigator.pushNamed('/');
       await tester.pumpAndSettle();
@@ -104,18 +96,6 @@ void main() {
       expect(find.text('a', skipOffstage: false), findsNothing);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
 
-      observer
-        ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          expectSync(route is PageRoute && route.settings.name == '/a', isTrue);
-          expectSync(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
-          log.add('/a pushed, previous route: /');
-        }
-        ..onRemoved = (Route<dynamic> route, Route<dynamic> previousRoute) {
-          expectSync(route is PageRoute && route.settings.name == '/', isTrue);
-          expectSync(previousRoute is PageRoute && previousRoute.settings.name == '/b', isTrue);
-          log.add('/ removed, previous route: /b');
-        };
-
       // Remove only some routes below
       navigator.pushNamedAndRemoveUntil('/a', ModalRoute.withName('/b'));
       await tester.pumpAndSettle();
@@ -123,15 +103,14 @@ void main() {
       expect(find.text('home', skipOffstage: false), findsNothing);
       expect(find.text('a', skipOffstage: false), findsOneWidget);
       expect(find.text('b', skipOffstage: false), findsOneWidget);
-      expect(log, contains('/a pushed, previous route: /'));
-      expect(log, contains('/ removed, previous route: /b'));
-
-      observer.onPushed = null;
-      log.clear();
+      expect(log, equals(<String>[
+        '/ pushed, previous route: /b',
+        '/a pushed, previous route: /',
+        '/ removed, previous route: /b',
+      ]));
     });
 
     testWidgets('triggers page transition animation for pushed route', (WidgetTester tester) async {
-
       final Widget myApp = MaterialApp(
         home: const Material(child: Text('home')),
         routes: <String, WidgetBuilder>{
@@ -160,7 +139,7 @@ void main() {
       expect(find.text('b'), findsOneWidget);
     });
 
-    testWidgets('Hero transition triggers when appropriate', (WidgetTester tester) async {
+    testWidgets('Hero transition triggers when preceding route contains hero, and predicate route does not', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         initialRoute: '/',
@@ -205,7 +184,7 @@ void main() {
       expect(find.text('b'), isOnstage);
     });
 
-    testWidgets('Hero transition does not trigger when appropriate', (WidgetTester tester) async {
+    testWidgets('Hero transition does not trigger when preceding route does not contain hero, but predicate route does', (WidgetTester tester) async {
       const String kHeroTag = 'hero';
       final Widget myApp = MaterialApp(
         initialRoute: '/',
