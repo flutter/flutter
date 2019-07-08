@@ -190,8 +190,8 @@ class DeviceManager {
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
         for (Device device in devices)
-          if (await device.targetPlatform != TargetPlatform.fuchsia
-          && await device.targetPlatform != TargetPlatform.web_javascript)
+          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+              await device.targetPlatform != TargetPlatform.web_javascript)
             device
       ];
     }
