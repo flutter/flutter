@@ -153,7 +153,7 @@ tasks:
     flaky: true
     required_agent_capabilities: ["mac/ios"]
 
-  tiles_scroll_perf_iphonex__timeline_summary:
+  tiles_scroll_perf_iphonexs__timeline_summary:
     description: >
       Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
     stage: devicelab

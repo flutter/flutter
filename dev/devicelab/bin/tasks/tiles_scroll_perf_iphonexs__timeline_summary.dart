@@ -12,4 +12,3 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.ios;
   await task(createTilesScrollPerfTest());
 }
-
