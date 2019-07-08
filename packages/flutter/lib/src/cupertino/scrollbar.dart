@@ -51,7 +51,8 @@ class CupertinoScrollbar extends StatefulWidget {
     Key key,
     // TODO(justinmc): When drag-in-from-side is implemented, might have to
     // change the type of this callback.
-    GestureLongPressMoveUpdateCallback this.onDragScroll,
+    this.onDragScroll,
+    this.onDragScrollUp,
     @required this.child,
   }) : super(key: key);
 
@@ -71,7 +72,14 @@ class CupertinoScrollbar extends StatefulWidget {
   ///
   ///   * [CupertinoPageScaffold], which uses the callback to implement the
   ///     scrolling.
+  ///   * [CupertinoScrollbar.onDragScrollUp]
   final GestureLongPressMoveUpdateCallback onDragScroll;
+
+  /// Called when the user releases after dragging the scrollbar.
+  ///
+  /// See also:
+  ///   * [CupertinoScrollbar.onDragScroll]
+  final VoidCallback onDragScrollUp;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -156,16 +164,13 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     setState(() {
       _thicknessAnimationController.reverse();
     });
+    widget.onDragScrollUp();
   }
 
   void _handleLongPress() {
     setState(() {
       _thicknessAnimationController.forward();
     });
-  }
-
-  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    widget.onDragScroll(details);
   }
 
   void _startFadeoutTimer() {
@@ -224,7 +229,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
           instance
             ..onLongPress = _handleLongPress
             ..onLongPressStart = _handleLongPressStart
-            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
+            ..onLongPressMoveUpdate = widget.onDragScroll
             ..onLongPressUp = _handleLongPressUp;
         },
       );

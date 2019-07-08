@@ -118,8 +118,6 @@ abstract class ScrollView extends StatelessWidget {
   /// [ScrollController.animateTo]).
   final ScrollController controller;
 
-  // TODO(justinmc): It looks like a tap in the status bar scrolls to top in
-  // iOS! How did we implement that? Probably useful to track that down.
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
