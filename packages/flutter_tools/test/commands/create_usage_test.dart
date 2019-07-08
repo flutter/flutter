@@ -6,12 +6,10 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
-import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
-
 
 void main() {
   group('usageValues', () {
@@ -34,8 +32,6 @@ void main() {
         for (String path in paths) {
           fs.file(path).createSync(recursive: true);
         }
-      }, overrides: <Type, Generator>{
-        DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
       });
     });
 
@@ -95,10 +91,3 @@ void main() {
   });
 }
 
-class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
-  @override
-  List<DoctorValidator> get validators => <DoctorValidator>[];
-
-  @override
-  List<Workflow> get workflows => <Workflow>[];
-}

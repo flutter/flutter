@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/doctor.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
-import 'create_usage_test.dart';
 
 void main() {
   group('Create --plugin', () {

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 
@@ -29,7 +30,8 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
-  FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
+  FlutterVersion: () => FakeFlutterVersion(), // prevent requirement to mock git for test runner.
+  DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(), // prevent doctor from performing work after command failure.
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -206,4 +208,12 @@ class FakeFlutterVersion implements FlutterVersion {
   Map<String, Object> toJson() {
     return null;
   }
+}
+
+class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
+  @override
+  List<DoctorValidator> get validators => <DoctorValidator>[];
+
+  @override
+  List<Workflow> get workflows => <Workflow>[];
 }
