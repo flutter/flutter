@@ -56,7 +56,12 @@ typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool
 
 /// Signature for the callback that's called when the expansion indicator of the
 /// [ExpansionPanel] needs to rebuild.
-typedef ExpansionPanelIconBuilder = Widget Function(BuildContext context, bool isExpanded);
+typedef ExpansionPanelIconBuilder = Widget Function(
+  BuildContext context,
+  bool isExpanded,
+  VoidCallback handlePressed,
+  Duration animationDuration,
+);
 
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
@@ -382,7 +387,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// If ExpansionPanelList.radio is used, the callback may be called a
   /// second time if a different panel was previously open. The arguments
   /// passed to the second callback are the index of the panel that will close
-  /// and false, marking that it will be closed.
+  /// and true, marking that it was previously open and is closing.
   ///
   /// For ExpansionPanelList, the callback needs to setState when it's notified
   /// about the closing/opening panel. On the other hand, the callback for
@@ -462,13 +467,13 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       final ExpansionPanelRadio pressedChild = widget.children[index];
 
       // If another ExpansionPanelRadio was already open, apply its
-      // expansionCallback (if any) to false, because it's closing.
+      // expansionCallback (if any) to true, because it's closing.
       for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
         final ExpansionPanelRadio child = widget.children[childIndex];
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value)
-          widget.expansionCallback(childIndex, false);
+          widget.expansionCallback(childIndex, true);
       }
 
       setState(() {
@@ -504,18 +509,16 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
       Widget expansionIndicator;
       if (child.expandIconBuilder != null) {
-        expansionIndicator = !child.canTapOnHeader
-          ? child.expandIconBuilder(
-              context,
-              _isChildExpanded(index),
-            )
-          : IgnorePointer(
-              ignoringSemantics: true,
-              child: child.expandIconBuilder(
-                context,
-                _isChildExpanded(index),
-              ),
-            );
+        expansionIndicator = IgnorePointer(
+          ignoring: child.canTapOnHeader,
+          ignoringSemantics: child.canTapOnHeader,
+          child: child.expandIconBuilder(
+            context,
+            _isChildExpanded(index),
+            () { _handlePressed(_isChildExpanded(index), index); },
+            widget.animationDuration,
+          ),
+        );
       } else {
         expansionIndicator = ExpandIcon(
           isExpanded: _isChildExpanded(index),

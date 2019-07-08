@@ -633,7 +633,7 @@ void main() {
     // Callback is invoked the second time with correct arguments
     callbackResults = callbackHistory[callbackHistory.length - 1];
     expect(callbackResults['index'], equals(1));
-    expect(callbackResults['isExpanded'], equals(false));
+    expect(callbackResults['isExpanded'], equals(true));
   });
 
   testWidgets('didUpdateWidget accounts for toggling between ExpansionPanelList'
@@ -1248,9 +1248,8 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Custom expandIconBuilder - does not trigger ExpansionList expansionCallback', (WidgetTester tester) async {
+  testWidgets('Custom expandIconBuilder', (WidgetTester tester) async {
     final List<bool> _isExpanded = <bool>[true, false];
-    bool isTriggered = false;
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
@@ -1258,7 +1257,6 @@ void main() {
             builder: (BuildContext context, StateSetter setState)  {
               return ExpansionPanelList(
                 expansionCallback: (int index, bool isExpanded) {
-                  isTriggered = true;
                   setState(() { _isExpanded[index] = !isExpanded; });
                 },
                 children: <ExpansionPanel>[
@@ -1266,11 +1264,16 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
-                          setState(() { _isExpanded[0] = val; });
+                        onChanged: (bool _) {
+                          handlePressed();
                         },
                       );
                     },
@@ -1281,11 +1284,16 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
-                          setState(() { _isExpanded[1] = val; });
+                        onChanged: (bool _) {
+                          handlePressed();
                         },
                       );
                     },
@@ -1315,12 +1323,10 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
-    expect(isTriggered, isFalse);
   });
 
-  testWidgets('Custom expandIconBuilder - does not trigger ExpansionListRadio expansionCallback', (WidgetTester tester) async {
-    bool isTriggered = false;
-    int _currentOpenValue = 0;
+  testWidgets('Custom expandIconBuilder - ExpansionListRadio', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1329,40 +1335,50 @@ void main() {
             builder: (BuildContext context, StateSetter setState)  {
               return ExpansionPanelList.radio(
                 expansionCallback: (int index, bool isExpanded) {
-                  isTriggered = true;
+                  setState(() {
+                    _isExpanded[index] = !isExpanded;
+                  });
                 },
-                initialOpenPanelValue: _currentOpenValue,
+                initialOpenPanelValue: _isExpanded.indexWhere((bool val) => val),
                 children: <ExpansionPanelRadio>[
                   ExpansionPanelRadio(
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
-                          if (!isExpanded)
-                            setState(() { _currentOpenValue = 0; });
+                          handlePressed();
                         },
                       );
                     },
-                    body: _currentOpenValue == 0 ? const Text('B') : const Text('A'),
+                    body: _isExpanded[0] ? const Text('B') : const Text('A'),
                     value: 0,
                   ),
                   ExpansionPanelRadio(
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header');
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
                         onChanged: (bool val) {
-                          if (!isExpanded)
-                            setState(() { _currentOpenValue = 1; });
+                          handlePressed();
                         },
                       );
                     },
-                    body: _currentOpenValue == 1 ? const Text('D') : const Text('C'),
+                    body: _isExpanded[1] ? const Text('D') : const Text('C'),
                     value: 1,
                   ),
                 ],
@@ -1388,7 +1404,6 @@ void main() {
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
-    expect(isTriggered, isFalse);
   });
 
   testWidgets('ExpansionPanel - Custom expansion icon hit testing ignored if canTapOnHeader set to true', (WidgetTester tester) async {
@@ -1412,11 +1427,16 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header', key: firstPanelKey);
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
-                          setState(() { _isExpanded[0] = val; });
+                        onChanged: (bool _) {
+                          handlePressed();
                         },
                       );
                     },
@@ -1428,12 +1448,17 @@ void main() {
                     headerBuilder: (BuildContext context, bool isExpanded) {
                       return const Text('Header', key: secondPanelKey);
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
+                        onChanged: (bool _) {
                           isTriggered = true;
-                          setState(() { _isExpanded[1] = val; });
+                          handlePressed();
                         },
                       );
                     },
@@ -1474,10 +1499,10 @@ void main() {
   });
 
   testWidgets('ExpansionPanelRadio - Custom expansion icon hit testing ignored if canTapOnHeader set to true', (WidgetTester tester) async {
+    final List<bool> _isExpanded = <bool>[true, false];
     const Key firstPanelKey = Key('firstPanelKey');
     const Key secondPanelKey = Key('secondPanelKey');
-    int _currentOpenValue = 1;
-    bool isTriggered = false; // reset in case it was previously triggered
+    bool isTriggered = false;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1485,43 +1510,55 @@ void main() {
           child: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState)  {
               return ExpansionPanelList.radio(
-                initialOpenPanelValue: _currentOpenValue,
+                expansionCallback: (int index, bool isExpanded) {
+                  setState(() {
+                    _isExpanded[index] = !isExpanded;
+                  });
+                },
+                initialOpenPanelValue: _isExpanded.indexWhere((bool val) => val),
                 children: <ExpansionPanelRadio>[
                   ExpansionPanelRadio(
                     value: 0,
                     canTapOnHeader: true,
                     headerBuilder: (BuildContext context, bool isExpanded) {
-                      return Text(isExpanded ? 'B' : 'A', key: firstPanelKey);
+                      return const Text('Header', key: firstPanelKey);
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
+                        onChanged: (bool _) {
                           isTriggered = true;
-                          if (!isExpanded)
-                            setState(() { _currentOpenValue = 0; });
+                          handlePressed();
                         },
                       );
                     },
-                    body: const SizedBox(height: 100.0),
+                    body: Text(_isExpanded[0] ? 'B' : 'A'),
                   ),
                   ExpansionPanelRadio(
                     value: 1,
                     canTapOnHeader: true,
                     headerBuilder: (BuildContext context, bool isExpanded) {
-                      return Text(isExpanded ? 'D' : 'C', key: secondPanelKey);
+                      return const Text('Header', key: secondPanelKey);
                     },
-                    expandIconBuilder: (BuildContext context, bool isExpanded) {
+                    expandIconBuilder: (
+                      BuildContext context,
+                      bool isExpanded,
+                      VoidCallback handlePressed,
+                      Duration animationDuration,
+                    ) {
                       return Checkbox(
                         value: isExpanded,
-                        onChanged: (bool val) {
+                        onChanged: (bool _) {
                           isTriggered = true;
-                          if (!isExpanded)
-                            setState(() { _currentOpenValue = 0; });
+                          handlePressed();
                         },
                       );
                     },
-                    body: const SizedBox(height: 100.0),
+                    body: Text(_isExpanded[1] ? 'D' : 'C'),
                   ),
                 ],
               );
@@ -1534,28 +1571,28 @@ void main() {
     expect(find.byType(Checkbox), findsNWidgets(2));
     expect(find.byType(ExpandIcon), findsNothing);
 
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsOneWidget);
+    expect(find.text('D'), findsNothing);
+
+    // should not trigger onChanged, but should expand
+    await tester.tap(find.byType(Checkbox).at(1));
+    await tester.pumpAndSettle();
+
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     expect(find.text('C'), findsNothing);
     expect(find.text('D'), findsOneWidget);
+    expect(isTriggered, isFalse);
 
-    // should not trigger onChanged, but should expand
-    await tester.tap(find.byType(Checkbox).at(0));
+    // should expand first panel by tapping on header
+    await tester.tap(find.byKey(firstPanelKey));
     await tester.pumpAndSettle();
 
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
-    expect(isTriggered, isFalse);
-
-    // should expand second panel by tapping on header
-    await tester.tap(find.byKey(secondPanelKey));
-    await tester.pumpAndSettle();
-
-    expect(find.text('A'), findsOneWidget);
-    expect(find.text('B'), findsNothing);
-    expect(find.text('C'), findsNothing);
-    expect(find.text('D'), findsOneWidget);
   });
 }
