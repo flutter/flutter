@@ -32,7 +32,7 @@ void main() {
                 SliverFixedExtentList(
                   itemExtent: 100.0,
                   delegate: SliverChildBuilderDelegate(
-                    (BuildContext c, int index) {
+                    (BuildContext _, int index) {
                       return Container(
                         height: 100.0,
                         color: index % 2 == 0 ? Colors.red : Colors.yellow,
