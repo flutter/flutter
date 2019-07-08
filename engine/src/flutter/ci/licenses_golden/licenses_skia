@@ -1,4 +1,4 @@
-Signature: 26df36ec78956d7d0c67926ab14be23c
+Signature: b9ea23bf5c82cdbc577336b87c8f3ff9
 
 UNUSED LICENSES:
 
@@ -2503,7 +2503,6 @@ FILE: ../../../third_party/skia/samplecode/SampleHairline.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLCD.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLayerMask.cpp
 FILE: ../../../third_party/skia/samplecode/SampleLayers.cpp
-FILE: ../../../third_party/skia/samplecode/SampleLines.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
