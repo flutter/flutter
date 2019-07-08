@@ -23,11 +23,10 @@ import 'transitions.dart';
 class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   _AnyTapGestureRecognizer({
     Object debugOwner,
-    @required this.onAnyTapDown,
-  }) : assert(onAnyTapDown != null),
-       super(debugOwner: debugOwner);
+    this.onAnyTapDown,
+  }) : super(debugOwner: debugOwner);
 
-  final VoidCallback onAnyTapDown;
+  VoidCallback onAnyTapDown;
 
   bool _sentTapDown = false;
 
@@ -67,6 +66,20 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
   }
 }
 
+class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
+  const _AnyTapGestureRecognizerFactory({ this.onAnyTapDown });
+
+  final VoidCallback onAnyTapDown;
+
+  @override
+  _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
+
+  @override
+  void initializer(_AnyTapGestureRecognizer instance) {
+    instance.onAnyTapDown = onAnyTapDown;
+  }
+}
+
 // A GestureDetector used by ModalBarrier. It only has one callback,
 // `onAnyTapDown`, which recognizes tap down unconditionally.
 class _ModalBarrierGestureDetector extends StatelessWidget {
@@ -89,10 +102,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<_AnyTapGestureRecognizer>(
-        () => _AnyTapGestureRecognizer(debugOwner: this, onAnyTapDown: onAnyTapDown),
-        (_AnyTapGestureRecognizer instance) => instance,
-      ),
+      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapDown: onAnyTapDown),
     };
 
     return RawGestureDetector(
