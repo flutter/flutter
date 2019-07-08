@@ -278,6 +278,9 @@ void FlutterPlatformViewsController::ApplyMutators(const MutatorsStack& mutators
         head = clipView;
         break;
       }
+      case opacity:
+        embedded_view.alpha = (*iter)->GetAlphaFloat() * embedded_view.alpha;
+        break;
     }
     ++iter;
   }
@@ -299,6 +302,7 @@ void FlutterPlatformViewsController::CompositeWithParams(int view_id,
   UIView* touchInterceptor = touch_interceptors_[view_id].get();
   touchInterceptor.layer.transform = CATransform3DIdentity;
   touchInterceptor.frame = frame;
+  touchInterceptor.alpha = 1;
 
   int currentClippingCount = CountClips(params.mutatorsStack);
   int previousClippingCount = clip_count_[view_id];
