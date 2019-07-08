@@ -35,7 +35,11 @@ class IOSDeploy {
     @required List<String> launchArguments,
   }) async {
     final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
-    const List<String> fallbackIosDeployPath = <String>['/usr/bin/env', 'ios-deploy']; // TODO(fujino): remove fallback once g3 updated
+    // TODO(fujino): remove fallback once g3 updated
+    const List<String> fallbackIosDeployPath = <String>[
+      '/usr/bin/env',
+      'ios-deploy'
+    ];
     final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
     final List<String> launchCommand = <String>[
       ...commandList,
@@ -120,14 +124,20 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    if (!platform.isMacOS) {
+    if (platform.isMacOS) {
       printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
       _installerPath = null;
       _iproxyPath = null;
-    } else {
-      _installerPath = artifacts.getArtifactPath(Artifact.ideviceinstaller, platform: TargetPlatform.ios) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
-      _iproxyPath = artifacts.getArtifactPath(Artifact.iproxy, platform: TargetPlatform.ios) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
+      return;
     }
+    _installerPath = artifacts.getArtifactPath(
+      Artifact.ideviceinstaller,
+      platform: TargetPlatform.ios
+    ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
+    _iproxyPath = artifacts.getArtifactPath(
+      Artifact.iproxy,
+      platform: TargetPlatform.ios
+    ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
   }
 
   String _installerPath;
