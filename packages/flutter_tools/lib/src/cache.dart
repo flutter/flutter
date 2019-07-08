@@ -917,7 +917,8 @@ class IosUsbArtifacts extends CachedArtifact {
   IosUsbArtifacts(String name, Cache cache) : super(
     name,
     cache,
-    const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
+    // This is universal to ensure every command checks for them first
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
   );
 
   static const List<String> artifactNames = <String>[
