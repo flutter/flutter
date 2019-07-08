@@ -7,10 +7,9 @@
 
 #include <vector>
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FLEDartProject_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLEViewController_Internal.h"
 #import "flutter/shell/platform/embedder/embedder.h"
-
-static NSString* const kICUBundlePath = @"icudtl.dat";
 
 /**
  * Private interface declaration for FLEEngine.
@@ -126,15 +125,18 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 }
 
 - (instancetype)init {
-  return [self initWithViewController:nil];
+  return [self initWithViewController:nil project:nil];
 }
 
-- (instancetype)initWithViewController:(FLEViewController*)viewController {
+- (instancetype)initWithViewController:(FLEViewController*)viewController
+                               project:(FLEDartProject*)project {
   self = [super init];
-  if (self != nil) {
-    _viewController = viewController;
-    _messageHandlers = [[NSMutableDictionary alloc] init];
-  }
+  NSAssert(self, @"Super init cannot be nil");
+
+  _viewController = viewController;
+  _project = project ?: [[FLEDartProject alloc] init];
+  _messageHandlers = [[NSMutableDictionary alloc] init];
+
   return self;
 }
 
@@ -144,8 +146,11 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
   }
 }
 
-- (BOOL)launchEngineWithAssetsPath:(NSURL*)assets
-              commandLineArguments:(NSArray<NSString*>*)arguments {
+- (void)setProject:(FLEDartProject*)project {
+  _project = project ?: [[FLEDartProject alloc] init];
+}
+
+- (BOOL)run {
   if (_engine != NULL) {
     return NO;
   }
@@ -162,23 +167,13 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 
   // TODO(stuartmorgan): Move internal channel registration from FLEViewController to here.
 
-  // FlutterProjectArgs is expecting a full argv, so when processing it for flags the first
-  // item is treated as the executable and ignored. Add a dummy value so that all provided arguments
-  // are used.
-  std::vector<const char*> argv = {"placeholder"};
-  for (NSUInteger i = 0; i < arguments.count; ++i) {
-    argv.push_back([arguments[i] UTF8String]);
-  }
-
-  NSString* icuData = [[NSBundle bundleForClass:[self class]] pathForResource:kICUBundlePath
-                                                                       ofType:nil];
-
   FlutterProjectArgs flutterArguments = {};
   flutterArguments.struct_size = sizeof(FlutterProjectArgs);
-  flutterArguments.assets_path = assets.fileSystemRepresentation;
-  flutterArguments.icu_data_path = icuData.UTF8String;
-  flutterArguments.command_line_argc = static_cast<int>(argv.size());
-  flutterArguments.command_line_argv = &argv[0];
+  flutterArguments.assets_path = _project.assetsPath.UTF8String;
+  flutterArguments.icu_data_path = _project.ICUDataPath.UTF8String;
+  std::vector<const char*> arguments = _project.argv;
+  flutterArguments.command_line_argc = static_cast<int>(arguments.size());
+  flutterArguments.command_line_argv = &arguments[0];
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
 
   FlutterEngineResult result = FlutterEngineRun(

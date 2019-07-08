@@ -49,17 +49,12 @@ FLUTTER_EXPORT
 @property(nonatomic) FlutterMouseTrackingMode mouseTrackingMode;
 
 /**
- * Launches the Flutter engine with the provided configuration.
+ * Launches the Flutter engine with the provided project.
  *
- * @param assets The path to the flutter_assets folder for the Flutter application to be run.
- * @param arguments Arguments to pass to the Flutter engine. See
- *                  https://github.com/flutter/engine/blob/master/shell/common/switches.h
- *                  for details. Not all arguments will apply to embedding mode.
- *                  Note: This API layer will abstract in the future, instead of providing a direct
- *                  passthrough.
+ * @param project The project to run in this view controller. If nil, a default `FLEDartProject`
+ *                will be used.
  * @return YES if the engine launched successfully.
  */
-- (BOOL)launchEngineWithAssetsPath:(nonnull NSURL*)assets
-              commandLineArguments:(nullable NSArray<NSString*>*)arguments;
+- (BOOL)launchEngineWithProject:(nullable FLEDartProject*)project;
 
 @end
