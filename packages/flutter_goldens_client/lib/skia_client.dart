@@ -66,7 +66,7 @@ class SkiaGoldClient extends GoldensClient {
   /// will only be called once for each instance of
   /// [FlutterSkiaGoldFileComparator].
   ///
-  /// The workDirectory parameter specifies the current directory that golden
+  /// The [workDirectory] parameter specifies the current directory that golden
   /// tests are executing in, relative to the library of the given test. It is
   /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
   Future<void> auth(Directory workDirectory) async {
@@ -168,16 +168,18 @@ class SkiaGoldClient extends GoldensClient {
     );
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
-    // Will not turn the tree red in this implementation.
-    // The ProcessResult that returns from line 157 contains the result of the
-    // test & links to the dashboard and diffs.
+    // So as not to turn the tree red in this initial implementation, this will
+    // return true for now.
+    // The ProcessResult that returns from line 157 contains the pass/fail
+    // result of the test & links to the dashboard and diffs.
     return true;
   }
 
+  /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     if (!flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Flutter root could not be found: $flutterRoot')
+        ..writeln('Flutter root could not be found: $flutterRoot');
       throw NonZeroExitCode(1, buf.toString());
     } else {
       final io.ProcessResult revParse = await process.run(
@@ -188,6 +190,11 @@ class SkiaGoldClient extends GoldensClient {
     }
   }
 
+  /// Returns a JSON String with keys value pairs used to uniquely identify the
+  /// configuration that generated the given golden file.
+  ///
+  /// Currently, the only key value pair being tracked is the platform the image
+  /// was rendered on.
   String _getKeysJSON() {
     return json.encode(
       <String, dynamic>{
@@ -196,6 +203,8 @@ class SkiaGoldClient extends GoldensClient {
     );
   }
 
+  /// Returns a boolean value to prevent the client from re-authorizing itself
+  /// for multiple tests.
   bool _clientIsAuthorized() {
     final File authFile = _workDirectory.childFile(fs.path.join(
       'temp',

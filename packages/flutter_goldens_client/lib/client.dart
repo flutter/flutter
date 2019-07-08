@@ -125,6 +125,7 @@ class GoldensRepositoryClient  extends GoldensClient {
     return (await versionFile.readAsString()).trim();
   }
 
+
   Future<void> _initRepository() async {
     await comparisonRoot.create(recursive: true);
     await _runCommands(
