@@ -77,10 +77,8 @@ class VMPlatform extends PlatformPlugin {
     final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
         .transformStream(StreamTransformer<Object, Object>.fromHandlers(handleDone: (EventSink<Object> sink) async {
       try {
-        // Pause the isolate so it is ready for coverage collection.
-        isolate.pause();
         // this will throw if collection fails.
-        await coverageCollector.collectCoverageIsolate(info.serverUri, path);
+        await coverageCollector.collectCoverageIsolate(info.serverUri);
       } finally {
         isolate.kill(priority: Isolate.immediate);
         isolate = null;
@@ -117,14 +115,13 @@ class VMPlatform extends PlatformPlugin {
     return await Isolate.spawnUri(p.toUri(testPath), <String>[], message,
       packageConfig: p.toUri('.packages'),
       checked: true,
-      debugName: path,
     );
   }
 
   @override
   Future<void> close() async {
     try {
-      await Future.wait(_pending.values).timeout(const Duration(seconds: 10));
+      await Future.wait(_pending.values).timeout(const Duration(minutes: 1));
     } on TimeoutException {
       // TODO(jonahwilliams): resolve whether there are any specific tests that
       // get stuck or if it is a general infra issue with how we are collecting
