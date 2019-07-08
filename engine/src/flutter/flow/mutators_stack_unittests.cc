@@ -42,7 +42,7 @@ TEST(MutatorsStack, PushClipRRect) {
 }
 
 TEST(MutatorsStack, PushClipPath) {
-  flutter::MutatorsStack stack;
+  MutatorsStack stack;
   SkPath path;
   stack.PushClipPath(path);
   auto iter = stack.Bottom();
@@ -58,6 +58,15 @@ TEST(MutatorsStack, PushTransform) {
   auto iter = stack.Bottom();
   ASSERT_TRUE(iter->get()->GetType() == MutatorType::transform);
   ASSERT_TRUE(iter->get()->GetMatrix() == matrix);
+}
+
+TEST(MutatorsStack, PushOpacity) {
+  MutatorsStack stack;
+  int alpha = 240;
+  stack.PushOpacity(alpha);
+  auto iter = stack.Bottom();
+  ASSERT_TRUE(iter->get()->GetType() == MutatorType::opacity);
+  ASSERT_TRUE(iter->get()->GetAlpha() == 240);
 }
 
 TEST(MutatorsStack, Pop) {
@@ -113,6 +122,8 @@ TEST(MutatorsStack, Equality) {
   stack.PushClipRRect(rrect);
   SkPath path;
   stack.PushClipPath(path);
+  int alpha = 240;
+  stack.PushOpacity(alpha);
 
   MutatorsStack stackOther;
   SkMatrix matrixOther = SkMatrix::MakeScale(1, 1);
@@ -123,6 +134,8 @@ TEST(MutatorsStack, Equality) {
   stackOther.PushClipRRect(rrectOther);
   SkPath otherPath;
   stackOther.PushClipPath(otherPath);
+  int otherAlpha = 240;
+  stackOther.PushOpacity(otherAlpha);
 
   ASSERT_TRUE(stack == stackOther);
 }
@@ -148,6 +161,10 @@ TEST(Mutator, Initialization) {
   Mutator mutator4 = Mutator(matrix);
   ASSERT_TRUE(mutator4.GetType() == MutatorType::transform);
   ASSERT_TRUE(mutator4.GetMatrix() == matrix);
+
+  int alpha = 240;
+  Mutator mutator5 = Mutator(alpha);
+  ASSERT_TRUE(mutator5.GetType() == MutatorType::opacity);
 }
 
 TEST(Mutator, CopyConstructor) {
@@ -171,6 +188,11 @@ TEST(Mutator, CopyConstructor) {
   Mutator mutator4 = Mutator(matrix);
   Mutator copy4 = Mutator(mutator4);
   ASSERT_TRUE(mutator4 == copy4);
+
+  int alpha = 240;
+  Mutator mutator5 = Mutator(alpha);
+  Mutator copy5 = Mutator(mutator5);
+  ASSERT_TRUE(mutator5 == copy5);
 }
 
 TEST(Mutator, Equality) {
@@ -195,6 +217,10 @@ TEST(Mutator, Equality) {
   flutter::Mutator otherMutator4 = flutter::Mutator(path);
   ASSERT_TRUE(mutator4 == otherMutator4);
   ASSERT_FALSE(mutator2 == mutator);
+  int alpha = 240;
+  Mutator mutator5 = Mutator(alpha);
+  Mutator otherMutator5 = Mutator(alpha);
+  ASSERT_TRUE(mutator5 == otherMutator5);
 }
 
 TEST(Mutator, UnEquality) {
@@ -204,6 +230,12 @@ TEST(Mutator, UnEquality) {
   matrix.setIdentity();
   Mutator notEqualMutator = Mutator(matrix);
   ASSERT_TRUE(notEqualMutator != mutator);
+
+  int alpha = 240;
+  int alpha2 = 241;
+  Mutator mutator2 = Mutator(alpha);
+  Mutator otherMutator2 = Mutator(alpha2);
+  ASSERT_TRUE(mutator2 != otherMutator2);
 }
 
 }  // namespace testing

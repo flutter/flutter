@@ -17,7 +17,7 @@
 
 namespace flutter {
 
-enum MutatorType { clip_rect, clip_rrect, clip_path, transform };
+enum MutatorType { clip_rect, clip_rrect, clip_path, transform, opacity };
 
 // Stores mutation information like clipping or transform.
 //
@@ -42,6 +42,9 @@ class Mutator {
       case transform:
         matrix_ = other.matrix_;
         break;
+      case opacity:
+        alpha_ = other.alpha_;
+        break;
       default:
         break;
     }
@@ -53,12 +56,15 @@ class Mutator {
       : type_(clip_path), path_(new SkPath(path)) {}
   explicit Mutator(const SkMatrix& matrix)
       : type_(transform), matrix_(matrix) {}
+  explicit Mutator(const int& alpha) : type_(opacity), alpha_(alpha) {}
 
   const MutatorType& GetType() const { return type_; }
   const SkRect& GetRect() const { return rect_; }
   const SkRRect& GetRRect() const { return rrect_; }
   const SkPath& GetPath() const { return *path_; }
   const SkMatrix& GetMatrix() const { return matrix_; }
+  const int& GetAlpha() const { return alpha_; }
+  float GetAlphaFloat() const { return (alpha_ / 255.0); }
 
   bool operator==(const Mutator& other) const {
     if (type_ != other.type_) {
@@ -73,6 +79,8 @@ class Mutator {
         return *path_ == *other.path_;
       case transform:
         return matrix_ == other.matrix_;
+      case opacity:
+        return alpha_ == other.alpha_;
     }
 
     return false;
@@ -98,6 +106,7 @@ class Mutator {
     SkRRect rrect_;
     SkMatrix matrix_;
     SkPath* path_;
+    int alpha_;
   };
 
 };  // Mutator
@@ -119,6 +128,7 @@ class MutatorsStack {
   void PushClipRRect(const SkRRect& rrect);
   void PushClipPath(const SkPath& path);
   void PushTransform(const SkMatrix& matrix);
+  void PushOpacity(const int& alpha);
 
   // Removes the `Mutator` on the top of the stack
   // and destroys it.
