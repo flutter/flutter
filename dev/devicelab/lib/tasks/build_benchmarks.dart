@@ -10,13 +10,14 @@ import 'package:path/path.dart' as path;
 
 final Directory helloWorldDir = dir(path.join(flutterDirectory.path, 'examples', 'hello_world'));
 
-/// Creates a device lab build benchmark for android.
+/// Creates a devicelab build benchmark for Android.
 TaskFunction createAndroidBuildBenchmarkTask() {
   return () async {
     return createBuildCommand('apk');
   };
 }
-/// Creates a device lab build benchmark for iOS.
+
+/// Creates a devicelab build benchmark for iOS.
 TaskFunction createIosBuildBenchmarkTask() {
   return () async {
     return createBuildCommand('ios');
