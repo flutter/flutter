@@ -124,8 +124,8 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        ...extraOptions,
       ];
-      options.addAll(extraOptions);
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);

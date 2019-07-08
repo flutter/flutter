@@ -201,7 +201,7 @@ class TestRunCommand extends RunCommand {
 
 class MockStableFlutterVersion extends MockFlutterVersion {
   @override
-  bool get isStable => true;
+  bool get isMaster => false;
 }
 
 class FakeDevice extends Fake implements Device {

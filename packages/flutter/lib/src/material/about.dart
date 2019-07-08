@@ -268,33 +268,32 @@ class AboutDialog extends StatelessWidget {
     final String name = applicationName ?? _defaultApplicationName(context);
     final String version = applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
-    List<Widget> body = <Widget>[];
-    if (icon != null)
-      body.add(IconTheme(data: const IconThemeData(size: 48.0), child: icon));
-    body.add(Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: ListBody(
-          children: <Widget>[
-            Text(name, style: Theme.of(context).textTheme.headline),
-            Text(version, style: Theme.of(context).textTheme.body1),
-            Container(height: 18.0),
-            Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
-          ],
-        ),
-      ),
-    ));
-    body = <Widget>[
-      Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: body,
-      ),
-    ];
-    if (children != null)
-      body.addAll(children);
     return AlertDialog(
       content: SingleChildScrollView(
-        child: ListBody(children: body),
+        child: ListBody(
+          children: <Widget>[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                if (icon != null) IconTheme(data: const IconThemeData(size: 48.0), child: icon),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: ListBody(
+                      children: <Widget>[
+                        Text(name, style: Theme.of(context).textTheme.headline),
+                        Text(version, style: Theme.of(context).textTheme.body1),
+                        Container(height: 18.0),
+                        Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            ...?children,
+          ],
+        ),
       ),
       actions: <Widget>[
         FlatButton(
@@ -401,6 +400,9 @@ class _LicensePageState extends State<LicensePage> {
           Priority.animation,
           debugLabel: 'License',
         );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _licenses.add(const Padding(
           padding: EdgeInsets.symmetric(vertical: 18.0),
@@ -454,24 +456,6 @@ class _LicensePageState extends State<LicensePage> {
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final List<Widget> contents = <Widget>[
-      Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
-      Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      Container(height: 18.0),
-      Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
-      Container(height: 18.0),
-      Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
-      Container(height: 24.0),
-    ];
-    contents.addAll(_licenses);
-    if (!_loaded) {
-      contents.add(const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24.0),
-        child: Center(
-          child: CircularProgressIndicator(),
-        ),
-      ));
-    }
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.licensesPageTitle),
@@ -488,7 +472,23 @@ class _LicensePageState extends State<LicensePage> {
             child: Scrollbar(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-                children: contents,
+                children: <Widget>[
+                  Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+                  Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Container(height: 18.0),
+                  Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+                  Container(height: 18.0),
+                  Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+                  Container(height: 24.0),
+                  ..._licenses,
+                  if (!_loaded)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 24.0),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                ],
               ),
             ),
           ),

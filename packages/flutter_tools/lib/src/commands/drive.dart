@@ -182,7 +182,7 @@ class DriveCommand extends RunCommandBase {
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
     final String pathWithNoExtension = fs.path.withoutExtension(fs.path.joinAll(
-      <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
+      <String>[packageDir, 'test_driver', ...parts.skip(1)]));
     return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
@@ -297,13 +297,13 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]
-      ..addAll(dartVmFlags)
-      ..addAll(testArgs)
-      ..addAll(<String>[
-        '--packages=${PackageMap.globalPackagesPath}',
-        '-rexpanded',
-      ]),
+    <String>[
+      dartVmPath,
+      ...dartVmFlags,
+      ...testArgs,
+      '--packages=${PackageMap.globalPackagesPath}',
+      '-rexpanded',
+    ],
     environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
   );
   if (result != 0)
