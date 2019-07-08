@@ -408,9 +408,16 @@ tasks:
 
   platform_interaction_test_ios:
     description: >
-      Checks platform interaction on iPhone 6.
+      Checks platform interaction on iPhone 6 Objective-C project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+
+  platform_interaction_test_swift:
+    description: >
+      Checks platform interaction on iPhone 6 Swift project.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   platform_channel_sample_test_ios:
     description: >
