@@ -1160,7 +1160,7 @@ class Navigator extends StatefulWidget {
   /// [Route.didChangeNext]). If the [Navigator] has any [Navigator.observers],
   /// they will be notified as well (see [NavigatorObservers.didPush] and
   /// [NavigatorObservers.didRemove]). The removed routes are disposed of and
-  /// notified, once the new route has finished animating. The futures that had\
+  /// notified, once the new route has finished animating. The futures that had
   /// been returned from pushing those routes will not complete.
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
