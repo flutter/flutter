@@ -17,6 +17,8 @@ void configureProject(Project project, File outputDir) {
     project.android.libraryVariants.all { variant ->
         addAarTask(project, outputDir, variant)
     }
+    // Snapshot versions include the timestamp in the artifact name.
+    project.version = project.version.replace("-SNAPSHOT", "")
 
     project.uploadArchives {
         repositories {
@@ -53,9 +55,6 @@ void addAarTask(Project project, File outputDir, variant) {
         if (!project.gradle.startParameter.taskNames.contains(taskName)) {
             return
         }
-        // Remove the existing repo directory, so we don't duplicate the artifacts.
-        delete "${outputDir}/repo"
-
         // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
         // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
         // `defaultPublishConfig` at this point. Therefore, the code below ensures that the

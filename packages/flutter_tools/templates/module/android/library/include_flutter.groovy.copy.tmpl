@@ -23,6 +23,7 @@ gradle.getGradle().projectsLoaded { g ->
         }
         assert flutterProject != null
         flutterProject.ext.hostProjects = subprojects
+        flutterProject.ext.pluginBuildDir = new File(flutterProjectRoot, 'build/host')
     }
     g.rootProject.afterEvaluate { p ->
         p.subprojects { sp ->

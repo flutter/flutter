@@ -206,6 +206,17 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    /**
+     * Returns the directory where the plugins are built.
+     */
+    private File getPluginBuildDir(Project project) {
+        // Module projects specify this flag to include plugins in the same repo as the module project.
+        if (project.ext.has("pluginBuildDir")) {
+            return project.ext.get("pluginBuildDir")
+        }
+        return project.buildDir
+    }
+
     private void addPluginTasks(Project project) {
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, ".flutter-plugins")
         Properties plugins = readPropertiesIfExist(pluginsFile)
@@ -224,7 +235,7 @@ class FlutterPlugin implements Plugin<Project> {
                         verbose isVerbose(project)
                         pluginDir project.file(path)
                         sourceDir project.file(project.flutter.source)
-                        intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/plugins/${name}/${buildModeValue}")
+                        intermediateDir getPluginBuildDir(project)
                     }
                 }
             }
@@ -232,6 +243,19 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private void buildPlugins(Project project, Set buildTypes) {
+        List<Project> projects = [project]
+        // Module projects set the `hostProjects` extra property in `include_flutter.groovy`.
+        // This is required to set the local repository in each host app project.
+        if (project.ext.has("hostProjects")) {
+            projects.addAll(project.ext.get("hostProjects"))
+        }
+        projects.each { hostProject ->
+            hostProject.repositories {
+                maven {
+                    url "${getPluginBuildDir(project)}/repo"
+                }
+            }
+        }
         buildTypes.each { buildType ->
             project.tasks.withType(FlutterPluginTask).all { pluginTask ->
                 String buildMode = buildType.debuggable ? "debug" : "release"
@@ -239,40 +263,23 @@ class FlutterPlugin implements Plugin<Project> {
                     return
                 }
                 pluginTask.execute()
-                // Add the local repos.
-                // Module projects set the `hostProjects` extra property in `include_flutter.groovy`,
-                // so we can configure the local repository in each the host app project.
-                if (project.ext.has("hostProjects")) {
-                    List<Project> hostProjects = project.ext.get("hostProjects")
-                    hostProjects.each { hostProject ->
-                        hostProject.repositories {
-                            maven {
-                                url "${pluginTask.intermediateDir}/repo"
-                            }
-                        }
-                    }
-                }
-                project.repositories {
-                    maven {
-                        url "${pluginTask.intermediateDir}/repo"
-                    }
-                }
-                File mavenMetadataFile
                 pluginTask.intermediateDir.eachFileRecurse(FILES) { file ->
-                    if (file.name == "maven-metadata.xml") {
-                        mavenMetadataFile = file
+                    if (file.name != "maven-metadata.xml") {
+                        return
                     }
-                }
-                assert mavenMetadataFile != null
-                def mavenMetadata = new XmlParser().parse(mavenMetadataFile)
+                    def mavenMetadata = new XmlParser().parse(file)
+                    String groupId = mavenMetadata.groupId.text()
+                    String artifactId = mavenMetadata.artifactId.text()
 
-                assert mavenMetadata != null
-                assert !mavenMetadata.groupId.text().empty
-                assert !mavenMetadata.artifactId.text().empty
-                // Add the plugin dependency based on the Maven metadata.
-                addApiDependencies(project, buildType.name, "${mavenMetadata.groupId.text()}:${mavenMetadata.artifactId.text()}:+@aar", {
-                    transitive = true
-                })
+                    if (!artifactId.endsWith(buildMode)) {
+                        return
+                    }
+                    // Add the plugin dependency based on the Maven metadata.
+                    println "$groupId:$artifactId:+@aar"
+                    addApiDependencies(project, buildType.name, "$groupId:$artifactId:+@aar", {
+                        transitive = true
+                    })
+                }
             }
         }
     }
