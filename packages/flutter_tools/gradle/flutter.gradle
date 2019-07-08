@@ -275,7 +275,6 @@ class FlutterPlugin implements Plugin<Project> {
                         return
                     }
                     // Add the plugin dependency based on the Maven metadata.
-                    println "$groupId:$artifactId:+@aar"
                     addApiDependencies(project, buildType.name, "$groupId:$artifactId:+@aar", {
                         transitive = true
                     })
