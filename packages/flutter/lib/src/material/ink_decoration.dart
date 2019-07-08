@@ -110,11 +110,14 @@ class Ink extends StatefulWidget {
   ///
   /// The [height] and [width] values include the [padding].
   ///
-  /// The `color` argument is a shorthand for `decoration: new
-  /// BoxDecoration(color: color)`, which means you cannot supply both a `color`
-  /// and a `decoration` argument. If you want to have both a `color` and a
-  /// `decoration`, you can pass the color as the `color` argument to the
-  /// `BoxDecoration`.
+  /// The `color` argument is a shorthand for
+  /// `decoration: BoxDecoration(color: color)`, which means you cannot supply
+  /// both a `color` and a `decoration` argument. If you want to have both a
+  /// `color` and a `decoration`, you can pass the color as the `color`
+  /// argument to the `BoxDecoration`.
+  ///
+  /// If there is no intention to render anything on this decoration, consider
+  /// using a [Container] with a [BoxDecoration] instead.
   Ink({
     Key key,
     this.padding,
@@ -127,7 +130,7 @@ class Ink extends StatefulWidget {
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
-         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
+         'The color argument is just a shorthand for "decoration: BoxDecoration(color: color)".'
        ),
        decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        super(key: key);
@@ -136,13 +139,16 @@ class Ink extends StatefulWidget {
   /// a [Material].
   ///
   /// This argument is a shorthand for passing a [BoxDecoration] that has only
-  /// its [BoxDecoration.image] property set to the [new Ink] constructor. The
+  /// its [BoxDecoration.image] property set to the [Ink] constructor. The
   /// properties of the [DecorationImage] of that [BoxDecoration] are set
   /// according to the arguments passed to this method.
   ///
-  /// The `image` argument must not be null. The `alignment`, `repeat`, and
-  /// `matchTextDirection` arguments must not be null either, but they have
-  /// default values.
+  /// The `image` argument must not be null. If there is no
+  /// intention to render anything on this image, consider using a
+  /// [Container] with a [BoxDecoration.image] instead.
+  ///
+  /// The `alignment`, `repeat`, and `matchTextDirection` arguments must not
+  /// be null either, but they have default values.
   ///
   /// See [paintImage] for a description of the meaning of these arguments.
   Ink.image({
@@ -194,8 +200,8 @@ class Ink extends StatefulWidget {
   /// constructor: set the `color` argument instead of the `decoration`
   /// argument.
   ///
-  /// A shorthand for specifying just an image is also available using the [new
-  /// Ink.image] constructor.
+  /// A shorthand for specifying just an image is also available using the
+  /// [Ink.image] constructor.
   final Decoration decoration;
 
   /// A width to apply to the [decoration] and the [child]. The width includes
@@ -257,7 +263,7 @@ class _InkState extends State<Ink> {
     final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
     if (effectivePadding != null)
       current = Padding(padding: effectivePadding, child: current);
-    return current;
+    return current ?? Container();
   }
 
   @override

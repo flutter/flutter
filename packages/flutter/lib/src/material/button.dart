@@ -13,6 +13,7 @@ import 'button_theme.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_state.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -85,6 +86,14 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
+  ///
+  /// If [textStyle.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   final TextStyle textStyle;
 
   /// The color of the button's [Material].
@@ -190,6 +199,14 @@ class RawMaterialButton extends StatefulWidget {
   ///
   /// The button's highlight and splash are clipped to this shape. If the
   /// button has an elevation, then its drop shadow is defined by this shape.
+  ///
+  /// If [shape] is a [MaterialStateProperty<ShapeBorder>], [MaterialStateProperty.resolve]
+  /// is used for the following [MaterialState]s:
+  ///
+  /// * [MaterialState.pressed].
+  /// * [MaterialState.hovered].
+  /// * [MaterialState.focused].
+  /// * [MaterialState.disabled].
   final ShapeBorder shape;
 
   /// Defines the duration of animated changes for [shape] and [elevation].
@@ -231,14 +248,21 @@ class RawMaterialButton extends StatefulWidget {
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
-  bool _highlight = false;
-  bool _focused = false;
-  bool _hovering = false;
+  final Set<MaterialState> _states = <MaterialState>{};
+
+  bool get _hovered => _states.contains(MaterialState.hovered);
+  bool get _focused => _states.contains(MaterialState.focused);
+  bool get _pressed => _states.contains(MaterialState.pressed);
+  bool get _disabled => _states.contains(MaterialState.disabled);
+
+  void _updateState(MaterialState state, bool value) {
+    value ? _states.add(state) : _states.remove(state);
+  }
 
   void _handleHighlightChanged(bool value) {
-    if (_highlight != value) {
+    if (_pressed != value) {
       setState(() {
-        _highlight = value;
+        _updateState(MaterialState.pressed, value);
         if (widget.onHighlightChanged != null) {
           widget.onHighlightChanged(value);
         }
@@ -246,47 +270,73 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     }
   }
 
-  @override
-  void didUpdateWidget(RawMaterialButton oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (_highlight && !widget.enabled) {
-      _highlight = false;
-      if (widget.onHighlightChanged != null) {
-        widget.onHighlightChanged(false);
-      }
+  void _handleHoveredChanged(bool value) {
+    if (_hovered != value) {
+      setState(() {
+        _updateState(MaterialState.hovered, value);
+      });
     }
   }
 
-  double _effectiveElevation() {
-    if (widget.enabled) {
-      // These conditionals are in order of precedence, so be careful about
-      // reorganizing them.
-      if (_highlight) {
-        return widget.highlightElevation;
-      }
-      if (_hovering) {
-        return widget.hoverElevation;
-      }
-      if (_focused) {
-        return widget.focusElevation;
-      }
-      return widget.elevation;
-    } else {
+  void _handleFocusedChanged(bool value) {
+    if (_focused != value) {
+      setState(() {
+        _updateState(MaterialState.focused, value);
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateState(MaterialState.disabled, !widget.enabled);
+  }
+
+  @override
+  void didUpdateWidget(RawMaterialButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateState(MaterialState.disabled, !widget.enabled);
+    // If the button is disabled while a press gesture is currently ongoing,
+    // InkWell makes a call to handleHighlightChanged. This causes an exception
+    // because it calls setState in the middle of a build. To preempt this, we
+    // manually update pressed to false when this situation occurs.
+    if (_disabled && _pressed) {
+      _handleHighlightChanged(false);
+    }
+  }
+
+  double get _effectiveElevation {
+    // These conditionals are in order of precedence, so be careful about
+    // reorganizing them.
+    if (_disabled) {
       return widget.disabledElevation;
     }
+    if (_pressed) {
+      return widget.highlightElevation;
+    }
+    if (_hovered) {
+      return widget.hoverElevation;
+    }
+    if (_focused) {
+      return widget.focusElevation;
+    }
+    return widget.elevation;
   }
 
   @override
   Widget build(BuildContext context) {
+    final Color effectiveTextColor = MaterialStateProperty.resolveAs<Color>(widget.textStyle?.color, _states);
+    final ShapeBorder effectiveShape =  MaterialStateProperty.resolveAs<ShapeBorder>(widget.shape, _states);
+
     final Widget result = Focus(
       focusNode: widget.focusNode,
-      onFocusChange: (bool focused) => setState(() { _focused = focused; }),
+      onFocusChange: _handleFocusedChanged,
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
-          elevation: _effectiveElevation(),
-          textStyle: widget.textStyle,
-          shape: widget.shape,
+          elevation: _effectiveElevation,
+          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
+          shape: effectiveShape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
           animationDuration: widget.animationDuration,
@@ -297,11 +347,11 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             highlightColor: widget.highlightColor,
             focusColor: widget.focusColor,
             hoverColor: widget.hoverColor,
-            onHover: (bool hovering) => setState(() => _hovering = hovering),
+            onHover: _handleHoveredChanged,
             onTap: widget.onPressed,
-            customBorder: widget.shape,
+            customBorder: effectiveShape,
             child: IconTheme.merge(
-              data: IconThemeData(color: widget.textStyle?.color),
+              data: IconThemeData(color: effectiveTextColor),
               child: Container(
                 padding: widget.padding,
                 child: Center(

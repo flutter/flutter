@@ -56,7 +56,10 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
+        if (!FlutterProject.current().web.existsSync()) {
+          return null;
+        }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
         return applicationBinary == null
@@ -387,10 +390,14 @@ class PrebuiltIOSApp extends IOSApp {
 }
 
 class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS });
+  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
 
   AndroidApk android;
   IOSApp iOS;
+  FuchsiaApp fuchsia;
+  LinuxApp linux;
+  MacOSApp macOS;
+  WindowsApp windows;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -403,12 +410,20 @@ class ApplicationPackageStore {
       case TargetPlatform.ios:
         iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
+        return fuchsia;
+      case TargetPlatform.darwin_x64:
+        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
+        return macOS;
+      case TargetPlatform.linux_x64:
+        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
+        return linux;
+      case TargetPlatform.windows_x64:
+        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
+        return windows;
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return null;
     }
     return null;
@@ -484,15 +499,16 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final _Element manifest = _Element.fromLine(lines[1], null);
+    final int manifestLine = lines.indexWhere((String line) => line.contains('E: manifest'));
+    final _Element manifest = _Element.fromLine(lines[manifestLine], null);
     _Element currentElement = manifest;
 
-    for (String line in lines.skip(2)) {
+    for (String line in lines.skip(manifestLine)) {
       final String trimLine = line.trimLeft();
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while (level <= currentElement.level) {
+      while (currentElement.parent != null && level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 

@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ui' show Offset;
 
+import 'package:vector_math/vector_math_64.dart';
 import 'package:flutter/foundation.dart';
 
 import 'arena.dart';
@@ -293,12 +294,16 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
 
   /// Causes events related to the given pointer ID to be routed to this recognizer.
   ///
-  /// The pointer events are delivered to [handleEvent].
+  /// The pointer events are transformed according to `transform` and then delivered
+  /// to [handleEvent]. The value for the `transform` argument is usually obtained
+  /// from [PointerDownEvent.transform] to transform the events from the global
+  /// coordinate space into the coordinate space of the event receiver. It may be
+  /// null if no transformation is necessary.
   ///
   /// Use [stopTrackingPointer] to remove the route added by this function.
   @protected
-  void startTrackingPointer(int pointer) {
-    GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent);
+  void startTrackingPointer(int pointer, [Matrix4 transform]) {
+    GestureBinding.instance.pointerRouter.addRoute(pointer, handleEvent, transform);
     _trackedPointers.add(pointer);
     assert(!_entries.containsValue(pointer));
     _entries[pointer] = _addPointerToArena(pointer);
@@ -410,8 +415,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   /// The ID of the primary pointer this recognizer is tracking.
   int primaryPointer;
 
-  /// The global location at which the primary pointer contacted the screen.
-  Offset initialPosition;
+  /// The location at which the primary pointer contacted the screen.
+  OffsetPair initialPosition;
 
   // Whether this pointer is accepted by winning the arena or as defined by
   // a subclass calling acceptGesture.
@@ -420,11 +425,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     if (state == GestureRecognizerState.ready) {
       state = GestureRecognizerState.possible;
       primaryPointer = event.pointer;
-      initialPosition = event.position;
+      initialPosition = OffsetPair(local: event.localPosition, global: event.position);
       if (deadline != null)
         _timer = Timer(deadline, () => didExceedDeadlineWithEvent(event));
     }
@@ -437,11 +442,11 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       final bool isPreAcceptSlopPastTolerance =
           !_gestureAccepted &&
           preAcceptSlopTolerance != null &&
-          _getDistance(event) > preAcceptSlopTolerance;
+          _getGlobalDistance(event) > preAcceptSlopTolerance;
       final bool isPostAcceptSlopPastTolerance =
           _gestureAccepted &&
           postAcceptSlopTolerance != null &&
-          _getDistance(event) > postAcceptSlopTolerance;
+          _getGlobalDistance(event) > postAcceptSlopTolerance;
 
       if (event is PointerMoveEvent && (isPreAcceptSlopPastTolerance || isPostAcceptSlopPastTolerance)) {
         resolve(GestureDisposition.rejected);
@@ -509,8 +514,8 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     }
   }
 
-  double _getDistance(PointerEvent event) {
-    final Offset offset = event.position - initialPosition;
+  double _getGlobalDistance(PointerEvent event) {
+    final Offset offset = event.position - initialPosition.global;
     return offset.distance;
   }
 
@@ -519,4 +524,58 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
     super.debugFillProperties(properties);
     properties.add(EnumProperty<GestureRecognizerState>('state', state));
   }
+}
+
+/// A container for a [local] and [global] [Offset] pair.
+///
+/// Usually, the [global] [Offset] is in the coordinate space of the screen
+/// after conversion to logical pixels and the [local] offset is the same
+/// [Offset], but transformed to a local coordinate space.
+class OffsetPair {
+  /// Creates a [OffsetPair] combining a [local] and [global] [Offset].
+  const OffsetPair({
+    @required this.local,
+    @required this.global,
+  });
+
+  /// Creates a [OffsetPair] from [PointerEvent.localPosition] and
+  /// [PointerEvent.position].
+  factory OffsetPair.fromEventPosition(PointerEvent event) {
+    return OffsetPair(local: event.localPosition, global: event.position);
+  }
+
+  /// Creates a [OffsetPair] from [PointerEvent.localDelta] and
+  /// [PointerEvent.delta].
+  factory OffsetPair.fromEventDelta(PointerEvent event) {
+    return OffsetPair(local: event.localDelta, global: event.delta);
+  }
+
+  /// A [OffsetPair] where both [Offset]s are [Offset.zero].
+  static const OffsetPair zero = OffsetPair(local: Offset.zero, global: Offset.zero);
+
+  /// The [Offset] in the local coordinate space.
+  final Offset local;
+
+  /// The [Offset] in the global coordinate space after conversion to logical
+  /// pixels.
+  final Offset global;
+
+  /// Adds the `other.global` to [global] and `other.local` to [local].
+  OffsetPair operator+(OffsetPair other) {
+    return OffsetPair(
+      local: local + other.local,
+      global: global + other.global,
+    );
+  }
+
+  /// Subtracts the `other.global` from [global] and `other.local` from [local].
+  OffsetPair operator-(OffsetPair other) {
+    return OffsetPair(
+      local: local - other.local,
+      global: global - other.global,
+    );
+  }
+
+  @override
+  String toString() => '$runtimeType(local: $local, global: $global)';
 }

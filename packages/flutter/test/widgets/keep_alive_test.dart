@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // diagnostics use Platform.operatingSystem.
 import 'dart:io' show Platform;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -237,6 +238,7 @@ void main() {
       '         │ needs compositing\n'
       '         │ parentData: <none> (can use size)\n'
       '         │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+      '         │ semantics node: SemanticsNode#1\n'
       '         │ semantic boundary\n'
       '         │ size: Size(800.0, 600.0)\n'
       '         │\n'
@@ -383,6 +385,7 @@ void main() {
       '         │ needs compositing\n'
       '         │ parentData: <none> (can use size)\n'
       '         │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+      '         │ semantics node: SemanticsNode#1\n'
       '         │ semantic boundary\n'
       '         │ size: Size(800.0, 600.0)\n'
       '         │\n'

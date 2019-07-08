@@ -11,7 +11,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
+import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -54,15 +54,15 @@ class FlutterDevice {
     Device device, {
     @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
+    @required String target,
+    @required BuildMode buildMode,
     String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
-    @required String target,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-    @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
     if (flutterProject.hasBuilders) {
@@ -166,8 +166,9 @@ class FlutterDevice {
       await service.getVM();
   }
 
-  Future<void> stopApps() async {
-    if (!device.supportsStopApp) {
+  Future<void> exitApps() async {
+    if (!device.supportsFlutterExit) {
+      await device.stopApp(package);
       return;
     }
     final List<FlutterView> flutterViews = views;
@@ -511,7 +512,6 @@ abstract class ResidentRunner {
     this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
-    this.saveCompilationTrace,
     this.stayResident,
     this.ipv6,
   }) {
@@ -526,11 +526,10 @@ abstract class ResidentRunner {
   final String target;
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
-  final bool saveCompilationTrace;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
-  bool _stopped = false;
+  bool _exited = false;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
   String _projectRootPath;
@@ -582,18 +581,16 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-  Future<void> stop() async {
-    _stopped = true;
-    if (saveCompilationTrace)
-      await _debugSaveCompilationTrace();
+  Future<void> exit() async {
+    _exited = true;
     await stopEchoingDeviceLog();
-    await preStop();
-    await stopApp();
+    await preExit();
+    await exitApp();
   }
 
   Future<void> detach() async {
     await stopEchoingDeviceLog();
-    await preStop();
+    await preExit();
     appFinished();
   }
 
@@ -703,35 +700,6 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _debugSaveCompilationTrace() async {
-    if (!supportsServiceProtocol)
-      return;
-
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        final int index = device.views.indexOf(view);
-        final File outputFile = fs.currentDirectory
-            .childFile('compilation${index == 0 ? '' : index}.txt');
-
-        printStatus('Saving compilation training data '
-            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
-            'to ${fs.path.relative(outputFile.path)}...');
-
-        List<int> buffer;
-        try {
-          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
-          assert(buffer != null);
-        } catch (error) {
-          printError('Error communicating with Flutter on the device: $error');
-          continue;
-        }
-
-        outputFile.parent.createSync(recursive: true);
-        outputFile.writeAsBytesSync(buffer);
-      }
-    }
-  }
-
   Future<void> _debugTogglePlatform() async {
     await refreshViews();
     final String from = await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
@@ -743,29 +711,29 @@ abstract class ResidentRunner {
 
   void registerSignalHandlers() {
     assert(stayResident);
-    ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
-  Future<void> _cleanUpAndExit(ProcessSignal signal) async {
+  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
     _resetTerminal();
     await cleanupAfterSignal();
-    exit(0);
+    io.exit(0);
   }
 
   bool _processingUserRequest = false;
-  Future<void> _handleSignal(ProcessSignal signal) async {
+  Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
 
-    final bool fullRestart = signal == ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
 
     try {
       await restart(fullRestart: fullRestart);
@@ -903,7 +871,7 @@ abstract class ResidentRunner {
       }
     } else if (lower == 'q') {
       // exit
-      await stop();
+      await exit();
       return true;
     } else if (lower == 'd') {
       await detach();
@@ -937,7 +905,7 @@ abstract class ResidentRunner {
   }
 
   void _serviceDisconnected() {
-    if (_stopped) {
+    if (_exited) {
       // User requested the application exit.
       return;
     }
@@ -980,12 +948,12 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  Future<void> preStop() async { }
+  Future<void> preExit() async { }
 
-  Future<void> stopApp() async {
+  Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      futures.add(device.stopApps());
+      futures.add(device.exitApps());
     await Future.wait(futures);
     appFinished();
   }

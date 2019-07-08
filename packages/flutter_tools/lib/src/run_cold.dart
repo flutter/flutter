@@ -23,14 +23,12 @@ class ColdRunner extends ResidentRunner {
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
-             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -160,10 +158,8 @@ class ColdRunner extends ResidentRunner {
     await stopEchoingDeviceLog();
     if (_didAttach) {
       appFinished();
-    } else {
-      await stopApp();
     }
-    await stopApp();
+    await exitApp();
   }
 
   @override
@@ -195,9 +191,6 @@ class ColdRunner extends ResidentRunner {
       ? 'To detach, press "d"; to quit, press "q".'
       : 'To quit, press "q".';
     if (haveDetails && !details) {
-      if (saveCompilationTrace) {
-        printStatus('Compilation training data will be saved when flutter run quits...');
-      }
       printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". $quitMessage');
@@ -207,7 +200,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> preStop() async {
+  Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

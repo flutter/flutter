@@ -127,15 +127,16 @@ class SnippetGenerator {
       'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
-    }..addAll(type == SnippetType.application
-        ? <String, String>{
-            'serial': metadata['serial'].toString() ?? '0',
-            'id':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
-            'app':
-                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
-          }
-        : <String, String>{'serial': '', 'id': '', 'app': ''});
+      'serial': '',
+      'id': '',
+      'app': '',
+    };
+    if (type == SnippetType.application) {
+      substitutions
+        ..['serial'] = metadata['serial'].toString() ?? '0'
+        ..['id'] = injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent
+        ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
+    }
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
@@ -175,7 +176,8 @@ class SnippetGenerator {
     }
     return <_ComponentTuple>[
       _ComponentTuple('description', description),
-    ]..addAll(components);
+      ...components,
+    ];
   }
 
   String _loadFileAsUtf8(File file) {

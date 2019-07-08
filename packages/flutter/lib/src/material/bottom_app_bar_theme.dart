@@ -101,7 +101,7 @@ class BottomAppBarTheme extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
   }
