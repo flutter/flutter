@@ -24,6 +24,8 @@ source_set("ui") {
     "painting/canvas.h",
     "painting/codec.cc",
     "painting/codec.h",
+    "painting/color_filter.cc",
+    "painting/color_filter.h",
     "painting/engine_layer.cc",
     "painting/engine_layer.h",
     "painting/frame_info.cc",
