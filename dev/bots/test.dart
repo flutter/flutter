@@ -469,7 +469,7 @@ Future<void> _runWebTests() async {
     // resolved.
     // 'test/widgets/',
     // 'test/material/',
-  ]);
+  ]).timeout(const Duration(minutes: 30)); // prevent tests that get stuck from causing the shard to fail.
 }
 
 Future<void> _runCoverage() async {
@@ -759,24 +759,25 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
     '-v',
     '--platform=chrome',
     ...?flutterTestArgs,
-    ...tests,
   ];
 
   // TODO(jonahwilliams): fix relative path issues to make this unecessary.
   final Directory oldCurrent = Directory.current;
   Directory.current = Directory(path.join(flutterRoot, 'packages', 'flutter'));
   try {
-    await runCommand(
-      flutter,
-      args,
-      workingDirectory: workingDirectory,
-      expectFlaky: true,
-      timeout: timeout,
-      environment: <String, String>{
-        'FLUTTER_WEB': 'true',
-        'FLUTTER_LOW_RESOURCE_MODE': 'true',
-      },
-    );
+    for (String testGroup in tests) {
+      await runCommand(
+        flutter,
+        <String>[...args, testGroup],
+        workingDirectory: workingDirectory,
+        expectFlaky: true,
+        timeout: timeout,
+        environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+          'FLUTTER_LOW_RESOURCE_MODE': 'true',
+        },
+      );
+    }
   } finally {
     Directory.current = oldCurrent;
   }
