@@ -1471,6 +1471,16 @@ class FlutterView extends ServiceObject {
         });
   }
 
+  Future<void> setSemanticsEnabled(bool enabled) async {
+    assert(enabled != null);
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
+        params: <String, dynamic>{
+          'isolateId': _uiIsolate.id,
+          'viewId': id,
+          'enabled': enabled,
+        });
+  }
+
   bool get hasIsolate => _uiIsolate != null;
 
   Future<void> flushUIThreadTasks() async {
