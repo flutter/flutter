@@ -109,7 +109,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
           assert(_pendingLoadRequests == null);
           _pendingLoadRequests = <_PendingLoadRequest>[];
           _pendingLoader = _setupIsolate()..then((Isolate isolate) {
-              final RawReceivePort handleError = RawReceivePort((List<String> errorAndStackTrace) {
+              final RawReceivePort handleError = RawReceivePort((List<dynamic> errorAndStackTrace) {
                 _cleanupDueToError(errorAndStackTrace[0]);
               });
               isolate.addErrorListener(handleError.sendPort);
