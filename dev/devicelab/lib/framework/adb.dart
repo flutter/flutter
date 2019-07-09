@@ -411,7 +411,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'libplist',
       'openssl',
       'ideviceinstaller',
-      'libtasn1',
       'ios-deploy',
     ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
     return <String, String>{'DYLD_LIBRARY_PATH': libPath};

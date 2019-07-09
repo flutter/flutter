@@ -927,7 +927,6 @@ class IosUsbArtifacts extends CachedArtifact {
     'libplist',
     'openssl',
     'ideviceinstaller',
-    'libtasn1',
     'ios-deploy',
   ];
 
