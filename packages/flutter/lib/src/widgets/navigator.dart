@@ -1724,8 +1724,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<T> pushNamedAndRemoveUntil<T extends Object>(
       String newRouteName,
       RoutePredicate predicate, {
-        Object arguments,
-      }) {
+      Object arguments,
+    }) {
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments), predicate);
   }
 
