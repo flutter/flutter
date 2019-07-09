@@ -526,7 +526,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// The following example transitions an AnimatedContainer between two states.
 /// It adjusts the [height], [width], [color], and [alignment] properties using
