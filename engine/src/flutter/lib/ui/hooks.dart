@@ -205,7 +205,7 @@ void _runMainZoned(Function startMainIsolateFunction,
                    Function userMainFunction,
                    List<String> args) {
   startMainIsolateFunction((){
-    runZoned<Future<void>>(() {
+    runZoned<void>(() {
       if (userMainFunction is _BinaryFunction) {
         // This seems to be undocumented but supported by the command line VM.
         // Let's do the same in case old entry-points are ported to Flutter.

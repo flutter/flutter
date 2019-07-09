@@ -167,7 +167,7 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
   }
 
   auto* isolate_data = static_cast<std::shared_ptr<DartIsolate>*>(
-      Dart_IsolateData(dart_isolate));
+      Dart_IsolateGroupData(dart_isolate));
   if (isolate_data->get() != this) {
     return false;
   }
@@ -178,7 +178,7 @@ bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
   // We are entering a new scope (for the first time since initialization) and
   // we want to restore the current scope to null when we exit out of this
   // method. This balances the implicit Dart_EnterIsolate call made by
-  // Dart_CreateIsolate (which calls the Initialize).
+  // Dart_CreateIsolateGroup (which calls the Initialize).
   Dart_ExitIsolate();
 
   tonic::DartIsolateScope scope(isolate());
@@ -641,8 +641,8 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
   return service_isolate->isolate();
 }
 
-// |Dart_IsolateCreateCallback|
-Dart_Isolate DartIsolate::DartIsolateCreateCallback(
+// |Dart_IsolateGroupCreateCallback|
+Dart_Isolate DartIsolate::DartIsolateGroupCreateCallback(
     const char* advisory_script_uri,
     const char* advisory_script_entrypoint,
     const char* package_root,
@@ -726,14 +726,16 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
   }
 
   // Create the Dart VM isolate and give it the embedder object as the baton.
-  Dart_Isolate isolate = Dart_CreateIsolate(
+  Dart_Isolate isolate = Dart_CreateIsolateGroup(
       advisory_script_uri,         //
       advisory_script_entrypoint,  //
       (*embedder_isolate)->GetIsolateSnapshot()->GetDataMapping(),
       (*embedder_isolate)->GetIsolateSnapshot()->GetInstructionsMapping(),
       (*embedder_isolate)->GetSharedSnapshot()->GetDataMapping(),
       (*embedder_isolate)->GetSharedSnapshot()->GetInstructionsMapping(), flags,
-      embedder_isolate.get(), error);
+      embedder_isolate.get(),  // isolate_group_data
+      embedder_isolate.get(),  // isolate_group
+      error);
 
   if (isolate == nullptr) {
     FML_DLOG(ERROR) << *error;
@@ -781,8 +783,8 @@ void DartIsolate::DartIsolateShutdownCallback(
   isolate_group_data->get()->OnShutdownCallback();
 }
 
-// |Dart_IsolateCleanupCallback|
-void DartIsolate::DartIsolateCleanupCallback(
+// |Dart_IsolateGroupCleanupCallback|
+void DartIsolate::DartIsolateGroupCleanupCallback(
     std::shared_ptr<DartIsolate>* isolate_data) {
   delete isolate_data;
 }
