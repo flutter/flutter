@@ -132,7 +132,7 @@ class Stepper extends StatefulWidget {
   /// new one.
   ///
   /// The [steps], [type], and [currentStep] arguments must not be null.
-  Stepper({
+  const Stepper({
     Key key,
     @required this.steps,
     this.physics,
@@ -690,7 +690,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         throw FlutterError(
           'Steppers must not be nested. The material specification advises '
           'that one should avoid embedding steppers within steppers. '
-          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
+          'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
         );
       return true;
     }());

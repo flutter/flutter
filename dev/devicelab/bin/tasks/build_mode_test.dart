@@ -17,7 +17,7 @@ Future<String> runFlutterAndQuit(List<String> args, Device device) async {
   print('run: starting...');
   final Process run = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['run', '--suppress-analytics']..addAll(args),
+    <String>['run', '--suppress-analytics', ...args],
     isBot: false, // we just want to test the output, not have any debugging info
   );
   final List<String> stdout = <String>[];
@@ -61,8 +61,13 @@ void main() {
     Future<void> checkMode(String mode, {bool releaseExpected = false, bool dynamic = false}) async {
       await inDirectory(appDir, () async {
         print('run: starting $mode test...');
-        final List<String> args = <String>['--$mode']..addAll(dynamic ? <String>['--dynamic'] : const <String>[]);
-        args.addAll(<String>['-d', device.deviceId, 'lib/build_mode.dart']);
+        final List<String> args = <String>[
+          '--$mode',
+          if (dynamic) '--dynamic',
+          '-d',
+          device.deviceId,
+          'lib/build_mode.dart',
+        ];
         final String stdout = await runFlutterAndQuit(args, device);
         if (!stdout.contains('>>> Release: $releaseExpected <<<')) {
           throw "flutter run --$mode ${dynamic ? '--dynamic ' : ''}didn't set kReleaseMode properly";

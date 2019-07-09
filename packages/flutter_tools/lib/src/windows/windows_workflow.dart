@@ -8,7 +8,7 @@ import '../desktop.dart';
 import '../doctor.dart';
 
 /// The [WindowsWorkflow] instance.
-WindowsWorkflow get windowsWorkflow => context[WindowsWorkflow];
+WindowsWorkflow get windowsWorkflow => context.get<WindowsWorkflow>();
 
 /// The windows-specific implementation of a [Workflow].
 ///
@@ -21,10 +21,10 @@ class WindowsWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isWindows;
 
   @override
-  bool get canLaunchDevices => flutterDesktopEnabled;
+  bool get canLaunchDevices => platform.isWindows && flutterDesktopEnabled;
 
   @override
-  bool get canListDevices => flutterDesktopEnabled;
+  bool get canListDevices => platform.isWindows && flutterDesktopEnabled;
 
   @override
   bool get canListEmulators => false;

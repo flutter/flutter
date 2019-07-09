@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 
 import '../rendering/src/solid_color_box.dart';
 
-// Solid colour, RenderObject version
+// Solid color, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
@@ -15,7 +15,7 @@ void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex
   childParentData.flex = flex;
 }
 
-// Solid colour, Widget version
+// Solid color, Widget version
 class Rectangle extends StatelessWidget {
   const Rectangle(this.color, { Key key }) : super(key: key);
 
@@ -53,7 +53,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     RaisedButton(
                       child: Row(
                         children: <Widget>[
-                          Image.network('https://flutter.io/images/favicon.png'),
+                          Image.network('https://flutter.dev/images/favicon.png'),
                           const Text('PRESS ME'),
                         ],
                       ),

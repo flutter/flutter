@@ -142,18 +142,18 @@ class Theme extends StatelessWidget {
   Widget build(BuildContext context) {
     return _InheritedTheme(
       theme: this,
-      child: IconTheme(
-        data: data.iconTheme,
-        child: CupertinoTheme(
-          // We're using a MaterialBasedCupertinoThemeData here instead of a
-          // CupertinoThemeData because it defers some properties to the Material
-          // ThemeData.
-          data: MaterialBasedCupertinoThemeData(
-            materialTheme: data,
-          ),
+      child: CupertinoTheme(
+        // We're using a MaterialBasedCupertinoThemeData here instead of a
+        // CupertinoThemeData because it defers some properties to the Material
+        // ThemeData.
+        data: MaterialBasedCupertinoThemeData(
+          materialTheme: data,
+        ),
+        child: IconTheme(
+          data: data.iconTheme,
           child: child,
         ),
-      ),
+      )
     );
   }
 

@@ -366,6 +366,7 @@ abstract class FlutterTestDriver {
       _debugPrint('$task...');
       return callback()..timeout(timeout, onTimeout: () {
         _debugPrint('$task is taking longer than usual...');
+        return null;
       });
     }
 
@@ -385,15 +386,16 @@ abstract class FlutterTestDriver {
     final Future<T> future = callback();
 
     future.timeout(timeout ?? defaultTimeout, onTimeout: () {
-      print(messages.toString());
+      _debugPrint(messages.toString());
       timeoutExpired = true;
-      print('$task is taking longer than usual...');
+      _debugPrint('$task is taking longer than usual...');
+      return null;
     });
 
     return future.catchError((dynamic error) {
       if (!timeoutExpired) {
         timeoutExpired = true;
-        print(messages.toString());
+        _debugPrint(messages.toString());
       }
       throw error;
     }).whenComplete(() => subscription.cancel());
@@ -417,6 +419,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
+        '--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',
@@ -511,6 +514,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   }
 
   Future<int> detach() async {
+    if (_process == null) {
+      return 0;
+    }
     if (_vmService != null) {
       _debugPrint('Closing VM service...');
       _vmService.dispose();
@@ -604,6 +610,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
         'test',
+        '--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',

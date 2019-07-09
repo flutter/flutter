@@ -270,16 +270,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   static _CupertinoBackGestureController<T> _startPopGesture<T>(PageRoute<T> route) {
     assert(_isPopGestureEnabled(route));
 
-    _CupertinoBackGestureController<T> backController;
-    backController = _CupertinoBackGestureController<T>(
-      route: route,
+    return _CupertinoBackGestureController<T>(
+      navigator: route.navigator,
       controller: route.controller, // protected access
-      onEnded: () {
-        backController?.dispose();
-        backController = null;
-      },
     );
-    return backController;
   }
 
   /// Returns a [CupertinoFullscreenDialogTransition] if [route] is a full
@@ -592,18 +586,15 @@ class _CupertinoBackGestureController<T> {
   ///
   /// The [navigator] and [controller] arguments must not be null.
   _CupertinoBackGestureController({
-    @required this.route,
+    @required this.navigator,
     @required this.controller,
-    @required this.onEnded,
-  }) : assert(route != null), assert(controller != null), assert(onEnded != null) {
-    route.navigator.didStartUserGesture();
+  }) : assert(navigator != null),
+       assert(controller != null) {
+    navigator.didStartUserGesture();
   }
 
-  final PageRoute<T> route;
   final AnimationController controller;
-  final VoidCallback onEnded;
-
-  bool _animating = false;
+  final NavigatorState navigator;
 
   /// The drag gesture has changed by [fractionalDelta]. The total range of the
   /// drag should be 0.0 to 1.0.
@@ -627,9 +618,10 @@ class _CupertinoBackGestureController<T> {
     // or after mid screen, we should animate the page out. Otherwise, the page
     // should be animated back in.
     if (velocity.abs() >= _kMinFlingVelocity)
-      animateForward = velocity > 0 ? false : true;
+      animateForward = velocity <= 0;
     else
-      animateForward = controller.value > 0.5 ? true : false;
+      animateForward = controller.value > 0.5;
+
     if (animateForward) {
       // The closer the panel is to dismissing, the shorter the animation is.
       // We want to cap the animation time, but we want to use a linear curve
@@ -640,36 +632,30 @@ class _CupertinoBackGestureController<T> {
       );
       controller.animateTo(1.0, duration: Duration(milliseconds: droppedPageForwardAnimationTime), curve: animationCurve);
     } else {
-      final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
-      controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      // This route is destined to pop at this point. Reuse navigator's pop.
+      navigator.pop();
+
+      // The popping may have finished inline if already at the target destination.
+      if (controller.isAnimating) {
+        // Otherwise, use a custom popping animation duration and curve.
+        final int droppedPageBackAnimationTime = lerpDouble(0, _kMaxDroppedSwipePageForwardAnimationTime, controller.value).floor();
+        controller.animateBack(0.0, duration: Duration(milliseconds: droppedPageBackAnimationTime), curve: animationCurve);
+      }
     }
 
     if (controller.isAnimating) {
-      // Don't end the gesture until the transition completes.
-      _animating = true;
-      controller.addStatusListener(_handleStatusChanged);
+      // Keep the userGestureInProgress in true state so we don't change the
+      // curve of the page transition mid-flight since CupertinoPageTransition
+      // depends on userGestureInProgress.
+      AnimationStatusListener animationStatusCallback;
+      animationStatusCallback = (AnimationStatus status) {
+        navigator.didStopUserGesture();
+        controller.removeStatusListener(animationStatusCallback);
+      };
+      controller.addStatusListener(animationStatusCallback);
     } else {
-      // Animate calls could return inline if already at the target destination
-      // value.
-      return _handleStatusChanged(controller.status);
+      navigator.didStopUserGesture();
     }
-
-  }
-
-  void _handleStatusChanged(AnimationStatus status) {
-    if (_animating) {
-      controller.removeStatusListener(_handleStatusChanged);
-    }
-    _animating = false;
-    onEnded();
-    if (status == AnimationStatus.dismissed)
-      route.navigator.removeRoute(route); // This also disposes the route.
-  }
-
-  void dispose() {
-    if (_animating)
-      controller.removeStatusListener(_handleStatusChanged);
-    route.navigator?.didStopUserGesture();
   }
 }
 
@@ -898,7 +884,7 @@ Future<T> showCupertinoModalPopup<T>({
 }
 
 // The curve and initial scale values were mostly eyeballed from iOS, however
-// they reuse the same animation curve that was modelled after native page
+// they reuse the same animation curve that was modeled after native page
 // transitions.
 final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));

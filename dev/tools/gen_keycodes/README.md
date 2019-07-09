@@ -27,6 +27,9 @@ used to generate the source files.
    generated data will be inserted.
  - `data/printable.json`: contains a mapping between Flutter key name and its
    printable character. This character is used as the key label.
+ - `data/synonyms.json`: contains a mapping between pseudo-keys that represent
+   other keys, and the sets of keys they represent. For example, this contains
+   the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
  
  ## Running the tool
  
@@ -56,18 +59,21 @@ checked in.
 
 ## Key Code ID Scheme
 
-In order to provide keys with unique ID codes, Flutter uses a scheme to assign
-codes which keeps us out of the business of minting new codes ourselves.
+In order to provide logical keys with unique ID codes, Flutter uses a scheme
+to assign logical key codes which keeps us out of the business of minting new
+codes ourselves. This only applies to logical key codes: Flutter's
+physical key codes are just defined as USB HID codes.
 
-The codes are meant to be opaque to the user, and should never be unpacked for
-meaning, since the code scheme could change at any time, and the meaning is
-likely to be retrievable in a more reliable and correct manner from the API.
+The logical codes are meant to be opaque to the user, and should never be
+unpacked for meaning, since the code scheme could change at any time, and the
+meaning is likely to be retrievable in a more reliable and correct manner from
+the API.
 
 However, if you are porting Flutter to a new platform, you should follow the
-following guidelines for specifying key codes.
+following guidelines for specifying logical key codes.
 
-The key code is a 37-bit integer in a namespace that we control and define. It
-has values in the following ranges.
+The logical key code is a 37-bit integer in a namespace that we control and
+define. It has values in the following ranges.
 
   - **0x00 0000 0000 - 0x0 0010 FFFF**: For keys that generate Unicode
     characters when pressed (this includes dead keys, but not e.g. function keys
@@ -81,9 +87,10 @@ has values in the following ranges.
     key in the US layout outputs a q in normal usage, but its code would be 0x0
     0000 0051 (U+00051 being the code for the uppercase Q).
 
-  - **0x01 0000 0000 - 0x01 FFFF FFFF**: For keys that are defined by the USB HID
-    standard, the key code consists of the 32 bit USB extended usage code. For
-    example, the Enter key would have code 0x0 0007 0028. Only keys that fall
+  - **0x01 0000 0000 - 0x01 FFFF FFFF**: For keys that are defined by the [USB HID
+    standard](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf),
+    the key code consists of the 32 bit USB extended usage code. For
+    example, the Enter key would have code 0x01 0007 0028. Only keys that fall
     into collections "Keyboard", "Keypad", and "Tablet PC System Controls" are
     considered for this API; for example, a mixing desk with multiple
     collections of volume controls would not be exposed via DOWN and UP events,
@@ -130,6 +137,13 @@ has values in the following ranges.
     that their version of Flutter doesn’t support yet. The prefix for this code
     is the platform prefix from the previous sections, plus 0x100.
 
+  - **0x200 0000 0000 - 0x2FF FFFF FFFF**: For pseudo-keys which represent
+    combinations of other keys, and conceptual keys which don't have a physical
+    representation. This is where things like key synonyms are defined (e.g. 
+    "shiftLeft" is a synonym for "shift": the "shift" key is a pseudo-key
+    representing either the left or right shift key).
+
+
 **This is intended to get us out of the business of defining key codes where
 possible.** We still have to have mapping tables, but at least the actual minting
 of codes is deferred to other organizations to a large extent. Coming up with a
@@ -142,23 +156,21 @@ Here are some examples:
 For example, on a French keyboard layout, pressing CAPS LOCK then pressing
 SHIFT + Y would generate the following sequence:
 
-DOWN, code 0x00070039. (CAPS LOCK DOWN)<br>
-UP, code 0x00070039. (CAPS LOCK UP)<br>
-DOWN, code 0x000700E1 (SHIFT DOWN)<br>
-DOWN, code 0x0007001D, string U+00059 (Y DOWN, the code is for the "Z" key, but
-string is the character, "Y")<br>
-UP, code 0x0007001D (Y UP)<br>
-UP, code 0x000700E1 (SHIFT UP)<br>
+DOWN, code 0x0100070039. (CAPS LOCK DOWN)<br>
+UP, code 0x0100070039. (CAPS LOCK UP)<br>
+DOWN, code 0x01000700E1 (LEFT SHIFT DOWN)<br>
+DOWN, code 0x0000000059, string U+00059 (Y DOWN)<br>
+UP, code 0x0000000059 (Y UP)<br>
+UP, code 0x01000700E1 (LEFT SHIFT UP)<br>
 
 Here's another example. On a German keyboard layout, you press ^e (the ^ key is
 at the top left of the keyboard and is a dead key) to produce a “ê”:
 
-DOWN, code 0x00070035 (GRAVE DOWN) Assuming that the keymap maps it to the same
-logical key, it produces no string, because it's a dead key. The HID key is for
-"Keyboard grave accent and tilde" in AT-101 keyboard typical position 1.<br>
-UP, code 0x00070035 (GRAVE UP)<br>
-DOWN, code 0x00070008, string U+000EA (Unicode for ê‬) (E DOWN).<br>
-UP, code 0x00070008. (E UP).<br>
+DOWN, code 0x0000000302 (CIRCUMFLEX DOWN) It produces no string, because it's a dead
+key. The key code is for "Combining circumflex accent U+0302" in Unicode.<br>
+UP, code 0x0000000302 (CIRCUMFLEX UP)<br>
+DOWN, code 0x0000000065, string U+000EA (Unicode for ê‬) (E DOWN).<br>
+UP, code 0x0000000065. (E UP).<br>
 
 It is an important point that even though we’re representing many keys with USB
 HID codes, these are not necessarily the same HID codes produced by the hardware

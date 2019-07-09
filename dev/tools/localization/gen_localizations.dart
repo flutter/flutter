@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program generates a getMaterialTranslation() function that looks up the
-// translations provided by the arb files. The returned value is a generated
-// instance of GlobalMaterialLocalizations that corresponds to a single
-// locale.
+// This program generates a getMaterialTranslation() and a
+// getCupertinoTranslation() function that look up the translations provided by
+// the arb files. The returned value is a generated instance of a
+// GlobalMaterialLocalizations or a GlobalCupertinoLocalizations that
+// corresponds to a single locale.
 //
 // The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
@@ -13,10 +14,10 @@
 // Each map value is itself a map with resource identifier keys and localized
 // resource string values.
 //
-// The arb filenames are expected to have the form "material_(\w+)\.arb", where
-// the group following "_" identifies the language code and the country code,
-// e.g. "material_en.arb" or "material_en_GB.arb". In most cases both codes are
-// just two characters.
+// The arb filenames are expected to have the form "material_(\w+)\.arb" or
+// "cupertino_(\w+)\.arb" where the group following "_" identifies the language
+// code and the country code, e.g. "material_en.arb" or "material_en_GB.arb".
+// In most cases both codes are just two characters.
 //
 // This app is typically run by hand when a module's .arb files have been
 // updated.
@@ -32,92 +33,53 @@
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
-// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart file:
+// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart
+// and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
 //
 // ```
 // dart dev/tools/localization/gen_localizations.dart --overwrite
 // ```
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
+import 'gen_cupertino_localizations.dart';
+import 'gen_material_localizations.dart';
 import 'localizations_utils.dart';
 import 'localizations_validator.dart';
 
-const String outputHeader = '''
-// Copyright 2017 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-// This file has been automatically generated. Please do not edit it manually.
-// To regenerate the file, use:
-// @(regenerate)
-
-import 'dart:collection';
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart' as intl;
-
-import '../material_localizations.dart';
-''';
-
-/// Maps locales to resource key/value pairs.
-final Map<LocaleInfo, Map<String, String>> localeToResources = <LocaleInfo, Map<String, String>>{};
-
-/// Maps locales to resource key/attributes pairs.
-///
-/// See also: <https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes>
-final Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
-
-/// Set that holds the locales that were assumed from the existing locales.
-///
-/// For example, when the data lacks data for zh_Hant, we will use the data of
-/// the first Hant Chinese locale as a default by repeating the data. If an
-/// explicit match is later found, we can reference this set to see if we should
-/// overwrite the existing assumed data.
-final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
-
-/// Return `s` as a Dart-parseable raw string in single or double quotes.
-///
-/// Double quotes are expanded:
-///
-/// ```
-/// foo => r'foo'
-/// foo "bar" => r'foo "bar"'
-/// foo 'bar' => r'foo ' "'" r'bar' "'"
-/// ```
-String generateString(String s) {
-  if (!s.contains("'"))
-    return "r'$s'";
-
-  final StringBuffer output = StringBuffer();
-  bool started = false; // Have we started writing a raw string.
-  for (int i = 0; i < s.length; i++) {
-    if (s[i] == "'") {
-      if (started)
-        output.write("'");
-      output.write(' "\'" ');
-      started = false;
-    } else if (!started) {
-      output.write("r'${s[i]}");
-      started = true;
-    } else {
-      output.write(s[i]);
-    }
-  }
-  if (started)
-    output.write("'");
-  return output.toString();
-}
-
 /// This is the core of this script; it generates the code used for translations.
-String generateTranslationBundles() {
+String generateArbBasedLocalizationSubclasses({
+  @required Map<LocaleInfo, Map<String, String>> localeToResources,
+  @required Map<LocaleInfo, Map<String, dynamic>> localeToResourceAttributes,
+  @required String generatedClassPrefix,
+  @required String baseClass,
+  @required HeaderGenerator generateHeader,
+  @required ConstructorGenerator generateConstructor,
+  @required String factoryName,
+  @required String factoryDeclaration,
+  @required String factoryArguments,
+  @required String supportedLanguagesConstant,
+  @required String supportedLanguagesDocMacro,
+}) {
+  assert(localeToResources != null);
+  assert(localeToResourceAttributes != null);
+  assert(generatedClassPrefix.isNotEmpty);
+  assert(baseClass.isNotEmpty);
+  assert(generateHeader != null);
+  assert(generateConstructor != null);
+  assert(factoryName.isNotEmpty);
+  assert(factoryDeclaration.isNotEmpty);
+  assert(factoryArguments.isNotEmpty);
+  assert(supportedLanguagesConstant.isNotEmpty);
+  assert(supportedLanguagesDocMacro.isNotEmpty);
+
   final StringBuffer output = StringBuffer();
+  output.writeln(generateHeader('dart dev/tools/localization/gen_localizations.dart --overwrite'));
+
   final StringBuffer supportedLocales = StringBuffer();
 
   final Map<String, List<LocaleInfo>> languageToLocales = <String, List<LocaleInfo>>{};
@@ -140,17 +102,9 @@ String generateTranslationBundles() {
     allResourceIdentifiers.addAll(localeToResources[locale].keys);
   }
 
-  output.writeln('''
-// The classes defined here encode all of the translations found in the
-// `flutter_localizations/lib/src/l10n/*.arb` files.
-//
-// These classes are constructed by the [getMaterialTranslation] method at the
-// bottom of this file, and used by the [_MaterialLocalizationsDelegate.load]
-// method defined in `flutter_localizations/lib/src/material_localizations.dart`.''');
-
   // We generate one class per supported language (e.g.
-  // `MaterialLocalizationEn`). These implement everything that is needed by
-  // GlobalMaterialLocalizations.
+  // `MaterialLocalizationEn`). These implement everything that is needed by the
+  // superclass (e.g. GlobalMaterialLocalizations).
 
   // We also generate one subclass for each locale with a script code (e.g.
   // `MaterialLocalizationZhHant`). Their superclasses are the aforementioned
@@ -177,7 +131,9 @@ String generateTranslationBundles() {
   final LocaleInfo canonicalLocale = LocaleInfo.fromString('en');
   for (String languageName in languageCodes) {
     final LocaleInfo languageLocale = LocaleInfo.fromString(languageName);
-    writeClassHeader(output, languageLocale, 'GlobalMaterialLocalizations');
+    output.writeln(generateClassDeclaration(languageLocale, generatedClassPrefix, baseClass));
+    output.writeln(generateConstructor(languageLocale));
+
     final Map<String, String> languageResources = localeToResources[languageLocale];
     for (String key in allKeys) {
       final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
@@ -192,7 +148,12 @@ String generateTranslationBundles() {
       // script default values before language default values.
       for (String scriptCode in languageToScriptCodes[languageName]) {
         final LocaleInfo scriptBaseLocale = LocaleInfo.fromString(languageName + '_' + scriptCode);
-        writeClassHeader(output, scriptBaseLocale, 'MaterialLocalization${camelCase(languageLocale)}');
+        output.writeln(generateClassDeclaration(
+          scriptBaseLocale,
+          generatedClassPrefix,
+          '$generatedClassPrefix${camelCase(languageLocale)}',
+        ));
+        output.writeln(generateConstructor(scriptBaseLocale));
         final Map<String, String> scriptResources = localeToResources[scriptBaseLocale];
         for (String key in scriptResources.keys) {
           if (languageResources[key] == scriptResources[key])
@@ -211,7 +172,12 @@ String generateTranslationBundles() {
           if (locale.scriptCode != scriptCode)
             continue;
           countryCodeCount += 1;
-          writeClassHeader(output, locale, 'MaterialLocalization${camelCase(scriptBaseLocale)}');
+          output.writeln(generateClassDeclaration(
+            locale,
+            generatedClassPrefix,
+            '$generatedClassPrefix${camelCase(scriptBaseLocale)}',
+          ));
+          output.writeln(generateConstructor(locale));
           final Map<String, String> localeResources = localeToResources[locale];
           for (String key in localeResources.keys) {
             // When script fallback contains the key, we compare to it instead of language fallback.
@@ -232,7 +198,12 @@ String generateTranslationBundles() {
           continue;
         countryCodeCount += 1;
         final Map<String, String> localeResources = localeToResources[locale];
-        writeClassHeader(output, locale, 'MaterialLocalization${camelCase(languageLocale)}');
+        output.writeln(generateClassDeclaration(
+          locale,
+          generatedClassPrefix,
+          '$generatedClassPrefix${camelCase(languageLocale)}',
+        ));
+        output.writeln(generateConstructor(locale));
         for (String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
@@ -256,13 +227,13 @@ String generateTranslationBundles() {
     }
   }
 
-  // Generate the getMaterialTranslation function. Given a Locale it returns the
-  // corresponding const GlobalMaterialLocalizations.
+  // Generate the factory function. Given a Locale it returns the corresponding
+  // base class implementation.
   output.writeln('''
 
 /// The set of supported languages, as language code strings.
 ///
-/// The [GlobalMaterialLocalizations.delegate] can generate localizations for
+/// The [$baseClass.delegate] can generate localizations for
 /// any [Locale] with a language code from this set, regardless of the region.
 /// Some regions have specific support (e.g. `de` covers all forms of German,
 /// but there is support for `de-CH` specifically to override some of the
@@ -270,42 +241,33 @@ String generateTranslationBundles() {
 ///
 /// See also:
 ///
-///  * [getMaterialTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
-${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").join('\n')}
+///  * [$factoryName], whose documentation describes these values.
+final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
+${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
-/// Creates a [GlobalMaterialLocalizations] instance for the given `locale`.
+/// Creates a [$baseClass] instance for the given `locale`.
 ///
-/// All of the function's arguments except `locale` will be passed to the [new
-/// GlobalMaterialLocalizations] constructor. (The `localeName` argument of that
+/// All of the function's arguments except `locale` will be passed to the [
+/// $baseClass] constructor. (The `localeName` argument of that
 /// constructor is specified by the actual subclass constructor by this
 /// function.)
 ///
 /// The following locales are supported by this package:
 ///
-/// {@template flutter.localizations.languages}
+/// {@template $supportedLanguagesDocMacro}
 $supportedLocales/// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
-/// [GlobalMaterialLocalizations.delegate].
-GlobalMaterialLocalizations getMaterialTranslation(
-  Locale locale,
-  intl.DateFormat fullYearFormat,
-  intl.DateFormat mediumDateFormat,
-  intl.DateFormat longDateFormat,
-  intl.DateFormat yearMonthFormat,
-  intl.NumberFormat decimalFormat,
-  intl.NumberFormat twoDigitZeroPaddedFormat,
-) {
+/// [$baseClass.delegate].
+$factoryDeclaration
   switch (locale.languageCode) {''');
-  const String arguments = 'fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
   for (String language in languageToLocales.keys) {
     // Only one instance of the language.
     if (languageToLocales[language].length == 1) {
       output.writeln('''
     case '$language':
-      return MaterialLocalization${camelCase(languageToLocales[language][0])}($arguments);''');
+      return $generatedClassPrefix${camelCase(languageToLocales[language][0])}($factoryArguments);''');
     } else if (!languageToScriptCodes.containsKey(language)) { // Does not distinguish between scripts. Switch on countryCode directly.
       output.writeln('''
     case '$language': {
@@ -317,11 +279,11 @@ GlobalMaterialLocalizations getMaterialTranslation(
         final String countryCode = locale.countryCode;
         output.writeln('''
         case '$countryCode':
-          return MaterialLocalization${camelCase(locale)}($arguments);''');
+          return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
       }
       output.writeln('''
       }
-      return MaterialLocalization${camelCase(LocaleInfo.fromString(language))}($arguments);
+      return $generatedClassPrefix${camelCase(LocaleInfo.fromString(language))}($factoryArguments);
     }''');
     } else { // Language has scriptCode, add additional switch logic.
       bool hasCountryCode = false;
@@ -347,7 +309,7 @@ GlobalMaterialLocalizations getMaterialTranslation(
             final String countryCode = locale.countryCode;
             output.writeln('''
             case '$countryCode':
-              return MaterialLocalization${camelCase(locale)}($arguments);''');
+              return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
           }
         }
         // Return a fallback locale that matches scriptCode, but not countryCode.
@@ -359,7 +321,7 @@ GlobalMaterialLocalizations getMaterialTranslation(
           }''');
           }
           output.writeln('''
-          return MaterialLocalization${camelCase(scriptLocale)}($arguments);
+          return $generatedClassPrefix${camelCase(scriptLocale)}($factoryArguments);
         }''');
         } else {
           // Not Explicitly defined, fallback to first locale with the same language and
@@ -372,7 +334,7 @@ GlobalMaterialLocalizations getMaterialTranslation(
           }''');
             }
             output.writeln('''
-          return MaterialLocalization${camelCase(scriptLocale)}($arguments);
+          return $generatedClassPrefix${camelCase(scriptLocale)}($factoryArguments);
         }''');
             break;
           }
@@ -392,34 +354,23 @@ GlobalMaterialLocalizations getMaterialTranslation(
           final String countryCode = locale.countryCode;
           output.writeln('''
         case '$countryCode':
-          return MaterialLocalization${camelCase(locale)}($arguments);''');
+          return $generatedClassPrefix${camelCase(locale)}($factoryArguments);''');
         }
         output.writeln('''
       }''');
       }
       output.writeln('''
-      return MaterialLocalization${camelCase(LocaleInfo.fromString(language))}($arguments);
+      return $generatedClassPrefix${camelCase(LocaleInfo.fromString(language))}($factoryArguments);
     }''');
     }
   }
   output.writeln('''
   }
-  assert(false, 'getMaterialTranslation() called for unsupported locale "\$locale"');
+  assert(false, '$factoryName() called for unsupported locale "\$locale"');
   return null;
 }''');
 
   return output.toString();
-}
-
-/// Writes the header of each class which corresponds to a locale.
-void writeClassHeader(StringBuffer output, LocaleInfo locale, String superClass) {
-  final String camelCaseName = camelCase(locale);
-  final String className = 'MaterialLocalization$camelCaseName';
-  final String constructor = generateConstructor(className, locale);
-  output.writeln('');
-  output.writeln('/// The translations for ${describeLocale(locale.originalString)} (`${locale.originalString}`).');
-  output.writeln('class $className extends $superClass {');
-  output.writeln(constructor);
 }
 
 /// Returns the appropriate type for getters with the given attributes.
@@ -455,6 +406,10 @@ String generateKey(String key, Map<String, dynamic> attributes) {
         return '${key}Raw';
     }
   }
+  if (key == 'datePickerDateOrder')
+    return 'datePickerDateOrderString';
+  if (key == 'datePickerDateTimeOrder')
+    return 'datePickerDateTimeOrderString';
   return key;
 }
 
@@ -486,6 +441,7 @@ const Map<String, String> _scriptCategoryToEnum = <String, String>{
 String generateValue(String value, Map<String, dynamic> attributes) {
   if (value == null)
     return null;
+  // cupertino_en.arb doesn't use x-flutter-type.
   if (attributes != null) {
     switch (attributes['x-flutter-type']) {
       case 'icuShortTimePattern':
@@ -523,77 +479,6 @@ String generateGetter(String key, String value, Map<String, dynamic> attributes)
   $type get $key => $value;''';
 }
 
-/// Returns the source of the constructor for a GlobalMaterialLocalizations
-/// subclass.
-String generateConstructor(String className, LocaleInfo locale) {
-  final String localeName = locale.originalString;
-  return '''
-  /// Create an instance of the translation bundle for ${describeLocale(localeName)}.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const $className({
-    String localeName = '$localeName',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );''';
-}
-
-/// Parse the data for a locale from a file, and store it in the [attributes]
-/// and [resources] keys.
-void processBundle(File file, { @required String localeString }) {
-  assert(localeString != null);
-  // Helper method to fill the maps with the correct data from file.
-  void populateResources(LocaleInfo locale) {
-    final Map<String, String> resources = localeToResources[locale];
-    final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-    final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
-    for (String key in bundle.keys) {
-      // The ARB file resource "attributes" for foo are called @foo.
-      if (key.startsWith('@'))
-        attributes[key.substring(1)] = bundle[key];
-      else
-        resources[key] = bundle[key];
-    }
-  }
-  // Only pre-assume scriptCode if there is a country or script code to assume off of.
-  // When we assume scriptCode based on languageCode-only, we want this initial pass
-  // to use the un-assumed version as a base class.
-  LocaleInfo locale = LocaleInfo.fromString(localeString, deriveScriptCode: localeString.split('_').length > 1);
-  // Allow overwrite if the existing data is assumed.
-  if (assumedLocales.contains(locale)) {
-    localeToResources[locale] = <String, String>{};
-    localeToResourceAttributes[locale] = <String, dynamic>{};
-    assumedLocales.remove(locale);
-  } else {
-    localeToResources[locale] ??= <String, String>{};
-    localeToResourceAttributes[locale] ??= <String, dynamic>{};
-  }
-  populateResources(locale);
-  // Add an assumed locale to default to when there is no info on scriptOnly locales.
-  locale = LocaleInfo.fromString(localeString, deriveScriptCode: true);
-  if (locale.scriptCode != null) {
-    final LocaleInfo scriptLocale = LocaleInfo.fromString(locale.languageCode + '_' + locale.scriptCode);
-    if (!localeToResources.containsKey(scriptLocale)) {
-      assumedLocales.add(scriptLocale);
-      localeToResources[scriptLocale] ??= <String, String>{};
-      localeToResourceAttributes[scriptLocale] ??= <String, dynamic>{};
-      populateResources(scriptLocale);
-    }
-  }
-}
-
 Future<void> main(List<String> rawArgs) async {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
@@ -604,36 +489,90 @@ Future<void> main(List<String> rawArgs) async {
 
   final Directory directory = Directory(path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp materialFilenameRE = RegExp(r'material_(\w+)\.arb$');
+  final RegExp cupertinoFilenameRE = RegExp(r'cupertino_(\w+)\.arb$');
 
   try {
     validateEnglishLocalizations(File(path.join(directory.path, 'material_en.arb')));
+    validateEnglishLocalizations(File(path.join(directory.path, 'cupertino_en.arb')));
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
 
   await precacheLanguageAndRegionTags();
 
-  for (FileSystemEntity entity in directory.listSync()) {
-    final String entityPath = entity.path;
-    if (FileSystemEntity.isFileSync(entityPath) && materialFilenameRE.hasMatch(entityPath)) {
-      processBundle(File(entityPath), localeString: materialFilenameRE.firstMatch(entityPath)[1]);
-    }
-  }
+  // Maps of locales to resource key/value pairs for Material ARBs.
+  final Map<LocaleInfo, Map<String, String>> materialLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  // Maps of locales to resource key/attributes pairs for Material ARBs..
+  // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
+  final Map<LocaleInfo, Map<String, dynamic>> materialLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+  // Maps of locales to resource key/value pairs for Cupertino ARBs.
+  final Map<LocaleInfo, Map<String, String>> cupertinoLocaleToResources = <LocaleInfo, Map<String, String>>{};
+  // Maps of locales to resource key/attributes pairs for Cupertino ARBs..
+  // https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
+  final Map<LocaleInfo, Map<String, dynamic>> cupertinoLocaleToResourceAttributes = <LocaleInfo, Map<String, dynamic>>{};
+
+  loadMatchingArbsIntoBundleMaps(
+    directory: directory,
+    filenamePattern: materialFilenameRE,
+    localeToResources: materialLocaleToResources,
+    localeToResourceAttributes: materialLocaleToResourceAttributes,
+  );
+  loadMatchingArbsIntoBundleMaps(
+    directory: directory,
+    filenamePattern: cupertinoFilenameRE,
+    localeToResources: cupertinoLocaleToResources,
+    localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+  );
 
   try {
-    validateLocalizations(localeToResources, localeToResourceAttributes);
+    validateLocalizations(materialLocaleToResources, materialLocaleToResourceAttributes);
+    validateLocalizations(cupertinoLocaleToResources, cupertinoLocaleToResourceAttributes);
   } on ValidationError catch (exception) {
     exitWithError('$exception');
   }
 
-  final StringBuffer buffer = StringBuffer();
-  buffer.writeln(outputHeader.replaceFirst('@(regenerate)', 'dart dev/tools/localization/gen_localizations.dart --overwrite'));
-  buffer.write(generateTranslationBundles());
+  final String materialLocalizations = options.writeToFile || !options.cupertinoOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: materialLocaleToResources,
+        localeToResourceAttributes: materialLocaleToResourceAttributes,
+        generatedClassPrefix: 'MaterialLocalization',
+        baseClass: 'GlobalMaterialLocalizations',
+        generateHeader: generateMaterialHeader,
+        generateConstructor: generateMaterialConstructor,
+        factoryName: materialFactoryName,
+        factoryDeclaration: materialFactoryDeclaration,
+        factoryArguments: materialFactoryArguments,
+        supportedLanguagesConstant: materialSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+      )
+      : null;
+  final String cupertinoLocalizations = options.writeToFile || !options.materialOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: cupertinoLocaleToResources,
+        localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+        generatedClassPrefix: 'CupertinoLocalization',
+        baseClass: 'GlobalCupertinoLocalizations',
+        generateHeader: generateCupertinoHeader,
+        generateConstructor: generateCupertinoConstructor,
+        factoryName: cupertinoFactoryName,
+        factoryDeclaration: cupertinoFactoryDeclaration,
+        factoryArguments: cupertinoFactoryArguments,
+        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+      )
+      : null;
 
   if (options.writeToFile) {
-    final File localizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
-    localizationsFile.writeAsStringSync(buffer.toString(), flush: true);
+    final File materialLocalizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
+    materialLocalizationsFile.writeAsStringSync(materialLocalizations, flush: true);
+    final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
+    cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations, flush: true);
   } else {
-    stdout.write(buffer.toString());
+    if (!options.cupertinoOnly) {
+      stdout.write(materialLocalizations);
+    }
+    if (!options.materialOnly) {
+      stdout.write(cupertinoLocalizations);
+    }
   }
 }

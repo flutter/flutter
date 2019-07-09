@@ -4,11 +4,12 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -86,7 +87,7 @@ void main() {
       expect(content.isModified, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-    });
+    }, skip: Platform.isWindows); // TODO(jonahwilliams): fix or disable this functionality.
   });
 
   group('devfs remote', () {
@@ -249,6 +250,7 @@ class MockVM implements VM {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
     bool timeoutFatal = true,
+    bool truncateLogs = true,
   }) async {
     _service.messages.add('$method $params');
     return <String, dynamic>{'success': true};

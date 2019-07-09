@@ -17,6 +17,7 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
@@ -113,7 +114,12 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(String id, { this.name, String sdkVersion })
       : _sdkVersion = sdkVersion,
-        super(id) {
+        super(
+          id,
+          category: Category.mobile,
+          platformType: PlatformType.ios,
+          ephemeral: true,
+      ) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }
@@ -138,6 +144,9 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool get supportsStartPaused => false;
@@ -279,6 +288,14 @@ class IOSDevice extends Device {
     if (debuggingOptions.startPaused)
       launchArguments.add('--start-paused');
 
+    if (debuggingOptions.disableServiceAuthCodes)
+      launchArguments.add('--disable-service-auth-codes');
+
+    if (debuggingOptions.dartFlags.isNotEmpty) {
+      final String dartFlags = debuggingOptions.dartFlags;
+      launchArguments.add('--dart-flags="$dartFlags"');
+    }
+
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
@@ -397,6 +414,11 @@ class IOSDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     await iMobileDevice.takeScreenshot(outputFile);
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
   }
 }
 

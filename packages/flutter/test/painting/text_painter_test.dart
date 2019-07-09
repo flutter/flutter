@@ -5,6 +5,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,7 +31,7 @@ void main() {
     painter.layout();
     caretOffset = painter.getOffsetForCaret(ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);
-  });
+  }, skip: isBrowser);
 
   test('TextPainter null text test', () {
     final TextPainter painter = TextPainter()
@@ -55,7 +56,7 @@ void main() {
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 0);
-  });
+  }, skip: isBrowser);
 
   test('TextPainter caret emoji test', () {
     final TextPainter painter = TextPainter()
@@ -119,7 +120,7 @@ void main() {
     expect(caretOffset.dx, 112); // 🇸
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
     expect(caretOffset.dx, 112); // 🇸
-  });
+  }, skip: isBrowser);
 
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
@@ -133,13 +134,15 @@ void main() {
     Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 21);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, 441);
+    // The end of the line is 441, but the width is only 420, so the cursor is
+    // stopped there without overflowing.
+    expect(caretOffset.dx, painter.width);
 
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, 49);
-  });
+  }, skip: isBrowser);
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -167,7 +170,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(123.0, 123.0));
-  });
+  }, skip: isBrowser);
 
   test('TextPainter textScaleFactor test', () {
     final TextPainter painter = TextPainter(
@@ -184,7 +187,7 @@ void main() {
     );
     painter.layout();
     expect(painter.size, const Size(20.0, 20.0));
-  });
+  }, skip: isBrowser);
 
   test('TextPainter default text height is 14 pixels', () {
     final TextPainter painter = TextPainter(
@@ -194,7 +197,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 14.0);
     expect(painter.size, const Size(14.0, 14.0));
-  });
+  }, skip: isBrowser);
 
   test('TextPainter sets paragraph size from root', () {
     final TextPainter painter = TextPainter(
@@ -204,7 +207,7 @@ void main() {
     painter.layout();
     expect(painter.preferredLineHeight, 100.0);
     expect(painter.size, const Size(100.0, 100.0));
-  });
+  }, skip: isBrowser);
 
   test('TextPainter intrinsic dimensions', () {
     const TextStyle style = TextStyle(
@@ -631,5 +634,99 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-  });
+  }, skip: isBrowser);
+
+  test('TextPainter widget span', () {
+    final TextPainter painter = TextPainter()
+      ..textDirection = TextDirection.ltr;
+
+    const String text = 'test';
+    painter.text = const TextSpan(
+      text: text,
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        TextSpan(text: text),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        TextSpan(text: text),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+        WidgetSpan(child: SizedBox(width: 50, height: 30)),
+      ]
+    );
+
+    // We provide dimensions for the widgets
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(51, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+      PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
+    ]);
+
+    painter.layout(maxWidth: 500);
+
+    // Now, each of the WidgetSpans will have their own placeholder 'hole'.
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    expect(caretOffset.dx, 14);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
+    expect(caretOffset.dx, 56);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
+    expect(caretOffset.dx, 106);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
+    expect(caretOffset.dx, 120);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
+    expect(caretOffset.dx, 212);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
+    expect(caretOffset.dx, 262);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
+    expect(caretOffset.dx, 276);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 13), ui.Rect.zero);
+    expect(caretOffset.dx, 290);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 14), ui.Rect.zero);
+    expect(caretOffset.dx, 304);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 15), ui.Rect.zero);
+    expect(caretOffset.dx, 318);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 16), ui.Rect.zero);
+    expect(caretOffset.dx, 368);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 17), ui.Rect.zero);
+    expect(caretOffset.dx, 418);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 18), ui.Rect.zero);
+    expect(caretOffset.dx, 0);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 19), ui.Rect.zero);
+    expect(caretOffset.dx, 50);
+    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 23), ui.Rect.zero);
+    expect(caretOffset.dx, 250);
+
+    expect(painter.inlinePlaceholderBoxes.length, 14);
+    expect(painter.inlinePlaceholderBoxes[0], const TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[2], const TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[3], const TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[4], const TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[5], const TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
+    // line should break here
+    expect(painter.inlinePlaceholderBoxes[6], const TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[7], const TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[10], const TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
+  }, skip: isBrowser);
 }

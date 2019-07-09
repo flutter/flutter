@@ -59,7 +59,7 @@ void showGalleryAboutDialog(BuildContext context) {
               ),
               _LinkTextSpan(
                 style: linkStyle,
-                url: 'https://flutter.io',
+                url: 'https://flutter.dev',
               ),
               TextSpan(
                 style: aboutTextStyle,

@@ -17,16 +17,19 @@ import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'fuchsia/application_package.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -41,24 +44,35 @@ class ApplicationPackageFactory {
           await checkGradleDependencies();
         }
         return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
+            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+            ? IOSApp.fromIosProject(FlutterProject.current().ios)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
-        return applicationBinary != null
-          ? MacOSApp.fromPrebuiltApp(applicationBinary)
-          : null;
-      case TargetPlatform.web:
-        return WebApplicationPackage(await FlutterProject.current());
+        return applicationBinary == null
+            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
+            : MacOSApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.web_javascript:
+        if (!FlutterProject.current().web.existsSync()) {
+          return null;
+        }
+        return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+        return applicationBinary == null
+            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+        return applicationBinary == null
+            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
-        return null;
+        return applicationBinary == null
+            ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
+            : FuchsiaApp.fromPrebuiltApp(applicationBinary);
     }
     assert(platform != null);
     return null;
@@ -158,8 +172,11 @@ class AndroidApk extends ApplicationPackage {
 
     final File manifest = androidProject.appManifestFile;
 
-    if (!manifest.existsSync())
+    if (!manifest.existsSync()) {
+      printError('AndroidManifest.xml could not be found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     final String manifestString = manifest.readAsStringSync();
     xml.XmlDocument document;
@@ -178,8 +195,11 @@ class AndroidApk extends ApplicationPackage {
     }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
-    if (manifests.isEmpty)
+    if (manifests.isEmpty) {
+      printError('AndroidManifest.xml has no manifest element.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
@@ -212,8 +232,11 @@ class AndroidApk extends ApplicationPackage {
       }
     }
 
-    if (packageId == null || launchActivity == null)
+    if (packageId == null || launchActivity == null) {
+      printError('package identifier or launch activity not found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     return AndroidApk(
       id: packageId,
@@ -298,8 +321,22 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   factory IOSApp.fromIosProject(IosProject project) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
+    }
+    if (!project.exists) {
+      // If the project doesn't exist at all the current hint to run flutter
+      // create is accurate.
+      return null;
+    }
+    if (!project.xcodeProject.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      return null;
+    }
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
+      return null;
+    }
     return BuildableIOSApp(project);
   }
 
@@ -353,10 +390,14 @@ class PrebuiltIOSApp extends IOSApp {
 }
 
 class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS });
+  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
 
   AndroidApk android;
   IOSApp iOS;
+  FuchsiaApp fuchsia;
+  LinuxApp linux;
+  MacOSApp macOS;
+  WindowsApp windows;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -364,17 +405,25 @@ class ApplicationPackageStore {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject((await FlutterProject.current()).android);
+        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject((await FlutterProject.current()).ios);
+        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
+        return fuchsia;
+      case TargetPlatform.darwin_x64:
+        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
+        return macOS;
+      case TargetPlatform.linux_x64:
+        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
+        return linux;
+      case TargetPlatform.windows_x64:
+        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
+        return windows;
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return null;
     }
     return null;
@@ -450,15 +499,16 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final _Element manifest = _Element.fromLine(lines[1], null);
+    final int manifestLine = lines.indexWhere((String line) => line.contains('E: manifest'));
+    final _Element manifest = _Element.fromLine(lines[manifestLine], null);
     _Element currentElement = manifest;
 
-    for (String line in lines.skip(2)) {
+    for (String line in lines.skip(manifestLine)) {
       final String trimLine = line.trimLeft();
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while (level <= currentElement.level) {
+      while (currentElement.parent != null && level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 

@@ -215,17 +215,17 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   String toString() {
     final List<String> values = <String>[];
     if (top != null)
-      values.add('top=$top');
+      values.add('top=${debugFormatDouble(top)}');
     if (right != null)
-      values.add('right=$right');
+      values.add('right=${debugFormatDouble(right)}');
     if (bottom != null)
-      values.add('bottom=$bottom');
+      values.add('bottom=${debugFormatDouble(bottom)}');
     if (left != null)
-      values.add('left=$left');
+      values.add('left=${debugFormatDouble(left)}');
     if (width != null)
-      values.add('width=$width');
+      values.add('width=${debugFormatDouble(width)}');
     if (height != null)
-      values.add('height=$height');
+      values.add('height=${debugFormatDouble(height)}');
     if (values.isEmpty)
       values.add('not positioned');
     values.add(super.toString());
@@ -581,7 +581,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -639,7 +639,7 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (index != null)
+    if (index != null && firstChild != null)
       visitor(_childAtIndex());
   }
 
@@ -668,13 +668,20 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    return child.hitTest(result, position: position - childParentData.offset);
+    return result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
   }
 
   @override

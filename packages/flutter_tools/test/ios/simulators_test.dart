@@ -6,11 +6,16 @@ import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -24,6 +29,8 @@ class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
+class MockSimControl extends Mock implements SimControl {}
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 
 void main() {
   FakePlatform osx;
@@ -102,15 +109,21 @@ void main() {
   group('sdkMajorVersion', () {
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     test('can be parsed from iOS-11-3', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
 
       expect(await device.sdkMajorVersion, 11);
     });
 
     test('can be parsed from iOS 11.2', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
 
       expect(await device.sdkMajorVersion, 11);
+    });
+
+    test('Has a simulator category', () async {
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+
+      expect(device.category, Category.mobile);
     });
   });
 
@@ -239,7 +252,7 @@ void main() {
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -251,7 +264,7 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -273,7 +286,7 @@ void main() {
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
@@ -285,7 +298,7 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.0');
       await launchSystemLogTool(device);
       verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
     },
@@ -323,7 +336,7 @@ void main() {
           return Future<Process>.value(mockProcess);
         });
 
-      final IOSSimulator device = IOSSimulator('123456', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('123456', simulatorCategory: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
         app: BuildableIOSApp(mockIosProject),
       );
@@ -413,5 +426,70 @@ void main() {
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
     });
+  });
+
+  group('startApp', () {
+    SimControl simControl;
+
+    setUp(() {
+      simControl = MockSimControl();
+    });
+
+    testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
+        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+        when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
+
+        final Directory mockDir = fs.currentDirectory;
+        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+
+        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+
+        verify(simControl.launch(any, 'correct', any));
+      },
+      overrides: <Type, Generator>{
+        SimControl: () => simControl,
+        IOSWorkflow: () => MockIOSWorkflow()
+      },
+    );
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }

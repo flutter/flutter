@@ -66,7 +66,7 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    // Backwards compatiblity: deprecated resizeToAvoidBottomPadding flag
+    // Backwards compatibility: deprecated resizeToAvoidBottomPadding flag
     await tester.pumpWidget(boilerplate(MediaQuery(
       data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
       child: Scaffold(
@@ -203,6 +203,40 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
   });
 
+  testWidgets('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        floatingActionButton: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
     final Key drawerKey = UniqueKey();
     const double appBarHeight = 256.0;
@@ -335,7 +369,6 @@ void main() {
         ),
       ),
     );
-
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
@@ -347,6 +380,40 @@ void main() {
     final Offset sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Offset.zero));
 
     expect(appBarBottomRight, equals(sheetTopRight));
+  });
+
+  testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        bottomSheet: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   testWidgets('Persistent bottom buttons are persistent', (WidgetTester tester) async {
@@ -402,6 +469,40 @@ void main() {
     );
     expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(10.0, 560.0));
     expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(770.0, 560.0));
+  });
+
+  testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        persistentFooterButtons: const <Widget>[Placeholder()],
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   group('back arrow', () {
@@ -760,18 +861,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getRect(find.byKey(appBar)), Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), Rect.fromLTRB(36.0, 255.0, 113.0, 332.0));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
-    expect(tester.getRect(find.byKey(drawer)), Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(bottomNavigationBar)), Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(insideAppBar)), Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), Rect.fromLTRB(36.0, 255.0, 113.0, 332.0));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
-    expect(tester.getRect(find.byKey(insideDrawer)), Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
-    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
+    expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)),const  Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(bottomNavigationBar)), const Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
+    expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), const Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
   });
 
   testWidgets('Scaffold and extreme window padding - persistent footer buttons only', (WidgetTester tester) async {
@@ -855,16 +956,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getRect(find.byKey(appBar)), Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), Rect.fromLTRB(36.0, 307.0, 113.0, 384.0));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
-    expect(tester.getRect(find.byKey(drawer)), Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(insideAppBar)), Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), Rect.fromLTRB(36.0, 307.0, 113.0, 384.0));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
-    expect(tester.getRect(find.byKey(insideDrawer)), Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
+    expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
+    expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
 
 
@@ -906,6 +1007,62 @@ void main() {
         geometry.bottomNavigationBarTop,
         null,
       );
+    });
+
+    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
+      Widget boilerplate(Widget child) {
+        return Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: child,
+          ),
+        );
+      }
+
+      final Widget child = boilerplate(
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: const Placeholder(),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: Text('test'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: Text('test'),
+              )
+            ]
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)),
+          child: child,
+        ),
+      );
+      final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+      // Consume bottom padding - as if by the keyboard opening
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      );
+      final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+      expect(initialPoint, finalPoint);
     });
 
     testWidgets('floatingActionButton', (WidgetTester tester) async {

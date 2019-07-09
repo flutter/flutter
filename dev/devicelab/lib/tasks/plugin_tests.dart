@@ -65,7 +65,7 @@ class FlutterProject {
     await inDirectory(directory, () async {
       await flutter(
         'create',
-        options: <String>['--template=app', '--org', 'io.flutter.devicelab']..addAll(options)..add('plugintest'),
+        options: <String>['--template=app', '--org', 'io.flutter.devicelab', ...options, 'plugintest'],
       );
     });
     return FlutterProject(directory, 'plugintest');

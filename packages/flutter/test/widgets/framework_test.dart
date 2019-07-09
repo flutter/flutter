@@ -76,7 +76,18 @@ void main() {
         ),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by multiple widgets. The parents of those widgets were:\n'
+        '- Container-[<1>]\n'
+        '- Container-[<2>]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      ),
+    );
   });
 
   testWidgets('GlobalKey duplication 2 - splitting and changing type', (WidgetTester tester) async {
@@ -111,7 +122,18 @@ void main() {
       ],
     ));
 
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by multiple widgets. The parents of those widgets were:\n'
+        '- Container-[<1>]\n'
+        '- Container-[<2>]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      )
+    );
   });
 
   testWidgets('GlobalKey duplication 3 - splitting and changing type', (WidgetTester tester) async {
@@ -129,7 +151,18 @@ void main() {
         Placeholder(key: key),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  SizedBox-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      )
+    );
   });
 
   testWidgets('GlobalKey duplication 4 - splitting and half changing type', (WidgetTester tester) async {
@@ -147,7 +180,18 @@ void main() {
         Placeholder(key: key),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Multiple widgets used the same GlobalKey.\n'
+        'The key [GlobalKey#00000 problematic] was used by 2 widgets:\n'
+        '  Container-[GlobalKey#00000 problematic]\n'
+        '  Placeholder-[GlobalKey#00000 problematic]\n'
+        'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+      )
+    );
   });
 
   testWidgets('GlobalKey duplication 5 - splitting and half changing type', (WidgetTester tester) async {
@@ -314,7 +358,16 @@ void main() {
         Container(key: key3),
       ],
     ));
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Duplicate keys found.\n'
+        'If multiple keyed nodes exist as children of another node, they must have unique keys.\n'
+        'Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, overflow: clip) has multiple children with key [GlobalKey#00000 problematic].'
+      ),
+    );
   });
 
   testWidgets('GlobalKey duplication 13 - all kinds of badness at once', (WidgetTester tester) async {
@@ -449,6 +502,41 @@ void main() {
     ));
     FlutterError.onError = oldHandler;
     expect(count, 2);
+  });
+
+  testWidgets('GlobalKey - dettach and re-attach child to different parents', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Container(
+          height: 100,
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(<Widget>[
+                  Text('child', key: GlobalKey()),
+                ]),
+              )
+            ],
+          ),
+        ),
+      ),
+    ));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
+    Element childElement;
+    // Removing and recreating child with same Global Key should not trigger
+    // duplicate key error.
+    element.visitChildren((Element e) {
+      childElement = e;
+    });
+    element.removeChild(childElement.renderObject);
+    element.createChild(0, after: null);
+    element.visitChildren((Element e) {
+      childElement = e;
+    });
+    element.removeChild(childElement.renderObject);
+    element.createChild(0, after: null);
   });
 
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {

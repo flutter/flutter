@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
@@ -30,10 +31,10 @@ import 'common.dart';
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context[Logger];
+BufferLogger get testLogger => context.get<Logger>();
 
-MockDeviceManager get testDeviceManager => context[DeviceManager];
-MockDoctor get testDoctor => context[Doctor];
+MockDeviceManager get testDeviceManager => context.get<DeviceManager>();
+MockDoctor get testDoctor => context.get<Doctor>();
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -121,13 +122,13 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout != null ? timeout : const Timeout(Duration(seconds: 60)),
+  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
       testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
-  if (testContext[Logger] is BufferLogger) {
-    final BufferLogger bufferLogger = testContext[Logger];
+  if (testContext.get<Logger>() is BufferLogger) {
+    final BufferLogger bufferLogger = testContext.get<Logger>();
     if (bufferLogger.errorText.isNotEmpty)
       print(bufferLogger.errorText);
     bufferLogger.clear();
@@ -185,6 +186,16 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  @override
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) {
+    return getDevices().toList();
+  }
+
+  @override
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
+  }
 }
 
 class MockAndroidLicenseValidator extends AndroidLicenseValidator {
@@ -222,15 +233,42 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+class MockOperatingSystemUtils implements OperatingSystemUtils {
+  @override
+  ProcessResult makeExecutable(File file) => null;
+
+  @override
+  File which(String execName) => null;
+
   @override
   List<File> whichAll(String execName) => <File>[];
+
+  @override
+  File makePipe(String path) => null;
+
+  @override
+  void zip(Directory data, File zipFile) { }
+
+  @override
+  void unzip(File file, Directory targetDirectory) { }
+
+  @override
+  bool verifyZip(File file) => true;
+
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) { }
+
+  @override
+  bool verifyGzip(File gzippedFile) => true;
 
   @override
   String get name => 'fake OS name and version';
 
   @override
   String get pathVarSeparator => ';';
+
+  @override
+  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
@@ -304,7 +342,14 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  MockFlutterVersion({bool isStable = false}) : _isStable = isStable;
+
+  final bool _isStable;
+
+  @override
+  bool get isMaster => !_isStable;
+}
 
 class MockClock extends Mock implements SystemClock {}
 

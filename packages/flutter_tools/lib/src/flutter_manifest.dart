@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
@@ -27,22 +25,22 @@ class FlutterManifest {
   }
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
-  static Future<FlutterManifest> createFromPath(String path) async {
+  static FlutterManifest createFromPath(String path) {
     if (path == null || !fs.isFileSync(path))
       return _createFromYaml(null);
-    final String manifest = await fs.file(path).readAsString();
+    final String manifest = fs.file(path).readAsStringSync();
     return createFromString(manifest);
   }
 
   /// Returns null on missing or invalid manifest
   @visibleForTesting
-  static Future<FlutterManifest> createFromString(String manifest) async {
+  static FlutterManifest createFromString(String manifest) {
     return _createFromYaml(loadYaml(manifest));
   }
 
-  static Future<FlutterManifest> _createFromYaml(dynamic yamlDocument) async {
+  static FlutterManifest _createFromYaml(dynamic yamlDocument) {
     final FlutterManifest pubspec = FlutterManifest._();
-    if (yamlDocument != null && !await _validate(yamlDocument))
+    if (yamlDocument != null && !_validate(yamlDocument))
       return null;
 
     final Map<dynamic, dynamic> yamlMap = yamlDocument;
@@ -119,6 +117,13 @@ class FlutterManifest {
 
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] ?? false;
+  }
+
+  /// True if this Flutter module should use AndroidX dependencies.
+  ///
+  /// If false the deprecated Android Support library will be used.
+  bool get usesAndroidX {
+    return _flutterDescriptor['module']['androidX'] ?? false;
   }
 
   /// True if this manifest declares a Flutter module project.
@@ -289,7 +294,7 @@ String buildSchemaPath(FileSystem fs) {
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
 /// but avoid introducing depdendencies on packages for simple validation.
-Future<bool> _validate(YamlMap manifest) async {
+bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
     if (kvp.key is! String) {
@@ -358,6 +363,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
 
+        if (kvp.value['androidX'] != null && kvp.value['androidX'] is! bool) {
+          errors.add('The "androidX" value must be a bool if set.');
+        }
         if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" value must be a string if set.');
         }
@@ -373,7 +381,10 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add('The "androidPackage" must either be null or a string.');
         }
         if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
-          errors.add('The "iosPrefix" must eithe rbe null or a string.');
+          errors.add('The "iosPrefix" must either be null or a string.');
+        }
+        if (kvp.value['macosPrefix'] != null && kvp.value['macosPrefix'] is! String) {
+          errors.add('The "macosPrefix" must either be null or a string.');
         }
         if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
           errors.add('The "pluginClass" must either be null or a string..');
@@ -400,10 +411,10 @@ void _validateFonts(YamlList fonts, List<String> errors) {
     if (fontMap['family'] != null && fontMap['family'] is! String) {
       errors.add('Font family must either be null or a String.');
     }
-    if (fontMap['fonts'] != null && fontMap['fonts'] is! YamlList) {
-      errors.add('Expected "fonts" to either be null or a list.');
-    }
     if (fontMap['fonts'] == null) {
+      continue;
+    } else if (fontMap['fonts'] is! YamlList) {
+      errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
     for (final YamlMap fontListItem in fontMap['fonts']) {

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -58,8 +56,8 @@ void main() {
   });
 
   test('RectTween', () {
-    final Rect a = Rect.fromLTWH(5.0, 3.0, 7.0, 11.0);
-    final Rect b = Rect.fromLTWH(8.0, 12.0, 14.0, 18.0);
+    const Rect a = Rect.fromLTWH(5.0, 3.0, 7.0, 11.0);
+    const Rect b = Rect.fromLTWH(8.0, 12.0, 14.0, 18.0);
     final RectTween tween = RectTween(begin: a, end: b);
     expect(tween.lerp(0.5), equals(Rect.lerp(a, b, 0.5)));
     expect(tween, hasOneLineDescription);
@@ -85,7 +83,7 @@ void main() {
       ),
       moreOrLessEquals(0.0),
     );
-  }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
+  }, skip: isWindows); // floating point math not quite deterministic on Windows?
 
   test('ConstantTween', () {
     final ConstantTween<double> tween = ConstantTween<double>(100.0);

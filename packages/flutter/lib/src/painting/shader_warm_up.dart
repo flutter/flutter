@@ -87,9 +87,8 @@ abstract class ShaderWarmUp {
     final ui.Picture picture = recorder.endRecording();
     final TimelineTask shaderWarmUpTask = TimelineTask();
     shaderWarmUpTask.start('Warm-up shader');
-    picture.toImage(size.width.ceil(), size.height.ceil()).then((ui.Image image) {
-      shaderWarmUpTask.finish();
-    });
+    await picture.toImage(size.width.ceil(), size.height.ceil());
+    shaderWarmUpTask.finish();
   }
 }
 
@@ -106,7 +105,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   /// compilation cache.
   @override
   Future<void> warmUpOnCanvas(ui.Canvas canvas) async {
-    final ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
+    const ui.RRect rrect = ui.RRect.fromLTRBXY(20.0, 20.0, 60.0, 60.0, 10.0, 10.0);
     final ui.Path rrectPath = ui.Path()..addRRect(rrect);
 
     final ui.Path circlePath = ui.Path()..addOval(

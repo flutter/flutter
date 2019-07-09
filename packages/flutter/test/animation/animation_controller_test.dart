@@ -4,6 +4,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -138,6 +139,69 @@ void main() {
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.dismissed, AnimationStatus.forward ]));
     expect(valueLog, equals(<double>[ 0.0 ]));
     expect(controller.value, equals(0.0));
+  });
+
+  test('Forward and reverse with different durations', () {
+    AnimationController controller = AnimationController(
+      duration: const Duration(milliseconds: 100),
+      reverseDuration: const Duration(milliseconds: 50),
+      vsync: const TestVSync(),
+    );
+
+    controller.forward();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, closeTo(0.2, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, closeTo(0.5, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 120));
+    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    controller.stop();
+
+    controller.reverse();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, closeTo(0.6, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, closeTo(0.4, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, closeTo(0.0, precisionErrorTolerance));
+    controller.stop();
+
+    // Swap which duration is longer.
+    controller = AnimationController(
+      duration: const Duration(milliseconds: 50),
+      reverseDuration: const Duration(milliseconds: 100),
+      vsync: const TestVSync(),
+    );
+
+    controller.forward();
+    tick(const Duration(milliseconds: 10));
+    tick(const Duration(milliseconds: 30));
+    expect(controller.value, closeTo(0.4, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 60));
+    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 90));
+    expect(controller.value, closeTo(1.0, precisionErrorTolerance));
+    controller.stop();
+
+    controller.reverse();
+    tick(const Duration(milliseconds: 210));
+    tick(const Duration(milliseconds: 220));
+    expect(controller.value, closeTo(0.9, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 230));
+    expect(controller.value, closeTo(0.8, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 240));
+    expect(controller.value, closeTo(0.7, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 260));
+    expect(controller.value, closeTo(0.5, precisionErrorTolerance));
+    tick(const Duration(milliseconds: 310));
+    expect(controller.value, closeTo(0.0, precisionErrorTolerance));
+    controller.stop();
   });
 
   test('Forward only from value', () {
@@ -284,7 +348,29 @@ void main() {
     expect(controller.repeat, throwsFlutterError);
 
     controller.dispose();
-    expect(controller.dispose, throwsFlutterError);
+    FlutterError result;
+    try {
+      controller.dispose();
+    } on FlutterError catch (e) {
+      result = e;
+    }
+    expect(result, isNotNull);
+    expect(
+      result.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'FlutterError\n'
+        '   AnimationController.dispose() called more than once.\n'
+        '   A given AnimationController cannot be disposed more than once.\n'
+        '   The following AnimationController object was disposed multiple\n'
+        '   times:\n'
+        '     AnimationController#00000(⏮ 0.000; paused; DISPOSED)\n'
+      ),
+    );
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    result.debugFillProperties(builder);
+    final DiagnosticsNode controllerProperty = builder.properties.last;
+    expect(controllerProperty.name, 'The following AnimationController object was disposed multiple times');
+    expect(controllerProperty.value, controller);
   });
 
   test('AnimationController repeat() throws if period is not specified', () {

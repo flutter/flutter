@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // entire file needs triage.
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -132,6 +133,39 @@ void _tests() {
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, equals(9));
+  });
+
+  testWidgets('tap-select switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(min45);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
+
+  testWidgets('drag-select switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour3 = Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = Offset(center.dx - 50.0, center.dy);
+
+    TestGesture gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour9 - hour6);
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 50));
+    gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour3 - hour6);
+    await gesture.up();
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 15)));
   });
 
   group('haptic feedback', () {
@@ -507,6 +541,38 @@ void _tests() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('header touch regions are large enough', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false);
+
+    final Size amSize = tester.getSize(find.ancestor(
+      of: find.text('AM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(amSize.width, greaterThanOrEqualTo(48.0));
+    expect(amSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size pmSize = tester.getSize(find.ancestor(
+      of: find.text('PM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(pmSize.width, greaterThanOrEqualTo(48.0));
+    expect(pmSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size hourSize = tester.getSize(find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    ));
+    expect(hourSize.width, greaterThanOrEqualTo(48.0));
+    expect(hourSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size minuteSize = tester.getSize(find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    ));
+    expect(minuteSize.width, greaterThanOrEqualTo(48.0));
+    expect(minuteSize.height, greaterThanOrEqualTo(48.0));
   });
 
   testWidgets('builder parameter', (WidgetTester tester) async {

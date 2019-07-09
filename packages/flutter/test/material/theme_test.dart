@@ -417,28 +417,26 @@ void main() {
   group('Cupertino theme', () {
     int buildCount;
     CupertinoThemeData actualTheme;
+    IconThemeData actualIconTheme;
 
     final Widget singletonThemeSubtree = Builder(
       builder: (BuildContext context) {
         buildCount++;
         actualTheme = CupertinoTheme.of(context);
+        actualIconTheme = IconTheme.of(context);
         return const Placeholder();
       },
     );
 
     Future<CupertinoThemeData> testTheme(WidgetTester tester, ThemeData theme) async {
-      await tester.pumpWidget(
-        Theme(
-          data: theme,
-          child: singletonThemeSubtree,
-        ),
-      );
+      await tester.pumpWidget(Theme(data: theme, child: singletonThemeSubtree));
       return actualTheme;
     }
 
     setUp(() {
       buildCount = 0;
       actualTheme = null;
+      actualIconTheme = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -507,6 +505,20 @@ void main() {
 
       expect(buildCount, 2);
       expect(theme.primaryColor, Colors.orange);
+    });
+
+    testWidgets("CupertinoThemeData does not override material theme's icon theme",
+      (WidgetTester tester) async {
+        const Color materialIconColor = Colors.blue;
+        const Color cupertinoIconColor = Colors.black;
+
+        await testTheme(tester, ThemeData(
+            iconTheme: const IconThemeData(color: materialIconColor),
+            cupertinoOverrideTheme: const CupertinoThemeData(primaryColor: cupertinoIconColor)
+        ));
+
+        expect(buildCount, 1);
+        expect(actualIconTheme.color, materialIconColor);
     });
 
     testWidgets(
@@ -707,6 +719,8 @@ class _TextStyleProxy implements TextStyle {
   double get wordSpacing => _delegate.wordSpacing;
   @override
   List<Shadow> get shadows => _delegate.shadows;
+  @override
+  List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
@@ -769,6 +783,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint foreground,
     ui.Paint background,
     List<Shadow> shadows,
+    List<ui.FontFeature> fontFeatures,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,

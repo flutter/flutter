@@ -24,7 +24,7 @@ void main() {
     expect(c1.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
     const StadiumBorder c2 = StadiumBorder(side: BorderSide(width: 1.0));
     expect(c2.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
-    final Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
     expect(
             (Canvas canvas) => c10.paint(canvas, rect),
         paints
@@ -38,7 +38,7 @@ void main() {
   test('StadiumBorder and CircleBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);
     const CircleBorder circle = CircleBorder(side: BorderSide.none);
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
       excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
@@ -84,12 +84,12 @@ void main() {
     expect(direct50, indirect50);
     expect(direct50.hashCode, indirect50.hashCode);
     expect(direct50.toString(), indirect50.toString());
-  });
+  }, skip: isBrowser);
 
   test('StadiumBorder and RoundedRectBorder', () {
     const StadiumBorder stadium = StadiumBorder(side: BorderSide.none);
     const RoundedRectangleBorder rrect = RoundedRectangleBorder(side: BorderSide.none);
-    final Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[
         Offset(25.0, 25.0),

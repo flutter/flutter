@@ -31,10 +31,12 @@ class TwoProductCardColumn extends StatelessWidget {
       const double spacerHeight = 44.0;
 
       final double heightOfCards = (constraints.biggest.height - spacerHeight) / 2.0;
-      final double heightOfImages = heightOfCards - ProductCard.kTextBoxHeight;
-      final double imageAspectRatio = (heightOfImages >= 0.0 && constraints.biggest.width > heightOfImages)
-        ? constraints.biggest.width / heightOfImages
-        : 33 / 49;
+      final double availableHeightForImages = heightOfCards - ProductCard.kTextBoxHeight;
+      // Ensure the cards take up the available space as long as the screen is
+      // sufficiently tall, otherwise fallback on a constant aspect ratio.
+      final double imageAspectRatio = availableHeightForImages >= 0.0
+        ? constraints.biggest.width / availableHeightForImages
+        : 49.0 / 33.0;
 
       return ListView(
         physics: const ClampingScrollPhysics(),

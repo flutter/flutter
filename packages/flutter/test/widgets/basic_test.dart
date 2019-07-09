@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
-
 
 void main() {
   group('PhysicalShape', () {
@@ -50,7 +51,7 @@ void main() {
       expect(tester.hitTestOnBinding(const Offset(100.0, 300.0)), hits(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesNotHit(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesNotHit(renderPhysicalShape));
-    });
+    }, skip: isBrowser);
 
   });
 
@@ -144,6 +145,64 @@ void main() {
       await tester.tap(find.byKey(key1));
       expect(_pointerDown, isTrue);
     });
+  });
+
+  group('Row', () {
+    testWidgets('multiple baseline aligned children', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      const double fontSize1 = 54;
+      const double fontSize2 = 14;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Container(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: <Widget>[
+                  Text('big text',
+                    key: key1,
+                    style: const TextStyle(fontSize: fontSize1),
+                  ),
+                  Text('one\ntwo\nthree\nfour\nfive\nsix\nseven',
+                    key: key2,
+                    style: const TextStyle(fontSize: fontSize2)
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox textBox1 = tester.renderObject(find.byKey(key1));
+      final RenderBox textBox2 = tester.renderObject(find.byKey(key2));
+      final RenderBox rowBox = tester.renderObject(find.byType(Row));
+
+      // The two Texts are baseline aligned, so some portion of them extends
+      // both above and below the baseline. The first has a huge font size, so
+      // it extends higher above the baseline than usual. The second has many
+      // lines, but being aligned by the first line's baseline, they hang far
+      // below the baseline. The size of the parent row is just enough to
+      // contain both of them.
+      const double ahemBaselineLocation = 0.8; // https://web-platform-tests.org/writing-tests/ahem.html
+      const double aboveBaseline1 = fontSize1 * ahemBaselineLocation;
+      const double belowBaseline1 = fontSize1 * (1 - ahemBaselineLocation);
+      const double aboveBaseline2 = fontSize2 * ahemBaselineLocation;
+      const double belowBaseline2 = fontSize2 * (1 - ahemBaselineLocation) + fontSize2 * 6;
+      final double aboveBaseline = math.max(aboveBaseline1, aboveBaseline2);
+      final double belowBaseline = math.max(belowBaseline1, belowBaseline2);
+      expect(rowBox.size.height, greaterThan(textBox1.size.height));
+      expect(rowBox.size.height, greaterThan(textBox2.size.height));
+      expect(rowBox.size.height, closeTo(aboveBaseline + belowBaseline, .001));
+      expect(tester.getTopLeft(find.byKey(key1)).dy, 0);
+      expect(
+        tester.getTopLeft(find.byKey(key2)).dy,
+        closeTo(aboveBaseline1 - aboveBaseline2, .001),
+      );
+    }, skip: isBrowser);
   });
 
   test('UnconstrainedBox toString', () {

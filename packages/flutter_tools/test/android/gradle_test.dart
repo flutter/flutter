@@ -33,12 +33,24 @@ void main() {
         // This test is written to fail if our bots get Android SDKs in the future: shouldBeToolExit
         // will be null and our expectation would fail. That would remind us to make these tests
         // hermetic before adding Android SDKs to the bots.
-        updateLocalProperties(project: await FlutterProject.current());
+        updateLocalProperties(project: FlutterProject.current());
       } on Exception catch (e) {
         shouldBeToolExit = e;
       }
       // Ensure that we throw a meaningful ToolExit instead of a general crash.
       expect(shouldBeToolExit, isToolExit);
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/34700
+    testUsingContext('Does not return nulls in apk list', () {
+      final GradleProject gradleProject = MockGradleProject();
+      const AndroidBuildInfo buildInfo = AndroidBuildInfo(BuildInfo.debug);
+      when(gradleProject.apkFilesFor(buildInfo)).thenReturn(<String>['not_real']);
+      when(gradleProject.apkDirectory).thenReturn(fs.currentDirectory);
+
+      expect(findApkFiles(gradleProject, buildInfo), <File>[]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
     });
 
     test('androidXFailureRegex should match lines with likely AndroidX errors', () {
@@ -157,16 +169,102 @@ someOtherTask
     });
     test('should provide apk file name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
-      expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
-      expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo.debug)).first, 'app-debug.apk');
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo.profile)).first, 'app-profile.apk');
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo.release)).first, 'app-release.apk');
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo(BuildMode.release, 'unknown'))).isEmpty, isTrue);
     });
     test('should provide apk file name for flavored build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo(BuildMode.debug, 'free'))).first, 'app-free-debug.apk');
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo(BuildMode.release, 'paid'))).first, 'app-paid-release.apk');
+      expect(project.apkFilesFor(const AndroidBuildInfo(BuildInfo(BuildMode.release, 'unknown'))).isEmpty, isTrue);
+    });
+    test('should provide apks for default build types and each ABI', () {
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo.debug,
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ),
+        <String>[
+          'app-armeabi-v7a-debug.apk',
+          'app-arm64-v8a-debug.apk',
+        ]);
+
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo.release,
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ),
+        <String>[
+          'app-armeabi-v7a-release.apk',
+          'app-arm64-v8a-release.apk',
+        ]);
+
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo(BuildMode.release, 'unknown'),
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ).isEmpty, isTrue);
+    });
+    test('should provide apks for each ABI and flavored build types', () {
+      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo(BuildMode.debug, 'free'),
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ),
+        <String>[
+          'app-free-armeabi-v7a-debug.apk',
+          'app-free-arm64-v8a-debug.apk',
+        ]);
+
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo(BuildMode.release, 'paid'),
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ),
+        <String>[
+          'app-paid-armeabi-v7a-release.apk',
+          'app-paid-arm64-v8a-release.apk',
+        ]);
+
+      expect(project.apkFilesFor(
+        const AndroidBuildInfo(
+          BuildInfo(BuildMode.release, 'unknown'),
+            splitPerAbi: true,
+            targetArchs: <AndroidArch>[
+                AndroidArch.armeabi_v7a,
+                AndroidArch.arm64_v8a,
+              ]
+            )
+          ).isEmpty, isTrue);
     });
     test('should provide bundle file name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
@@ -252,7 +350,8 @@ someOtherTask
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.android_arm, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
@@ -263,7 +362,7 @@ someOtherTask
       writeEmptySchemaFile(fs);
 
       updateLocalProperties(
-        project: await FlutterProject.fromPath('path/to/project'),
+        project: FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
         requireAndroidSdk: false,
       );
@@ -450,3 +549,4 @@ Platform fakePlatform(String name) {
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockGradleProject extends Mock implements GradleProject {}

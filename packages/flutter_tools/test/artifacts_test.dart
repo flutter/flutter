@@ -28,7 +28,7 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
+          artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework'),
       );
       expect(
@@ -78,7 +78,7 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
+          artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: BuildMode.release),
           fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework'),
       );
       expect(

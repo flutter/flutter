@@ -86,12 +86,15 @@ class CrashReportSender {
     @required String getFlutterVersion(),
   }) async {
     try {
-      if (_usage.suppressAnalytics)
+      final String flutterVersion = getFlutterVersion();
+
+      // We don't need to report exceptions happening on user branches
+      if (_usage.suppressAnalytics || RegExp(r'^\[user-branch\]\/').hasMatch(flutterVersion)) {
         return;
+      }
 
       printStatus('Sending crash report to Google.');
 
-      final String flutterVersion = getFlutterVersion();
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
           'product': _kProductId,

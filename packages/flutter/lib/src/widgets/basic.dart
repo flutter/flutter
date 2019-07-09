@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
@@ -419,7 +420,9 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
 /// those bounds, there might be insufficient memory allocated to rasterize the
-/// painting commands and the resulting behavior is undefined.)
+/// painting commands and the resulting behavior is undefined.) To enforce
+/// painting within those bounds, consider wrapping this [CustomPaint] with a
+/// [ClipRect] widget.
 ///
 /// Painters are implemented by subclassing [CustomPainter].
 ///
@@ -592,7 +595,9 @@ class ClipRect extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -659,6 +664,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
       ..borderRadius = borderRadius
+      ..clipBehavior = clipBehavior
       ..clipper = clipper;
   }
 
@@ -708,7 +714,9 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -794,7 +802,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -884,6 +894,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
     renderObject
       ..shape = shape
+      ..clipBehavior = clipBehavior
       ..borderRadius = borderRadius
       ..elevation = elevation
       ..color = color
@@ -896,8 +907,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     properties.add(EnumProperty<BoxShape>('shape', shape));
     properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(ColorProperty('color', color));
+    properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 
@@ -972,6 +983,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
     renderObject
       ..clipper = clipper
+      ..clipBehavior = clipBehavior
       ..elevation = elevation
       ..color = color
       ..shadowColor = shadowColor;
@@ -982,14 +994,19 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(ColorProperty('color', color));
+    properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 
 // POSITIONING AND SIZING NODES
 
 /// A widget that applies a transformation before painting its child.
+///
+/// Unlike [RotatedBox], which applies a rotation prior to layout, this object
+/// applies its transformation just prior to painting, which means the
+/// transformation is not taken into account when calculating how much space
+/// this widget's child (and thus this widget) consumes.
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9z_YNlRlWfA}
 ///
@@ -1321,7 +1338,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class FittedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that scales and positions its child within itself according to [fit].
   ///
@@ -1395,7 +1412,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
 ///    paint time.
 ///  * [new Transform.translate], which applies an absolute offset translation
 ///    transformation instead of an offset scaled to the child.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Creates a widget that translates its child's painting.
   ///
@@ -1457,7 +1474,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 ///  * [Transform], which is a paint effect that allows you to apply an
 ///    arbitrary transform to a child.
 ///  * [new Transform.rotate], which applies a rotation paint effect.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class RotatedBox extends SingleChildRenderObjectWidget {
   /// A widget that rotates its child.
   ///
@@ -1524,7 +1541,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [EdgeInsets], the class that is used to describe the padding dimensions.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
   ///
@@ -1686,7 +1703,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///    set to [Alignment.center].
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its
 ///    own size and positions the child according to an [Alignment] value.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -1776,7 +1793,7 @@ class Align extends SingleChildRenderObjectWidget {
 ///  * [Column], a widget that displays its children in a vertical array.
 ///  * [Container], a convenience widget that combines common painting,
 ///    positioning, and sizing widgets.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Center extends Align {
   /// Creates a widget that centers its child.
   const Center({ Key key, double widthFactor, double heightFactor, Widget child })
@@ -1923,12 +1940,15 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// either the width or height is null, this widget will size itself to match
 /// the child's size in that dimension.
 ///
-/// If not given a child, this widget will size itself to the given width and
-/// height, treating nulls as zero.
+/// If not given a child, [SizedBox] will try to size itself as close to the
+/// specified height and width as possible given the parent's constraints. If
+/// [height] or [width] is null or unspecified, it will be treated as zero.
 ///
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
 /// {@tool sample}
 ///
@@ -1956,7 +1976,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///    constraints while also sizing its child to match a given aspect ratio.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
@@ -2064,7 +2084,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 ///    own size and positions the child according to an [Alignment] value.
 ///  * [AspectRatio], a widget that attempts to fit within the parent's
 ///    constraints while also sizing its child to match a given aspect ratio.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
   ///
@@ -2192,7 +2212,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow the
 ///    parent.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to a fraction of the total available space.
   ///
@@ -2297,7 +2317,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 ///    when the incoming constraints are unbounded.
 ///  * [SizedBox], which lets you specify tight constraints by explicitly
 ///    specifying the height or width.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class LimitedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that limits its size only when it's unconstrained.
   ///
@@ -2357,7 +2377,7 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 ///  * [UnconstrainedBox], a container that tries to let its child draw without
 ///    constraints.
 ///  * [SizedBox], a box with a specified size.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class OverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that lets its child overflow itself.
   const OverflowBox({
@@ -2452,7 +2472,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
 ///    child.
 ///  * [UnconstrainedBox], a container that tries to let its child draw without
 ///    constraints.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget of a given size that lets its child overflow.
   ///
@@ -2531,7 +2551,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 ///  * [Visibility], which can hide a child more efficiently (albeit less
 ///    subtly).
 ///  * [TickerMode], which can be used to disable animations in a subtree.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage = true, Widget child })
@@ -2584,6 +2604,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XcnP3_mO_Ms}
+///
 /// For example, a 16:9 width:height aspect ratio would have a value of
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
@@ -2613,7 +2635,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 ///    child.
 ///  * [UnconstrainedBox], a container that tries to let its child draw without
 ///    constraints.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class AspectRatio extends SingleChildRenderObjectWidget {
   /// Creates a widget with a specific aspect ratio.
   ///
@@ -2664,7 +2686,7 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -2723,7 +2745,7 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [The catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * [The catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -2748,7 +2770,7 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 ///  * [Align], a widget that aligns its child within itself and optionally
 ///    sizes itself based on the child's size.
 ///  * [Center], a widget that centers its child within itself.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
   ///
@@ -3080,7 +3102,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   ///
@@ -3175,7 +3197,7 @@ class Stack extends MultiChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Stack], for more details about stacks.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
@@ -3651,7 +3673,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Flexible], to indicate children that should share the remaining room.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
 ///    that may be sized smaller (leaving some remaining room unused).
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
@@ -3989,7 +4011,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -4187,7 +4209,7 @@ class Row extends Flex {
 ///  * [SingleChildScrollView], whose documentation discusses some ways to
 ///    use a [Column] inside a scrolling container.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -4235,11 +4257,13 @@ class Column extends Flex {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CI7x0mAZiY0}
+///
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
@@ -4297,10 +4321,11 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 }
 
-/// A widget that expands a child of a [Row], [Column], or [Flex].
+/// A widget that expands a child of a [Row], [Column], or [Flex]
+/// so that the child fills the available space.
 ///
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
-/// expand to fill the available space in the main axis (e.g., horizontally for
+/// expand to fill the available space along the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
 /// the available space is divided among them according to the [flex] factor.
 ///
@@ -4392,10 +4417,11 @@ class Flexible extends ParentDataWidget<Flex> {
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
 ///  * [Spacer], a widget that takes up space proportional to it's flex value.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
-  /// expand to fill the available space in the main axis.
+  /// so that the child fills the available space along the flex widget's
+  /// main axis.
   const Expanded({
     Key key,
     int flex = 1,
@@ -4454,7 +4480,7 @@ class Expanded extends Flexible {
 ///
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 class Wrap extends MultiChildRenderObjectWidget {
   /// Creates a wrap layout.
   ///
@@ -4685,7 +4711,129 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
+///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///
+/// {@tool snippet --template=freeform}
+///
+/// This example uses the [Flow] widget to create a menu that opens and closes
+/// as it is interacted with. The color of the button in the menu changes to
+/// indicate which one has been selected.
+///
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+///
+/// ```dart main
+/// import 'package:flutter/material.dart';
+///
+/// void main() => runApp(FlowApp());
+///
+/// class FlowApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Flow Example'),
+///         ),
+///         body: FlowMenu(),
+///       ),
+///     );
+///   }
+/// }
+///
+/// class FlowMenu extends StatefulWidget {
+///   @override
+///   _FlowMenuState createState() => _FlowMenuState();
+/// }
+///
+/// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
+///   AnimationController menuAnimation;
+///   IconData lastTapped = Icons.notifications;
+///   final List<IconData> menuItems = <IconData>[
+///     Icons.home,
+///     Icons.new_releases,
+///     Icons.notifications,
+///     Icons.settings,
+///     Icons.menu,
+///   ];
+///
+///   void _updateMenu(IconData icon) {
+///     if (icon != Icons.menu)
+///       setState(() => lastTapped = icon);
+///   }
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     menuAnimation = AnimationController(
+///       duration: const Duration(milliseconds: 250),
+///       vsync: this,
+///     );
+///   }
+///
+///   Widget flowMenuItem(IconData icon) {
+///     final double buttonDiameter = MediaQuery.of(context).size.width / menuItems.length;
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 8.0),
+///       child: RawMaterialButton(
+///         fillColor: lastTapped == icon ? Colors.amber[700] : Colors.blue,
+///         splashColor: Colors.amber[100],
+///         shape: CircleBorder(),
+///         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
+///         onPressed: () {
+///           _updateMenu(icon);
+///           menuAnimation.status == AnimationStatus.completed
+///             ? menuAnimation.reverse()
+///             : menuAnimation.forward();
+///         },
+///         child: Icon(
+///           icon,
+///           color: Colors.white,
+///           size: 45.0,
+///         ),
+///       ),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Container(
+///       child: Flow(
+///         delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
+///         children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
+///       ),
+///     );
+///   }
+/// }
+///
+/// class FlowMenuDelegate extends FlowDelegate {
+///   FlowMenuDelegate({this.menuAnimation}) : super(repaint: menuAnimation);
+///
+///   final Animation<double> menuAnimation;
+///
+///   @override
+///   bool shouldRepaint(FlowMenuDelegate oldDelegate) {
+///     return menuAnimation != oldDelegate.menuAnimation;
+///   }
+///
+///   @override
+///   void paintChildren(FlowPaintingContext context) {
+///     double dx = 0.0;
+///     for (int i = 0; i < context.childCount; ++i) {
+///       dx = context.getChildSize(i).width * i;
+///       context.paintChild(
+///         i,
+///         transform: Matrix4.translationValues(
+///           dx * menuAnimation.value,
+///           0,
+///           0,
+///         ),
+///       );
+///     }
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -4769,7 +4917,9 @@ class Flow extends MultiChildRenderObjectWidget {
 ///  * [TextSpan], which is used to describe the text in a paragraph.
 ///  * [Text], which automatically applies the ambient styles described by a
 ///    [DefaultTextStyle] to a single string.
-class RichText extends LeafRenderObjectWidget {
+///  * [Text.rich], a const text widget that provides similar functionality
+///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
+class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
@@ -4780,7 +4930,7 @@ class RichText extends LeafRenderObjectWidget {
   ///
   /// The [textDirection], if null, defaults to the ambient [Directionality],
   /// which in that case must not be null.
-  const RichText({
+  RichText({
     Key key,
     @required this.text,
     this.textAlign = TextAlign.start,
@@ -4791,16 +4941,31 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
+    this.textWidthBasis = TextWidthBasis.parent,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key);
+       assert(textWidthBasis != null),
+       super(key: key, children: _extractChildren(text));
+
+  // Traverses the InlineSpan tree and depth-first collects the list of
+  // child widgets that are created in WidgetSpans.
+  static List<Widget> _extractChildren(InlineSpan span) {
+    final List<Widget> result = <Widget>[];
+    span.visitChildren((InlineSpan span) {
+      if (span is WidgetSpan) {
+        result.add(span.child);
+      }
+      return true;
+    });
+    return result;
+  }
 
   /// The text to display in this widget.
-  final TextSpan text;
+  final InlineSpan text;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -4855,6 +5020,9 @@ class RichText extends LeafRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  final TextWidthBasis textWidthBasis;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4866,6 +5034,7 @@ class RichText extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
       strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4882,6 +5051,7 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
       ..strutStyle = strutStyle
+      ..textWidthBasis = textWidthBasis
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -4894,6 +5064,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }
@@ -5089,7 +5260,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -5374,6 +5545,9 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
+  _ListenerElement createElement() => _ListenerElement(this);
+
+  @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
@@ -5424,6 +5598,24 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
+  }
+}
+
+class _ListenerElement extends SingleChildRenderObjectElement {
+  _ListenerElement(SingleChildRenderObjectWidget widget) : super(widget);
+
+  @override
+  void activate() {
+    super.activate();
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.postActivate();
+  }
+
+  @override
+  void deactivate() {
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.preDeactivate();
+    super.deactivate();
   }
 }
 
@@ -5729,6 +5921,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool button,
     bool header,
     bool textField,
+    bool readOnly,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
@@ -5778,6 +5971,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       button: button,
       header: header,
       textField: textField,
+      readOnly: readOnly,
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
@@ -5886,6 +6080,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       button: properties.button,
       header: properties.header,
       textField: properties.textField,
+      readOnly: properties.readOnly,
       focused: properties.focused,
       liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
@@ -5951,6 +6146,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..button = properties.button
       ..header = properties.header
       ..textField = properties.textField
+      ..readOnly = properties.readOnly
       ..focused = properties.focused
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
@@ -6237,6 +6433,45 @@ class Builder extends StatelessWidget {
 typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSetter setState);
 
 /// A platonic widget that both has state and calls a closure to obtain its child widget.
+///
+/// The [StateSetter] function passed to the [builder] is used to invoke a
+/// rebuild instead of a typical [State]'s [State.setState].
+///
+/// Since the [builder] is re-invoked when the [StateSetter] is called, any
+/// variables that represents state should be kept outside the [builder] function.
+///
+/// {@tool sample}
+///
+/// This example shows using an inline StatefulBuilder that rebuilds and that
+/// also has state.
+///
+/// ```dart
+/// await showDialog<void>(
+///   context: context,
+///   builder: (BuildContext context) {
+///     int selectedRadio = 0;
+///     return AlertDialog(
+///       content: StatefulBuilder(
+///         builder: (BuildContext context, StateSetter setState) {
+///           return Column(
+///             mainAxisSize: MainAxisSize.min,
+///             children: List<Widget>.generate(4, (int index) {
+///               return Radio<int>(
+///                 value: index,
+///                 groupValue: selectedRadio,
+///                 onChanged: (int value) {
+///                   setState(() => selectedRadio = value);
+///                 },
+///               );
+///             }),
+///           );
+///         },
+///       ),
+///     );
+///   },
+/// );
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///

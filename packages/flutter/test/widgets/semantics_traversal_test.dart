@@ -152,11 +152,11 @@ void main() {
   //   ┌─────────────────┘
   //   V
   // ┌───┐ ┌─────────┐ ┌───┐
-  // │ E │ │         │>│ H │
-  // └───┘ │    G    │ └───┘
-  //   V   │         │   V
+  // │ E │>│         │>│ G │
+  // └───┘ │    F    │ └───┘
+  //   ┌───|─────────|───┘
   // ┌───┐ │         │ ┌───┐
-  // │ F │>│         │ │ I │
+  // │ H │─|─────────|>│ I │
   // └───┘ └─────────┘ └───┘
   //   ┌─────────────────┘
   //   V
@@ -171,11 +171,11 @@ void main() {
   //   └─────────────────┐
   //                     V
   // ┌───┐ ┌─────────┐ ┌───┐
-  // │ E │<│         │ │ H │
-  // └───┘ │    G    │ └───┘
-  //   V   │         │   V
+  // │ E │<│         │<│ G │
+  // └───┘ │    F    │ └───┘
+  //    └──|─────────|────┐
   // ┌───┐ │         │ ┌───┐
-  // │ F │ │         │<│ I │
+  // │ H │<|─────────|─│ I │
   // └───┘ └─────────┘ └───┘
   //   └─────────────────┐
   //                     V
@@ -189,9 +189,9 @@ void main() {
       'C': const Offset(40.0, 0.0) & tenByTen,
       'D': const Offset(60.0, 0.0) & tenByTen,
       'E': const Offset(0.0, 20.0) & tenByTen,
-      'F': const Offset(0.0, 40.0) & tenByTen,
-      'G': const Offset(20.0, 20.0) & (tenByTen * 2.0),
-      'H': const Offset(60.0, 20.0) & tenByTen,
+      'F': const Offset(20.0, 20.0) & (tenByTen * 2.0),
+      'G': const Offset(60.0, 20.0) & tenByTen,
+      'H': const Offset(0.0, 40.0) & tenByTen,
       'I': const Offset(60.0, 40.0) & tenByTen,
       'J': const Offset(0.0, 60.0) & tenByTen,
       'K': const Offset(20.0, 60.0) & tenByTen,
@@ -208,7 +208,7 @@ void main() {
     await tester.test(
       textDirection: TextDirection.rtl,
       children: children,
-      expectedTraversal: 'D C B A H I G E F M L K J',
+      expectedTraversal: 'D C B A G F E I H M L K J',
     );
   });
 
@@ -251,8 +251,11 @@ void main() {
 
     for (int i = 0; i < 8; i += 1) {
       final double angle = start + i.toDouble() * math.pi / 4.0;
-      final double dx = math.cos(angle) * 5.0;
-      final double dy = math.sin(angle) * 5.0;
+      // These values should be truncated so that double precision rounding
+      // issues won't impact the heights/widths and throw off the traversal
+      // ordering.
+      final double dx = (math.cos(angle) * 15.0) / 10.0;
+      final double dy = (math.sin(angle) * 15.0) / 10.0;
 
       final Map<String, Rect> children = <String, Rect>{
         'A': const Offset(10.0, 10.0) & tenByTen,

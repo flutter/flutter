@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,7 +64,7 @@ void main() {
           ],
           label: '+',
           textDirection: TextDirection.ltr,
-          rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           children: <TestSemantics>[],
         ),
       ]
@@ -189,7 +190,7 @@ void main() {
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
 
-  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+  testWidgets('$RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -207,5 +208,62 @@ void main() {
     );
 
     expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
+  });
+
+  testWidgets('$RawMaterialButton handles focus', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'Button Focus');
+    const Key key = Key('test');
+    const Color focusColor = Color(0xff00ff00);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: RawMaterialButton(
+            key: key,
+            focusNode: focusNode,
+            focusColor: focusColor,
+            onPressed: () {},
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    expect(box, isNot(paints..rect(color: focusColor)));
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(box, paints..rect(color: focusColor));
+  });
+
+  testWidgets('$RawMaterialButton handles hover', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Color hoverColor = Color(0xff00ff00);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: RawMaterialButton(
+            key: key,
+            hoverColor: hoverColor,
+            hoverElevation: 10.5,
+            onPressed: () {},
+            child: Container(width: 100, height: 100, color: const Color(0xffff0000)),
+          ),
+        ),
+      ),
+    );
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    expect(box, isNot(paints..rect(color: hoverColor)));
+
+    await gesture.moveTo(tester.getCenter(find.byType(RawMaterialButton)));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    expect(box, paints..rect(color: hoverColor));
+
+    await gesture.removePointer();
   });
 }

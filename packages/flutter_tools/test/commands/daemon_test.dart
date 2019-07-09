@@ -195,7 +195,7 @@ void main() {
       await commands.close();
     });
 
-    testUsingContext('device.getDevices reports avaiable devices', () async {
+    testUsingContext('device.getDevices reports available devices', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
@@ -292,10 +292,6 @@ void main() {
       expect(
         jsonEncodeObject(OperationResult(1, 'foo')),
         '{"code":1,"message":"foo"}',
-      );
-      expect(
-        jsonEncodeObject(OperationResult(0, 'foo', hintMessage: 'my hint', hintId: 'myId')),
-        '{"code":0,"message":"foo","hintMessage":"my hint","hintId":"myId"}',
       );
     });
   });

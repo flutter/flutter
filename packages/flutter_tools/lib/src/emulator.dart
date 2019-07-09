@@ -10,10 +10,11 @@ import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/io.dart' show ProcessResult;
 import 'base/process_manager.dart';
+import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
-EmulatorManager get emulatorManager => context[EmulatorManager];
+EmulatorManager get emulatorManager => context.get<EmulatorManager>();
 
 /// A class to get all available emulators.
 class EmulatorManager {
@@ -217,7 +218,8 @@ abstract class Emulator {
   final bool hasConfig;
   String get name;
   String get manufacturer;
-  String get label;
+  Category get category;
+  PlatformType get platformType;
 
   @override
   int get hashCode => id.hashCode;
@@ -247,7 +249,7 @@ abstract class Emulator {
         emulator.id ?? '',
         emulator.name ?? '',
         emulator.manufacturer ?? '',
-        emulator.label ?? '',
+        emulator.platformType?.toString() ?? '',
       ]);
     }
 

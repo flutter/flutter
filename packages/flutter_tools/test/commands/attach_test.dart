@@ -34,7 +34,7 @@ void main() {
     setUp(() {
       Cache.disableLocking();
       testFileSystem.directory('lib').createSync();
-      testFileSystem.file('lib/main.dart').createSync();
+      testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
     });
 
     group('with one device and no specified target file', () {
@@ -178,7 +178,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command determines '
+            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -193,7 +193,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command does not use '
+            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );
@@ -246,7 +246,7 @@ void main() {
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file('lib/main.dart').deleteSync();
+      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
@@ -398,7 +398,7 @@ void main() {
         createTestCommandRunner(command).run(<String>['attach']),
         throwsA(isInstanceOf<ToolExit>()),
       );
-      expect(testLogger.statusText, contains('No connected devices'));
+      expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
@@ -438,7 +438,7 @@ void main() {
       final MDnsClient client = MockMDnsClient();
 
       when(client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(MDnsObservatoryPortDiscovery.dartObservatoryName),
+        ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
       )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
 
       for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
@@ -452,8 +452,8 @@ void main() {
     testUsingContext('No ports available', () async {
       final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
-      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.queryForPort();
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
     });
 
@@ -469,8 +469,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.queryForPort();
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
     });
 
@@ -490,8 +490,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
-      expect(() => portDiscovery.queryForPort(), throwsToolExit());
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      expect(() => portDiscovery.query(), throwsToolExit());
     });
 
     testUsingContext('Multiple ports available, with appId', () async {
@@ -510,8 +510,8 @@ void main() {
         },
       );
 
-      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.queryForPort(applicationId: 'fiz');
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
     });
 
@@ -533,9 +533,20 @@ void main() {
         },
       );
 
-      final MDnsObservatoryPortDiscovery portDiscovery = MDnsObservatoryPortDiscovery(mdnsClient: client);
-      final int port = await portDiscovery.queryForPort(applicationId: 'bar');
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
+    });
+
+    testUsingContext('Query returns null', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[],
+         <String, List<SrvResourceRecord>>{},
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      expect(port, isNull);
     });
   });
 }

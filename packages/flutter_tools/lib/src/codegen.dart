@@ -13,7 +13,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// Arbitrarily chosen multi-root file scheme. This is used to configure the
 // frontend_server to resolve a package uri to multiple filesystem directories.
 // In this case, the source directory and a generated directory.
 const String kMultiRootScheme = 'org-dartlang-app';
@@ -22,7 +22,7 @@ const String kMultiRootScheme = 'org-dartlang-app';
 ///
 /// If [experimentalBuildEnabled] is false, this will contain an unsupported
 /// implementation.
-CodeGenerator get codeGenerator => context[CodeGenerator];
+CodeGenerator get codeGenerator => context.get<CodeGenerator>();
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -115,7 +115,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     codeGenerator.updatePackages(flutterProject);
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();

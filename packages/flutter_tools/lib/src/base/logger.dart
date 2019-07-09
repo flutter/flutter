@@ -19,7 +19,7 @@ const Duration _kSlowOperation = Duration(minutes: 2);
 /// The [TimeoutConfiguration] instance.
 ///
 /// If not provided via injection, a default instance is provided.
-TimeoutConfiguration get timeoutConfiguration => context[TimeoutConfiguration] ?? const TimeoutConfiguration();
+TimeoutConfiguration get timeoutConfiguration => context.get<TimeoutConfiguration>() ?? const TimeoutConfiguration();
 
 class TimeoutConfiguration {
   const TimeoutConfiguration();
@@ -131,7 +131,7 @@ abstract class Logger {
   /// The `timeout` argument sets a duration after which an additional message
   /// may be shown saying that the operation is taking a long time. (Not all
   /// [Status] subclasses show such a message.) Set this to null if the
-  /// operation can legitimately take an abritrary amount of time (e.g. waiting
+  /// operation can legitimately take an arbitrary amount of time (e.g. waiting
   /// for the user).
   ///
   /// The `progressId` argument provides an ID that can be used to identify
@@ -486,7 +486,7 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch _stopwatch = context[Stopwatch] ?? Stopwatch();
+  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
 
   @protected
   @visibleForTesting

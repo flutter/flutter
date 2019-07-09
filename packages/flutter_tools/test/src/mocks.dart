@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink;
+import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -35,6 +35,18 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
     ),
     iOS: BuildableIOSApp(MockIosProject())
   );
+}
+
+class MockApplicationPackageFactory extends Mock implements ApplicationPackageFactory {
+  final MockApplicationPackageStore _store = MockApplicationPackageStore();
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
+    return _store.getPackageForPlatform(platform);
+  }
 }
 
 /// An SDK installation with several SDK levels (19, 22, 23).
@@ -196,6 +208,38 @@ class MockProcess extends Mock implements Process {
   final Stream<List<int>> stderr;
 }
 
+/// A fake process implemenation which can be provided all necessary values.
+class FakeProcess implements Process {
+  FakeProcess({
+    this.pid = 1,
+    Future<int> exitCode,
+    Stream<List<int>> stdin,
+    this.stdout = const Stream<List<int>>.empty(),
+    this.stderr = const Stream<List<int>>.empty(),
+  }) : exitCode = exitCode ?? Future<int>.value(0),
+       stdin = stdin ?? MemoryIOSink();
+
+  @override
+  final int pid;
+
+  @override
+  final Future<int> exitCode;
+
+  @override
+  final io.IOSink stdin;
+
+  @override
+  final Stream<List<int>> stdout;
+
+  @override
+  final Stream<List<int>> stderr;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return true;
+  }
+}
+
 /// A process that prompts the user to proceed, then asynchronously writes
 /// some lines to stdout before it exits.
 class PromptingProcess implements Process {
@@ -310,17 +354,56 @@ class MemoryIOSink implements IOSink {
   Future<void> flush() async { }
 }
 
+class MemoryStdout extends MemoryIOSink implements io.Stdout {
+  @override
+  bool get hasTerminal => _hasTerminal;
+  set hasTerminal(bool value) {
+    assert(value != null);
+    _hasTerminal = value;
+  }
+  bool _hasTerminal = true;
+
+  @override
+  io.IOSink get nonBlocking => this;
+
+  @override
+  bool get supportsAnsiEscapes => _supportsAnsiEscapes;
+  set supportsAnsiEscapes(bool value) {
+    assert(value != null);
+    _supportsAnsiEscapes = value;
+  }
+  bool _supportsAnsiEscapes = true;
+
+  @override
+  int get terminalColumns {
+    if (_terminalColumns != null)
+      return _terminalColumns;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalColumns(int value) => _terminalColumns = value;
+  int _terminalColumns;
+
+  @override
+  int get terminalLines {
+    if (_terminalLines != null)
+      return _terminalLines;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalLines(int value) => _terminalLines = value;
+  int _terminalLines;
+}
+
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
-  final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryStdout _stdout = MemoryStdout();
   final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
-  IOSink get stdout => _stdout;
+  MemoryStdout get stdout => _stdout;
 
   @override
-  IOSink get stderr => _stderr;
+  MemoryIOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
@@ -379,6 +462,9 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockIOSDevice extends Mock implements IOSDevice {
@@ -387,6 +473,9 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
@@ -395,6 +484,9 @@ class MockIOSSimulator extends Mock implements IOSSimulator {
 
   @override
   bool isSupported() => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
 class MockDeviceLogReader extends DeviceLogReader {
@@ -492,4 +584,26 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
+}
+
+/// A fake implementation of [ProcessResult].
+class FakeProcessResult implements ProcessResult {
+  FakeProcessResult({
+    this.exitCode = 0,
+    this.pid = 1,
+    this.stderr,
+    this.stdout,
+  });
+
+  @override
+  final int exitCode;
+
+  @override
+  final int pid;
+
+  @override
+  final dynamic stderr;
+
+  @override
+  final dynamic stdout;
 }

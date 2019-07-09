@@ -49,19 +49,29 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
-/// Tests using the [AutomatedTestWidgetsFlutterBinding]
-/// have a default time out of two seconds,
-/// which is automatically increased for some expensive operations,
-/// and can also be manually increased by calling
-/// [AutomatedTestWidgetsFlutterBinding.addTime].
-/// The maximum that this timeout can reach (automatically or manually increased)
-/// is defined by the timeout property,
-/// which defaults to [TestWidgetsFlutterBinding.defaultTestTimeout].
 ///
-/// If the `enableSemantics` parameter is set to `true`,
+/// There are two kinds of timeouts that can be specified. The `timeout`
+/// argument specifies the backstop timeout implemented by the `test` package.
+/// If set, it should be relatively large (minutes). It defaults to ten minutes
+/// for tests run by `flutter test`, and is unlimited for tests run by `flutter
+/// run`; specifically, it defaults to
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// The `initialTimeout` argument specifies the timeout implemented by the
+/// `flutter_test` package itself. If set, it may be relatively small (seconds),
+/// as it is automatically increased for some expensive operations, and can also
+/// be manually increased by calling
+/// [AutomatedTestWidgetsFlutterBinding.addTime]. The effective maximum value of
+/// this timeout (even after calling `addTime`) is the one specified by the
+/// `timeout` argument.
+///
+/// In general, timeouts are race conditions and cause flakes, so best practice
+/// is to avoid the use of timeouts in tests.
+///
+/// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
 /// passed to the `callback`, and that handle will automatically be disposed
-/// after the callback is finished.
+/// after the callback is finished. It defaults to true.
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
@@ -72,7 +82,7 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
-/// timeout and how to manually increase timeouts.
+///    timeout and how to manually increase timeouts.
 ///
 /// ## Sample code
 ///
@@ -89,11 +99,11 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout,
-  bool semanticsEnabled = false,
+  Duration initialTimeout,
+  bool semanticsEnabled = true,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  timeout ??= binding.defaultTestTimeout;
   test(
     description,
     () {
@@ -105,15 +115,17 @@ void testWidgets(
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () async {
+          debugResetSemanticsIdCounter();
           await callback(tester);
           semanticsHandle?.dispose();
         },
         tester._endOfTestVerifications,
         description: description ?? '',
+        timeout: initialTimeout,
       );
     },
     skip: skip,
-    timeout: timeout,
+    timeout: timeout ?? binding.defaultTestTimeout,
   );
 }
 
@@ -133,8 +145,15 @@ void testWidgets(
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
 ///
-/// Benchmarks must not be run in checked mode. To avoid this, this
-/// function will print a big message if it is run in checked mode.
+/// If the `semanticsEnabled` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
+///
+/// Benchmarks must not be run in checked mode, because the performance is not
+/// representative. To avoid this, this function will print a big message if it
+/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
@@ -152,8 +171,15 @@ void testWidgets(
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
+Future<void> benchmarkWidgets(
+  WidgetTesterCallback callback, {
+  bool mayRunWithAsserts = false,
+  bool semanticsEnabled = false,
+}) {
   assert(() {
+    if (mayRunWithAsserts)
+      return true;
+
     print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
     print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
     print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
@@ -170,9 +196,16 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
+  SemanticsHandle semanticsHandle;
+  if (semanticsEnabled == true) {
+    semanticsHandle = tester.ensureSemantics();
+  }
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
-    () => callback(tester),
+    () async {
+      await callback(tester);
+      semanticsHandle?.dispose();
+    },
     tester._endOfTestVerifications,
   ) ?? Future<void>.value();
 }
@@ -753,7 +786,7 @@ typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  final _TickerDisposeCallback _onDispose;
 
   @override
   void dispose() {

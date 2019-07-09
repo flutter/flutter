@@ -48,6 +48,7 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
+                        "androidX": { "type": "boolean" },
                         "androidPackage": { "type": "string" },
                         "iosBundleIdentifier": { "type": "string" }
                     }
@@ -58,6 +59,7 @@
                     "properties": {
                         "androidPackage": { "type": "string" },
                         "iosPrefix": { "type": "string" },
+                        "macosPrefix": { "type": "string" },
                         "pluginClass": { "type": "string" }
                     }
                 }

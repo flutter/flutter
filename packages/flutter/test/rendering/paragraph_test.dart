@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,7 +21,7 @@ void main() {
     );
     layout(paragraph);
 
-    final Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+    const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
 
     final Offset offset5 = paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
     expect(offset5.dx, greaterThan(0.0));
@@ -48,7 +48,7 @@ void main() {
 
     final TextPosition positionBelow = paragraph.getPositionForOffset(const Offset(5.0, 20.0));
     expect(positionBelow.offset, greaterThan(position40.offset));
-  });
+  }, skip: isBrowser);
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -71,7 +71,7 @@ void main() {
     expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
   },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  skip: isLinux || isBrowser);
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -88,7 +88,7 @@ void main() {
 
     final TextRange range85 = paragraph.getWordBoundary(const TextPosition(offset: 75));
     expect(range85.textInside(_kText), equals('Queen\'s'));
-  });
+  }, skip: isBrowser);
 
   test('overflow test', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -164,7 +164,7 @@ void main() {
 
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
-  });
+  }, skip: isBrowser);
 
   test('maxLines', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -193,7 +193,7 @@ void main() {
 
     layoutAt(3);
     expect(paragraph.size.height, 30.0);
-  }, skip: Platform.isWindows); // Ahem-based tests don't yet quite work on Windows
+  }, skip: isWindows || isBrowser); // Ahem-based tests don't yet quite work on Windows
 
   test('changing color does not do layout', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -260,13 +260,13 @@ void main() {
     expect(paragraph.size.height, 26.0);
 
     // Test the sizes of nested spans.
-    final List<ui.TextBox> boxes = <ui.TextBox>[];
     final String text = testSpan.toStringDeep();
-    for (int i = 0; i < text.length; ++i) {
-      boxes.addAll(paragraph.getBoxesForSelection(
+    final List<ui.TextBox> boxes = <ui.TextBox>[
+      for (int i = 0; i < text.length; ++i)
+        ...paragraph.getBoxesForSelection(
           TextSelection(baseOffset: i, extentOffset: i + 1)
-      ));
-    }
+        ),
+    ];
     expect(boxes.length, equals(4));
 
     // anyOf is needed here and below because Linux and Mac have different text
@@ -280,7 +280,7 @@ void main() {
     expect(boxes[2].toRect().height, closeTo(26.0, 0.0001));
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[3].toRect().height, closeTo(13.0, 0.0001));
-  });
+  }, skip: isBrowser);
 
   test('toStringDeep', () {
     final RenderParagraph paragraph = RenderParagraph(
@@ -325,4 +325,93 @@ void main() {
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
 
+  test('inline widgets test', () {
+    const TextSpan text = TextSpan(
+      text: 'a',
+      style: TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        TextSpan(text: 'a'),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+      ],
+    );
+    // Fake the render boxes that correspond to the WidgetSpans. We use
+    // RenderParagraph to reduce dependencies this test has.
+    final List<RenderBox> renderBoxes = <RenderBox>[];
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      children: renderBoxes,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 8)
+    );
+
+    expect(boxes.length, equals(5));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  }, skip: isWindows || isMacOS || isBrowser);
+
+  test('inline widgets multiline test', () {
+    const TextSpan text = TextSpan(
+      text: 'a',
+      style: TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        TextSpan(text: 'a'),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+      ],
+    );
+    // Fake the render boxes that correspond to the WidgetSpans. We use
+    // RenderParagraph to reduce dependencies this test has.
+    final List<RenderBox> renderBoxes = <RenderBox>[];
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      children: renderBoxes,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 12)
+    );
+
+    expect(boxes.length, equals(9));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    // Wraps
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
+    expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
+    // Wraps
+    expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  }, skip: isWindows || isMacOS || isBrowser);
 }

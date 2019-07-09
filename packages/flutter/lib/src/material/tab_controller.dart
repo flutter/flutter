@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -18,6 +20,8 @@ import 'constants.dart';
 /// When the [TabBar] and [TabBarView] don't have a convenient stateful
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
+///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
 /// {@tool sample}
 ///
@@ -62,7 +66,13 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return Center(child: Text(tab.text));
+///           final String label = tab.text.toLowerCase();
+///           return Center(
+///             child: Text(
+///               'This is the $label tab',
+///               style: const TextStyle(fontSize: 36),
+///             ),
+///           );
 ///         }).toList(),
 ///       ),
 ///     );
@@ -71,23 +81,52 @@ import 'constants.dart';
 /// ```
 /// {@end-tool}
 class TabController extends ChangeNotifier {
-  /// Creates an object that manages the state required by [TabBar] and a [TabBarView].
+  /// Creates an object that manages the state required by [TabBar] and a
+  /// [TabBarView].
   ///
-  /// The [length] must not be null or negative. Typically its a value greater than one, i.e.
-  /// typically there are two or more tabs.
+  /// The [length] must not be null or negative. Typically it's a value greater
+  /// than one, i.e. typically there are two or more tabs. The [length] must
+  /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
-  /// The `initialIndex` must be valid given [length] and must not be null. If [length] is
-  /// zero, then `initialIndex` must be 0 (the default).
+  /// The `initialIndex` must be valid given [length] and must not be null. If
+  /// [length] is zero, then `initialIndex` must be 0 (the default).
   TabController({ int initialIndex = 0, @required this.length, @required TickerProvider vsync })
     : assert(length != null && length >= 0),
       assert(initialIndex != null && initialIndex >= 0 && (length == 0 || initialIndex < length)),
       _index = initialIndex,
       _previousIndex = initialIndex,
-      _animationController = length < 2 ? null : AnimationController(
+      _animationController = AnimationController.unbounded(
         value: initialIndex.toDouble(),
-        upperBound: (length - 1).toDouble(),
         vsync: vsync,
       );
+
+  // Private constructor used by `_copyWith`. This allows a new TabController to
+  // be created without having to create a new animationController.
+  TabController._({
+    int index,
+    int previousIndex,
+    AnimationController animationController,
+    @required this.length,
+  }) : _index = index,
+       _previousIndex = previousIndex,
+       _animationController = animationController;
+
+
+  /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
+  /// if they are non-null.
+  ///
+  /// This method is used by [DefaultTabController].
+  ///
+  /// When [DefaultTabController.length] is updated, this method is called to
+  /// create a new [TabController] without creating a new [AnimationController].
+  TabController _copyWith({ int index, int length, int previousIndex }) {
+    return TabController._(
+      index: index ?? _index,
+      length: length ?? this.length,
+      animationController: _animationController,
+      previousIndex: previousIndex ?? _previousIndex,
+    );
+  }
 
   /// An animation whose value represents the current position of the [TabBar]'s
   /// selected tab indicator as well as the scrollOffsets of the [TabBar]
@@ -98,18 +137,20 @@ class TabController extends ChangeNotifier {
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
   ///
-  /// If length is zero or one, [index] animations don't happen and the value
-  /// of this property is [kAlwaysCompleteAnimation].
-  Animation<double> get animation => _animationController?.view ?? kAlwaysCompleteAnimation;
-  final AnimationController _animationController;
+  /// If this [TabController] was disposed, then return null.
+  Animation<double> get animation => _animationController?.view;
+  AnimationController _animationController;
 
-  /// The total number of tabs. Typically greater than one.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
-    assert(duration == null ? curve == null : true);
+    assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
     if (value == _index || length < 2)
       return;
@@ -132,9 +173,10 @@ class TabController extends ChangeNotifier {
     }
   }
 
-  /// The index of the currently selected tab. Changing the index also updates
-  /// [previousIndex], sets the [animation]'s value to index, resets
-  /// [indexIsChanging] to false, and notifies listeners.
+  /// The index of the currently selected tab.
+  ///
+  /// Changing the index also updates [previousIndex], sets the [animation]'s
+  /// value to index, resets [indexIsChanging] to false, and notifies listeners.
   ///
   /// To change the currently selected tab and play the [animation] use [animateTo].
   ///
@@ -146,7 +188,9 @@ class TabController extends ChangeNotifier {
     _changeIndex(value);
   }
 
-  /// The index of the previously selected tab. Initially the same as [index].
+  /// The index of the previously selected tab.
+  ///
+  /// Initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
@@ -168,16 +212,16 @@ class TabController extends ChangeNotifier {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
-  /// The difference between the [animation]'s value and [index]. The offset
-  /// value must be between -1.0 and 1.0.
+  /// The difference between the [animation]'s value and [index].
+  ///
+  /// The offset value must be between -1.0 and 1.0.
   ///
   /// This property is typically set by the [TabBarView] when the user
   /// drags left or right. A value between -1.0 and 0.0 implies that the
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
-  double get offset => length > 1 ? _animationController.value - _index.toDouble() : 0.0;
+  double get offset => _animationController.value - _index.toDouble();
   set offset(double value) {
-    assert(length > 1);
     assert(value != null);
     assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
@@ -189,6 +233,7 @@ class TabController extends ChangeNotifier {
   @override
   void dispose() {
     _animationController?.dispose();
+    _animationController = null;
     super.dispose();
   }
 }
@@ -219,6 +264,8 @@ class _TabControllerScope extends InheritedWidget {
 /// widgets are created by a stateless parent widget or by different parent
 /// widgets.
 ///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
@@ -238,7 +285,13 @@ class _TabControllerScope extends InheritedWidget {
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return Center(child: Text(tab.text));
+///             final String label = tab.text.toLowerCase();
+///             return Center(
+///               child: Text(
+///                 'This is the $label tab',
+///                 style: const TextStyle(fontSize: 36),
+///               ),
+///             );
 ///           }).toList(),
 ///         ),
 ///       ),
@@ -249,7 +302,8 @@ class _TabControllerScope extends InheritedWidget {
 class DefaultTabController extends StatefulWidget {
   /// Creates a default tab controller for the given [child] widget.
   ///
-  /// The [length] argument is typically greater than one.
+  /// The [length] argument is typically greater than one. The [length] must
+  /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
@@ -258,9 +312,14 @@ class DefaultTabController extends StatefulWidget {
     this.initialIndex = 0,
     @required this.child,
   }) : assert(initialIndex != null),
+       assert(length >= 0),
+       assert(initialIndex >= 0 && initialIndex < length),
        super(key: key);
 
-  /// The total number of tabs. Typically greater than one.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   /// The initial index of the selected tab.
@@ -317,5 +376,25 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
       enabled: TickerMode.of(context),
       child: widget.child,
     );
+  }
+
+  @override
+  void didUpdateWidget(DefaultTabController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.length != widget.length) {
+      // If the length is shortened while the last tab is selected, we should
+      // automatically update the index of the controller to be the new last tab.
+      int newIndex;
+      int previousIndex = _controller.previousIndex;
+      if (_controller.index >= widget.length) {
+        newIndex = math.max(0, widget.length - 1);
+        previousIndex = _controller.index;
+      }
+      _controller = _controller._copyWith(
+        length: widget.length,
+        index: newIndex,
+        previousIndex: previousIndex,
+      );
+    }
   }
 }

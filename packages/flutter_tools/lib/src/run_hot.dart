@@ -40,7 +40,7 @@ class HotRunnerConfig {
   }
 }
 
-HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 const bool kHotReloadDefault = true;
 
@@ -64,7 +64,6 @@ class HotRunner extends ResidentRunner {
     String projectRootPath,
     String packagesFilePath,
     this.dillOutputPath,
-    bool saveCompilationTrace = false,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
@@ -73,7 +72,6 @@ class HotRunner extends ResidentRunner {
              usesTerminalUI: usesTerminalUI,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
-             saveCompilationTrace: saveCompilationTrace,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -218,7 +216,7 @@ class HotRunner extends ResidentRunner {
         printStatus('Benchmark completed. Exiting application.');
         await _cleanupDevFS();
         await stopEchoingDeviceLog();
-        await stopApp();
+        await exitApp();
       }
       final File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
@@ -446,6 +444,7 @@ class HotRunner extends ResidentRunner {
                 // Resume the isolate so that it can be killed by the embedder.
                 return view.uiIsolate.resume();
               }
+              return null;
             },
           ).whenComplete(
             () { completer.complete(null); },
@@ -586,8 +585,6 @@ class HotRunner extends ResidentRunner {
           printStatus('${result.message}.');
         }
       }
-      if (result.hintMessage != null)
-        printStatus('\n${result.hintMessage}');
       return result;
     }
   }
@@ -923,12 +920,12 @@ class HotRunner extends ResidentRunner {
     if (_didAttach) {
       appFinished();
     } else {
-      await stopApp();
+      await exitApp();
     }
   }
 
   @override
-  Future<void> preStop() async {
+  Future<void> preExit() async {
     await _cleanupDevFS();
     await hotRunnerConfig.runPreShutdownOperations();
   }

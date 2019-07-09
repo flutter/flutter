@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
+import 'package:flutter_tools/src/usage.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -57,16 +58,16 @@ void main() {
       return projectPath;
     }
 
-    Future<void> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      final List<String> commandArgs = <String>['packages', verb];
-      if (args != null)
-        commandArgs.addAll(args);
-      commandArgs.add(projectPath);
-
-      await runner.run(commandArgs);
+      await runner.run(<String>[
+        'packages',
+        verb,
+        ...?args,
+        projectPath,
+      ]);
+      return command;
     }
 
     void expectExists(String projectPath, String relPath) {
@@ -217,6 +218,39 @@ void main() {
       expectZeroPluginsInjected(projectPath);
     }, timeout: allowForCreateFlutterProject);
 
+    testUsingContext('set the number of plugins as usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues, containsPair(kCommandPackagesNumberPlugins, '0'));
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('indicate that the project is not a module in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'false'));
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('indicate that the project is a module in usage value', () async {
+      final String projectPath = await createProject(tempDir,
+        arguments: <String>['--no-pub', '--template=module']);
+      removeGeneratedFiles(projectPath);
+
+      final PackagesCommand command = await runCommandIn(projectPath, 'get');
+      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
+
+      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'true'));
+    }, timeout: allowForCreateFlutterProject);
+
     testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(tempDir,
         arguments: <String>['--no-pub', '--template=module']);
@@ -308,7 +342,7 @@ void main() {
       Stdio: () => mockStdio,
     });
 
-    testUsingContext('publish', () async {
+    testUsingContext('pub publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
       final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
@@ -330,6 +364,85 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
+    });
+
+    testUsingContext('publish', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'publish');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('deps', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'deps']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'deps');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('cache', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'cache']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'cache');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('version', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'version']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'version');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('uploader', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'uploader']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(3));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'uploader');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
+    });
+
+    testUsingContext('global', () async {
+      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'global', 'list']);
+      final List<String> commands = mockProcessManager.commands;
+      expect(commands, hasLength(4));
+      expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
+      expect(commands[1], '--trace');
+      expect(commands[2], 'global');
+      expect(commands[3], 'list');
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Stdio: () => mockStdio,
+      BotDetector: () => const AlwaysTrueBotDetector(),
     });
   });
 }

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -22,7 +21,10 @@ import '../runner/flutter_command.dart';
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
+  'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
+  'test_api': '0.2.5', //  |
+  'test_core': '0.2.5' //  |
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -84,6 +86,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+  };
+
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
@@ -126,17 +133,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           return directory.path.endsWith('packages${fs.path.separator}$package');
         });
       });
-    }
-
-    // The dev/integration_tests/android_views integration test depends on an assets
-    // package that is in the goldens repository. We need to make sure that the goldens
-    // repository is cloned locally before we verify or update pubspecs.
-    printStatus('Cloning goldens repository...');
-    try {
-      final GoldensClient goldensClient = GoldensClient();
-      await goldensClient.prepare();
-    } on NonZeroExitCode catch (e) {
-      throwToolExit(e.stderr, exitCode: e.exitCode);
     }
 
     if (isVerifyOnly) {
@@ -729,9 +725,11 @@ class PubspecYaml {
     // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
     // and the dependencies we know this file mentions that are already pinned
     // (and which didn't get special processing above).
-    final Set<String> implied = Set<String>.from(directDependencies)
-      ..addAll(specialDependencies)
-      ..addAll(devDependencies);
+    final Set<String> implied = <String>{
+      ...directDependencies,
+      ...specialDependencies,
+      ...devDependencies,
+    };
 
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
@@ -752,12 +750,12 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
     // Build a sorted list of all dependencies for the checksum.
-    final Set<String> checksumDependencies = <String>{}
-      ..addAll(directDependencies)
-      ..addAll(devDependencies)
-      ..addAll(transitiveDependenciesAsList)
-      ..addAll(transitiveDevDependenciesAsList);
-    checksumDependencies.removeAll(specialDependencies);
+    final Set<String> checksumDependencies = <String>{
+      ...directDependencies,
+      ...devDependencies,
+      ...transitiveDependenciesAsList,
+      ...transitiveDevDependenciesAsList,
+    }..removeAll(specialDependencies);
 
     // Add a blank line before and after each section to keep the resulting output clean.
     transitiveDependencyOutput
@@ -1109,7 +1107,16 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
+    final Set<String> allTransitive = <String>{
+      for (PubspecDependency dependency in dependencies)
+        dependency.name
+    };
     for (String package in _kManuallyPinnedDependencies.keys) {
+      // Don't add pinned dependency if it is not in the set of all transitive dependencies.
+      if (!allTransitive.contains(package)) {
+        printStatus('Skipping $package because it was not transitive');
+        continue;
+      }
       final String version = _kManuallyPinnedDependencies[package];
       result.writeln('  $package: $version');
       printStatus('  - $package: $version');

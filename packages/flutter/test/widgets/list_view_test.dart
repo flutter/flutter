@@ -35,8 +35,10 @@ class AliveState extends State<Alive> with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => widget.alive;
 
   @override
-  Widget build(BuildContext context) =>
-     Text('${widget.index}:$wantKeepAlive');
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text('${widget.index}:$wantKeepAlive');
+  }
 }
 
 typedef WhetherToKeepAlive = bool Function(int);
@@ -210,7 +212,7 @@ void main() {
 
     await tester.pumpWidget(_StatefulListView((int i) => i % 3 == 0));
     await checkAndScroll('0:true');
-  });
+  }, skip: isBrowser);
 
   testWidgets('ListView can build out of underflow', (WidgetTester tester) async {
     await tester.pumpWidget(

@@ -4,12 +4,10 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
-import 'package:bsdiff/bsdiff.dart';
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -17,13 +15,15 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../runner/flutter_command.dart';
+import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -116,7 +116,7 @@ Future<GradleProject> _gradleProject() async {
 /// potentially downloaded.
 Future<void> checkGradleDependencies() async {
   final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: timeoutConfiguration.slowOperation);
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   await runCheckedAsync(
     <String>[gradle, 'dependencies'],
@@ -130,7 +130,7 @@ Future<void> checkGradleDependencies() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
   final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);
@@ -319,7 +319,7 @@ void _exitIfNoAndroidSdk() {
 
 Future<void> buildGradleProject({
   @required FlutterProject project,
-  @required BuildInfo buildInfo,
+  @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required bool isBuildingBundle,
 }) async {
@@ -331,7 +331,7 @@ Future<void> buildGradleProject({
   // and can be overwritten with flutter build command.
   // The default Gradle script reads the version name and number
   // from the local.properties file.
-  updateLocalProperties(project: project, buildInfo: buildInfo);
+  updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
   final String gradle = await _ensureGradle(project);
 
@@ -343,7 +343,7 @@ Future<void> buildGradleProject({
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
+      return _buildGradleProjectV2(project, gradle, androidBuildInfo, target, isBuildingBundle);
   }
 }
 
@@ -354,6 +354,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
+  final Stopwatch sw = Stopwatch()..start();
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
@@ -361,6 +362,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
     environment: _gradleEnv,
   );
   status.stop();
+  flutterUsage.sendTiming('build', 'gradle-v1', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (exitCode != 0)
     throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
@@ -368,14 +370,34 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
 }
 
+String _hex(List<int> bytes) {
+  final StringBuffer result = StringBuffer();
+  for (int part in bytes)
+    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  return result.toString();
+}
+
+String _calculateSha(File file) {
+  final Stopwatch sw = Stopwatch()..start();
+  final List<int> bytes = file.readAsBytesSync();
+  printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
+  flutterUsage.sendTiming('build', 'apk-sha-read', Duration(milliseconds: sw.elapsedMilliseconds));
+  sw.reset();
+  final String sha = _hex(sha1.convert(bytes).bytes);
+  printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
+  flutterUsage.sendTiming('build', 'apk-sha-calc', Duration(milliseconds: sw.elapsedMilliseconds));
+  return sha;
+}
+
 Future<void> _buildGradleProjectV2(
   FlutterProject flutterProject,
   String gradle,
-  BuildInfo buildInfo,
+  AndroidBuildInfo androidBuildInfo,
   String target,
   bool isBuildingBundle,
 ) async {
   final GradleProject project = await _gradleProject();
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
 
@@ -423,10 +445,6 @@ Future<void> _buildGradleProjectV2(
   }
   assert(buildInfo.trackWidgetCreation != null);
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
-  if (buildInfo.compilationTraceFilePath != null)
-    command.add('-Pcompilation-trace-file=${buildInfo.compilationTraceFilePath}');
-  if (buildInfo.createPatch)
-    command.add('-Ppatch=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
@@ -435,38 +453,44 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
-    command.add('-Pbuild-shared-library=true');
+  if (androidBuildInfo.splitPerAbi)
+    command.add('-Psplit-per-abi=true');
+  if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
-  if (buildInfo.targetPlatform != null)
-    command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
-
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
-  final int exitCode = await runCommandAndStreamOutput(
-    command,
-    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    allowReentrantFlutter: true,
-    environment: _gradleEnv,
-    // TODO(mklim): if AndroidX warnings are no longer required, this
-    // mapFunction and all its associated variabled can be replaced with just
-    // `filter: ndkMessagefilter`.
-    mapFunction: (String line) {
-      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
-      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
-        potentialAndroidXFailure = true;
-      }
-      // Always print the full line in verbose mode.
-      if (logger.isVerbose) {
-        return line;
-      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
-        return null;
-      }
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
+  try {
+    exitCode = await runCommandAndStreamOutput(
+      command,
+      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      allowReentrantFlutter: true,
+      environment: _gradleEnv,
+      // TODO(mklim): if AndroidX warnings are no longer required, this
+      // mapFunction and all its associated variabled can be replaced with just
+      // `filter: ndkMessagefilter`.
+      mapFunction: (String line) {
+        final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
+        if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
+          potentialAndroidXFailure = true;
+        }
+        // Always print the full line in verbose mode.
+        if (logger.isVerbose) {
+          return line;
+        } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
+          return null;
+        }
 
-      return line;
-    },
-  );
-  status.stop();
+        return line;
+      },
+    );
+  } finally {
+    status.stop();
+  }
 
   if (exitCode != 0) {
     if (potentialAndroidXFailure) {
@@ -474,140 +498,42 @@ Future<void> _buildGradleProjectV2(
       printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
       printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
       printError('*******************************************************************************************');
+      String commandName = '';
+      if (FlutterCommand.current != null) {
+        commandName = '-${FlutterCommand.current.name}';
+      }
+      flutterUsage.sendEvent('build$commandName', 'android-x-failure');
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
+  flutterUsage.sendTiming('build', 'gradle-v2', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (!isBuildingBundle) {
-    final File apkFile = _findApkFile(project, buildInfo);
-    if (apkFile == null)
+    final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
+    if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
-    // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-    apkFile.copySync(project.apkDirectory.childFile('app.apk').path);
+    // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
+    // TODO(blasten): Handle multiple APKs.
+    apkFiles.first.copySync(project.apkDirectory.childFile('app.apk').path);
 
     printTrace('calculateSha: ${project.apkDirectory}/app.apk');
     final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
-    apkShaFile.writeAsStringSync(calculateSha(apkFile));
+    apkShaFile.writeAsStringSync(_calculateSha(apkFiles.first));
 
-    String appSize;
-    if (buildInfo.mode == BuildMode.debug) {
-      appSize = '';
-    } else {
-      appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
-    }
-    printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
-
-    if (buildInfo.createBaseline) {
-      // Save baseline apk for generating dynamic patches in later builds.
-      final AndroidApk package = AndroidApk.fromApk(apkFile);
-      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
-      baselineApkFile.parent.createSync(recursive: true);
-      apkFile.copySync(baselineApkFile.path);
-      printStatus('Saved baseline package ${baselineApkFile.path}.');
-    }
-
-    if (buildInfo.createPatch) {
-      final AndroidApk package = AndroidApk.fromApk(apkFile);
-      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
-      if (!baselineApkFile.existsSync())
-        throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
-
-      printStatus('Found baseline package ${baselineApkFile.path}.');
-      printStatus('Creating dynamic patch...');
-      final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
-      final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
-
-      final Archive update = Archive();
-      for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile)
-          continue;
-
-        // Ignore changes to signature manifests.
-        if (newFile.name.startsWith('META-INF/'))
-          continue;
-
-        final ArchiveFile oldFile = oldApk.findFile(newFile.name);
-        if (oldFile != null && oldFile.crc32 == newFile.crc32)
-          continue;
-
-        // Only allow certain changes.
-        if (!newFile.name.startsWith('assets/') &&
-            !(buildInfo.usesAot && newFile.name.endsWith('.so')))
-          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
-
-        final String name = newFile.name;
-        if (name.contains('_snapshot_') || name.endsWith('.so')) {
-          final List<int> diff = bsdiff(oldFile.content, newFile.content);
-          final int ratio = 100 * diff.length ~/ newFile.content.length;
-          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
-          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
-        } else {
-          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
-        }
-      }
-
-      File updateFile;
-      if (buildInfo.patchNumber != null) {
-        updateFile = fs.directory(buildInfo.patchDir)
-            .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
+    for (File apkFile in apkFiles) {
+      String appSize;
+      if (buildInfo.mode == BuildMode.debug) {
+        appSize = '';
       } else {
-        updateFile = fs.directory(buildInfo.patchDir)
-            .childFile('${package.versionCode}.zip');
+        appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
       }
-
-      if (update.files.isEmpty) {
-        printStatus('No changes detected, creating rollback patch.');
-      }
-
-      final List<String> checksumFiles = <String>[
-        'assets/isolate_snapshot_data',
-        'assets/isolate_snapshot_instr',
-        'assets/flutter_assets/isolate_snapshot_data',
-      ];
-
-      int baselineChecksum = 0;
-      for (String fn in checksumFiles) {
-        final ArchiveFile oldFile = oldApk.findFile(fn);
-        if (oldFile != null)
-          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
-      }
-      if (baselineChecksum == 0)
-        throwToolExit('Error: Could not find baseline VM snapshot.');
-
-      final Map<String, dynamic> manifest = <String, dynamic>{
-        'baselineChecksum': baselineChecksum,
-        'buildNumber': package.versionCode,
-      };
-
-      if (buildInfo.patchNumber != null) {
-        manifest.addAll(<String, dynamic>{
-          'patchNumber': buildInfo.patchNumber,
-        });
-      }
-
-      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-      final String manifestJson = encoder.convert(manifest);
-      update.addFile(ArchiveFile('manifest.json', manifestJson.length, manifestJson.codeUnits));
-
-      updateFile.parent.createSync(recursive: true);
-      updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      final String patchSize = getSizeAsMB(updateFile.lengthSync());
-      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
+      printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.',
+          color: TerminalColor.green);
     }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
-    // Copy the bundle to app.aab, so `flutter run`, `flutter install`, etc. can find it.
-    bundleFile.copySync(project.bundleDirectory
-        .childFile('app.aab')
-        .path);
-
-    printTrace('calculateSha: ${project.bundleDirectory}/app.aab');
-    final File bundleShaFile = project.bundleDirectory.childFile('app.aab.sha1');
-    bundleShaFile.writeAsStringSync(calculateSha(bundleFile));
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -615,28 +541,39 @@ Future<void> _buildGradleProjectV2(
     } else {
       appSize = ' (${getSizeAsMB(bundleFile.lengthSync())})';
     }
-    printStatus('Built ${fs.path.relative(bundleFile.path)}$appSize.');
+    printStatus('Built ${fs.path.relative(bundleFile.path)}$appSize.',
+        color: TerminalColor.green);
   }
 }
 
-File _findApkFile(GradleProject project, BuildInfo buildInfo) {
-  final String apkFileName = project.apkFileFor(buildInfo);
-  if (apkFileName == null)
-    return null;
-  File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));
-  if (apkFile.existsSync())
-    return apkFile;
-  final String modeName = camelCase(buildInfo.modeName);
-  apkFile = fs.file(fs.path.join(project.apkDirectory.path, modeName, apkFileName));
-  if (apkFile.existsSync())
-    return apkFile;
-  if (buildInfo.flavor != null) {
-    // Android Studio Gradle plugin v3 adds flavor to path.
-    apkFile = fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
+@visibleForTesting
+Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
+  final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
+  if (apkFileNames.isEmpty)
+    return const <File>[];
+
+  return apkFileNames.expand<File>((String apkFileName) {
+    File apkFile = project.apkDirectory.childFile(apkFileName);
     if (apkFile.existsSync())
-      return apkFile;
-  }
-  return null;
+      return <File>[apkFile];
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
+    final String modeName = camelCase(buildInfo.modeName);
+    apkFile = project.apkDirectory
+        .childDirectory(modeName)
+        .childFile(apkFileName);
+    if (apkFile.existsSync())
+      return <File>[apkFile];
+    if (buildInfo.flavor != null) {
+      // Android Studio Gradle plugin v3 adds flavor to path.
+      apkFile = project.apkDirectory
+          .childDirectory(buildInfo.flavor)
+          .childDirectory(modeName)
+          .childFile(apkFileName);
+      if (apkFile.existsSync())
+        return <File>[apkFile];
+    }
+    return const <File>[];
+  });
 }
 
 File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
@@ -644,17 +581,17 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
 
   if (bundleFileName == null)
     return null;
-  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, bundleFileName));
-  if (bundleFile.existsSync()) {
-    return bundleFile;
-  }
   final String modeName = camelCase(buildInfo.modeName);
-  bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
+  File bundleFile = project.bundleDirectory.childDirectory(modeName).childFile(bundleFileName);
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {
+
     // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
-    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
+    // On linux, filenames are case sensitive.
+    bundleFile = project.bundleDirectory
+        .childDirectory(camelCase('${buildInfo.flavor}_$modeName'))
+        .childFile(bundleFileName);
     if (bundleFile.existsSync())
       return bundleFile;
   }
@@ -667,6 +604,10 @@ Map<String, String> get _gradleEnv {
     // Use java bundled with Android Studio.
     env['JAVA_HOME'] = javaPath;
   }
+
+  // Don't log analytics for downstream Flutter commands.
+  // e.g. `flutter build bundle`.
+  env['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';
   return env;
 }
 
@@ -743,13 +684,20 @@ class GradleProject {
     return 'assemble${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
-  String apkFileFor(BuildInfo buildInfo) {
-    final String buildType = _buildTypeFor(buildInfo);
-    final String productFlavor = _productFlavorFor(buildInfo);
+  Iterable<String> apkFilesFor(AndroidBuildInfo androidBuildInfo) {
+    final String buildType = _buildTypeFor(androidBuildInfo.buildInfo);
+    final String productFlavor = _productFlavorFor(androidBuildInfo.buildInfo);
     if (buildType == null || productFlavor == null)
-      return null;
+      return const <String>[];
+
     final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
-    return 'app$flavorString-$buildType.apk';
+    if (androidBuildInfo.splitPerAbi) {
+      return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
+        final String abi = getNameForAndroidArch(arch);
+        return 'app$flavorString-$abi-$buildType.apk';
+      });
+    }
+    return <String>['app$flavorString-$buildType.apk'];
   }
 
   String bundleTaskFor(BuildInfo buildInfo) {

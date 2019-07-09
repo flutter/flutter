@@ -16,6 +16,10 @@ import 'globals.dart';
 import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+
+const String kSessionHostOsDetails = 'cd1';
+const String kSessionChannelName = 'cd2';
+
 const String kEventReloadReasonParameterName = 'cd5';
 const String kEventReloadFinalLibraryCount = 'cd6';
 const String kEventReloadSyncedLibraryCount = 'cd7';
@@ -25,6 +29,27 @@ const String kEventReloadSyncedBytes = 'cd10';
 const String kEventReloadInvalidatedSourcesCount = 'cd11';
 const String kEventReloadTransferTimeInMs = 'cd12';
 const String kEventReloadOverallTimeInMs = 'cd13';
+
+const String kCommandRunIsEmulator = 'cd3';
+const String kCommandRunTargetName = 'cd4';
+const String kCommandRunProjectType = 'cd14';
+const String kCommandRunProjectHostLanguage = 'cd15';
+const String kCommandRunProjectModule = 'cd18';
+const String kCommandRunTargetOsVersion = 'cd22';
+const String kCommandRunModeName = 'cd23';
+
+const String kCommandCreateAndroidLanguage = 'cd16';
+const String kCommandCreateIosLanguage = 'cd17';
+const String kCommandCreateProjectType = 'cd19';
+
+const String kCommandPackagesNumberPlugins = 'cd20';
+const String kCommandPackagesProjectModule = 'cd21';
+
+const String kCommandBuildBundleTargetPlatform = 'cd24';
+const String kCommandBuildBundleIsModule = 'cd25';
+
+const String kCommandResult = 'cd26';
+// Next ID: cd27
 
 Usage get flutterUsage => Usage.instance;
 
@@ -38,24 +63,25 @@ class Usage {
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue('cd1', os.name);
+    _analytics.setSessionValue(kSessionHostOsDetails, os.name);
     // Send the branch name as the "channel".
-    _analytics.setSessionValue('cd2', flutterVersion.getBranchName(redactUnknownBranches: true));
+    _analytics.setSessionValue(kSessionChannelName, flutterVersion.getBranchName(redactUnknownBranches: true));
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
+    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     // Many CI systems don't do a full git checkout.
-    if (version.endsWith('/unknown') || isRunningOnBot) {
+    if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
     }
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context[Usage];
+  static Usage get instance => context.get<Usage>();
 
   Analytics _analytics;
 
@@ -148,7 +174,7 @@ class Usage {
     printStatus('');
     printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════╗
-  ║                 Welcome to Flutter! - https://flutter.io                   ║
+  ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
   ║ The Flutter tool anonymously reports feature usage statistics and crash    ║
   ║ reports to Google in order to help Google contribute improvements to       ║

@@ -82,7 +82,7 @@ class SnippetGenerator {
         return description.join('\n').trim();
       } else {
         // If the match isn't found in the injections, then just remove the
-        // moustache reference, since we want to allow the sections to be
+        // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
         return injections
@@ -127,15 +127,16 @@ class SnippetGenerator {
       'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
-    }..addAll(type == SnippetType.application
-        ? <String, String>{
-            'serial': metadata['serial'].toString() ?? '0',
-            'id':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
-            'app':
-                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
-          }
-        : <String, String>{'serial': '', 'id': '', 'app': ''});
+      'serial': '',
+      'id': '',
+      'app': '',
+    };
+    if (type == SnippetType.application) {
+      substitutions
+        ..['serial'] = metadata['serial'].toString() ?? '0'
+        ..['id'] = injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent
+        ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
+    }
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
@@ -175,7 +176,8 @@ class SnippetGenerator {
     }
     return <_ComponentTuple>[
       _ComponentTuple('description', description),
-    ]..addAll(components);
+      ...components,
+    ];
   }
 
   String _loadFileAsUtf8(File file) {
@@ -252,9 +254,7 @@ class SnippetGenerator {
         metadata.addAll(<String, Object>{
           'id': id,
           'file': path.basename(outputFile.path),
-          'description': description != null
-              ? description.mergedContent
-              : null,
+          'description': description?.mergedContent,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;

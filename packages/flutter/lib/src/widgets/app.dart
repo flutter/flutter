@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -373,6 +374,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  ///
   /// {@endtemplate}
   final String initialRoute;
 
@@ -625,7 +627,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * <https://flutter.io/debugging/#performanceoverlay>
+  ///  * <https://flutter.dev/debugging/#performanceoverlay>
   final bool showPerformanceOverlay;
 
   /// Checkerboards raster cache images.
@@ -873,11 +875,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
   ///  3. [Locale.languageCode] and [Locale.countryCode] only
   ///  4. [Locale.languageCode] only (with caveats, see above)
-  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  5. returns [supportedLocales.first] as a fallback
+  ///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  6. returns [supportedLocales.first] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
@@ -1068,7 +1070,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         );
       }
       message.writeln(
-        'See https://flutter.io/tutorials/internationalization/ for more\n'
+        'See https://flutter.dev/tutorials/internationalization/ for more\n'
         'information about configuring an app\'s locale, supportedLocales,\n'
         'and localizationsDelegates parameters.'
       );
@@ -1190,12 +1192,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-      child: Localizations(
-        locale: appLocale,
-        delegates: _localizationsDelegates.toList(),
-        child: title,
+    return DefaultFocusTraversal(
+      policy: ReadingOrderTraversalPolicy(),
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Localizations(
+          locale: appLocale,
+          delegates: _localizationsDelegates.toList(),
+          child: title,
+        ),
       ),
     );
   }

@@ -19,22 +19,33 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'desktop.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'linux/linux_doctor.dart';
+import 'linux/linux_workflow.dart';
+import 'macos/cocoapods_validator.dart';
+import 'macos/macos_workflow.dart';
+import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
+import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'web/web_validator.dart';
+import 'web/workflow.dart';
+import 'windows/visual_studio_validator.dart';
+import 'windows/windows_workflow.dart';
 
-Doctor get doctor => context[Doctor];
+Doctor get doctor => context.get<Doctor>();
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+  static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 
@@ -49,29 +60,37 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(FlutterValidator());
+      final List<DoctorValidator> ideValidators = <DoctorValidator>[
+        ...AndroidStudioValidator.allValidators,
+        ...IntelliJValidator.installedValidators,
+        ...VsCodeValidator.installedValidators,
+      ];
 
-      if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
-
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
-
-      final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-      ideValidators.addAll(AndroidStudioValidator.allValidators);
-      ideValidators.addAll(IntelliJValidator.installedValidators);
-      ideValidators.addAll(VsCodeValidator.installedValidators);
-      if (ideValidators.isNotEmpty)
-        _validators.addAll(ideValidators);
-      else
-        _validators.add(NoIdeValidator());
-
-      if (ProxyValidator.shouldShow)
-        _validators.add(ProxyValidator());
-
-      if (deviceManager.canListAnything)
-        _validators.add(DeviceValidator());
+      _validators = <DoctorValidator>[
+        FlutterValidator(),
+        if (androidWorkflow.appliesToHostPlatform)
+          GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
+        if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+          GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+        if (iosWorkflow.appliesToHostPlatform)
+          iosValidator,
+        if (webWorkflow.appliesToHostPlatform)
+          const WebValidator(),
+        // Add desktop doctors to workflow if the flag is enabled.
+        if (flutterDesktopEnabled)
+          ...<DoctorValidator>[
+            if (linuxWorkflow.appliesToHostPlatform) LinuxDoctorValidator(),
+            if (windowsWorkflow.appliesToHostPlatform) visualStudioValidator,
+          ],
+        if (ideValidators.isNotEmpty)
+          ...ideValidators
+        else
+          NoIdeValidator(),
+        if (ProxyValidator.shouldShow)
+          ProxyValidator(),
+        if (deviceManager.canListAnything)
+          DeviceValidator(),
+      ];
     }
     return _validators;
   }
@@ -89,6 +108,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (fuchsiaWorkflow.appliesToHostPlatform)
         _workflows.add(fuchsiaWorkflow);
+
+      if (linuxWorkflow.appliesToHostPlatform)
+        _workflows.add(linuxWorkflow);
+
+      if (macOSWorkflow.appliesToHostPlatform)
+        _workflows.add(macOSWorkflow);
+
+      if (windowsWorkflow.appliesToHostPlatform)
+        _workflows.add(windowsWorkflow);
+
     }
     return _workflows;
   }
@@ -212,6 +241,8 @@ class Doctor {
           break;
       }
 
+      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
+
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
@@ -260,6 +291,8 @@ class Doctor {
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
 abstract class Workflow {
+  const Workflow();
+
   /// Whether the workflow applies to this platform (as in, should we ever try and use it).
   bool get appliesToHostPlatform;
 
@@ -289,6 +322,7 @@ enum ValidationMessageType {
 abstract class DoctorValidator {
   const DoctorValidator(this.title);
 
+  /// This is displayed in the CLI.
   final String title;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
@@ -396,6 +430,22 @@ class ValidationResult {
     }
     return null;
   }
+
+  /// The string representation of the type.
+  String get typeStr {
+    assert(type != null);
+    switch (type) {
+      case ValidationType.missing:
+        return 'missing';
+      case ValidationType.installed:
+        return 'installed';
+      case ValidationType.notAvailable:
+        return 'notAvailable';
+      case ValidationType.partial:
+        return 'partial';
+    }
+    return null;
+  }
 }
 
 class ValidationMessage {
@@ -434,6 +484,19 @@ class ValidationMessage {
 
   @override
   String toString() => message;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final ValidationMessage typedOther = other;
+    return typedOther.message == message
+      && typedOther.type == type;
+  }
+
+  @override
+  int get hashCode => type.hashCode ^ message.hashCode;
 }
 
 class FlutterValidator extends DoctorValidator {

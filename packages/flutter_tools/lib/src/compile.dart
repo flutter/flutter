@@ -23,7 +23,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
 
 class KernelCompilerFactory {
   const KernelCompilerFactory();
@@ -38,7 +38,7 @@ class KernelCompilerFactory {
 
 typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 
-/// The target model describes the set of core libraries that are availible within
+/// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
   /// Parse a [TargetModel] from a raw string.
@@ -230,7 +230,7 @@ class KernelCompiler {
     );
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
 
     // TODO(cbracken): eliminate pathFilter.
@@ -246,7 +246,7 @@ class KernelCompiler {
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
           'engineHash': Cache.instance.engineRevision,
-          'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+          'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
@@ -281,8 +281,12 @@ class KernelCompiler {
       command.add('--aot');
       command.add('--tfa');
     }
+    // If we're not targeting product (release) mode and we're still aot, then
+    // target profile mode.
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
+    } else if (aot) {
+      command.add('-Ddart.vm.profile=true');
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
@@ -446,8 +450,8 @@ class ResidentCompiler {
   String _sdkRoot;
   Process _server;
   final StdoutHandler _stdoutHandler;
-  String _initializeFromDill;
-  bool _unsafePackageSerialization;
+  final String _initializeFromDill;
+  final bool _unsafePackageSerialization;
   final List<String> _experimentalFlags;
   bool _compileRequestNeedsConfirmation = false;
 
@@ -730,10 +734,11 @@ class ResidentCompiler {
   }
 
   Future<dynamic> shutdown() async {
-    // Server was never sucessfully created.
+    // Server was never successfully created.
     if (_server == null) {
       return 0;
     }
+    printTrace('killing pid ${_server.pid}');
     _server.kill();
     return _server.exitCode;
   }

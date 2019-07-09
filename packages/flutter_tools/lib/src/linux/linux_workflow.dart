@@ -8,7 +8,7 @@ import '../desktop.dart';
 import '../doctor.dart';
 
 /// The [WindowsWorkflow] instance.
-LinuxWorkflow get linuxWorkflow => context[LinuxWorkflow];
+LinuxWorkflow get linuxWorkflow => context.get<LinuxWorkflow>();
 
 /// The windows-specific implementation of a [Workflow].
 ///
@@ -21,10 +21,10 @@ class LinuxWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isLinux;
 
   @override
-  bool get canLaunchDevices => flutterDesktopEnabled;
+  bool get canLaunchDevices => platform.isLinux && flutterDesktopEnabled;
 
   @override
-  bool get canListDevices => flutterDesktopEnabled;
+  bool get canListDevices => platform.isLinux && flutterDesktopEnabled;
 
   @override
   bool get canListEmulators => false;

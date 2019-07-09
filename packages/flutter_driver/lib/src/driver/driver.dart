@@ -15,10 +15,12 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
 import '../common/fuchsia_compat.dart';
+import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -63,7 +65,8 @@ const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-const Duration _kUnusuallyLongTimeout = Duration(seconds: 5);
+@visibleForTesting
+const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
@@ -99,17 +102,7 @@ Future<T> _warnIfSlow<T>({
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  return future..timeout(timeout, onTimeout: () { _log.warning(message); });
-}
-
-Duration _maxDuration(Duration a, Duration b) {
-  if (a == null)
-    return b;
-  if (b == null)
-    return a;
-  if (a > b)
-    return a;
-  return b;
+  return future..timeout(timeout, onTimeout: () { _log.warning(message); return null; });
 }
 
 /// A convenient accessor to frequently used finders.
@@ -130,12 +123,12 @@ typedef EvaluatorFunction = dynamic Function();
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_serviceClient], [_peer] and [_appIsolate].
+  /// [serviceClient], [_peer] and [appIsolate].
   @visibleForTesting
   FlutterDriver.connectedTo(
-    this._serviceClient,
+    this.serviceClient,
     this._peer,
-    this._appIsolate, {
+    this.appIsolate, {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
   }) : _printCommunication = printCommunication,
@@ -143,12 +136,28 @@ class FlutterDriver {
        _driverId = _nextDriverId++;
 
   static const String _flutterExtensionMethodName = 'ext.flutter.driver';
-  static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
-  static const String _getVMTimelineMethodName = '_getVMTimeline';
-  static const String _clearVMTimelineMethodName = '_clearVMTimeline';
+  static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = 'getVMTimeline';
+  static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;
+
+  // The additional blank line in the beginning is for _log.warning.
+  static const String _kDebugWarning = '''
+
+┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
+┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
+┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦
+│                                                       │
+│  Numbers obtained from a benchmark while asserts are  │
+│  enabled will not accurately reflect the performance  │
+│  that will be experienced by end users using release  ╎
+│  builds. Benchmarks should be run using this command  ┆
+│  line:  flutter drive --profile test_perf.dart        ┊
+│                                                       ┊
+└─────────────────────────────────────────────────╌┄┈  🐢
+''';
 
   /// Connects to a Flutter application.
   ///
@@ -318,7 +327,7 @@ class FlutterDriver {
       // register it. If that happens, show a message but continue waiting.
       await _warnIfSlow<String>(
         future: whenServiceExtensionReady,
-        timeout: _kUnusuallyLongTimeout,
+        timeout: kUnusuallyLongTimeout,
         message: 'Flutter Driver extension is taking a long time to become available. '
                  'Ensure your test app (often "lib/main.dart") imports '
                  '"package:flutter_driver/driver_extension.dart" and '
@@ -375,13 +384,22 @@ class FlutterDriver {
   final int _driverId;
 
   /// Client connected to the Dart VM running the Flutter application
-  final VMServiceClient _serviceClient;
+  ///
+  /// You can use [VMServiceClient] to check VM version, flags and get
+  /// notified when a new isolate has been instantiated. That could be
+  /// useful if your application spawns multiple isolates that you
+  /// would like to instrument.
+  final VMServiceClient serviceClient;
 
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
 
-  /// The main isolate hosting the Flutter application
-  final VMIsolate _appIsolate;
+  /// The main isolate hosting the Flutter application.
+  ///
+  /// If you used the [registerExtension] API to instrument your application,
+  /// you can use this [VMIsolate] to call these extension methods via
+  /// [invokeExtension].
+  final VMIsolate appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
@@ -394,13 +412,13 @@ class FlutterDriver {
     try {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
-      final Future<Map<String, dynamic>> future = _appIsolate.invokeExtension(
+      final Future<Map<String, dynamic>> future = appIsolate.invokeExtension(
         _flutterExtensionMethodName,
         serialized,
       ).then<Map<String, dynamic>>((Object value) => value);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
-        timeout: _maxDuration(command.timeout, _kUnusuallyLongTimeout),
+        timeout: command.timeout ?? kUnusuallyLongTimeout,
         message: '${command.kind} message is taking a long time to complete...',
       );
       _logCommunication('<<< $response');
@@ -457,6 +475,121 @@ class FlutterDriver {
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+  }
+
+  Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
+    final GetOffset command = GetOffset(finder, type, timeout: timeout);
+    final GetOffsetResult result = GetOffsetResult.fromJson(await _sendCommand(command));
+    return DriverOffset(result.dx, result.dy);
+  }
+
+  /// Returns the point at the top left of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
+  Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the top right of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
+  Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topRight, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom left of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
+  Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom right of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
+  Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
+  }
+
+  /// Returns the point at the center of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
+  Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.center, timeout: timeout);
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [RenderObject] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [RenderObject] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [RenderObject]s are responsible for positioning, layout, and painting on
+  /// the screen, based on the configuration from a [Widget]. Callers that need
+  /// information about size or position should use this method.
+  ///
+  /// A widget may indirectly create multiple [RenderObject]s, which each
+  /// implement some aspect of the widget configuration. A 1:1 relationship
+  /// should not be assumed.
+  ///
+  /// See also:
+  ///
+  ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
+  Future<Map<String, Object>> getRenderObjectDiagnostics(
+      SerializableFinder finder, {
+      int subtreeDepth = 0,
+      bool includeProperties = true,
+      Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [Widget] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [Widget] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [Widget]s describe configuration for the rendering tree. Individual
+  /// widgets may create multiple [RenderObject]s to actually layout and paint
+  /// the desired configuration.
+  ///
+  /// See also:
+  ///
+  ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
+  ///    [RenderObject].
+  Future<Map<String, Object>> getWidgetDiagnostics(
+    SerializableFinder finder, {
+    int subtreeDepth = 0,
+    bool includeProperties = true,
+    Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -708,7 +841,9 @@ class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
-    return result['flags'];
+    return result != null
+        ? result['flags'].cast<Map<String,dynamic>>()
+        : const <Map<String, dynamic>>[];
   }
 
   /// Starts recording performance traces.
@@ -718,7 +853,7 @@ class FlutterDriver {
   /// operation.
   Future<void> startTracing({
     List<TimelineStream> streams = _defaultStreams,
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(streams != null && streams.isNotEmpty);
     assert(timeout != null);
@@ -745,7 +880,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<Timeline> stopTracingAndDownloadTimeline({
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {
@@ -764,6 +899,16 @@ class FlutterDriver {
     }
   }
 
+  Future<bool> _isPrecompiledMode() async {
+    final List<Map<String, dynamic>> flags = await getVmFlags();
+    for(Map<String, dynamic> flag in flags) {
+      if (flag['name'] == 'precompiled_mode') {
+        return flag['valueAsString'] == 'true';
+      }
+    }
+    return false;
+  }
+
   /// Runs [action] and outputs a performance trace for it.
   ///
   /// Waits for the `Future` returned by [action] to complete prior to stopping
@@ -778,6 +923,9 @@ class FlutterDriver {
   /// If [retainPriorEvents] is true, retains events recorded prior to calling
   /// [action]. Otherwise, prior events are cleared before calling [action]. By
   /// default, prior events are cleared.
+  ///
+  /// If this is run in debug mode, a warning message will be printed to suggest
+  /// running the benchmark in profile mode instead.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
     List<TimelineStream> streams = _defaultStreams,
@@ -788,6 +936,10 @@ class FlutterDriver {
     }
     await startTracing(streams: streams);
     await action();
+
+    if (!(await _isPrecompiledMode())) {
+      _log.warning(_kDebugWarning);
+    }
     return stopTracingAndDownloadTimeline();
   }
 
@@ -797,7 +949,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<void> clearTimeline({
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {
@@ -847,7 +999,7 @@ class FlutterDriver {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
-            'isolateId': 'isolates/${_appIsolate.numberAsString}',
+            'isolateId': 'isolates/${appIsolate.numberAsString}',
           });
     } catch (error, stackTrace) {
       throw DriverError(
@@ -863,7 +1015,7 @@ class FlutterDriver {
   /// Returns a [Future] that fires once the connection has been closed.
   Future<void> close() async {
     // Don't leak vm_service_client-specific objects, if any
-    await _serviceClient.close();
+    await serviceClient.close();
     await _peer.close();
   }
 }
@@ -898,12 +1050,52 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
+  _log.trace('Unhandled RPC error:\n$error\n$stack');
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+  // assert(false);
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   Uri uri = Uri.parse(url);
+  final List<String> pathSegments = <String>[];
+  // If there's an authentication code (default), we need to add it to our path.
+  if (uri.pathSegments.isNotEmpty) {
+    pathSegments.add(uri.pathSegments.first);
+  }
+  pathSegments.add('ws');
   if (uri.scheme == 'http')
-    uri = uri.replace(scheme: 'ws', path: '/ws');
+    uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
@@ -913,7 +1105,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws2 = await WebSocket.connect(uri.toString());
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast())..listen(),
+        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
       );
     } catch (e) {
       await ws1?.close();
@@ -946,5 +1138,53 @@ class CommonFinders {
   SerializableFinder byType(String type) => ByType(type);
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
-  SerializableFinder pageBack() => PageBack();
+  SerializableFinder pageBack() => const PageBack();
+
+  /// Finds the widget that is an ancestor of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder ancestor({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+
+  /// Finds the widget that is an descendant of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder descendant({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
+}
+
+/// An immutable 2D floating-point offset used by Flutter Driver.
+class DriverOffset {
+  /// Creates an offset.
+  const DriverOffset(this.dx, this.dy);
+
+  /// The x component of the offset.
+  final double dx;
+
+  /// The y component of the offset.
+  final double dy;
+
+  @override
+  String toString() => '$runtimeType($dx, $dy)';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! DriverOffset)
+      return false;
+    final DriverOffset typedOther = other;
+    return dx == typedOther.dx && dy == typedOther.dy;
+  }
+
+  @override
+  int get hashCode => dx.hashCode + dy.hashCode;
 }

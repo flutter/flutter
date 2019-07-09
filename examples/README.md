@@ -3,7 +3,7 @@ Flutter Examples
 
 This directory contains several examples of using Flutter. To run an example,
 use `flutter run` inside that example's directory. See the [getting started
-guide](https://flutter.io/getting-started/) to install the `flutter` tool.
+guide](https://flutter.dev/getting-started/) to install the `flutter` tool.
 
 For additional samples, see the
 [`flutter/samples`](https://github.com/flutter/samples) repo.
@@ -23,7 +23,7 @@ Available examples include:
 
 - **Platform Channel** The [platform channel app](platform_channel) demonstrates
   how to connect a Flutter app to platform-specific APIs. For documentation, see
-  <https://flutter.io/platform-channels/>.
+  <https://flutter.dev/platform-channels/>.
 
 - **Platform Channel Swift** The [platform channel swift
   app](platform_channel_swift) is the same as [platform

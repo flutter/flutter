@@ -462,39 +462,6 @@ void main() {
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
   });
-
-  testWidgets('test edge swipe then drop back at ending point works', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      CupertinoApp(
-        onGenerateRoute: (RouteSettings settings) {
-          return CupertinoPageRoute<void>(
-            settings: settings,
-            builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? '1' : '2';
-              return Center(child: Text('Page $pageNumber'));
-            },
-          );
-        },
-      ),
-    );
-
-    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.text('Page 1'), findsNothing);
-    expect(find.text('Page 2'), isOnstage);
-
-    final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
-    // The width of the page.
-    await gesture.moveBy(const Offset(800, 0));
-    await gesture.up();
-    await tester.pump();
-
-    expect(find.text('Page 1'), isOnstage);
-    expect(find.text('Page 2'), findsNothing);
-  });
 }
 
 class RtlOverrideWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {

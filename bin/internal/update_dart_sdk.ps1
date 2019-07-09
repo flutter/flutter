@@ -28,7 +28,7 @@ $psMajorVersionRequired = 5
 $psMajorVersionLocal = $PSVersionTable.PSVersion.Major
 if ($psMajorVersionLocal -lt $psMajorVersionRequired) {
     Write-Host "Flutter requires PowerShell $psMajorVersionRequired.0 or newer."
-    Write-Host "See https://flutter.io/docs/get-started/install/windows for more."
+    Write-Host "See https://flutter.dev/docs/get-started/install/windows for more."
     return
 }
 

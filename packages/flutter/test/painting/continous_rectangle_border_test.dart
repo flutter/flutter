@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +22,7 @@ void main() {
   });
 
   test('ContinuousRectangleBorder BorderRadius.zero', () {
-    final Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
       includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
@@ -43,10 +42,10 @@ void main() {
     const BorderSide side = BorderSide(width: 4.0);
     expect(const ContinuousRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const ContinuousRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
-  });
+  }, skip: isBrowser);
 
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
-    final Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
       includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],
@@ -56,7 +55,7 @@ void main() {
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -72,10 +71,13 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'continuous_rectangle_border.golden_test_even_radii.png',
+        version: null,
+      ),
+      skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test varying radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -94,10 +96,13 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'continuous_rectangle_border.golden_test_varying_radii.png',
+        version: null,
+      ),
+      skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test large radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -113,9 +118,12 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'continuous_rectangle_border.golden_test_large_radii.png',
+        version: null,
+      ),
+      skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
 }

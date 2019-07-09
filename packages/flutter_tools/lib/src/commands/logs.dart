@@ -26,14 +26,17 @@ class LogsCommand extends FlutterCommand {
   @override
   final String description = 'Show log output for running Flutter apps.';
 
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
   Device device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);
-    return super.verifyThenRunCommand(commandPath);
+    return super.verifyThenRunCommand();
   }
 
   @override

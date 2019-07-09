@@ -5,19 +5,21 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../usage.dart';
+import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp = false}) {
+  BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicBaselineFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
@@ -28,7 +30,16 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios'],
+        allowed: const <String>[
+          'android-arm',
+          'android-arm64',
+          'android-x86',
+          'android-x64',
+          'ios',
+          'darwin-x64',
+          'linux-x64',
+          'windows-x64',
+        ],
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -48,7 +59,11 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+
+    bundleBuilder ??= BundleBuilder();
   }
+
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -62,17 +77,43 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
+  Future<Map<String, String>> get usageValues async {
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+
+    if (futterProject == null) {
+      return const <String, String>{};
+    }
+
+    return <String, String>{
+      kCommandBuildBundleTargetPlatform: argResults['target-platform'],
+      kCommandBuildBundleIsModule: '${futterProject.isModule}'
+    };
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
+    if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
+    }
+    // Check for target platforms that are only allowed on unstable Flutter.
+    switch (platform) {
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        if (!FlutterVersion.instance.isMaster) {
+          throwToolExit('$targetPlatform is not supported on stable Flutter.');
+        }
+        break;
+      default:
+        break;
+    }
 
     final BuildMode buildMode = getBuildMode();
 
-    final String buildNumber = argResults['build-number'] != null ? argResults['build-number'] : null;
-
-    await build(
+    await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,
@@ -83,10 +124,6 @@ class BuildBundleCommand extends BuildSubCommand {
       precompiledSnapshot: argResults['precompiled'],
       reportLicensedPackages: argResults['report-licensed-packages'],
       trackWidgetCreation: argResults['track-widget-creation'],
-      compilationTraceFilePath: argResults['compilation-trace-file'],
-      createPatch: argResults['patch'],
-      buildNumber: buildNumber,
-      baselineDir: argResults['baseline-dir'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],

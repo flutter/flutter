@@ -9,10 +9,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void sendFakeKeyEvent(Map<String, dynamic> data) {
-  BinaryMessages.handlePlatformMessage(
+  defaultBinaryMessenger.handlePlatformMessage(
     SystemChannels.keyEvent.name,
     SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) { },
+    (ByteData data) {},
   );
 }
 
@@ -29,13 +29,15 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(RawKeyboardListener(
-      focusNode: focusNode,
-      onKey: events.add,
-      child: Container(),
-    ));
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: events.add,
+        child: Container(),
+      ),
+    );
 
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+    focusNode.requestFocus();
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
@@ -65,13 +67,15 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(RawKeyboardListener(
-      focusNode: focusNode,
-      onKey: events.add,
-      child: Container(),
-    ));
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: events.add,
+        child: Container(),
+      ),
+    );
 
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+    focusNode.requestFocus();
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
