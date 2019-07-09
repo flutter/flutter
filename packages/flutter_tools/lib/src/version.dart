@@ -32,9 +32,10 @@ class FlutterVersion {
     return _repositoryUrl;
   }
 
-  /// Whether we are currently on the stable branch.
-  bool get isStable {
-    return getBranchName() == 'stable';
+  /// Whether we are currently on the master branch.
+  bool get isMaster {
+    final String branchName = getBranchName();
+    return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
   static const Set<String> officialChannels = <String>{
@@ -132,12 +133,15 @@ class FlutterVersion {
   String get frameworkCommitDate => _latestGitCommitDate();
 
   static String _latestGitCommitDate([ String branch ]) {
-    final List<String> args = <String>['git', 'log'];
-
-    if (branch != null)
-      args.add(branch);
-
-    args.addAll(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']);
+    final List<String> args = <String>[
+      'git',
+      'log',
+      if (branch != null) branch,
+      '-n',
+      '1',
+      '--pretty=format:%ad',
+      '--date=iso',
+    ];
     return _runSync(args, lenient: false);
   }
 

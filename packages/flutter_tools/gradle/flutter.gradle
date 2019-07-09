@@ -223,8 +223,16 @@ class FlutterPlugin implements Plugin<Project> {
                             initWith debug
                         }
                     }
+                    
+                    pluginProject.android.buildTypes.each {
+                        def buildMode = buildModeFor(it)
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                    }
+                    pluginProject.android.buildTypes.whenObjectAdded {
+                        def buildMode = buildModeFor(it)
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                    }
                 }
-                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
@@ -268,13 +276,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static Boolean getBuildShareLibrary(Project project) {
-        if (project.hasProperty('build-shared-library')) {
-            return project.property('build-shared-library').toBoolean()
-        }
-        return false;
-    }
-
     private static Boolean splitPerAbi(Project project) {
         if (project.hasProperty('split-per-abi')) {
             return project.property('split-per-abi').toBoolean()
@@ -299,33 +300,20 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
-    // TODO(blasten): Clean this up.
-    private void addFlutterJarCompileOnlyDependency(Project project) {
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
         if (project.state.failure) {
             return
         }
-        project.dependencies {
-            if (flutterJar != null) {
-                if (project.getConfigurations().findByName("compileOnly")) {
-                    compileOnly project.files(flutterJar)
-                } else {
-                    provided project.files(flutterJar)
-                }
-            } else {
-                assert baseJar["debug"].isFile()
-                assert baseJar["profile"].isFile()
-                assert baseJar["release"].isFile()
 
-                if (project.getConfigurations().findByName("debugCompileOnly")) {
-                    debugCompileOnly project.files(baseJar["debug"])
-                    profileCompileOnly project.files(baseJar["profile"])
-                    releaseCompileOnly project.files(baseJar["release"])
-                } else {
-                    debugProvided project.files(baseJar["debug"])
-                    profileProvided project.files(baseJar["profile"])
-                    releaseProvided project.files(baseJar["release"])
-                }
+        project.dependencies {
+            String configuration;
+            if (project.getConfigurations().findByName("compileOnly")) {
+                configuration = "${variantName}CompileOnly";
+            } else {
+                configuration = "${variantName}Provided";
             }
+
+            add(configuration, files)
         }
     }
 
@@ -645,7 +633,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "build", "aot"
                 args "--suppress-analytics"
                 args "--quiet"
-                args "--build-shared-library"
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
                 args "--target-platform", "${targetPlatform}"

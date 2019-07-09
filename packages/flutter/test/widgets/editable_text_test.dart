@@ -268,6 +268,66 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
+  testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(
+          text: 'initial value',
+        )
+    );
+    Future<void> pumpEditableTextWithTextStyle(TextStyle style) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: EditableText(
+            backgroundCursorColor: Colors.grey,
+            controller: controller,
+            focusNode: focusNode,
+            style: style,
+            cursorColor: cursorColor,
+            selectionControls: materialTextSelectionControls,
+            showSelectionHandles: true,
+          ),
+        ),
+      );
+    }
+
+    await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 18));
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.longPress,
+    );
+    await tester.pumpAndSettle();
+    await tester.idle();
+
+    List<RenderBox> handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
+
+    expect(handles[0].localToGlobal(Offset.zero), const Offset(-35.0, 5.0));
+    expect(handles[1].localToGlobal(Offset.zero), const Offset(113.0, 5.0));
+
+    await pumpEditableTextWithTextStyle(const TextStyle(fontSize: 30));
+    await tester.pumpAndSettle();
+
+    // Handles should be updated with bigger font size.
+    handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
+    // First handle should have the same dx but bigger dy.
+    expect(handles[0].localToGlobal(Offset.zero), const Offset(-35.0, 17.0));
+    expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
+  });
+
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -1908,7 +1968,7 @@ void main() {
     ));
 
     final EditableTextState state =
-        tester.state<EditableTextState>(find.byType(EditableText));
+      tester.state<EditableTextState>(find.byType(EditableText));
     final RenderEditable renderEditable = state.renderEditable;
     final Scrollable scrollable = tester.widget<Scrollable>(find.byType(Scrollable));
 
@@ -1963,12 +2023,14 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<CompositedTransformFollower> container =
-        find.byType(CompositedTransformFollower)
-          .evaluate()
-          .map((Element e) => e.widget)
-          .cast<CompositedTransformFollower>()
-          .toList();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(GestureDetector),
+          ),
+        ),
+      );
 
       final Size viewport = renderEditable.size;
 
@@ -2006,8 +2068,8 @@ void main() {
         }
       }
       expect(state.selectionOverlay.handlesAreVisible, isTrue);
-      testPosition(container[0].offset.dx, leftPosition);
-      testPosition(container[1].offset.dx, rightPosition);
+      testPosition(handles[0].localToGlobal(Offset.zero).dx, leftPosition);
+      testPosition(handles[1].localToGlobal(Offset.zero).dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.
@@ -2080,21 +2142,23 @@ void main() {
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pump();
-    final List<CompositedTransformFollower> container =
-      find.byType(CompositedTransformFollower)
-        .evaluate()
-        .map((Element e) => e.widget)
-        .cast<CompositedTransformFollower>()
-        .toList();
+    final List<RenderBox> handles = List<RenderBox>.from(
+      tester.renderObjectList<RenderBox>(
+        find.descendant(
+          of: find.byType(CompositedTransformFollower),
+          matching: find.byType(GestureDetector),
+        ),
+      ),
+    );
     expect(
-      container[0].offset.dx,
+      handles[0].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
         -kMinInteractiveSize,
         kMinInteractiveSize,
       ),
     );
     expect(
-      container[1].offset.dx,
+      handles[1].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
         70.0 - kMinInteractiveSize,
         70.0 + kMinInteractiveSize,
@@ -2188,12 +2252,14 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<CompositedTransformFollower> container =
-        find.byType(CompositedTransformFollower)
-          .evaluate()
-          .map((Element e) => e.widget)
-          .cast<CompositedTransformFollower>()
-          .toList();
+      final List<RenderBox> handles = List<RenderBox>.from(
+        tester.renderObjectList<RenderBox>(
+          find.descendant(
+            of: find.byType(CompositedTransformFollower),
+            matching: find.byType(GestureDetector),
+          ),
+        ),
+      );
 
       final Size viewport = renderEditable.size;
 
@@ -2231,8 +2297,8 @@ void main() {
         }
       }
       expect(state.selectionOverlay.handlesAreVisible, isTrue);
-      testPosition(container[0].offset.dx, leftPosition);
-      testPosition(container[1].offset.dx, rightPosition);
+      testPosition(handles[0].localToGlobal(Offset.zero).dx, leftPosition);
+      testPosition(handles[1].localToGlobal(Offset.zero).dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.

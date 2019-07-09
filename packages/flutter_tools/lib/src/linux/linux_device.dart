@@ -54,6 +54,9 @@ class LinuxDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool isSupported() => true;
 
   @override
@@ -78,7 +81,11 @@ class LinuxDevice extends Device {
   }) async {
     _lastBuiltMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
-      await buildLinux(FlutterProject.current().linux, debuggingOptions.buildInfo);
+      await buildLinux(
+        FlutterProject.current().linux,
+        debuggingOptions.buildInfo,
+        target: mainPath,
+      );
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[

@@ -52,7 +52,8 @@ class GenSnapshot {
   }) {
     final List<String> args = <String>[
       '--causal_async_stacks',
-    ]..addAll(additionalArgs);
+      ...additionalArgs,
+    ];
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
 
@@ -62,7 +63,7 @@ class GenSnapshot {
     // architecture.
     if (snapshotType.platform == TargetPlatform.ios) {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
-      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath, ...args]);
     }
 
     StringConverter outputFilter;
@@ -73,8 +74,7 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args),
-                                     mapFunction: outputFilter);
+    return runCommandAndStreamOutput(<String>[snapshotterPath, ...args], mapFunction: outputFilter);
   }
 }
 
@@ -93,7 +93,6 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    @required bool buildSharedLibrary,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
   }) async {
@@ -107,10 +106,6 @@ class AOTSnapshotter {
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
     assert(platform != TargetPlatform.ios || iosArch != null);
-
-    // buildSharedLibrary is ignored for iOS builds.
-    if (platform == TargetPlatform.ios)
-      buildSharedLibrary = false;
 
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -144,26 +139,12 @@ class AOTSnapshotter {
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly.xyz');
-    } else if (buildSharedLibrary) {
+    } else {
       final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
       genSnapshotArgs.add('--strip');
-    } else {
-      // Blob AOT snapshot.
-      final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
-      final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-      final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-      final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
-      genSnapshotArgs.addAll(<String>[
-        '--snapshot_kind=app-aot-blobs',
-        '--vm_snapshot_data=$vmSnapshotData',
-        '--isolate_snapshot_data=$isolateSnapshotData',
-        '--vm_snapshot_instructions=$vmSnapshotInstructions',
-        '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-      ]);
     }
 
     if (platform == TargetPlatform.android_arm || iosArch == IOSArch.armv7) {
@@ -188,15 +169,14 @@ class AOTSnapshotter {
     // If inputs and outputs have not changed since last run, skip the build.
     final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
+      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
       properties: <String, String>{
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),
         'entryPoint': mainPath,
-        'sharedLib': buildSharedLibrary.toString(),
         'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
         'engineHash': Cache.instance.engineRevision,
-        'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+        'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
       },
       depfilePaths: <String>[],
     );
@@ -259,7 +239,7 @@ class AOTSnapshotter {
     final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
-    final RunResult compileResult = await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO, '-fembed-bitcode']));
+    final RunResult compileResult = await xcode.cc(<String>[...commonBuildOptions, '-c', assemblyPath, '-o', assemblyO, '-fembed-bitcode']);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
@@ -268,15 +248,16 @@ class AOTSnapshotter {
     final String frameworkDir = fs.path.join(outputPath, 'App.framework');
     fs.directory(frameworkDir).createSync(recursive: true);
     final String appLib = fs.path.join(frameworkDir, 'App');
-    final List<String> linkArgs = commonBuildOptions.toList()..addAll(<String>[
-        '-dynamiclib',
-        '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
-        '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-        '-install_name', '@rpath/App.framework/App',
-        '-fembed-bitcode',
-        '-o', appLib,
-        assemblyO,
-    ]);
+    final List<String> linkArgs = <String>[
+      ...commonBuildOptions,
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-fembed-bitcode',
+      '-o', appLib,
+      assemblyO,
+    ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
@@ -412,8 +393,10 @@ class JITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final Set<String> outputPaths = <String>{};
-    outputPaths.addAll(<String>[isolateSnapshotData, isolateSnapshotInstructions]);
+    final Set<String> outputPaths = <String>{
+      isolateSnapshotData,
+      isolateSnapshotInstructions,
+    };
 
     // There are a couple special cases below where we create a snapshot
     // with only the data section, which only contains interpreted code.
@@ -463,7 +446,7 @@ class JITSnapshotter {
     // If inputs and outputs have not changed since last run, skip the build.
     final Fingerprinter fingerprinter = Fingerprinter(
       fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath]..addAll(inputPaths)..addAll(outputPaths),
+      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
       properties: <String, String>{
         'buildMode': buildMode.toString(),
         'targetPlatform': platform.toString(),

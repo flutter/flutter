@@ -286,13 +286,14 @@ class SampleChecker {
           '--snapshot=$_snippetsSnapshotPath',
           '--snapshot-kind=app-jit',
           path.canonicalize(_snippetsExecutable),
-        ]..addAll(args),
+          ...args,
+        ],
         workingDirectory: workingDirectory,
       );
     } else {
       return Process.runSync(
         _dartExecutable,
-        <String>[path.canonicalize(_snippetsSnapshotPath)]..addAll(args),
+        <String>[path.canonicalize(_snippetsSnapshotPath), ...args],
         workingDirectory: workingDirectory,
       );
     }
@@ -311,7 +312,8 @@ class SampleChecker {
     final List<String> args = <String>[
       '--output=${outputFile.absolute.path}',
       '--input=${inputFile.absolute.path}',
-    ]..addAll(snippet.args);
+      ...snippet.args,
+    ];
     print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
     if (process.exitCode != 0) {
@@ -394,9 +396,7 @@ class SampleChecker {
               if (preambleSections.isEmpty) {
                 sections.add(processed);
               } else {
-                sections.add(Section.combine(preambleSections
-                  ..toList()
-                  ..add(processed)));
+                sections.add(Section.combine(preambleSections..add(processed)));
               }
               block.clear();
             } else if (trimmedLine == _dartDocPrefix) {
@@ -430,7 +430,7 @@ class SampleChecker {
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null ? sampleMatch[1] == 'snippet' : false;
+            inSnippet = sampleMatch != null && sampleMatch[1] == 'snippet';
             if (inSnippet) {
               startLine = Line(
                 '',
@@ -531,10 +531,12 @@ linter:
   File _writeSection(Section section) {
     final String sectionId = _createNameFromSource('sample', section.start.filename, section.start.line);
     final File outputFile = File(path.join(_tempDirectory.path, '$sectionId.dart'))..createSync(recursive: true);
-    final List<Line> mainContents = headers.toList();
-    mainContents.add(const Line(''));
-    mainContents.add(Line('// From: ${section.start.filename}:${section.start.line}'));
-    mainContents.addAll(section.code);
+    final List<Line> mainContents = <Line>[
+      ...headers,
+      const Line(''),
+      Line('// From: ${section.start.filename}:${section.start.line}'),
+      ...section.code,
+    ];
     outputFile.writeAsStringSync(mainContents.map<String>((Line line) => line.code).join('\n'));
     return outputFile;
   }
@@ -820,10 +822,9 @@ class Line {
 class Section {
   const Section(this.code);
   factory Section.combine(List<Section> sections) {
-    final List<Line> code = <Line>[];
-    for (Section section in sections) {
-      code.addAll(section.code);
-    }
+    final List<Line> code = sections
+      .expand((Section section) => section.code)
+      .toList();
     return Section(code);
   }
   factory Section.fromStrings(Line firstLine, List<String> code) {
@@ -854,9 +855,11 @@ class Section {
         ),
       );
     }
-    return Section(<Line>[Line(prefix)]
-      ..addAll(codeLines)
-      ..add(Line(postfix)));
+    return Section(<Line>[
+      Line(prefix),
+      ...codeLines,
+      Line(postfix),
+    ]);
   }
   Line get start => code.firstWhere((Line line) => line.filename != null);
   final List<Line> code;
@@ -868,8 +871,8 @@ class Section {
 /// analyzed.
 class Snippet {
   Snippet({this.start, List<String> input, List<String> args, this.serial}) {
-    this.input = <String>[]..addAll(input);
-    this.args = <String>[]..addAll(args);
+    this.input = input.toList();
+    this.args = args.toList();
   }
   final Line start;
   final int serial;

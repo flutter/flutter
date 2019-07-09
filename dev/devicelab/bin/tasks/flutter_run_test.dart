@@ -40,7 +40,7 @@ Future<TaskResult> createFlutterRunTask() async {
   await inDirectory<void>(flutterGalleryDir, () async {
     startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['run']..addAll(options),
+      <String>['run', ...options],
       environment: null,
     );
     final Completer<void> finished = Completer<void>();

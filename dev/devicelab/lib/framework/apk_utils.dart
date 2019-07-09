@@ -116,6 +116,42 @@ android {
     ''');
   }
 
+  Future<void> addGlobalBuildType(String name, {String initWith}) async {
+    final File buildScript = File(
+      path.join(androidPath, 'build.gradle'),
+    );
+
+    buildScript.openWrite(mode: FileMode.append).write('''
+subprojects {
+  afterEvaluate {
+    android {
+        buildTypes {
+            $name {
+                initWith $initWith
+            }
+        }
+    }
+  }
+}
+    ''');
+  }
+
+  Future<void> addPlugin(String plugin) async {
+    final File pubspec = File(path.join(rootPath, 'pubspec.yaml'));
+    String content = await pubspec.readAsString();
+    content = content.replaceFirst(
+      '\ndependencies:\n',
+      '\ndependencies:\n  $plugin:\n',
+    );
+    await pubspec.writeAsString(content, flush: true);
+  }
+
+  Future<void> getPackages() async {
+    await inDirectory(Directory(rootPath), () async {
+      await flutter('pub', options: <String>['get']);
+    });
+  }
+
   Future<void> addProductFlavors(Iterable<String> flavors) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
@@ -158,7 +194,7 @@ android {
   Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
     return Process.run(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>[command]..addAll(options),
+      <String>[command, ...options],
       workingDirectory: rootPath,
     );
   }
@@ -216,10 +252,10 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
 
   print('\nUsing JAVA_HOME=$javaHome');
 
-  final List<String> args = <String>['app:$task'];
-  if (options != null) {
-    args.addAll(options);
-  }
+  final List<String> args = <String>[
+    'app:$task',
+    ...?options,
+  ];
   final String gradle = Platform.isWindows ? 'gradlew.bat' : './gradlew';
   print('Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
   print(File(path.join(workingDirectory, gradle)).readAsStringSync());

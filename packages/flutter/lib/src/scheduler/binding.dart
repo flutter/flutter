@@ -845,13 +845,30 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   /// The time stamp for the frame currently being processed.
   ///
-  /// This is only valid while [handleBeginFrame] is running, i.e. while a frame
-  /// is being produced.
+  /// This is only valid while between the start of [handleBeginFrame] and the
+  /// end of the corresponding [handleDrawFrame], i.e. while a frame is being
+  /// produced.
   Duration get currentFrameTimeStamp {
     assert(_currentFrameTimeStamp != null);
     return _currentFrameTimeStamp;
   }
   Duration _currentFrameTimeStamp;
+
+  /// The raw time stamp as provided by the engine to [Window.onBeginFrame]
+  /// for the frame currently being processed.
+  ///
+  /// Unlike [currentFrameTimeStamp], this time stamp is neither adjusted to
+  /// offset when the epoch started nor scaled to reflect the [timeDilation] in
+  /// the current epoch.
+  ///
+  /// On most platforms, this is a more or less arbitrary value, and should
+  /// generally be ignored. On Fuchsia, this corresponds to the system-provided
+  /// presentation time, and can be used to ensure that animations running in
+  /// different processes are synchronized.
+  Duration get currentSystemFrameTimeStamp {
+    assert(_lastRawTimeStamp != null);
+    return _lastRawTimeStamp;
+  }
 
   int _debugFrameNumber = 0;
   String _debugBanner;
