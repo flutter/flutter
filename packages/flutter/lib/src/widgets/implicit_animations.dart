@@ -22,6 +22,7 @@ import 'transitions.dart';
 //   @override
 //   MyWidgetState createState() => MyWidgetState();
 // }
+// void setState(VoidCallback fn) { }
 
 /// An interpolation between two [BoxConstraints].
 ///
@@ -521,9 +522,42 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// Here's an illustration of what using this widget looks like, using a [curve]
-/// of [Curves.fastOutSlowIn].
+/// Here's an illustration (implemented below) of what using this widget looks
+/// like, using a [curve] of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// The following example (depicted above) transitions an AnimatedContainer
+/// between two states. It adjusts the [height], [width], [color], and
+/// [alignment] properties when tapped.
+///
+/// ```dart
+/// bool selected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return GestureDetector(
+///     onTap: () {
+///       setState(() {
+///         selected = !selected;
+///       });
+///     },
+///     child: Center(
+///       child: AnimatedContainer(
+///         width: selected ? 200.0 : 100.0,
+///         height: selected ? 100.0 : 200.0,
+///         color: selected ? Colors.red : Colors.blue,
+///         alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
+///         duration: Duration(seconds: 2),
+///         curve: Curves.fastOutSlowIn,
+///         child: FlutterLogo(size: 75),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
