@@ -675,10 +675,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       );
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        final String onTapHint = _isChildExpanded(index) ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
         expandIconContainer = Semantics(
-          label: _isChildExpanded(index) ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          label: onTapHint,
+          onTapHint: child.expandIconBuilder != null
+            ? onTapHint
+            : null,
           container: true,
-          child: expandIconContainer
+          child: expandIconContainer,
         );
       }
       Widget header = Row(

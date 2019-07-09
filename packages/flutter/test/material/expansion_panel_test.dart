@@ -1754,6 +1754,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      onTapHint: localizations.expandedIconTapHint,
     ));
 
     // Check the semantics of the header widget for expanded panel.
@@ -1777,6 +1778,7 @@ void main() {
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
+      onTapHint: localizations.collapsedIconTapHint,
     ));
 
     // Check the semantics of the header widget for expanded panel.
