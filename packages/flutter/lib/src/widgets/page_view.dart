@@ -704,8 +704,11 @@ class _PageViewState extends State<PageView> {
             widget.onPageChanged(currentPage);
           }
         } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
+          if (!widget.pageSnapping) {
+            return false;
+          }
           final PageMetrics metrics = notification.metrics;
-          final int currentPage = metrics.page.toInt();
+          final int currentPage = metrics.page.round();
           if (currentPage != _lastPageDidChangeIndex) {
             _lastPageDidChangeIndex = currentPage;
             widget.pageDidChange(currentPage);
