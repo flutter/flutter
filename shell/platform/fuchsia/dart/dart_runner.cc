@@ -92,7 +92,7 @@ void IsolateShutdownCallback(void* isolate_group_data, void* isolate_data) {
   }
 }
 
-void IsolateCleanupCallback(void* isolate_group_data) {
+void IsolateGroupCleanupCallback(void* isolate_group_data) {
   delete static_cast<std::shared_ptr<tonic::DartState>*>(isolate_group_data);
 }
 
