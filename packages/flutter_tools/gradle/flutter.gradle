@@ -294,6 +294,14 @@ class FlutterPlugin implements Plugin<Project> {
      * Unfortunately, the engine artifacts include the .class and libflutter.so files.
      */
     private static String getBasePlatform(Project project) {
+        // When ndk.abiFilters does not contain arm64-v8a, we use android-arm platform.
+        if (project.android.defaultConfig.ndk.hasProperty("abiFilters")) {
+            def abiFilters = project.android.defaultConfig.ndk.abiFilters
+            if (!(ARCH_ARM64 in abiFilters)) {
+                return PLATFORM_ARM32;
+            }
+        }
+
         if (PLATFORM_ARM64 in getTargetPlatforms(project)) {
             return PLATFORM_ARM64;
         }
