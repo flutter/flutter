@@ -1397,11 +1397,17 @@ mixin WidgetInspectorService {
   }
 
   bool _isLocalCreationLocation(_Location location) {
-    if (_pubRootDirectories == null || location == null || location.file == null) {
+    if (location == null || location.file == null) {
       return false;
     }
-
     final String file = Uri.parse(location.file).path;
+
+    // By default check whether the creation location was within package:flutter.
+    if (_pubRootDirectories == null) {
+      // TODO(chunhtai): Make it more robust once
+      // https://github.com/flutter/flutter/issues/32660 is fixed.
+      return !file.contains('packages/flutter/');
+    }
     for (String directory in _pubRootDirectories) {
       if (file.startsWith(directory)) {
         return true;
@@ -2705,6 +2711,105 @@ class _Location {
   }
 }
 
+bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
+
+/// Transformer to parse and gather information about [DiagnosticsDebugCreator].
+///
+/// This function will be registered to [FlutterErrorDetails.propertiesTransformers]
+/// in [WidgetsBinding.initInstances].
+Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
+  final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
+  bool foundStackTrace = false;
+  for (DiagnosticsNode node in properties) {
+    if (!foundStackTrace && node is DiagnosticsStackTrace)
+      foundStackTrace = true;
+    if (_isDebugCreator(node)) {
+      yield* _parseDiagnosticsNode(node);
+    } else {
+      if (foundStackTrace) {
+        pending.add(node);
+      } else {
+        yield node;
+      }
+    }
+  }
+  yield* pending;
+}
+
+/// Transform the input [DiagnosticsNode].
+///
+/// Return null if input [DiagnosticsNode] is not applicable.
+Iterable<DiagnosticsNode> _parseDiagnosticsNode(DiagnosticsNode node) {
+  if (!_isDebugCreator(node))
+    return null;
+  final DebugCreator debugCreator = node.value;
+  final Element element = debugCreator.element;
+  return _describeRelevantUserCode(element);
+}
+
+Iterable<DiagnosticsNode> _describeRelevantUserCode(Element element) {
+  if (!WidgetInspectorService.instance.isWidgetCreationTracked()) {
+    return <DiagnosticsNode>[
+      ErrorDescription(
+        'Widget creation tracking is currently disabled. Enabling '
+        'it enables improved error messages. It can be enabled by passing '
+        '`--track-widget-creation` to `flutter run` or `flutter test`.',
+      ),
+      ErrorSpacer(),
+    ];
+  }
+  final List<DiagnosticsNode> nodes = <DiagnosticsNode>[];
+  element.visitAncestorElements((Element ancestor) {
+    // TODO(chunhtai): should print out all the widgets that are about to cross
+    // package boundaries.
+    if (_isLocalCreationLocation(ancestor)) {
+      nodes.add(
+        DiagnosticsBlock(
+          name: 'User-created ancestor of the error-causing widget was',
+          children: <DiagnosticsNode>[
+            ErrorDescription('${ancestor.widget.toStringShort()} ${_describeCreationLocation(ancestor)}'),
+          ],
+        )
+      );
+      nodes.add(ErrorSpacer());
+      return false;
+    }
+    return true;
+  });
+  return nodes;
+}
+
+/// Returns if an object is user created.
+///
+/// This function will only work in debug mode builds when
+/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+///
+/// Currently is local creation locations are only available for
+/// [Widget] and [Element].
+bool _isLocalCreationLocation(Object object) {
+  final _Location location = _getCreationLocation(object);
+  if (location == null)
+    return false;
+  return WidgetInspectorService.instance._isLocalCreationLocation(location);
+}
+
+/// Returns the creation location of an object in String format if one is available.
+///
+/// ex: "file:///path/to/main.dart:4:3"
+///
+/// Creation locations are only available for debug mode builds when
+/// the `--track-widget-creation` flag is passed to `flutter_tool`. Dart 2.0 is
+/// required as injecting creation locations requires a
+/// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
+///
+/// Currently creation locations are only available for [Widget] and [Element].
+String _describeCreationLocation(Object object) {
+  final _Location location = _getCreationLocation(object);
+  return location?.toString();
+}
+
 /// Returns the creation location of an object if one is available.
 ///
 /// Creation locations are only available for debug mode builds when
@@ -2712,7 +2817,7 @@ class _Location {
 /// required as injecting creation locations requires a
 /// [Dart Kernel Transformer](https://github.com/dart-lang/sdk/wiki/Kernel-Documentation).
 ///
-/// Currently creation locations are only available for [Widget] and [Element]
+/// Currently creation locations are only available for [Widget] and [Element].
 _Location _getCreationLocation(Object object) {
   final Object candidate =  object is Element ? object.widget : object;
   return candidate is _HasCreationLocation ? candidate._location : null;

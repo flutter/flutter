@@ -1459,5 +1459,79 @@ void main() {
 
     await gesture.up();
   });
+
+  testWidgets('Range Slider top value indicator gets stroked when overlapping with large text scale', (WidgetTester tester) async {
+    RangeValues values = const RangeValues(0.3, 0.7);
+
+    final ThemeData theme = ThemeData(
+        platform: TargetPlatform.android,
+        primarySwatch: Colors.blue,
+        sliderTheme: const SliderThemeData(
+          valueIndicatorColor: Color(0xff000001),
+          overlappingShapeStrokeColor: Color(0xff000002),
+          showValueIndicator: ShowValueIndicator.always,
+        )
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window).copyWith(textScaleFactor: 2.0),
+              child: Material(
+                child: Center(
+                  child: Theme(
+                    data: theme,
+                    child: RangeSlider(
+                      values: values,
+                      labels: RangeLabels(values.start.toStringAsFixed(2), values.end.toStringAsFixed(2)),
+                      onChanged: (RangeValues newValues) {
+                        setState(() {
+                          values = newValues;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(RangeSlider));
+
+    // Get the bounds of the track by finding the slider edges and translating
+    // inwards by the overlay radius.
+    final Offset topLeft = tester.getTopLeft(find.byType(RangeSlider)).translate(24, 0);
+    final Offset bottomRight = tester.getBottomRight(find.byType(RangeSlider)).translate(-24, 0);
+    final Offset middle = topLeft + bottomRight / 2;
+
+    // Drag the the thumbs towards the center.
+    final Offset leftTarget = topLeft + (bottomRight - topLeft) * 0.3;
+    await tester.dragFrom(leftTarget, middle - leftTarget);
+    await tester.pumpAndSettle();
+    final Offset rightTarget = topLeft + (bottomRight - topLeft) * 0.7;
+    await tester.dragFrom(rightTarget, middle - rightTarget);
+    await tester.pumpAndSettle();
+    expect(values.start, closeTo(0.5, 0.03));
+    expect(values.end, closeTo(0.5, 0.03));
+    final TestGesture gesture = await tester.startGesture(middle);
+    await tester.pumpAndSettle();
+
+    expect(
+      sliderBox,
+      paints
+        ..path(color: sliderTheme.valueIndicatorColor)
+        ..path(color: sliderTheme.overlappingShapeStrokeColor)
+        ..path(color: sliderTheme.valueIndicatorColor),
+    );
+
+    await gesture.up();
+  });
 }
 

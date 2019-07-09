@@ -210,7 +210,7 @@ void main() {
   print('$_kStartTimeoutTimerMessage');
   String serverPort = Platform.environment['SERVER_PORT'];
   String server = Uri.decodeComponent('$encodedWebsocketUrl:\$serverPort');
-  StreamChannel channel = serializeSuite(() {
+  StreamChannel<dynamic> channel = serializeSuite(() {
     catchIsolateErrors();
     goldenFileComparator = new LocalFileComparator(Uri.parse('$testUrl'));
     autoUpdateGoldenFiles = $updateGoldens;
