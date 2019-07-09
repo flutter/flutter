@@ -532,45 +532,30 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// It adjusts the [height], [width], [color], and [alignment] properties using
 /// [State.setState].
 ///
-/// ```dart preamble
-/// enum BoxState { small, large }
-/// ```
-///
 /// ```dart
-/// BoxState state = BoxState.small;
-///
-/// void _changeSize() {
-///   setState(() {
-///     state = state == BoxState.small ? BoxState.large : BoxState.small;
-///   });
-/// }
+/// static const Curve curve = Curves.fastOutSlowIn;
+/// bool selected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Column(
-///     mainAxisAlignment: MainAxisAlignment.center,
-///     children: [
-///       AnimatedContainer(
-///         duration: Duration(seconds: 1),
-///         width: state == BoxState.small ? 192 : 256,
-///         height: state == BoxState.small ? 192 : 256,
-///         color: state == BoxState.small ? Colors.blue : Colors.indigo,
-///         transform: Matrix4.rotationZ(state == BoxState.small ? 0.0 : 0.1),
-///         child: Center(
-///           child: Text(
-///             "Hello, World!",
-///             style: Theme.of(context)
-///                 .textTheme
-///                 .display1
-///                 .copyWith(color: Colors.white),
-///           ),
-///         ),
+///   return GestureDetector(
+///     onTap: () {
+///       setState(() {
+///         selected = !selected;
+///       });
+///     },
+///     child: Center(
+///       child: AnimatedContainer(
+///         width: selected ? 200.0 : 100.0,
+///         height: selected ? 100.0 : 200.0,
+///         color: selected ? Colors.red : Colors.blue,
+///         alignment:
+///             selected ? Alignment.center : AlignmentDirectional.topCenter,
+///         duration: Duration(seconds: 2),
+///         curve: curve,
+///         child: FlutterLogo(size: 75),
 ///       ),
-///       RaisedButton(
-///         child: Text('Animate'),
-///         onPressed: _changeSize,
-///       ),
-///     ],
+///     ),
 ///   );
 /// }
 /// ```
