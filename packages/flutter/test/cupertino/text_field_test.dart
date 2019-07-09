@@ -3244,6 +3244,9 @@ void main() {
             ),
           ),
         );
+        // This extra pump allows the selection set by autofocus to propagate to
+        // the RenderEditable.
+        await tester.pump();
 
         // Long press shows the selection menu.
         await tester.longPressAt(textOffsetToPosition(tester, 0));
