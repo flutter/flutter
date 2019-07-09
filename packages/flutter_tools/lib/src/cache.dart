@@ -224,9 +224,9 @@ class Cache {
     return getCacheArtifacts().childDirectory(name);
   }
 
-  Map<String, String> get dyLdLibEnv {
-    if (_dyLdLibEnv != null) {
-      return _dyLdLibEnv;
+  MapEntry<String, String> get dyLdLibEntry {
+    if (_dyLdLibEntry != null) {
+      return _dyLdLibEntry;
     }
     final List<String> paths = <String>[];
     for (CachedArtifact artifact in _artifacts) {
@@ -235,10 +235,10 @@ class Cache {
         paths.add(currentPath);
       }
     }
-    _dyLdLibEnv = <String, String>{'DYLD_LIBARY_PATH': paths.join(':')};
-    return _dyLdLibEnv;
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBARY_PATH', paths.join(':'));
+    return _dyLdLibEntry;
   }
-  Map<String, String> _dyLdLibEnv;
+  MapEntry<String, String> _dyLdLibEntry;
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.

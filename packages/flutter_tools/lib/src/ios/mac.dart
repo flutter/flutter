@@ -67,7 +67,9 @@ class IMobileDevice {
         _ideviceIdPath,
         '-h'
       ],
-      environment: cache.dyLdLibEnv,
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
     );
     return _isInstalled;
   }
@@ -86,7 +88,9 @@ class IMobileDevice {
     }
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final Map<String, String> executionEnv = cache.dyLdLibEnv;
+    final Map<String, String> executionEnv = Map<String, String>.fromEntries(
+      <MapEntry<String, String>>[cache.dyLdLibEntry]
+    );
     final ProcessResult ideviceResult = (await runAsync(
       <String>[
         _ideviceinfoPath,
@@ -128,7 +132,9 @@ class IMobileDevice {
           _ideviceIdPath,
           '-l'
         ],
-        environment: cache.dyLdLibEnv,
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry]
+        ),
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
@@ -148,7 +154,9 @@ class IMobileDevice {
           '-k',
           key
         ],
-        environment: cache.dyLdLibEnv,
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry]
+        ),
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
@@ -168,7 +176,9 @@ class IMobileDevice {
         '-u',
         deviceID,
       ],
-      environment: cache.dyLdLibEnv,
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
     );
   }
 
@@ -179,7 +189,9 @@ class IMobileDevice {
         _idevicescreenshotPath,
         outputFile.path
       ],
-      environment: cache.dyLdLibEnv,
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
     );
   }
 }
