@@ -528,8 +528,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@tool sample --template=stateful_widget_scaffold}
 ///
-/// The following example transitions an AnimatedContainer between two states
-/// with different [height], [width], [color], and transform properties using
+/// The following example transitions an AnimatedContainer between two states.
+/// It adjusts the [height], [width], [color], and [alignment] properties using
 /// [State.setState].
 ///
 /// ```dart preamble
