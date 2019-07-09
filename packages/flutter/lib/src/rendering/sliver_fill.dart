@@ -128,38 +128,31 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    double extent;
-    if (hasScrollBody) {
-      extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
-      if (child != null) {
-        child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);;
+    if (hasScrollBody && child != null) {
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+
+    } else if (child != null) {
+      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+      double childExtent;
+      switch (constraints.axis) {
+        case Axis.horizontal:
+          childExtent = child.size.width;
+          break;
+        case Axis.vertical:
+          childExtent = child.size.height;
+          break;
       }
-    } else {
-      extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0)
-      // Adding the offset for when this SliverFillRemaining is not scrollable,
-      // so it will stretch to fill on overscroll.
-        + constraints.scrollOffset;
-      if (child != null) {
-          child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-        double childExtent;
-        switch (constraints.axis) {
-          case Axis.horizontal:
-            childExtent = child.size.width;
-            break;
-          case Axis.vertical:
-            childExtent = child.size.height;
-            break;
-        }
-        extent = math.max(extent, childExtent);
-      }
+      print('extent $extent');
+      print('childExtent $childExtent');
+      print(' ');
+      extent = math.min(extent, childExtent);
     }
     assert(extent.isFinite);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      // 0.0 can be applied here for cases when there is not scroll body since
-      // SliverFillRemaining will not have any slivers following it.
       scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
