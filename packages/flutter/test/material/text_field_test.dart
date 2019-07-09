@@ -5362,12 +5362,12 @@ void main() {
       );
 
       // Long press shows the selection menu.
-      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.longPress(find.byType(TextField));
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
       // Tap hides the selection menu.
-      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.tap(find.byType(TextField));
       await tester.pump();
       expect(find.text('PASTE'), findsNothing);
     },
@@ -5393,7 +5393,8 @@ void main() {
       );
 
       // Long press shows the selection menu.
-      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      expect(find.text('PASTE'), findsNothing);
+      await tester.longPress(find.byType(TextField));
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
     },
