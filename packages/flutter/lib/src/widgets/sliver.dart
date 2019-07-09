@@ -899,7 +899,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
 ///     maxCrossAxisExtent: 200.0,
 ///     mainAxisSpacing: 10.0,
-///     crossAxisSpacing: 10.0,
+///     crossAxisSpacing:
+///     10.0,
 ///     childAspectRatio: 4.0,
 ///   ),
 ///   delegate: SliverChildBuilderDelegate(
