@@ -472,7 +472,9 @@ Future<void> _runWebTests() async {
       // 'test/widgets/',
       // 'test/material/',
     ]).timeout(const Duration(minutes: 30)); // prevent tests that get stuck from causing the shard to fail.
-  } on TimeoutException { // Do nothing for now }
+  } on TimeoutException {
+    // Do nothing for now
+  }
 }
 
 Future<void> _runCoverage() async {
