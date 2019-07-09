@@ -3017,11 +3017,11 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     _childCount = 0;
   }
 
-  /// Move this child in the child list to be before the given child.
+  /// Move the given `child` in the child list to be after another child.
   ///
   /// More efficient than removing and re-adding the child. Requires the child
-  /// to already be in the child list at some position. Pass null for before to
-  /// move the child to the end of the child list.
+  /// to already be in the child list at some position. Pass null for `after` to
+  /// move the child to the start of the child list.
   void move(ChildType child, { ChildType after }) {
     assert(child != this);
     assert(after != this);

@@ -8,10 +8,9 @@ import 'dart:convert'; // ignore: dart_convert_import
 import 'dart:io'; // ignore: dart_io_import
 import 'dart:isolate';
 
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/analysis/results.dart';
 import 'package:analyzer/dart/analysis/utilities.dart';
-import 'package:build_runner/build_runner.dart' as build_runner;
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
 import 'package:build_modules/build_modules.dart';
@@ -19,6 +18,7 @@ import 'package:build_modules/builders.dart';
 import 'package:build_modules/src/module_builder.dart';
 import 'package:build_modules/src/platform.dart';
 import 'package:build_modules/src/workers.dart';
+import 'package:build_runner/build_runner.dart' as build_runner;
 import 'package:build_runner_core/build_runner_core.dart' as core;
 import 'package:build_test/builder.dart';
 import 'package:build_test/src/debug_test_builder.dart';
@@ -26,7 +26,6 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:crypto/crypto.dart';
-
 import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:scratch_space/scratch_space.dart';
 import 'package:test_core/backend.dart';
@@ -126,10 +125,10 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               librariesPath: 'libraries.json',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
-              useIncrementalCompiler: true,
+              useIncrementalCompiler: false,
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
-              sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
+              sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
             ),
       ],
       core.toAllPackages(),

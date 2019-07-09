@@ -807,78 +807,98 @@ abstract class ResidentRunner {
 
   /// Returns [true] if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
-    final String lower = character.toLowerCase();
 
     printStatus(''); // the key the user tapped might be on this line
-
-    if (lower == 'h' || lower == '?') {
-      // help
-      printHelp(details: true);
-      return true;
-    } else if (lower == 'w') {
-      if (supportsServiceProtocol) {
-        await _debugDumpApp();
+    switch(character) {
+      case 'a':
+        if (supportsServiceProtocol) {
+          await _debugToggleProfileWidgetBuilds();
+          return true;
+        }
+        return false;
+      case 'd':
+      case 'D':
+        await detach();
         return true;
-      }
-    } else if (lower == 't') {
-      if (supportsServiceProtocol) {
-        await _debugDumpRenderTree();
+      case 'h':
+      case 'H':
+      case '?':
+        // help
+        printHelp(details: true);
         return true;
-      }
-    } else if (character == 'L') {
-      if (supportsServiceProtocol) {
-        await _debugDumpLayerTree();
+      case 'i':
+      case 'I':
+        if (supportsServiceProtocol) {
+          await _debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'L':
+        if (supportsServiceProtocol) {
+          await _debugDumpLayerTree();
+          return true;
+        }
+        return false;
+      case 'o':
+      case 'O':
+        if (supportsServiceProtocol && isRunningDebug) {
+          await _debugTogglePlatform();
+          return true;
+        }
+        return false;
+      case 'p':
+        if (supportsServiceProtocol && isRunningDebug) {
+          await _debugToggleDebugPaintSizeEnabled();
+          return true;
+        }
+        return false;
+      case 'P':
+        if (supportsServiceProtocol) {
+          await _debugTogglePerformanceOverlayOverride();
+          return true;
+        }
+        return false;
+      case 'q':
+      case 'Q':
+        // exit
+        await exit();
         return true;
-      }
-    } else if (character == 'S') {
-      if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInTraversalOrder();
+      case 's':
+        for (FlutterDevice device in flutterDevices) {
+          if (device.device.supportsScreenshot)
+            await _screenshot(device);
+        }
         return true;
-      }
-    } else if (character == 'U') {
-      if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInInverseHitTestOrder();
+      case 'S':
+        if (supportsServiceProtocol) {
+          await _debugDumpSemanticsTreeInTraversalOrder();
+          return true;
+        }
+        return false;
+      case 't':
+      case 'T':
+        if (supportsServiceProtocol) {
+          await _debugDumpRenderTree();
+          return true;
+        }
+        return false;
+      case 'U':
+        if (supportsServiceProtocol) {
+          await _debugDumpSemanticsTreeInInverseHitTestOrder();
+          return true;
+        }
+        return false;
+      case 'w':
+      case 'W':
+        if (supportsServiceProtocol) {
+          await _debugDumpApp();
+          return true;
+        }
+        return false;
+      case 'z':
+      case 'Z':
+        await _debugToggleDebugCheckElevationsEnabled();
         return true;
-      }
-    } else if (character == 'p') {
-      if (supportsServiceProtocol && isRunningDebug) {
-        await _debugToggleDebugPaintSizeEnabled();
-        return true;
-      }
-    } else if (character == 'P') {
-      if (supportsServiceProtocol) {
-        await _debugTogglePerformanceOverlayOverride();
-      }
-    } else if (lower == 'i') {
-      if (supportsServiceProtocol) {
-        await _debugToggleWidgetInspector();
-        return true;
-      }
-    } else if (character == 's') {
-      for (FlutterDevice device in flutterDevices) {
-        if (device.device.supportsScreenshot)
-          await _screenshot(device);
-      }
-      return true;
-    } else if (character == 'a') {
-      if (supportsServiceProtocol) {
-        await _debugToggleProfileWidgetBuilds();
-      }
-    } else if (lower == 'o') {
-      if (supportsServiceProtocol && isRunningDebug) {
-        await _debugTogglePlatform();
-        return true;
-      }
-    } else if (lower == 'q') {
-      // exit
-      await exit();
-      return true;
-    } else if (lower == 'd') {
-      await detach();
-      return true;
-    } else if (lower == 'z') {
-      await _debugToggleDebugCheckElevationsEnabled();
-      return true;
     }
 
     return false;
