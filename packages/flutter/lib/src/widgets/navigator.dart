@@ -1515,14 +1515,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           FlutterError.reportError(
             FlutterErrorDetails(
               exception:
-              'Could not navigate to initial route.\n'
-               'The requested route name was: "/$initialRouteName"\n'
-               'The following routes were therefore attempted:\n'
-               ' * ${plannedInitialRouteNames.join("\n * ")}\n'
-               'This resulted in the following objects:\n'
-               ' * ${plannedInitialRoutes.join("\n * ")}\n'
-               'One or more of those objects was null, and therefore the initial route specified will be '
-               'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+                'Could not navigate to initial route.\n'
+                'The requested route name was: "/$initialRouteName"\n'
+                'The following routes were therefore attempted:\n'
+                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
+                'This resulted in the following objects:\n'
+                ' * ${plannedInitialRoutes.join("\n * ")}\n'
+                'One or more of those objects was null, and therefore the initial route specified will be '
+                'ignored and "${Navigator.defaultRouteName}" will be used instead.'
             ),
           );
           return true;
@@ -1644,8 +1644,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @optionalTypeArgs
   Future<T> pushNamed<T extends Object>(
       String routeName, {
-        Object arguments,
-      }) {
+      Object arguments,
+    }) {
     return push<T>(_routeNamed<T>(routeName, arguments: arguments));
   }
 
