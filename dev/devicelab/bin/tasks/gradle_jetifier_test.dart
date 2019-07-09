@@ -72,17 +72,17 @@ Future<void> main() async {
       ));
 
       if (!exists(releaseApk)) {
-        return TaskResult.failure('Failed to build release APK');
+        return TaskResult.failure('Failed to build release APK.');
       }
 
       final ApkExtractor releaseApkExtractor = ApkExtractor(releaseApk);
 
       if (!(await releaseApkExtractor.containsClass('io.flutter.plugins.firebaseauth.FirebaseAuthPlugin'))) {
-        return TaskResult.failure('Release APK doesn\'t contain class io.flutter.plugins.firebaseauth.FirebaseAuthPlugin');
+        return TaskResult.failure('Release APK doesn\'t contain class io.flutter.plugins.firebaseauth.FirebaseAuthPlugin.');
       }
 
       if (!(await releaseApkExtractor.containsClass('com.google.firebase.FirebaseApp'))) {
-        return TaskResult.failure('Release APK doesn\'t contain class com.google.firebase.FirebaseApp');
+        return TaskResult.failure('Release APK doesn\'t contain class com.google.firebase.FirebaseApp.');
       }
 
       releaseApkExtractor.dispose();
@@ -107,17 +107,17 @@ Future<void> main() async {
       ));
 
       if (!exists(debugApk)) {
-        return TaskResult.failure('Failed to build debug APK');
+        return TaskResult.failure('Failed to build debug APK.');
       }
 
       final ApkExtractor debugApkExtractor = ApkExtractor(debugApk);
 
       if (!(await debugApkExtractor.containsClass('io.flutter.plugins.firebaseauth.FirebaseAuthPlugin'))) {
-        return TaskResult.failure('Debug APK doesn\'t contain class io.flutter.plugins.firebaseauth.FirebaseAuthPlugin');
+        return TaskResult.failure('Debug APK doesn\'t contain class io.flutter.plugins.firebaseauth.FirebaseAuthPlugin.');
       }
 
       if (!(await debugApkExtractor.containsClass('com.google.firebase.FirebaseApp'))) {
-        return TaskResult.failure('Debug APK doesn\'t contain class com.google.firebase.FirebaseApp');
+        return TaskResult.failure('Debug APK doesn\'t contain class com.google.firebase.FirebaseApp.');
       }
 
       debugApkExtractor.dispose();

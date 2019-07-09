@@ -63,7 +63,7 @@ Future<void> main() async {
       ));
 
       if (!exists(releaseAar)) {
-        return TaskResult.failure('Failed to build the release AAR file');
+        return TaskResult.failure('Failed to build the release AAR file.');
       }
 
       final File releasePom = File(path.join(
@@ -78,7 +78,7 @@ Future<void> main() async {
       ));
 
       if (!exists(releasePom)) {
-        return TaskResult.failure('Failed to build the release POM file');
+        return TaskResult.failure('Failed to build the release POM file.');
       }
 
       section('Build debug AAR');
@@ -102,7 +102,7 @@ Future<void> main() async {
       ));
 
       if (!exists(debugAar)) {
-        return TaskResult.failure('Failed to build the debug AAR file');
+        return TaskResult.failure('Failed to build the debug AAR file.');
       }
 
       final File debugPom = File(path.join(
@@ -117,7 +117,7 @@ Future<void> main() async {
       ));
 
       if (!exists(debugPom)) {
-        return TaskResult.failure('Failed to build the debug POM file');
+        return TaskResult.failure('Failed to build the debug POM file.');
       }
 
       return TaskResult.success(null);
