@@ -124,7 +124,7 @@ EmbedderContext::GetUpdateSemanticsCustomActionCallbackHook() {
 }
 
 void EmbedderContext::SetupOpenGLSurface() {
-  gl_surface_ = std::make_unique<EmbedderTestGLSurface>();
+  gl_surface_ = std::make_unique<TestGLSurface>();
 }
 
 bool EmbedderContext::GLMakeCurrent() {

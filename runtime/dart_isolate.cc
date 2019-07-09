@@ -37,6 +37,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     std::unique_ptr<Window> window,
     fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
+    fml::WeakPtr<ImageDecoder> image_decoder,
     std::string advisory_script_uri,
     std::string advisory_script_entrypoint,
     Dart_IsolateFlags* flags,
@@ -62,6 +63,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
           task_runners,                  // task runners
           std::move(snapshot_delegate),  // snapshot delegate
           std::move(io_manager),         // IO manager
+          std::move(image_decoder),      // Image Decoder
           advisory_script_uri,           // advisory URI
           advisory_script_entrypoint,    // advisory entrypoint
           nullptr,                       // child isolate preparer
@@ -106,6 +108,7 @@ DartIsolate::DartIsolate(const Settings& settings,
                          TaskRunners task_runners,
                          fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                          fml::WeakPtr<IOManager> io_manager,
+                         fml::WeakPtr<ImageDecoder> image_decoder,
                          std::string advisory_script_uri,
                          std::string advisory_script_entrypoint,
                          ChildIsolatePreparer child_isolate_preparer,
@@ -116,6 +119,7 @@ DartIsolate::DartIsolate(const Settings& settings,
                   settings.task_observer_remove,
                   std::move(snapshot_delegate),
                   std::move(io_manager),
+                  std::move(image_decoder),
                   advisory_script_uri,
                   advisory_script_entrypoint,
                   settings.log_tag,
@@ -597,6 +601,7 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           nullptr,                        // window
           {},                             // snapshot delegate
           {},                             // IO Manager
+          {},                             // Image Decoder
           DART_VM_SERVICE_ISOLATE_NAME,   // script uri
           DART_VM_SERVICE_ISOLATE_NAME,   // script entrypoint
           flags,                          // flags
@@ -709,6 +714,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
             null_task_runners,                              // task_runners
             fml::WeakPtr<SnapshotDelegate>{},               // snapshot_delegate
             fml::WeakPtr<IOManager>{},                      // io_manager
+            fml::WeakPtr<ImageDecoder>{},                   // io_manager
             advisory_script_uri,         // advisory_script_uri
             advisory_script_entrypoint,  // advisory_script_entrypoint
             (*raw_embedder_isolate)->child_isolate_preparer_,    // preparer

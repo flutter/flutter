@@ -23,6 +23,7 @@ void ThreadTest::TearDown() {
   thread_task_runner_ = nullptr;
   thread_ = nullptr;
   current_task_runner_ = nullptr;
+  extra_threads_.clear();
 }
 
 fml::RefPtr<fml::TaskRunner> ThreadTest::GetCurrentTaskRunner() {
@@ -31,6 +32,13 @@ fml::RefPtr<fml::TaskRunner> ThreadTest::GetCurrentTaskRunner() {
 
 fml::RefPtr<fml::TaskRunner> ThreadTest::GetThreadTaskRunner() {
   return thread_task_runner_;
+}
+
+fml::RefPtr<fml::TaskRunner> ThreadTest::CreateNewThread(std::string name) {
+  auto thread = std::make_unique<fml::Thread>(name);
+  auto runner = thread->GetTaskRunner();
+  extra_threads_.emplace_back(std::move(thread));
+  return runner;
 }
 
 }  // namespace testing

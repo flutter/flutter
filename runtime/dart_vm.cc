@@ -253,6 +253,7 @@ size_t DartVM::GetVMLaunchCount() {
 DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
                std::shared_ptr<IsolateNameServer> isolate_name_server)
     : settings_(vm_data->GetSettings()),
+      concurrent_message_loop_(fml::ConcurrentMessageLoop::Create()),
       vm_data_(vm_data),
       isolate_name_server_(std::move(isolate_name_server)),
       service_protocol_(std::make_shared<ServiceProtocol>()) {
@@ -449,6 +450,11 @@ std::shared_ptr<ServiceProtocol> DartVM::GetServiceProtocol() const {
 
 std::shared_ptr<IsolateNameServer> DartVM::GetIsolateNameServer() const {
   return isolate_name_server_;
+}
+
+std::shared_ptr<fml::ConcurrentTaskRunner>
+DartVM::GetConcurrentWorkerTaskRunner() const {
+  return concurrent_message_loop_->GetTaskRunner();
 }
 
 }  // namespace flutter

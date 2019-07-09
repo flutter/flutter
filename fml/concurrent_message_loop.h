@@ -5,49 +5,65 @@
 #ifndef FLUTTER_FML_CONCURRENT_MESSAGE_LOOP_H_
 #define FLUTTER_FML_CONCURRENT_MESSAGE_LOOP_H_
 
-#include <atomic>
-#include <chrono>
 #include <condition_variable>
+#include <queue>
 #include <thread>
-#include <vector>
 
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
-#include "flutter/fml/message_loop_impl.h"
-#include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 
 namespace fml {
 
-class ConcurrentMessageLoop : public MessageLoopImpl {
- private:
-  const size_t worker_count_;
-  std::mutex wait_condition_mutex_;
-  std::condition_variable wait_condition_;
-  std::vector<std::thread> workers_;
-  CountDownLatch shutdown_latch_;
-  std::chrono::high_resolution_clock::time_point next_wake_;
-  std::atomic_bool shutdown_;
+class ConcurrentTaskRunner;
 
-  ConcurrentMessageLoop();
+class ConcurrentMessageLoop
+    : public std::enable_shared_from_this<ConcurrentMessageLoop> {
+ public:
+  static std::shared_ptr<ConcurrentMessageLoop> Create(
+      size_t worker_count = std::thread::hardware_concurrency());
 
   ~ConcurrentMessageLoop();
 
-  // |fml::MessageLoopImpl|
-  void Run() override;
+  size_t GetWorkerCount() const;
 
-  // |fml::MessageLoopImpl|
-  void Terminate() override;
+  std::shared_ptr<ConcurrentTaskRunner> GetTaskRunner();
 
-  // |fml::MessageLoopImpl|
-  void WakeUp(fml::TimePoint time_point) override;
+  void Terminate();
 
-  static void WorkerMain(ConcurrentMessageLoop* loop);
+ private:
+  friend ConcurrentTaskRunner;
+
+  size_t worker_count_ = 0;
+  std::vector<std::thread> workers_;
+  std::mutex tasks_mutex_;
+  std::condition_variable tasks_condition_;
+  std::queue<fml::closure> tasks_;
+  bool shutdown_ = false;
+
+  ConcurrentMessageLoop(size_t worker_count);
 
   void WorkerMain();
 
-  FML_FRIEND_MAKE_REF_COUNTED(ConcurrentMessageLoop);
-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(ConcurrentMessageLoop);
+  void PostTask(fml::closure task);
+
   FML_DISALLOW_COPY_AND_ASSIGN(ConcurrentMessageLoop);
+};
+
+class ConcurrentTaskRunner {
+ public:
+  ConcurrentTaskRunner(std::weak_ptr<ConcurrentMessageLoop> weak_loop);
+
+  ~ConcurrentTaskRunner();
+
+  void PostTask(fml::closure task);
+
+ private:
+  friend ConcurrentMessageLoop;
+
+  std::weak_ptr<ConcurrentMessageLoop> weak_loop_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(ConcurrentTaskRunner);
 };
 
 }  // namespace fml

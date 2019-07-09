@@ -7,6 +7,7 @@
 
 #include <string>
 
+#include "flutter/fml/file.h"
 #include "gtest/gtest.h"
 
 namespace flutter {
@@ -16,6 +17,8 @@ namespace testing {
 // target has fixtures configured. If there are no fixtures, this is a link
 // error.
 const char* GetFixturesPath();
+
+fml::UniqueFD OpenFixture(std::string fixture_name);
 
 std::string GetCurrentTestName();
 
