@@ -676,7 +676,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       if (!child.canTapOnHeader) {
         final MaterialLocalizations localizations = MaterialLocalizations.of(context);
         expandIconContainer = Semantics(
-          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          label: _isChildExpanded(index) ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
           container: true,
           child: expandIconContainer
         );
@@ -701,8 +701,14 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         header = MergeSemantics(
           child: InkWell(
             onTap: () => _handlePressed(_isChildExpanded(index), index),
-            child: header,
-          )
+            child: child.expandIconBuilder != null
+              ? Semantics(
+                button: true,
+                enabled: true,
+                child: header,
+              )
+            : header,
+          ),
         );
       }
       items.add(
