@@ -88,7 +88,7 @@ Future<void> _runSmokeTests() async {
     script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    timeout: _kShort
+    timeout: _kShortTimeout
                         ,
   );
   // We run the timeout tests individually because they are timing-sensitive.
