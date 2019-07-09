@@ -185,7 +185,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// A second [darkTheme] [ThemeData] value, which is used to provide a dark
   /// version of the user interface can also be specified. [themeMode] will
-  /// control which theme will be used.
+  /// control which theme will be used if a [darkTheme] is provided.
   ///
   /// The default value of this property is the value of [ThemeData.light()].
   ///
@@ -221,7 +221,8 @@ class MaterialApp extends StatefulWidget {
   ///    [MediaQueryData.platformBrightness].
   final ThemeData darkTheme;
 
-  /// Determines which theme will be used by the application.
+  /// Determines which theme will be used by the application if both [theme]
+  /// and [darkTheme] are provided.
   ///
   /// If set to [ThemeMode.system], the choice of which theme to use will
   /// be based on the user's system preferences. If the [MediaQuery.platformBrightnessOf]
@@ -240,9 +241,10 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [theme].
-  ///   * [darkTheme].
-  ///   * [ThemeData.brightness].
+  ///   * [theme], which is used when a light mode is selected.
+  ///   * [darkTheme], which is used when a dark mode is selected.
+  ///   * [ThemeData.brightness], which indicates to various parts of the
+  ///     system what kind of theme is being used.
   final ThemeMode themeMode;
 
   /// {@macro flutter.widgets.widgetsApp.color}
