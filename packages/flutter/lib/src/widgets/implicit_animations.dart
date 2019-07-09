@@ -548,8 +548,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///         width: selected ? 200.0 : 100.0,
 ///         height: selected ? 100.0 : 200.0,
 ///         color: selected ? Colors.red : Colors.blue,
-///         alignment:
-///             selected ? Alignment.center : AlignmentDirectional.topCenter,
+///         alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
 ///         duration: Duration(seconds: 2),
 ///         curve: Curves.fastOutSlowIn,
 ///         child: FlutterLogo(size: 75),
