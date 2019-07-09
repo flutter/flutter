@@ -533,7 +533,6 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// [State.setState].
 ///
 /// ```dart
-/// static const Curve curve = Curves.fastOutSlowIn;
 /// bool selected = false;
 ///
 /// @override
@@ -552,7 +551,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///         alignment:
 ///             selected ? Alignment.center : AlignmentDirectional.topCenter,
 ///         duration: Duration(seconds: 2),
-///         curve: curve,
+///         curve: Curves.fastOutSlowIn,
 ///         child: FlutterLogo(size: 75),
 ///       ),
 ///     ),
