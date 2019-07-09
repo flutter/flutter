@@ -1851,7 +1851,6 @@ void main() {
       ),
     );
 
-    print(tester.getSemantics(find.byKey(expandedKey)));
     expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
       label: 'Expanded',
       isButton: true,
