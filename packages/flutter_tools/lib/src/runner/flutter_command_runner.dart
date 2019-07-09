@@ -30,6 +30,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../hooks.dart';
 import '../tester/flutter_tester.dart';
 import '../usage.dart';
 import '../version.dart';
@@ -393,7 +394,33 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['machine']) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
+        
+        SubHook matchedSubHook;
+        final String workingDir = fs.path.normalize(fs.currentDirectory.path);
+        final File hooksYamlFile = fs.file(fs.path.join(workingDir, 'hooks.yaml'));
+        if (hooksYamlFile.existsSync()) {
+          final Hooks hooks = Hooks.fromYaml(hooksYamlFile.readAsStringSync());
+          String topLevelCmds = '';
+          ArgResults argResults = topLevelResults.command;
+          while (argResults != null) {
+            topLevelCmds += (argResults.name ?? '') + ' ';
+            argResults = argResults.command;
+          }
+          topLevelCmds = topLevelCmds.trim();
+          for (SubHook hook in hooks?.subhooks) {
+            final String hookCmds = hook.cmds.join(' ');
+            if (topLevelCmds.trimRight() == hookCmds) {
+              matchedSubHook = hook;
+            }
+          }
+          if(matchedSubHook != null) {
+            printTrace('Found hook specified for `$topLevelCmds` command in hooks.yaml');
+          }
+        }
+        
+        await matchedSubHook?.runBeforeHook(workingDir, topLevelResults.arguments);
         await super.runCommand(topLevelResults);
+        await matchedSubHook?.runAfterHook(workingDir, topLevelResults.arguments);
       },
     );
   }
