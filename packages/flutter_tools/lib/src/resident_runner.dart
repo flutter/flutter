@@ -841,27 +841,30 @@ abstract class ResidentRunner {
 
   /// Called when the runner should handle a terminal command.
   Future<void> handleTerminalCommand(String code) async {
-    final String lower = code.toLowerCase();
-    if (lower == 'r' && hotMode) {
-      OperationResult result;
-      if (code == 'R') {
+    switch (code) {
+      case 'r':
+        final OperationResult result = await restart(fullRestart: false);
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return;
+      case 'R':
         // If hot restart is not supported for all devices, ignore the command.
         if (!canHotRestart) {
           return;
         }
-        result = await restart(fullRestart: true);
-      } else {
-        result = await restart(fullRestart: false);
-      }
-      if (!result.isOk) {
-        printStatus('Try again after fixing the above error(s).', emphasis: true);
-      }
-    } else if (lower == 'l') {
-      final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
-      printStatus('Connected ${pluralize('view', views.length)}:');
-      for (FlutterView v in views) {
-        printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
-      }
+        final OperationResult result = await restart(fullRestart: true);
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return;
+      case 'l':
+      case 'L':
+        final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
+        printStatus('Connected ${pluralize('view', views.length)}:');
+        for (FlutterView v in views) {
+          printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
+        }
     }
   }
 }
