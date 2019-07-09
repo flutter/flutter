@@ -707,11 +707,11 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             onTap: () => _handlePressed(_isChildExpanded(index), index),
             child: child.expandIconBuilder != null
               ? Semantics(
-                button: true,
-                enabled: true,
-                child: header,
-              )
-            : header,
+                  button: true,
+                  enabled: true,
+                  child: header,
+                )
+              : header,
           ),
         );
       }
