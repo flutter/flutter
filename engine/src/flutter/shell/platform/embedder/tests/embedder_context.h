@@ -14,8 +14,8 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/tests/embedder_test_gl_surface.h"
 #include "flutter/testing/test_dart_native_resolver.h"
+#include "flutter/testing/test_gl_surface.h"
 
 namespace flutter {
 namespace testing {
@@ -65,8 +65,8 @@ class EmbedderContext {
   std::shared_ptr<TestDartNativeResolver> native_resolver_;
   SemanticsNodeCallback update_semantics_node_callback_;
   SemanticsActionCallback update_semantics_custom_action_callback_;
-  std::unique_ptr<EmbedderTestGLSurface> gl_surface_;  // lazy
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
+  std::unique_ptr<TestGLSurface> gl_surface_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 

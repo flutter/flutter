@@ -22,6 +22,7 @@ RuntimeController::RuntimeController(
     TaskRunners p_task_runners,
     fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
     fml::WeakPtr<IOManager> p_io_manager,
+    fml::WeakPtr<ImageDecoder> p_image_decoder,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
     std::function<void(int64_t)> p_idle_notification_callback,
@@ -34,6 +35,7 @@ RuntimeController::RuntimeController(
                         std::move(p_task_runners),
                         std::move(p_snapshot_delegate),
                         std::move(p_io_manager),
+                        std::move(p_image_decoder),
                         std::move(p_advisory_script_uri),
                         std::move(p_advisory_script_entrypoint),
                         p_idle_notification_callback,
@@ -49,6 +51,7 @@ RuntimeController::RuntimeController(
     TaskRunners p_task_runners,
     fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
     fml::WeakPtr<IOManager> p_io_manager,
+    fml::WeakPtr<ImageDecoder> p_image_decoder,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
     std::function<void(int64_t)> idle_notification_callback,
@@ -62,6 +65,7 @@ RuntimeController::RuntimeController(
       task_runners_(p_task_runners),
       snapshot_delegate_(p_snapshot_delegate),
       io_manager_(p_io_manager),
+      image_decoder_(p_image_decoder),
       advisory_script_uri_(p_advisory_script_uri),
       advisory_script_entrypoint_(p_advisory_script_entrypoint),
       idle_notification_callback_(idle_notification_callback),
@@ -79,6 +83,7 @@ RuntimeController::RuntimeController(
                                      std::make_unique<Window>(this),   //
                                      snapshot_delegate_,               //
                                      io_manager_,                      //
+                                     image_decoder_,                   //
                                      p_advisory_script_uri,            //
                                      p_advisory_script_entrypoint,     //
                                      nullptr,                          //
@@ -139,6 +144,7 @@ std::unique_ptr<RuntimeController> RuntimeController::Clone() const {
       task_runners_,                //
       snapshot_delegate_,           //
       io_manager_,                  //
+      image_decoder_,               //
       advisory_script_uri_,         //
       advisory_script_entrypoint_,  //
       idle_notification_callback_,  //

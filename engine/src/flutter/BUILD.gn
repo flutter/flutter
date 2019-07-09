@@ -55,6 +55,7 @@ group("flutter") {
     public_deps += [
       "$flutter_root/flow:flow_unittests",
       "$flutter_root/fml:fml_unittests",
+      "$flutter_root/lib/ui:ui_unittests",
       "$flutter_root/runtime:runtime_unittests",
       "$flutter_root/shell/common:shell_unittests",
       "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_unittests",

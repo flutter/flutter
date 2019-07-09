@@ -45,3 +45,25 @@ source_set("dart") {
     "//third_party/tonic",
   ]
 }
+
+if (current_toolchain == host_toolchain) {
+  source_set("opengl") {
+    testonly = true
+
+    configs += [ "//third_party/swiftshader_flutter:swiftshader_config" ]
+
+    sources = [
+      "$flutter_root/testing/test_gl_surface.cc",
+      "$flutter_root/testing/test_gl_surface.h",
+    ]
+
+    deps = [
+      "//$flutter_root/fml",
+      "//third_party/swiftshader_flutter:swiftshader",
+    ]
+
+    public_deps = [
+      "//third_party/skia",
+    ]
+  }
+}

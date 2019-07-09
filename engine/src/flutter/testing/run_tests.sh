@@ -54,6 +54,9 @@ echo "Running client_wrapper_glfw_unittests..."
 echo "Running txt_unittests..."
 "$HOST_DIR/txt_unittests" --font-directory="$BUILDROOT_DIR/flutter/third_party/txt/third_party/fonts"
 
+echo "Running ui_unittests..."
+"$HOST_DIR/ui_unittests"
+
 echo "Running txt_benchmarks..."
 "$HOST_DIR/txt_benchmarks" --font-directory="$BUILDROOT_DIR/flutter/third_party/txt/third_party/fonts"
 

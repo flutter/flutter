@@ -49,6 +49,9 @@ Engine::Engine(Delegate& delegate,
       animator_(std::move(animator)),
       activity_running_(false),
       have_surface_(false),
+      image_decoder_(task_runners,
+                     vm.GetConcurrentWorkerTaskRunner(),
+                     io_manager),
       weak_factory_(this) {
   // Runtime controller is initialized here because it takes a reference to this
   // object as its delegate. The delegate may be called in the constructor and
@@ -61,6 +64,7 @@ Engine::Engine(Delegate& delegate,
       std::move(task_runners),               // task runners
       std::move(snapshot_delegate),          // snapshot delegate
       std::move(io_manager),                 // io manager
+      image_decoder_.GetWeakPtr(),           // image decoder
       settings_.advisory_script_uri,         // advisory script uri
       settings_.advisory_script_entrypoint,  // advisory script entrypoint
       settings_.idle_notification_callback,  // idle notification callback

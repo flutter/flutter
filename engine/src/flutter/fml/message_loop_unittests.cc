@@ -7,6 +7,7 @@
 #include <iostream>
 #include <thread>
 
+#include "flutter/fml/concurrent_message_loop.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
@@ -281,19 +282,31 @@ TEST(MessageLoop, TaskObserverFire) {
   ASSERT_TRUE(terminated);
 }
 
+TEST(MessageLoop, CanCreateAndShutdownConcurrentMessageLoopsOverAndOver) {
+  for (size_t i = 0; i < 10; ++i) {
+    auto loop = fml::ConcurrentMessageLoop::Create(i + 1);
+    ASSERT_EQ(loop->GetWorkerCount(), i + 1);
+  }
+}
+
 TEST(MessageLoop, CanCreateConcurrentMessageLoop) {
-  fml::MessageLoop loop(fml::MessageLoop::Type::kConcurrent);
-  auto task_runner = loop.GetTaskRunner();
+  auto loop = fml::ConcurrentMessageLoop::Create();
+  auto task_runner = loop->GetTaskRunner();
   const size_t kCount = 10;
   fml::CountDownLatch latch(kCount);
+  std::mutex thread_ids_mutex;
+  std::set<std::thread::id> thread_ids;
   for (size_t i = 0; i < kCount; ++i) {
-    task_runner->PostTask([&latch]() {
-      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    task_runner->PostTask([&]() {
+      std::this_thread::sleep_for(std::chrono::seconds(1));
       std::cout << "Ran on thread: " << std::this_thread::get_id() << std::endl;
+      std::scoped_lock lock(thread_ids_mutex);
+      thread_ids.insert(std::this_thread::get_id());
       latch.CountDown();
     });
   }
   latch.Wait();
+  ASSERT_GE(thread_ids.size(), 1u);
 }
 
 TEST(MessageLoop, CanSwapMessageLoopsAndPreserveThreadConfiguration) {

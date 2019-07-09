@@ -58,6 +58,7 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
       {},                                 // window
       {},                                 // snapshot_delegate
       {},                                 // io_manager
+      {},                                 // image_decoder
       "main.dart",                        // advisory_script_uri
       entrypoint.c_str(),                 // advisory_script_entrypoint
       nullptr,                            // flags

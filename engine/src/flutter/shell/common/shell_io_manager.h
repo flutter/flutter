@@ -29,8 +29,6 @@ class ShellIOManager final : public IOManager {
 
   ~ShellIOManager() override;
 
-  fml::WeakPtr<GrContext> GetResourceContext() const override;
-
   // This method should be called when a resource_context first becomes
   // available. It is safe to call multiple times, and will only update
   // the held resource context if it has not already been set.
@@ -42,9 +40,16 @@ class ShellIOManager final : public IOManager {
   // resource context, but may be called if the Dart VM is restarted.
   void UpdateResourceContext(sk_sp<GrContext> resource_context);
 
-  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
-
   fml::WeakPtr<ShellIOManager> GetWeakPtr();
+
+  // |IOManager|
+  fml::WeakPtr<IOManager> GetWeakIOManager() const override;
+
+  // |IOManager|
+  fml::WeakPtr<GrContext> GetResourceContext() const override;
+
+  // |IOManager|
+  fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const override;
 
  private:
   // Resource context management.

@@ -6,6 +6,7 @@
 #define FLUTTER_TESTING_THREAD_TEST_H_
 
 #include <memory>
+#include <string>
 
 #include "flutter/fml/macros.h"
 #include "flutter/fml/message_loop.h"
@@ -22,6 +23,8 @@ class ThreadTest : public ::testing::Test {
 
   fml::RefPtr<fml::TaskRunner> GetThreadTaskRunner();
 
+  fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name = "");
+
  protected:
   // |testing::Test|
   void SetUp() override;
@@ -33,6 +36,7 @@ class ThreadTest : public ::testing::Test {
   std::unique_ptr<fml::Thread> thread_;
   fml::RefPtr<fml::TaskRunner> thread_task_runner_;
   fml::RefPtr<fml::TaskRunner> current_task_runner_;
+  std::vector<std::unique_ptr<fml::Thread>> extra_threads_;
 };
 
 }  // namespace testing

@@ -17,6 +17,8 @@ class IOManager {
  public:
   virtual ~IOManager() = default;
 
+  virtual fml::WeakPtr<IOManager> GetWeakIOManager() const = 0;
+
   virtual fml::WeakPtr<GrContext> GetResourceContext() const = 0;
 
   virtual fml::RefPtr<flutter::SkiaUnrefQueue> GetSkiaUnrefQueue() const = 0;
