@@ -394,7 +394,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         if (topLevelResults['machine']) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
-        
+
         SubHook matchedSubHook;
         final String workingDir = fs.path.normalize(fs.currentDirectory.path);
         final File hooksYamlFile = fs.file(fs.path.join(workingDir, 'hooks.yaml'));
@@ -417,7 +417,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
             printTrace('Found hook specified for `$topLevelCmds` command in hooks.yaml');
           }
         }
-        
+
         await matchedSubHook?.runBeforeHook(workingDir, topLevelResults.arguments);
         await super.runCommand(topLevelResults);
         await matchedSubHook?.runAfterHook(workingDir, topLevelResults.arguments);

@@ -20,7 +20,7 @@ void main() {
       expect(hooks.subhooks[0].cmds.join(' '), 'doctor');
       expect(hooks.subhooks[0].beforeHookExecutable, 'perl');
       expect(hooks.subhooks[0].beforeHookArgument, 'flutter_tools_hook.pl');
-      
+
       expect(hooks.subhooks[1].cmds.join(' '), 'build apk');
       expect(hooks.subhooks[1].beforeHookExecutable, 'python');
       expect(hooks.subhooks[1].beforeHookArgument, 'flutter_tools_hook.py');
@@ -29,7 +29,7 @@ void main() {
     test('Hooks can deal with yaml of bad format properly', () {
       Hooks hooks = Hooks.fromYaml(yamlContentWithBadFormat);
       expect(hooks.subhooks.length, 0);
-      
+
       hooks = Hooks.fromYaml(null);
       expect(hooks.subhooks.length, 0);
     });
@@ -81,19 +81,19 @@ const String yamlContentWithGoodFormat = '''
 commands:
   doctor:
     hook:
-      before: 
+      before:
         executable: "perl"
         argument: "flutter_tools_hook.pl"
-      after: 
+      after:
         executable: "/bin/sh"
         argument: "flutter_tools_hook.sh"
   build:
     apk:
       hook:
-        before: 
+        before:
           executable: "python"
           argument: "flutter_tools_hook.py"
-        after: 
+        after:
           executable: "ruby"
           argument: "flutter_tools_hook.rb"
 ''';

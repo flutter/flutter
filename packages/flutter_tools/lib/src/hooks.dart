@@ -28,7 +28,7 @@ class SubHook {
     if(hookCommand?.isEmpty ?? true) {
       return null;
     }
-    final List<String> innerCommand = <String>['$hookCommand', '$hookArgument']; 
+    final List<String> innerCommand = <String>['$hookCommand', '$hookArgument'];
     final String argumentConcated = arguments?.join(' ') ?? '';
     if (argumentConcated.isNotEmpty) {
       innerCommand.add('"$argumentConcated"');
@@ -70,18 +70,18 @@ class Hooks {
   /// commands:
   ///   doctor:
   ///     hook:
-  ///       before: 
+  ///       before:
   ///         executable: "python"
   ///         argument: "flutter_tools_hook.py"
-  ///       after: 
+  ///       after:
   ///         executable: "/bin/sh"
   ///         argument: "flutter_tools_hook.sh"
   /// '''
-  /// If you specified the yaml content with content above, and running `flutter doctor -v` command, 
+  /// If you specified the yaml content with content above, and running `flutter doctor -v` command,
   /// 'python flutter_tools_hook.py "doctor -v"' will be executed before running the command,
   /// while '/bin/sh flutter_tools_hook.sh "doctor -v"' will be executed afterwards.
   factory Hooks.fromYaml(dynamic yaml) {
-    final List<SubHook> subhooks = <SubHook>[];    
+    final List<SubHook> subhooks = <SubHook>[];
     try {
         if (yaml != null) {
           final YamlMap yamlSpec = loadYaml(yaml);
@@ -89,7 +89,6 @@ class Hooks {
           _parseYamp(subhooks, <String>[], commandsSpec);
         }
     } catch (_) {
-        
     }
     return Hooks(
           subhooks: subhooks,
@@ -119,12 +118,12 @@ class Hooks {
             afterHookArgument = yamlMap.nodes['argument'].value;
           }
         });
-        if((beforeHookExecutable?.isNotEmpty ?? false) || 
+        if((beforeHookExecutable?.isNotEmpty ?? false) ||
           (afterHookExecutable?.isNotEmpty ?? false)) {
-          subhooks.add(SubHook(cmds: subCmds, 
-                            beforeHookExecutable: beforeHookExecutable, 
-                            beforeHookArgument: beforeHookArgument, 
-                            afterHookExecutable: afterHookExecutable, 
+          subhooks.add(SubHook(cmds: subCmds,
+                            beforeHookExecutable: beforeHookExecutable,
+                            beforeHookArgument: beforeHookArgument,
+                            afterHookExecutable: afterHookExecutable,
                             afterHookArgument: afterHookArgument));
         }
         return;
