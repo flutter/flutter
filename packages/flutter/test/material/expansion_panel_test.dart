@@ -1518,7 +1518,8 @@ void main() {
       isFalse,
     );
 
-    // should not trigger onChanged, but should expand
+    // Tapping the custom expand icon should not trigger onChanged, but
+    // should still expand its panel.
     await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
 
@@ -1536,7 +1537,7 @@ void main() {
       isTrue,
     );
 
-    // should expand second panel by tapping on header
+    // The second panel should expand by tapping on header
     await tester.tap(find.byKey(secondPanelKey));
     await tester.pumpAndSettle();
 
@@ -1640,7 +1641,8 @@ void main() {
       isFalse,
     );
 
-    // should not trigger onChanged, but should expand
+    // Tapping the custom expand icon should not trigger onChanged, but
+    // should still expand its panel.
     await tester.tap(find.byType(Checkbox).at(1));
     await tester.pumpAndSettle();
 
@@ -1658,7 +1660,7 @@ void main() {
       isTrue,
     );
 
-    // should expand first panel by tapping on header
+    // The first panel should expand by tapping on header
     await tester.tap(find.byKey(firstPanelKey));
     await tester.pumpAndSettle();
 
