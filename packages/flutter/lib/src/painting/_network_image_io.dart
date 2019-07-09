@@ -58,7 +58,10 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     );
   }
 
-  static Future<Isolate> _pendingLoader;
+  // For [_pendingLoader] we don't need the value(worker isolate), just future
+  // itself that is used as indicator that successive load requests should be
+  // add to the list of pending load requests [_pendingLoadRequests].
+  static Future<void> _pendingLoader;
   static List<_PendingLoadRequest> _pendingLoadRequests;
   static SendPort _requestPort;
 
@@ -74,6 +77,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       final Completer<TransferableTypedData> bytesCompleter = Completer<TransferableTypedData>();
       final RawReceivePort downloadResponseHandler = RawReceivePort((_DownloadResponse response) {
         if (response.bytes != null) {
+          if (bytesCompleter.isCompleted) {
+            // If an uncaught error occurred in the worker isolate, we'll have
+            // already completed our bytes completer.
+            return;
+          }
           bytesCompleter.complete(response.bytes);
         } else if (response.chunkEvent != null) {
           chunkEvents.add(response.chunkEvent);
@@ -98,10 +106,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       } else {
         if (_pendingLoader == null) {
           // If worker isolate creation was not started, start creation now.
+          assert(_pendingLoadRequests == null);
           _pendingLoadRequests = <_PendingLoadRequest>[];
-
-
-
           _pendingLoader = _setupIsolate()..then((Isolate isolate) {
               final RawReceivePort handleError = RawReceivePort((List<String> errorAndStackTrace) {
                 _cleanupDueToError(errorAndStackTrace[0]);
@@ -150,8 +156,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     final RawReceivePort receivePort = RawReceivePort((SendPort sendPort) {
       _requestPort = sendPort;
       if (sendPort == null) {
-        _pendingLoader = null;
         assert(_pendingLoadRequests.isEmpty);
+        _pendingLoader = null;
+        _pendingLoadRequests = null;
         return;
       }
 
@@ -161,7 +168,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       for (_PendingLoadRequest pendingRequest in _pendingLoadRequests) {
         // [sendPort] being null indicates that worker has been idle and exited.
         // That should not happen if there are pending download requests.
-        assert(sendPort != null);
         pendingRequest.sendRequest(sendPort);
       }
       _pendingLoadRequests.clear();
