@@ -128,10 +128,9 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);;
+    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
     if (hasScrollBody && child != null) {
       child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
-
     } else if (child != null) {
       child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
       double childExtent;
@@ -143,10 +142,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           childExtent = child.size.height;
           break;
       }
-      print('extent $extent');
-      print('childExtent $childExtent');
-      print(' ');
-      extent = math.min(extent, childExtent);
+      extent = childExtent;
     }
     assert(extent.isFinite);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
