@@ -936,82 +936,102 @@ class TerminalHandler {
 
   /// Returns [true] if the input has been handled by this function.
   Future<bool> _commonTerminalInputHandler(String character) async {
-    final String lower = character.toLowerCase();
-
     printStatus(''); // the key the user tapped might be on this line
-
-    if (lower == 'h' || lower == '?') {
-      // help
-      residentRunner.printHelp(details: true);
-      return true;
-    } else if (lower == 'w') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugDumpApp();
+    switch(character) {
+      case 'a':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugToggleProfileWidgetBuilds();
+          return true;
+        }
+        return false;
+      case 'd':
+      case 'D':
+        await residentRunner.detach();
         return true;
-      }
-    } else if (lower == 't') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugDumpRenderTree();
+      case 'h':
+      case 'H':
+      case '?':
+        // help
+        residentRunner.printHelp(details: true);
         return true;
-      }
-    } else if (character == 'L') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugDumpLayerTree();
+      case 'i':
+      case 'I':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'L':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpLayerTree();
+          return true;
+        }
+        return false;
+      case 'o':
+      case 'O':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugTogglePlatform();
+          return true;
+        }
+        return false;
+      case 'p':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugToggleDebugPaintSizeEnabled();
+          return true;
+        }
+        return false;
+      case 'P':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugTogglePerformanceOverlayOverride();
+          return true;
+        }
+        return false;
+      case 'q':
+      case 'Q':
+        // exit
+        await residentRunner.exit();
         return true;
-      }
-    } else if (character == 'S') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
+      case 's':
+        for (FlutterDevice device in residentRunner.flutterDevices) {
+          if (device.device.supportsScreenshot)
+            await residentRunner.screenshot(device);
+        }
         return true;
-      }
-    } else if (character == 'U') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+      case 'S':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
+          return true;
+        }
+        return false;
+      case 't':
+      case 'T':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpRenderTree();
+          return true;
+        }
+        return false;
+      case 'U':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+          return true;
+        }
+        return false;
+      case 'w':
+      case 'W':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpApp();
+          return true;
+        }
+        return false;
+      case 'z':
+      case 'Z':
+        await residentRunner.debugToggleDebugCheckElevationsEnabled();
         return true;
-      }
-    } else if (character == 'p') {
-      if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-        await residentRunner.debugToggleDebugPaintSizeEnabled();
-        return true;
-      }
-    } else if (character == 'P') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugTogglePerformanceOverlayOverride();
-      }
-    } else if (lower == 'i') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugToggleWidgetInspector();
-        return true;
-      }
-    } else if (character == 's') {
-      for (FlutterDevice device in residentRunner.flutterDevices) {
-        if (device.device.supportsScreenshot)
-          await residentRunner.screenshot(device);
-      }
-      return true;
-    } else if (character == 'a') {
-      if (residentRunner.supportsServiceProtocol) {
-        await residentRunner.debugToggleProfileWidgetBuilds();
-      }
-    } else if (lower == 'o') {
-      if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
-        await residentRunner.debugTogglePlatform();
-        return true;
-      }
-    } else if (lower == 'q') {
-      // exit
-      await residentRunner.exit();
-      return true;
-    } else if (lower == 'd') {
-      await residentRunner.detach();
-      return true;
-    } else if (lower == 'z') {
-      await residentRunner.debugToggleDebugCheckElevationsEnabled();
-      return true;
     }
 
     return false;
   }
+
 
   Future<void> processTerminalInput(String command) async {
     // When terminal doesn't support line mode, '\n' can sneak into the input.

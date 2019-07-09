@@ -16,6 +16,7 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand() {
+    usesTargetOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app.',
@@ -59,7 +60,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!flutterProject.linux.existsSync()) {
       throwToolExit('No Linux desktop project configured.');
     }
-    await buildLinux(flutterProject.linux, buildInfo);
+    await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
     return null;
   }
 }

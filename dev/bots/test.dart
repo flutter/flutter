@@ -754,11 +754,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '-v', '--platform=chrome'];
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
-
-  args.addAll(tests);
+  final List<String> args = <String>[
+    'test',
+    '-v',
+    '--platform=chrome',
+    ...?flutterTestArgs,
+    ...tests,
+  ];
 
   // TODO(jonahwilliams): fix relative path issues to make this unecessary.
   final Directory oldCurrent = Directory.current;
@@ -791,9 +793,11 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
-  final List<String> args = <String>['test', ...options];
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
+  final List<String> args = <String>[
+    'test',
+    ...options,
+    ...?flutterTestArgs,
+  ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
   if (shouldProcessOutput) {

@@ -269,7 +269,9 @@ class TextSelectionOverlay {
     @required TextEditingValue value,
     @required this.context,
     this.debugRequiredFor,
-    @required this.layerLink,
+    @required this.toolbarLayerLink,
+    @required this.startHandleLayerLink,
+    @required this.endHandleLayerLink,
     @required this.renderObject,
     this.selectionControls,
     bool handlesVisible = false,
@@ -300,7 +302,15 @@ class TextSelectionOverlay {
 
   /// The object supplied to the [CompositedTransformTarget] that wraps the text
   /// field.
-  final LayerLink layerLink;
+  final LayerLink toolbarLayerLink;
+
+  /// The objects supplied to the [CompositedTransformTarget] that wraps the
+  /// location of start selection handle.
+  final LayerLink startHandleLayerLink;
+
+  /// The objects supplied to the [CompositedTransformTarget] that wraps the
+  /// location of end selection handle.
+  final LayerLink endHandleLayerLink;
 
   // TODO(mpcomplete): what if the renderObject is removed or replaced, or
   // moves? Not sure what cases I need to handle, or how to handle them.
@@ -499,7 +509,8 @@ class TextSelectionOverlay {
       child: _TextSelectionHandleOverlay(
         onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
         onSelectionHandleTapped: onSelectionHandleTapped,
-        layerLink: layerLink,
+        startHandleLayerLink: startHandleLayerLink,
+        endHandleLayerLink: endHandleLayerLink,
         renderObject: renderObject,
         selection: _selection,
         selectionControls: selectionControls,
@@ -539,7 +550,7 @@ class TextSelectionOverlay {
     return FadeTransition(
       opacity: _toolbarOpacity,
       child: CompositedTransformFollower(
-        link: layerLink,
+        link: toolbarLayerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
         child: selectionControls.buildToolbar(
@@ -575,7 +586,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     Key key,
     @required this.selection,
     @required this.position,
-    @required this.layerLink,
+    @required this.startHandleLayerLink,
+    @required this.endHandleLayerLink,
     @required this.renderObject,
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
@@ -585,7 +597,8 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 
   final TextSelection selection;
   final _TextSelectionHandlePosition position;
-  final LayerLink layerLink;
+  final LayerLink startHandleLayerLink;
+  final LayerLink endHandleLayerLink;
   final RenderEditable renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
@@ -696,29 +709,29 @@ class _TextSelectionHandleOverlayState
 
   @override
   Widget build(BuildContext context) {
-    final List<TextSelectionPoint> endpoints = widget.renderObject.getEndpointsForSelection(widget.selection);
-    Offset point;
+    LayerLink layerLink;
     TextSelectionHandleType type;
 
     switch (widget.position) {
       case _TextSelectionHandlePosition.start:
-        point = endpoints[0].point;
-        type = _chooseType(endpoints[0], TextSelectionHandleType.left, TextSelectionHandleType.right);
+        layerLink = widget.startHandleLayerLink;
+        type = _chooseType(
+          widget.renderObject.textDirection,
+          TextSelectionHandleType.left,
+          TextSelectionHandleType.right,
+        );
         break;
       case _TextSelectionHandlePosition.end:
-        // [endpoints] will only contain 1 point for collapsed selections, in
-        // which case we shouldn't be building the [end] handle.
-        assert(endpoints.length == 2);
-        point = endpoints[1].point;
-        type = _chooseType(endpoints[1], TextSelectionHandleType.right, TextSelectionHandleType.left);
+        // For collapsed selections, we shouldn't be building the [end] handle.
+        assert(!widget.selection.isCollapsed);
+        layerLink = widget.endHandleLayerLink;
+        type = _chooseType(
+          widget.renderObject.textDirection,
+          TextSelectionHandleType.right,
+          TextSelectionHandleType.left,
+        );
         break;
     }
-
-    final Size viewport = widget.renderObject.size;
-    point = Offset(
-      point.dx.clamp(0.0, viewport.width),
-      point.dy.clamp(0.0, viewport.height),
-    );
 
     final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
@@ -727,10 +740,10 @@ class _TextSelectionHandleOverlayState
     final Size handleSize = widget.selectionControls.getHandleSize(
       widget.renderObject.preferredLineHeight,
     );
+
     final Rect handleRect = Rect.fromLTWH(
-      // Put handleAnchor on top of point
-      point.dx - handleAnchor.dx,
-      point.dy - handleAnchor.dy,
+      -handleAnchor.dx,
+      -handleAnchor.dy,
       handleSize.width,
       handleSize.height,
     );
@@ -747,7 +760,7 @@ class _TextSelectionHandleOverlayState
     );
 
     return CompositedTransformFollower(
-      link: widget.layerLink,
+      link: layerLink,
       offset: interactiveRect.topLeft,
       showWhenUnlinked: false,
       child: FadeTransition(
@@ -782,15 +795,15 @@ class _TextSelectionHandleOverlayState
   }
 
   TextSelectionHandleType _chooseType(
-    TextSelectionPoint endpoint,
+    TextDirection textDirection,
     TextSelectionHandleType ltrType,
     TextSelectionHandleType rtlType,
   ) {
     if (widget.selection.isCollapsed)
       return TextSelectionHandleType.collapsed;
 
-    assert(endpoint.direction != null);
-    switch (endpoint.direction) {
+    assert(textDirection != null);
+    switch (textDirection) {
       case TextDirection.ltr:
         return ltrType;
       case TextDirection.rtl:

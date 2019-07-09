@@ -72,6 +72,7 @@ Future<void> main(List<String> args) async {
     // Otherwise assume the package is flat.
     targetFile = entrypoint;
   }
+  final String deviceName = argResults['device'];
   final List<String> command = <String>[
     'attach',
     '--module',
@@ -86,14 +87,9 @@ Future<void> main(List<String> args) async {
     outputDill,
     '--packages',
     packages,
+    if (deviceName != null && deviceName.isNotEmpty) ...<String>['-d', deviceName],
+    if (verbose) '--verbose',
   ];
-  final String deviceName = argResults['device'];
-  if (deviceName != null && deviceName.isNotEmpty) {
-    command.addAll(<String>['-d', deviceName]);
-  }
-  if (verbose) {
-    command.add('--verbose');
-  }
   Cache.disableLocking(); // ignore: invalid_use_of_visible_for_testing_member
   await runner.run(
     command,

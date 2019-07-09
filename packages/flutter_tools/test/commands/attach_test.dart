@@ -37,7 +37,7 @@ void main() {
           : FileSystemStyle.posix,
       );
       testFileSystem.directory('lib').createSync();
-      testFileSystem.file('lib/main.dart').createSync();
+      testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
     });
 
     group('with one device and no specified target file', () {
@@ -250,7 +250,7 @@ void main() {
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file('lib/main.dart').deleteSync();
+      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);

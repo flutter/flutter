@@ -289,10 +289,11 @@ class CompileTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> metrics = <String, dynamic>{}
-        ..addAll(await _compileAot())
-        ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
-        ..addAll(await _compileDebug());
+      final Map<String, dynamic> metrics = <String, dynamic>{
+        ...await _compileAot(),
+        ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
+        ...await _compileDebug(),
+      };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
@@ -533,10 +534,11 @@ class MemoryTest {
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
       final ListStatistics diffMemoryStatistics = ListStatistics(_diffMemory);
 
-      final Map<String, dynamic> memoryUsage = <String, dynamic>{};
-      memoryUsage.addAll(startMemoryStatistics.asMap('start'));
-      memoryUsage.addAll(endMemoryStatistics.asMap('end'));
-      memoryUsage.addAll(diffMemoryStatistics.asMap('diff'));
+      final Map<String, dynamic> memoryUsage = <String, dynamic>{
+        ...startMemoryStatistics.asMap('start'),
+        ...endMemoryStatistics.asMap('end'),
+        ...diffMemoryStatistics.asMap('diff'),
+      };
 
       _device = null;
       _startMemory.clear();
@@ -607,9 +609,26 @@ class MemoryTest {
   }
 }
 
-class ReportedDurationTest {
-  ReportedDurationTest(this.project, this.test, this.package, this.durationPattern);
+enum ReportedDurationTestFlavor {
+  debug, profile, release
+}
 
+String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
+  switch (flavor) {
+    case ReportedDurationTestFlavor.debug:
+      return 'debug';
+    case ReportedDurationTestFlavor.profile:
+      return 'profile';
+    case ReportedDurationTestFlavor.release:
+      return 'release';
+  }
+  throw ArgumentError('Unexpected value for enum $flavor');
+}
+
+class ReportedDurationTest {
+  ReportedDurationTest(this.flavor, this.project, this.test, this.package, this.durationPattern);
+
+  final ReportedDurationTestFlavor flavor;
   final String project;
   final String test;
   final String package;
@@ -643,7 +662,7 @@ class ReportedDurationTest {
       print('launching $project$test on device...');
       await flutter('run', options: <String>[
         '--verbose',
-        '--release',
+        '--${_reportedDurationTestToString(flavor)}',
         '--no-resident',
         '-d', device.deviceId,
         test,

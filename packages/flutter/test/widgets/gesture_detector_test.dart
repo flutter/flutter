@@ -224,7 +224,7 @@ void main() {
     expect(didTap, isFalse);
   });
 
-  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
+  testWidgets('cache render object', (WidgetTester tester) async {
     final GestureTapCallback inputCallback = () { };
 
     await tester.pumpWidget(
@@ -237,7 +237,6 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
       Center(
@@ -249,10 +248,8 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback2 = renderObj2.onTap;
 
     expect(renderObj1, same(renderObj2));
-    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 
   testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
@@ -525,4 +522,90 @@ void main() {
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
   });
+
+  group('RawGestureDetectorState\'s debugFillProperties', () {
+    testWidgets('when default', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+      ]);
+    });
+
+    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        behavior: HitTestBehavior.deferToChild,
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+            (TapGestureRecognizer recognizer) {
+              recognizer.onTap = () {};
+            },
+          ),
+          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(),
+            (LongPressGestureRecognizer recognizer) {
+              recognizer.onLongPress = () {};
+            },
+          ),
+        },
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: tap, long press',
+        'semantics: _EmptySemanticsGestureDelegate()',
+        'behavior: deferToChild',
+      ]);
+    });
+
+    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        gestures: const <Type, GestureRecognizerFactory>{},
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+        excludeFromSemantics: true,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+        'excludeFromSemantics: true',
+      ]);
+    });
+  });
+}
+
+class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
 }

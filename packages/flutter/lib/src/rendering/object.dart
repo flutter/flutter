@@ -3017,11 +3017,11 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     _childCount = 0;
   }
 
-  /// Move this child in the child list to be before the given child.
+  /// Move the given `child` in the child list to be after another child.
   ///
   /// More efficient than removing and re-adding the child. Requires the child
-  /// to already be in the child list at some position. Pass null for before to
-  /// move the child to the end of the child list.
+  /// to already be in the child list at some position. Pass null for `after` to
+  /// move the child to the start of the child list.
   void move(ChildType child, { ChildType after }) {
     assert(child != this);
     assert(after != this);
@@ -3326,15 +3326,16 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
     node.rect = owner.semanticBounds;
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      assert(fragment.config == null);
-      children.addAll(fragment.compileChildren(
-        parentSemanticsClipRect: parentSemanticsClipRect,
-        parentPaintClipRect: parentPaintClipRect,
-        elevationAdjustment: 0.0,
-      ));
-    }
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) {
+        assert(fragment.config == null);
+        return fragment.compileChildren(
+          parentSemanticsClipRect: parentSemanticsClipRect,
+          parentPaintClipRect: parentPaintClipRect,
+          elevationAdjustment: 0.0,
+        );
+      })
+      .toList();
     node.updateWith(config: null, childrenInInversePaintOrder: children);
 
     // The root node is the only semantics node allowed to be invisible. This
@@ -3447,14 +3448,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       }
     }
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      children.addAll(fragment.compileChildren(
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) => fragment.compileChildren(
         parentSemanticsClipRect: node.parentSemanticsClipRect,
         parentPaintClipRect: node.parentPaintClipRect,
         elevationAdjustment: 0.0,
-      ));
-    }
+      ))
+      .toList();
 
     if (_config.isSemanticBoundary) {
       owner.assembleSemanticsNode(node, _config, children);
@@ -3614,7 +3614,7 @@ class _SemanticsGeometry {
     assert(transform != null);
     if (rect == null)
       return null;
-    if (rect.isEmpty)
+    if (rect.isEmpty || transform.isZero())
       return Rect.zero;
     return MatrixUtils.inverseTransformRect(transform, rect);
   }

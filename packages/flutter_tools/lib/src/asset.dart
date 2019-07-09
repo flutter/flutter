@@ -216,10 +216,10 @@ class _ManifestAssetBundle implements AssetBundle {
       }
     }
 
-    final List<_Asset> materialAssets = <_Asset>[];
-    if (flutterManifest.usesMaterialDesign && includeDefaultFonts) {
-      materialAssets.addAll(_getMaterialAssets(_fontSetMaterial));
-    }
+    final List<_Asset> materialAssets = <_Asset>[
+      if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
+        ..._getMaterialAssets(_fontSetMaterial),
+    ];
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
       entries[asset.entryUri.path] ??= DevFSFileContent(asset.assetFile);
@@ -421,20 +421,18 @@ List<Map<String, dynamic>> _parseFonts(
   PackageMap packageMap, {
   String packageName,
 }) {
-  final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
-  if (manifest.usesMaterialDesign && includeDefaultFonts) {
-    fonts.addAll(_getMaterialFonts(_ManifestAssetBundle._fontSetMaterial));
-  }
-  if (packageName == null) {
-    fonts.addAll(manifest.fontsDescriptor);
-  } else {
-    fonts.addAll(_createFontsDescriptor(_parsePackageFonts(
-      manifest,
-      packageName,
-      packageMap,
-    )));
-  }
-  return fonts;
+  return <Map<String, dynamic>>[
+    if (manifest.usesMaterialDesign && includeDefaultFonts)
+      ..._getMaterialFonts(_ManifestAssetBundle._fontSetMaterial),
+    if (packageName == null)
+      ...manifest.fontsDescriptor
+    else
+      ..._createFontsDescriptor(_parsePackageFonts(
+        manifest,
+        packageName,
+        packageMap,
+      )),
+  ];
 }
 
 /// Prefixes family names and asset paths of fonts included from packages with
