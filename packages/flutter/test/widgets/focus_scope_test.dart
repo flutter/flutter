@@ -718,6 +718,7 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TestFocus(
+                      debugLabel: 'Child B',
                       key: keyB,
                       name: 'b',
                       autofocus: true,
@@ -799,6 +800,7 @@ void main() {
                 child: Column(
                   children: <Widget>[
                     TestFocus(
+                      debugLabel: 'Child B',
                       key: keyB,
                       name: 'b',
                       autofocus: true,

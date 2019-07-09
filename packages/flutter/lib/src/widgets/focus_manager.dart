@@ -14,6 +14,24 @@ import 'focus_scope.dart';
 import 'focus_traversal.dart';
 import 'framework.dart';
 
+// Used for debugging focus code. Set to true to see highly verbose debug output
+// when focus changes occur.
+const bool _kDebugFocus = false;
+
+void _focusDebug(String message, [Iterable<String> details]) {
+  assert(() {
+    if (_kDebugFocus) {
+      debugPrint('FOCUS: $message');
+      if (details != null && details.isNotEmpty) {
+        for (String detail in details) {
+          debugPrint('    $detail');
+        }
+      }
+    }
+    return true;
+  }());
+}
+
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
 /// to receive key events.
 ///
@@ -61,6 +79,7 @@ class FocusAttachment {
   /// Calling [FocusNode.dispose] will also automatically detach the node.
   void detach() {
     assert(_node != null);
+    _focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']);
     if (isAttached) {
       if (_node.hasPrimaryFocus) {
         _node.unfocus();
@@ -855,6 +874,7 @@ class FocusScopeNode extends FocusNode {
   /// tree, the given scope must be a descendant of this scope.
   void setFirstFocus(FocusScopeNode scope) {
     assert(scope != null);
+    assert(scope != this, 'Unexpected self-reference in setFirstFocus.');
     if (scope._parent == null) {
       _reparent(scope);
     }
@@ -998,6 +1018,7 @@ class FocusManager with DiagnosticableTreeMixin {
   // Called to indicate that the given node is being disposed.
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
+    _focusDebug('Disposing of node:', <String>[node.toString(), 'with enclosing scope ${node.enclosingScope}']);
     _willUnfocusNode(node);
     _dirtyNodes.remove(node);
   }
@@ -1006,6 +1027,7 @@ class FocusManager with DiagnosticableTreeMixin {
   // pending request to be focused should be canceled.
   void _willUnfocusNode(FocusNode node) {
     assert(node != null);
+    _focusDebug('Unfocusing node $node');
     if (_primaryFocus == node) {
       _primaryFocus = null;
       _dirtyNodes.add(node);
@@ -1016,6 +1038,7 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.add(node);
       _markNeedsUpdate();
     }
+    _focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_nextFocus']);
   }
 
   // True indicates that there is an update pending.
@@ -1027,6 +1050,7 @@ class FocusManager with DiagnosticableTreeMixin {
     // If newFocus isn't specified, then don't mess with _nextFocus, just
     // schedule the update.
     _nextFocus = newFocus ?? _nextFocus;
+    _focusDebug('Scheduling update, next focus will be $_nextFocus');
     if (_haveScheduledUpdate) {
       return;
     }
@@ -1036,6 +1060,7 @@ class FocusManager with DiagnosticableTreeMixin {
 
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
+    _focusDebug('Refreshing focus state. Next focus will be $_nextFocus');
     final FocusNode previousFocus = _primaryFocus;
     if (_primaryFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
@@ -1053,6 +1078,7 @@ class FocusManager with DiagnosticableTreeMixin {
       _nextFocus = null;
     }
     if (previousFocus != _primaryFocus) {
+      _focusDebug('Updating focus from $previousFocus to $_primaryFocus');
       if (previousFocus != null) {
         _dirtyNodes.add(previousFocus);
       }
@@ -1060,10 +1086,17 @@ class FocusManager with DiagnosticableTreeMixin {
         _dirtyNodes.add(_primaryFocus);
       }
     }
+    _focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString()));
     for (FocusNode node in _dirtyNodes) {
       node._notify();
     }
     _dirtyNodes.clear();
+    assert(() {
+      if (_kDebugFocus) {
+        debugDumpFocusTree();
+      }
+      return true;
+    }());
   }
 
   @override
@@ -1076,7 +1109,11 @@ class FocusManager with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
-    properties.add(DiagnosticsProperty<FocusNode>('currentFocus', primaryFocus, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('primaryFocus', primaryFocus, defaultValue: null));
+    final Element element = primaryFocus?.context;
+    if (element != null) {
+      properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));
+    }
   }
 }
 
