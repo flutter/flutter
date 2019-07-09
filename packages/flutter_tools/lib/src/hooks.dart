@@ -63,13 +63,30 @@ class Hooks {
     this.subhooks,
   });
 
+  /// Creates a new [Hooks] instance from yaml content specified by [yaml].
+  ///
+  /// A typical yaml content is as below :
+  /// '''
+  /// commands:
+  ///   doctor:
+  ///     hook:
+  ///       before: 
+  ///         executable: "python"
+  ///         argument: "flutter_tools_hook.py"
+  ///       after: 
+  ///         executable: "/bin/sh"
+  ///         argument: "flutter_tools_hook.sh"
+  /// '''
+  /// If you specified the yaml content with content above, and running `flutter doctor -v` command, 
+  /// 'python flutter_tools_hook.py "doctor -v"' will be executed before running the command,
+  /// while '/bin/sh flutter_tools_hook.sh "doctor -v"' will be executed afterwards.
   factory Hooks.fromYaml(dynamic yaml) {
     final List<SubHook> subhooks = <SubHook>[];    
     try {
         if (yaml != null) {
           final YamlMap yamlSpec = loadYaml(yaml);
           final YamlMap commandsSpec = yamlSpec['commands'];
-          parseYamp(subhooks, <String>[], commandsSpec);
+          _parseYamp(subhooks, <String>[], commandsSpec);
         }
     } catch (_) {
         
@@ -79,7 +96,7 @@ class Hooks {
         );
   }
 
-  static void parseYamp(List<SubHook> subhooks,List<String> subCmds, YamlMap yamlMap) {
+  static void _parseYamp(List<SubHook> subhooks,List<String> subCmds, YamlMap yamlMap) {
     yamlMap?.nodes?.forEach((dynamic key, YamlNode yamlNode) {
       final String subCmdName = key.value;
       if (subCmdName == 'hook') {
@@ -113,7 +130,7 @@ class Hooks {
         return;
        }
       final List<String> tmpCmds = subCmds.sublist(0)..add(subCmdName);
-      parseYamp(subhooks, tmpCmds, yamlNode);
+      _parseYamp(subhooks, tmpCmds, yamlNode);
     });
   }
 
