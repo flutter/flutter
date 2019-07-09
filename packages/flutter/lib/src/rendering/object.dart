@@ -1189,6 +1189,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       context: ErrorDescription('during $method()'),
       renderObject: this,
       informationCollector: () sync* {
+        if (debugCreator != null)
+          yield DiagnosticsDebugCreator(debugCreator);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
@@ -3674,4 +3676,21 @@ class _SemanticsGeometry {
   ///  * [SemanticsFlag.isHidden] for the purpose of marking a node as hidden.
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
+}
+
+/// A class that creates [DiagnosticsNode] by wrapping [RenderObject.debugCreator].
+///
+/// Attach a [DiagnosticsDebugCreator] into [FlutterErrorDetails.informationCollector]
+/// when a [RenderObject.debugCreator] is available. This will lead to improved
+/// error message.
+class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
+  /// Create a [DiagnosticsProperty] with its [value] initialized to input
+  /// [RenderObject.debugCreator].
+  DiagnosticsDebugCreator(Object value):
+    assert(value != null),
+    super(
+      'debugCreator',
+      value,
+      level: DiagnosticLevel.hidden
+    );
 }
