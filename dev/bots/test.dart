@@ -88,8 +88,7 @@ Future<void> _runSmokeTests() async {
     script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    timeout: _kShortTimeout
-                        ,
+    timeout: _kShortTimeout,
   );
   // We run the timeout tests individually because they are timing-sensitive.
   await _runFlutterTest(automatedTests,
@@ -458,23 +457,19 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  try {
-    await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-      'test/foundation/',
-      'test/physics/',
-      'test/rendering/',
-      'test/services/',
-      'test/painting/',
-      'test/scheduler/',
-      'test/semantics/',
-      // TODO(flutterweb): re-enable when instabiliy around pumpAndSettle is
-      // resolved.
-      // 'test/widgets/',
-      // 'test/material/',
-    ]).timeout(const Duration(minutes: 30)); // prevent tests that get stuck from causing the shard to fail.
-  } on TimeoutException {
-    // Do nothing for now
-  }
+  _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+    'test/foundation/',
+    'test/physics/',
+    'test/rendering/',
+    'test/services/',
+    'test/painting/',
+    'test/scheduler/',
+    'test/semantics/',
+    // TODO(flutterweb): re-enable when instabiliy around pumpAndSettle is
+    // resolved.
+    // 'test/widgets/',
+    // 'test/material/',
+  ]);
 }
 
 Future<void> _runCoverage() async {
