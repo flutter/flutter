@@ -129,10 +129,10 @@ class ExpansionPanel {
   /// ```dart
   /// bool _isExpanded = false;
   ///
-  /// ExpansionPanel(
+  /// ExpansionPanel({
   ///   isExpanded: _isExpanded,
   ///   headerBuilder: (context, isExpanded) {
-  ///     return Text("This is ExpansionPanel's header");
+  ///     return const Text("This is ExpansionPanel's header");
   ///   },
   ///   expandIconBuilder: (
   ///     BuildContext context,
@@ -151,7 +151,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// )
+  /// })
   /// ```
   /// {@end-tool}
   ///
@@ -163,10 +163,10 @@ class ExpansionPanel {
   /// toggles _isExpanded.
   ///
   /// ```dart
-  /// ExpansionPanel(
+  /// ExpansionPanel({
   ///   isExpanded: _isExpanded,
   ///   headerBuilder: (context, isExpanded) {
-  ///     return Text("This is ExpansionPanel's header");
+  ///     return const Text("This is ExpansionPanel's header");
   ///   },
   ///   expandIconBuilder: (
   ///     BuildContext context,
@@ -189,7 +189,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// )
+  /// })
   /// ```
   /// {@end-tool}
   ///
@@ -251,10 +251,10 @@ class ExpansionPanel {
   ///
   /// // ...
   ///
-  /// ExpansionPanel(
+  /// ExpansionPanel({
   ///   isExpanded: _isExpanded,
   ///   headerBuilder: (context, isExpanded) {
-  ///     return Text("This is ExpansionPanel's header");
+  ///     return const Text("This is ExpansionPanel's header");
   ///   },
   ///   expandIconBuilder: (
   ///     BuildContext context,
@@ -275,7 +275,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// )
+  /// })
   /// ```
   /// {@end-tool}
   final ExpansionPanelIconBuilder expandIconBuilder;
