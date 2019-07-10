@@ -10,17 +10,17 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'skia_client.dart';
-
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// A base class that provides shared information to the [SkiaGoldClient] and
+/// An base class that provides shared information to the
+/// [FlutterGoldenFileComparator] as well as the [SkiaGoldClient] and
 /// [GoldensRepositoryClient].
 class GoldensClient {
+  /// Creates a handle to the local environment of golden file images.
   GoldensClient({
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
@@ -60,18 +60,15 @@ class GoldensClient {
 /// A class that represents a clone of the https://github.com/flutter/goldens
 /// repository, nested within the `bin/cache` directory of the caller's Flutter
 /// repository.
-class GoldensRepositoryClient  extends GoldensClient {
-  GoldensRepositoryClient() : super();
-
-  /// Constructor used specifically for testing in order to provide mock members.
-  GoldensRepositoryClient.test({
-    FileSystem testFileSystem,
-    ProcessManager testProcess,
-    Platform testPlatform,
+class GoldensRepositoryClient extends GoldensClient {
+  GoldensRepositoryClient({
+    FileSystem fs = const LocalFileSystem(),
+    ProcessManager process = const LocalProcessManager(),
+    Platform platform = const LocalPlatform(),
   }) : super(
-    fs: testFileSystem,
-    process: testProcess,
-    platform: testPlatform,
+    fs: fs,
+    process: process,
+    platform: platform,
   );
 
   RandomAccessFile _lock;

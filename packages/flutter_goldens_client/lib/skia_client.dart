@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -24,20 +25,17 @@ const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// An extension of the [GoldensClient] class that interfaces with Skia Gold
-/// for golden file testing
+/// for golden file testing.
 class SkiaGoldClient extends GoldensClient {
-  SkiaGoldClient(this.workDirectory) : super();
-
-  /// Constructor used specifically for testing in order to provide mock members.
-  SkiaGoldClient.test(
+  SkiaGoldClient(
     this.workDirectory, {
-    FileSystem testFileSystem,
-    ProcessManager testProcess,
-    Platform testPlatform,
+    FileSystem fs = const LocalFileSystem(),
+    ProcessManager process = const LocalProcessManager(),
+    Platform platform = const LocalPlatform(),
   }) : super(
-    fs: testFileSystem,
-    process: testProcess,
-    platform: testPlatform,
+    fs: fs,
+    process: process,
+    platform: platform,
   );
 
   /// The local [Directory] within the [comparisonRoot] for the current test

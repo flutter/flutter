@@ -36,11 +36,13 @@ void main() {
   group('GoldensClient', () {
     GoldensRepositoryClient goldens;
 
-    setUp(() => goldens = GoldensRepositoryClient.test(
-      testFileSystem: fs,
-      testProcess: process,
-      testPlatform: platform,
-    ));
+    setUp(() {
+      goldens = GoldensRepositoryClient(
+        fs: fs,
+        process: process,
+        platform: platform,
+      );
+    });
 
     group('prepare', () {
       test('performs minimal work if versions match', () async {
@@ -63,11 +65,11 @@ void main() {
 
     setUp(() {
       final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
-      goldens = SkiaGoldClient.test(
+      goldens = SkiaGoldClient(
         workDirectory,
-        testFileSystem: fs,
-        testProcess: process,
-        testPlatform: platform,
+        fs: fs,
+        process: process,
+        platform: platform,
       );
     });
 
@@ -113,10 +115,10 @@ void main() {
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterGoldensRepositoryFileComparator.test(
+      comparator = FlutterGoldensRepositoryFileComparator(
         testDirectory.uri,
-        fs,
-        platform,
+        fs: fs,
+        platform: platform,
       );
     });
 
@@ -184,10 +186,10 @@ void main() {
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterSkiaGoldFileComparator.test(
+      comparator = FlutterSkiaGoldFileComparator(
         testDirectory.uri,
-        fs,
-        platform,
+        fs: fs,
+        platform: platform,
       );
     });
 
