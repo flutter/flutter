@@ -213,7 +213,8 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     goldens ??= GoldensClient();
 
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(goldens, defaultComparator);
-    baseDirectory.createSync(recursive: true);
+    if (!baseDirectory.existsSync())
+      baseDirectory.createSync(recursive: true);
     final SkiaGoldClient skiaClient = SkiaGoldClient(baseDirectory);
     await skiaClient.auth();
     await skiaClient.imgtestInit();
