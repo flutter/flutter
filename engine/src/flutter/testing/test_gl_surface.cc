@@ -203,7 +203,7 @@ bool TestGLSurface::Present() {
   return result == EGL_TRUE;
 }
 
-uint32_t TestGLSurface::GetFramebuffer() {
+uint32_t TestGLSurface::GetFramebuffer() const {
   // Return FBO0
   return 0;
 }
@@ -220,7 +220,7 @@ bool TestGLSurface::MakeResourceCurrent() {
   return result == EGL_TRUE;
 }
 
-void* TestGLSurface::GetProcAddress(const char* name) {
+void* TestGLSurface::GetProcAddress(const char* name) const {
   if (name == nullptr) {
     return nullptr;
   }

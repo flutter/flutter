@@ -12,8 +12,9 @@
 #include "flutter/shell/common/run_configuration.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/thread_host.h"
-#include "flutter/shell/gpu/gpu_surface_software.h"
+#include "flutter/shell/gpu/gpu_surface_gl_delegate.h"
 #include "flutter/testing/test_dart_native_resolver.h"
+#include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/thread_test.h"
 
 namespace flutter {
@@ -66,8 +67,7 @@ class ShellTest : public ThreadTest {
   void SetSnapshotsAndAssets(Settings& settings);
 };
 
-class ShellTestPlatformView : public PlatformView,
-                              public GPUSurfaceSoftwareDelegate {
+class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   ShellTestPlatformView(PlatformView::Delegate& delegate,
                         TaskRunners task_runners);
@@ -75,14 +75,25 @@ class ShellTestPlatformView : public PlatformView,
   ~ShellTestPlatformView() override;
 
  private:
+  TestGLSurface gl_surface_;
+
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
 
-  // |GPUSurfaceSoftwareDelegate|
-  virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) override;
+  // |GPUSurfaceGLDelegate|
+  bool GLContextMakeCurrent() override;
 
-  // |GPUSurfaceSoftwareDelegate|
-  virtual bool PresentBackingStore(sk_sp<SkSurface> backing_store) override;
+  // |GPUSurfaceGLDelegate|
+  bool GLContextClearCurrent() override;
+
+  // |GPUSurfaceGLDelegate|
+  bool GLContextPresent() override;
+
+  // |GPUSurfaceGLDelegate|
+  intptr_t GLContextFBO() const override;
+
+  // |GPUSurfaceGLDelegate|
+  GLProcResolver GetGLProcResolver() const override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ShellTestPlatformView);
 };
