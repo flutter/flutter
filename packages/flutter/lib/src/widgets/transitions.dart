@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart' as prefix0;
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -75,16 +76,40 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// ```
 /// {@end-tool}
 ///
-/// For more complex case involving additional state, consider using
-/// [AnimatedBuilder].
+/// The framework ships with many concrete subclasses of [AnimatedWidget]s for
+/// specific use cases. They are listed in the "see also" section below and
+/// their names usually end in `Transition`. One notable exception is the
+/// [AnimatedBuilder], which is useful for more complex cases involving
+/// additional state.
+///
+/// ## Relationship to [ImplicitlyAnimatedWidget]s
+///
+/// [AnimatedWidget]s and their subclasses take an explicit [Listenable]
+/// (usually an [Animation] derived from an [AnimationController]) to power
+/// the animation. In contrast to that, [ImplicitlyAnimatedWidget]s instantiate
+/// and manage their own [AnimationController]s to power the animation. For
+/// multiple parallel animations it is more efficient to instantiate one
+/// [AnimationController] that powers multiple [AnimatedWidget] compared to
+/// using multiple [ImplicitlyAnimatedWidget]s where each one manages their own
+/// [AnimationController]. However, the [ImplicitlyAnimatedWidget]s and their
+/// subclasses are easier to use for simple use cases.
 ///
 /// See also:
 ///
-///  * [AnimatedBuilder], which is useful for more complex use cases.
-///  * [Animation], which is a [Listenable] object that can be used for
-///    [listenable].
-///  * [ChangeNotifier], which is another [Listenable] object that can be used
-///    for [listenable].
+///  * [AnimatedBuilder], which is useful for complex animation use cases.
+///  * [AlignTransition], which is an animated version of [Align].
+///  * [AnimatedModalBarrier], which is an animated version of [ModalBarrier].
+///  * [DecoratedBoxTransition], which is an animated version of [DecoratedBox].
+///  * [DefaultTextStyleTransition], which is an animated version of
+///    [DefaultTextStyle].
+///  * [PositionedTransition], which is an animated version of [Positioned].
+///  * [RelativePositionedTransition], which is an animated version of [Positioned].
+///  * [RotationTransition], which animates the rotation of a widget..
+///  * [ScaleTransition], which animates the scale of a widget.
+///  * [SizeTransition], which animates its own size.
+///  * [SlideTransition], which is an animated version of []
+///  * [FadeTransition], which animates the position of a widget relative to its
+///    normal position.
 abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///
@@ -446,6 +471,17 @@ class SizeTransition extends AnimatedWidget {
 /// Here's an illustration of the [FadeTransition] widget, with it's [opacity]
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
+///
+/// In contrast to [FadeTransition], this widget creates its own internal
+/// [AnimationController] to power the animation. Instead of using multiple
+/// widgets, that create their own implicit [AnimationController], it is
+/// more efficient to manually instantiate one [AnimationController] to drive
+/// parallel animations. For that case, pass that [AnimationController] to
+/// [FadeTransition] instead of using this widget.
+///
+/// See also:
+///
+///  * [Opacity], which does not animate changes in opacity.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
@@ -530,6 +566,8 @@ class RelativeRectTween extends Tween<RelativeRect> {
 ///
 /// See also:
 ///
+///  * [AnimatedPositioned], which transitions a child's position without
+///    taking an explicit [Animation] argument.
 ///  * [RelativePositionedTransition], a widget that transitions its child's
 ///    position based on the value of a rectangle relative to a bounding box.
 ///  * [SlideTransition], a widget that animates the position of a widget
@@ -695,6 +733,8 @@ class DecoratedBoxTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
+///  * [AnimatedAlign], which animates changes to the [alignment] without
+///    taking an explicit [Animation] argument.
 ///  * [PositionedTransition], a widget that animates its child from a start
 ///    position to an end position over the lifetime of the animation.
 ///  * [RelativePositionedTransition], a widget that transitions its child's
@@ -750,6 +790,8 @@ class AlignTransition extends AnimatedWidget {
 ///
 /// See also:
 ///
+///  * [AnimatedDefaultTextStyle], which animates changes in text style without
+///    taking an explicit [Animation] argument.
 ///  * [DefaultTextStyle], which also defines a [TextStyle] for its descendants
 ///    but is not animated.
 class DefaultTextStyleTransition extends AnimatedWidget {
