@@ -527,9 +527,9 @@ void main() {
     final List<String> lines =  errorDetails.toString().split('\n');
     // The lines in the middle of the error message contain the stack trace
     // which will change depending on where the test is run.
-    expect(lines.length, greaterThan(9));
+    expect(lines.length, greaterThan(7));
     expect(
-      lines.take(9).join('\n'),
+      lines.take(7).join('\n'),
       equalsIgnoringHashCodes(
         '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
         'The following assertion was thrown building Stepper(dirty,\n'
@@ -537,12 +537,9 @@ void main() {
         '_StepperState#00000):\n'
         'Steppers must not be nested. The material specification advises\n'
         'that one should avoid embedding steppers within steppers.\n'
-        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage\n'
-        '\n'
-        'When the exception was thrown, this was the stack:'
+        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
       ),
     );
-
   });
 
   ///https://github.com/flutter/flutter/issues/16920
