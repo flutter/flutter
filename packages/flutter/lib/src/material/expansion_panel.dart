@@ -225,7 +225,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// )
+  /// );
   ///
   /// // ...
   ///
