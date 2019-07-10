@@ -27,7 +27,6 @@ import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
-const String gradleVersion = '4.10.2';
 final RegExp _assembleTaskPattern = RegExp(r'assemble(\S+)');
 
 GradleProject _cachedGradleAppProject;
@@ -282,6 +281,7 @@ void injectGradleWrapper(Directory directory) {
   _locateGradlewExecutable(directory);
   final File propertiesFile = directory.childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
   if (!propertiesFile.existsSync()) {
+    final String gradleVersion = getGradleVersionForAndroidPlugin(directory);
     propertiesFile.writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
@@ -291,6 +291,109 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 ''', flush: true,
     );
   }
+}
+
+/// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
+bool isWithinVersionRange(String targetVersion, {String min, String max}) {
+  final List<String> targetParts = targetVersion.split('.');
+  final List<String> minParts = min.split('.');
+  final List<String> maxParts = max.split('.');
+
+  if (targetParts.length != minParts.length) {
+    return false;
+  }
+  if (targetParts.length != maxParts.length) {
+    return false;
+  }
+  // This is true while the consumed version parts are equal to the
+  // corresponding min version parts.
+  bool minEqual = true;
+  // This is true while the consumed version parts are equal to the
+  // corresponding max version parts.
+  bool maxEqual = true;
+  for (int i = 0; i < targetParts.length; i++) {
+    final int targetPartValue = int.parse(targetParts[i]);
+    final int minPartValue = int.parse(minParts[i]);
+    final int maxPartValue = int.parse(maxParts[i]);
+
+    if (targetPartValue < minPartValue) {
+      if (minEqual) {
+        return false;
+      }
+      minEqual = false;
+    } else if (targetPartValue > minPartValue) {
+      minEqual = false;
+    }
+    if (targetPartValue > maxPartValue) {
+      if (maxEqual) {
+        return false;
+      }
+      maxEqual = false;
+    } else if (targetPartValue < maxPartValue) {
+      maxEqual = false;
+    }
+  }
+  return true;
+}
+
+/// Returns the Gradle version that is required by the given Android Gradle plugin version.
+String getGradleVersionFor(String androidPluginVersion) {
+  // Pick the largest Gradle version from
+  // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
+  if (isWithinVersionRange(androidPluginVersion, min: '1.0.0', max: '1.1.3')) {
+    return '2.3';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '1.2.0', max: '1.3.1')) {
+    return '2.9';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '1.5.0', max: '1.5.0')) {
+    return '2.2.1';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '2.0.0', max: '2.1.2')) {
+    return '2.13';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '2.1.3', max: '2.2.3')) {
+    return '2.14.1';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '2.3.0', max: '2.9.9')) {
+    return '3.3';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.0.0', max: '3.0.9')) {
+    return '4.1';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.1.0', max: '3.1.9')) {
+    return '4.4';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.2.0', max: '3.2.1')) {
+    return '4.6';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
+    return '4.10.1';
+  }
+  return '5.1.1';
+}
+
+const String defaultGradleVersion = '4.10.2';
+final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
+
+/// Returns the Gradle version that the current Android plugin depends on when found,
+/// otherwise it returns a default version.
+///
+/// The Android plugin version is specified in the [build.gradle] file within
+/// the project's Android directory.
+String getGradleVersionForAndroidPlugin(Directory directory) {
+  final File buildFile = directory.childFile('build.gradle');
+  if (!buildFile.existsSync()) {
+    return defaultGradleVersion;
+  }
+  final String buildFileContent = buildFile.readAsStringSync();
+  final Iterable<Match> pluginMatches = _androidPluginRegExp.allMatches(buildFileContent);
+
+  if (pluginMatches.isEmpty) {
+    return defaultGradleVersion;
+  }
+  final String androidPluginVersion = pluginMatches.first.group(1);
+  return getGradleVersionFor(androidPluginVersion);
 }
 
 /// Overwrite local.properties in the specified Flutter project's Android

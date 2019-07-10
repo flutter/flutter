@@ -540,6 +540,69 @@ flutter:
       );
     });
   });
+
+  group('gradle version', () {
+    test('should have the same number of parts as the plugin version', () {
+      expect(isWithinVersionRange('1', min: '1.0', max: '1.0'), isFalse);
+      expect(isWithinVersionRange('1.0', min: '1', max: '1.0'), isFalse);
+      expect(isWithinVersionRange('1.0', min: '1.0', max: '1'), isFalse);
+      expect(isWithinVersionRange('1.0', min: '1.0', max: '1.0'), isTrue);
+    });
+
+    test('can be compared against an Android plugin', () {
+      expect(isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.0.0'), isTrue);
+      expect(isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.0.9'), isTrue);
+      expect(isWithinVersionRange('1.0.2', min: '1.0.0', max: '1.0.9'), isTrue);
+      expect(isWithinVersionRange('1.0.8', min: '1.0.0', max: '1.0.9'), isTrue);
+
+      expect(isWithinVersionRange('1.0.9', min: '1.0.0', max: '1.0.9'), isTrue);
+      expect(isWithinVersionRange('1.1.0', min: '1.0.0', max: '1.0.9'), isFalse);
+      expect(isWithinVersionRange('1.0.10', min: '1.0.0', max: '1.0.9'), isFalse);
+
+      expect(isWithinVersionRange('1.0.0', min: '0.0.0', max: '100.0.0'), isTrue);
+      expect(isWithinVersionRange('50.0.0', min: '0.0.0', max: '100.0.0'), isTrue);
+      expect(isWithinVersionRange('50.10000.0', min: '0.0.0', max: '100.0.0'), isTrue);
+      expect(isWithinVersionRange('50.10000.1000', min: '0.0.0', max: '100.0.0'), isTrue);
+    });
+
+    test('should be compatible with the Android plugin version', () {
+      // Granular versions.
+      expect(getGradleVersionFor('1.0.0'), '2.3');
+      expect(getGradleVersionFor('1.0.1'), '2.3');
+      expect(getGradleVersionFor('1.0.2'), '2.3');
+      expect(getGradleVersionFor('1.0.4'), '2.3');
+      expect(getGradleVersionFor('1.0.8'), '2.3');
+      expect(getGradleVersionFor('1.1.0'), '2.3');
+      expect(getGradleVersionFor('1.1.2'), '2.3');
+      expect(getGradleVersionFor('1.1.2'), '2.3');
+      expect(getGradleVersionFor('1.1.3'), '2.3');
+      // Version Ranges.
+      expect(getGradleVersionFor('1.2.0'), '2.9');
+      expect(getGradleVersionFor('1.3.1'), '2.9');
+
+      expect(getGradleVersionFor('1.5.0'), '2.2.1');
+
+      expect(getGradleVersionFor('2.0.0'), '2.13');
+      expect(getGradleVersionFor('2.1.2'), '2.13');
+
+      expect(getGradleVersionFor('2.1.3'), '2.14.1');
+      expect(getGradleVersionFor('2.2.3'), '2.14.1');
+
+      expect(getGradleVersionFor('2.3.0'), '3.3');
+
+      expect(getGradleVersionFor('3.0.0'), '4.1');
+
+      expect(getGradleVersionFor('3.1.0'), '4.4');
+
+      expect(getGradleVersionFor('3.2.0'), '4.6');
+      expect(getGradleVersionFor('3.2.1'), '4.6');
+
+      expect(getGradleVersionFor('3.3.0'), '4.10.1');
+      expect(getGradleVersionFor('3.3.2'), '4.10.1');
+
+      expect(getGradleVersionFor('3.4.0'), '5.1.1');
+    });
+  });
 }
 
 Platform fakePlatform(String name) {
