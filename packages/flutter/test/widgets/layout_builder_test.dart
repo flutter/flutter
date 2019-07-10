@@ -359,4 +359,49 @@ void main() {
       ));
       expect(built, 2);
   });
+
+  testWidgets('nested SliverLayoutBuilder', (WidgetTester tester) async {
+    SliverConstraints parentConstraints1;
+    SliverConstraints parentConstraints2;
+    final Key childKey = UniqueKey();
+    final Key parentKey1 = UniqueKey();
+    final Key parentKey2 = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              key: parentKey1,
+              builder: (BuildContext context, SliverConstraints constraint) {
+                parentConstraints1 = constraint;
+                return SliverLayoutBuilder(
+                  key: parentKey2,
+                  builder: (BuildContext context, SliverConstraints constraint) {
+                    parentConstraints2 = constraint;
+                    return SliverPadding(key: childKey, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(parentConstraints1, parentConstraints2);
+
+    expect(parentConstraints1.crossAxisExtent, 800);
+    expect(parentConstraints1.remainingPaintExtent, 600);
+
+    final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
+    final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
+    // scrollExtent == top + bottom.
+    expect(parentSliver1.geometry.scrollExtent, 2 + 4);
+
+    final RenderSliver childSliver = tester.renderObject(find.byKey(childKey));
+    expect(childSliver.geometry, parentSliver1.geometry);
+    expect(parentSliver1.geometry, parentSliver2.geometry);
+  });
 }
