@@ -67,6 +67,14 @@ enum RoutePopDisposition {
   bubble,
 }
 
+/// Name for the method which is called when the system wants the current route
+/// to be shifted to the previous route in the history.
+const String popRouteMethod = 'popRoute';
+
+/// Name for the method which is called when the system wants to open a
+/// particular page.
+const String pushRouteMethod = 'pushRoute';
+
 /// An abstraction for an entry managed by a [Navigator].
 ///
 /// This class defines an abstract interface between the navigator and the
@@ -1877,7 +1885,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    _sendRouteChangeToSystemChannels('pushRoute', newRoute, oldRoute);
+    _sendRouteChangeToSystemChannels(pushRouteMethod, newRoute, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(newRoute);
     return newRoute.popped;
@@ -1989,7 +1997,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    _sendRouteChangeToSystemChannels('pushRoute', newRoute, oldRoute);
+    _sendRouteChangeToSystemChannels(pushRouteMethod, newRoute, oldRoute);
     oldRoute.dispose();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -2092,7 +2100,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _history.last.didPopNext(route);
         for (NavigatorObserver observer in widget.observers)
           observer.didPop(route, _history.last);
-        _sendRouteChangeToSystemChannels('popRoute', route, _history.last);
+        _sendRouteChangeToSystemChannels(popRouteMethod, route, _history.last);
       } else {
         assert(() { _debugLocked = false; return true; }());
         return false;
