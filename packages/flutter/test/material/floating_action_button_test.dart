@@ -146,7 +146,6 @@ void main() {
     try {
       await gesture.addPointer();
       await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-      await tester.pump();
       await tester.pumpAndSettle();
 
       expect(find.text('Add'), findsOneWidget);
