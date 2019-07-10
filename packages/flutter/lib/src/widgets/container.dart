@@ -297,7 +297,7 @@ class Container extends StatelessWidget {
   /// and a `decoration` argument. If you want to have both a `color` and a
   /// `decoration`, you can pass the color as the `color` argument to the
   /// `BoxDecoration`.
-  Container({
+  const Container({
     Key key,
     this.alignment,
     this.padding,
