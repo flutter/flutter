@@ -834,7 +834,7 @@ void main() {
       await tester.pump();
       expect(focusBottom.hasFocus, isTrue);
 
-      //remove center focus node
+      // Remove center focus node.
       await tester.pumpWidget(DefaultFocusTraversal(
         policy: policy,
         child: FocusScope(
