@@ -6,7 +6,20 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+/// Defines the color and border properties of [ToggleButtons] widgets.
+///
+/// Used by [ToggleButtonsTheme] to control the color and border properties
+/// of toggle buttons in a widget subtree.
+///
+/// To obtain the current [ToggleButtonsTheme], use [ToggleButtonsTheme.of].
+///
+/// See also:
+///
+///  * [ToggleButtonsTheme], which describes the actual configuration of a
+///    toggle buttons theme.
 class ToggleButtonsThemeData extends Diagnosticable {
+  /// Creates the set of color and border properties used to configure
+  /// [ToggleButtons].
   const ToggleButtonsThemeData({
     this.color,
     this.selectedColor,
@@ -78,6 +91,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
   ToggleButtonsThemeData copyWith({
     Color color,
     Color selectedColor,
@@ -110,6 +125,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
     );
   }
 
+  /// Linearly interpolate between two toggle buttons themes.
   static ToggleButtonsThemeData lerp(ToggleButtonsThemeData a, ToggleButtonsThemeData b, double t) {
     assert (t != null);
     if (a == null && b == null)
@@ -232,6 +248,7 @@ class ToggleButtonsTheme extends InheritedWidget {
         ),
         super(key: key, child: child);
 
+  /// Specifies the color and border values for descendant [ToggleButtons] widgets.
   final ToggleButtonsThemeData data;
 
   /// The closest instance of this class that encloses the given context.
