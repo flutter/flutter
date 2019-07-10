@@ -489,6 +489,13 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     flaky: true
 
+  build_benchmark_ios:
+    description: >
+      Measures iOS build performance across config changes.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   # Tests running on Windows host
 
   flavors_test_win:
