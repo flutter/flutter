@@ -556,7 +556,6 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
-      removeLine: (String line) => line.contains('[INFO]') || line.contains('loading test')
     );
   }
 }
@@ -609,7 +608,7 @@ Future<void> _pubRunTest(
       pub,
       args,
       workingDirectory: workingDirectory,
-      removeLine: (String line) => line.contains('[INFO]') || line.contains('loading test')
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
