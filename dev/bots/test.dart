@@ -592,6 +592,9 @@ Future<void> _pubRunTest(
     case 'tool':
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
+    case 'create':
+      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      break;
   }
 
   if (useFlutterTestFormatter) {
@@ -608,7 +611,6 @@ Future<void> _pubRunTest(
       pub,
       args,
       workingDirectory: workingDirectory,
-      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
