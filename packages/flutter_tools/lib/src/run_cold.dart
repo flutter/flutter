@@ -39,6 +39,12 @@ class ColdRunner extends ResidentRunner {
   bool _didAttach = false;
 
   @override
+  bool get canHotReload => false;
+
+  @override
+  bool get canHotRestart => false;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
