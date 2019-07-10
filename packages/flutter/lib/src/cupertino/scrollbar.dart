@@ -166,11 +166,15 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void _handleLongPressUp() {
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    widget.onDragScrollbarUp();
+    if (widget.onDragScrollbarUp != null) {
+      widget.onDragScrollbarUp();
+    }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    widget.onDragScrollbar(details.localOffsetFromOrigin.dy);
+    if (widget.onDragScrollbar != null) {
+      widget.onDragScrollbar(details.localOffsetFromOrigin.dy);
+    }
   }
 
   void _handleLongPress() {
@@ -186,14 +190,18 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    widget.onDragScrollbar(details.localPosition.dy - _dragStartY);
+    if (widget.onDragScrollbar != null) {
+      widget.onDragScrollbar(details.localPosition.dy - _dragStartY);
+    }
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
     _dragStartY = null;
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    widget.onDragScrollbarUp();
+    if (widget.onDragScrollbarUp != null) {
+      widget.onDragScrollbarUp();
+    }
   }
 
   void _startFadeoutTimer() {
