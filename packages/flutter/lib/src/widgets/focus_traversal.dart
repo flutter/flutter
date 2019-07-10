@@ -312,7 +312,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
       if (policyData.history.last.node.parent == null) {
-        //Reset the policy data if history node is unavailable
+        // Reset the policy data if history node is unavailable.
         invalidateScopeData(nearestScope);
         return false;
       }
