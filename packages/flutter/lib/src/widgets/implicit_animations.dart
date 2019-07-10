@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -232,10 +231,11 @@ class TextStyleTween extends Tween<TextStyle> {
 ///
 /// In contrast to [AnimatedWidget]s (and its subclasses),
 /// [ImplicitlyAnimatedWidget]s instantiate and manage their own
-/// [AnimationController]s, which may be inefficient for multiple parallel
-/// animations. For those cases, consider instantiating an explicit
-/// [AnimationController] that is passed to (subclasses of) [AnimatedWidget]s
-/// instead of using (subclasses of) [ImplicitlyAnimatedWidget]s.
+/// [AnimationController]s, which - while simpler to use - may be inefficient
+/// for multiple parallel animations. For those cases, consider instantiating an
+/// explicit [AnimationController] that is passed to (subclasses of)
+/// [AnimatedWidget]s instead of using (subclasses of)
+/// [ImplicitlyAnimatedWidget]s.
 ///
 /// See also:
 ///
@@ -243,7 +243,7 @@ class TextStyleTween extends Tween<TextStyle> {
 ///  * [AnimatedContainer], which is an implicitly animated version of 
 ///    [Container].
 ///  * [AnimatedDefaultTextStyle], which is an implicitly animated version of
-///    [AnimatedOpacity].
+///    [DefaultTextStyle].
 ///  * [AnimatedOpacity], which is an implicitly animated version of [Opacity].
 ///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
 ///  * [AnimatedPhysicalModel], which is an implicitly animated version of
@@ -823,11 +823,11 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_align.mp4}
 ///
 /// In contrast to [AlignTransition], this widget creates its own internal
-/// [AnimationController] to power the animation. Instead of using multiple
-/// widgets, that create their own implicit [AnimationController], it is
-/// more efficient to manually instantiate one [AnimationController] to drive
-/// parallel animations. For that case, pass that [AnimationController] to
-/// [AlignTransition] instead of using this widget.
+/// [AnimationController] to power the animation. While this makes the widget
+/// simpler to use, it may be inefficient if multiple parallel animations all
+/// create their own implicit [AnimationController]s. For those cases,
+/// consider manually instantiating one [AnimationController] for the animations
+/// and passing it to [AlignTransition] instead of using this widget.
 ///
 /// See also:
 ///
@@ -923,12 +923,12 @@ class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_positioned.mp4}
 ///
-/// In contrast to [AnimatedTransition], this widget creates its own internal
-/// [AnimationController] to power the animation. Instead of using multiple
-/// widgets, that create their own implicit [AnimationController], it is
-/// more efficient to manually instantiate one [AnimationController] to drive
-/// parallel animations. For that case, pass that [AnimationController] to
-/// [AnimatedTransition] instead of using this widget.
+/// In contrast to [PositionedTransition], this widget creates its own internal
+/// [AnimationController] to power the animation. While this makes the widget
+/// simpler to use, it may be inefficient if multiple parallel animations all
+/// create their own implicit [AnimationController]s. For those cases,
+/// consider manually instantiating one [AnimationController] for the animations
+/// and passing it to [PositionedTransition] instead of using this widget.
 ///
 /// See also:
 ///
@@ -1321,12 +1321,12 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// of [Curves.elasticInOut].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
 ///
-/// In contrast to [DefaultTextStyleTransition], this widget creates its own internal
-/// [AnimationController] to power the animation. Instead of using multiple
-/// widgets, that create their own implicit [AnimationController], it is
-/// more efficient to manually instantiate one [AnimationController] to drive
-/// parallel animations. For that case, pass that [AnimationController] to
-/// [DefaultTextStyleTransition] instead of using this widget.
+/// In contrast to [DefaulttextStyleTransition], this widget creates its own
+/// internal [AnimationController] to power the animation. While this makes the
+/// widget simpler to use, it may be inefficient if multiple parallel animations
+/// all create their own implicit [AnimationController]s. For those cases,
+/// consider manually instantiating one [AnimationController] for the animations
+/// and passing it to [DefaulttextStyleTransition] instead of using this widget.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///

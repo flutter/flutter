@@ -1712,7 +1712,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [AnimatedAlign], which automatically transitions the child's
-///    position over a given duration whenever the given [alignment] changes
+///    position over a given duration whenever the given [alignment] changes.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always

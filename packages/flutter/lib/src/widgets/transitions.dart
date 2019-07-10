@@ -4,7 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' as prefix0;
 import 'package:flutter/rendering.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
@@ -473,16 +472,11 @@ class SizeTransition extends AnimatedWidget {
 /// animated by a [CurvedAnimation] set to [Curves.fastOutSlowIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/fade_transition.mp4}
 ///
-/// In contrast to [FadeTransition], this widget creates its own internal
-/// [AnimationController] to power the animation. Instead of using multiple
-/// widgets, that create their own implicit [AnimationController], it is
-/// more efficient to manually instantiate one [AnimationController] to drive
-/// parallel animations. For that case, pass that [AnimationController] to
-/// [FadeTransition] instead of using this widget.
-///
 /// See also:
 ///
 ///  * [Opacity], which does not animate changes in opacity.
+///  * [AnimatedOpacity], which animates changes in opacity without taking an
+///    explicit [Animation] argument.
 class FadeTransition extends SingleChildRenderObjectWidget {
   /// Creates an opacity transition.
   ///
