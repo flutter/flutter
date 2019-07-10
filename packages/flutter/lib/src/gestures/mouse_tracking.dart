@@ -146,8 +146,8 @@ class MouseTracker extends ChangeNotifier {
         collectMousePositions();
       });
     }
-      SchedulerBinding.instance.scheduleFrame();
-    }
+    SchedulerBinding.instance.scheduleFrame();
+  }
 
   // Handler for events coming from the PointerRouter.
   void _handleEvent(PointerEvent event) {
