@@ -303,10 +303,10 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
+/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
+///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
-///
-/// ![Custom list item a](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_a.png)
 ///
 /// ```dart preamble
 /// class CustomListItem extends StatelessWidget {
@@ -424,11 +424,11 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
+/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
+///
 /// Here is an example of an article list item with multi-line titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
-///
-/// ![Custom list item b](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_list_item_b.png)
 ///
 /// ```dart preamble
 /// class _ArticleDescription extends StatelessWidget {

@@ -33,11 +33,11 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
-/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
-/// and lastly a RaisedButton with gradient background.
-///
 /// ![Three raised buttons, one enabled, another disabled, and the last one
 /// styled with a blue gradient background](https://flutter.github.io/assets-for-api-docs/assets/material/raised_button.png)
+///
+/// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
+/// and lastly a RaisedButton with gradient background.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
