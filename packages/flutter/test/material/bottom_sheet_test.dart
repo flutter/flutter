@@ -386,7 +386,8 @@ void main() {
     await tester.tap(find.text('Show bottom sheet'));
     await tester.pumpAndSettle();
 
-    // Bottom sheet is displayed in correct position.
+    // Bottom sheet is displayed in correct position within the inner navigator
+    // and above the BottomNavigationBar.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
   });
 
@@ -414,7 +415,8 @@ void main() {
     await tester.tap(find.text('Show bottom sheet'));
     await tester.pumpAndSettle();
 
-    // Bottom sheet is displayed in correct position.
+    // Bottom sheet is displayed in correct position above all content including
+    // the BottomNavigationBar.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
 }
