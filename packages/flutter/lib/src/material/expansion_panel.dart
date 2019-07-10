@@ -13,7 +13,6 @@ import 'theme.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
-// bool _isExpanded = false;
 
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
@@ -121,40 +120,56 @@ class ExpansionPanel {
   /// define a [VoidCallback] that calls [ExpansionPanelList.expansionCallback]
   /// with the correct index and isExpanded values.
   ///
-  /// {@tool sample}
+  /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// Here is a custom expansion icon that uses a [Checkbox], which has its own
   /// gesture detection out of the box. This example assumes that
   /// [ExpansionPanelList.expansionCallback] toggles _isExpanded.
   ///
   /// ```dart
-  /// ExpansionPanel(
-  ///   isExpanded: _isExpanded,
-  ///   headerBuilder: (context, isExpanded) {
-  ///     return const Text("This is ExpansionPanel's header");
-  ///   },
-  ///   expandIconBuilder: (
-  ///     BuildContext context,
-  ///     bool isExpanded,
-  ///     VoidCallback handlePressed,
-  ///     Duration animationDuration,
-  ///   ) {
-  ///     return Checkbox(
-  ///       value: isExpanded,
-  ///       onChanged: (bool val) {
-  ///         handlePressed();
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !isExpanded;
+  ///         });
   ///       },
-  ///     );
-  ///   },
-  ///   body: ListTile(
-  ///     title: Text("This is title for ExpansionPanel's body"),
-  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
-  ///   ),
-  /// )
+  ///       children: [
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (context, isExpanded) {
+  ///             return ListTile(title: Text("This is ExpansionPanel's header"));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return Checkbox(
+  ///               value: isExpanded,
+  ///               onChanged: (bool val) {
+  ///                 handlePressed();
+  ///               },
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text("This is title for ExpansionPanel's body"),
+  ///             subtitle: Text("This is subtitle for ExpansionPanel's body"),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// Here is a custom expansion icon that uses two static icons, which require
   /// gesture detection to be manually handled. In this case, an [InkWell] is
@@ -162,37 +177,55 @@ class ExpansionPanel {
   /// toggles _isExpanded.
   ///
   /// ```dart
-  /// ExpansionPanel(
-  ///   isExpanded: _isExpanded,
-  ///   headerBuilder: (context, isExpanded) {
-  ///     return const Text("This is ExpansionPanel's header");
-  ///   },
-  ///   expandIconBuilder: (
-  ///     BuildContext context,
-  ///     bool isExpanded,
-  ///     VoidCallback handlePressed,
-  ///     Duration animationDuration,
-  ///   ) {
-  ///     return InkWell(
-  ///       customBorder: CircleBorder(),
-  ///       onTap: () { handlePressed(); },
-  ///       child: Padding(
-  ///         padding: EdgeInsets.all(12.0),
-  ///         child: isExpanded
-  ///           ? Icon(Icons.check_box)
-  ///           : Icon(Icons.check_box_outline_blank),
-  ///       ),
-  ///     );
-  ///   },
-  ///   body: ListTile(
-  ///     title: Text("This is title for ExpansionPanel's body"),
-  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
-  ///   ),
-  /// )
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !isExpanded;
+  ///         });
+  ///       },
+  ///       children: [
+  ///           ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (context, isExpanded) {
+  ///             return ListTile(title: Text("This is ExpansionPanel's header"));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: CircleBorder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: EdgeInsets.all(12.0),
+  ///                 child: isExpanded
+  ///                     ? Icon(Icons.check_box)
+  ///                     : Icon(Icons.check_box_outline_blank),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text("This is title for ExpansionPanel's body"),
+  ///             subtitle: Text("This is subtitle for ExpansionPanel's body"),
+  ///           ),
+  ///         ),
+  ///       ],
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet --template=stateful_widget_scaffold}
   ///
   /// Here is a custom expansion icon that uses an [AnimatedIcon], which
   /// requires gesture detection to be manually handled. In this case, an
@@ -200,37 +233,9 @@ class ExpansionPanel {
   /// [ExpansionPanelList.animationDuration] for its animation. This example
   /// assumes that [ExpansionPanelList.expansionCallback] toggles _isExpanded.
   ///
-  /// ```dart
-  /// ExpansionPanel(
-  ///   isExpanded: _isExpanded,
-  ///   headerBuilder: (context, isExpanded) {
-  ///     return const Text("This is ExpansionPanel's header");
-  ///   },
-  ///   expandIconBuilder: (
-  ///     BuildContext context,
-  ///     bool isExpanded,
-  ///     VoidCallback handlePressed,
-  ///     Duration animationDuration,
-  ///   ) {
-  ///     return InkWell(
-  ///       customBorder: CircleBorder(),
-  ///       onTap: () { handlePressed(); },
-  ///       child: Padding(
-  ///         padding: EdgeInsets.all(12.0),
-  ///         child: CustomIcon(isExpanded, animationDuration),
-  ///       ),
-  ///     );
-  ///   },
-  ///   body: ListTile(
-  ///     title: Text("This is title for ExpansionPanel's body"),
-  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
-  ///   ),
-  /// );
-  ///
-  /// // ...
-  ///
-  /// class CustomIcon extends StatefulWidget {
-  ///   CustomIcon(
+  /// ```dart preamble
+  /// class CustomAnimatedIcon extends StatefulWidget {
+  ///   CustomAnimatedIcon(
   ///     this.isExpanded,
   ///     this.duration,
   ///   );
@@ -240,10 +245,10 @@ class ExpansionPanel {
   ///   final Duration duration;
   ///
   ///   @override
-  ///   _CustomIconState createState() => _CustomIconState();
+  ///   _CustomAnimatedIconState createState() => _CustomAnimatedIconState();
   /// }
   ///
-  /// class _CustomIconState extends State<CustomIcon> with SingleTickerProviderStateMixin {
+  /// class _CustomAnimatedIconState extends State<CustomAnimatedIcon> with SingleTickerProviderStateMixin {
   ///   AnimationController animationController;
   ///
   ///   @override
@@ -256,7 +261,7 @@ class ExpansionPanel {
   ///   }
   ///
   ///   @override
-  ///   void didUpdateWidget(CustomIcon oldWidget) {
+  ///   void didUpdateWidget(CustomAnimatedIcon oldWidget) {
   ///     if (widget.isExpanded != oldWidget.isExpanded) {
   ///       if (widget.isExpanded) {
   ///         animationController.forward();
@@ -274,6 +279,52 @@ class ExpansionPanel {
   ///       progress: animationController,
   ///     );
   ///   }
+  /// }
+  /// ```
+  ///
+  /// ```dart
+  /// bool _isExpanded = false;
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return SingleChildScrollView(
+  ///     child: ExpansionPanelList(
+  ///       expansionCallback: (int index, bool isExpanded) {
+  ///         setState(() {
+  ///           _isExpanded = !isExpanded;
+  ///         });
+  ///       },
+  ///       children: [
+  ///         ExpansionPanel(
+  ///           isExpanded: _isExpanded,
+  ///           headerBuilder: (context, isExpanded) {
+  ///             return ListTile(title: Text("This is ExpansionPanel's header"));
+  ///           },
+  ///           expandIconBuilder: (
+  ///             BuildContext context,
+  ///             bool isExpanded,
+  ///             VoidCallback handlePressed,
+  ///             Duration animationDuration,
+  ///           ) {
+  ///             return InkWell(
+  ///               customBorder: CircleBorder(),
+  ///               onTap: () {
+  ///                 handlePressed();
+  ///               },
+  ///               child: Padding(
+  ///                 padding: EdgeInsets.all(12.0),
+  ///                 child: CustomAnimatedIcon(isExpanded, animationDuration),
+  ///               ),
+  ///             );
+  ///           },
+  ///           body: ListTile(
+  ///             title: Text("This is title for ExpansionPanel's body"),
+  ///             subtitle: Text("This is subtitle for ExpansionPanel's body"),
+  ///           ),
+  ///         ),
+  ///       ]
+  ///     ),
+  ///   );
   /// }
   /// ```
   /// {@end-tool}
