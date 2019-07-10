@@ -240,7 +240,8 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
-  if (noUseBuildRunner) {
+  // reduce overhead of build_runner in the create case.
+  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
