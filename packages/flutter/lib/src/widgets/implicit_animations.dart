@@ -236,7 +236,7 @@ class TextStyleTween extends Tween<TextStyle> {
 /// simpler to use, but it may be less efficient for multiple parallel
 /// animations: Instead of using multiple [ImplicitlyAnimatedWidget]s, which
 /// all instantiate their own [AnimationController] behind the scenes, consider
-/// instantiating an explicit [AnimationController] that is passed to
+/// instantiating one explicit [AnimationController] that is passed to
 /// (subclasses of) [AnimatedWidget]s instead of using (subclasses of)
 /// [ImplicitlyAnimatedWidget]s.
 ///
