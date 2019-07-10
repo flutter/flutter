@@ -82,7 +82,7 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
   }
 
   // Keep track of the starting position of a drag scroll.
-  double _DragScrollbarStartY;
+  double _dragScrollbarStartY;
 
   @override
   Widget build(BuildContext context) {
@@ -153,15 +153,15 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           final double viewHeight = _primaryScrollController.position.viewportDimension;
           final double scrollHeight = _primaryScrollController.position.maxScrollExtent
             + viewHeight - _primaryScrollController.position.minScrollExtent;
-          _DragScrollbarStartY ??= _primaryScrollController.position.pixels;
+          _dragScrollbarStartY ??= _primaryScrollController.position.pixels;
           final double scrollDistance =
             primaryDelta / viewHeight * scrollHeight;
           _primaryScrollController.position.jumpTo(
-            _DragScrollbarStartY + scrollDistance,
+            _dragScrollbarStartY + scrollDistance,
           );
         },
         onDragScrollbarUp: () {
-          _DragScrollbarStartY = null;
+          _dragScrollbarStartY = null;
         },
         child: paddedContent,
       );
