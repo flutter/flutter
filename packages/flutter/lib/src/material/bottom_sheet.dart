@@ -427,6 +427,7 @@ Future<T> showModalBottomSheet<T>({
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
