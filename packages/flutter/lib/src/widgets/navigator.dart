@@ -1770,7 +1770,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
-    _sendRouteChangeToSystemChannels('pushRoute', route, oldRoute);
+    _sendRouteChangeToSystemChannels(pushRouteMethod, route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(route);
     return route.popped;
