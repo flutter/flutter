@@ -62,7 +62,9 @@ void main() {
     SkiaGoldClient goldens;
 
     setUp(() {
+      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       goldens = SkiaGoldClient.test(
+        workDirectory,
         testFileSystem: fs,
         testProcess: process,
         testPlatform: platform,
@@ -71,16 +73,30 @@ void main() {
 
     group('auth', () {
       test('performs minimal work if already authorized', () async {
-        final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
         fs.file('/workDirectory/temp/auth_opt.json')..createSync(recursive: true);
         when(process.run(any)).thenAnswer((_) => Future<io.ProcessResult>.value(io.ProcessResult(123, 0, '', '')));
-        await goldens.auth(workDirectory);
+        await goldens.auth();
 
         // Verify that we spawned no process calls
         final VerificationResult verifyProcessRun =
           verifyNever(process.run(captureAny, workingDirectory: captureAnyNamed('workingDirectory')));
         expect(verifyProcessRun.callCount, 0);
       });
+    });
+  });
+
+  group('FlutterGoldenFileComparator', () {
+    test('calculates the basedir correctly', () async {
+      final MockSkiaGoldClient goldens = MockSkiaGoldClient();
+      final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
+      final Directory flutterRoot = fs.directory('/foo')..createSync(recursive: true);
+      final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
+      when(goldens.fs).thenReturn(fs);
+      when(goldens.flutterRoot).thenReturn(flutterRoot);
+      when(goldens.comparisonRoot).thenReturn(goldensRoot);
+      when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
+      final Directory basedir = FlutterGoldenFileComparator.getBaseDirectory(goldens, defaultComparator);
+      expect(basedir.uri, fs.directory('/foo/bar/baz').uri);
     });
   });
 
@@ -97,27 +113,11 @@ void main() {
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterGoldensRepositoryFileComparator(
+      comparator = FlutterGoldensRepositoryFileComparator.test(
         testDirectory.uri,
-        fs: fs,
-        platform: platform,
+        fs,
+        platform,
       );
-    });
-
-    group('fromDefaultComparator', () {
-      test('calculates the basedir correctly', () async {
-        final MockGoldensRepositoryClient goldens = MockGoldensRepositoryClient();
-        final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
-        final Directory flutterRoot = fs.directory('/foo')..createSync(recursive: true);
-        final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
-        when(goldens.fs).thenReturn(fs);
-        when(goldens.flutterRoot).thenReturn(flutterRoot);
-        when(goldens.comparisonRoot).thenReturn(goldensRoot);
-        when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
-        comparator = await FlutterGoldensRepositoryFileComparator.fromDefaultComparator(
-            goldens: goldens, defaultComparator: defaultComparator);
-        expect(comparator.basedir, fs.directory('/foo/bar/baz').uri);
-      });
     });
 
     group('compare', () {
@@ -184,27 +184,11 @@ void main() {
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterSkiaGoldFileComparator(
+      comparator = FlutterSkiaGoldFileComparator.test(
         testDirectory.uri,
-        fs: fs,
-        platform: platform,
+        fs,
+        platform,
       );
-    });
-
-    group('fromDefaultComparator', () {
-      test('calculates the basedir correctly', () async {
-        final MockSkiaGoldClient goldens = MockSkiaGoldClient();
-        final MockLocalFileComparator defaultComparator = MockLocalFileComparator();
-        final Directory flutterRoot = fs.directory('/foo')..createSync(recursive: true);
-        final Directory goldensRoot = flutterRoot.childDirectory('bar')..createSync(recursive: true);
-        when(goldens.fs).thenReturn(fs);
-        when(goldens.flutterRoot).thenReturn(flutterRoot);
-        when(goldens.comparisonRoot).thenReturn(goldensRoot);
-        when(defaultComparator.basedir).thenReturn(flutterRoot.childDirectory('baz').uri);
-        comparator = await FlutterSkiaGoldFileComparator.fromDefaultComparator(
-          goldens: goldens, defaultComparator: defaultComparator);
-        expect(comparator.basedir, fs.directory('/foo/bar/baz').uri);
-      });
     });
 
     group('getTestUri', () {

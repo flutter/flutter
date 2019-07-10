@@ -61,10 +61,9 @@ class GoldensClient {
 /// repository, nested within the `bin/cache` directory of the caller's Flutter
 /// repository.
 class GoldensRepositoryClient  extends GoldensClient {
-
   GoldensRepositoryClient() : super();
 
-  /// Constructor used specifically for testing.
+  /// Constructor used specifically for testing in order to provide mock members.
   GoldensRepositoryClient.test({
     FileSystem testFileSystem,
     ProcessManager testProcess,
@@ -124,7 +123,6 @@ class GoldensRepositoryClient  extends GoldensClient {
     final File versionFile = flutterRoot.childFile(fs.path.join('bin', 'internal', 'goldens.version'));
     return (await versionFile.readAsString()).trim();
   }
-
 
   Future<void> _initRepository() async {
     await comparisonRoot.create(recursive: true);

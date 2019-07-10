@@ -46,8 +46,8 @@ abstract class GoldenFileComparator {
   /// is left up to the implementation class.
   Future<void> update(Uri golden, Uint8List imageBytes);
 
-  /// Updates the uri [key] of the golden file to incorporate any [version]
-  /// number.
+  /// Returns a new golden file [Uri] to incorporate any [version] number with
+  /// the [key].
   ///
   /// The [version] is an optional int that can be used to differentiate
   /// historical golden files.

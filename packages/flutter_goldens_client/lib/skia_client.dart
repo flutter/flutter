@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,17 +19,18 @@ import 'package:flutter_goldens_client/client.dart';
 
 // TODO(Piinks): This file will replace ./client.dart when transition to Skia
 // Gold testing is complete
+
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 
 /// An extension of the [GoldensClient] class that interfaces with Skia Gold
 /// for golden file testing
 class SkiaGoldClient extends GoldensClient {
+  SkiaGoldClient(this.workDirectory) : super();
 
-  SkiaGoldClient() : super();
-
-  /// Constructor used specifically for testing.
-  SkiaGoldClient.test({
+  /// Constructor used specifically for testing in order to provide mock members.
+  SkiaGoldClient.test(
+    this.workDirectory, {
     FileSystem testFileSystem,
     ProcessManager testProcess,
     Platform testPlatform,
@@ -43,20 +44,19 @@ class SkiaGoldClient extends GoldensClient {
   /// context. In this directory, the client will create image and json files
   /// for the goldctl tool to use.
   ///
-  /// This is provided by the [FlutterGoldenFileComparator] to the [auth]
-  /// method. It cannot be null.
-  Directory _workDirectory;
-
+  /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
+  /// be null.
+  final Directory workDirectory;
 
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
-  /// Uses the [platform] environment in this iteration.
+  /// Uses the [platform] environment in this implementation.
   String get _goldctl => platform.environment[_kGoldctlKey];
 
   /// The path to the local [Directory] where the service account key is
   /// hosted.
   ///
-  /// Uses the [platform] environment in this iteration.
+  /// Uses the [platform] environment in this implementation.
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
   /// Prepares the local work space for golden file testing and calls the
@@ -69,20 +69,17 @@ class SkiaGoldClient extends GoldensClient {
   /// The [workDirectory] parameter specifies the current directory that golden
   /// tests are executing in, relative to the library of the given test. It is
   /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
-  Future<void> auth(Directory workDirectory) async {
-    _workDirectory = workDirectory;
-    assert(_workDirectory != null);
-
+  Future<void> auth() async {
     if (_clientIsAuthorized())
       return;
 
-    final File authorization = _workDirectory.childFile('serviceAccount.json');
+    final File authorization = workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
       'auth',
       '--service-account', authorization.path,
-      '--work-dir', _workDirectory.childDirectory('temp').path,
+      '--work-dir', workDirectory.childDirectory('temp').path,
     ];
 
     final io.ProcessResult authResults = await io.Process.run(
@@ -105,8 +102,8 @@ class SkiaGoldClient extends GoldensClient {
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
     final String commitHash = await _getCurrentCommit();
-    final File keys = _workDirectory.childFile('keys.json');
-    final File failures = _workDirectory.childFile('failures.json');
+    final File keys = workDirectory.childFile('keys.json');
+    final File failures = workDirectory.childFile('failures.json');
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
@@ -114,7 +111,7 @@ class SkiaGoldClient extends GoldensClient {
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
-      '--work-dir', _workDirectory.childDirectory('temp').path,
+      '--work-dir', workDirectory.childDirectory('temp').path,
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
@@ -157,7 +154,7 @@ class SkiaGoldClient extends GoldensClient {
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
-      '--work-dir', _workDirectory.childDirectory('temp').path,
+      '--work-dir', workDirectory.childDirectory('temp').path,
       '--test-name', testName.split(path.extension(testName.toString()))[0],
       '--png-file', goldenFile.path,
     ];
@@ -206,7 +203,7 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
-    final File authFile = _workDirectory.childFile(fs.path.join(
+    final File authFile = workDirectory.childFile(super.fs.path.join(
       'temp',
       'auth_opt.json',
     ));
