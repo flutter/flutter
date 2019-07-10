@@ -20,8 +20,8 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{

@@ -13,9 +13,9 @@ import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
+import '../src/common.dart';
+import '../src/context.dart';
+import '../src/mocks.dart' show MockProcessManager, MockStdio, PromptingProcess;
 
 class AlwaysTrueBotDetector implements BotDetector {
   const AlwaysTrueBotDetector();

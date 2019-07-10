@@ -15,9 +15,9 @@ import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../src/common.dart';
+import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('drive', () {

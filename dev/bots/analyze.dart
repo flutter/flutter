@@ -231,7 +231,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
   }
   printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
-  final DateTime start = DateTime.now();
+  final Stopwatch time = Stopwatch()..start();
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
@@ -246,7 +246,7 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     exitCode: exitCode,
   );
 
-  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  print('$clock ELAPSED TIME: $bold${prettyPrintDuration(time.elapsed)}$reset for $commandDescription in $relativeWorkingDir');
 
   if (exitCode != 0 && !allowNonZeroExit) {
     stderr.write(result.stderr);

@@ -11,8 +11,8 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/clean.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
-import '../../src/context.dart';
+import '../src/common.dart';
+import '../src/context.dart';
 
 void main() {
   MockFileSystem mockFileSystem;
