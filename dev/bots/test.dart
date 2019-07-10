@@ -320,7 +320,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication) async {
   print('Done.');
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaBuildFailure = false}) async {
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   if (!Platform.isMacOS) {
     return;
   }
@@ -339,7 +339,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaB
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: expectIpaBuildFailure,
+    expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
   print('Done.');
