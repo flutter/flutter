@@ -5,14 +5,12 @@
 #ifndef FLUTTER_FML_BASE32_H_
 #define FLUTTER_FML_BASE32_H_
 
-#include <string>
+#include <string_view>
 #include <utility>
-
-#include "flutter/fml/string_view.h"
 
 namespace fml {
 
-std::pair<bool, std::string> Base32Encode(StringView input);
+std::pair<bool, std::string> Base32Encode(std::string_view input);
 
 }  // namespace fml
 

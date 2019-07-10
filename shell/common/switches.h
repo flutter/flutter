@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <string_view>
+
 #include "flutter/common/settings.h"
 #include "flutter/fml/command_line.h"
-#include "flutter/fml/string_view.h"
 
 #ifndef SHELL_COMMON_SWITCHES_H_
 #define SHELL_COMMON_SWITCHES_H_
@@ -157,7 +158,7 @@ DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);
 
-const fml::StringView FlagForSwitch(Switch swtch);
+const std::string_view FlagForSwitch(Switch swtch);
 
 Settings SettingsFromCommandLine(const fml::CommandLine& command_line);
 

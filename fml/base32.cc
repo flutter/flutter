@@ -5,14 +5,13 @@
 #include "flutter/fml/base32.h"
 
 #include <limits>
-
-#include "flutter/fml/macros.h"
+#include <string>
 
 namespace fml {
 
 static constexpr char kEncoding[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
-std::pair<bool, std::string> Base32Encode(StringView input) {
+std::pair<bool, std::string> Base32Encode(std::string_view input) {
   if (input.empty()) {
     return {true, ""};
   }

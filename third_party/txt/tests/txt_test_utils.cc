@@ -16,6 +16,8 @@
 
 #include "txt_test_utils.h"
 
+#include <sstream>
+
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "txt/asset_font_manager.h"
 #include "txt/typeface_font_asset_provider.h"
