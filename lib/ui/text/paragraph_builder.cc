@@ -283,9 +283,16 @@ ParagraphBuilder::ParagraphBuilder(
 
   FontCollection& font_collection =
       UIDartState::Current()->window()->client()->GetFontCollection();
-  m_paragraphBuilder = std::make_unique<txt::ParagraphBuilder>(
-      style, font_collection.GetFontCollection());
-}  // namespace flutter
+
+#if FLUTTER_ENABLE_SKSHAPER
+#define FLUTTER_PARAGRAPH_BUILDER txt::ParagraphBuilder::CreateSkiaBuilder
+#else
+#define FLUTTER_PARAGRAPH_BUILDER txt::ParagraphBuilder::CreateTxtBuilder
+#endif
+
+  m_paragraphBuilder =
+      FLUTTER_PARAGRAPH_BUILDER(style, font_collection.GetFontCollection());
+}
 
 ParagraphBuilder::~ParagraphBuilder() = default;
 

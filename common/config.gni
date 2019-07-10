@@ -17,6 +17,9 @@ if (target_cpu == "arm" || target_cpu == "arm64") {
 declare_args() {
   # The runtime mode ("debug", "profile", or "release")
   flutter_runtime_mode = "debug"
+
+  # Whether to use the Skia text shaper module
+  flutter_enable_skshaper = false
 }
 
 # feature_defines_list ---------------------------------------------------------

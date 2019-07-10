@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("$flutter_root/common/config.gni")
+
 declare_args() {
   flutter_use_fontconfig = false
 }
@@ -29,6 +31,9 @@ source_set("txt") {
   defines = []
   if (flutter_use_fontconfig) {
     defines += [ "FLUTTER_USE_FONTCONFIG" ]
+  }
+  if (flutter_enable_skshaper) {
+    defines += [ "FLUTTER_ENABLE_SKSHAPER" ]
   }
 
   sources = [
@@ -84,12 +89,15 @@ source_set("txt") {
     "src/txt/font_weight.h",
     "src/txt/paint_record.cc",
     "src/txt/paint_record.h",
-    "src/txt/paragraph.cc",
     "src/txt/paragraph.h",
     "src/txt/paragraph_builder.cc",
     "src/txt/paragraph_builder.h",
+    "src/txt/paragraph_builder_txt.cc",
+    "src/txt/paragraph_builder_txt.h",
     "src/txt/paragraph_style.cc",
     "src/txt/paragraph_style.h",
+    "src/txt/paragraph_txt.cc",
+    "src/txt/paragraph_txt.h",
     "src/txt/placeholder_run.cc",
     "src/txt/placeholder_run.h",
     "src/txt/platform.h",
@@ -128,6 +136,17 @@ source_set("txt") {
 
   if (flutter_use_fontconfig) {
     deps += [ "//third_party/fontconfig" ]
+  }
+
+  if (flutter_enable_skshaper) {
+    sources += [
+      "src/skia/paragraph_builder_skia.cc",
+      "src/skia/paragraph_builder_skia.h",
+      "src/skia/paragraph_skia.cc",
+      "src/skia/paragraph_skia.h",
+    ]
+
+    deps += [ "//third_party/skia/modules/skparagraph" ]
   }
 
   if (is_mac || is_ios) {

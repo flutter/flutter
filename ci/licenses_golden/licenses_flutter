@@ -1068,6 +1068,10 @@ FILE: ../../../flutter/third_party/txt/src/minikin/SparseBitSet.cpp
 FILE: ../../../flutter/third_party/txt/src/minikin/SparseBitSet.h
 FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.cpp
 FILE: ../../../flutter/third_party/txt/src/minikin/WordBreaker.h
+FILE: ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.cc
+FILE: ../../../flutter/third_party/txt/src/skia/paragraph_builder_skia.h
+FILE: ../../../flutter/third_party/txt/src/skia/paragraph_skia.cc
+FILE: ../../../flutter/third_party/txt/src/skia/paragraph_skia.h
 FILE: ../../../flutter/third_party/txt/src/txt/asset_font_manager.cc
 FILE: ../../../flutter/third_party/txt/src/txt/asset_font_manager.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_asset_provider.cc
@@ -1082,12 +1086,15 @@ FILE: ../../../flutter/third_party/txt/src/txt/font_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_weight.h
 FILE: ../../../flutter/third_party/txt/src/txt/paint_record.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paint_record.h
-FILE: ../../../flutter/third_party/txt/src/txt/paragraph.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder.h
+FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.cc
+FILE: ../../../flutter/third_party/txt/src/txt/paragraph_builder_txt.h
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.h
+FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.cc
+FILE: ../../../flutter/third_party/txt/src/txt/paragraph_txt.h
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.cc
 FILE: ../../../flutter/third_party/txt/src/txt/placeholder_run.h
 FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.cc

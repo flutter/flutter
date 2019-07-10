@@ -18,6 +18,8 @@
 
 #include "flutter/fml/command_line.h"
 #include "txt/font_collection.h"
+#include "txt/paragraph_builder_txt.h"
+#include "txt/paragraph_txt.h"
 
 namespace txt {
 
@@ -30,5 +32,7 @@ const fml::CommandLine& GetCommandLineForProcess();
 void SetCommandLine(fml::CommandLine cmd);
 
 std::shared_ptr<FontCollection> GetTestFontCollection();
+
+std::unique_ptr<ParagraphTxt> BuildParagraph(ParagraphBuilderTxt& builder);
 
 }  // namespace txt

@@ -302,4 +302,25 @@ void FontCollection::ClearFontFamilyCache() {
   font_collections_cache_.clear();
 }
 
+#if FLUTTER_ENABLE_SKSHAPER
+
+sk_sp<skia::textlayout::FontCollection>
+FontCollection::CreateSktFontCollection() {
+  sk_sp<skia::textlayout::FontCollection> skt_collection =
+      sk_make_sp<skia::textlayout::FontCollection>();
+
+  skt_collection->setDefaultFontManager(default_font_manager_,
+                                        GetDefaultFontFamily().c_str());
+  skt_collection->setAssetFontManager(asset_font_manager_);
+  skt_collection->setDynamicFontManager(dynamic_font_manager_);
+  skt_collection->setTestFontManager(test_font_manager_);
+  if (!enable_font_fallback_) {
+    skt_collection->disableFontFallback();
+  }
+
+  return skt_collection;
+}
+
+#endif  // FLUTTER_ENABLE_SKSHAPER
+
 }  // namespace txt

@@ -27,6 +27,7 @@
 #include "third_party/googletest/googletest/include/gtest/gtest_prod.h"  // nogncheck
 #include "third_party/skia/include/core/SkFontMgr.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
+#include "third_party/skia/modules/skparagraph/include/FontCollection.h"
 #include "txt/asset_font_manager.h"
 #include "txt/text_style.h"
 
@@ -62,6 +63,13 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
 
   // Remove all entries in the font family cache.
   void ClearFontFamilyCache();
+
+#if FLUTTER_ENABLE_SKSHAPER
+
+  // Construct a Skia text layout FontCollection based on this collection.
+  sk_sp<skia::textlayout::FontCollection> CreateSktFontCollection();
+
+#endif  // FLUTTER_ENABLE_SKSHAPER
 
  private:
   struct FamilyKey {
