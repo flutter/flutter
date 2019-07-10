@@ -589,6 +589,7 @@ class ThemeData extends Diagnosticable {
   /// and [FlatButton].
   final ButtonThemeData buttonTheme;
 
+  /// Defines the default configuration of [ToggleButtons] widgets.
   final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
@@ -763,7 +764,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
-    ToggleButtonsTheme toggleButtonTheme,
+    ToggleButtonsTheme toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
