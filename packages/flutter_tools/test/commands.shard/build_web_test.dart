@@ -17,8 +17,8 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../src/common.dart';
+import '../src/testbed.dart';
 
 void main() {
   MockWebCompilationProxy mockWebCompilationProxy;

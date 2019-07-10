@@ -39,7 +39,18 @@ Future<void> main(List<String> arguments) async {
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
+    await test.main(<String>[
+      '--no-color',
+      '-r', 'compact',
+      '-j', '1',
+      if (arguments.isEmpty)
+        // We only run the general shard because the others are not appropriate for
+        // coverage (either they are way too slow to run, or they use subprocesses
+        // for the tool, where we can't collect coverage).
+        path.join('test', 'general.shard')
+      else
+        ...arguments
+    ]);
     exit(exitCode);
   });
 }
@@ -138,8 +149,7 @@ class VMPlatform extends PlatformPlugin {
     final String result = await coverageCollector.finalizeCoverage(
       formatter: formatter,
     );
-    final String prefix = Platform.environment['SUBSHARD'] ?? '';
-    final String outputLcovPath = path.join('coverage', '$prefix.lcov.info');
+    final String outputLcovPath = path.join('coverage', 'lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);

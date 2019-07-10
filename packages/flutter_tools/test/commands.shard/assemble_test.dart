@@ -12,8 +12,8 @@ import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../src/common.dart';
+import '../src/testbed.dart';
 
 void main() {
   Testbed testbed;
