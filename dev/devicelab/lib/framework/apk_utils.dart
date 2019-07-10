@@ -139,7 +139,8 @@ class ApkExtractor {
     if (!File(classesDex).existsSync()) {
       throw 'Couldn\'t find classes.dex in the APK.';
     }
-    final String classDescriptors = await eval(dexDump, <String>[classesDex]);
+    final String classDescriptors = await eval(dexDump,
+      <String>[classesDex], printStdout: false);
 
     if (classDescriptors.isEmpty) {
       throw 'No descriptors found in classes.dex.';
