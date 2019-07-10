@@ -77,6 +77,7 @@ void main() {
     expect(parentConstraints2.remainingPaintExtent, 600 - 2 - 4);
     final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
     final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
+
     // scrollExtent == top + bottom.
     expect(parentSliver1.geometry.scrollExtent, 2 + 4);
     expect(parentSliver2.geometry.scrollExtent, 7 + 13);
@@ -187,6 +188,7 @@ void main() {
     expect(parentSliver.geometry.scrollExtent, childHeight);
     expect(parentSliver.geometry.paintExtent, childHeight);
 
+    // When child is over-sized.
     setState(() {
         childWidth = 900.0;
         childHeight = 900.0;
@@ -200,7 +202,6 @@ void main() {
     expect(parentSliver.geometry.scrollExtent, childHeight);
     expect(parentSliver.geometry.paintExtent, 600);
   });
-
 
   testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     Size layoutBuilderSize;
@@ -507,7 +508,7 @@ void main() {
     // Tap item 2.
     await tester.tapAt(const Offset(300, 50.0 + 100 + 200));
     await tester.pump();
-    //expect(hitCounts, const <int> [1, 1, 0]);
+    expect(hitCounts, const <int> [1, 1, 0]);
 
     // Tap item 3. Shift the touch point up to ensure the touch lands within the viewport.
     await tester.tapAt(const Offset(300, 50.0 + 200 + 200 + 10));
@@ -534,7 +535,6 @@ void main() {
     await tester.pump();
     expect(hitCounts, const <int> [1, 1, 1]);
 
-
     // Tapping outside of the viewport shouldn't do anything.
     await tester.tapAt(const Offset(300, 1));
     await tester.pump();
@@ -551,7 +551,6 @@ void main() {
     await tester.tapAt(const Offset(799, 100));
     await tester.pump();
     expect(hitCounts, const <int> [1, 1, 1]);
-
 
     // Tap the no-content area in the viewport shouldn't do anything
     hitCounts = <int> [0, 0, 0];

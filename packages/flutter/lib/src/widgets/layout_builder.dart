@@ -17,52 +17,15 @@ typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, Sliver
 // A widget that defers its building until layout.
 abstract class _GenericLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
   const _GenericLayoutBuilder({
-      Key key,
-      @required this.builder,
+    Key key,
+    @required this.builder,
   }) : assert(builder != null),
   super(key: key);
 
   @override
   _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
-  /// Called at layout time to construct the widget tree. The builder must not
-  /// return null.
   final Widget Function(BuildContext context, ConstraintType constraints) builder;
-}
-
-/// Builds a widget tree that can depend on the parent widget's size.
-///
-/// Similar to the [Builder] widget except that the framework calls the [builder]
-/// function at layout time and provides the parent widget's constraints. This
-/// is useful when the parent constrains the child's size and doesn't depend on
-/// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
-/// child's size.
-///
-/// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
-///
-/// If the child should be smaller than the parent, consider wrapping the child
-/// in an [Align] widget. If the child might want to be bigger, consider
-/// wrapping it in a [SingleChildScrollView].
-///
-/// See also:
-///
-///  * [Builder], which calls a `builder` function at build time.
-///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-///  * [CustomSingleChildLayout], which positions its child during layout.
-class LayoutBuilder extends _GenericLayoutBuilder<BoxConstraints> {
-  /// Creates a widget that defers its building until layout.
-  ///
-  /// The [builder] argument must not be null.
-  const LayoutBuilder({
-    Key key,
-    LayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
-
-  @override
-  LayoutWidgetBuilder get builder;
-
-  @override
-  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -163,36 +126,60 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 }
 
-mixin _GenericRenderLayoutBuilder<T extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
-  LayoutCallback<T> get callback => _callback;
-  LayoutCallback<T> _callback;
-  set callback(LayoutCallback<T> value) {
+mixin _GenericRenderLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
+  LayoutCallback<ConstraintType> _callback;
+  set callback(LayoutCallback<ConstraintType> value) {
     if (value == _callback)
-    return;
+      return;
     _callback = value;
     markNeedsLayout();
   }
 
-  bool _debugThrowIfNotCheckingIntrinsics() {
-    assert(() {
-      if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError(
-          'LayoutBuilder does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require running the layout '
-          'callback speculatively, which might mutate the live render object tree.'
-        );
-      }
-      return true;
-    }());
-    return true;
+  void layoutAndBuildChild() {
+    assert(_callback != null);
+    invokeLayoutCallback(_callback);
   }
 }
 
-class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, _GenericRenderLayoutBuilder<BoxConstraints, RenderBox> {
-  _RenderLayoutBuilder({
-    LayoutCallback<BoxConstraints> callback,
-  }) { _callback = callback; }
+/// Builds a widget tree that can depend on the parent widget's size.
+///
+/// Similar to the [Builder] widget except that the framework calls the [builder]
+/// function at layout time and provides the parent widget's constraints. This
+/// is useful when the parent constrains the child's size and doesn't depend on
+/// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
+/// child's size.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
+///
+/// If the child should be smaller than the parent, consider wrapping the child
+/// in an [Align] widget. If the child might want to be bigger, consider
+/// wrapping it in a [SingleChildScrollView].
+///
+/// See also:
+///
+///  * [SliverLayoutBuilder], the sliver counterpart of this widget.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
+class LayoutBuilder extends _GenericLayoutBuilder<BoxConstraints> {
+  /// Creates a widget that defers its building until layout.
+  ///
+  /// The [builder] argument must not be null.
+  const LayoutBuilder({
+    Key key,
+    LayoutWidgetBuilder builder,
+  }) : super(key: key, builder: builder);
 
+  /// Called at layout time to construct the widget tree. The builder must not
+  /// return null.
+  @override
+  LayoutWidgetBuilder get builder;
+
+  @override
+  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
+}
+
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, _GenericRenderLayoutBuilder<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
@@ -219,8 +206,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 
   @override
   void performLayout() {
-    assert(callback != null);
-    invokeLayoutCallback(callback);
+    layoutAndBuildChild();
     if (child != null) {
       child.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
@@ -239,32 +225,46 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
     if (child != null)
       context.paintChild(child, offset);
   }
+
+  bool _debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw FlutterError(
+          'LayoutBuilder does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require running the layout '
+          'callback speculatively, which might mutate the live render object tree.'
+        );
+      }
+      return true;
+    }());
+
+    return true;
+  }
 }
 
-/// Builds a sliver widget tree that can depend on the parent widget's size.
+/// Builds a sliver widget tree that can depend on its own [SliverConstraints].
 ///
-/// Similar to the [LayoutBuilder] widget except that the framework calls the [builder]
-/// function at layout time and provides the parent widget's constraints. This
-/// is useful when the parent constrains the child's size and doesn't depend on
-/// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
-/// child's size.
+/// Similar to the [LayoutBuilder] widget except its builder should return a sliver
+/// widget, and [SliverLayoutBuilder] is itself a sliver. The framework calls the
+/// [builder] function at layout time and provides the current [SliverConstraints].
+/// The [SliverLayoutBuilder]'s final [SliverGeometry] will match the [SliverGeometry]
+/// of its child.
 ///
-/// If the child should be smaller than the parent, consider wrapping the child
-/// in an [Align] widget. If the child might want to be bigger, consider
-/// wrapping it in a [SingleChildScrollView].
 ///
 /// See also:
 ///
-///  * [Builder], which calls a `builder` function at build time.
-///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-///  * [CustomSingleChildLayout], which positions its child during layout.
+///  * [LayoutBuilder], the non-sliver version of this widget.
 class SliverLayoutBuilder extends _GenericLayoutBuilder<SliverConstraints> {
+  /// Creates a sliver widget that defers its building until layout.
   ///
+  /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
-      Key key,
-      SliverLayoutWidgetBuilder builder,
+    Key key,
+    SliverLayoutWidgetBuilder builder,
   }) : super(key: key, builder: builder);
 
+  /// Called at layout time to construct the widget tree. The builder must return
+  /// a non-null sliver widget.
   @override
   SliverLayoutWidgetBuilder get builder;
 
@@ -273,7 +273,6 @@ class SliverLayoutBuilder extends _GenericLayoutBuilder<SliverConstraints> {
 }
 
 class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, _GenericRenderLayoutBuilder<SliverConstraints, RenderSliver> {
-
   @override
   double childMainAxisPosition(RenderObject child) {
     assert(child != null);
@@ -283,26 +282,22 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
 
   @override
   void performLayout() {
-    assert(callback != null);
-    invokeLayoutCallback(callback);
-    if (child == null) {
-      geometry = SliverGeometry.zero;
-      return;
-    }
-
-    child.layout(constraints, parentUsesSize: true);
-    geometry = child.geometry;
+    layoutAndBuildChild();
+    child?.layout(constraints, parentUsesSize: true);
+    geometry = child?.geometry ?? SliverGeometry.zero;
   }
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
     assert(child == this.child);
-    // No-op because transform.translate(0, 0) doesn't do anything.
+    // No-op because child's offset is always (0, 0),
+    // transform.translate(0, 0) doesn't do anything.
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // This renderObject does not introduce additional offset to child's position.
     if (child?.geometry?.visible == true)
       context.paintChild(child, offset);
   }
