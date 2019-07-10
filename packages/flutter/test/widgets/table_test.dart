@@ -33,11 +33,7 @@ class TestChildState extends State<TestChildWidget> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return toggle
-    ? const SizedBox()
-    : const Text('CRASHHH');
-  }
+  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
 }
 
 void main() {
@@ -848,7 +844,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow> [TableRow(children: <Widget> [TestChildWidget()])]),
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
         ),
       );
       expect(find.text('CRASHHH'), findsNothing);
@@ -859,7 +855,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow> [TableRow(children: <Widget> [TestChildWidget()])]),
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
         ),
       );
 
