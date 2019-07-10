@@ -85,7 +85,7 @@ void main() {
 
     // check the color of the icon - dark mode
     checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
-    checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.white38); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });
 }

@@ -12,7 +12,7 @@ dependencies:
   json_rpc_2: 2.1.0
   meta: 1.1.6
   path: 1.6.2
-  web_socket_channel: 1.0.13
+  web_socket_channel: 1.0.14
   vm_service_client: 0.2.6+2
   flutter:
     sdk: flutter
@@ -46,4 +46,4 @@ dev_dependencies:
   mockito: 4.1.0
   quiver: 2.0.3
 
-# PUBSPEC CHECKSUM: fc49
+# PUBSPEC CHECKSUM: fd4a
