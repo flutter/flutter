@@ -404,4 +404,190 @@ void main() {
     expect(childSliver.geometry, parentSliver1.geometry);
     expect(parentSliver1.geometry, parentSliver2.geometry);
   });
+
+  testWidgets('localToGlobal works with SliverLayoutBuilder', (WidgetTester tester) async {
+    final Key childKey1 = UniqueKey();
+    final Key childKey2 = UniqueKey();
+    final ScrollController scrollController = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: <Widget>[
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 300),
+            ),
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                child: SizedBox(key: childKey1, height: 200),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(key: childKey2, height: 100),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox renderChild1 = tester.renderObject(find.byKey(childKey1));
+    final RenderBox renderChild2 = tester.renderObject(find.byKey(childKey2));
+
+    // scrollController.scrollOffset = 0:
+    expect(
+      renderChild1.localToGlobal(const Offset(100, 100)),
+      const Offset(100, 300.0 + 100),
+    );
+
+    expect(
+      renderChild2.localToGlobal(const Offset(100, 100)),
+      const Offset(100, 300.0 + 200 + 100),
+    );
+
+    scrollController.jumpTo(100);
+    await tester.pump();
+    expect(
+      renderChild1.localToGlobal(const Offset(100, 100)),
+      // -100 because the scroll offset is now 100.
+      const Offset(100, 300.0 + 100 - 100),
+    );
+
+    expect(
+      renderChild2.localToGlobal(const Offset(100, 100)),
+      // -100 because the scroll offset is now 100.
+      const Offset(100, 300.0 + 100 + 200 - 100),
+    );
+  });
+
+  testWidgets('hitTest works within SliverLayoutBuilder', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    List<int> hitCounts = <int> [0, 0, 0];
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Padding(
+          padding: const EdgeInsets.all(50),
+          child: CustomScrollView(
+            controller: scrollController,
+            slivers: <Widget>[
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 200,
+                  child: GestureDetector(onTap: () => hitCounts[0]++),
+                ),
+              ),
+              SliverLayoutBuilder(
+                builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 200,
+                    child: GestureDetector(onTap: () => hitCounts[1]++),
+                  ),
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 200,
+                  child: GestureDetector(onTap: () => hitCounts[2]++),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Tap item 1.
+    await tester.tapAt(const Offset(300, 50.0 + 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 0, 0]);
+
+    // Tap item 2.
+    await tester.tapAt(const Offset(300, 50.0 + 100 + 200));
+    await tester.pump();
+    //expect(hitCounts, const <int> [1, 1, 0]);
+
+    // Tap item 3. Shift the touch point up to ensure the touch lands within the viewport.
+    await tester.tapAt(const Offset(300, 50.0 + 200 + 200 + 10));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+    // Scrolling doesn't break it.
+    hitCounts = <int> [0, 0, 0];
+    scrollController.jumpTo(100);
+    await tester.pump();
+
+    // Tap item 1.
+    await tester.tapAt(const Offset(300, 50.0 + 100 - 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 0, 0]);
+
+    // Tap item 2.
+    await tester.tapAt(const Offset(300, 50.0 + 100 + 200 - 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 0]);
+
+    // Tap item 3.
+    await tester.tapAt(const Offset(300, 50.0 + 100 + 200 + 200 - 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+
+    // Tapping outside of the viewport shouldn't do anything.
+    await tester.tapAt(const Offset(300, 1));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+    await tester.tapAt(const Offset(300, 599));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+    await tester.tapAt(const Offset(1, 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+    await tester.tapAt(const Offset(799, 100));
+    await tester.pump();
+    expect(hitCounts, const <int> [1, 1, 1]);
+
+
+    // Tap the no-content area in the viewport shouldn't do anything
+    hitCounts = <int> [0, 0, 0];
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: scrollController,
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 100,
+                child: GestureDetector(onTap: () => hitCounts[0]++),
+              ),
+            ),
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) => SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 100,
+                  child: GestureDetector(onTap: () => hitCounts[1]++),
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 100,
+                child: GestureDetector(onTap: () => hitCounts[2]++),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tapAt(const Offset(300, 301));
+    await tester.pump();
+    expect(hitCounts, const <int> [0, 0, 0]);
+  });
 }

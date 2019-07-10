@@ -11,13 +11,11 @@ import 'framework.dart';
 /// The signature of the [LayoutBuilder] builder function.
 typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
-/// The signature of the [LayoutBuilder] builder function.
+/// The signature of the [SliverLayoutBuilder] builder function.
 typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, SliverConstraints constraints);
 
+// A widget that defers its building until layout.
 abstract class _GenericLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
-  /// Creates a widget that defers its building until layout.
-  ///
-  /// The [builder] argument must not be null.
   const _GenericLayoutBuilder({
       Key key,
       @required this.builder,
@@ -177,15 +175,15 @@ mixin _GenericRenderLayoutBuilder<T extends Constraints, ChildType extends Rende
 
   bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
-        if (!RenderObject.debugCheckingIntrinsics) {
-          throw FlutterError(
-            'LayoutBuilder does not support returning intrinsic dimensions.\n'
-            'Calculating the intrinsic dimensions would require running the layout '
-            'callback speculatively, which might mutate the live render object tree.'
-          );
-        }
-        return true;
-      }());
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw FlutterError(
+          'LayoutBuilder does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require running the layout '
+          'callback speculatively, which might mutate the live render object tree.'
+        );
+      }
+      return true;
+    }());
     return true;
   }
 }
@@ -193,9 +191,7 @@ mixin _GenericRenderLayoutBuilder<T extends Constraints, ChildType extends Rende
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, _GenericRenderLayoutBuilder<BoxConstraints, RenderBox> {
   _RenderLayoutBuilder({
     LayoutCallback<BoxConstraints> callback,
-  }) {
-    _callback = callback;
-  }
+  }) { _callback = callback; }
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -282,7 +278,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   double childMainAxisPosition(RenderObject child) {
     assert(child != null);
     assert(child == this.child);
-    return calculatePaintOffset(constraints, from: 0, to: 0);
+    return 0;
   }
 
   @override
@@ -295,8 +291,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
     }
 
     child.layout(constraints, parentUsesSize: true);
-    final SliverGeometry childGeometry= child.geometry;
-    geometry = childGeometry;
+    geometry = child.geometry;
   }
 
   @override
@@ -310,6 +305,13 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   void paint(PaintingContext context, Offset offset) {
     if (child?.geometry?.visible == true)
       context.paintChild(child, offset);
+  }
+
+  @override
+  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return child != null
+        && child.geometry.hitTestExtent > 0
+        && child.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
   }
 }
 
