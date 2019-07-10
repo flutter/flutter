@@ -118,6 +118,7 @@ def run_gn():
   runtime_modes = [debug, profile, release]
   unopt = ['--unoptimized']
   android = ['--android']
+  fuchsia = ['--fuchsia']
 
   for mode in runtime_modes:
     if set(mode) != set(release):
@@ -127,6 +128,7 @@ def run_gn():
     if set(mode) == set(debug):
       host += unopt
     run_process(host + mode, cwd=engine_home())
+  run_process(common + fuchsia + debug + unopt, cwd=engine_home())
 
 
 def build():
@@ -138,7 +140,8 @@ def build():
     'host_profile',
     'android_debug_unopt',
     'android_profile',
-    'android_release'
+    'android_release',
+    'fuchsia_debug_unopt',
   ]
 
   build_dir = 'out'

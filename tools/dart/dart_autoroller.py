@@ -286,14 +286,12 @@ def wait_for_status(commit):
   if FLAG_skip_wait_for_artifacts:
     return True
 
-  print_status('Sleeping for 30 seconds to allow for Cirrus to start...')
+  print_status('Sleeping for 120 seconds to allow for Cirrus to start...')
 
   # Give Cirrus a chance to start. The GitHub statuses posted by Cirrus go
   # through some weird states when the PR is created and can be marked as
   # failing temporarily, causing this check to return False if we don't wait.
-  # This delay can probably be reduced, but the checks won't finish any faster
-  # than 30 seconds anyway.
-  time.sleep(30)
+  time.sleep(120)
 
   print_status('Starting PR status checks (this may take awhile).')
 
