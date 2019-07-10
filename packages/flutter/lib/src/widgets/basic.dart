@@ -3553,7 +3553,7 @@ class Positioned extends ParentDataWidget<Stack> {
 ///    position using [start] and [end] but has an explicit [TextDirection].
 ///  * [AnimatedPositionedDirectional], which automatically transitions
 ///    the child's position over a given duration whenever the given position
-//     changes.
+///    changes.
 class PositionedDirectional extends StatelessWidget {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///

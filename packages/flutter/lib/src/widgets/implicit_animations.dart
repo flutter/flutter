@@ -229,12 +229,15 @@ class TextStyleTween extends Tween<TextStyle> {
 ///
 /// ## Relationship to [AnimatedWidget]s
 ///
-/// In contrast to [AnimatedWidget]s (and its subclasses),
-/// [ImplicitlyAnimatedWidget]s instantiate and manage their own
-/// [AnimationController]s, which - while simpler to use - may be inefficient
-/// for multiple parallel animations. For those cases, consider instantiating an
-/// explicit [AnimationController] that is passed to (subclasses of)
-/// [AnimatedWidget]s instead of using (subclasses of)
+/// [ImplicitlyAnimatedWidget]s (and its subclasses) create and manage their own
+/// internal [AnimationController]s to power the animation. In contrast to that,
+/// [AnimatedWidget]s (and its subclasses) take an explicit [Animation] as
+/// argument to drive the animation. This makes [ImplicitlyAnimatedWidget]s
+/// simpler to use, but it may be less efficient for multiple parallel
+/// animations: Instead of using multiple [ImplicitlyAnimatedWidget]s, which
+/// all instantiate their own [AnimationController] behind the scenes, consider
+/// instantiating an explicit [AnimationController] that is passed to
+/// (subclasses of) [AnimatedWidget]s instead of using (subclasses of)
 /// [ImplicitlyAnimatedWidget]s.
 ///
 /// See also:
