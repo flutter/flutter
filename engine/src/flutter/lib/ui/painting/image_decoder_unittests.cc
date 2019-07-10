@@ -75,7 +75,7 @@ class TestIOManager final : public IOManager {
 
 static sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
   auto fixtures_directory =
-      fml::OpenFile(GetFixturesPath(), false, fml::FilePermission::kRead);
+      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
   if (!fixtures_directory.is_valid()) {
     return nullptr;
   }
