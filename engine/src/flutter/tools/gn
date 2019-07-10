@@ -93,6 +93,7 @@ def to_gn_args(args):
     gn_args['skia_use_expat'] = args.target_os == 'android'
     gn_args['skia_use_fontconfig'] = args.enable_fontconfig
     gn_args['flutter_use_fontconfig'] = args.enable_fontconfig
+    gn_args['flutter_enable_skshaper'] = args.enable_skshaper
     gn_args['is_official_build'] = True    # Disable Skia test utilities.
     gn_args['dart_component_kind'] = 'static_library' # Always link Dart in statically.
     gn_args['is_debug'] = args.unoptimized
@@ -307,6 +308,7 @@ def parse_args(args):
   parser.add_argument('--enable-metal', action='store_true', default=False)
 
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
+  parser.add_argument('--enable-skshaper', action='store_true', default=False)
 
   parser.add_argument('--embedder-for-target', dest='embedder_for_target', action='store_true', default=False)
 

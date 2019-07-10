@@ -118,4 +118,12 @@ std::shared_ptr<FontCollection> GetTestFontCollection() {
   return collection;
 }
 
+// Build a paragraph and return it as a ParagraphTxt usable by tests that need
+// access to ParagraphTxt internals.
+std::unique_ptr<ParagraphTxt> BuildParagraph(
+    txt::ParagraphBuilderTxt& builder) {
+  return std::unique_ptr<txt::ParagraphTxt>(
+      static_cast<txt::ParagraphTxt*>(builder.Build().release()));
+}
+
 }  // namespace txt

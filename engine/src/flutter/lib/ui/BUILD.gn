@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/common/config.gni")
 import("$flutter_root/testing/testing.gni")
 
 source_set("ui") {
@@ -125,6 +126,10 @@ source_set("ui") {
   public_deps = [
     "$flutter_root/third_party/txt",
   ]
+
+  if (flutter_enable_skshaper) {
+    defines = [ "FLUTTER_ENABLE_SKSHAPER" ]
+  }
 
   if (is_fuchsia) {
     sources += [

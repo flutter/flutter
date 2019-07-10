@@ -25,21 +25,27 @@
 #include "paragraph.h"
 #include "paragraph_style.h"
 #include "placeholder_run.h"
-#include "styled_runs.h"
 #include "text_style.h"
 
 namespace txt {
 
 class ParagraphBuilder {
  public:
-  ParagraphBuilder(ParagraphStyle style,
-                   std::shared_ptr<FontCollection> font_collection);
+  static std::unique_ptr<ParagraphBuilder> CreateTxtBuilder(
+      const ParagraphStyle& style,
+      std::shared_ptr<FontCollection> font_collection);
 
-  ~ParagraphBuilder();
+#if FLUTTER_ENABLE_SKSHAPER
+  static std::unique_ptr<ParagraphBuilder> CreateSkiaBuilder(
+      const ParagraphStyle& style,
+      std::shared_ptr<FontCollection> font_collection);
+#endif
+
+  virtual ~ParagraphBuilder() = default;
 
   // Push a style to the stack. The corresponding text added with AddText will
   // use the top-most style.
-  void PushStyle(const TextStyle& style);
+  virtual void PushStyle(const TextStyle& style) = 0;
 
   // Remove a style from the stack. Useful to apply different styles to chunks
   // of text such as bolding.
@@ -52,14 +58,14 @@ class ParagraphBuilder {
   //
   //   builder.Pop();
   //   builder.AddText(" Back to normal again.");
-  void Pop();
+  virtual void Pop() = 0;
 
   // Returns the last TextStyle on the stack.
-  const TextStyle& PeekStyle() const;
+  virtual const TextStyle& PeekStyle() = 0;
 
   // Adds text to the builder. Forms the proper runs to use the upper-most style
   // on the style_stack_;
-  void AddText(const std::u16string& text);
+  virtual void AddText(const std::u16string& text) = 0;
 
   // Pushes the information requried to leave an open space, where Flutter may
   // draw a custom placeholder into.
@@ -67,33 +73,16 @@ class ParagraphBuilder {
   // Internally, this method adds a single object replacement character (0xFFFC)
   // and emplaces a new PlaceholderRun instance to the vector of inline
   // placeholders.
-  void AddPlaceholder(PlaceholderRun& span);
-
-  void SetParagraphStyle(const ParagraphStyle& style);
+  virtual void AddPlaceholder(PlaceholderRun& span) = 0;
 
   // Constructs a Paragraph object that can be used to layout and paint the text
   // to a SkCanvas.
-  std::unique_ptr<Paragraph> Build();
+  virtual std::unique_ptr<Paragraph> Build() = 0;
+
+ protected:
+  ParagraphBuilder() = default;
 
  private:
-  std::vector<uint16_t> text_;
-  // A vector of PlaceholderRuns, which detail the sizes, positioning and break
-  // behavior of the empty spaces to leave. Each placeholder span corresponds to
-  // a 0xFFFC (object replacement character) in text_, which indicates the
-  // position in the text where the placeholder will occur. There should be an
-  // equal number of 0xFFFC characters and elements in this vector.
-  std::vector<PlaceholderRun> inline_placeholders_;
-  // The indexes of the obj replacement characters added through
-  // ParagraphBuilder::addPlaceholder().
-  std::unordered_set<size_t> obj_replacement_char_indexes_;
-  std::vector<size_t> style_stack_;
-  std::shared_ptr<FontCollection> font_collection_;
-  StyledRuns runs_;
-  ParagraphStyle paragraph_style_;
-  size_t paragraph_style_index_;
-
-  size_t PeekStyleIndex() const;
-
   FML_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
 

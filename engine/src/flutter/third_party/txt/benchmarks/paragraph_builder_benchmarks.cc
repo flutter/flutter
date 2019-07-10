@@ -23,7 +23,7 @@
 #include "txt/font_style.h"
 #include "txt/font_weight.h"
 #include "txt/paragraph.h"
-#include "txt/paragraph_builder.h"
+#include "txt/paragraph_builder_txt.h"
 
 namespace txt {
 
@@ -31,7 +31,7 @@ static void BM_ParagraphBuilderConstruction(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
   }
 }
 BENCHMARK(BM_ParagraphBuilderConstruction);
@@ -43,7 +43,7 @@ static void BM_ParagraphBuilderPushStyle(benchmark::State& state) {
   text_style.color = SK_ColorBLACK;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.PushStyle(text_style);
   }
 }
@@ -51,7 +51,7 @@ BENCHMARK(BM_ParagraphBuilderPushStyle);
 
 static void BM_ParagraphBuilderPushPop(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
-  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
   text_style.color = SK_ColorBLACK;
@@ -70,7 +70,7 @@ static void BM_ParagraphBuilderAddTextString(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.AddText(text);
   }
 }
@@ -82,7 +82,7 @@ static void BM_ParagraphBuilderAddTextChar(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.AddText(text);
   }
 }
@@ -97,7 +97,7 @@ static void BM_ParagraphBuilderAddTextU16stringShort(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.AddText(u16_text);
   }
 }
@@ -131,7 +131,7 @@ static void BM_ParagraphBuilderAddTextU16stringLong(benchmark::State& state) {
   txt::ParagraphStyle paragraph_style;
 
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.AddText(u16_text);
   }
 }
@@ -150,7 +150,7 @@ static void BM_ParagraphBuilderShortParagraphConstruct(
   text_style.color = SK_ColorBLACK;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
@@ -188,7 +188,7 @@ static void BM_ParagraphBuilderLongParagraphConstruct(benchmark::State& state) {
   text_style.color = SK_ColorBLACK;
   auto font_collection = GetTestFontCollection();
   while (state.KeepRunning()) {
-    txt::ParagraphBuilder builder(paragraph_style, font_collection);
+    txt::ParagraphBuilderTxt builder(paragraph_style, font_collection);
     builder.PushStyle(text_style);
     builder.AddText(u16_text);
     builder.Pop();
