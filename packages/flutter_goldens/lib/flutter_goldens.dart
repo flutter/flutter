@@ -26,10 +26,10 @@ Future<void> main(FutureOr<void> testMain()) async {
   const Platform platform = LocalPlatform();
   if (_testingWithSkiaGold(platform)) {
     goldenFileComparator = await FlutterSkiaGoldFileComparator.fromDefaultComparator();
-  } else if (platform.isLinux) {
+  } else if (_testingWithGoldensRepository(platform)) {
     goldenFileComparator = await FlutterGoldensRepositoryFileComparator.fromDefaultComparator();
   } else {
-    goldenFileComparator = await FlutterSkippingGoldenFileComparator.fromDefaultComparator();
+    goldenFileComparator = FlutterSkippingGoldenFileComparator.fromDefaultComparator();
   }
   await testMain();
 }
@@ -258,11 +258,11 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
 
   /// Creates a new [FlutterSkippingGoldenFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
-  static Future<FlutterSkiaGoldFileComparator> fromDefaultComparator({
+  static FlutterSkippingGoldenFileComparator fromDefaultComparator({
     LocalFileComparator defaultComparator,
-  }) async {
+  }) {
     defaultComparator ??= goldenFileComparator;
-    return FlutterSkiaGoldFileComparator(defaultComparator.basedir);
+    return FlutterSkippingGoldenFileComparator(defaultComparator.basedir);
   }
 
   @override
@@ -273,6 +273,9 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
     );
     return true;
   }
+
+  @override
+  Future<void> update(Uri golden, Uint8List imageBytes) => null;
 }
 
 /// Decides based on the current environment whether goldens tests should be
@@ -283,3 +286,7 @@ bool _testingWithSkiaGold(Platform platform) {
   final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
   return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
 }
+
+/// Decides based on the current environment whether goldens tests should be
+/// performed against the flutter/goldens repository.
+bool _testingWithGoldensRepository(Platform platform) => platform.isLinux;
