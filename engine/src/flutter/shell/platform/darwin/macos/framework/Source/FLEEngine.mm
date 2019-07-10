@@ -210,15 +210,15 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 #pragma mark - Private methods
 
 - (bool)engineCallbackOnMakeCurrent {
-  if (!_viewController.view) {
+  if (!_viewController.flutterView) {
     return false;
   }
-  [_viewController.view makeCurrentContext];
+  [_viewController.flutterView makeCurrentContext];
   return true;
 }
 
 - (bool)engineCallbackOnClearCurrent {
-  if (!_viewController.view) {
+  if (!_viewController.flutterView) {
     return false;
   }
   [NSOpenGLContext clearCurrentContext];
@@ -226,15 +226,15 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 }
 
 - (bool)engineCallbackOnPresent {
-  if (!_viewController.view) {
+  if (!_viewController.flutterView) {
     return false;
   }
-  [_viewController.view onPresent];
+  [_viewController.flutterView onPresent];
   return true;
 }
 
 - (bool)engineCallbackOnMakeResourceCurrent {
-  if (!_viewController.view) {
+  if (!_viewController.flutterView) {
     return false;
   }
   [_viewController makeResourceContextCurrent];

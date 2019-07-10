@@ -5,8 +5,6 @@
 #import <Cocoa/Cocoa.h>
 
 #import "FLEEngine.h"
-#import "FLEOpenGLContextHandling.h"
-#import "FLEReshapeListener.h"
 #import "FlutterMacros.h"
 #import "FlutterPluginRegistrarMacOS.h"
 
@@ -29,13 +27,7 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
  * Flutter engine in non-interactive mode, or with a drawable Flutter canvas.
  */
 FLUTTER_EXPORT
-@interface FLEViewController : NSViewController <FlutterPluginRegistry, FLEReshapeListener>
-
-/**
- * The view this controller manages. Must be capable of handling text input events, and the OpenGL
- * context handling protocols.
- */
-@property(nullable) NSView<FLEOpenGLContextHandling>* view;
+@interface FLEViewController : NSViewController <FlutterPluginRegistry>
 
 /**
  * The Flutter engine associated with this view controller.

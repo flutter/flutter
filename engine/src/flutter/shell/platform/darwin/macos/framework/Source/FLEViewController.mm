@@ -8,10 +8,9 @@
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEEngine.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEReshapeListener.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEView.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLEEngine_Internal.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
 namespace {
@@ -68,7 +67,7 @@ struct MouseState {
 /**
  * Private interface declaration for FLEViewController.
  */
-@interface FLEViewController ()
+@interface FLEViewController () <FlutterViewReshapeListener>
 
 /**
  * A list of additional responders to keyboard events. Keybord events are forwarded to all of them.
@@ -195,16 +194,13 @@ static void CommonInit(FLEViewController* controller) {
   return self;
 }
 
-- (void)setView:(NSView*)view {
-  if (_trackingArea) {
-    [self.view removeTrackingArea:_trackingArea];
-  }
-  [super setView:view];
-  [self configureTrackingArea];
+- (void)loadView {
+  FlutterView* flutterView = [[FlutterView alloc] initWithReshapeListener:self];
+  self.view = flutterView;
 }
 
-- (void)loadView {
-  self.view = [[FLEView alloc] init];
+- (void)viewDidLoad {
+  [self configureTrackingArea];
 }
 
 #pragma mark - Public methods
@@ -237,6 +233,10 @@ static void CommonInit(FLEViewController* controller) {
 }
 
 #pragma mark - Framework-internal methods
+
+- (FlutterView*)flutterView {
+  return static_cast<FlutterView*>(self.view);
+}
 
 - (void)addKeyResponder:(NSResponder*)responder {
   [self.additionalKeyResponders addObject:responder];
@@ -449,12 +449,12 @@ static void CommonInit(FLEViewController* controller) {
   }
 }
 
-#pragma mark - FLEReshapeListener
+#pragma mark - FlutterViewReshapeListener
 
 /**
  * Responds to view reshape by notifying the engine of the change in dimensions.
  */
-- (void)viewDidReshape:(NSOpenGLView*)view {
+- (void)viewDidReshape:(NSView*)view {
   CGSize scaledSize = [view convertRectToBacking:view.bounds].size;
   double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
   [_engine updateWindowMetricsWithSize:scaledSize pixelRatio:pixelRatio];

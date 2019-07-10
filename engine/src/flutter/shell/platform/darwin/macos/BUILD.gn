@@ -35,9 +35,6 @@ _flutter_framework_headers = [
   "framework/Headers/FlutterPluginRegistrarMacOS.h",
   "framework/Headers/FLEDartProject.h",
   "framework/Headers/FLEEngine.h",
-  "framework/Headers/FLEOpenGLContextHandling.h",
-  "framework/Headers/FLEReshapeListener.h",
-  "framework/Headers/FLEView.h",
   "framework/Headers/FLEViewController.h",
 ]
 
@@ -58,9 +55,10 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FLETextInputModel.mm",
     "framework/Source/FLETextInputPlugin.h",
     "framework/Source/FLETextInputPlugin.mm",
-    "framework/Source/FLEView.mm",
     "framework/Source/FLEViewController.mm",
     "framework/Source/FLEViewController_Internal.h",
+    "framework/Source/FlutterView.h",
+    "framework/Source/FlutterView.mm",
   ]
 
   sources += _flutter_framework_headers
