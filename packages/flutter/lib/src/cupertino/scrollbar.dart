@@ -28,6 +28,16 @@ const double _kScrollbarThicknessDragging = 8.0;
 const double _kScrollbarMainAxisMargin = 3.0;
 const double _kScrollbarCrossAxisMargin = 3.0;
 
+// Callback for iOS13-style scrollbar drag events.
+//
+// primaryDelta is the amount that the gesture has moved along the primary axis
+// in the coordinate space of the scrollbar since the previous update.
+//
+// See also:
+//
+//   * [CupertinoScrollbar.onDragScroll]
+typedef GestureDragScrollCallback = void Function(double primaryDelta);
+
 /// An iOS style scrollbar.
 ///
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
@@ -49,8 +59,6 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
     Key key,
-    // TODO(justinmc): When drag-in-from-side is implemented, might have to
-    // change the type of this callback.
     this.onDragScroll,
     this.onDragScrollUp,
     @required this.child,
@@ -73,7 +81,7 @@ class CupertinoScrollbar extends StatefulWidget {
   ///   * [CupertinoPageScaffold], which uses the callback to implement the
   ///     scrolling.
   ///   * [CupertinoScrollbar.onDragScrollUp]
-  final GestureLongPressMoveUpdateCallback onDragScroll;
+  final GestureDragScrollCallback onDragScroll;
 
   /// Called when the user releases after dragging the scrollbar.
   ///
@@ -155,22 +163,37 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     );
   }
 
-  void _handleLongPressStart(LongPressStartDetails details) {
-    _fadeoutTimer?.cancel();
-  }
-
   void _handleLongPressUp() {
     _startFadeoutTimer();
-    setState(() {
-      _thicknessAnimationController.reverse();
-    });
+    _thicknessAnimationController.reverse();
     widget.onDragScrollUp();
   }
 
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    widget.onDragScroll(details.localOffsetFromOrigin.dy);
+  }
+
   void _handleLongPress() {
-    setState(() {
-      _thicknessAnimationController.forward();
-    });
+    _fadeoutTimer?.cancel();
+    _thicknessAnimationController.forward();
+  }
+
+  double _dragStartY;
+  void _handleHorizontalDragStart(DragStartDetails details) {
+    _dragStartY = details.localPosition.dy;
+    _fadeoutTimer?.cancel();
+    _thicknessAnimationController.forward();
+  }
+
+  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+    widget.onDragScroll(details.localPosition.dy - _dragStartY);
+  }
+
+  void _handleHorizontalDragEnd(DragEndDetails details) {
+    _dragStartY = null;
+    _startFadeoutTimer();
+    _thicknessAnimationController.reverse();
+    widget.onDragScrollUp();
   }
 
   void _startFadeoutTimer() {
@@ -228,9 +251,22 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         (_ThumbLongPressGestureRecognizer instance) {
           instance
             ..onLongPress = _handleLongPress
-            ..onLongPressStart = _handleLongPressStart
-            ..onLongPressMoveUpdate = widget.onDragScroll
+            ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
             ..onLongPressUp = _handleLongPressUp;
+        },
+      );
+    gestures[_ThumbHorizontalDragGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_ThumbHorizontalDragGestureRecognizer>(
+        () => _ThumbHorizontalDragGestureRecognizer(
+          debugOwner: this,
+          kind: PointerDeviceKind.touch,
+          customPaintKey: _customPaintKey,
+        ),
+        (_ThumbHorizontalDragGestureRecognizer instance) {
+          instance
+            ..onStart = _handleHorizontalDragStart
+            ..onUpdate = _handleHorizontalDragUpdate
+            ..onEnd = _handleHorizontalDragEnd;
         },
       );
     return NotificationListener<ScrollNotification>(
@@ -272,6 +308,41 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
   bool isPointerAllowed(PointerDownEvent event) {
     // foregroundPainter also hit tests its children by default, but the
     // scrollbar should only respond to a longpress directly on its thumb, so
+    // manually check for a hit on the thumb here.
+    if (_customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
+    final ScrollbarPainter painter = customPaint.foregroundPainter;
+    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(event.position);
+    if (!painter.hitTestInteractive(localOffset)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+}
+
+// A horizontal drag gesture detector that only responds to events on the
+// scrollbar's thumb and ignores everything else.
+class _ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _ThumbHorizontalDragGestureRecognizer({
+    PointerDeviceKind kind,
+    Object debugOwner,
+    GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+        super(
+          kind: kind,
+          debugOwner: debugOwner,
+        );
+
+  final GlobalKey _customPaintKey;
+
+  // TODO(justinmc): Could I use some OOP magic to avoid duplicating this code?
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    // foregroundPainter also hit tests its children by default, but the
+    // scrollbar should only respond to a gesture directly on its thumb, so
     // manually check for a hit on the thumb here.
     if (_customPaintKey.currentContext == null) {
       return false;

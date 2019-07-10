@@ -146,13 +146,13 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
     // TODO(justinmc): Take a new param to enable this?
     if (true) {
       paddedContent = CupertinoScrollbar(
-        onDragScroll: (LongPressMoveUpdateDetails details) {
+        onDragScroll: (double primaryDelta) {
           final double viewHeight = _primaryScrollController.position.viewportDimension;
           final double scrollHeight = _primaryScrollController.position.maxScrollExtent
             + viewHeight - _primaryScrollController.position.minScrollExtent;
           _dragScrollStartY ??= _primaryScrollController.position.pixels;
           final double scrollDistance =
-            details.localOffsetFromOrigin.dy / viewHeight * scrollHeight;
+            primaryDelta / viewHeight * scrollHeight;
           _primaryScrollController.position.jumpTo(
             _dragScrollStartY + scrollDistance,
           );
