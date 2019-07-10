@@ -103,13 +103,14 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 ///  * [DefaultTextStyleTransition], which is an animated version of
 ///    [DefaultTextStyle].
 ///  * [PositionedTransition], which is an animated version of [Positioned].
-///  * [RelativePositionedTransition], which is an animated version of [Positioned].
-///  * [RotationTransition], which animates the rotation of a widget..
+///  * [RelativePositionedTransition], which is an animated version of
+///    [Positioned].
+///  * [RotationTransition], which animates the rotation of a widget.
 ///  * [ScaleTransition], which animates the scale of a widget.
 ///  * [SizeTransition], which animates its own size.
-///  * [SlideTransition], which is an animated version of []
-///  * [FadeTransition], which animates the position of a widget relative to its
-///    normal position.
+///  * [SlideTransition], which animates the position of a widget relative to
+///    its normal position.
+///  * [FadeTransition], which is an animated version of [Opacity].
 abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///
