@@ -75,7 +75,7 @@ class AssetManagerFontProvider : public txt::FontAssetProvider {
 
  private:
   std::shared_ptr<AssetManager> asset_manager_;
-  std::unordered_map<std::string, AssetManagerFontStyleSet>
+  std::unordered_map<std::string, sk_sp<AssetManagerFontStyleSet>>
       registered_families_;
   std::vector<std::string> family_names_;
 
