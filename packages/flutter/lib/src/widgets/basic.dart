@@ -4715,7 +4715,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 ///
 /// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-/// 
+///
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
