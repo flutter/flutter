@@ -9,6 +9,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -1812,16 +1813,17 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// There are two methods: 'pushRoute', 'popRoute'. 'pushRoute' is also used
   /// for notifying the route replacements.
   ///
-  /// See also [SystemChannels.navigation].
-  void _sendRouteChangeToSystemChannels(String methodName, Route<dynamic> newRoute, Route<dynamic> oldRoute) {
-    final String oldRouteName = oldRoute?.settings?.name;
-    final String newRouteName = newRoute?.settings?.name;
-    if (oldRouteName != null || newRouteName != null) {
+  /// See also [SystemChannels.navigation], which handles subsequent navigation
+  /// requests.
+  void _sendRouteChangeToSystemChannels(String methodName, Route<dynamic> route, Route<dynamic> previousRoute) {
+    final String previousRouteName = previousRoute?.settings?.name;
+    final String routeName = route?.settings?.name;
+    if (previousRouteName != null || routeName!= null) {
       SystemChannels.navigation.invokeMethod(
         methodName,
         <String, dynamic>{
-          'oldRouteName': oldRouteName,
-          'newRouteName': newRouteName,
+          'previousRouteName': previousRouteName,
+          'routeName': routeName,
         },
       );
     }
