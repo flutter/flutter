@@ -39,11 +39,7 @@ Future<BuildDaemonClient> connectClient(
   Function(ServerLog) logHandler,
 ) {
   final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-  // Try and use the snapshot, but if that failed fall back to calling dart directly.
-  String buildScript = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'flutter_web_build.snapshot');
-  if (!fs.file(buildScript).existsSync()) {
-    buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
-  }
+  final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
   final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
   return BuildDaemonClient.connect(
     workingDirectory,
@@ -56,6 +52,7 @@ Future<BuildDaemonClient> connectClient(
       buildScript,
       'daemon',
       '--skip-build-script-check',
+      '-v',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
@@ -100,23 +97,13 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
 
 void _registerBuildTargets(
   BuildDaemonClient client,
-  int targetPorts,
 ) {
-  // Register a target for each serve target.
-  {
-    OutputLocation outputLocation;
-    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-      ..target = 'web'
-      ..outputLocation = outputLocation?.toBuilder()));
-  }
-  // Empty string indicates we should build everything, register a corresponding
-  // target.
   final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
     ..output = ''
     ..useSymlinks = true
     ..hoist = false);
   client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-    ..target = ''
+    ..target = 'web'
     ..outputLocation = outputLocation?.toBuilder()));
 }
 
@@ -226,9 +213,12 @@ class ResidentWebRunner extends ResidentRunner {
       return 1;
     }
     final int targetPort = await os.findFreePort();
+    printTrace('Connecting to $targetPort');
     /// Start the build daemon and run an initial build.
     final String workingDirectory = fs.currentDirectory.path;
     _client = await _startBuildDaemon(workingDirectory);
+    // Register the current build targets.
+    _registerBuildTargets(_client);
     _client.startBuild();
 
     // Listen to build results to log error messages.
@@ -236,12 +226,9 @@ class ResidentWebRunner extends ResidentRunner {
       if (data.results.any((BuildResult result) =>
           result.status == BuildStatus.failed ||
           result.status == BuildStatus.succeeded)) {
-        printTrace(data.results.toString());
+          printTrace(data.results.toString());
       }
     });
-
-    // Register the current build targets.
-    _registerBuildTargets(_client, targetPort);
 
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -254,6 +241,7 @@ class ResidentWebRunner extends ResidentRunner {
       _client.buildResults,
       optionalHandler: _assetHandler,
     )).first;
+    print('HERE');
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -490,6 +478,7 @@ class ResidentWebRunner extends ResidentRunner {
   }
 }
 
+/// Returns the port of the daemon asset server.
 int daemonPort(String workingDirectory) {
   final File portFile = fs.file(_assetServerPortFilePath(workingDirectory));
   if (!portFile.existsSync()) {
