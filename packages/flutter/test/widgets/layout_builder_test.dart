@@ -38,6 +38,38 @@ void main() {
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
+  testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
+    SliverConstraints parentConstraints;
+    final Key childKey = UniqueKey();
+    final Key parentKey = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              key: parentKey,
+              builder: (BuildContext context, SliverConstraints constraint) {
+                parentConstraints = constraint;
+                return SliverPadding(key:childKey, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(parentConstraints.crossAxisExtent, 800);
+    expect(parentConstraints.remainingPaintExtent, 600);
+    final RenderSliver parentSliver = tester.renderObject(find.byKey(parentKey));
+    print(parentSliver.geometry);
+    // scrollExtent == top + bottom.
+    expect(parentSliver.geometry.scrollExtent, 2 + 4);
+    final RenderSliver childSliver = tester.renderObject(find.byKey(childKey));
+    expect(childSliver.geometry, parentSliver.geometry);
+  });
+
   testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
@@ -64,7 +96,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     );
 
     expect(layoutBuilderSize, equals(const Size(800.0, 600.0)));

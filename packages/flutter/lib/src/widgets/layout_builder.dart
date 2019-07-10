@@ -276,10 +276,40 @@ class SliverLayoutBuilder extends _GenericLayoutBuilder<SliverConstraints> {
   _RenderSliverLayoutBuilder createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
-class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, _GenericRenderLayoutBuilder<BoxConstraints, RenderSliver> {
+class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, _GenericRenderLayoutBuilder<SliverConstraints, RenderSliver> {
+
+  @override
+  double childMainAxisPosition(RenderObject child) {
+    assert(child != null);
+    assert(child == this.child);
+    return calculatePaintOffset(constraints, from: 0, to: 0);
+  }
+
   @override
   void performLayout() {
-    // TODO: implement performLayout
+    assert(callback != null);
+    invokeLayoutCallback(callback);
+    if (child == null) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+
+    child.layout(constraints, parentUsesSize: true);
+    final SliverGeometry childGeometry= child.geometry;
+    geometry = childGeometry;
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
+    assert(child == this.child);
+    // No-op because transform.translate(0, 0) doesn't do anything.
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child?.geometry?.visible == true)
+      context.paintChild(child, offset);
   }
 }
 
