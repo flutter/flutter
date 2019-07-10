@@ -3,9 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
@@ -24,37 +27,21 @@ void main() {
     testUsingContext('single help character', () async {
       final TestRunner testRunner = createTestRunner();
       final TerminalHandler terminalHandler = TerminalHandler(testRunner);
-      expect(testRunner.hasHelpBeenPrinted, isFalse);
+      expect(testRunner.hasHelpBeenPrinted, false);
       await terminalHandler.processTerminalInput('h');
-      expect(testRunner.hasHelpBeenPrinted, isTrue);
+      expect(testRunner.hasHelpBeenPrinted, true);
     });
 
     testUsingContext('help character surrounded with newlines', () async {
       final TestRunner testRunner = createTestRunner();
       final TerminalHandler terminalHandler = TerminalHandler(testRunner);
-      expect(testRunner.hasHelpBeenPrinted, isFalse);
+      expect(testRunner.hasHelpBeenPrinted, false);
       await terminalHandler.processTerminalInput('\nh\n');
-      expect(testRunner.hasHelpBeenPrinted, isTrue);
-    });
-
-    testUsingContext('reload character with trailing newline', () async {
-      final TestRunner testRunner = createTestRunner();
-      final TerminalHandler terminalHandler = TerminalHandler(testRunner);
-      expect(testRunner.receivedCommand, isNull);
-      await terminalHandler.processTerminalInput('r\n');
-      expect(testRunner.receivedCommand, equals('r'));
-    });
-
-    testUsingContext('newlines', () async {
-      final TestRunner testRunner = createTestRunner();
-      final TerminalHandler terminalHandler = TerminalHandler(testRunner);
-      expect(testRunner.receivedCommand, isNull);
-      await terminalHandler.processTerminalInput('\n\n');
-      expect(testRunner.receivedCommand, equals(''));
+      expect(testRunner.hasHelpBeenPrinted, true);
     });
   });
 
-  group('keycode verification, brought to you by the letter r', () {
+  group('keycode verification, brought to you by the letter', () {
     MockResidentRunner mockResidentRunner;
     TerminalHandler terminalHandler;
 
@@ -62,7 +49,18 @@ void main() {
       mockResidentRunner = MockResidentRunner();
       terminalHandler = TerminalHandler(mockResidentRunner);
       when(mockResidentRunner.supportsServiceProtocol).thenReturn(true);
-      when(mockResidentRunner.handleTerminalCommand(any)).thenReturn(null);
+    });
+
+    testUsingContext('a, can handle trailing newlines', () async {
+      await terminalHandler.processTerminalInput('a\n');
+
+      expect(terminalHandler.lastReceivedCommand, 'a');
+    });
+
+    testUsingContext('n, can handle trailing only newlines', () async {
+      await terminalHandler.processTerminalInput('\n\n');
+
+      expect(terminalHandler.lastReceivedCommand, '');
     });
 
     testUsingContext('a - debugToggleProfileWidgetBuilds with service protocol', () async {
@@ -114,6 +112,19 @@ void main() {
       await terminalHandler.processTerminalInput('I');
 
       verifyNever(mockResidentRunner.debugToggleWidgetInspector());
+    });
+
+    testUsingContext('l - list flutter views', () async {
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+      when(mockResidentRunner.isRunningDebug).thenReturn(true);
+      when(mockResidentRunner.flutterDevices).thenReturn(<FlutterDevice>[mockFlutterDevice]);
+      when(mockFlutterDevice.views).thenReturn(<FlutterView>[]);
+
+      await terminalHandler.processTerminalInput('l');
+
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Connected views:\n'));
     });
 
     testUsingContext('L - debugDumpLayerTree with service protocol', () async {
@@ -207,6 +218,74 @@ void main() {
       await terminalHandler.processTerminalInput('s');
 
       verify(mockResidentRunner.screenshot(mockFlutterDevice)).called(1);
+    });
+
+    testUsingContext('r - hotReload supported and succeeds', () async {
+      when(mockResidentRunner.canHotReload).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: false))
+          .thenAnswer((Invocation invocation) async {
+            return OperationResult(0, '');
+          });
+      await terminalHandler.processTerminalInput('r');
+
+      verify(mockResidentRunner.restart(fullRestart: false)).called(1);
+    });
+
+    testUsingContext('r - hotReload supported and fails', () async {
+      when(mockResidentRunner.canHotReload).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: false))
+          .thenAnswer((Invocation invocation) async {
+            return OperationResult(1, '');
+          });
+      await terminalHandler.processTerminalInput('r');
+
+      verify(mockResidentRunner.restart(fullRestart: false)).called(1);
+
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
+    });
+
+    testUsingContext('r - hotReload unsupported', () async {
+      when(mockResidentRunner.canHotReload).thenReturn(false);
+      await terminalHandler.processTerminalInput('r');
+
+      verifyNever(mockResidentRunner.restart(fullRestart: false));
+    });
+
+    testUsingContext('R - hotRestart supported and succeeds', () async {
+      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.hotMode).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: true))
+        .thenAnswer((Invocation invocation) async {
+          return OperationResult(0, '');
+        });
+      await terminalHandler.processTerminalInput('R');
+
+      verify(mockResidentRunner.restart(fullRestart: true)).called(1);
+    });
+
+    testUsingContext('R - hotRestart supported and fails', () async {
+      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.hotMode).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: true))
+        .thenAnswer((Invocation invocation) async {
+          return OperationResult(1, 'fail');
+        });
+      await terminalHandler.processTerminalInput('R');
+
+      verify(mockResidentRunner.restart(fullRestart: true)).called(1);
+
+      final BufferLogger bufferLogger = logger;
+
+      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
+    });
+
+    testUsingContext('R - hot restart unsupported', () async {
+      when(mockResidentRunner.canHotRestart).thenReturn(false);
+      await terminalHandler.processTerminalInput('R');
+
+      verifyNever(mockResidentRunner.restart(fullRestart: true));
     });
 
     testUsingContext('S - debugDumpSemanticsTreeInTraversalOrder with service protocol', () async {
@@ -305,11 +384,6 @@ class TestRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async { }
-
-  @override
-  Future<void> handleTerminalCommand(String code) async {
-    receivedCommand = code;
-  }
 
   @override
   void printHelp({ bool details }) {
