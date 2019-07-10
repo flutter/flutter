@@ -15,10 +15,13 @@
  */
 
 #include "paragraph_builder.h"
-#include "flutter/third_party/txt/src/skia/paragraph_builder_skia.h"
 #include "paragraph_builder_txt.h"
 #include "paragraph_style.h"
 #include "third_party/icu/source/common/unicode/unistr.h"
+
+#if FLUTTER_ENABLE_SKSHAPER
+#include "flutter/third_party/txt/src/skia/paragraph_builder_skia.h"
+#endif
 
 namespace txt {
 
