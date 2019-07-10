@@ -417,6 +417,7 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   bool isScrollControlled = false,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -424,7 +425,7 @@ Future<T> showModalBottomSheet<T>({
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.push(context, _ModalBottomSheetRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
