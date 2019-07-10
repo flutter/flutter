@@ -518,5 +518,87 @@ TEST_F(ShellTest, ReportTimingsIsCalledImmediatelyAfterTheFirstFrame) {
   ASSERT_EQ(timestamps.size(), FrameTiming::kCount);
 }
 
+TEST_F(ShellTest, WaitForFirstFrame) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+  fml::Status result =
+      shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
+  ASSERT_TRUE(result.ok());
+}
+
+TEST_F(ShellTest, WaitForFirstFrameTimeout) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+  fml::Status result =
+      shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(10));
+  ASSERT_EQ(result.code(), fml::StatusCode::kDeadlineExceeded);
+}
+
+TEST_F(ShellTest, WaitForFirstFrameMultiple) {
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+  fml::Status result =
+      shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
+  ASSERT_TRUE(result.ok());
+  for (int i = 0; i < 100; ++i) {
+    result = shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1));
+    ASSERT_TRUE(result.ok());
+  }
+}
+
+/// Makes sure that WaitForFirstFrame works if we rendered a frame with the
+/// single-thread setup.
+TEST_F(ShellTest, WaitForFirstFrameInlined) {
+  Settings settings = CreateSettingsForFixture();
+  auto task_runner = GetThreadTaskRunner();
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("emptyMain");
+
+  RunEngine(shell.get(), std::move(configuration));
+  PumpOneFrame(shell.get());
+  fml::AutoResetWaitableEvent event;
+  task_runner->PostTask([&shell, &event] {
+    fml::Status result =
+        shell->WaitForFirstFrame(fml::TimeDelta::FromMilliseconds(1000));
+    ASSERT_EQ(result.code(), fml::StatusCode::kFailedPrecondition);
+    event.Signal();
+  });
+  ASSERT_FALSE(event.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(1000)));
+}
+
 }  // namespace testing
 }  // namespace flutter

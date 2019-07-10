@@ -406,8 +406,9 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
-  if (_viewportMetrics.physical_width)
+  if (_viewportMetrics.physical_width) {
     [self surfaceUpdated:YES];
+  }
   [[_engine.get() lifecycleChannel] sendMessage:@"AppLifecycleState.inactive"];
 
   [super viewWillAppear:animated];
@@ -698,8 +699,22 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate)
+  if (firstViewBoundsUpdate) {
     [self surfaceUpdated:YES];
+
+    flutter::Shell& shell = [_engine.get() shell];
+    fml::TimeDelta waitTime =
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+        fml::TimeDelta::FromMilliseconds(200);
+#else
+        fml::TimeDelta::FromMilliseconds(100);
+#endif
+    if (shell.WaitForFirstFrame(waitTime).code() == fml::StatusCode::kDeadlineExceeded) {
+      FML_LOG(INFO) << "Timeout waiting for the first frame to render.  This may happen in "
+                    << "unoptimized builds.  If this is a release build, you should load a less "
+                    << "complex frame to avoid the timeout.";
+    }
+  }
 }
 
 - (void)viewSafeAreaInsetsDidChange {
