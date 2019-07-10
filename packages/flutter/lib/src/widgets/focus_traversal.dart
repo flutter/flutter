@@ -312,7 +312,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
       if (policyData.history.last.node.parent == null) {
-        // Reset the policy data if history node is unavailable.
+        // If a node has been removed from the tree, then we should stop
+        // referencing it and reset the scope data so that we don't try and
+        // request focus on it. This can happen in slivers where the rendered node
+        // has been unmounted. This has the side effect that hysteresis might not
+        // be avoided when items that go off screen get unmounted.
         invalidateScopeData(nearestScope);
         return false;
       }
