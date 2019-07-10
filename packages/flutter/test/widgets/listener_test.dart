@@ -282,7 +282,7 @@ void main() {
       expect(enter1, isEmpty);
       expect(exit1, isEmpty);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
       clearLists();
 
       await gesture.removePointer();
@@ -352,7 +352,7 @@ void main() {
       expect(enter2, isEmpty);
       expect(exit2, isEmpty);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
       clearLists();
       await gesture.moveTo(center2);
       await tester.pump();
@@ -365,7 +365,7 @@ void main() {
       expect(enter2, isNotEmpty);
       expect(enter2.last.position, equals(center2));
       expect(exit2, isEmpty);
-      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
       clearLists();
       await gesture.moveTo(const Offset(400.0, 450.0));
@@ -377,8 +377,8 @@ void main() {
       expect(enter2, isEmpty);
       expect(exit2, isNotEmpty);
       expect(exit2.last.position, equals(const Offset(400.0, 450.0)));
-      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
-      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
       clearLists();
       await tester.pumpWidget(Container());
       expect(move1, isEmpty);
