@@ -9,9 +9,9 @@ import 'platform.dart' as platform;
 /// The dart:io implementation of [platform.defaultTargetPlatform].
 platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform result;
-  if (Platform.isIOS) {
+  if (Platform.isIOS || Platform.isMacOS) {
     result = platform.TargetPlatform.iOS;
-  } else if (Platform.isAndroid) {
+  } else if (Platform.isAndroid || Platform.isLinux || Platform.isWindows) {
     result = platform.TargetPlatform.android;
   } else if (Platform.isFuchsia) {
     result = platform.TargetPlatform.fuchsia;
