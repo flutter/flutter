@@ -891,10 +891,10 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamed<T extends Object>(
-      BuildContext context,
-      String routeName, {
-      Object arguments,
-    }) {
+    BuildContext context,
+    String routeName, {
+    Object arguments,
+   }) {
     return Navigator.of(context).pushNamed<T>(routeName, arguments: arguments);
   }
 
@@ -945,11 +945,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
-      BuildContext context,
-      String routeName, {
-      TO result,
-      Object arguments,
-    }) {
+    BuildContext context,
+    String routeName, {
+    TO result,
+    Object arguments,
+  }) {
     return Navigator.of(context).pushReplacementNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -1000,11 +1000,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static Future<T> popAndPushNamed<T extends Object, TO extends Object>(
-      BuildContext context,
-      String routeName, {
-      TO result,
-      Object arguments,
-    }) {
+    BuildContext context,
+    String routeName, {
+    TO result,
+    Object arguments,
+   }) {
     return Navigator.of(context).popAndPushNamed<T, TO>(routeName, arguments: arguments, result: result);
   }
 
@@ -1061,11 +1061,11 @@ class Navigator extends StatefulWidget {
   /// {@end-tool}
   @optionalTypeArgs
   static Future<T> pushNamedAndRemoveUntil<T extends Object>(
-      BuildContext context,
-      String newRouteName,
-      RoutePredicate predicate, {
-      Object arguments,
-    }) {
+    BuildContext context,
+    String newRouteName,
+    RoutePredicate predicate, {
+    Object arguments,
+  }) {
     return Navigator.of(context).pushNamedAndRemoveUntil<T>(newRouteName, predicate, arguments: arguments);
   }
 
@@ -1458,10 +1458,10 @@ class Navigator extends StatefulWidget {
   /// this class is given instead. Useful for pushing contents above all subsequent
   /// instances of [Navigator].
   static NavigatorState of(
-      BuildContext context, {
-      bool rootNavigator = false,
-      bool nullOk = false,
-    }) {
+    BuildContext context, {
+    bool rootNavigator = false,
+    bool nullOk = false,
+  }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
@@ -1652,9 +1652,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamed<T extends Object>(
-      String routeName, {
-      Object arguments,
-    }) {
+    String routeName, {
+    Object arguments,
+  }) {
     return push<T>(_routeNamed<T>(routeName, arguments: arguments));
   }
 
@@ -1678,10 +1678,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushReplacementNamed<T extends Object, TO extends Object>(
-      String routeName, {
-      TO result,
-      Object arguments,
-    }) {
+    String routeName, {
+    TO result,
+    Object arguments,
+  }) {
     return pushReplacement<T, TO>(_routeNamed<T>(routeName, arguments: arguments), result: result);
   }
 
@@ -1704,10 +1704,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// {@end-tool}
   @optionalTypeArgs
   Future<T> popAndPushNamed<T extends Object, TO extends Object>(
-      String routeName, {
-      TO result,
-      Object arguments,
-    }) {
+    String routeName, {
+    TO result,
+    Object arguments,
+  }) {
     pop<TO>(result);
     return pushNamed<T>(routeName, arguments: arguments);
   }
@@ -1731,10 +1731,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// {@end-tool}
   @optionalTypeArgs
   Future<T> pushNamedAndRemoveUntil<T extends Object>(
-      String newRouteName,
-      RoutePredicate predicate, {
-      Object arguments,
-    }) {
+    String newRouteName,
+    RoutePredicate predicate, {
+    Object arguments,
+  }) {
     return pushAndRemoveUntil<T>(_routeNamed<T>(newRouteName, arguments: arguments), predicate);
   }
 
