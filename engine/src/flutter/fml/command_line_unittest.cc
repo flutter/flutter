@@ -4,6 +4,7 @@
 
 #include "flutter/fml/command_line.h"
 
+#include <string_view>
 #include <utility>
 
 #include "flutter/fml/macros.h"
@@ -315,7 +316,7 @@ TEST(CommandLineTest, MultipleOccurrencesOfOption) {
       CommandLine::Option("flag1", "value3")};
   EXPECT_EQ("value3", cl.GetOptionValueWithDefault("flag1", "nope"));
   EXPECT_EQ("value2", cl.GetOptionValueWithDefault("flag2", "nope"));
-  std::vector<StringView> values = cl.GetOptionValues("flag1");
+  std::vector<std::string_view> values = cl.GetOptionValues("flag1");
   ASSERT_EQ(2u, values.size());
   EXPECT_EQ("value1", values[0]);
   EXPECT_EQ("value3", values[1]);

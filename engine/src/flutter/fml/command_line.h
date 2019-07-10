@@ -40,11 +40,11 @@
 
 #include <initializer_list>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
 #include "flutter/fml/macros.h"
-#include "flutter/fml/string_view.h"
 
 namespace fml {
 
@@ -108,21 +108,21 @@ class CommandLine final {
   // Returns true if this command line has the option |name| (and if |index| is
   // non-null, sets |*index| to the index of the *last* occurrence of the given
   // option in |options()|) and false if not.
-  bool HasOption(StringView name, size_t* index = nullptr) const;
+  bool HasOption(std::string_view name, size_t* index = nullptr) const;
 
   // Gets the value of the option |name|. Returns true (and sets |*value|) on
   // success and false (leaving |*value| alone) on failure.
-  bool GetOptionValue(StringView name, std::string* value) const;
+  bool GetOptionValue(std::string_view name, std::string* value) const;
 
   // Gets all values of the option |name|. Returns all values, which may be
   // empty if the option is not specified.
-  std::vector<StringView> GetOptionValues(StringView name) const;
+  std::vector<std::string_view> GetOptionValues(std::string_view name) const;
 
   // Gets the value of the option |name|, with a default if the option is not
   // specified. (Note: This doesn't return a const reference, since this would
   // make the |default_value| argument inconvenient/dangerous.)
-  std::string GetOptionValueWithDefault(StringView name,
-                                        StringView default_value) const;
+  std::string GetOptionValueWithDefault(std::string_view name,
+                                        std::string_view default_value) const;
 
  private:
   bool has_argv0_ = false;

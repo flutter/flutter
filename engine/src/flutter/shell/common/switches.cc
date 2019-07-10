@@ -12,7 +12,6 @@
 #include "flutter/fml/native_library.h"
 #include "flutter/fml/paths.h"
 #include "flutter/fml/size.h"
-#include "flutter/fml/string_view.h"
 #include "flutter/shell/version/version.h"
 
 // Include once for the default enum definition.
@@ -22,7 +21,7 @@
 
 struct SwitchDesc {
   flutter::Switch sw;
-  const fml::StringView flag;
+  const std::string_view flag;
   const char* help;
 };
 
@@ -86,7 +85,9 @@ void PrintUsage(const std::string& executable_name) {
     auto desc = gSwitchDescs[i];
 
     std::cerr << std::setw(max_width)
-              << std::string("--") + desc.flag.ToString() << " : ";
+              << std::string("--") +
+                     std::string{desc.flag.data(), desc.flag.size()}
+              << " : ";
 
     std::istringstream stream(desc.help);
     int32_t remaining = help_width;
@@ -108,13 +109,13 @@ void PrintUsage(const std::string& executable_name) {
   std::cerr << std::string(column_width, '-') << std::endl;
 }
 
-const fml::StringView FlagForSwitch(Switch swtch) {
+const std::string_view FlagForSwitch(Switch swtch) {
   for (uint32_t i = 0; i < static_cast<uint32_t>(Switch::Sentinel); i++) {
     if (gSwitchDescs[i].sw == swtch) {
       return gSwitchDescs[i].flag;
     }
   }
-  return fml::StringView();
+  return std::string_view();
 }
 
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
