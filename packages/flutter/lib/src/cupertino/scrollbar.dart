@@ -35,8 +35,8 @@ const double _kScrollbarCrossAxisMargin = 3.0;
 //
 // See also:
 //
-//   * [CupertinoScrollbar.onDragScroll]
-typedef GestureDragScrollCallback = void Function(double primaryDelta);
+//   * [CupertinoScrollbar.onDragScrollbar]
+typedef GestureDragScrollbarCallback = void Function(double primaryDelta);
 
 /// An iOS style scrollbar.
 ///
@@ -59,8 +59,8 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
     Key key,
-    this.onDragScroll,
-    this.onDragScrollUp,
+    this.onDragScrollbar,
+    this.onDragScrollbarUp,
     @required this.child,
   }) : super(key: key);
 
@@ -80,14 +80,14 @@ class CupertinoScrollbar extends StatefulWidget {
   ///
   ///   * [CupertinoPageScaffold], which uses the callback to implement the
   ///     scrolling.
-  ///   * [CupertinoScrollbar.onDragScrollUp]
-  final GestureDragScrollCallback onDragScroll;
+  ///   * [CupertinoScrollbar.onDragScrollbarUp]
+  final GestureDragScrollbarCallback onDragScrollbar;
 
   /// Called when the user releases after dragging the scrollbar.
   ///
   /// See also:
-  ///   * [CupertinoScrollbar.onDragScroll]
-  final VoidCallback onDragScrollUp;
+  ///   * [CupertinoScrollbar.onDragScrollbar]
+  final VoidCallback onDragScrollbarUp;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -166,11 +166,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void _handleLongPressUp() {
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    widget.onDragScrollUp();
+    widget.onDragScrollbarUp();
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    widget.onDragScroll(details.localOffsetFromOrigin.dy);
+    widget.onDragScrollbar(details.localOffsetFromOrigin.dy);
   }
 
   void _handleLongPress() {
@@ -186,14 +186,14 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    widget.onDragScroll(details.localPosition.dy - _dragStartY);
+    widget.onDragScrollbar(details.localPosition.dy - _dragStartY);
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
     _dragStartY = null;
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    widget.onDragScrollUp();
+    widget.onDragScrollbarUp();
   }
 
   void _startFadeoutTimer() {
