@@ -334,7 +334,7 @@ class ArchiveUnpublisher {
     bool failOk = false,
     bool confirm = false,
   }) async {
-    final List<String> command = <String>['gsutil', '--']..addAll(args);
+    final List<String> command = <String>['gsutil', '--', ...args];
     if (confirm) {
       return _processRunner.runProcess(
         command,
@@ -358,7 +358,7 @@ class ArchiveUnpublisher {
         print('  $file');
       }
     }
-    await _runGsUtil(<String>['rm']..addAll(files), failOk: true, confirm: confirmed);
+    await _runGsUtil(<String>['rm', ...files], failOk: true, confirm: confirmed);
   }
 
   Future<String> _cloudReplaceDest(String src, String dest) async {
@@ -377,13 +377,12 @@ class ArchiveUnpublisher {
     if (dest.endsWith('.json')) {
       mimeType = 'application/json';
     }
-    final List<String> args = <String>[];
-    // Use our preferred MIME type for the files we care about
-    // and let gsutil figure it out for anything else.
-    if (mimeType != null) {
-      args.addAll(<String>['-h', 'Content-Type:$mimeType']);
-    }
-    args.addAll(<String>['cp', src, dest]);
+    final List<String> args = <String>[
+      // Use our preferred MIME type for the files we care about
+      // and let gsutil figure it out for anything else.
+      if (mimeType != null) ...<String>['-h', 'Content-Type:$mimeType'],
+      ...<String>['cp', src, dest],
+    ];
     return await _runGsUtil(args, confirm: confirmed);
   }
 }

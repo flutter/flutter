@@ -37,10 +37,10 @@ class ResidentWebRunner extends ResidentRunner {
   }) : super(
           flutterDevices,
           target: target,
-          usesTerminalUI: true,
-          stayResident: true,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
+          usesTerminalUi: true,
+          stayResident: true,
         );
 
   WebAssetServer _server;
@@ -54,7 +54,6 @@ class ResidentWebRunner extends ResidentRunner {
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     connectionInfoCompleter?.complete(DebugConnectionInfo());
-    setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;
@@ -130,14 +129,17 @@ class ResidentWebRunner extends ResidentRunner {
       return 1;
     }
     // Start the web compiler and build the assets.
-    await webCompilationProxy.initialize(
+    final bool success = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
     );
+    if (!success) {
+      throwToolExit('Failed to compile for the web.');
+    }
     _lastCompiled = DateTime.now();
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     final int build = await assetBundle.build();
     if (build != 0) {
-      throwToolExit('Error: Failed to build asset bundle');
+      throwToolExit('Error: Failed to build asset bundle.');
     }
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
