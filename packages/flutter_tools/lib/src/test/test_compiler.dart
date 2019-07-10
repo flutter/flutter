@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' as io;
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -39,10 +40,12 @@ class TestCompiler {
   TestCompiler(
     this.trackWidgetCreation,
     this.flutterProject,
-  ) : testFilePath = getKernelPathForTransformerOptions(
+  ) : testLockFilePath = fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.lock'),
+      testWithLockingFilePath = getKernelPathForTransformerOptions(
         fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
         trackWidgetCreation: trackWidgetCreation,
-      ) {
+      ),
+      testWithoutLockingFilePath = fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile_${io.pid}.dill') {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
@@ -60,13 +63,15 @@ class TestCompiler {
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   final FlutterProject flutterProject;
   final bool trackWidgetCreation;
-  final String testFilePath;
-
+  final String testLockFilePath;
+  final String testWithLockingFilePath;
+  final String testWithoutLockingFilePath;
 
   ResidentCompiler compiler;
   File outputDill;
   // Whether to report compiler messages.
   bool _suppressOutput = false;
+  int testWithLockSize = -1;
 
   Future<String> compile(String mainDart) {
     final Completer<String> completer = Completer<String>();
@@ -81,6 +86,14 @@ class TestCompiler {
       await compiler.shutdown();
       compiler = null;
     }
+
+    // If we created a copy of the test dill file for this process only, clean it up.
+    if (testWithoutLockingFilePath != null) {
+      final File testFile = fs.file(testWithoutLockingFilePath);
+      if (await testFile.exists()) {
+        await testFile.delete();
+      }
+    }
   }
 
   Future<void> dispose() async {
@@ -91,12 +104,22 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
+    // Copy lock-guarded testfile (if it exists) into this copy for this process only.
+    final File lockFile = fs.file(testLockFilePath);
+    final RandomAccessFile lock = lockFile.openSync(mode: FileMode.write)..lockSync(FileLock.blockingExclusive);
+    final File testFile = fs.file(testWithLockingFilePath);
+    if (testFile.existsSync()) {
+      testWithLockSize = testFile.lengthSync();
+      testFile.copySync(testWithoutLockingFilePath);
+    }
+    lock.unlockSync();
+
     if (flutterProject.hasBuilders) {
       return CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
         trackWidgetCreation: trackWidgetCreation,
         compilerMessageConsumer: _reportCompilerMessage,
-        initializeFromDill: testFilePath,
+        initializeFromDill: testWithoutLockingFilePath,
         // We already ran codegen once at the start, we only need to
         // configure builders.
         runCold: true,
@@ -107,7 +130,7 @@ class TestCompiler {
       packagesPath: PackageMap.globalPackagesPath,
       trackWidgetCreation: trackWidgetCreation,
       compilerMessageConsumer: _reportCompilerMessage,
-      initializeFromDill: testFilePath,
+      initializeFromDill: testWithoutLockingFilePath,
       unsafePackageSerialization: false,
     );
   }
@@ -149,13 +172,19 @@ class TestCompiler {
       } else {
         final File outputFile = fs.file(outputPath);
         final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
-        final File testCache = fs.file(testFilePath);
-        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
+        if (firstCompile || testWithLockSize < 0 || testWithLockSize < outputFile.lengthSync()) {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
-          // possible.
-          ensureDirectoryExists(testFilePath);
-          await outputFile.copy(testFilePath);
+          // possible. Notice the lock.
+          final File lockFile = fs.file(testLockFilePath);
+          final RandomAccessFile lock = lockFile.openSync(mode: FileMode.write)..lockSync(FileLock.blockingExclusive);
+          final File testFile = fs.file(testWithLockingFilePath);
+          if (firstCompile || !testFile.existsSync() || testFile.lengthSync() < outputFile.lengthSync()) {
+            ensureDirectoryExists(testWithLockingFilePath);
+            await outputFile.copy(testWithLockingFilePath);
+            testWithLockSize = testFile.lengthSync();
+          }
+          lock.unlockSync();
         }
         request.result.complete(kernelReadyToRun.path);
         compiler.accept();
