@@ -870,6 +870,7 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
     await _runDevicelabTest('gradle_jetifier_test', env: env);
+    await _runDevicelabTest('gradle_plugin_dependencies_test', env: env);
     await _runDevicelabTest('build_aar_plugin_test', env: env);
     await _runDevicelabTest('build_aar_module_test', env: env);
   }

@@ -13,7 +13,8 @@ import 'package:path/path.dart' as path;
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
 
-/// Tests that Jetifier can translate plugins that use support libraries.
+/// Tests that projects can include plugins that have a transtive dependency in common.
+/// For more see: https://github.com/flutter/flutter/issues/27254.
 Future<void> main() async {
   await task(() async {
 
@@ -36,13 +37,16 @@ Future<void> main() async {
         );
       });
 
-      section('Add plugin that uses support libraries');
+      section('Add plugin that have conflicting dependencies');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
+
+      // `flutter_local_notifications` uses `androidx.core:core:1.0.1`
+      // `firebase_core` and `firebase_messaging` use `androidx.core:core:1.0.0`.
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  firebase_auth: 0.7.0\n',
+        '\ndependencies:\n  flutter_local_notifications: 0.7.1+3\n  firebase_core:\n  firebase_messaging:\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -76,10 +80,14 @@ Future<void> main() async {
       }
 
       checkApkContainsClasses(releaseApk, <String>[
-        // The plugin class defined by `firebase_auth`.
-        'io.flutter.plugins.firebaseauth.FirebaseAuthPlugin',
-        // Used by `firebase_auth`.
+        // Used by `flutter_local_notifications`.
+        'com.google.gson.Gson',
+        // Used by `firebase_core` and `firebase_messaging`.
         'com.google.firebase.FirebaseApp',
+        // Used by `firebase_core`.
+        'com.google.firebase.FirebaseOptions',
+        // Used by `firebase_messaging`.
+        'com.google.firebase.messaging.FirebaseMessaging',
       ]);
 
       section('Build debug APK');
@@ -106,10 +114,14 @@ Future<void> main() async {
       }
 
       checkApkContainsClasses(debugApk, <String>[
-        // The plugin class defined by `firebase_auth`.
-        'io.flutter.plugins.firebaseauth.FirebaseAuthPlugin',
-        // Used by `firebase_auth`.
+        // Used by `flutter_local_notifications`.
+        'com.google.gson.Gson',
+        // Used by `firebase_core` and `firebase_messaging`.
         'com.google.firebase.FirebaseApp',
+        // Used by `firebase_core`.
+        'com.google.firebase.FirebaseOptions',
+        // Used by `firebase_messaging`.
+        'com.google.firebase.messaging.FirebaseMessaging',
       ]);
 
       return TaskResult.success(null);

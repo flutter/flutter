@@ -109,13 +109,13 @@ class ApkExtractor {
         Platform.environment['ANDROID_SDK_ROOT'];
 
     if (androidHome == null || androidHome.isEmpty) {
-      throw TaskResult.failure('Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.');
+      throw 'Unset env flag: `ANDROID_HOME` or `ANDROID_SDK_ROOT`.';
     }
 
     final String dexdumps = await eval('find', <String>[androidHome, '-name', 'dexdump']);
 
     if (dexdumps.isEmpty) {
-      throw TaskResult.failure('Couldn\'t find a dexdump executable.');
+      throw 'Couldn\'t find a dexdump executable.';
     }
     return dexdumps.split('\n').first;
   }
@@ -137,15 +137,26 @@ class ApkExtractor {
     final String classesDex = path.join(_outputDir.path, 'classes.dex');
 
     if (!File(classesDex).existsSync()) {
-      throw TaskResult.failure('Couldn\'t find classes.dex in the APK.');
+      throw 'Couldn\'t find classes.dex in the APK.';
     }
     final String classDescriptors = await eval(dexDump, <String>[classesDex]);
 
     if (classDescriptors.isEmpty) {
-      throw TaskResult.failure('No descriptors found in classes.dex.');
+      throw 'No descriptors found in classes.dex.';
     }
     return classDescriptors.contains(className.replaceAll('.', '/'));
   }
+}
+
+ /// Checks that the classes are contained in the APK, throws otherwise.
+Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
+  final ApkExtractor extractor = ApkExtractor(apk);
+  for (String className in classes) {
+    if (!(await extractor.containsClass(className))) {
+      throw 'APK doesn\'t contain class `$className`.';
+    }
+  }
+  extractor.dispose();
 }
 
 class FlutterProject {
