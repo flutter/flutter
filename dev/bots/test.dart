@@ -240,7 +240,8 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
-  if (noUseBuildRunner) {
+  // reduce overhead of build_runner in the create case.
+  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
@@ -591,6 +592,9 @@ Future<void> _pubRunTest(
     case 'tool':
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
+    case 'create':
+      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      break;
   }
 
   if (useFlutterTestFormatter) {
@@ -606,7 +610,7 @@ Future<void> _pubRunTest(
     await runCommand(
       pub,
       args,
-      workingDirectory:workingDirectory,
+      workingDirectory: workingDirectory,
     );
   }
 }
