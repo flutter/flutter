@@ -1,4 +1,4 @@
-Signature: 817f6d2b3ae78000f1acccb6046198f2
+Signature: b3966c67fb8c4db36f90ae187a743fd3
 
 UNUSED LICENSES:
 
@@ -22,6 +22,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
@@ -30,6 +31,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
@@ -227,6 +229,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
@@ -235,6 +238,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
@@ -433,6 +437,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
@@ -489,9 +494,11 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
@@ -526,6 +533,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
@@ -683,6 +692,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
@@ -691,6 +701,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
@@ -888,6 +899,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
@@ -896,6 +908,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
@@ -1094,6 +1107,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
@@ -1150,9 +1164,11 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
@@ -1187,6 +1203,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
@@ -1343,6 +1361,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
@@ -1351,6 +1370,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
@@ -1550,6 +1570,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
@@ -1558,6 +1579,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
@@ -1769,6 +1791,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/inspect/property.d
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/bitfield64.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/block.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/heap.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/little_big_slab.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/util.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_fields.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_holder.dart
@@ -1798,6 +1821,12 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/internal/_flags.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/pseudo_vmo_file.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/lib/src/vmo_file.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_web_services.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_webview.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/fuchsia_webview_platform_controller.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/src/utils.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/webview.dart
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/audio.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/dump.dart
@@ -1824,6 +1853,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/address.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/appearance.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/id.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/uuid.fidl
@@ -1897,15 +1927,18 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/heap.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/view_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/events.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/keys.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/modifiers.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/events.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keyboard.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keys.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/modifiers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
@@ -1977,6 +2010,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/service_directory_provider.
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/flags.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/connection.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/internal/directory.h
@@ -2017,6 +2052,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_threading.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_unique_objects.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/pager.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/pager.cc
@@ -2066,6 +2102,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
@@ -2074,6 +2111,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/sysroot/include/ar.h
@@ -2271,6 +2309,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
@@ -2279,6 +2318,7 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsyslog.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-engine.so
+FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libtrace-provider-so.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/alloca.h
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/ar.h
@@ -2477,6 +2517,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_scenic_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_services/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_vfs/meta.json
+FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/zircon/meta.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
@@ -2533,9 +2574,11 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.app/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
@@ -2570,6 +2613,8 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d/VkLayer_core_validation.json
@@ -3055,6 +3100,9 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/fake_launcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/global.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/logger.h
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/include/lib/syslog/wire_format.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/fdio_connect.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event_args.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_args.h
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/composed_service_dir.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/vfs_cpp/include/lib/vfs/cpp/composed_service_dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/bti.cc
@@ -3144,7 +3192,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peripheral.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/status.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
@@ -3248,6 +3296,16 @@ FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/field
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/handler.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/instrumentation.h
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/include/lib/trace-engine/types.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace-provider-so/include/lib/trace-provider/provider.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/event.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/event.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_common.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/event_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/pairs_internal.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/internal/string_traits.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/include/lib/trace/observer.h
+FILE: ../../../fuchsia/sdk/linux/pkg/trace/observer.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/fifo.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/fifo.h
 FILE: ../../../fuchsia/sdk/linux/pkg/zx/include/lib/zx/handle.h
@@ -3564,6 +3622,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/environment_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/launcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/loader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/runner.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presenter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_containers.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_properties.fidl
