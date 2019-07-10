@@ -27,6 +27,7 @@ import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_theme.dart';
+import 'toggle_buttons_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -135,6 +136,7 @@ class ThemeData extends Diagnosticable {
     Color disabledColor,
     Color buttonColor,
     ButtonThemeData buttonTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color cursorColor,
@@ -249,6 +251,7 @@ class ThemeData extends Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
+    toggleButtonsTheme ??= const ToggleButtonsThemeData();
     disabledColor ??= isDark ? Colors.white30 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
@@ -292,6 +295,7 @@ class ThemeData extends Diagnosticable {
       disabledColor: disabledColor,
       buttonTheme: buttonTheme,
       buttonColor: buttonColor,
+      toggleButtonsTheme: toggleButtonsTheme,
       toggleableActiveColor: toggleableActiveColor,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
@@ -361,6 +365,7 @@ class ThemeData extends Diagnosticable {
     @required this.disabledColor,
     @required this.buttonTheme,
     @required this.buttonColor,
+    @required this.toggleButtonsTheme,
     @required this.secondaryHeaderColor,
     @required this.textSelectionColor,
     @required this.cursorColor,
@@ -416,6 +421,7 @@ class ThemeData extends Diagnosticable {
        assert(disabledColor != null),
        assert(toggleableActiveColor != null),
        assert(buttonTheme != null),
+       assert(toggleButtonsTheme != null),
        assert(secondaryHeaderColor != null),
        assert(textSelectionColor != null),
        assert(cursorColor != null),
@@ -582,6 +588,8 @@ class ThemeData extends Diagnosticable {
   /// Defines the default configuration of button widgets, like [RaisedButton]
   /// and [FlatButton].
   final ButtonThemeData buttonTheme;
+
+  final ToggleButtonsThemeData toggleButtonsTheme;
 
   /// The default fill color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
@@ -755,6 +763,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
+    ToggleButtonsTheme toggleButtonTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
@@ -814,6 +823,7 @@ class ThemeData extends Diagnosticable {
       disabledColor: disabledColor ?? this.disabledColor,
       buttonColor: buttonColor ?? this.buttonColor,
       buttonTheme: buttonTheme ?? this.buttonTheme,
+      toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
       cursorColor: cursorColor ?? this.cursorColor,
@@ -949,6 +959,7 @@ class ThemeData extends Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
+      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
@@ -1014,6 +1025,7 @@ class ThemeData extends Diagnosticable {
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonTheme == buttonTheme) &&
            (otherData.buttonColor == buttonColor) &&
+           (otherData.toggleButtonsTheme == toggleButtonsTheme) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.cursorColor == cursorColor) &&
@@ -1077,6 +1089,7 @@ class ThemeData extends Diagnosticable {
       disabledColor,
       buttonTheme,
       buttonColor,
+      toggleButtonsTheme,
       toggleableActiveColor,
       secondaryHeaderColor,
       textSelectionColor,
@@ -1148,6 +1161,7 @@ class ThemeData extends Diagnosticable {
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
     properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme));
     properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
     properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
