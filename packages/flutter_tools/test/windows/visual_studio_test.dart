@@ -41,18 +41,17 @@ void main() {
 
     final MockProcessResult result = MockProcessResult();
     when(result.exitCode).thenReturn(0);
-    when<String>(result.stdout).thenReturn(response == null
-        ? json.encode(<Map<String, dynamic>>[
-            <String, dynamic>{
-              'installationPath': visualStudioPath,
-              'displayName': 'Visual Studio Community 2017',
-              'installationVersion': '15.9.28307.665',
-              'catalog': <String, String>{
-                'productDisplayVersion': '15.9.12',
-              },
-            }
-          ])
-        : response);
+    when<String>(result.stdout).thenReturn(response ??
+      json.encode(<Map<String, dynamic>>[
+        <String, dynamic>{
+          'installationPath': visualStudioPath,
+          'displayName': 'Visual Studio Community 2017',
+          'installationVersion': '15.9.28307.665',
+          'catalog': <String, String>{
+            'productDisplayVersion': '15.9.12',
+          },
+        },
+      ]));
 
     final List<String> requirementArguments = requiredComponents == null
         ? <String>[]

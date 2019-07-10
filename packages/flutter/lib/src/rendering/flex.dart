@@ -708,12 +708,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               '  http://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html'
             ),
             describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
-            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty)
-          ]..addAll(addendum)
-           ..add(ErrorDescription(
-             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-             '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-          )));
+            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty),
+            ...addendum,
+            ErrorDescription(
+              'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+              '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            )
+          ]);
         }());
         totalFlex += childParentData.flex;
         lastFlexChild = child;

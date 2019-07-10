@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -476,6 +477,69 @@ void main() {
     );
 
     expect(find.text('!'), findsOneWidget);
+  });
+
+  testWidgets('Nested stepper error test', (WidgetTester tester) async {
+    FlutterErrorDetails errorDetails;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorDetails = details;
+    };
+    try {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Stepper(
+              type: StepperType.horizontal,
+              steps: <Step>[
+                Step(
+                  title: const Text('Step 2'),
+                  content:  Stepper(
+                    type: StepperType.vertical,
+                    steps: const <Step>[
+                      Step(
+                        title: Text('Nested step 1'),
+                        content: Text('A'),
+                      ),
+                      Step(
+                        title: Text('Nested step 2'),
+                        content: Text('A'),
+                      ),
+                    ],
+                  )
+                ),
+                const Step(
+                  title: Text('Step 1'),
+                  content: Text('A'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    } finally {
+      FlutterError.onError = oldHandler;
+    }
+
+    expect(errorDetails, isNotNull);
+    expect(errorDetails.stack, isNotNull);
+    // Check the ErrorDetails without the stack trace
+    final List<String> lines =  errorDetails.toString().split('\n');
+    // The lines in the middle of the error message contain the stack trace
+    // which will change depending on where the test is run.
+    expect(lines.length, greaterThan(7));
+    expect(
+      lines.take(7).join('\n'),
+      equalsIgnoringHashCodes(
+        '══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞════════════════════════\n'
+        'The following assertion was thrown building Stepper(dirty,\n'
+        'dependencies: [_LocalizationsScope-[GlobalKey#00000]], state:\n'
+        '_StepperState#00000):\n'
+        'Steppers must not be nested. The material specification advises\n'
+        'that one should avoid embedding steppers within steppers.\n'
+        'https://material.io/archive/guidelines/components/steppers.html#steppers-usage'
+      ),
+    );
   });
 
   ///https://github.com/flutter/flutter/issues/16920

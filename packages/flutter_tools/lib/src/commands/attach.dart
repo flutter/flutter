@@ -26,7 +26,6 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -278,7 +277,7 @@ class AttachCommand extends FlutterCommand {
             target: targetFile,
             debuggingOptions: debuggingOptions,
             packagesFilePath: globalResults['packages'],
-            usesTerminalUI: daemon == null,
+            usesTerminalUi: daemon == null,
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
@@ -313,13 +312,18 @@ class AttachCommand extends FlutterCommand {
         result = await app.runner.waitForAppToFinish();
         assert(result != null);
       } else {
-        result = await runner.attach();
+        final Completer<void> onAppStart = Completer<void>.sync();
+        unawaited(onAppStart.future.whenComplete(() {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }));
+        result = await runner.attach(
+          appStartedCompleter: onAppStart,
+        );
         assert(result != null);
       }
-      if (result == 0) {
-        flutterUsage.sendEvent('attach', 'success');
-      } else {
-        flutterUsage.sendEvent('attach', 'failure');
+      if (result != 0) {
         throwToolExit(null, exitCode: result);
       }
     } finally {
@@ -354,7 +358,7 @@ class HotRunnerFactory {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
+    bool usesTerminalUi = true,
     bool benchmarkMode = false,
     File applicationBinary,
     bool hostIsIde = false,
@@ -368,7 +372,7 @@ class HotRunnerFactory {
     devices,
     target: target,
     debuggingOptions: debuggingOptions,
-    usesTerminalUI: usesTerminalUI,
+    usesTerminalUi: usesTerminalUi,
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,

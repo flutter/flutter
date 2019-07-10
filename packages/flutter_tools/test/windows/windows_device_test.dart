@@ -43,6 +43,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(windowsApp), true);
       expect(await device.isAppInstalled(windowsApp), true);
       expect(await device.stopApp(windowsApp), false);
+      expect(device.category, Category.desktop);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

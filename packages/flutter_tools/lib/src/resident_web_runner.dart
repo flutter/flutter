@@ -130,11 +130,10 @@ class ResidentWebRunner extends ResidentRunner {
   }) : super(
           <FlutterDevice>[],
           target: target,
-          usesTerminalUI: true,
-          stayResident: true,
-          saveCompilationTrace: false,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
+          usesTerminalUi: true,
+          stayResident: true,
         );
 
   final Device device;
@@ -227,7 +226,6 @@ class ResidentWebRunner extends ResidentRunner {
       return 1;
     }
     final int targetPort = await os.findFreePort();
-
     /// Start the build daemon and run an initial build.
     final String workingDirectory = fs.currentDirectory.path;
     _client = await _startBuildDaemon(workingDirectory);
@@ -288,7 +286,6 @@ class ResidentWebRunner extends ResidentRunner {
       wsUri: _webDevHandle.wsUri,
     ));
     _webDevHandle.runMain();
-    setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;

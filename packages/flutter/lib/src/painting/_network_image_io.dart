@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui'  show hashValues;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -118,7 +117,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  int get hashCode => hashValues(url, scale);
+  int get hashCode => ui.hashValues(url, scale);
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';

@@ -24,7 +24,6 @@ void main() {
     final MockProcessManager mockProcessManager = MockProcessManager();
 
     when(notLinux.isLinux).thenReturn(false);
-    when(notLinux.environment).thenReturn(const <String, String>{});
     when(mockProcessManager.run(<String>[
       'ps', 'aux',
     ])).thenAnswer((Invocation invocation) async {
@@ -43,6 +42,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(linuxApp), true);
       expect(await device.isAppInstalled(linuxApp), true);
       expect(await device.stopApp(linuxApp), true);
+      expect(device.category, Category.desktop);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

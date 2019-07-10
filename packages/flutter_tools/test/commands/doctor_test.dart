@@ -18,6 +18,7 @@ import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:flutter_tools/src/usage.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -207,6 +208,75 @@ void main() {
     });
   });
 
+  group('doctor usage params', () {
+    Usage mockUsage;
+
+    setUp(() {
+      mockUsage = MockUsage();
+      when(mockUsage.isFirstRun).thenReturn(true);
+    });
+
+    testUsingContext('contains installed', () async {
+      await doctor.diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed', 'installed'],
+      );
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('contains installed and partial', () async {
+      await FakePassingDoctor().diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed', 'installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('contains installed, missing and partial', () async {
+      await FakeDoctor().diagnose(verbose: false);
+
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PassingValidator', captureAny)).captured,
+        <dynamic>['installed'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.MissingValidator', captureAny)).captured,
+        <dynamic>['missing'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.NotAvailableValidator', captureAny)).captured,
+        <dynamic>['notAvailable'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithHintsOnly', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+      expect(
+        verify(mockUsage.sendEvent('doctorResult.PartialValidatorWithErrors', captureAny)).captured,
+        <dynamic>['partial'],
+      );
+    }, overrides: <Type, Generator>{
+      Platform: _kNoColorOutputPlatform,
+      Usage: () => mockUsage,
+    });
+  });
 
   group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
@@ -486,6 +556,8 @@ void main() {
   });
 }
 
+class MockUsage extends Mock implements Usage {}
+
 class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
 
@@ -639,8 +711,6 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows => <Workflow>[];
 }
 
-
-
 class PassingGroupedValidator extends DoctorValidator {
   PassingGroupedValidator(String name) : super(name);
 
@@ -650,7 +720,6 @@ class PassingGroupedValidator extends DoctorValidator {
     messages.add(ValidationMessage('A helpful message'));
     return ValidationResult(ValidationType.installed, messages);
   }
-
 }
 
 class MissingGroupedValidator extends DoctorValidator {

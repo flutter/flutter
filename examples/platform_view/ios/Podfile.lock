@@ -15,9 +15,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   MaterialControls: 1c6b29e78d3a13d8dd6a67ed31b6d26eb5de8f72
 
-PODFILE CHECKSUM: 4a320bf98e7f7e414d7d7f5079edf1b2d6679c9b
+PODFILE CHECKSUM: 80af51c01ee3f0969ddbf2d1f0dcd6f44fad2c52
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.7.1

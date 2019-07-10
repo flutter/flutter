@@ -12,7 +12,7 @@ import '../version.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
-        help: 'Precache artifacts for all platforms.');
+        help: 'Precache artifacts for all host platforms.');
     argParser.addFlag('force', abbr: 'f', negatable: false,
         help: 'Force downloading of artifacts.');
     argParser.addFlag('android', negatable: true, defaultsTo: true,
@@ -50,7 +50,7 @@ class PrecacheCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (FlutterVersion.instance.isStable && artifact.unstable) {
+      if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
       if (argResults[artifact.name]) {

@@ -59,8 +59,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
   // \S matches non-whitespace characters.
   static final RegExp _flutterLogOutput = RegExp(r'INFO: \S+\(flutter\): ');
 
-  FuchsiaDevice _device;
-  ApplicationPackage _app;
+  final FuchsiaDevice _device;
+  final ApplicationPackage _app;
 
   @override
   String get name => _device.name;
@@ -175,7 +175,12 @@ List<FuchsiaDevice> parseListDevices(String text) {
 }
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {this.name}) : super(id);
+  FuchsiaDevice(String id, {this.name}) : super(
+      id,
+      platformType: PlatformType.fuchsia,
+      category: null,
+      ephemeral: false,
+  );
 
   @override
   bool get supportsHotReload => true;
@@ -191,6 +196,9 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool get supportsStartPaused => false;
@@ -252,8 +260,22 @@ class FuchsiaDevice extends Device {
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
     try {
+      // Ask amber to pre-fetch some things we'll need before setting up our own
+      // package server. This is to avoid relying on amber correctly using
+      // multiple package servers, support for which is in flux.
+      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
+        printError('Failed to get amber to prefetch tiles');
+        return LaunchResult.failed();
+      }
+      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
+        printError('Failed to get amber to prefetch tiles_ctl');
+        return LaunchResult.failed();
+      }
+
       // Start up a package server.
-      fuchsiaPackageServer = FuchsiaPackageServer(packageRepo.path, host, port);
+      const String packageServerName = 'flutter_tool';
+      fuchsiaPackageServer = FuchsiaPackageServer(
+          packageRepo.path, packageServerName, host, port);
       if (!await fuchsiaPackageServer.start()) {
         printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
@@ -265,16 +287,17 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
 
-      // Teach amber about the package server.
-      if (!await fuchsiaDeviceTools.amberCtl.addSrc(this, fuchsiaPackageServer)) {
+      // Teach the package controller about the package server.
+      if (!await fuchsiaDeviceTools.amberCtl.addRepoCfg(this, fuchsiaPackageServer)) {
         printError('Failed to teach amber about the package server');
         return LaunchResult.failed();
       }
       serverRegistered = true;
 
-      // Tell amber to prefetch the app.
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, appName)) {
-        printError('Failed to get amber to prefetch the package');
+      // Tell the package controller to prefetch the app.
+      if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
+          this, fuchsiaPackageServer, appName)) {
+        printError('Failed to get pkgctl to prefetch the package');
         return LaunchResult.failed();
       }
 
@@ -286,18 +309,19 @@ class FuchsiaDevice extends Device {
 
       // Instruct tiles_ctl to start the app.
       final String fuchsiaUrl =
-          'fuchsia-pkg://fuchsia.com/$appName#meta/$appName.cmx';
+          'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
       if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
         printError('Failed to add the app to tiles');
         return LaunchResult.failed();
       }
     } finally {
-      // Try to un-teach amber about the package server if needed.
+      // Try to un-teach the package controller about the package server if
+      // needed.
       if (serverRegistered) {
-        await fuchsiaDeviceTools.amberCtl.rmSrc(this, fuchsiaPackageServer);
+        await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
-      fuchsiaPackageServer.stop();
+      fuchsiaPackageServer?.stop();
       packageRepo.deleteSync(recursive: true);
       status.cancel();
     }
@@ -334,7 +358,20 @@ class FuchsiaDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
 
   @override
-  Future<String> get sdkNameAndVersion async => 'Fuchsia';
+  Future<String> get sdkNameAndVersion async {
+    const String versionPath = '/pkgfs/packages/build-info/0/data/version';
+    final RunResult catResult = await shell('cat $versionPath');
+    if (catResult.exitCode != 0) {
+      printTrace('Failed to cat $versionPath: ${catResult.stderr}');
+      return 'Fuchsia';
+    }
+    final String version = catResult.stdout.trim();
+    if (version.isEmpty) {
+      printTrace('$versionPath was empty');
+      return 'Fuchsia';
+    }
+    return 'Fuchsia $version';
+  }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) =>

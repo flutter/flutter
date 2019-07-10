@@ -137,10 +137,13 @@ void main() {
 
     await expectLater(
       find.byKey(painterKey),
-      matchesGoldenFile('card_theme.custom_shape.png'),
+      matchesGoldenFile(
+        'card_theme.custom_shape.png',
+        version: null,
+      ),
       skip: !isLinux,
     );
-  });
+  },  skip: isBrowser);
 }
 
 CardTheme _cardTheme() {

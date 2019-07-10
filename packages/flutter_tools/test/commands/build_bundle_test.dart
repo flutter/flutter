@@ -38,7 +38,6 @@ void main() {
           precompiledSnapshot: anyNamed('precompiledSnapshot'),
           reportLicensedPackages: anyNamed('reportLicensedPackages'),
           trackWidgetCreation: anyNamed('trackWidgetCreation'),
-          compilationTraceFilePath: anyNamed('compilationTraceFilePath'),
           extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
           extraGenSnapshotOptions: anyNamed('extraGenSnapshotOptions'),
           fileSystemRoots: anyNamed('fileSystemRoots'),
@@ -54,13 +53,11 @@ void main() {
     Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String> arguments }) async {
       final BuildBundleCommand command = BuildBundleCommand(bundleBuilder: mockBundleBuilder);
       final CommandRunner<void> runner = createTestCommandRunner(command);
-
-      final List<String> commandArgs = <String>['bundle'];
-      if (arguments != null)
-        commandArgs.addAll(arguments);
-      commandArgs.add('--target=$projectPath/lib/main.dart');
-
-      await runner.run(commandArgs);
+      await runner.run(<String>[
+        'bundle',
+        ...?arguments,
+        '--target=$projectPath/lib/main.dart',
+      ]);
       return command;
     }
 

@@ -330,7 +330,7 @@ class TextureLayer extends Layer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = rect.shift(layerOffset);
+    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addTexture(
       textureId,
       offset: shiftedRect.topLeft,
@@ -370,7 +370,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = rect.shift(layerOffset);
+    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
       offset: shiftedRect.topLeft,
@@ -449,7 +449,8 @@ class PerformanceOverlayLayer extends Layer {
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
+    final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
+    builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
@@ -523,10 +524,12 @@ class ContainerLayer extends Layer {
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
-      informationCollector: () sync* {
-        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield ErrorDescription('which occupies the same area at a higher elevation.');
+      informationCollector: () {
+        return <DiagnosticsNode>[
+          child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty),
+          predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
+          ErrorDescription('which occupies the same area at a higher elevation.'),
+        ];
       }
     ));
     return <PictureLayer>[
@@ -614,16 +617,18 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    Iterable<S> result = Iterable<S>.empty();
     if (firstChild == null)
-      return;
+      return result;
     Layer child = lastChild;
     while (true) {
-      yield* child.findAll<S>(regionOffset);
+      result = result.followedBy(child.findAll<S>(regionOffset));
       if (child == firstChild)
         break;
       child = child.previousSibling;
     }
+    return result;
   }
 
   @override
@@ -982,7 +987,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
+  /// Controls how to clip (defaults to [Clip.hardEdge]).
   ///
   /// [Clip.none] is not allowed here.
   /// {@endtemplate}
@@ -1005,10 +1010,10 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1018,8 +1023,10 @@ class ClipRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipRect(clipRect.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
+      builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1084,10 +1091,10 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1097,8 +1104,10 @@ class ClipRRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
+      builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1163,10 +1172,10 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1176,8 +1185,10 @@ class ClipPathLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipPath(clipPath.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
+      builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1257,12 +1268,12 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null) {
-      return;
+      return Iterable<S>.empty();
     }
-    yield* super.findAll<S>(transformedOffset);
+    return super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1414,7 +1425,8 @@ class ShaderMaskLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushShaderMask(shader, maskRect.shift(layerOffset), blendMode);
+    final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
+    builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
     return null; // this does not return an engine layer yet.
@@ -1574,10 +1586,10 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1590,7 +1602,7 @@ class PhysicalModelLayer extends ContainerLayer {
     }());
     if (enabled) {
       engineLayer = builder.pushPhysicalShape(
-        path: clipPath.shift(layerOffset),
+        path: layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
@@ -1607,7 +1619,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(ColorProperty('color', color));
   }
 }
 
@@ -2023,20 +2035,21 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    final Iterable<S> childResults = super.findAll<S>(regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
-      return;
+      return childResults;
     }
     if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      yield typedResult;
+      return childResults.followedBy(<S>[typedResult]);
     }
+    return childResults;
   }
 
   @override

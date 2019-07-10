@@ -185,6 +185,45 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      SizedBox(
+        height: 10,
+        child: Text.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
+              TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            ],
+            style: textStyle,
+          ),
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[SemanticsAction.tap]
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
   testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
@@ -218,7 +257,7 @@ void main() {
               ],
             ),
             TestSemantics(
-              label: ' regrettable event',
+              label: ' this is a regrettable event',
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -414,7 +453,7 @@ void main() {
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: const Rect.fromLTRB(448.0, 0.0, 488.0, 80.0),
+              rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 80.0),
             ),
             TestSemantics(
               label: 'sky',
