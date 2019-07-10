@@ -148,8 +148,8 @@ void main() {
       });
 
       test('Expect thrown exception with statusCode', () async {
-        final errorStatusCode = HttpStatus.notFound;
-        final requestUrl = 'foo-url';
+        final int errorStatusCode = HttpStatus.notFound;
+        const String requestUrl = 'foo-url';
 
         final MockHttpClientRequest request = MockHttpClientRequest();
         final MockHttpClientResponse response = MockHttpClientResponse();
@@ -166,10 +166,10 @@ void main() {
           caughtError.complete(error);
         }));
 
-        final err = await caughtError.future;
+        final dynamic err = await caughtError.future;
         expect(err, const TypeMatcher<NetworkImageLoadException>()
-            .having((e) => e.statusCode, 'statusCode', errorStatusCode)
-            .having((e) => e.uri, 'uri', Uri.base.resolve(requestUrl))
+            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl))
         );
       });
 
