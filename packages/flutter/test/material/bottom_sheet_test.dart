@@ -384,8 +384,7 @@ void main() {
     ));
 
     await tester.tap(find.text('Show bottom sheet'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     // Bottom sheet is displayed in correct position.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
@@ -413,8 +412,7 @@ void main() {
     ));
 
     await tester.tap(find.text('Show bottom sheet'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     // Bottom sheet is displayed in correct position.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
