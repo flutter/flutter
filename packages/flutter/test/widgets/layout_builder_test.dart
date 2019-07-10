@@ -39,9 +39,12 @@ void main() {
   });
 
   testWidgets('SliverLayoutBuilder parent geometry', (WidgetTester tester) async {
-    SliverConstraints parentConstraints;
-    final Key childKey = UniqueKey();
-    final Key parentKey = UniqueKey();
+    SliverConstraints parentConstraints1;
+    SliverConstraints parentConstraints2;
+    final Key childKey1 = UniqueKey();
+    final Key parentKey1 = UniqueKey();
+    final Key childKey2 = UniqueKey();
+    final Key parentKey2 = UniqueKey();
 
     await tester.pumpWidget(
       Directionality(
@@ -49,10 +52,17 @@ void main() {
         child: CustomScrollView(
           slivers: <Widget>[
             SliverLayoutBuilder(
-              key: parentKey,
+              key: parentKey1,
               builder: (BuildContext context, SliverConstraints constraint) {
-                parentConstraints = constraint;
-                return SliverPadding(key:childKey, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+                parentConstraints1 = constraint;
+                return SliverPadding(key: childKey1, padding: const EdgeInsets.fromLTRB(1, 2, 3, 4));
+              },
+            ),
+            SliverLayoutBuilder(
+              key: parentKey2,
+              builder: (BuildContext context, SliverConstraints constraint) {
+                parentConstraints2 = constraint;
+                return SliverPadding(key: childKey2, padding: const EdgeInsets.fromLTRB(5, 7, 11, 13));
               },
             ),
           ],
@@ -60,14 +70,21 @@ void main() {
       ),
     );
 
-    expect(parentConstraints.crossAxisExtent, 800);
-    expect(parentConstraints.remainingPaintExtent, 600);
-    final RenderSliver parentSliver = tester.renderObject(find.byKey(parentKey));
-    print(parentSliver.geometry);
+    expect(parentConstraints1.crossAxisExtent, 800);
+    expect(parentConstraints1.remainingPaintExtent, 600);
+
+    expect(parentConstraints2.crossAxisExtent, 800);
+    expect(parentConstraints2.remainingPaintExtent, 600 - 2 - 4);
+    final RenderSliver parentSliver1 = tester.renderObject(find.byKey(parentKey1));
+    final RenderSliver parentSliver2 = tester.renderObject(find.byKey(parentKey2));
     // scrollExtent == top + bottom.
-    expect(parentSliver.geometry.scrollExtent, 2 + 4);
-    final RenderSliver childSliver = tester.renderObject(find.byKey(childKey));
-    expect(childSliver.geometry, parentSliver.geometry);
+    expect(parentSliver1.geometry.scrollExtent, 2 + 4);
+    expect(parentSliver2.geometry.scrollExtent, 7 + 13);
+
+    final RenderSliver childSliver1 = tester.renderObject(find.byKey(childKey1));
+    final RenderSliver childSliver2 = tester.renderObject(find.byKey(childKey2));
+    expect(childSliver1.geometry, parentSliver1.geometry);
+    expect(childSliver2.geometry, parentSliver2.geometry);
   });
 
   testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
@@ -116,6 +133,75 @@ void main() {
     expect(childBox.size, equals(const Size(100.0, 200.0)));
   });
 
+  testWidgets('SliverLayoutBuilder stateful descendants', (WidgetTester tester) async {
+    StateSetter setState;
+    double childWidth = 10.0;
+    double childHeight = 20.0;
+    final Key parentKey = UniqueKey();
+    final Key childKey = UniqueKey();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              key: parentKey,
+              builder: (BuildContext context, SliverConstraints constraint) {
+                return SliverToBoxAdapter(
+                  child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setter) {
+                      setState = setter;
+                      return SizedBox(
+                        key: childKey,
+                        width: childWidth,
+                        height: childHeight,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    RenderBox childBox = tester.renderObject(find.byKey(childKey));
+    RenderSliver parentSliver = tester.renderObject(find.byKey(parentKey));
+    expect(childBox.size.width, 800);
+    expect(childBox.size.height, childHeight);
+    expect(parentSliver.geometry.scrollExtent, childHeight);
+    expect(parentSliver.geometry.paintExtent, childHeight);
+
+    setState(() {
+      childWidth = 100.0;
+      childHeight = 200.0;
+    });
+
+    await tester.pump();
+    childBox = tester.renderObject(find.byKey(childKey));
+    parentSliver = tester.renderObject(find.byKey(parentKey));
+    expect(childBox.size.width, 800);
+    expect(childBox.size.height, childHeight);
+    expect(parentSliver.geometry.scrollExtent, childHeight);
+    expect(parentSliver.geometry.paintExtent, childHeight);
+
+    setState(() {
+        childWidth = 900.0;
+        childHeight = 900.0;
+    });
+
+    await tester.pump();
+    childBox = tester.renderObject(find.byKey(childKey));
+    parentSliver = tester.renderObject(find.byKey(parentKey));
+    expect(childBox.size.width, 800);
+    expect(childBox.size.height, childHeight);
+    expect(parentSliver.geometry.scrollExtent, childHeight);
+    expect(parentSliver.geometry.paintExtent, 600);
+  });
+
+
   testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
@@ -159,7 +245,6 @@ void main() {
     box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(100.0, 200.0)));
   });
-
 
   testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
@@ -206,5 +291,72 @@ void main() {
       child: target,
     ));
     expect(built, 2);
+  });
+
+  testWidgets('SliverLayoutBuilder and Inherited -- do not rebuild when not using inherited',
+    (WidgetTester tester) async {
+
+    int built = 0;
+    final Widget target = Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverLayoutBuilder(
+            builder: (BuildContext context, SliverConstraints constraint) {
+              built++;
+              return SliverToBoxAdapter(child: Container());
+            },
+          ),
+        ],
+      ),
+    );
+
+    expect(built, 0);
+
+    await tester.pumpWidget(MediaQuery(
+        data: const MediaQueryData(size: Size(400.0, 300.0)),
+        child: target,
+    ));
+    expect(built, 1);
+
+    await tester.pumpWidget(MediaQuery(
+        data: const MediaQueryData(size: Size(300.0, 400.0)),
+        child: target,
+    ));
+    expect(built, 1);
+  });
+
+  testWidgets('SliverLayoutBuilder and Inherited -- do rebuild when not using inherited',
+    (WidgetTester tester) async {
+
+      int built = 0;
+      final Widget target = Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverLayoutBuilder(
+              builder: (BuildContext context, SliverConstraints constraint) {
+                built++;
+                MediaQuery.of(context);
+                return SliverToBoxAdapter(child: Container());
+              },
+            ),
+          ],
+        ),
+      );
+
+      expect(built, 0);
+
+      await tester.pumpWidget(MediaQuery(
+          data: const MediaQueryData(size: Size(400.0, 300.0)),
+          child: target,
+      ));
+      expect(built, 1);
+
+      await tester.pumpWidget(MediaQuery(
+          data: const MediaQueryData(size: Size(300.0, 400.0)),
+          child: target,
+      ));
+      expect(built, 2);
   });
 }
