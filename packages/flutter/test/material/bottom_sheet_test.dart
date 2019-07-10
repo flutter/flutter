@@ -366,17 +366,17 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
-          return const TestPage();
+          return const _TestPage();
         })),
         bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: const Text('Item 1'),
+              title: Text('Item 1'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: const Text('Item 2'),
+              title: Text('Item 2'),
             )
           ],
         ),
@@ -387,7 +387,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Bottom sheet is in displayed in correct position
+    // Bottom sheet is displayed in correct position.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
   });
 
@@ -395,17 +395,17 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
-          return const TestPage(useRootNavigator: true);
+          return const _TestPage(useRootNavigator: true);
         })),
         bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
+          items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.ac_unit),
-              title: const Text('Item 1'),
+              title: Text('Item 1'),
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.style),
-              title: const Text('Item 2'),
+              title: Text('Item 2'),
             )
           ],
         ),
@@ -416,13 +416,13 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    // Bottom sheet is in displayed in correct position
+    // Bottom sheet is displayed in correct position.
     expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
   });
 }
 
-class TestPage extends StatelessWidget {
-  const TestPage({Key key, this.useRootNavigator}) : super(key: key);
+class _TestPage extends StatelessWidget {
+  const _TestPage({Key key, this.useRootNavigator}) : super(key: key);
 
   final bool useRootNavigator;
 
