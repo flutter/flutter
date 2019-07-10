@@ -2500,8 +2500,8 @@ class ColorFilter {
   /// matrix is in row-major order and the translation column is specified in
   /// unnormalized, 0...255, space.
   const ColorFilter.matrix(List<double> matrix)
-      : assert(matrix != null),
-        assert(matrix.length == 20),
+      : assert(matrix != null, 'Color Matrix argument was null.'),
+        assert(matrix.length == 20, 'Color Matrix must have 20 entries.'),
         _color = null,
         _blendMode = null,
         _matrix = matrix,

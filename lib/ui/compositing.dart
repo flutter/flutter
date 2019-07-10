@@ -387,13 +387,14 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
   ///
   /// See [pop] for details about the operation stack.
-  ColorFilterEngineLayer pushColorFilter(Color color, BlendMode blendMode, { ColorFilterEngineLayer oldLayer }) {
+  ColorFilterEngineLayer pushColorFilter(ColorFilter filter, { ColorFilterEngineLayer oldLayer }) {
+    assert(filter != null);
     assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushColorFilter'));
-    final ColorFilterEngineLayer layer = ColorFilterEngineLayer._(_pushColorFilter(color.value, blendMode.index));
+    final ColorFilterEngineLayer layer = ColorFilterEngineLayer._(_pushColorFilter(filter._toNativeColorFilter()));
     assert(_debugPushLayer(layer));
     return layer;
   }
-  EngineLayer _pushColorFilter(int color, int blendMode) native 'SceneBuilder_pushColorFilter';
+  EngineLayer _pushColorFilter(_ColorFilter filter) native 'SceneBuilder_pushColorFilter';
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///

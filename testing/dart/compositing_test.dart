@@ -274,9 +274,6 @@ void main() {
       return builder.pushOpacity(100, oldLayer: oldLayer);
     });
     testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
-      return builder.pushColorFilter(const Color.fromARGB(0, 0, 0, 0), BlendMode.color, oldLayer: oldLayer);
-    });
-    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
       return builder.pushBackdropFilter(ImageFilter.blur(), oldLayer: oldLayer);
     });
     testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
@@ -293,6 +290,38 @@ void main() {
     });
     testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
       return builder.pushPhysicalShape(path: Path(), color: const Color.fromARGB(0, 0, 0, 0), oldLayer: oldLayer);
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushColorFilter(
+        const ColorFilter.mode(
+          Color.fromARGB(0, 0, 0, 0),
+          BlendMode.color,
+        ),
+        oldLayer: oldLayer,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushColorFilter(
+        const ColorFilter.matrix(<double>[
+          1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0,
+          0, 0, 1, 0, 0,
+          0, 0, 0, 1, 0,
+        ]),
+        oldLayer: oldLayer,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushColorFilter(
+        const ColorFilter.linearToSrgbGamma(),
+        oldLayer: oldLayer,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushColorFilter(
+        const ColorFilter.srgbToLinearGamma(),
+        oldLayer: oldLayer,
+      );
     });
   });
 }
