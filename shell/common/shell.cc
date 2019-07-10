@@ -454,18 +454,22 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
   // This is a synchronous operation because certain platforms depend on
   // setup/suspension of all activities that may be interacting with the GPU in
   // a synchronous fashion.
-
   fml::AutoResetWaitableEvent latch;
-  auto gpu_task = fml::MakeCopyable([rasterizer = rasterizer_->GetWeakPtr(),  //
-                                     surface = std::move(surface),            //
-                                     &latch]() mutable {
-    if (rasterizer) {
-      rasterizer->Setup(std::move(surface));
-    }
-    // Step 3: All done. Signal the latch that the platform thread is waiting
-    // on.
-    latch.Signal();
-  });
+  auto gpu_task =
+      fml::MakeCopyable([& waiting_for_first_frame = waiting_for_first_frame_,
+                         rasterizer = rasterizer_->GetWeakPtr(),  //
+                         surface = std::move(surface),            //
+                         &latch]() mutable {
+        if (rasterizer) {
+          rasterizer->Setup(std::move(surface));
+        }
+
+        waiting_for_first_frame.store(true);
+
+        // Step 3: All done. Signal the latch that the platform thread is
+        // waiting on.
+        latch.Signal();
+      });
 
   // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
@@ -787,10 +791,17 @@ void Shell::OnAnimatorDraw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   FML_DCHECK(is_setup_);
 
   task_runners_.GetGPUTaskRunner()->PostTask(
-      [rasterizer = rasterizer_->GetWeakPtr(),
+      [& waiting_for_first_frame = waiting_for_first_frame_,
+       &waiting_for_first_frame_condition = waiting_for_first_frame_condition_,
+       rasterizer = rasterizer_->GetWeakPtr(),
        pipeline = std::move(pipeline)]() {
         if (rasterizer) {
           rasterizer->Draw(pipeline);
+
+          if (waiting_for_first_frame.load()) {
+            waiting_for_first_frame.store(false);
+            waiting_for_first_frame_condition.notify_all();
+          }
         }
       });
 }
@@ -1224,6 +1235,28 @@ Rasterizer::Screenshot Shell::Screenshot(
       });
   latch.Wait();
   return screenshot;
+}
+
+fml::Status Shell::WaitForFirstFrame(fml::TimeDelta timeout) {
+  FML_DCHECK(is_setup_);
+  if (task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread() ||
+      task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread()) {
+    return fml::Status(fml::StatusCode::kFailedPrecondition,
+                       "WaitForFirstFrame called from thread that can't wait "
+                       "because it is responsible for generating the frame.");
+  }
+
+  std::unique_lock<std::mutex> lock(waiting_for_first_frame_mutex_);
+  bool success = waiting_for_first_frame_condition_.wait_for(
+      lock, std::chrono::milliseconds(timeout.ToMilliseconds()),
+      [& waiting_for_first_frame = waiting_for_first_frame_] {
+        return !waiting_for_first_frame.load();
+      });
+  if (success) {
+    return fml::Status();
+  } else {
+    return fml::Status(fml::StatusCode::kDeadlineExceeded, "timeout");
+  }
 }
 
 }  // namespace flutter
