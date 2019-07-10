@@ -13,6 +13,7 @@ import 'theme.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
+// bool _isExpanded = false;
 
 const double _kPanelHeaderCollapsedHeight = 48.0;
 const double _kPanelHeaderExpandedHeight = 64.0;
@@ -127,9 +128,7 @@ class ExpansionPanel {
   /// [ExpansionPanelList.expansionCallback] toggles _isExpanded.
   ///
   /// ```dart
-  /// bool _isExpanded = false;
-  ///
-  /// ExpansionPanel({
+  /// ExpansionPanel(
   ///   isExpanded: _isExpanded,
   ///   headerBuilder: (context, isExpanded) {
   ///     return const Text("This is ExpansionPanel's header");
@@ -151,7 +150,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// })
+  /// )
   /// ```
   /// {@end-tool}
   ///
@@ -163,7 +162,7 @@ class ExpansionPanel {
   /// toggles _isExpanded.
   ///
   /// ```dart
-  /// ExpansionPanel({
+  /// ExpansionPanel(
   ///   isExpanded: _isExpanded,
   ///   headerBuilder: (context, isExpanded) {
   ///     return const Text("This is ExpansionPanel's header");
@@ -189,7 +188,7 @@ class ExpansionPanel {
   ///     title: Text("This is title for ExpansionPanel's body"),
   ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
   ///   ),
-  /// })
+  /// )
   /// ```
   /// {@end-tool}
   ///
@@ -202,6 +201,34 @@ class ExpansionPanel {
   /// assumes that [ExpansionPanelList.expansionCallback] toggles _isExpanded.
   ///
   /// ```dart
+  /// ExpansionPanel(
+  ///   isExpanded: _isExpanded,
+  ///   headerBuilder: (context, isExpanded) {
+  ///     return const Text("This is ExpansionPanel's header");
+  ///   },
+  ///   expandIconBuilder: (
+  ///     BuildContext context,
+  ///     bool isExpanded,
+  ///     VoidCallback handlePressed,
+  ///     Duration animationDuration,
+  ///   ) {
+  ///     return InkWell(
+  ///       customBorder: CircleBorder(),
+  ///       onTap: () { handlePressed(); },
+  ///       child: Padding(
+  ///         padding: EdgeInsets.all(12.0),
+  ///         child: CustomIcon(isExpanded, animationDuration),
+  ///       ),
+  ///     );
+  ///   },
+  ///   body: ListTile(
+  ///     title: Text("This is title for ExpansionPanel's body"),
+  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
+  ///   ),
+  /// )
+  ///
+  /// // ...
+  ///
   /// class CustomIcon extends StatefulWidget {
   ///   CustomIcon(
   ///     this.isExpanded,
@@ -248,34 +275,6 @@ class ExpansionPanel {
   ///     );
   ///   }
   /// }
-  ///
-  /// // ...
-  ///
-  /// ExpansionPanel({
-  ///   isExpanded: _isExpanded,
-  ///   headerBuilder: (context, isExpanded) {
-  ///     return const Text("This is ExpansionPanel's header");
-  ///   },
-  ///   expandIconBuilder: (
-  ///     BuildContext context,
-  ///     bool isExpanded,
-  ///     VoidCallback handlePressed,
-  ///     Duration animationDuration,
-  ///   ) {
-  ///     return InkWell(
-  ///       customBorder: CircleBorder(),
-  ///       onTap: () { handlePressed(); },
-  ///       child: Padding(
-  ///         padding: EdgeInsets.all(12.0),
-  ///         child: CustomIcon(isExpanded, animationDuration),
-  ///       ),
-  ///     );
-  ///   },
-  ///   body: ListTile(
-  ///     title: Text("This is title for ExpansionPanel's body"),
-  ///     subtitle: Text("This is subtitle for ExpansionPanel's body"),
-  ///   ),
-  /// })
   /// ```
   /// {@end-tool}
   final ExpansionPanelIconBuilder expandIconBuilder;
