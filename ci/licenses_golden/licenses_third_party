@@ -1,4 +1,4 @@
-Signature: 867dd399b0f19bf93a3ed95b59498779
+Signature: ccd483c87594ed0c5e461273b748f428
 
 UNUSED LICENSES:
 
@@ -517,27 +517,6 @@ FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib_xrandr.h
 FILE: ../../../third_party/wuffs/cmd/commonflags/commonflags.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/genlib.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/all-impl.c
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/core-private.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/core-public.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/image-impl.c
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/image-private.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/image-public.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/io-private.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/io-public.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/memory-private.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/memory-public.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/range-private.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/base/range-public.h
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/builtin.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/cgen.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/data.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/expr.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/func.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/gen.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/resume.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/statement.go
-FILE: ../../../third_party/wuffs/cmd/wuffs-c/internal/cgen/var.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/main.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/release.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/test.go
@@ -553,6 +532,28 @@ FILE: ../../../third_party/wuffs/example/zcat/zcat.c
 FILE: ../../../third_party/wuffs/fuzz/c/fuzzlib/fuzzlib.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/gif_fuzzer.c
 FILE: ../../../third_party/wuffs/fuzz/c/std/zlib_fuzzer.c
+FILE: ../../../third_party/wuffs/internal/cgen/base/all-impl.c
+FILE: ../../../third_party/wuffs/internal/cgen/base/core-private.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/core-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/image-impl.c
+FILE: ../../../third_party/wuffs/internal/cgen/base/image-private.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/image-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/io-private.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/io-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/memory-private.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/memory-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/range-private.h
+FILE: ../../../third_party/wuffs/internal/cgen/base/range-public.h
+FILE: ../../../third_party/wuffs/internal/cgen/builtin.go
+FILE: ../../../third_party/wuffs/internal/cgen/cgen.go
+FILE: ../../../third_party/wuffs/internal/cgen/data.go
+FILE: ../../../third_party/wuffs/internal/cgen/expr.go
+FILE: ../../../third_party/wuffs/internal/cgen/func.go
+FILE: ../../../third_party/wuffs/internal/cgen/gen.go
+FILE: ../../../third_party/wuffs/internal/cgen/resume.go
+FILE: ../../../third_party/wuffs/internal/cgen/statement.go
+FILE: ../../../third_party/wuffs/internal/cgen/var.go
+FILE: ../../../third_party/wuffs/internal/testcut/testcut.go
 FILE: ../../../third_party/wuffs/lang/ast/ast.go
 FILE: ../../../third_party/wuffs/lang/ast/eq.go
 FILE: ../../../third_party/wuffs/lang/ast/sort.go
@@ -576,9 +577,17 @@ FILE: ../../../third_party/wuffs/lang/token/token.go
 FILE: ../../../third_party/wuffs/lang/wuffsroot/wuffsroot.go
 FILE: ../../../third_party/wuffs/lib/base38/base38.go
 FILE: ../../../third_party/wuffs/lib/base38/base38_test.go
+FILE: ../../../third_party/wuffs/lib/flatecut/flatecut.go
+FILE: ../../../third_party/wuffs/lib/flatecut/flatecut_test.go
 FILE: ../../../third_party/wuffs/lib/interval/interval.go
 FILE: ../../../third_party/wuffs/lib/interval/interval_test.go
 FILE: ../../../third_party/wuffs/lib/interval/radial_test.go
+FILE: ../../../third_party/wuffs/lib/rac/example_test.go
+FILE: ../../../third_party/wuffs/lib/rac/rac.go
+FILE: ../../../third_party/wuffs/lib/rac/writer.go
+FILE: ../../../third_party/wuffs/lib/rac/writer_test.go
+FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut.go
+FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut_test.go
 FILE: ../../../third_party/wuffs/release/c/wuffs-unsupported-snapshot.c
 FILE: ../../../third_party/wuffs/release/c/wuffs-v0.2.c
 FILE: ../../../third_party/wuffs/script/adler32-standalone.c
@@ -594,6 +603,7 @@ FILE: ../../../third_party/wuffs/script/extract-giflzw.go
 FILE: ../../../third_party/wuffs/script/extract-palette-indexes.go
 FILE: ../../../third_party/wuffs/script/inline-c-relative-includes.go
 FILE: ../../../third_party/wuffs/script/make-artificial.go
+FILE: ../../../third_party/wuffs/script/mmap-ring-buffer.c
 FILE: ../../../third_party/wuffs/script/print-bits.go
 FILE: ../../../third_party/wuffs/script/print-crc32-example.go
 FILE: ../../../third_party/wuffs/script/print-crc32-magic-numbers.go
@@ -18568,6 +18578,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: wuffs
 ORIGIN: ../../../third_party/wuffs/LICENSE
 TYPE: LicenseType.apache
+FILE: ../../../third_party/wuffs/go.mod
 FILE: ../../../third_party/wuffs/script/bench-rust-gif-dot-rs/Cargo.toml
 FILE: ../../../third_party/wuffs/script/bench-rust-gif/Cargo.toml
 ----------------------------------------------------------------------------------------------------

@@ -390,7 +390,7 @@ deps = {
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
 
   'src/third_party/wuffs':
-   Var('fuchsia_git') + '/third_party/wuffs' + '@' + 'a71538baa8f1f4053176c0d9f31bc12fd4e8e71b',
+   Var('fuchsia_git') + '/third_party/wuffs' + '@' + '11de618a6717c5c5d8c444b9c5ddf38d966b851d',
 
   'src/third_party/fontconfig/src':
    Var('chromium_git') + '/external/fontconfig.git' + '@' + 'c336b8471877371f0190ba06f7547c54e2b890ba',
