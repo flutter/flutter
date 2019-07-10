@@ -43,7 +43,8 @@ SkFontStyleSet* TypefaceFontAssetProvider::MatchFamily(
   if (found == registered_families_.end()) {
     return nullptr;
   }
-  return SkRef(&found->second);
+  sk_sp<TypefaceFontStyleSet> font_style_set = found->second;
+  return font_style_set.release();
 }
 
 void TypefaceFontAssetProvider::RegisterTypeface(sk_sp<SkTypeface> typeface) {
@@ -69,13 +70,11 @@ void TypefaceFontAssetProvider::RegisterTypeface(
   auto family_it = registered_families_.find(canonical_name);
   if (family_it == registered_families_.end()) {
     family_names_.push_back(family_name_alias);
-    family_it = registered_families_
-                    .emplace(std::piecewise_construct,
-                             std::forward_as_tuple(canonical_name),
-                             std::forward_as_tuple())
-                    .first;
+    auto value =
+        std::make_pair(canonical_name, sk_make_sp<TypefaceFontStyleSet>());
+    family_it = registered_families_.emplace(value).first;
   }
-  family_it->second.registerTypeface(std::move(typeface));
+  family_it->second->registerTypeface(std::move(typeface));
 }
 
 TypefaceFontStyleSet::TypefaceFontStyleSet() = default;
