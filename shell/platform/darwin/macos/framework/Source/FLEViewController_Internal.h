@@ -4,7 +4,12 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h"
 
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
+
 @interface FLEViewController ()
+
+// The FlutterView for this view controller.
+@property(nonatomic, readonly, nullable) FlutterView* flutterView;
 
 /**
  * Adds a responder for keyboard events. Key up and key down events are forwarded to all added
