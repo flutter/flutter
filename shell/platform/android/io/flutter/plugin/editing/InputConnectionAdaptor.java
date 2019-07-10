@@ -168,10 +168,21 @@ class InputConnectionAdaptor extends BaseInputConnection {
                     // isRTLCharAt() call below is returning blanket direction assumption
                     // based on the first character in the line.
                     boolean isRtl = mLayout.isRtlCharAt(mLayout.getLineForOffset(selStart));
-                    if (isRtl) {
-                        Selection.extendRight(mEditable, mLayout);
-                    } else {
-                        Selection.extendLeft(mEditable, mLayout);
+                    try {
+                        if (isRtl) {
+                            Selection.extendRight(mEditable, mLayout);
+                        } else {
+                            Selection.extendLeft(mEditable, mLayout);
+                        }
+                    } catch (IndexOutOfBoundsException e) {
+                        // On some Chinese devices (primarily Huawei, some Xiaomi),
+                        // on initial app startup before focus is lost, the
+                        // Selection.extendLeft and extendRight calls always extend
+                        // from the index of the initial contents of mEditable. This
+                        // try-catch will prevent crashing on Huawei devices by falling
+                        // back to a simple way of deletion, although this a hack and
+                        // will not handle emojis.
+                        Selection.setSelection(mEditable, selStart, selStart - 1);
                     }
                     int newStart = clampIndexToEditable(Selection.getSelectionStart(mEditable), mEditable);
                     int newEnd = clampIndexToEditable(Selection.getSelectionEnd(mEditable), mEditable);
