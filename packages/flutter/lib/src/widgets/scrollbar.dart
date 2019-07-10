@@ -302,6 +302,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     if (_thumbRect == null) {
       return false;
     }
+    // The thumb is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
+    }
     final Rect interactiveThumbRect = _thumbRect.expandToInclude(
       Rect.fromCircle(center: _thumbRect.center, radius: _kMinInteractiveSize / 2),
     );
@@ -313,6 +317,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   bool hitTest(Offset position) {
     if (_thumbRect == null) {
       return null;
+    }
+    // The thumb is not able to be hit when transparent.
+    if (fadeoutOpacityAnimation.value == 0.0) {
+      return false;
     }
     return _thumbRect.contains(position);
   }
