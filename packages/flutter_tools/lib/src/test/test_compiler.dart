@@ -105,6 +105,7 @@ class TestCompiler {
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
     // Copy lock-guarded testfile (if it exists) into this copy for this process only.
+    ensureDirectoryExists(testLockFilePath);
     final File lockFile = fs.file(testLockFilePath);
     final RandomAccessFile lock = lockFile.openSync(mode: FileMode.write)..lockSync(FileLock.blockingExclusive);
     final File testFile = fs.file(testWithLockingFilePath);
