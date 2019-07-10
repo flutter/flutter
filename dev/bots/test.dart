@@ -272,12 +272,10 @@ Future<void> _runBuildTests() async {
       continue;
     }
     final String examplePath = fileEntity.path;
-    final String basename = path.basename(examplePath);
-    final bool expectIpaBuildFailure = basename == 'platform_channel_swift'; // Remove when https://github.com/flutter/flutter/issues/35773 is fixed.
 
     await _flutterBuildAot(examplePath);
     await _flutterBuildApk(examplePath);
-    await _flutterBuildIpa(examplePath, expectIpaBuildFailure: expectIpaBuildFailure);
+    await _flutterBuildIpa(examplePath);
   }
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
@@ -322,7 +320,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication) async {
   print('Done.');
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaBuildFailure = false}) async {
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   if (!Platform.isMacOS) {
     return;
   }
@@ -341,7 +339,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaB
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: expectIpaBuildFailure,
+    expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
   print('Done.');
