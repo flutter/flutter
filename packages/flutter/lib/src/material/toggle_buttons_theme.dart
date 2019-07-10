@@ -109,8 +109,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
     Color borderColor,
     Color selectedBorderColor,
     Color disabledBorderColor,
-    BorderRadius borderRadius = BorderRadius.zero,
-    double borderWidth = 1.0,
+    BorderRadius borderRadius,
+    double borderWidth,
   }) {
     return ToggleButtonsThemeData(
       color: color ?? this.color,
