@@ -17,8 +17,6 @@ import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
-export '_network_image_io.dart';
-
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
 ///
