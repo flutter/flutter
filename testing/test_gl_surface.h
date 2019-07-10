@@ -25,11 +25,11 @@ class TestGLSurface {
 
   bool Present();
 
-  uint32_t GetFramebuffer();
+  uint32_t GetFramebuffer() const;
 
   bool MakeResourceCurrent();
 
-  void* GetProcAddress(const char* name);
+  void* GetProcAddress(const char* name) const;
 
   sk_sp<GrContext> CreateContext();
 

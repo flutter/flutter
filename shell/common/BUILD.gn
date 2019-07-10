@@ -139,43 +139,46 @@ template("shell_host_executable") {
   }
 }
 
-shell_gpu_configuration("shell_unittests_gpu_configuration") {
-  enable_software = true
-  enable_vulkan = false
-  enable_gl = false
-  enable_metal = false
-}
+if (current_toolchain == host_toolchain) {
+  shell_gpu_configuration("shell_unittests_gpu_configuration") {
+    enable_software = true
+    enable_vulkan = false
+    enable_gl = true
+    enable_metal = false
+  }
 
-test_fixtures("shell_unittests_fixtures") {
-  dart_main = "fixtures/shell_test.dart"
-}
+  test_fixtures("shell_unittests_fixtures") {
+    dart_main = "fixtures/shell_test.dart"
+  }
 
-shell_host_executable("shell_unittests") {
-  sources = [
-    "pipeline_unittests.cc",
-    "shell_test.cc",
-    "shell_test.h",
-    "shell_unittests.cc",
-  ]
+  shell_host_executable("shell_unittests") {
+    sources = [
+      "pipeline_unittests.cc",
+      "shell_test.cc",
+      "shell_test.h",
+      "shell_unittests.cc",
+    ]
 
-  deps = [
-    ":shell_unittests_fixtures",
-    ":shell_unittests_gpu_configuration",
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/shell",
-    "$flutter_root/testing:dart",
-  ]
-}
+    deps = [
+      ":shell_unittests_fixtures",
+      ":shell_unittests_gpu_configuration",
+      "$flutter_root/common",
+      "$flutter_root/flow",
+      "$flutter_root/shell",
+      "$flutter_root/testing:dart",
+      "$flutter_root/testing:opengl",
+    ]
+  }
 
-shell_host_executable("shell_benchmarks") {
-  sources = [
-    "shell_benchmarks.cc",
-  ]
+  shell_host_executable("shell_benchmarks") {
+    sources = [
+      "shell_benchmarks.cc",
+    ]
 
-  deps = [
-    ":shell_unittests_fixtures",
-    "$flutter_root/benchmarking",
-    "$flutter_root/testing:testing_lib",
-  ]
+    deps = [
+      ":shell_unittests_fixtures",
+      "$flutter_root/benchmarking",
+      "$flutter_root/testing:testing_lib",
+    ]
+  }
 }
