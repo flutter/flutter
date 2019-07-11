@@ -139,7 +139,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             'lipo',
             '-create',
             '-output', fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF', 'App'),
-            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'));
+            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
+          ]);
         } else {
           status?.cancel();
           exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
