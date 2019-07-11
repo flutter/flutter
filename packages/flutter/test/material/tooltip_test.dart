@@ -856,7 +856,6 @@ void main() {
 
     expect(description, <String>[
       '"message"',
-      'position: below',
     ]);
   });
   testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {

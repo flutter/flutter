@@ -29,6 +29,7 @@ class TooltipThemeData extends Diagnosticable {
     this.preferBelow = true,
     this.excludeFromSemantics = false,
     this.decoration,
+    this.textStyle,
     this.waitDuration = _defaultWaitDuration,
     this.showDuration = _defaultShowDuration,
   }) : assert(height != null),
@@ -76,6 +77,8 @@ class TooltipThemeData extends Diagnosticable {
   /// [ThemeData.brightness] is dark, and [ThemeData.primaryTextTheme] if not.
   final Decoration decoration;
 
+  final TextStyle textStyle;
+
   /// The amount of time that a pointer must hover over the widget before it
   /// will show a tooltip.
   ///
@@ -96,6 +99,7 @@ class TooltipThemeData extends Diagnosticable {
     bool preferBelow,
     bool excludeFromSemantics,
     Decoration decoration,
+    TextStyle textStyle,
     Duration waitDuration,
     Duration showDuration,
   }) {
@@ -106,6 +110,7 @@ class TooltipThemeData extends Diagnosticable {
       preferBelow: preferBelow ?? this.preferBelow,
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
       decoration: decoration ?? this.decoration,
+      textStyle: textStyle ?? this.textStyle,
       waitDuration: waitDuration ?? this.waitDuration,
       showDuration: showDuration ?? this.showDuration,
     );
@@ -123,6 +128,7 @@ class TooltipThemeData extends Diagnosticable {
       padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
+      textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
     );
   }
 
@@ -135,6 +141,7 @@ class TooltipThemeData extends Diagnosticable {
       preferBelow,
       excludeFromSemantics,
       decoration,
+      textStyle,
       waitDuration,
       showDuration,
     );
@@ -153,6 +160,7 @@ class TooltipThemeData extends Diagnosticable {
         && typedOther.preferBelow == preferBelow
         && typedOther.excludeFromSemantics == excludeFromSemantics
         && typedOther.decoration == decoration
+        && typedOther.textStyle == textStyle
         && typedOther.waitDuration == waitDuration
         && typedOther.showDuration == showDuration;
   }
@@ -186,6 +194,7 @@ class TooltipTheme extends InheritedWidget {
     bool preferBelow,
     bool excludeFromSemantics,
     Decoration decoration,
+    TextStyle textStyle,
     Duration waitDuration,
     Duration showDuration,
     Widget child,
@@ -196,6 +205,7 @@ class TooltipTheme extends InheritedWidget {
          preferBelow: preferBelow,
          excludeFromSemantics: excludeFromSemantics,
          decoration: decoration,
+         textStyle: textStyle,
          waitDuration: waitDuration,
          showDuration: showDuration,
        ),
@@ -219,7 +229,3 @@ class TooltipTheme extends InheritedWidget {
   @override
   bool updateShouldNotify(TooltipTheme oldWidget) => data != oldWidget.data;
 }
-
-// TODO: Wire TooltipTheme through ThemeData
-
-// TODO: Wire TooltipTheme through Tooltip widget
