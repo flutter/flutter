@@ -137,6 +137,9 @@ class Tooltip extends StatefulWidget {
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
+  static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
+  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
+  static const bool _defaultExcludeFromSemantics = false;
 
   AnimationController _controller;
   OverlayEntry _entry;
@@ -303,10 +306,10 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-    final bool excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics;
+    final bool excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
 
-    waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration;
-    showDuration = widget.showDuration ?? tooltipTheme.showDuration;
+    waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
+    showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -395,6 +398,11 @@ class _TooltipOverlay extends StatelessWidget {
     this.preferBelow,
   }) : super(key: key);
 
+  static const double _defaultTooltipHeight = 32.0;
+  static const double _defaultVerticalOffset = 24.0;
+  static const bool _defaultPreferBelow = true;
+  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
+
   final String message;
   final double height;
   final EdgeInsetsGeometry padding;
@@ -424,16 +432,16 @@ class _TooltipOverlay extends StatelessWidget {
         child: CustomSingleChildLayout(
           delegate: _TooltipPositionDelegate(
             target: target,
-            verticalOffset: verticalOffset ?? tooltipTheme.verticalOffset,
-            preferBelow: preferBelow ?? tooltipTheme.preferBelow,
+            verticalOffset: verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
+            preferBelow: preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
           ),
           child: FadeTransition(
             opacity: animation,
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: height ?? tooltipTheme.height),
+              constraints: BoxConstraints(minHeight: height ?? tooltipTheme.height ?? _defaultTooltipHeight),
               child: Container(
                 decoration: decoration ?? tooltipTheme.decoration ?? defaultDecoration,
-                padding: padding ?? tooltipTheme.padding,
+                padding: padding ?? tooltipTheme.padding ?? _defaultPadding,
                 child: Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,

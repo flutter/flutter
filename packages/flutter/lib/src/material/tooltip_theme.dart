@@ -23,28 +23,16 @@ import 'theme.dart';
 class TooltipThemeData extends Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
   const TooltipThemeData({
-    this.height = _defaultTooltipHeight,
-    this.padding = _defaultPadding,
-    this.verticalOffset = _defaultVerticalOffset,
-    this.preferBelow = true,
-    this.excludeFromSemantics = false,
+    this.height,
+    this.padding,
+    this.verticalOffset,
+    this.preferBelow,
+    this.excludeFromSemantics,
     this.decoration,
     this.textStyle,
-    this.waitDuration = _defaultWaitDuration,
-    this.showDuration = _defaultShowDuration,
-  }) : assert(height != null),
-       assert(padding != null),
-       assert(verticalOffset != null),
-       assert(preferBelow != null),
-       assert(excludeFromSemantics != null),
-       assert(waitDuration != null),
-       assert(showDuration != null);
-
-  static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
-  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
-  static const double _defaultTooltipHeight = 32.0;
-  static const double _defaultVerticalOffset = 24.0;
-  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
+    this.waitDuration,
+    this.showDuration,
+  });
 
   /// They height of the tooltip's [child].
   ///
@@ -176,13 +164,13 @@ class TooltipThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DoubleProperty('height', height, defaultValue: _defaultTooltipHeight));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: _defaultPadding));
-    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: _defaultVerticalOffset));
-    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: false));
-    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: _defaultWaitDuration));
-    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: _defaultShowDuration));
+    properties.add(DoubleProperty('height', height, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
+    properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
+    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
   }
 }
 
