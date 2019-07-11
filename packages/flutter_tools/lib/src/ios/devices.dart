@@ -45,7 +45,7 @@ class IOSDeploy {
       '--bundle',
       bundlePath,
       '--no-wifi',
-      '--no-interactive',
+      '--justlaunch',
     ];
     if (launchArguments.isNotEmpty) {
       launchCommand.add('--args');
