@@ -54,15 +54,15 @@ class FlutterDevice {
     Device device, {
     @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
+    @required String target,
+    @required BuildMode buildMode,
     String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
-    @required String target,
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
-    @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
     if (flutterProject.hasBuilders) {
@@ -115,7 +115,7 @@ class FlutterDevice {
   /// expressions requested during debugging of the application.
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  Future<void> _connect({
+  Future<void> connect({
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
@@ -375,7 +375,7 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: hotRunner.usesTerminalUI,
+      usesTerminalUi: hotRunner.usesTerminalUi,
       ipv6: hotRunner.ipv6,
     );
 
@@ -437,7 +437,7 @@ class FlutterDevice {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      usesTerminalUi: coldRunner.usesTerminalUI,
+      usesTerminalUi: coldRunner.usesTerminalUi,
       ipv6: coldRunner.ipv6,
     );
 
@@ -509,12 +509,12 @@ abstract class ResidentRunner {
     this.flutterDevices, {
     this.target,
     this.debuggingOptions,
-    this.usesTerminalUI = true,
     String projectRootPath,
     String packagesFilePath,
-    this.saveCompilationTrace,
-    this.stayResident,
     this.ipv6,
+    this.usesTerminalUi = true,
+    this.stayResident = true,
+    this.hotMode = true,
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
@@ -526,12 +526,12 @@ abstract class ResidentRunner {
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
-  final bool usesTerminalUI;
-  final bool saveCompilationTrace;
+  final bool usesTerminalUi;
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
   bool _exited = false;
+  bool hotMode ;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
   String _projectRootPath;
@@ -585,8 +585,6 @@ abstract class ResidentRunner {
 
   Future<void> exit() async {
     _exited = true;
-    if (saveCompilationTrace)
-      await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
     await preExit();
     await exitApp();
@@ -605,68 +603,68 @@ abstract class ResidentRunner {
     await Future.wait(futures);
   }
 
-  Future<void> _debugDumpApp() async {
+  Future<void> debugDumpApp() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpApp();
   }
 
-  Future<void> _debugDumpRenderTree() async {
+  Future<void> debugDumpRenderTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpRenderTree();
   }
 
-  Future<void> _debugDumpLayerTree() async {
+  Future<void> debugDumpLayerTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpLayerTree();
   }
 
-  Future<void> _debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInTraversalOrder();
   }
 
-  Future<void> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
-  Future<void> _debugToggleDebugPaintSizeEnabled() async {
+  Future<void> debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleDebugPaintSizeEnabled();
   }
 
-  Future<void> _debugToggleDebugCheckElevationsEnabled() async {
+  Future<void> debugToggleDebugCheckElevationsEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleDebugCheckElevationsEnabled();
   }
 
-  Future<void> _debugTogglePerformanceOverlayOverride() async {
+  Future<void> debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugTogglePerformanceOverlayOverride();
   }
 
-  Future<void> _debugToggleWidgetInspector() async {
+  Future<void> debugToggleWidgetInspector() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleWidgetInspector();
   }
 
-  Future<void> _debugToggleProfileWidgetBuilds() async {
+  Future<void> debugToggleProfileWidgetBuilds() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
     }
   }
 
-  Future<void> _screenshot(FlutterDevice device) async {
+  Future<void> screenshot(FlutterDevice device) async {
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
@@ -704,75 +702,13 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _debugSaveCompilationTrace() async {
-    if (!supportsServiceProtocol)
-      return;
-
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        final int index = device.views.indexOf(view);
-        final File outputFile = fs.currentDirectory
-            .childFile('compilation${index == 0 ? '' : index}.txt');
-
-        printStatus('Saving compilation training data '
-            'for ${device.device.name}${index == 0 ? '' :'/Isolate$index'} '
-            'to ${fs.path.relative(outputFile.path)}...');
-
-        List<int> buffer;
-        try {
-          buffer = await view.uiIsolate.flutterDebugSaveCompilationTrace();
-          assert(buffer != null);
-        } catch (error) {
-          printError('Error communicating with Flutter on the device: $error');
-          continue;
-        }
-
-        outputFile.parent.createSync(recursive: true);
-        outputFile.writeAsBytesSync(buffer);
-      }
-    }
-  }
-
-  Future<void> _debugTogglePlatform() async {
+  Future<void> debugTogglePlatform() async {
     await refreshViews();
     final String from = await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
     String to;
     for (FlutterDevice device in flutterDevices)
       to = await device.togglePlatform(from: from);
     printStatus('Switched operating system to $to');
-  }
-
-  void registerSignalHandlers() {
-    assert(stayResident);
-    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
-    if (!supportsServiceProtocol || !supportsRestart)
-      return;
-    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
-  }
-
-  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
-    _resetTerminal();
-    await cleanupAfterSignal();
-    io.exit(0);
-  }
-
-  bool _processingUserRequest = false;
-  Future<void> _handleSignal(io.ProcessSignal signal) async {
-    if (_processingUserRequest) {
-      printTrace('Ignoring signal: "$signal" because we are busy.');
-      return;
-    }
-    _processingUserRequest = true;
-
-    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
-
-    try {
-      await restart(fullRestart: fullRestart);
-    } finally {
-      _processingUserRequest = false;
-    }
   }
 
   Future<void> stopEchoingDeviceLog() async {
@@ -797,7 +733,7 @@ abstract class ResidentRunner {
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
-      await device._connect(
+      await device.connect(
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
@@ -838,105 +774,6 @@ abstract class ResidentRunner {
     return Future<void>.error(error, stack);
   }
 
-  /// Returns [true] if the input has been handled by this function.
-  Future<bool> _commonTerminalInputHandler(String character) async {
-    final String lower = character.toLowerCase();
-
-    printStatus(''); // the key the user tapped might be on this line
-
-    if (lower == 'h' || lower == '?') {
-      // help
-      printHelp(details: true);
-      return true;
-    } else if (lower == 'w') {
-      if (supportsServiceProtocol) {
-        await _debugDumpApp();
-        return true;
-      }
-    } else if (lower == 't') {
-      if (supportsServiceProtocol) {
-        await _debugDumpRenderTree();
-        return true;
-      }
-    } else if (character == 'L') {
-      if (supportsServiceProtocol) {
-        await _debugDumpLayerTree();
-        return true;
-      }
-    } else if (character == 'S') {
-      if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInTraversalOrder();
-        return true;
-      }
-    } else if (character == 'U') {
-      if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInInverseHitTestOrder();
-        return true;
-      }
-    } else if (character == 'p') {
-      if (supportsServiceProtocol && isRunningDebug) {
-        await _debugToggleDebugPaintSizeEnabled();
-        return true;
-      }
-    } else if (character == 'P') {
-      if (supportsServiceProtocol) {
-        await _debugTogglePerformanceOverlayOverride();
-      }
-    } else if (lower == 'i') {
-      if (supportsServiceProtocol) {
-        await _debugToggleWidgetInspector();
-        return true;
-      }
-    } else if (character == 's') {
-      for (FlutterDevice device in flutterDevices) {
-        if (device.device.supportsScreenshot)
-          await _screenshot(device);
-      }
-      return true;
-    } else if (character == 'a') {
-      if (supportsServiceProtocol) {
-        await _debugToggleProfileWidgetBuilds();
-      }
-    } else if (lower == 'o') {
-      if (supportsServiceProtocol && isRunningDebug) {
-        await _debugTogglePlatform();
-        return true;
-      }
-    } else if (lower == 'q') {
-      // exit
-      await exit();
-      return true;
-    } else if (lower == 'd') {
-      await detach();
-      return true;
-    } else if (lower == 'z') {
-      await _debugToggleDebugCheckElevationsEnabled();
-      return true;
-    }
-
-    return false;
-  }
-
-  Future<void> processTerminalInput(String command) async {
-    // When terminal doesn't support line mode, '\n' can sneak into the input.
-    command = command.trim();
-    if (_processingUserRequest) {
-      printTrace('Ignoring terminal input: "$command" because we are busy.');
-      return;
-    }
-    _processingUserRequest = true;
-    try {
-      final bool handled = await _commonTerminalInputHandler(command);
-      if (!handled)
-        await handleTerminalCommand(command);
-    } catch (error, st) {
-      printError('$error\n$st');
-      await _cleanUpAndExit(null);
-    } finally {
-      _processingUserRequest = false;
-    }
-  }
-
   void _serviceDisconnected() {
     if (_exited) {
       // User requested the application exit.
@@ -945,7 +782,6 @@ abstract class ResidentRunner {
     if (_finished.isCompleted)
       return;
     printStatus('Lost connection to device.');
-    _resetTerminal();
     _finished.complete(0);
   }
 
@@ -953,25 +789,7 @@ abstract class ResidentRunner {
     if (_finished.isCompleted)
       return;
     printStatus('Application finished.');
-    _resetTerminal();
     _finished.complete(0);
-  }
-
-  void _resetTerminal() {
-    if (usesTerminalUI)
-      terminal.singleCharMode = false;
-  }
-
-  void setupTerminal() {
-    assert(stayResident);
-    if (usesTerminalUI) {
-      if (!logger.quiet) {
-        printStatus('');
-        printHelp(details: false);
-      }
-      terminal.singleCharMode = true;
-      terminal.keystrokes.listen(processTerminalInput);
-    }
   }
 
   Future<int> waitForAppToFinish() async {
@@ -1017,10 +835,38 @@ abstract class ResidentRunner {
 
   /// Called when a signal has requested we exit.
   Future<void> cleanupAfterSignal();
+
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
+
   /// Called when the runner should handle a terminal command.
-  Future<void> handleTerminalCommand(String code);
+  Future<void> handleTerminalCommand(String code) async {
+    switch (code) {
+      case 'r':
+        final OperationResult result = await restart(fullRestart: false);
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return;
+      case 'R':
+        // If hot restart is not supported for all devices, ignore the command.
+        if (!canHotRestart) {
+          return;
+        }
+        final OperationResult result = await restart(fullRestart: true);
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return;
+      case 'l':
+      case 'L':
+        final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
+        printStatus('Connected ${pluralize('view', views.length)}:');
+        for (FlutterView v in views) {
+          printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
+        }
+    }
+  }
 }
 
 class OperationResult {
@@ -1061,6 +907,176 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     default:
       return null;
+  }
+}
+
+/// Redirects terminal commands to the correct resident runner methods.
+class TerminalHandler {
+  TerminalHandler(this.residentRunner);
+
+  final ResidentRunner residentRunner;
+  bool _processingUserRequest = false;
+  StreamSubscription<void> subscription;
+
+  void setupTerminal() {
+    if (!logger.quiet) {
+      printStatus('');
+      residentRunner.printHelp(details: false);
+    }
+    terminal.singleCharMode = true;
+    subscription = terminal.keystrokes.listen(processTerminalInput);
+  }
+
+  void registerSignalHandlers() {
+    assert(residentRunner.stayResident);
+    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart)
+      return;
+    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+  }
+
+  /// Returns [true] if the input has been handled by this function.
+  Future<bool> _commonTerminalInputHandler(String character) async {
+    printStatus(''); // the key the user tapped might be on this line
+    switch(character) {
+      case 'a':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugToggleProfileWidgetBuilds();
+          return true;
+        }
+        return false;
+      case 'd':
+      case 'D':
+        await residentRunner.detach();
+        return true;
+      case 'h':
+      case 'H':
+      case '?':
+        // help
+        residentRunner.printHelp(details: true);
+        return true;
+      case 'i':
+      case 'I':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugToggleWidgetInspector();
+          return true;
+        }
+        return false;
+      case 'L':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpLayerTree();
+          return true;
+        }
+        return false;
+      case 'o':
+      case 'O':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugTogglePlatform();
+          return true;
+        }
+        return false;
+      case 'p':
+        if (residentRunner.supportsServiceProtocol && residentRunner.isRunningDebug) {
+          await residentRunner.debugToggleDebugPaintSizeEnabled();
+          return true;
+        }
+        return false;
+      case 'P':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugTogglePerformanceOverlayOverride();
+          return true;
+        }
+        return false;
+      case 'q':
+      case 'Q':
+        // exit
+        await residentRunner.exit();
+        return true;
+      case 's':
+        for (FlutterDevice device in residentRunner.flutterDevices) {
+          if (device.device.supportsScreenshot)
+            await residentRunner.screenshot(device);
+        }
+        return true;
+      case 'S':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
+          return true;
+        }
+        return false;
+      case 't':
+      case 'T':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpRenderTree();
+          return true;
+        }
+        return false;
+      case 'U':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+          return true;
+        }
+        return false;
+      case 'w':
+      case 'W':
+        if (residentRunner.supportsServiceProtocol) {
+          await residentRunner.debugDumpApp();
+          return true;
+        }
+        return false;
+      case 'z':
+      case 'Z':
+        await residentRunner.debugToggleDebugCheckElevationsEnabled();
+        return true;
+    }
+
+    return false;
+  }
+
+
+  Future<void> processTerminalInput(String command) async {
+    // When terminal doesn't support line mode, '\n' can sneak into the input.
+    command = command.trim();
+    if (_processingUserRequest) {
+      printTrace('Ignoring terminal input: "$command" because we are busy.');
+      return;
+    }
+    _processingUserRequest = true;
+    try {
+      final bool handled = await _commonTerminalInputHandler(command);
+      if (!handled)
+        await residentRunner.handleTerminalCommand(command);
+    } catch (error, st) {
+      printError('$error\n$st');
+      await _cleanUpAndExit(null);
+    } finally {
+      _processingUserRequest = false;
+    }
+  }
+
+  Future<void> _handleSignal(io.ProcessSignal signal) async {
+    if (_processingUserRequest) {
+      printTrace('Ignoring signal: "$signal" because we are busy.');
+      return;
+    }
+    _processingUserRequest = true;
+
+    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
+
+    try {
+      await residentRunner.restart(fullRestart: fullRestart);
+    } finally {
+      _processingUserRequest = false;
+    }
+  }
+
+  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
+    terminal.singleCharMode = false;
+    await subscription.cancel();
+    await residentRunner.cleanupAfterSignal();
+    io.exit(0);
   }
 }
 

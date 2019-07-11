@@ -22,7 +22,6 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
-  'build_daemon': '0.6.1', // Crashes at 1.0
   'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
   'test_api': '0.2.5', //  |
   'test_core': '0.2.5' //  |
@@ -77,9 +76,6 @@ class UpdatePackagesCommand extends FlutterCommand {
         negatable: false,
       );
   }
-
-  @override
-  bool get isExperimental => true;
 
   @override
   final String name = 'update-packages';
@@ -729,9 +725,11 @@ class PubspecYaml {
     // Merge the lists of dependencies we've seen in this file from dependencies, dev dependencies,
     // and the dependencies we know this file mentions that are already pinned
     // (and which didn't get special processing above).
-    final Set<String> implied = Set<String>.from(directDependencies)
-      ..addAll(specialDependencies)
-      ..addAll(devDependencies);
+    final Set<String> implied = <String>{
+      ...directDependencies,
+      ...specialDependencies,
+      ...devDependencies,
+    };
 
     // Create a new set to hold the list of packages we've already processed, so
     // that we don't redundantly process them multiple times.
@@ -752,12 +750,12 @@ class PubspecYaml {
       transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
 
     // Build a sorted list of all dependencies for the checksum.
-    final Set<String> checksumDependencies = <String>{}
-      ..addAll(directDependencies)
-      ..addAll(devDependencies)
-      ..addAll(transitiveDependenciesAsList)
-      ..addAll(transitiveDevDependenciesAsList);
-    checksumDependencies.removeAll(specialDependencies);
+    final Set<String> checksumDependencies = <String>{
+      ...directDependencies,
+      ...devDependencies,
+      ...transitiveDependenciesAsList,
+      ...transitiveDevDependenciesAsList,
+    }..removeAll(specialDependencies);
 
     // Add a blank line before and after each section to keep the resulting output clean.
     transitiveDependencyOutput

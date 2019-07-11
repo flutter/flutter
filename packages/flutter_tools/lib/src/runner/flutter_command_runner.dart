@@ -543,7 +543,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
       final PackageMap packageMap = PackageMap(kPackagesFileName);
-      final Uri flutterUri = packageMap.map['flutter'];
+      Uri flutterUri;
+      try {
+        flutterUri = packageMap.map['flutter'];
+      } on FormatException {
+        // We're not quite sure why this can happen, perhaps the user
+        // accidentally edited the .packages file. Re-running pub should
+        // fix the issue, and we definitely shouldn't crash here.
+        printTrace('Failed to parse .packages file to check flutter dependency.');
+        return;
+      }
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib

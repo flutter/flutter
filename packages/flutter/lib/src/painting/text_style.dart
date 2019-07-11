@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, S
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'colors.dart';
 import 'strut_style.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
@@ -105,17 +106,33 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ### Line height
 ///
+/// By default, text will layout with line height as defined by the font.
+/// Font-metrics defined line height may be taller or shorter than the font size.
+/// The [height] property allows manual adjustment of the height of the line as
+/// a multiple of [fontSize]. For most fonts, setting [height] to 1.0 is not
+/// the same as omitting or setting height to null. The following diagram
+/// illustrates the difference between the font-metrics defined line height and
+/// the line height produced with `height: 1.0` (also known as the EM-square):
+///
+/// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+///
 /// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
 /// height is set to 5 times the font size, so that the text is very spaced out.
+/// Since the `fontSize` is set to 10, the final height of the line is
+/// 50 pixels.
 ///
 /// ```dart
 /// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(height: 5.0),
+///   style: TextStyle(fontSize: 10, height: 5.0),
 /// )
 /// ```
 /// {@end-tool}
+///
+/// Examples of the resulting heights from different values of `TextStyle.height`:
+///
+/// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
 /// ### Wavy red underline with black text
 ///
@@ -438,9 +455,28 @@ class TextStyle extends Diagnosticable {
 
   /// The height of this text span, as a multiple of the font size.
   ///
-  /// If applied to the root [TextSpan], this value sets the line height, which
-  /// is the minimum distance between subsequent text baselines, as multiple of
-  /// the font size.
+  /// When [height] is null or omitted, the line height will be determined
+  /// by the font's metrics directly, which may differ from the fontSize.
+  /// When [height] is non-null, the line height of the span of text will be a
+  /// multiple of [fontSize] and be exactly `fontSize * height` logical pixels
+  /// tall.
+  ///
+  /// For most fonts, setting [height] to 1.0 is not the same as omitting or
+  /// setting height to null because the [fontSize] sets the height of the EM-square,
+  /// which is different than the font provided metrics for line height. The
+  /// following diagram illustrates the difference between the font-metrics
+  /// defined line height and the line height produced with `height: 1.0`
+  /// (which forms the upper and lower edges of the EM-square):
+  ///
+  /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+  ///
+  /// {@tool sample}
+  ///
+  /// Examples of the resulting line heights from different values of `TextStyle.height`:
+  ///
+  /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
+  ///
+  /// {@end-tool}
   final double height;
 
   /// The locale used to select region-specific glyphs.
@@ -1091,8 +1127,8 @@ class TextStyle extends Diagnosticable {
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
-    styles.add(DiagnosticsProperty<Color>('${prefix}backgroundColor', backgroundColor, defaultValue: null));
+    styles.add(ColorProperty('${prefix}color', color, defaultValue: null));
+    styles.add(ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
     styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
@@ -1124,7 +1160,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');

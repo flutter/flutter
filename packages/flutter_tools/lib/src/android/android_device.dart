@@ -26,6 +26,7 @@ import '../protocol_discovery.dart';
 
 import 'adb.dart';
 import 'android.dart';
+import 'android_console.dart';
 import 'android_sdk.dart';
 
 enum _HardwareType { emulator, physical }
@@ -72,7 +73,12 @@ class AndroidDevice extends Device {
     this.productID,
     this.modelID,
     this.deviceCodeName,
-  }) : super(id);
+  }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.android,
+      ephemeral: true,
+  );
 
   final String productID;
   final String modelID;
@@ -129,6 +135,55 @@ class AndroidDevice extends Device {
     return _isLocalEmulator;
   }
 
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  @override
+  Future<String> get emulatorId async {
+    if (!(await isLocalEmulator))
+      return null;
+
+    // Emulators always have IDs in the format emulator-(port) where port is the
+    // Android Console port number.
+    final RegExp emulatorPortRegex = RegExp(r'emulator-(\d+)');
+
+    final Match portMatch = emulatorPortRegex.firstMatch(id);
+    if (portMatch == null || portMatch.groupCount < 1) {
+      return null;
+    }
+
+    const String host = 'localhost';
+    final int port = int.parse(portMatch.group(1));
+    printTrace('Fetching avd name for $name via Android console on $host:$port');
+
+    try {
+      final Socket socket = await androidConsoleSocketFactory(host, port);
+      final AndroidConsole console = AndroidConsole(socket);
+
+      try {
+        await console
+            .connect()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('Connection timed out'));
+
+        return await console
+            .getAvdName()
+            .timeout(timeoutConfiguration.fastOperation,
+                onTimeout: () => throw TimeoutException('"avd name" timed out'));
+      } finally {
+        console.destroy();
+      }
+    } catch (e) {
+      printTrace('Failed to fetch avd name for emulator at $host:$port: $e');
+      // If we fail to connect to the device, we should not fail so just return
+      // an empty name. This data is best-effort.
+      return null;
+    }
+  }
+
   @override
   Future<TargetPlatform> get targetPlatform async {
     if (_platform == null) {
@@ -164,7 +219,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
+    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -382,8 +437,8 @@ class AndroidDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
+    bool usesTerminalUi = true,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
@@ -391,8 +446,7 @@ class AndroidDevice extends Device {
     final TargetPlatform devicePlatform = await targetPlatform;
     if (!(devicePlatform == TargetPlatform.android_arm ||
           devicePlatform == TargetPlatform.android_arm64) &&
-        !(debuggingOptions.buildInfo.isDebug ||
-          debuggingOptions.buildInfo.isDynamic)) {
+        !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
@@ -466,38 +520,40 @@ class AndroidDevice extends Device {
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
+      if (traceStartup)
+        ...<String>['--ez', 'trace-startup', 'true'],
+      if (route != null)
+        ...<String>['--es', 'route', route],
+      if (debuggingOptions.enableSoftwareRendering)
+        ...<String>['--ez', 'enable-software-rendering', 'true'],
+      if (debuggingOptions.skiaDeterministicRendering)
+        ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
+      if (debuggingOptions.traceSkia)
+        ...<String>['--ez', 'trace-skia', 'true'],
+      if (debuggingOptions.traceSystrace)
+        ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.dumpSkpOnShaderCompilation)
+        ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
+      if (debuggingOptions.debuggingEnabled)
+        ...<String>[
+          if (debuggingOptions.buildInfo.isDebug)
+            ...<String>[
+              ...<String>['--ez', 'enable-checked-mode', 'true'],
+              ...<String>['--ez', 'verify-entry-points', 'true'],
+            ],
+          if (debuggingOptions.startPaused)
+            ...<String>['--ez', 'start-paused', 'true'],
+          if (debuggingOptions.disableServiceAuthCodes)
+            ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+          if (debuggingOptions.dartFlags.isNotEmpty)
+            ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+          if (debuggingOptions.useTestFonts)
+            ...<String>['--ez', 'use-test-fonts', 'true'],
+          if (debuggingOptions.verboseSystemLogs)
+            ...<String>['--ez', 'verbose-logging', 'true'],
+        ],
+      apk.launchActivity,
     ];
-
-    if (traceStartup)
-      cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (route != null)
-      cmd.addAll(<String>['--es', 'route', route]);
-    if (debuggingOptions.enableSoftwareRendering)
-      cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
-    if (debuggingOptions.skiaDeterministicRendering)
-      cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
-    if (debuggingOptions.traceSkia)
-      cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
-    if (debuggingOptions.traceSystrace)
-      cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
-    if (debuggingOptions.dumpSkpOnShaderCompilation)
-      cmd.addAll(<String>['--ez', 'dump-skp-on-shader-compilation', 'true']);
-    if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildInfo.isDebug) {
-        cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
-        cmd.addAll(<String>['--ez', 'verify-entry-points', 'true']);
-      }
-      if (debuggingOptions.startPaused)
-        cmd.addAll(<String>['--ez', 'start-paused', 'true']);
-      if (debuggingOptions.disableServiceAuthCodes)
-        cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
-      if (debuggingOptions.useTestFonts)
-        cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
-      if (debuggingOptions.verboseSystemLogs) {
-        cmd.addAll(<String>['--ez', 'verbose-logging', 'true']);
-      }
-    }
-    cmd.add(apk.launchActivity);
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {

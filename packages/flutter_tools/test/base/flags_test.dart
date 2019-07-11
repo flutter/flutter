@@ -17,7 +17,7 @@ void main() {
   Cache.disableLocking();
 
   Future<void> runCommand(Iterable<String> flags, _TestMethod testMethod) async {
-    final List<String> args = <String>['test']..addAll(flags);
+    final List<String> args = <String>['test', ...flags];
     final _TestCommand command = _TestCommand(testMethod);
     await createTestCommandRunner(command).run(args);
   }

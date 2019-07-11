@@ -68,7 +68,6 @@ void main() {
     expect(description, <String>[
       'trackHeight: 7.0',
       'activeTrackColor: Color(0xff000001)',
-      'activeTrackColor: Color(0xff000001)',
       'inactiveTrackColor: Color(0xff000002)',
       'disabledActiveTrackColor: Color(0xff000003)',
       'disabledInactiveTrackColor: Color(0xff000004)',
@@ -161,6 +160,30 @@ void main() {
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x1f)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
+  });
+
+  testWidgets('SliderThemeData generates correct shapes for fromPrimaryColors', (WidgetTester tester) async {
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xdecaface);
+    const Color customColor4 = Color(0xfeedcafe);
+
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+      primaryColor: customColor1,
+      primaryColorDark: customColor2,
+      primaryColorLight: customColor3,
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+    );
+
+    expect(sliderTheme.overlayShape, const RoundSliderOverlayShape());
+    expect(sliderTheme.tickMarkShape, const RoundSliderTickMarkShape());
+    expect(sliderTheme.thumbShape, const RoundSliderThumbShape());
+    expect(sliderTheme.trackShape, const RoundedRectSliderTrackShape());
+    expect(sliderTheme.valueIndicatorShape, const PaddleSliderValueIndicatorShape());
+    expect(sliderTheme.rangeTickMarkShape, const RoundRangeSliderTickMarkShape());
+    expect(sliderTheme.rangeThumbShape, const RoundRangeSliderThumbShape());
+    expect(sliderTheme.rangeTrackShape, const RoundedRectRangeSliderTrackShape());
+    expect(sliderTheme.rangeValueIndicatorShape, const PaddleRangeSliderValueIndicatorShape());
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
@@ -505,7 +528,8 @@ void main() {
         ),
     );
     await gesture.up();
-  });
+  }, skip: isBrowser
+  );
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);

@@ -510,6 +510,8 @@ class MediaQueryData {
 /// exception, unless the `nullOk` argument is set to true, in which case it
 /// returns null.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=A3WrA4zAaPw}
+///
 /// See also:
 ///
 ///  * [WidgetsApp] and [MaterialApp], which introduce a [MediaQuery] and keep

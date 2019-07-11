@@ -13,7 +13,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
-  group(WebDevice, () {
+  group(ChromeDevice, () {
    MockChromeLauncher mockChromeLauncher;
    MockPlatform mockPlatform;
    MockProcessManager mockProcessManager;
@@ -26,16 +26,30 @@ void main() {
         return null;
       });
     });
+
+    test('Defaults', () async {
+      final ChromeDevice chromeDevice = ChromeDevice();
+
+      expect(chromeDevice.name, 'Chrome');
+      expect(chromeDevice.id, 'chrome');
+      expect(chromeDevice.supportsHotReload, true);
+      expect(chromeDevice.supportsHotRestart, true);
+      expect(chromeDevice.supportsStartPaused, true);
+      expect(chromeDevice.supportsFlutterExit, true);
+      expect(chromeDevice.supportsScreenshot, false);
+      expect(await chromeDevice.isLocalEmulator, false);
+    });
+
     testUsingContext('Invokes version command on non-Windows platforms', () async{
       when(mockPlatform.isWindows).thenReturn(false);
       when(mockProcessManager.canRun('chrome.foo')).thenReturn(true);
       when(mockProcessManager.run(<String>['chrome.foo', '--version'])).thenAnswer((Invocation invocation) async {
         return MockProcessResult(0, 'ABC');
       });
-      final WebDevice webDevice = WebDevice();
+      final ChromeDevice chromeDevice = ChromeDevice();
 
-      expect(webDevice.isSupported(), true);
-      expect(await webDevice.sdkNameAndVersion, 'ABC');
+      expect(chromeDevice.isSupported(), true);
+      expect(await chromeDevice.sdkNameAndVersion, 'ABC');
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
       ProcessManager: () => mockProcessManager,
@@ -53,10 +67,10 @@ void main() {
       ])).thenAnswer((Invocation invocation) async {
         return MockProcessResult(0, r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A');
       });
-      final WebDevice webDevice = WebDevice();
+      final ChromeDevice chromeDevice = ChromeDevice();
 
-      expect(webDevice.isSupported(), true);
-      expect(await webDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
+      expect(chromeDevice.isSupported(), true);
+      expect(await chromeDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
       ProcessManager: () => mockProcessManager,

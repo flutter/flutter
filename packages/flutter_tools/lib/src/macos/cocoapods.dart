@@ -57,8 +57,8 @@ enum CocoaPodsStatus {
 class CocoaPods {
   Future<String> _versionText;
 
-  String get cocoaPodsMinimumVersion => '1.0.0';
-  String get cocoaPodsRecommendedVersion => '1.5.0';
+  String get cocoaPodsMinimumVersion => '1.6.0';
+  String get cocoaPodsRecommendedVersion => '1.6.0';
 
   Future<String> get cocoaPodsVersionText {
     _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {

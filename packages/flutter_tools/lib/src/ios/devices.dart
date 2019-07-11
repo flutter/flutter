@@ -45,7 +45,7 @@ class IOSDeploy {
       '--bundle',
       bundlePath,
       '--no-wifi',
-      '--justlaunch',
+      '--no-interactive',
     ];
     if (launchArguments.isNotEmpty) {
       launchCommand.add('--args');
@@ -114,7 +114,12 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(String id, { this.name, String sdkVersion })
       : _sdkVersion = sdkVersion,
-        super(id) {
+        super(
+          id,
+          category: Category.mobile,
+          platformType: PlatformType.ios,
+          ephemeral: true,
+      ) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }
@@ -139,6 +144,9 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => false;
+
+  @override
+  Future<String> get emulatorId async => null;
 
   @override
   bool get supportsStartPaused => false;
@@ -282,6 +290,11 @@ class IOSDevice extends Device {
 
     if (debuggingOptions.disableServiceAuthCodes)
       launchArguments.add('--disable-service-auth-codes');
+
+    if (debuggingOptions.dartFlags.isNotEmpty) {
+      final String dartFlags = debuggingOptions.dartFlags;
+      launchArguments.add('--dart-flags="$dartFlags"');
+    }
 
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');

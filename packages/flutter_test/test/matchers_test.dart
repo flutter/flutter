@@ -326,10 +326,35 @@ void main() {
     });
 
     group('matches', () {
+
       testWidgets('if comparator succeeds', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(finder, matchesGoldenFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+
+      testWidgets('Comparator succeeds incorporating version number', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesGoldenFile(
+          'foo.png',
+          version: 1,
+        ));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, hasLength(greaterThan(0)));
+        expect(comparator.golden, Uri.parse('foo.1.png'));
+      });
+
+      testWidgets('Comparator succeeds with null version number', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesGoldenFile(
+          'foo.png',
+          version: null,
+        ));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
         expect(comparator.golden, Uri.parse('foo.png'));
@@ -386,6 +411,40 @@ void main() {
         } on TestFailure catch (error) {
           expect(comparator.invocation, isNull);
           expect(error.message, contains('too many widgets'));
+        }
+      });
+
+      testWidgets('Comparator failure incorporates version number', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.returnFalse;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile(
+            'foo.png',
+            version: 1,
+          ));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('does not match'));
+          expect(error.message, contains('foo.1.png'));
+        }
+      });
+
+      testWidgets('Comparator failure with null version number', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.returnFalse;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesGoldenFile(
+            'foo.png',
+            version: null,
+          ));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('does not match'));
+          expect(error.message, contains('foo.png'));
         }
       });
     });
@@ -538,6 +597,7 @@ void main() {
          isSelected: true,
          isButton: true,
          isTextField: true,
+         isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
          isEnabled: true,

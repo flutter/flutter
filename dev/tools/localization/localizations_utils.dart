@@ -299,7 +299,7 @@ Future<void> precacheLanguageAndRegionTags() async {
   final HttpClient client = HttpClient();
   final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
   final HttpClientResponse response = await request.close();
-  final String body = (await response.transform<String>(utf8.decoder).toList()).join('');
+  final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
   client.close(force: true);
   final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (Map<String, List<String>> section in sections) {

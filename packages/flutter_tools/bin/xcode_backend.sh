@@ -76,7 +76,7 @@ BuildApp() {
       EchoError "If that is not set, the CONFIGURATION environment variable is used."
       EchoError ""
       EchoError "You can fix this by either adding an appropriately named build"
-      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
       EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
       EchoError "========================================================================"
       exit -1;;
@@ -249,7 +249,7 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                  \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \

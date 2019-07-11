@@ -84,7 +84,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     markNeedsLayout();
   }
 
-  ui.Window _window;
+  final ui.Window _window;
 
   /// Whether Flutter should automatically compute the desired system UI.
   ///

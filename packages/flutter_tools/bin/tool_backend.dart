@@ -13,7 +13,7 @@ Future<void> main(List<String> arguments) async {
   final String projectDirectory = Platform.environment['PROJECT_DIR'];
   final bool verbose = Platform.environment['VERBOSE_SCRIPT_LOGGING'] != null;
   final bool trackWidgetCreation = Platform.environment['TRACK_WIDGET_CREATION'] != null;
-  final String flutterTarget = Platform.environment['FLUTTER_TARGET'] ?? 'lib/main.dart';
+  final String flutterTarget = Platform.environment['FLUTTER_TARGET'] ?? path.join('lib', 'main.dart');
   final String flutterEngine = Platform.environment['FLUTTER_ENGINE'];
   final String localEngine = Platform.environment['LOCAL_ENGINE'];
   final String flutterRoot = Platform.environment['FLUTTER_ROOT'];

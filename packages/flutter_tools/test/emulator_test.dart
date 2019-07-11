@@ -9,6 +9,7 @@ import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -45,11 +46,11 @@ void main() {
 
     testUsingContext('getEmulatorsById', () async {
       final _MockEmulator emulator1 =
-          _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
+          _MockEmulator('Nexus_5', 'Nexus 5', 'Google');
       final _MockEmulator emulator2 =
-          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
+          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
       final _MockEmulator emulator3 =
-          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
+          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
@@ -159,7 +160,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class _MockEmulator extends Emulator {
-  _MockEmulator(String id, this.name, this.manufacturer, this.label)
+  _MockEmulator(String id, this.name, this.manufacturer)
     : super(id, true);
 
   @override
@@ -169,7 +170,10 @@ class _MockEmulator extends Emulator {
   final String manufacturer;
 
   @override
-  final String label;
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.android;
 
   @override
   Future<void> launch() {

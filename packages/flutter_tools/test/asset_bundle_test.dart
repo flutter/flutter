@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -138,7 +139,7 @@ name: example''');
       expect(bundle.entries.length, 4);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-    });
+    }, skip: io.Platform.isWindows /* https://github.com/flutter/flutter/issues/34446 */);
   });
 
 }

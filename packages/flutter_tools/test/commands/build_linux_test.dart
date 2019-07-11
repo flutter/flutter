@@ -19,23 +19,32 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  Cache.disableLocking();
-  final MockProcessManager mockProcessManager = MockProcessManager();
-  final MockProcess mockProcess = MockProcess();
-  final MockPlatform linuxPlatform = MockPlatform();
-  final MockPlatform notLinuxPlatform = MockPlatform();
+  MockProcessManager mockProcessManager;
+  MockProcess mockProcess;
+  MockPlatform linuxPlatform;
+  MockPlatform notLinuxPlatform;
 
-  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-    return 0;
+  setUpAll(() {
+    Cache.disableLocking();
   });
-  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+    mockProcess = MockProcess();
+    linuxPlatform = MockPlatform();
+    notLinuxPlatform = MockPlatform();
+    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(linuxPlatform.isLinux).thenReturn(true);
+    when(notLinuxPlatform.isLinux).thenReturn(false);
   });
-  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(linuxPlatform.isLinux).thenReturn(true);
-  when(notLinuxPlatform.isLinux).thenReturn(false);
 
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
@@ -54,6 +63,7 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
@@ -69,6 +79,7 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       'make',

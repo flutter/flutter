@@ -15,6 +15,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
@@ -135,9 +136,9 @@ class FlutterDriver {
        _driverId = _nextDriverId++;
 
   static const String _flutterExtensionMethodName = 'ext.flutter.driver';
-  static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
-  static const String _getVMTimelineMethodName = '_getVMTimeline';
-  static const String _clearVMTimelineMethodName = '_clearVMTimeline';
+  static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = 'getVMTimeline';
+  static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;
@@ -520,6 +521,75 @@ class FlutterDriver {
   /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [RenderObject] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [RenderObject] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [RenderObject]s are responsible for positioning, layout, and painting on
+  /// the screen, based on the configuration from a [Widget]. Callers that need
+  /// information about size or position should use this method.
+  ///
+  /// A widget may indirectly create multiple [RenderObject]s, which each
+  /// implement some aspect of the widget configuration. A 1:1 relationship
+  /// should not be assumed.
+  ///
+  /// See also:
+  ///
+  ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
+  Future<Map<String, Object>> getRenderObjectDiagnostics(
+      SerializableFinder finder, {
+      int subtreeDepth = 0,
+      bool includeProperties = true,
+      Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [Widget] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [Widget] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [Widget]s describe configuration for the rendering tree. Individual
+  /// widgets may create multiple [RenderObject]s to actually layout and paint
+  /// the desired configuration.
+  ///
+  /// See also:
+  ///
+  ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
+  ///    [RenderObject].
+  Future<Map<String, Object>> getWidgetDiagnostics(
+    SerializableFinder finder, {
+    int subtreeDepth = 0,
+    bool includeProperties = true,
+    Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
   }
 
   /// Tell the driver to perform a scrolling action.

@@ -123,6 +123,28 @@ void main() {
     expect(_called, true);
   });
 
+  testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
+    String _value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onChanged: (String value) {
+                _value = value;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'Soup');
+    await tester.pump();
+    expect(_value, 'Soup');
+  });
+
   testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
     int _validateCalled = 0;
 

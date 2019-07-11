@@ -478,7 +478,7 @@ void main() {
     );
     expect(children.sublist(0, 21).any((RenderBox r) => r.attached), false);
     expect(children.sublist(21, 30).every((RenderBox r) => r.attached), true);
-  });
+  }, skip: isBrowser);
 
   test('RenderSliverGrid calculates correct geometry', () {
     // Viewport is 800x600, each grid element is 400x100, giving us space for 12 visible children

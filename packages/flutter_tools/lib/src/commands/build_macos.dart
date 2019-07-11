@@ -16,6 +16,7 @@ import 'build.dart';
 /// A command to build a macos desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand() {
+    usesTargetOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app.',
@@ -59,7 +60,11 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!flutterProject.macos.existsSync()) {
       throwToolExit('No macOS desktop project configured.');
     }
-    await buildMacOS(flutterProject, buildInfo);
+    await buildMacOS(
+      flutterProject: flutterProject,
+      buildInfo: buildInfo,
+      targetOverride: targetFile,
+    );
     return null;
   }
 }

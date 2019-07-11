@@ -113,16 +113,17 @@ void main() {
         scrollMetrics: defaultMetrics,
       );
 
-      final List<ScrollMetrics> metricsList =
-        <ScrollMetrics> [startingMetrics.copyWith(pixels: 0.01)]
-        ..addAll(List<ScrollMetrics>.generate(
-            (maxExtent/viewportDimension).round(),
-            (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension),
-          ).where((ScrollMetrics metrics) => !metrics.outOfRange))
-        ..add(startingMetrics.copyWith(pixels: maxExtent - 0.01));
+      final List<ScrollMetrics> metricsList = <ScrollMetrics> [
+        startingMetrics.copyWith(pixels: 0.01),
+        ...List<ScrollMetrics>.generate(
+          (maxExtent / viewportDimension).round(),
+          (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension),
+        ).where((ScrollMetrics metrics) => !metrics.outOfRange),
+        startingMetrics.copyWith(pixels: maxExtent - 0.01),
+      ];
 
       double lastCoefficient;
-      for(ScrollMetrics metrics in metricsList) {
+      for (ScrollMetrics metrics in metricsList) {
         painter.update(metrics, metrics.axisDirection);
         painter.paint(testCanvas, size);
 

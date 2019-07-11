@@ -28,11 +28,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         allowed: <String>['android-arm', 'android-arm64', 'ios'],
       )
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('build-shared-library',
-        negatable: false,
-        defaultsTo: false,
-        help: 'Compile to a *.so file (requires NDK when building for Android).',
-      )
       ..addFlag('report-timings',
         negatable: false,
         defaultsTo: false,
@@ -122,7 +117,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
-            buildSharedLibrary: false,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
           ).then<int>((int buildExitCode) {
             return buildExitCode;
@@ -133,10 +127,13 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
           final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>['lipo']
-            ..addAll(dylibs)
-            ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
-          );
+          await runCheckedAsync(<String>[
+            'lipo',
+            ...dylibs,
+            '-create',
+            '-output',
+            fs.path.join(outputPath, 'App.framework', 'App'),
+          ]);
         } else {
           status?.cancel();
           exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
@@ -152,7 +149,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           mainPath: mainPath,
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
-          buildSharedLibrary: argResults['build-shared-library'],
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
         );
         if (snapshotExitCode != 0) {

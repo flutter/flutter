@@ -244,21 +244,6 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addFlag('dynamic',
-      hide: !verboseHelp,
-      negatable: false,
-      help: 'Enable dynamic code. Only allowed with --release or --profile.');
-  }
-
-  void addDynamicModeFlags({ bool verboseHelp = false }) {
-    argParser.addOption('compilation-trace-file',
-        defaultsTo: 'compilation.txt',
-        hide: !verboseHelp,
-        help: 'Filename of Dart compilation trace file. This file will be produced\n'
-              'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
-              '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
-              'some code by the offline compiler.',
-    );
   }
 
   void usesFuchsiaOptions({ bool hide = false }) {
@@ -286,27 +271,15 @@ abstract class FlutterCommand extends Command<void> {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic']
-        : false;
-
     if (argResults['debug']) {
-      if (dynamicFlag)
-        throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
     }
-    if (argResults['profile'])
-      return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (argResults['release'])
-      return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-
-    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
-      throw ToolExit('Error: --dynamic requires --release or --profile.');
-    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
-      return BuildMode.dynamicRelease;
-    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
-      return BuildMode.dynamicProfile;
-
+    if (argResults['profile']) {
+      return BuildMode.profile;
+    }
+    if (argResults['release']) {
+      return BuildMode.release;
+    }
     return _defaultBuildMode;
   }
 
@@ -349,9 +322,6 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['flavor']
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
-          ? argResults['compilation-trace-file']
-          : null,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
@@ -408,10 +378,9 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
-        final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand(commandPath);
+          commandResult = await verifyThenRunCommand();
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
@@ -419,29 +388,64 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          if (commandPath != null) {
-            final List<String> labels = <String>[];
-            if (commandResult?.exitStatus != null)
-              labels.add(getEnumName(commandResult.exitStatus));
-            if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-              labels.addAll(commandResult.timingLabelParts);
 
-            final String label = labels
-                .where((String label) => !isBlank(label))
-                .join('-');
-            flutterUsage.sendTiming(
-              'flutter',
-              name,
-              // If the command provides its own end time, use it. Otherwise report
-              // the duration of the entire execution.
-              (commandResult?.endTimeOverride ?? endTime).difference(startTime),
-              // Report in the form of `success-[parameter1-parameter2]`, all of which
-              // can be null if the command doesn't provide a FlutterCommandResult.
-              label: label == '' ? null : label,
-            );
-          }
+          await _sendUsage(commandResult, startTime, endTime);
         }
       },
+    );
+  }
+
+  /// Logs data about this command.
+  ///
+  /// For example, the command path (e.g. `build/apk`) and the result,
+  /// as well as the time spent running it.
+  Future<void> _sendUsage(FlutterCommandResult commandResult, DateTime startTime, DateTime endTime) async {
+    final String commandPath = await usagePath;
+
+    if (commandPath == null) {
+      return;
+    }
+
+    // Send screen.
+    final Map<String, String> currentUsageValues = await usageValues;
+    final Map<String, String> additionalUsageValues = <String, String>{
+      ...?currentUsageValues,
+    };
+    if (commandResult != null) {
+      switch (commandResult.exitStatus) {
+        case ExitStatus.success:
+          additionalUsageValues[kCommandResult] = 'success';
+          break;
+        case ExitStatus.warning:
+          additionalUsageValues[kCommandResult] = 'warning';
+          break;
+        case ExitStatus.fail:
+          additionalUsageValues[kCommandResult] = 'fail';
+          break;
+      }
+    }
+    flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+
+    // Send timing.
+    final List<String> labels = <String>[
+      if (commandResult?.exitStatus != null)
+        getEnumName(commandResult.exitStatus),
+      if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+        ...commandResult.timingLabelParts,
+    ];
+
+    final String label = labels
+        .where((String label) => !isBlank(label))
+        .join('-');
+    flutterUsage.sendTiming(
+      'flutter',
+      name,
+      // If the command provides its own end time, use it. Otherwise report
+      // the duration of the entire execution.
+      (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+      // Report in the form of `success-[parameter1-parameter2]`, all of which
+      // can be null if the command doesn't provide a FlutterCommandResult.
+      label: label == '' ? null : label,
     );
   }
 
@@ -453,7 +457,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -470,22 +474,14 @@ abstract class FlutterCommand extends Command<void> {
 
     setupApplicationPackages();
 
-    if (commandPath != null) {
-      final Map<String, String> additionalUsageValues = await usageValues;
-      flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
-    }
-
     return await runCommand();
   }
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  /// Defaults to [DevelopmentArtifact.universal].
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
   };
 
   /// Subclasses must implement this to execute the command.
@@ -503,7 +499,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices().toList();
+    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -512,20 +508,6 @@ abstract class FlutterCommand extends Command<void> {
       printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      printNoConnectedDevices();
-      return null;
-    }
-
-    devices = devices.where((Device device) => device.isSupported()).toList();
-    // If the user has not specified all devices and has multiple connected
-    // then filter then list by those supported in the current project. If
-    // this ends up with a single device we can proceed as normal.
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      final FlutterProject flutterProject = FlutterProject.current();
-      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
-    }
-
-    if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
@@ -569,7 +551,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -665,17 +647,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;

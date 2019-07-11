@@ -21,10 +21,10 @@ class MacOSWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isMacOS;
 
   @override
-  bool get canLaunchDevices => flutterDesktopEnabled;
+  bool get canLaunchDevices => platform.isMacOS && flutterDesktopEnabled;
 
   @override
-  bool get canListDevices => flutterDesktopEnabled;
+  bool get canListDevices => platform.isMacOS && flutterDesktopEnabled;
 
   @override
   bool get canListEmulators => false;

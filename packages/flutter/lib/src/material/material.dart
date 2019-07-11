@@ -289,8 +289,8 @@ class Material extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
@@ -561,7 +561,7 @@ abstract class InkFeature {
   /// Typically used by subclasses to call
   /// [MaterialInkController.markNeedsPaint] when they need to repaint.
   MaterialInkController get controller => _controller;
-  _RenderInkFeatures _controller;
+  final _RenderInkFeatures _controller;
 
   /// The render box whose visual position defines the frame of reference for this ink feature.
   final RenderBox referenceBox;
@@ -691,8 +691,8 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 

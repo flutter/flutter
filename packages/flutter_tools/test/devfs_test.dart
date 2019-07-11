@@ -250,6 +250,7 @@ class MockVM implements VM {
     Map<String, dynamic> params = const <String, dynamic>{},
     Duration timeout,
     bool timeoutFatal = true,
+    bool truncateLogs = true,
   }) async {
     _service.messages.add('$method $params');
     return <String, dynamic>{'success': true};

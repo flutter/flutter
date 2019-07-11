@@ -182,6 +182,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
         'This is a multi-line message,',
         '  with a non-Flutter log message following it.',
       ]);
+      expect(device.category, Category.mobile);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });

@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
@@ -185,6 +186,16 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
+
+  @override
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) {
+    return getDevices().toList();
+  }
+
+  @override
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
+  }
 }
 
 class MockAndroidLicenseValidator extends AndroidLicenseValidator {
@@ -332,8 +343,12 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {
+  MockFlutterVersion({bool isStable = false}) : _isStable = isStable;
+
+  final bool _isStable;
+
   @override
-  bool get isStable => false;
+  bool get isMaster => !_isStable;
 }
 
 class MockClock extends Mock implements SystemClock {}

@@ -199,8 +199,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -233,10 +233,10 @@ void main() {
   });
 
   testWidgets('color on icon theme overrides selected and unselected item colors', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
-    const Color selectedItemColor = Color(3);
-    const Color unselectedItemColor = Color(4);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const Color selectedItemColor = Color(0x00000003);
+    const Color unselectedItemColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -891,7 +891,7 @@ void main() {
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
     double builderIconSize;
@@ -1001,7 +1001,7 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(66.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
@@ -1033,7 +1033,7 @@ void main() {
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
     final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1103,7 +1103,7 @@ void main() {
           ..translate(x: 400.0)
           ..circle(x: 200.0),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
     const Key filled = Key('filled');
@@ -1434,11 +1434,14 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.2.png'),
+        matchesGoldenFile(
+          'bottom_navigation_bar.shifting_transition.$pump.png',
+          version: 2,
+        ),
         skip: !isLinux,
       );
     }
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {

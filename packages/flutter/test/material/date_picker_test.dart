@@ -19,7 +19,7 @@ void main() {
   },
     // Skip on Windows because this test is quite flaky when run on Windows,
     // until https://github.com/flutter/flutter/issues/19696 is fixed.
-    skip: isWindows,
+    skip: isWindows || isBrowser,
   );
 }
 
@@ -449,6 +449,7 @@ void _tests() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 55,
                     actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -456,7 +457,22 @@ void _tests() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 11,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  // TODO(dnfield): These shouldn't be here. https://github.com/flutter/flutter/issues/34431
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
                                   TestSemantics(
                                     actions: <SemanticsAction>[SemanticsAction.tap],
                                     label: '1, Friday, January 1, 2016',

@@ -15,10 +15,13 @@ import '../project.dart';
 import '../usage.dart';
 import 'cocoapod_utils.dart';
 
-/// Builds the macOS project through xcode build.
-// TODO(jonahwilliams): support target option.
+/// Builds the macOS project through xcodebuild.
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
-Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
+Future<void> buildMacOS({
+  FlutterProject flutterProject,
+  BuildInfo buildInfo,
+  String targetOverride,
+}) async {
   final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -27,6 +30,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
   await updateGeneratedXcodeProperties(
     project: flutterProject,
     buildInfo: buildInfo,
+    targetOverride: targetOverride,
     useMacOSConfig: true,
     setSymroot: false,
   );

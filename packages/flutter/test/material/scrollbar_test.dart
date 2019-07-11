@@ -115,8 +115,9 @@ void main() {
     final List<Invocation> invocations = <Invocation>[];
     final TestCanvas canvas = TestCanvas(invocations);
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
-    final Rect thumbRect = invocations.single.positionalArguments[0];
-    expect(thumbRect.isFinite, isTrue);
+
+    // Scrollbar is not supposed to draw anything if there isn't enough content.
+    expect(invocations.isEmpty, isTrue);
   });
 
   testWidgets('Adaptive scrollbar', (WidgetTester tester) async {

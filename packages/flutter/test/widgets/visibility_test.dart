@@ -309,5 +309,5 @@ void main() {
     log.clear();
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 }

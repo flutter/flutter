@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
+  testWidgets('SliverFillViewport control test', (WidgetTester tester) async {
     final List<Widget> children = List<Widget>.generate(20, (int i) {
       return Container(child: Text('$i', textDirection: TextDirection.ltr));
     });
@@ -91,6 +91,7 @@ void main() {
         ' │ └─child: RenderParagraph#00000\n'
         ' │   │ parentData: <none> (can use size)\n'
         ' │   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        ' │   │ semantics node: SemanticsNode#2\n'
         ' │   │ size: Size(800.0, 600.0)\n'
         ' │   │ textAlign: start\n'
         ' │   │ textDirection: ltr\n'
@@ -115,6 +116,7 @@ void main() {
         '   └─child: RenderParagraph#00000\n'
         '     │ parentData: <none> (can use size)\n'
         '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '     │ semantics node: SemanticsNode#3\n'
         '     │ size: Size(800.0, 600.0)\n'
         '     │ textAlign: start\n'
         '     │ textDirection: ltr\n'
@@ -126,6 +128,7 @@ void main() {
         '       ║   <all styles inherited>\n'
         '       ║   "1"\n'
         '       ╚═══════════\n'
+        ''
       ),
     );
   });

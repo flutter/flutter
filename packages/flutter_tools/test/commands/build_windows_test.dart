@@ -19,29 +19,40 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  Cache.disableLocking();
-  final MockProcessManager mockProcessManager = MockProcessManager();
-  final MemoryFileSystem memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
-  final MockProcess mockProcess = MockProcess();
-  final MockPlatform windowsPlatform = MockPlatform()
-      ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
-  final MockPlatform notWindowsPlatform = MockPlatform();
-  final MockVisualStudio mockVisualStudio = MockVisualStudio();
+  MockProcessManager mockProcessManager;
+  MemoryFileSystem memoryFilesystem;
+  MockProcess mockProcess;
+  MockPlatform windowsPlatform;
+  MockPlatform notWindowsPlatform;
+  MockVisualStudio mockVisualStudio;
   const String solutionPath = r'C:\windows\Runner.sln';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
   const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
-  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-    return 0;
+  setUpAll(() {
+    Cache.disableLocking();
   });
-  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+    memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
+    mockProcess = MockProcess();
+    windowsPlatform = MockPlatform()
+        ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
+    notWindowsPlatform = MockPlatform();
+    mockVisualStudio = MockVisualStudio();
+    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(windowsPlatform.isWindows).thenReturn(true);
+    when(notWindowsPlatform.isWindows).thenReturn(false);
   });
-  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(windowsPlatform.isWindows).thenReturn(true);
-  when(notWindowsPlatform.isWindows).thenReturn(false);
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
@@ -76,6 +87,7 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
@@ -93,6 +105,7 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',

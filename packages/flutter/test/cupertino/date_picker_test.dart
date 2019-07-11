@@ -815,7 +815,7 @@ void main() {
       );
 
       final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
+      expect(exception, isFlutterError);
       expect(
         exception.toString(),
         contains('Insufficient horizontal space to render the CupertinoDatePicker'),
@@ -843,7 +843,10 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
+        matchesGoldenFile(
+          'date_picker_test.datetime.initial.png',
+          version: 1,
+        ),
         skip: !isLinux
       );
 
@@ -853,7 +856,10 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
+        matchesGoldenFile(
+          'date_picker_test.datetime.drag.png',
+          version: 1,
+        ),
         skip: !isLinux
       );
     });

@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
-import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus;
+import 'package:build_runner_core/build_runner_core.dart' hide BuildStatus, OutputLocation;
 import 'package:build_daemon/data/server_log.dart';
 import 'package:build_daemon/data/build_status.dart' as build;
 import 'package:build_daemon/client.dart';
@@ -28,7 +28,7 @@ import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
 const String kMinimumBuildRunnerVersion = '1.4.0';
-const String kSupportedBuildDaemonVersion = '0.6.1';
+const String kSupportedBuildDaemonVersion = '1.0.0';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -155,7 +155,6 @@ class BuildRunner extends CodeGenerator {
         .path;
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
-    final String path = cache.getArtifactDirectory('web-sdk').path;
     try {
       final List<String> command = <String>[
         engineDartBinaryPath,
@@ -164,7 +163,6 @@ class BuildRunner extends CodeGenerator {
         'daemon',
          '--skip-build-script-check',
          '--delete-conflicting-outputs',
-         '--define', 'build|ddc=flutter_sdk_dir=$path',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(
         flutterProject.directory.path,
@@ -176,11 +174,19 @@ class BuildRunner extends CodeGenerator {
     } finally {
       status.stop();
     }
+    // Empty string indicates we should build everything.
+    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+      ..output = ''
+      ..useSymlinks = false
+      ..hoist = false,
+    );
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
-      builder.target = flutterProject.manifest.appName;
+      builder.target = 'lib';
+      builder.outputLocation = outputLocation.toBuilder();
     }));
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = 'test';
+      builder.outputLocation = outputLocation.toBuilder();
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }

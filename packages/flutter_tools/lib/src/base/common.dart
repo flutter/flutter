@@ -5,6 +5,10 @@
 import 'file_system.dart';
 import 'platform.dart';
 
+/// Whether the tool started from the daemon, as opposed to the command line.
+// TODO(jonahwilliams): remove once IDE updates have rolled.
+bool isRunningFromDaemon = false;
+
 /// Return the absolute path of the user's home directory
 String get homeDirPath {
   String path = platform.isWindows

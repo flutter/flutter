@@ -45,6 +45,12 @@ const String kCommandCreateProjectType = 'cd19';
 const String kCommandPackagesNumberPlugins = 'cd20';
 const String kCommandPackagesProjectModule = 'cd21';
 
+const String kCommandBuildBundleTargetPlatform = 'cd24';
+const String kCommandBuildBundleIsModule = 'cd25';
+
+const String kCommandResult = 'cd26';
+// Next ID: cd27
+
 Usage get flutterUsage => Usage.instance;
 
 class Usage {
@@ -66,8 +72,9 @@ class Usage {
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
+    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     // Many CI systems don't do a full git checkout.
-    if (version.endsWith('/unknown') || isRunningOnBot) {
+    if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
     }

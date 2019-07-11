@@ -17,7 +17,7 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'exampl
 TaskFunction createWebDevModeTest() {
   return () async {
     final List<String> options = <String>[
-      '--hot', '-d', 'web', '--verbose', '--resident', '--target=lib/main.dart',
+      '--hot', '-d', 'chrome', '--verbose', '--resident', '--target=lib/main.dart',
     ];
     setLocalEngineOptionIfNecessary(options);
     int hotRestartCount = 0;
@@ -37,7 +37,7 @@ TaskFunction createWebDevModeTest() {
           await packagesGet.exitCode;
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
@@ -96,7 +96,7 @@ TaskFunction createWebDevModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              <String>['run', ...options],
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },

@@ -11,11 +11,10 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 class TestAssetBundle extends CachingAssetBundle {
   TestAssetBundle(this._assetBundleMap);
 
-  Map<String, List<String>> _assetBundleMap;
+  final Map<String, List<String>> _assetBundleMap;
 
   Map<String, int> loadCallCount = <String, int>{};
 

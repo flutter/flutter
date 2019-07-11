@@ -120,6 +120,10 @@ class CupertinoTabController extends ChangeNotifier {
 /// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
 ///
+/// Adding/removing tabs, or changing the order of tabs is supported but not
+/// recommended. Doing so is against the iOS human interface guidelines, and
+/// [CupertinoTabScaffold] may lose some tabs' state in the process.
+///
 /// Use [CupertinoTabView] as the root widget of each tab to support tabs with
 /// parallel navigation state and history. Since each [CupertinoTabView] contains
 /// a [Navigator], rebuilding the [CupertinoTabView] with a different
@@ -193,6 +197,7 @@ class CupertinoTabController extends ChangeNotifier {
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
 ///  * [CupertinoPageScaffold], typical contents of an iOS modal page implementing
 ///    layout with a navigation bar on top.
+///  * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/bars/tab-bars/).
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
@@ -448,17 +453,13 @@ class _TabSwitchingView extends StatefulWidget {
 }
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
-  List<Widget> tabs;
+  List<bool> shouldBuildTab;
   List<FocusScopeNode> tabFocusNodes;
 
   @override
   void initState() {
     super.initState();
-    tabs = List<Widget>(widget.tabNumber);
-    tabFocusNodes = List<FocusScopeNode>.generate(
-      widget.tabNumber,
-      (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
-    );
+    shouldBuildTab = List<bool>.filled(widget.tabNumber, false, growable: true);
   }
 
   @override
@@ -470,10 +471,28 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   @override
   void didUpdateWidget(_TabSwitchingView oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Only partially invalidate the tabs cache to avoid breaking the current
+    // behavior. We assume that the only possible change is either:
+    // - new tabs are appended to the tab list, or
+    // - some trailing tabs are removed.
+    // If the above assumption is not true, some tabs may lose their state.
+    final int lengthDiff = widget.tabNumber - shouldBuildTab.length;
+    if (lengthDiff > 0) {
+      shouldBuildTab.addAll(List<bool>.filled(lengthDiff, false));
+    } else if (lengthDiff < 0) {
+      shouldBuildTab.removeRange(widget.tabNumber, shouldBuildTab.length);
+    }
     _focusActiveTab();
   }
 
   void _focusActiveTab() {
+    if (tabFocusNodes?.length != widget.tabNumber) {
+      tabFocusNodes = List<FocusScopeNode>.generate(
+        widget.tabNumber,
+        (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
+      );
+    }
     FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
   }
 
@@ -491,10 +510,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
       fit: StackFit.expand,
       children: List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
-
-        if (active || tabs[index] != null) {
-          tabs[index] = widget.tabBuilder(context, index);
-        }
+        shouldBuildTab[index] = active || shouldBuildTab[index];
 
         return Offstage(
           offstage: !active,
@@ -502,7 +518,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
             enabled: active,
             child: FocusScope(
               node: tabFocusNodes[index],
-              child: tabs[index] ?? Container(),
+              child: shouldBuildTab[index]
+                ? widget.tabBuilder(context, index)
+                : Container(),
             ),
           ),
         );

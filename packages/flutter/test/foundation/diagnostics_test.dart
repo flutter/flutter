@@ -52,7 +52,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap()));
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate())));
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
@@ -2097,5 +2097,42 @@ void main() {
           '════════════════════════════════════════\n'
         )
     );
+  });
+
+  test('DiagnosticsProperty for basic types has value in json', () {
+    DiagnosticsProperty<int> intProperty = DiagnosticsProperty<int>('int1', 10);
+    Map<String, Object> json = simulateJsonSerialization(intProperty);
+    expect(json['name'], 'int1');
+    expect(json['value'], 10);
+
+    intProperty = IntProperty('int2', 20);
+    json = simulateJsonSerialization(intProperty);
+    expect(json['name'], 'int2');
+    expect(json['value'], 20);
+
+    DiagnosticsProperty<double> doubleProperty = DiagnosticsProperty<double>('double', 33.3);
+    json = simulateJsonSerialization(doubleProperty);
+    expect(json['name'], 'double');
+    expect(json['value'], 33.3);
+
+    doubleProperty = DoubleProperty('double2', 33.3);
+    json = simulateJsonSerialization(doubleProperty);
+    expect(json['name'], 'double2');
+    expect(json['value'], 33.3);
+
+    final DiagnosticsProperty<bool> boolProperty = DiagnosticsProperty<bool>('bool', true);
+    json = simulateJsonSerialization(boolProperty);
+    expect(json['name'], 'bool');
+    expect(json['value'], true);
+
+    DiagnosticsProperty<String> stringProperty = DiagnosticsProperty<String>('string1', 'hello');
+    json = simulateJsonSerialization(stringProperty);
+    expect(json['name'], 'string1');
+    expect(json['value'], 'hello');
+
+    stringProperty = StringProperty('string2', 'world');
+    json = simulateJsonSerialization(stringProperty);
+    expect(json['name'], 'string2');
+    expect(json['value'], 'world');
   });
 }

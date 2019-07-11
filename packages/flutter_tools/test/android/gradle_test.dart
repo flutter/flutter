@@ -41,6 +41,18 @@ void main() {
       expect(shouldBeToolExit, isToolExit);
     });
 
+    // Regression test for https://github.com/flutter/flutter/issues/34700
+    testUsingContext('Does not return nulls in apk list', () {
+      final GradleProject gradleProject = MockGradleProject();
+      const AndroidBuildInfo buildInfo = AndroidBuildInfo(BuildInfo.debug);
+      when(gradleProject.apkFilesFor(buildInfo)).thenReturn(<String>['not_real']);
+      when(gradleProject.apkDirectory).thenReturn(fs.currentDirectory);
+
+      expect(findApkFiles(gradleProject, buildInfo), <File>[]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+    });
+
     test('androidXFailureRegex should match lines with likely AndroidX errors', () {
       final List<String> nonMatchingLines = <String>[
         ':app:preBuild UP-TO-DATE',
@@ -537,3 +549,4 @@ Platform fakePlatform(String name) {
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+class MockGradleProject extends Mock implements GradleProject {}

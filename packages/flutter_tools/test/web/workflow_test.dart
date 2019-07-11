@@ -17,7 +17,6 @@ import '../src/testbed.dart';
 void main() {
   group('WebWorkflow', () {
     Testbed testbed;
-    MockPlatform noEnvironment;
     MockPlatform notSupported;
     MockPlatform windows;
     MockPlatform linux;
@@ -30,7 +29,6 @@ void main() {
     setUpAll(() {
       unstable = MockFlutterVersion(false);
       stable = MockFlutterVersion(true);
-      noEnvironment = MockPlatform(environment: const <String, String>{});
       notSupported = MockPlatform(linux: false, windows: false, macos: false);
       windows = MockPlatform(windows: true);
       linux = MockPlatform(linux: true);
@@ -45,15 +43,6 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
     });
-
-    test('does not apply if FLUTTER_WEB is not true', ()=> testbed.run(() {
-      expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => noEnvironment,
-    }));
 
     test('Applies on Linux', () => testbed.run(() {
       expect(workflow.appliesToHostPlatform, true);
@@ -92,7 +81,7 @@ void main() {
       Platform: () => notSupported,
     }));
 
-    test('does not apply on stable brnach', () => testbed.run(() {
+    test('does not apply on stable branch', () => testbed.run(() {
       expect(workflow.appliesToHostPlatform, false);
       expect(workflow.canLaunchDevices, false);
       expect(workflow.canListDevices, false);
@@ -107,8 +96,10 @@ void main() {
 class MockFlutterVersion extends Mock implements FlutterVersion {
   MockFlutterVersion(this.isStable);
 
-  @override
   final bool isStable;
+
+  @override
+  bool get isMaster => !isStable;
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -119,7 +110,6 @@ class MockPlatform extends Mock implements Platform {
       this.macos = false,
       this.linux = false,
       this.environment = const <String, String>{
-        'FLUTTER_WEB': 'true',
         kChromeEnvironment: 'chrome',
       }});
 
