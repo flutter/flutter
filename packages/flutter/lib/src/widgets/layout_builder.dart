@@ -20,7 +20,7 @@ abstract class _GenericLayoutBuilder<ConstraintType extends Constraints> extends
     Key key,
     @required this.builder,
   }) : assert(builder != null),
-  super(key: key);
+       super(key: key);
 
   @override
   _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
