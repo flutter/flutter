@@ -1,4 +1,4 @@
-Signature: e75c275a8d7c816ae31a565e64728328
+Signature: f718d85f24031221165245bf8ee262c2
 
 UNUSED LICENSES:
 
@@ -4793,6 +4793,7 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/debugger_bindings
 FILE: ../../../third_party/skia/gm/asyncrescaleandread.cpp
 FILE: ../../../third_party/skia/gm/crbug_908646.cpp
 FILE: ../../../third_party/skia/gm/crbug_946965.cpp
+FILE: ../../../third_party/skia/gm/patharcto.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
 FILE: ../../../third_party/skia/gm/runtimeshader.cpp
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
