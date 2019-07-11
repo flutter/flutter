@@ -1343,16 +1343,17 @@ class Paint {
   }
 
   set colorFilter(ColorFilter value) {
-    if (value == null) {
+    final _ColorFilter nativeFilter = value?._toNativeColorFilter();
+    if (nativeFilter == null) {
       if (_objects != null) {
         _objects[_kColorFilterIndex] = null;
       }
     } else {
       if (_objects == null) {
         _objects = List<dynamic>(_kObjectCount);
-        _objects[_kColorFilterIndex] = value._toNativeColorFilter();
+        _objects[_kColorFilterIndex] = nativeFilter;
       } else if (_objects[_kColorFilterIndex]?.creator != value) {
-        _objects[_kColorFilterIndex] = value._toNativeColorFilter();
+        _objects[_kColorFilterIndex] = nativeFilter;
       }
     }
   }
@@ -2489,9 +2490,7 @@ class ColorFilter {
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
   const ColorFilter.mode(Color color, BlendMode blendMode)
-      : assert(color != null),
-        assert(blendMode != null),
-        _color = color,
+      : _color = color,
         _blendMode = blendMode,
         _matrix = null,
         _type = _TypeMode;
@@ -2500,8 +2499,7 @@ class ColorFilter {
   /// matrix is in row-major order and the translation column is specified in
   /// unnormalized, 0...255, space.
   const ColorFilter.matrix(List<double> matrix)
-      : assert(matrix != null, 'Color Matrix argument was null.'),
-        _color = null,
+      : _color = null,
         _blendMode = null,
         _matrix = matrix,
         _type = _TypeMatrix;
@@ -2555,8 +2553,14 @@ class ColorFilter {
   _ColorFilter _toNativeColorFilter() {
     switch (_type) {
       case _TypeMode:
+        if (_color == null || _blendMode == null) {
+          return null;
+        }
         return _ColorFilter.mode(this);
       case _TypeMatrix:
+        if (_matrix == null) {
+          return null;
+        }
         assert(_matrix.length == 20, 'Color Matrix must have 20 entries.');
         return _ColorFilter.matrix(this);
       case _TypeLinearToSrgbGamma:

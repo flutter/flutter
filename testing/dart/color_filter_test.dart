@@ -41,6 +41,14 @@ void main() {
     return bytes.buffer.asUint32List();
   }
 
+  test('ColorFilter - nulls', () async {
+    final Paint paint = Paint()..colorFilter = ColorFilter.mode(null, null);
+    expect(paint.colorFilter, null);
+
+    paint.colorFilter = ColorFilter.matrix(null);
+    expect(paint.colorFilter, null);
+  });
+
   test('ColorFilter - mode', () async {
     final Paint paint = Paint()
       ..color = green
