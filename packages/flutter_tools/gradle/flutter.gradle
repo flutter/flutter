@@ -283,17 +283,22 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    /**
+     * Returns a set with the build type names that apply to the given list of tasks
+     * required to configure the plugin dependencies.
+     */
     private Set getBuildTypesForTasks(Project project, List<String> tasksToExecute) {
         Set buildTypes = []
         tasksToExecute.each { task ->
-            if (!task.contains("assemble")) {
-                return
-            }
-            project.android.buildTypes.each {
-                if (task.endsWith('assemble')) {
-                    buildTypes.add(it)
-                } else if (task.endsWith(it.name.capitalize())) {
-                    buildTypes.add(it)
+            project.android.buildTypes.each { buildType ->
+                if (task == "androidDependencies" || task.endsWith("dependencies")) {
+                    // The tasks to query the dependencies includes all the build types.
+                    buildTypes.add(buildType)
+                } else if (task.endsWith("assemble")) {
+                    // The `assemble` task includes all the build types.
+                    buildTypes.add(buildType)
+                } else if (task.endsWith(buildType.name.capitalize())) {
+                    buildTypes.add(buildType)
                 }
             }
         }
