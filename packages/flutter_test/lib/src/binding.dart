@@ -836,15 +836,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _allowedAssetKeys = <String>{};
       return;
     }
-    final Map<String, dynamic> manifest = json.decode(
-        manifestFile.readAsStringSync());
+    final Map<String, dynamic> manifest = json.decode(manifestFile.readAsStringSync());
     _allowedAssetKeys = <String>{
       'AssetManifest.json',
+      ...manifest.values.cast<List<dynamic>>().expand<dynamic>((List<dynamic> e) => e).cast<String>(),
     };
-    for (List<dynamic> value in manifest.values) {
-      final List<String> strList = List<String>.from(value);
-      _allowedAssetKeys.addAll(strList);
-    }
   }
 
   @override

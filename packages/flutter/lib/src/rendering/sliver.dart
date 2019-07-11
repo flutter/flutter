@@ -421,14 +421,12 @@ class SliverConstraints extends Constraints {
       void verify(bool check, String message) {
         if (check)
           return;
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-        information.add(ErrorSummary('$runtimeType is not valid: $message'));
-
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-        information.add(DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType is not valid: $message'),
+          if (informationCollector != null)
+            ...informationCollector(),
+          DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty)
+        ]);
       }
       verify(axis != null, 'The "axis" is null.');
       verify(growthDirection != null, 'The "growthDirection" is null.');
@@ -700,15 +698,12 @@ class SliverGeometry extends Diagnosticable {
       void verify(bool check, String summary, {List<DiagnosticsNode> details}) {
         if (check)
           return;
-        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-        information.add(ErrorSummary('$runtimeType is not valid: $summary'));
-        if (details != null) {
-          information.addAll(details);
-        }
-        if (informationCollector != null) {
-          information.addAll(informationCollector());
-        }
-        throw FlutterError.fromParts(information);
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType is not valid: $summary'),
+          ...?details,
+          if (informationCollector != null)
+            ...informationCollector(),
+        ]);
       }
 
       verify(scrollExtent != null, 'The "scrollExtent" is null.');

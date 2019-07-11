@@ -848,7 +848,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   AnimationController _cursorBlinkOpacityController;
 
-  final LayerLink _layerLink = LayerLink();
+  final LayerLink _toolbarLayerLink = LayerLink();
+  final LayerLink _startHandleLayerLink = LayerLink();
+  final LayerLink _endHandleLayerLink = LayerLink();
+
   bool _didAutoFocus = false;
   FocusAttachment _focusAttachment;
 
@@ -1226,7 +1229,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         context: context,
         value: _value,
         debugRequiredFor: widget,
-        layerLink: _layerLink,
+        toolbarLayerLink: _toolbarLayerLink,
+        startHandleLayerLink: _startHandleLayerLink,
+        endHandleLayerLink: _endHandleLayerLink,
         renderObject: renderObject,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
@@ -1442,7 +1447,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       _showCaretOnScreen();
       if (!_value.selection.isValid) {
         // Place cursor at the end if the selection is invalid when we receive focus.
-        widget.controller.selection = TextSelection.collapsed(offset: _value.text.length);
+        _handleSelectionChanged(TextSelection.collapsed(offset: _value.text.length), renderEditable, null);
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
@@ -1495,6 +1500,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void hideToolbar() {
+    if (_selectionOverlay == null || !_selectionOverlay.toolbarIsVisible) {
+      return;
+    }
     _selectionOverlay?.hide();
   }
 
@@ -1541,13 +1549,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       dragStartBehavior: widget.dragStartBehavior,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return CompositedTransformTarget(
-          link: _layerLink,
+          link: _toolbarLayerLink,
           child: Semantics(
             onCopy: _semanticsOnCopy(controls),
             onCut: _semanticsOnCut(controls),
             onPaste: _semanticsOnPaste(controls),
             child: _Editable(
               key: _editableKey,
+              startHandleLayerLink: _startHandleLayerLink,
+              endHandleLayerLink: _endHandleLayerLink,
               textSpan: buildTextSpan(),
               value: _value,
               cursorColor: _cursorColor,
@@ -1624,6 +1634,8 @@ class _Editable extends LeafRenderObjectWidget {
     Key key,
     this.textSpan,
     this.value,
+    this.startHandleLayerLink,
+    this.endHandleLayerLink,
     this.cursorColor,
     this.backgroundCursorColor,
     this.showCursor,
@@ -1657,6 +1669,8 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSpan textSpan;
   final TextEditingValue value;
   final Color cursorColor;
+  final LayerLink startHandleLayerLink;
+  final LayerLink endHandleLayerLink;
   final Color backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
   final bool hasFocus;
@@ -1688,6 +1702,8 @@ class _Editable extends LeafRenderObjectWidget {
     return RenderEditable(
       text: textSpan,
       cursorColor: cursorColor,
+      startHandleLayerLink: startHandleLayerLink,
+      endHandleLayerLink: endHandleLayerLink,
       backgroundCursorColor: backgroundCursorColor,
       showCursor: showCursor,
       hasFocus: hasFocus,
@@ -1721,6 +1737,8 @@ class _Editable extends LeafRenderObjectWidget {
     renderObject
       ..text = textSpan
       ..cursorColor = cursorColor
+      ..startHandleLayerLink = startHandleLayerLink
+      ..endHandleLayerLink = endHandleLayerLink
       ..showCursor = showCursor
       ..hasFocus = hasFocus
       ..maxLines = maxLines

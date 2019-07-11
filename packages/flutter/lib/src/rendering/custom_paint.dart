@@ -628,12 +628,11 @@ class RenderCustomPaint extends RenderProxyBox {
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
-    final List<SemanticsNode> finalChildren = <SemanticsNode>[];
-    if (hasBackgroundSemantics)
-      finalChildren.addAll(_backgroundSemanticsNodes);
-    finalChildren.addAll(children);
-    if (hasForegroundSemantics)
-      finalChildren.addAll(_foregroundSemanticsNodes);
+    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+      if (hasBackgroundSemantics) ..._backgroundSemanticsNodes,
+      ...children,
+      if (hasForegroundSemantics) ..._foregroundSemanticsNodes,
+    ];
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 

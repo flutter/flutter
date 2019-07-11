@@ -524,10 +524,12 @@ class ContainerLayer extends Layer {
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
-      informationCollector: () sync* {
-        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield ErrorDescription('which occupies the same area at a higher elevation.');
+      informationCollector: () {
+        return <DiagnosticsNode>[
+          child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty),
+          predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
+          ErrorDescription('which occupies the same area at a higher elevation.'),
+        ];
       }
     ));
     return <PictureLayer>[
@@ -615,16 +617,18 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    Iterable<S> result = Iterable<S>.empty();
     if (firstChild == null)
-      return;
+      return result;
     Layer child = lastChild;
     while (true) {
-      yield* child.findAll<S>(regionOffset);
+      result = result.followedBy(child.findAll<S>(regionOffset));
       if (child == firstChild)
         break;
       child = child.previousSibling;
     }
+    return result;
   }
 
   @override
@@ -1006,10 +1010,10 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1087,10 +1091,10 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1168,10 +1172,10 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1313,12 +1317,12 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null) {
-      return;
+      return Iterable<S>.empty();
     }
-    yield* super.findAll<S>(transformedOffset);
+    return super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1631,10 +1635,10 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -2080,20 +2084,21 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    final Iterable<S> childResults = super.findAll<S>(regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
-      return;
+      return childResults;
     }
     if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      yield typedResult;
+      return childResults.followedBy(<S>[typedResult]);
     }
+    return childResults;
   }
 
   @override

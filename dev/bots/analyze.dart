@@ -40,9 +40,10 @@ Future<void> main(List<String> args) async {
 
   {
     // Analyze all the Dart code in the repo.
-    final List<String> options = <String>['--flutter-repo'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      ...args,
+    ]);
   }
 
   // Ensure that all package dependencies are in sync.
@@ -59,9 +60,12 @@ Future<void> main(List<String> args) async {
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
   {
-    final List<String> options = <String>['--flutter-repo', '--watch', '--benchmark'];
-    options.addAll(args);
-    await _runFlutterAnalyze(flutterRoot, options: options);
+    await _runFlutterAnalyze(flutterRoot, options: <String>[
+      '--flutter-repo',
+      '--watch',
+      '--benchmark',
+      ...args,
+    ]);
   }
 
   await _checkForTrailingSpaces();
@@ -79,9 +83,11 @@ Future<void> main(List<String> args) async {
       workingDirectory: flutterRoot,
     );
     {
-      final List<String> options = <String>['--watch', '--benchmark'];
-      options.addAll(args);
-      await _runFlutterAnalyze(outDir.path, options: options);
+      await _runFlutterAnalyze(outDir.path, options: <String>[
+        '--watch',
+        '--benchmark',
+        ...args,
+      ]);
     }
   } finally {
     outDir.deleteSync(recursive: true);

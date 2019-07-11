@@ -136,9 +136,9 @@ class FlutterDriver {
        _driverId = _nextDriverId++;
 
   static const String _flutterExtensionMethodName = 'ext.flutter.driver';
-  static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
-  static const String _getVMTimelineMethodName = '_getVMTimeline';
-  static const String _clearVMTimelineMethodName = '_clearVMTimeline';
+  static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = 'getVMTimeline';
+  static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;

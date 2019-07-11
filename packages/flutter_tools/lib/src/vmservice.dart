@@ -948,13 +948,13 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> clearVMTimeline() {
-    return invokeRpcRaw('_clearVMTimeline');
+    return invokeRpcRaw('clearVMTimeline');
   }
 
   Future<Map<String, dynamic>> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return invokeRpcRaw(
-      '_setVMTimelineFlags',
+      'setVMTimelineFlags',
       params: <String, dynamic>{
         'recordedStreams': recordedStreams,
       },
@@ -962,7 +962,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> getVMTimeline() {
-    return invokeRpcRaw('_getVMTimeline');
+    return invokeRpcRaw('getVMTimeline');
   }
 
   Future<void> refreshViews({ bool waitForViews = false }) async {
@@ -1468,6 +1468,16 @@ class FlutterView extends ServiceObject {
           'isolateId': _uiIsolate.id,
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        });
+  }
+
+  Future<void> setSemanticsEnabled(bool enabled) async {
+    assert(enabled != null);
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
+        params: <String, dynamic>{
+          'isolateId': _uiIsolate.id,
+          'viewId': id,
+          'enabled': enabled,
         });
   }
 
