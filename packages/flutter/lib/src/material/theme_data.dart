@@ -251,7 +251,7 @@ class ThemeData extends Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
-    disabledColor ??= isDark ? Colors.white38 : Colors.black38;
+    disabledColor ??= isDark ? Colors.white30 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
@@ -400,59 +400,59 @@ class ThemeData extends Diagnosticable {
     @required this.bottomSheetTheme,
     @required this.popupMenuEntryTheme,
   }) : assert(brightness != null),
-        assert(primaryColor != null),
-        assert(primaryColorBrightness != null),
-        assert(primaryColorLight != null),
-        assert(primaryColorDark != null),
-        assert(accentColor != null),
-        assert(accentColorBrightness != null),
-        assert(canvasColor != null),
-        assert(scaffoldBackgroundColor != null),
-        assert(bottomAppBarColor != null),
-        assert(cardColor != null),
-        assert(dividerColor != null),
-        assert(focusColor != null),
-        assert(hoverColor != null),
-        assert(highlightColor != null),
-        assert(splashColor != null),
-        assert(splashFactory != null),
-        assert(selectedRowColor != null),
-        assert(unselectedWidgetColor != null),
-        assert(disabledColor != null),
-        assert(toggleableActiveColor != null),
-        assert(buttonTheme != null),
-        assert(secondaryHeaderColor != null),
-        assert(textSelectionColor != null),
-        assert(cursorColor != null),
-        assert(textSelectionHandleColor != null),
-        assert(backgroundColor != null),
-        assert(dialogBackgroundColor != null),
-        assert(indicatorColor != null),
-        assert(hintColor != null),
-        assert(errorColor != null),
-        assert(textTheme != null),
-        assert(primaryTextTheme != null),
-        assert(accentTextTheme != null),
-        assert(inputDecorationTheme != null),
-        assert(iconTheme != null),
-        assert(primaryIconTheme != null),
-        assert(accentIconTheme != null),
-        assert(sliderTheme != null),
-        assert(tabBarTheme != null),
-        assert(cardTheme != null),
-        assert(chipTheme != null),
-        assert(platform != null),
-        assert(materialTapTargetSize != null),
-        assert(pageTransitionsTheme != null),
-        assert(appBarTheme != null),
-        assert(bottomAppBarTheme != null),
-        assert(colorScheme != null),
-        assert(dialogTheme != null),
-        assert(floatingActionButtonTheme != null),
-        assert(typography != null),
-        assert(snackBarTheme != null),
-        assert(bottomSheetTheme != null),
-        assert(popupMenuEntryTheme != null);
+       assert(primaryColor != null),
+       assert(primaryColorBrightness != null),
+       assert(primaryColorLight != null),
+       assert(primaryColorDark != null),
+       assert(accentColor != null),
+       assert(accentColorBrightness != null),
+       assert(canvasColor != null),
+       assert(scaffoldBackgroundColor != null),
+       assert(bottomAppBarColor != null),
+       assert(cardColor != null),
+       assert(dividerColor != null),
+       assert(focusColor != null),
+       assert(hoverColor != null),
+       assert(highlightColor != null),
+       assert(splashColor != null),
+       assert(splashFactory != null),
+       assert(selectedRowColor != null),
+       assert(unselectedWidgetColor != null),
+       assert(disabledColor != null),
+       assert(toggleableActiveColor != null),
+       assert(buttonTheme != null),
+       assert(secondaryHeaderColor != null),
+       assert(textSelectionColor != null),
+       assert(cursorColor != null),
+       assert(textSelectionHandleColor != null),
+       assert(backgroundColor != null),
+       assert(dialogBackgroundColor != null),
+       assert(indicatorColor != null),
+       assert(hintColor != null),
+       assert(errorColor != null),
+       assert(textTheme != null),
+       assert(primaryTextTheme != null),
+       assert(accentTextTheme != null),
+       assert(inputDecorationTheme != null),
+       assert(iconTheme != null),
+       assert(primaryIconTheme != null),
+       assert(accentIconTheme != null),
+       assert(sliderTheme != null),
+       assert(tabBarTheme != null),
+       assert(cardTheme != null),
+       assert(chipTheme != null),
+       assert(platform != null),
+       assert(materialTapTargetSize != null),
+       assert(pageTransitionsTheme != null),
+       assert(appBarTheme != null),
+       assert(bottomAppBarTheme != null),
+       assert(colorScheme != null),
+       assert(dialogTheme != null),
+       assert(floatingActionButtonTheme != null),
+       assert(typography != null),
+       assert(snackBarTheme != null),
+       assert(bottomSheetTheme != null),
+       assert(popupMenuEntryTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -738,7 +738,7 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
-  /// A theme for customizing the color, shape, elevation and text style of a
+  /// A theme for customizing the color, shape, elevation, and text style of a
   /// menu.
   final PopupMenuEntryThemeData popupMenuEntryTheme;
 
@@ -870,7 +870,7 @@ class ThemeData extends Diagnosticable {
 
   /// Caches localized themes to speed up the [localize] method.
   static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache =
-  _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+      _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
   /// Returns a new theme built by merging the text geometry provided by the
   /// [localTextGeometry] theme with the [baseTheme].
@@ -897,7 +897,7 @@ class ThemeData extends Diagnosticable {
 
     return _localizedThemeDataCache.putIfAbsent(
       _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
-          () {
+      () {
         return baseTheme.copyWith(
           primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
           accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
@@ -1008,59 +1008,59 @@ class ThemeData extends Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return (otherData.brightness == brightness) &&
-        (otherData.primaryColor == primaryColor) &&
-        (otherData.primaryColorBrightness == primaryColorBrightness) &&
-        (otherData.primaryColorLight == primaryColorLight) &&
-        (otherData.primaryColorDark == primaryColorDark) &&
-        (otherData.accentColor == accentColor) &&
-        (otherData.accentColorBrightness == accentColorBrightness) &&
-        (otherData.canvasColor == canvasColor) &&
-        (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
-        (otherData.bottomAppBarColor == bottomAppBarColor) &&
-        (otherData.cardColor == cardColor) &&
-        (otherData.dividerColor == dividerColor) &&
-        (otherData.highlightColor == highlightColor) &&
-        (otherData.splashColor == splashColor) &&
-        (otherData.splashFactory == splashFactory) &&
-        (otherData.selectedRowColor == selectedRowColor) &&
-        (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
-        (otherData.disabledColor == disabledColor) &&
-        (otherData.buttonTheme == buttonTheme) &&
-        (otherData.buttonColor == buttonColor) &&
-        (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
-        (otherData.textSelectionColor == textSelectionColor) &&
-        (otherData.cursorColor == cursorColor) &&
-        (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
-        (otherData.backgroundColor == backgroundColor) &&
-        (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
-        (otherData.indicatorColor == indicatorColor) &&
-        (otherData.hintColor == hintColor) &&
-        (otherData.errorColor == errorColor) &&
-        (otherData.toggleableActiveColor == toggleableActiveColor) &&
-        (otherData.textTheme == textTheme) &&
-        (otherData.primaryTextTheme == primaryTextTheme) &&
-        (otherData.accentTextTheme == accentTextTheme) &&
-        (otherData.inputDecorationTheme == inputDecorationTheme) &&
-        (otherData.iconTheme == iconTheme) &&
-        (otherData.primaryIconTheme == primaryIconTheme) &&
-        (otherData.accentIconTheme == accentIconTheme) &&
-        (otherData.sliderTheme == sliderTheme) &&
-        (otherData.tabBarTheme == tabBarTheme) &&
-        (otherData.cardTheme == cardTheme) &&
-        (otherData.chipTheme == chipTheme) &&
-        (otherData.platform == platform) &&
-        (otherData.materialTapTargetSize == materialTapTargetSize) &&
-        (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
-        (otherData.appBarTheme == appBarTheme) &&
-        (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
-        (otherData.colorScheme == colorScheme) &&
-        (otherData.dialogTheme == dialogTheme) &&
-        (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
-        (otherData.typography == typography) &&
-        (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
-        (otherData.snackBarTheme == snackBarTheme) &&
-        (otherData.bottomSheetTheme == bottomSheetTheme) &&
-        (otherData.popupMenuEntryTheme == popupMenuEntryTheme);
+           (otherData.primaryColor == primaryColor) &&
+           (otherData.primaryColorBrightness == primaryColorBrightness) &&
+           (otherData.primaryColorLight == primaryColorLight) &&
+           (otherData.primaryColorDark == primaryColorDark) &&
+           (otherData.accentColor == accentColor) &&
+           (otherData.accentColorBrightness == accentColorBrightness) &&
+           (otherData.canvasColor == canvasColor) &&
+           (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
+           (otherData.bottomAppBarColor == bottomAppBarColor) &&
+           (otherData.cardColor == cardColor) &&
+           (otherData.dividerColor == dividerColor) &&
+           (otherData.highlightColor == highlightColor) &&
+           (otherData.splashColor == splashColor) &&
+           (otherData.splashFactory == splashFactory) &&
+           (otherData.selectedRowColor == selectedRowColor) &&
+           (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
+           (otherData.disabledColor == disabledColor) &&
+           (otherData.buttonTheme == buttonTheme) &&
+           (otherData.buttonColor == buttonColor) &&
+           (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
+           (otherData.textSelectionColor == textSelectionColor) &&
+           (otherData.cursorColor == cursorColor) &&
+           (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
+           (otherData.backgroundColor == backgroundColor) &&
+           (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
+           (otherData.indicatorColor == indicatorColor) &&
+           (otherData.hintColor == hintColor) &&
+           (otherData.errorColor == errorColor) &&
+           (otherData.toggleableActiveColor == toggleableActiveColor) &&
+           (otherData.textTheme == textTheme) &&
+           (otherData.primaryTextTheme == primaryTextTheme) &&
+           (otherData.accentTextTheme == accentTextTheme) &&
+           (otherData.inputDecorationTheme == inputDecorationTheme) &&
+           (otherData.iconTheme == iconTheme) &&
+           (otherData.primaryIconTheme == primaryIconTheme) &&
+           (otherData.accentIconTheme == accentIconTheme) &&
+           (otherData.sliderTheme == sliderTheme) &&
+           (otherData.tabBarTheme == tabBarTheme) &&
+           (otherData.cardTheme == cardTheme) &&
+           (otherData.chipTheme == chipTheme) &&
+           (otherData.platform == platform) &&
+           (otherData.materialTapTargetSize == materialTapTargetSize) &&
+           (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
+           (otherData.appBarTheme == appBarTheme) &&
+           (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
+           (otherData.colorScheme == colorScheme) &&
+           (otherData.dialogTheme == dialogTheme) &&
+           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
+           (otherData.typography == typography) &&
+           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
+           (otherData.snackBarTheme == snackBarTheme) &&
+           (otherData.bottomSheetTheme == bottomSheetTheme) &&
+           (otherData.popupMenuEntryTheme == popupMenuEntryTheme);
   }
 
   @override
@@ -1226,18 +1226,18 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   MaterialBasedCupertinoThemeData({
     @required ThemeData materialTheme,
   }) : assert(materialTheme != null),
-        _materialTheme = materialTheme,
-  // Pass all values to the superclass so Material-agnostic properties
-  // like barBackgroundColor can still behave like a normal
-  // CupertinoThemeData.
-        super.raw(
-        materialTheme.cupertinoOverrideTheme?.brightness,
-        materialTheme.cupertinoOverrideTheme?.primaryColor,
-        materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
-        materialTheme.cupertinoOverrideTheme?.textTheme,
-        materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
-        materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
-      );
+       _materialTheme = materialTheme,
+       // Pass all values to the superclass so Material-agnostic properties
+       // like barBackgroundColor can still behave like a normal
+       // CupertinoThemeData.
+       super.raw(
+         materialTheme.cupertinoOverrideTheme?.brightness,
+         materialTheme.cupertinoOverrideTheme?.primaryColor,
+         materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
+         materialTheme.cupertinoOverrideTheme?.textTheme,
+         materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
+         materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
+       );
 
   final ThemeData _materialTheme;
 
