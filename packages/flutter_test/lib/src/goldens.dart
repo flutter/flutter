@@ -54,7 +54,17 @@ abstract class GoldenFileComparator {
   ///
   /// Version numbers are used in golden file tests for package:flutter. You can
   /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
-  Uri getTestUri(Uri key, int version);
+  Uri getTestUri(Uri key, int version) {
+    if (version == null)
+      return key;
+    final String keyString = key.toString();
+    final String extension = path.extension(keyString);
+    return Uri.parse(
+      keyString
+        .split(extension)
+        .join() + '.' + version.toString() + extension
+    );
+  }
 }
 
 /// Compares rasterized image bytes against a golden image file.
@@ -155,7 +165,7 @@ class TrivialComparator implements GoldenFileComparator {
 ///
 /// When using `flutter test --update-goldens`, [LocalFileComparator]
 /// updates the files on disk to match the rendering.
-class LocalFileComparator implements GoldenFileComparator {
+class LocalFileComparator extends GoldenFileComparator {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the
@@ -203,19 +213,6 @@ class LocalFileComparator implements GoldenFileComparator {
     final File goldenFile = _getFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
-  }
-
-  @override
-  Uri getTestUri(Uri key, int version) {
-    if (version == null)
-      return key;
-    final String keyString = key.toString();
-    final String extension = path.extension(keyString);
-    return version == null ? key : Uri.parse(
-      keyString
-        .split(extension)
-        .join() + '.' + version.toString() + extension
-    );
   }
 
   File _getFile(Uri golden) {
