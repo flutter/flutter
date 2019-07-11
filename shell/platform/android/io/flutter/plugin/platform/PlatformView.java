@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.platform;
 
+import android.annotation.SuppressLint;
 import android.view.View;
 
 /**
@@ -24,4 +25,26 @@ public interface PlatformView {
      * after this method is called. Failing to do so will result in a memory leak.
      */
     void dispose();
+
+    /**
+    * Callback fired when the platform's input connection is locked, or should be used. See also
+    * {@link TextInputPlugin#lockPlatformViewInputConnection}.
+    *
+    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
+    * connection. This probably doesn't need to be implemented.
+    */
+    // Default interface methods are supported on all min SDK versions of Android.
+    @SuppressLint("NewApi")
+    default void onInputConnectionLocked() {};
+
+    /**
+    * Callback fired when the platform input connection has been unlocked. See also
+    * {@link TextInputPlugin#lockPlatformViewInputConnection}.
+    *
+    * <p>This hook only exists for rare cases where the plugin relies on the state of the input
+    * connection. This probably doesn't need to be implemented.
+    */
+    // Default interface methods are supported on all min SDK versions of Android.
+    @SuppressLint("NewApi")
+    default void onInputConnectionUnlocked() {};
 }
