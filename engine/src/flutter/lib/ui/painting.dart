@@ -2501,7 +2501,6 @@ class ColorFilter {
   /// unnormalized, 0...255, space.
   const ColorFilter.matrix(List<double> matrix)
       : assert(matrix != null, 'Color Matrix argument was null.'),
-        assert(matrix.length == 20, 'Color Matrix must have 20 entries.'),
         _color = null,
         _blendMode = null,
         _matrix = matrix,
@@ -2558,6 +2557,7 @@ class ColorFilter {
       case _TypeMode:
         return _ColorFilter.mode(this);
       case _TypeMatrix:
+        assert(_matrix.length == 20, 'Color Matrix must have 20 entries.');
         return _ColorFilter.matrix(this);
       case _TypeLinearToSrgbGamma:
         return _ColorFilter.linearToSrgbGamma(this);
