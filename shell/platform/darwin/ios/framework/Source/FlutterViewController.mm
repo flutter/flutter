@@ -25,6 +25,9 @@
 
 NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemanticsUpdate";
 
+// This is left a FlutterBinaryMessenger privately for now to give people a chance to notice the
+// change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
+// just a warning.
 @interface FlutterViewController () <FlutterBinaryMessenger>
 @end
 
@@ -44,7 +47,6 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   BOOL _viewOpaque;
   BOOL _engineNeedsLaunch;
   NSMutableSet<NSNumber*>* _ongoingTouches;
-  FlutterBinaryMessengerRelay* _binaryMessenger;
 }
 
 #pragma mark - Manage and override all designated initializers
@@ -55,7 +57,6 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   NSAssert(engine != nil, @"Engine is required");
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
-    _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
     _viewOpaque = YES;
     _engine.reset([engine retain]);
     _engineNeedsLaunch = NO;
@@ -75,7 +76,6 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
                          bundle:(NSBundle*)nibBundleOrNil {
   self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
   if (self) {
-    _binaryMessenger = [[FlutterBinaryMessengerRelay alloc] initWithParent:self];
     _viewOpaque = YES;
     _weakFactory = std::make_unique<fml::WeakPtrFactory<FlutterViewController>>(self);
     _engine.reset([[FlutterEngine alloc] initWithName:@"io.flutter"
@@ -474,8 +474,6 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 }
 
 - (void)dealloc {
-  _binaryMessenger.parent = nil;
-  [_binaryMessenger release];
   [_engine.get() notifyViewControllerDeallocated];
   [[NSNotificationCenter defaultCenter] removeObserver:self];
   [super dealloc];
@@ -1003,7 +1001,7 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 }
 
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger {
-  return _binaryMessenger;
+  return _engine.get().binaryMessenger;
 }
 
 #pragma mark - FlutterBinaryMessenger
