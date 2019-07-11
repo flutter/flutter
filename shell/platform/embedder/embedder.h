@@ -653,6 +653,9 @@ typedef struct {
   // Path to a directory used to store data that is cached across runs of a
   // Flutter application (such as compiled shader programs used by Skia).
   // This is optional.  The string must be NULL terminated.
+  //
+  // This is different from the cache-path-dir argument defined in switches.h,
+  // which is used in |flutter::Settings| as |temp_directory_path|.
   const char* persistent_cache_path;
 
   // If true, we'll only read the existing cache, but not write new ones.
