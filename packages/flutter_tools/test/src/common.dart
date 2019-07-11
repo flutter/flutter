@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// Disable both web and desktop to make testing easier. For example, prevent
 /// them from showing up in the devices list if the host happens to be setup
@@ -131,7 +131,7 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
+  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 

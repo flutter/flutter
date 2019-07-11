@@ -103,7 +103,7 @@ void main() {
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
       final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();

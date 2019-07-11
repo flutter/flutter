@@ -244,21 +244,6 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
-    argParser.addFlag('dynamic',
-      hide: !verboseHelp,
-      negatable: false,
-      help: 'Enable dynamic code. Only allowed with --release or --profile.');
-  }
-
-  void addDynamicModeFlags({ bool verboseHelp = false }) {
-    argParser.addOption('compilation-trace-file',
-        defaultsTo: 'compilation.txt',
-        hide: !verboseHelp,
-        help: 'Filename of Dart compilation trace file. This file will be produced\n'
-              'by \'flutter run --dynamic --profile --train\' and consumed by subsequent\n'
-              '--dynamic builds such as \'flutter build apk --dynamic\' to precompile\n'
-              'some code by the offline compiler.',
-    );
   }
 
   void usesFuchsiaOptions({ bool hide = false }) {
@@ -422,12 +407,10 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Send screen.
-    final Map<String, String> additionalUsageValues = <String, String>{};
     final Map<String, String> currentUsageValues = await usageValues;
-
-    if (currentUsageValues != null) {
-      additionalUsageValues.addAll(currentUsageValues);
-    }
+    final Map<String, String> additionalUsageValues = <String, String>{
+      ...?currentUsageValues,
+    };
     if (commandResult != null) {
       switch (commandResult.exitStatus) {
         case ExitStatus.success:
@@ -444,11 +427,12 @@ abstract class FlutterCommand extends Command<void> {
     flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
 
     // Send timing.
-    final List<String> labels = <String>[];
-    if (commandResult?.exitStatus != null)
-      labels.add(getEnumName(commandResult.exitStatus));
-    if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-      labels.addAll(commandResult.timingLabelParts);
+    final List<String> labels = <String>[
+      if (commandResult?.exitStatus != null)
+        getEnumName(commandResult.exitStatus),
+      if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+        ...commandResult.timingLabelParts,
+    ];
 
     final String label = labels
         .where((String label) => !isBlank(label))
@@ -495,12 +479,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal],
-  /// [DevelopmentArtifact.android], and [DevelopmentArtifact.iOS].
+  /// Defaults to [DevelopmentArtifact.universal].
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-    DevelopmentArtifact.android,
   };
 
   /// Subclasses must implement this to execute the command.
@@ -518,7 +499,7 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices().toList();
+    List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
@@ -527,20 +508,6 @@ abstract class FlutterCommand extends Command<void> {
       printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      printNoConnectedDevices();
-      return null;
-    }
-
-    devices = devices.where((Device device) => device.isSupported()).toList();
-    // If the user has not specified all devices and has multiple connected
-    // then filter then list by those supported in the current project. If
-    // this ends up with a single device we can proceed as normal.
-    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
-      final FlutterProject flutterProject = FlutterProject.current();
-      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
-    }
-
-    if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
@@ -584,7 +551,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     // If we're on a stable branch, then don't allow the usage of
     // "experimental" features.
-    if (isExperimental && FlutterVersion.instance.isStable) {
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
       throwToolExit('Experimental feature $name is not supported on stable branches');
     }
 
@@ -680,17 +647,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isStable) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;

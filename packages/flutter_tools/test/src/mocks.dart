@@ -585,3 +585,25 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
 }
+
+/// A fake implementation of [ProcessResult].
+class FakeProcessResult implements ProcessResult {
+  FakeProcessResult({
+    this.exitCode = 0,
+    this.pid = 1,
+    this.stderr,
+    this.stdout,
+  });
+
+  @override
+  final int exitCode;
+
+  @override
+  final int pid;
+
+  @override
+  final dynamic stderr;
+
+  @override
+  final dynamic stdout;
+}

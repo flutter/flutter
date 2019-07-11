@@ -63,12 +63,12 @@ void main() {
   });
 
   test('TableBorder.lerp', () {
-    const BorderSide side1 = BorderSide(width: 1.0, color: Color(1));
-    const BorderSide side2 = BorderSide(width: 2.0, color: Color(2));
-    const BorderSide side3 = BorderSide(width: 3.0, color: Color(3));
-    const BorderSide side4 = BorderSide(width: 4.0, color: Color(4));
-    const BorderSide side5 = BorderSide(width: 5.0, color: Color(5));
-    const BorderSide side6 = BorderSide(width: 6.0, color: Color(6));
+    const BorderSide side1 = BorderSide(width: 1.0, color: Color(0x00000001));
+    const BorderSide side2 = BorderSide(width: 2.0, color: Color(0x00000002));
+    const BorderSide side3 = BorderSide(width: 3.0, color: Color(0x00000003));
+    const BorderSide side4 = BorderSide(width: 4.0, color: Color(0x00000004));
+    const BorderSide side5 = BorderSide(width: 5.0, color: Color(0x00000005));
+    const BorderSide side6 = BorderSide(width: 6.0, color: Color(0x00000006));
     const TableBorder tableA = TableBorder(
       top: side1,
       right: side2,

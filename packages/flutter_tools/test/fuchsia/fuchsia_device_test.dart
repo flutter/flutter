@@ -571,6 +571,69 @@ void main() {
     });
 
   });
+
+  group('sdkNameAndVersion: ', () {
+    MockFile sshConfig;
+    MockProcessManager mockSuccessProcessManager;
+    MockProcessResult mockSuccessProcessResult;
+    MockProcessManager mockFailureProcessManager;
+    MockProcessResult mockFailureProcessResult;
+    MockProcessManager emptyStdoutProcessManager;
+    MockProcessResult emptyStdoutProcessResult;
+
+    setUp(() {
+      sshConfig = MockFile();
+      when(sshConfig.absolute).thenReturn(sshConfig);
+
+      mockSuccessProcessManager = MockProcessManager();
+      mockSuccessProcessResult = MockProcessResult();
+      when(mockSuccessProcessManager.run(any)).thenAnswer(
+          (Invocation invocation) => Future<ProcessResult>.value(mockSuccessProcessResult));
+      when(mockSuccessProcessResult.exitCode).thenReturn(0);
+      when<String>(mockSuccessProcessResult.stdout).thenReturn('version');
+      when<String>(mockSuccessProcessResult.stderr).thenReturn('');
+
+      mockFailureProcessManager = MockProcessManager();
+      mockFailureProcessResult = MockProcessResult();
+      when(mockFailureProcessManager.run(any)).thenAnswer(
+          (Invocation invocation) => Future<ProcessResult>.value(mockFailureProcessResult));
+      when(mockFailureProcessResult.exitCode).thenReturn(1);
+      when<String>(mockFailureProcessResult.stdout).thenReturn('');
+      when<String>(mockFailureProcessResult.stderr).thenReturn('');
+
+      emptyStdoutProcessManager = MockProcessManager();
+      emptyStdoutProcessResult = MockProcessResult();
+      when(emptyStdoutProcessManager.run(any)).thenAnswer((Invocation invocation) =>
+          Future<ProcessResult>.value(emptyStdoutProcessResult));
+      when(emptyStdoutProcessResult.exitCode).thenReturn(0);
+      when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+    });
+
+    testUsingContext('returns what we get from the device on success', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(await device.sdkNameAndVersion, equals('Fuchsia version'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockSuccessProcessManager,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+    });
+
+    testUsingContext('returns "Fuchsia" when device command fails', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(await device.sdkNameAndVersion, equals('Fuchsia'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockFailureProcessManager,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+    });
+
+    testUsingContext('returns "Fuchsia" when device gives an empty result', () async {
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      expect(await device.sdkNameAndVersion, equals('Fuchsia'));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => emptyStdoutProcessManager,
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
+    });
+  });
 }
 
 class FuchsiaModulePackage extends ApplicationPackage {

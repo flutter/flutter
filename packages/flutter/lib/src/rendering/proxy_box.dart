@@ -2311,7 +2311,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2325,7 +2325,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2969,7 +2969,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in

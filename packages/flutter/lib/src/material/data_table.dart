@@ -505,7 +505,7 @@ class DataTable extends StatelessWidget {
           fontSize: 13.0,
           color: isLightTheme
             ? (placeholder ? Colors.black38 : Colors.black87)
-            : (placeholder ? Colors.white30 : Colors.white70),
+            : (placeholder ? Colors.white38 : Colors.white70),
         ),
         child: IconTheme.merge(
           data: IconThemeData(
@@ -616,7 +616,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true) : null,
+        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );

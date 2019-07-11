@@ -68,10 +68,10 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// In general, timeouts are race conditions and cause flakes, so best practice
 /// is to avoid the use of timeouts in tests.
 ///
-/// If the `enableSemantics` parameter is set to `true`,
+/// If the `semanticsEnabled` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
 /// passed to the `callback`, and that handle will automatically be disposed
-/// after the callback is finished.
+/// after the callback is finished. It defaults to true.
 ///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
@@ -100,7 +100,7 @@ void testWidgets(
   bool skip = false,
   test_package.Timeout timeout,
   Duration initialTimeout,
-  bool semanticsEnabled = false,
+  bool semanticsEnabled = true,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
@@ -115,6 +115,7 @@ void testWidgets(
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
         () async {
+          debugResetSemanticsIdCounter();
           await callback(tester);
           semanticsHandle?.dispose();
         },
@@ -144,6 +145,11 @@ void testWidgets(
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
 ///
+/// If the `semanticsEnabled` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
+///
 /// Benchmarks must not be run in checked mode, because the performance is not
 /// representative. To avoid this, this function will print a big message if it
 /// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
@@ -165,7 +171,11 @@ void testWidgets(
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAsserts = false}) {
+Future<void> benchmarkWidgets(
+  WidgetTesterCallback callback, {
+  bool mayRunWithAsserts = false,
+  bool semanticsEnabled = false,
+}) {
   assert(() {
     if (mayRunWithAsserts)
       return true;
@@ -186,9 +196,16 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAss
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
+  SemanticsHandle semanticsHandle;
+  if (semanticsEnabled == true) {
+    semanticsHandle = tester.ensureSemantics();
+  }
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
-    () => callback(tester),
+    () async {
+      await callback(tester);
+      semanticsHandle?.dispose();
+    },
     tester._endOfTestVerifications,
   ) ?? Future<void>.value();
 }
@@ -769,7 +786,7 @@ typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  final _TickerDisposeCallback _onDispose;
 
   @override
   void dispose() {

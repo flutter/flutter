@@ -2604,6 +2604,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XcnP3_mO_Ms}
+///
 /// For example, a 16:9 width:height aspect ratio would have a value of
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
 /// by applying the aspect ratio to the maximum height.
@@ -4711,13 +4713,14 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
+///
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+///
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with. The color of the button in the menu changes to
-/// indicate which one has been selected.
-///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+/// as it is interacted with, shown above. The color of the button in the menu
+/// changes to indicate which one has been selected.
 ///
 /// ```dart main
 /// import 'package:flutter/material.dart';

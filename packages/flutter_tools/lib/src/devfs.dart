@@ -369,7 +369,7 @@ class DevFS {
   final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
-  String _packagesFilePath;
+  final String _packagesFilePath;
   final Set<String> assetPathsToEvict = <String>{};
   List<Uri> sources = <Uri>[];
   DateTime lastCompiled;

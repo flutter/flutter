@@ -165,6 +165,17 @@ Future<void> main() async {
       });
 
       await runProjectTest((FlutterProject project) async {
+        section('gradlew assembleLocal (plugin with custom build type)');
+        await project.addCustomBuildType('local', initWith: 'debug');
+        await project.addGlobalBuildType('local', initWith: 'debug');
+        section('Add plugin');
+        await project.addPlugin('path_provider');
+        await project.getPackages();
+
+        await project.runGradleTask('assembleLocal');
+      });
+
+      await runProjectTest((FlutterProject project) async {
         section('gradlew assembleFreeDebug (product flavor)');
         await project.addProductFlavors(<String>['free']);
         await project.runGradleTask('assembleFreeDebug');

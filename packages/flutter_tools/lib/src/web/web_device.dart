@@ -27,9 +27,9 @@ class WebApplicationPackage extends ApplicationPackage {
   Directory get webSourcePath => flutterProject.directory.childDirectory('web');
 }
 
-class WebDevice extends Device {
-  WebDevice() : super(
-      'web',
+class ChromeDevice extends Device {
+  ChromeDevice() : super(
+      'chrome',
       category: Category.web,
       platformType: PlatformType.web,
       ephemeral: false,
@@ -71,10 +71,13 @@ class WebDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override
-  String get name => 'web';
+  String get name => 'Chrome';
 
   @override
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
@@ -143,9 +146,9 @@ class WebDevice extends Device {
 }
 
 class WebDevices extends PollingDeviceDiscovery {
-  WebDevices() : super('web');
+  WebDevices() : super('chrome');
 
-  final WebDevice _webDevice = WebDevice();
+  final ChromeDevice _webDevice = ChromeDevice();
 
   @override
   bool get canListAnything => flutterWebEnabled;

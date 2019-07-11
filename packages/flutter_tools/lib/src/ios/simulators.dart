@@ -27,6 +27,7 @@ import 'mac.dart';
 import 'plist_utils.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
+const String iosSimulatorId = 'apple_ios_simulator';
 
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('iOS simulators');
@@ -143,12 +144,16 @@ class SimControl {
   }
 
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
-    final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
-    if (launchArgs != null)
-      args.addAll(launchArgs);
     Future<RunResult> result;
     try {
-      result = runCheckedAsync(args);
+      result = runCheckedAsync(<String>[
+        _xcrunPath,
+        'simctl',
+        'launch',
+        deviceId,
+        appIdentifier,
+        ...?launchArgs,
+      ]);
     } on ProcessException catch (exception) {
       throwToolExit('Unable to launch $appIdentifier on $deviceId:\n$exception');
     }
@@ -229,6 +234,9 @@ class IOSSimulator extends Device {
 
   @override
   Future<bool> get isLocalEmulator async => true;
+
+  @override
+  Future<String> get emulatorId async => iosSimulatorId;
 
   @override
   bool get supportsHotReload => true;

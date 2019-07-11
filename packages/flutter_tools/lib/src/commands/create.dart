@@ -613,7 +613,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': FlutterVersion.instance.frameworkRevision,
       'flutterChannel': FlutterVersion.instance.channel,
-      'web': web && !FlutterVersion.instance.isStable,
+      'web': web && FlutterVersion.instance.isMaster
     };
   }
 

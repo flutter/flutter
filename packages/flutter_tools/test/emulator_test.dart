@@ -46,11 +46,11 @@ void main() {
 
     testUsingContext('getEmulatorsById', () async {
       final _MockEmulator emulator1 =
-          _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
+          _MockEmulator('Nexus_5', 'Nexus 5', 'Google');
       final _MockEmulator emulator2 =
-          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
+          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google');
       final _MockEmulator emulator3 =
-          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
+          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
@@ -160,7 +160,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class _MockEmulator extends Emulator {
-  _MockEmulator(String id, this.name, this.manufacturer, this.label)
+  _MockEmulator(String id, this.name, this.manufacturer)
     : super(id, true);
 
   @override
@@ -168,9 +168,6 @@ class _MockEmulator extends Emulator {
 
   @override
   final String manufacturer;
-
-  @override
-  final String label;
 
   @override
   Category get category => Category.mobile;

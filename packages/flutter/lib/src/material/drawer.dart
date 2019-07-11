@@ -346,7 +346,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
     }
 
-    final bool opened = _controller.value > 0.5 ? true : false;
+    final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null)
       widget.drawerCallback(opened);
     _previouslyOpened = opened;

@@ -150,10 +150,10 @@ void main() {
   testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -217,10 +217,10 @@ void main() {
     final FocusNode focusNode = FocusNode();
     final Key buttonKey = UniqueKey();
 
-    const Color pressedColor = Color(1);
-    const Color hoverColor = Color(2);
-    const Color focusedColor = Color(3);
-    const Color defaultColor = Color(4);
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.pressed)) {
@@ -282,9 +282,9 @@ void main() {
   testWidgets('OutlineButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    const Color disabledColor = Color(1);
-    const Color defaultColor = Color(2);
-    const Color unusedDisabledTextColor = Color(3);
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color unusedDisabledTextColor = Color(0x00000003);
 
     Color getTextColor(Set<MaterialState> states) {
       if (states.contains(MaterialState.disabled)) {
@@ -316,6 +316,138 @@ void main() {
     // Disabled.
     expect(textColor(), equals(disabledColor));
     expect(textColor(), isNot(unusedDisabledTextColor));
+  });
+
+  testWidgets('OutlineButton uses stateful color for border color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
+
+    Color getBorderColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlineButton(
+              child: const Text('OutlineButton'),
+              onPressed: () {},
+              focusNode: focusNode,
+              borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder outlineButton = find.byType(OutlineButton);
+
+    // Default, not disabled.
+    expect(outlineButton, paints..path(color: defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(outlineButton, paints..path(color: focusedColor));
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(OutlineButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(outlineButton, paints..path(color: hoverColor));
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(outlineButton, paints..path(color: pressedColor));
+    await gesture.removePointer();
+  });
+
+  testWidgets('OutlineButton ignores highlightBorderColor if border color is stateful', (WidgetTester tester) async {
+    const Color pressedColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color ignoredPressedColor = Color(0x00000003);
+
+    Color getBorderColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlineButton(
+              child: const Text('OutlineButton'),
+              onPressed: () {},
+              borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
+              highlightedBorderColor: ignoredPressedColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder outlineButton = find.byType(OutlineButton);
+
+    // Default, not disabled.
+    expect(outlineButton, paints..path(color: defaultColor));
+
+    // Highlighted (pressed).
+    await tester.press(outlineButton);
+    await tester.pumpAndSettle();
+    expect(outlineButton, paints..path(color: pressedColor));
+  });
+
+  testWidgets('OutlineButton ignores disabledBorderColor if border color is stateful', (WidgetTester tester) async {
+    const Color disabledColor = Color(0x00000001);
+    const Color defaultColor = Color(0x00000002);
+    const Color ignoredDisabledColor = Color(0x00000003);
+
+    Color getBorderColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlineButton(
+              child: const Text('OutlineButton'),
+              onPressed: null,
+              borderSide: BorderSide(color: MaterialStateColor.resolveWith(getBorderColor)),
+              highlightedBorderColor: ignoredDisabledColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Disabled.
+    expect(find.byType(OutlineButton), paints..path(color: disabledColor));
   });
 
   testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
@@ -425,7 +557,7 @@ void main() {
         ..path(color: disabledBorderColor, strokeWidth: borderWidth));
     _checkPhysicalLayer(
       tester.element(outlineButton),
-      const Color(0),
+      const Color(0x00000000),
       clipPath: clipPath,
       clipRect: clipRect,
     );

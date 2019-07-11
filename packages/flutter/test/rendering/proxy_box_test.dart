@@ -15,6 +15,23 @@ import '../flutter_test_alternative.dart';
 import 'rendering_tester.dart';
 
 void main() {
+  test('RenderFittedBox handles applying paint transform and hit-testing with empty size', () {
+    final RenderFittedBox fittedBox = RenderFittedBox(
+      child: RenderCustomPaint(
+        preferredSize: Size.zero,
+        painter: TestCallbackPainter(onPaint: () {}),
+      ),
+    );
+
+    layout(fittedBox, phase: EnginePhase.flushSemantics);
+    final Matrix4 transform = Matrix4.identity();
+    fittedBox.applyPaintTransform(fittedBox.child, transform);
+    expect(transform, Matrix4.zero());
+
+    final BoxHitTestResult hitTestResult = BoxHitTestResult();
+    expect(fittedBox.hitTestChildren(hitTestResult), isFalse);
+  });
+
   test('RenderFittedBox does not paint with empty sizes', () {
     bool painted;
     RenderFittedBox makeFittedBox(Size size) {

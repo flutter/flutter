@@ -1189,12 +1189,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       context: ErrorDescription('during $method()'),
       renderObject: this,
       informationCollector: () sync* {
+        if (debugCreator != null)
+          yield DiagnosticsDebugCreator(debugCreator);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
         // users. Inspector users can see the full tree by clicking on the
         // render object so this may not be that useful.
-        yield describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
+        yield describeForError('RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
       }
     ));
   }
@@ -2030,14 +2032,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _paintWithContext(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugDoingThisPaint) {
-        throw FlutterError(
-          'Tried to paint a RenderObject reentrantly.\n'
-          'The following RenderObject was already being painted when it was '
-          'painted again:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'Since this typically indicates an infinite recursion, it is '
-          'disallowed.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('Tried to paint a RenderObject reentrantly.'),
+          describeForError(
+            'The following RenderObject was already being painted when it was '
+            'painted again'
+          ),
+          ErrorDescription(
+            'Since this typically indicates an infinite recursion, it is '
+            'disallowed.'
+          )
+        ]);
       }
       return true;
     }());
@@ -2052,17 +2057,24 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     assert(() {
       if (_needsCompositingBitsUpdate) {
-        throw FlutterError(
-          'Tried to paint a RenderObject before its compositing bits were '
-          'updated.\n'
-          'The following RenderObject was marked as having dirty compositing '
-          'bits at the time that it was painted:\n'
-          '  ${toStringShallow(joiner: "\n    ")}\n'
-          'A RenderObject that still has dirty compositing bits cannot be '
-          'painted because this indicates that the tree has not yet been '
-          'properly configured for creating the layer tree.\n'
-          'This usually indicates an error in the Flutter framework itself.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'Tried to paint a RenderObject before its compositing bits were '
+            'updated.'
+          ),
+          describeForError(
+            'The following RenderObject was marked as having dirty compositing '
+            'bits at the time that it was painted',
+          ),
+          ErrorDescription(
+            'A RenderObject that still has dirty compositing bits cannot be '
+            'painted because this indicates that the tree has not yet been '
+            'properly configured for creating the layer tree.'
+          ),
+          ErrorHint(
+            'This usually indicates an error in the Flutter framework itself.'
+          )
+        ]);
       }
       return true;
     }());
@@ -2720,21 +2732,31 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
-          'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
-          'coordinate with their children during layout and paint. For '
-          'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'A $runtimeType expected a child of type $ChildType but received a '
+            'child of type ${child.runtimeType}.'
+          ),
+          ErrorDescription(
+            'RenderObjects expect specific types of children because they '
+            'coordinate with their children during layout and paint. For '
+            'example, a RenderSliver cannot be the child of a RenderBox because '
+            'a RenderSliver does not understand the RenderBox layout protocol.',
+          ),
+          ErrorSpacer(),
+          DiagnosticsProperty<dynamic>(
+            'The $runtimeType that expected a $ChildType child was created by',
+            debugCreator,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          ErrorSpacer(),
+          DiagnosticsProperty<dynamic>(
+            'The ${child.runtimeType} that did not match the expected child type '
+            'was created by',
+            child.debugCreator,
+            style: DiagnosticsTreeStyle.errorProperty,
+          )
+        ]);
       }
       return true;
     }());
@@ -2849,21 +2871,31 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
-        throw FlutterError(
-          'A $runtimeType expected a child of type $ChildType but received a '
-          'child of type ${child.runtimeType}.\n'
-          'RenderObjects expect specific types of children because they '
-          'coordinate with their children during layout and paint. For '
-          'example, a RenderSliver cannot be the child of a RenderBox because '
-          'a RenderSliver does not understand the RenderBox layout protocol.\n'
-          '\n'
-          'The $runtimeType that expected a $ChildType child was created by:\n'
-          '  $debugCreator\n'
-          '\n'
-          'The ${child.runtimeType} that did not match the expected child type '
-          'was created by:\n'
-          '  ${child.debugCreator}\n'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary(
+            'A $runtimeType expected a child of type $ChildType but received a '
+            'child of type ${child.runtimeType}.'
+          ),
+          ErrorDescription(
+            'RenderObjects expect specific types of children because they '
+            'coordinate with their children during layout and paint. For '
+            'example, a RenderSliver cannot be the child of a RenderBox because '
+            'a RenderSliver does not understand the RenderBox layout protocol.'
+          ),
+          ErrorSpacer(),
+          DiagnosticsProperty<dynamic>(
+            'The $runtimeType that expected a $ChildType child was created by',
+            debugCreator,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+          ErrorSpacer(),
+          DiagnosticsProperty<dynamic>(
+            'The ${child.runtimeType} that did not match the expected child type '
+            'was created by',
+            child.debugCreator,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
       }
       return true;
     }());
@@ -2987,11 +3019,11 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     _childCount = 0;
   }
 
-  /// Move this child in the child list to be before the given child.
+  /// Move the given `child` in the child list to be after another child.
   ///
   /// More efficient than removing and re-adding the child. Requires the child
-  /// to already be in the child list at some position. Pass null for before to
-  /// move the child to the end of the child list.
+  /// to already be in the child list at some position. Pass null for `after` to
+  /// move the child to the start of the child list.
   void move(ChildType child, { ChildType after }) {
     assert(child != this);
     assert(after != this);
@@ -3296,15 +3328,16 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
     node.rect = owner.semanticBounds;
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      assert(fragment.config == null);
-      children.addAll(fragment.compileChildren(
-        parentSemanticsClipRect: parentSemanticsClipRect,
-        parentPaintClipRect: parentPaintClipRect,
-        elevationAdjustment: 0.0,
-      ));
-    }
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) {
+        assert(fragment.config == null);
+        return fragment.compileChildren(
+          parentSemanticsClipRect: parentSemanticsClipRect,
+          parentPaintClipRect: parentPaintClipRect,
+          elevationAdjustment: 0.0,
+        );
+      })
+      .toList();
     node.updateWith(config: null, childrenInInversePaintOrder: children);
 
     // The root node is the only semantics node allowed to be invisible. This
@@ -3417,14 +3450,13 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       }
     }
 
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in _children) {
-      children.addAll(fragment.compileChildren(
+    final List<SemanticsNode> children = _children
+      .expand((_InterestingSemanticsFragment fragment) => fragment.compileChildren(
         parentSemanticsClipRect: node.parentSemanticsClipRect,
         parentPaintClipRect: node.parentPaintClipRect,
         elevationAdjustment: 0.0,
-      ));
-    }
+      ))
+      .toList();
 
     if (_config.isSemanticBoundary) {
       owner.assembleSemanticsNode(node, _config, children);
@@ -3554,9 +3586,10 @@ class _SemanticsGeometry {
       } else {
         _semanticsClipRect = _intersectRects(_semanticsClipRect, parent.describeApproximatePaintClip(child));
       }
-      _semanticsClipRect = _transformRect(_semanticsClipRect, parent, child);
-      _paintClipRect = _transformRect(_paintClipRect, parent, child);
-      parent.applyPaintTransform(child, _transform);
+      _temporaryTransformHolder.setIdentity(); // clears data from previous call(s)
+      _applyIntermediatePaintTransforms(parent, child, _transform, _temporaryTransformHolder);
+      _semanticsClipRect = _transformRect(_semanticsClipRect, _temporaryTransformHolder);
+      _paintClipRect = _transformRect(_paintClipRect, _temporaryTransformHolder);
     }
 
     final RenderObject owner = ancestors.first;
@@ -3569,15 +3602,51 @@ class _SemanticsGeometry {
     }
   }
 
+  // A matrix used to store transient transform data.
+  //
+  // Reusing this matrix avoids allocating a new matrix every time a temporary
+  // matrix is needed.
+  //
+  // This instance should never be returned to the caller. Otherwise, the data
+  // stored in it will be overwritten unpredictably by subsequent reuses.
+  static final Matrix4 _temporaryTransformHolder = Matrix4.zero();
+
   /// From parent to child coordinate system.
-  static Rect _transformRect(Rect rect, RenderObject parent, RenderObject child) {
+  static Rect _transformRect(Rect rect, Matrix4 transform) {
+    assert(transform != null);
     if (rect == null)
       return null;
-    if (rect.isEmpty)
+    if (rect.isEmpty || transform.isZero())
       return Rect.zero;
-    final Matrix4 transform = Matrix4.identity();
-    parent.applyPaintTransform(child, transform);
     return MatrixUtils.inverseTransformRect(transform, rect);
+  }
+
+  // Calls applyPaintTransform on all of the render objects between [child] and
+  // [ancestor]. This method handles cases where the immediate semantic parent
+  // is not the immediate render object parent of the child.
+  //
+  // It will mutate both transform and clipRectTransform.
+  static void _applyIntermediatePaintTransforms(
+    RenderObject ancestor,
+    RenderObject child,
+    Matrix4 transform,
+    Matrix4 clipRectTransform,
+  ) {
+    assert(ancestor != null);
+    assert(child != null);
+    assert(transform != null);
+    assert(clipRectTransform != null);
+    assert(clipRectTransform.isIdentity());
+    RenderObject intermediateParent = child.parent;
+    assert(intermediateParent != null);
+    while (intermediateParent != ancestor) {
+      intermediateParent.applyPaintTransform(child, transform);
+      intermediateParent = intermediateParent.parent;
+      child = child.parent;
+      assert(intermediateParent != null);
+    }
+    ancestor.applyPaintTransform(child, transform);
+    ancestor.applyPaintTransform(child, clipRectTransform);
   }
 
   static Rect _intersectRects(Rect a, Rect b) {
@@ -3607,4 +3676,21 @@ class _SemanticsGeometry {
   ///  * [SemanticsFlag.isHidden] for the purpose of marking a node as hidden.
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
+}
+
+/// A class that creates [DiagnosticsNode] by wrapping [RenderObject.debugCreator].
+///
+/// Attach a [DiagnosticsDebugCreator] into [FlutterErrorDetails.informationCollector]
+/// when a [RenderObject.debugCreator] is available. This will lead to improved
+/// error message.
+class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
+  /// Create a [DiagnosticsProperty] with its [value] initialized to input
+  /// [RenderObject.debugCreator].
+  DiagnosticsDebugCreator(Object value):
+    assert(value != null),
+    super(
+      'debugCreator',
+      value,
+      level: DiagnosticLevel.hidden
+    );
 }

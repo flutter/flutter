@@ -2282,8 +2282,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/15008.
   testWidgets('TabBar with one tab has correct color', (WidgetTester tester) async {
     const Tab tab = Tab(text: 'A');
-    const Color selectedTabColor = Color(1);
-    const Color unselectedTabColor = Color(2);
+    const Color selectedTabColor = Color(0x00000001);
+    const Color unselectedTabColor = Color(0x00000002);
 
     await tester.pumpWidget(boilerplate(
       child: const DefaultTabController(

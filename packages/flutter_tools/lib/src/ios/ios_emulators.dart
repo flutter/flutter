@@ -11,6 +11,7 @@ import '../emulator.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import 'ios_workflow.dart';
+import 'simulators.dart';
 
 class IOSEmulators extends EmulatorDiscovery {
   @override
@@ -31,9 +32,6 @@ class IOSEmulator extends Emulator {
 
   @override
   String get manufacturer => 'Apple';
-
-  @override
-  String get label => null;
 
   @override
   Category get category => Category.mobile;
@@ -74,5 +72,5 @@ List<IOSEmulator> getEmulators() {
     return <IOSEmulator>[];
   }
 
-  return <IOSEmulator>[IOSEmulator('apple_ios_simulator')];
+  return <IOSEmulator>[IOSEmulator(iosSimulatorId)];
 }

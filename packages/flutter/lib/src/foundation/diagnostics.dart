@@ -1469,7 +1469,7 @@ abstract class DiagnosticsNode {
   ///
   /// If `minLevel` is [DiagnosticLevel.hidden] no diagnostics will be filtered.
   /// If `minLevel` is [DiagnosticLevel.off] all diagnostics will be filtered.
-  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode ? true : level.index < minLevel.index;
+  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode || level.index < minLevel.index;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -1541,61 +1541,46 @@ abstract class DiagnosticsNode {
     if (kReleaseMode) {
       return <String, Object>{};
     }
-    final Map<String, Object> data = <String, Object>{
+    final bool hasChildren = getChildren().isNotEmpty;
+    return <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
+      if (name != null)
+        'name': name,
+      if (!showSeparator)
+        'showSeparator': showSeparator,
+      if (level != DiagnosticLevel.info)
+        'level': describeEnum(level),
+      if (showName == false)
+        'showName': showName,
+      if (emptyBodyDescription != null)
+        'emptyBodyDescription': emptyBodyDescription,
+      if (style != DiagnosticsTreeStyle.sparse)
+        'style': describeEnum(style),
+      if (allowTruncate)
+        'allowTruncate': allowTruncate,
+      if (hasChildren)
+        'hasChildren': hasChildren,
+      if (linePrefix?.isNotEmpty == true)
+        'linePrefix': linePrefix,
+      if (!allowWrap)
+        'allowWrap': allowWrap,
+      if (allowNameWrap)
+        'allowNameWrap': allowNameWrap,
+      ...delegate.additionalNodeProperties(this),
+      if (delegate.includeProperties)
+        'properties': toJsonList(
+          delegate.filterProperties(getProperties(), this),
+          this,
+          delegate,
+        ),
+      if (delegate.subtreeDepth > 0)
+        'children': toJsonList(
+          delegate.filterChildren(getChildren(), this),
+          this,
+          delegate,
+        ),
     };
-    if (name != null)
-      data['name'] = name;
-
-    if (!showSeparator)
-      data['showSeparator'] = showSeparator;
-    if (level != DiagnosticLevel.info)
-      data['level'] = describeEnum(level);
-    if (showName == false)
-      data['showName'] = showName;
-    if (emptyBodyDescription != null)
-      data['emptyBodyDescription'] = emptyBodyDescription;
-    if (style != DiagnosticsTreeStyle.sparse)
-      data['style'] = describeEnum(style);
-
-    if (allowTruncate)
-      data['allowTruncate'] = allowTruncate;
-
-    final bool hasChildren = getChildren().isNotEmpty;
-    if (hasChildren)
-      data['hasChildren'] = hasChildren;
-
-    if (linePrefix?.isNotEmpty == true)
-      data['linePrefix'] = linePrefix;
-
-    if (!allowWrap)
-      data['allowWrap'] = allowWrap;
-
-    if (allowNameWrap)
-      data['allowNameWrap'] = allowNameWrap;
-
-    data.addAll(delegate.additionalNodeProperties(this));
-
-    if (delegate.includeProperties) {
-      final List<DiagnosticsNode> properties = getProperties();
-      data['properties'] = toJsonList(
-        delegate.filterProperties(properties, this),
-        this,
-        delegate,
-      );
-    }
-
-    if (delegate.subtreeDepth > 0) {
-      final List<DiagnosticsNode> children = getChildren();
-      data['children'] = toJsonList(
-        delegate.filterChildren(children, this),
-        this,
-        delegate,
-      );
-    }
-
-    return data;
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -2707,7 +2692,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// [defaultValue] has type [T] or is [kNoDefaultValue].
   final Object defaultValue;
 
-  DiagnosticLevel _defaultLevel;
+  final DiagnosticLevel _defaultLevel;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -2789,7 +2774,10 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   DiagnosticPropertiesBuilder _cachedBuilder;
 
-  DiagnosticPropertiesBuilder get _builder {
+  /// Retrieve the [DiagnosticPropertiesBuilder] of current node.
+  ///
+  /// It will cache the result to prevent duplicate operation.
+  DiagnosticPropertiesBuilder get builder {
     if (kReleaseMode)
       return null;
     if (_cachedBuilder == null) {
@@ -2801,14 +2789,14 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   DiagnosticsTreeStyle get style {
-    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? _builder.defaultDiagnosticsTreeStyle;
+    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? builder.defaultDiagnosticsTreeStyle;
   }
 
   @override
-  String get emptyBodyDescription => kReleaseMode ? '' : _builder.emptyBodyDescription;
+  String get emptyBodyDescription => kReleaseMode ? '' : builder.emptyBodyDescription;
 
   @override
-  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : _builder.properties;
+  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : builder.properties;
 
   @override
   List<DiagnosticsNode> getChildren() {
@@ -2890,6 +2878,13 @@ String describeEnum(Object enumEntry) {
 /// Builder to accumulate properties and configuration used to assemble a
 /// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
+  /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
+  /// an empty array.
+  DiagnosticPropertiesBuilder() : properties = <DiagnosticsNode>[];
+
+  /// Creates a [DiagnosticPropertiesBuilder] with a given [properties].
+  DiagnosticPropertiesBuilder.fromProperties(this.properties);
+
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
     if (!kReleaseMode) {
@@ -2898,7 +2893,7 @@ class DiagnosticPropertiesBuilder {
   }
 
   /// List of properties accumulated so far.
-  final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+  final List<DiagnosticsNode> properties;
 
   /// Default style to use for the [DiagnosticsNode] if no style is specified.
   DiagnosticsTreeStyle defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.sparse;

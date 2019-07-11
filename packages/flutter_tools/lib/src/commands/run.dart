@@ -30,7 +30,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   // Used by run and drive commands.
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -353,7 +352,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
+    if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '
                            'channel.', null);
     }
@@ -412,7 +411,7 @@ class RunCommand extends RunCommandBase {
     }
     // Only support "web mode" on non-stable branches with a single web device
     // in a "hot mode".
-    final bool webMode = !FlutterVersion.instance.isStable
+    final bool webMode = FlutterVersion.instance.isMaster
       && devices.length == 1
       && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
@@ -451,8 +450,8 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        stayResident: stayResident,
         ipv6: ipv6,
+        stayResident: stayResident,
       );
     }
 
@@ -464,7 +463,14 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
-      (_) { appStartedTime = systemClock.now(); }
+      (_) {
+        appStartedTime = systemClock.now();
+        if (stayResident) {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }
+      }
     ));
 
     final int result = await runner.run(
@@ -472,8 +478,9 @@ class RunCommand extends RunCommandBase {
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null, exitCode: result);
+    }
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[

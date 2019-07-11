@@ -574,6 +574,7 @@ class _RenderDecorationLayout {
   const _RenderDecorationLayout({
     this.boxToBaseline,
     this.inputBaseline, // for InputBorderType.underline
+    this.outlineBaseline, // for InputBorderType.outline
     this.subtextBaseline,
     this.containerHeight,
     this.subtextHeight,
@@ -581,6 +582,7 @@ class _RenderDecorationLayout {
 
   final Map<RenderBox, double> boxToBaseline;
   final double inputBaseline;
+  final double outlineBaseline;
   final double subtextBaseline; // helper/error counter
   final double containerHeight;
   final double subtextHeight;
@@ -1055,12 +1057,31 @@ class _RenderDecoration extends RenderBox {
       - topHeight
       - contentPadding.bottom;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
-    // When outline aligned, the baseline is vertically centered by default, and
-    // outlinePadding is used to account for the presence of the border and
-    // floating label.
-    final double outlinePadding = _isOutlineAligned ? 10.0 : 0;
-    final double textAlignVerticalOffset = (maxContentHeight - alignableHeight - outlinePadding) * textAlignVerticalFactor;
+    final double maxVerticalOffset = maxContentHeight - alignableHeight;
+    final double textAlignVerticalOffset = maxVerticalOffset * textAlignVerticalFactor;
     final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
+
+    // The three main alignments for the baseline when an outline is present are
+    //
+    //  * top (-1.0): topmost point considering padding.
+    //  * center (0.0): the absolute center of the input ignoring padding but
+    //      accommodating the border and floating label.
+    //  * bottom (1.0): bottommost point considering padding.
+    //
+    // That means that if the padding is uneven, center is not the exact
+    // midpoint of top and bottom. To account for this, the above center and
+    // below center alignments are interpolated independently.
+    final double outlineCenterBaseline = inputInternalBaseline
+      + baselineAdjustment / 2.0
+      + (containerHeight - (2.0 + inputHeight)) / 2.0;
+    final double outlineTopBaseline = topInputBaseline;
+    final double outlineBottomBaseline = topInputBaseline + maxVerticalOffset;
+    final double outlineBaseline = _interpolateThree(
+      outlineTopBaseline,
+      outlineCenterBaseline,
+      outlineBottomBaseline,
+      textAlignVertical,
+    );
 
     // Find the positions of the text below the input when it exists.
     double subtextCounterBaseline = 0;
@@ -1090,9 +1111,39 @@ class _RenderDecoration extends RenderBox {
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
+      outlineBaseline: outlineBaseline,
       subtextBaseline: subtextBaseline,
       subtextHeight: subtextHeight,
     );
+  }
+
+  // Interpolate between three stops using textAlignVertical. This is used to
+  // calculate the outline baseline, which ignores padding when the alignment is
+  // middle. When the alignment is less than zero, it interpolates between the
+  // centered text box's top and the top of the content padding. When the
+  // alignment is greater than zero, it interpolates between the centered box's
+  // top and the position that would align the bottom of the box with the bottom
+  // padding.
+  double _interpolateThree(double begin, double middle, double end, TextAlignVertical textAlignVertical) {
+    if (textAlignVertical.y <= 0) {
+      // It's possible for begin, middle, and end to not be in order because of
+      // excessive padding. Those cases are handled by using middle.
+      if (begin >= middle) {
+        return middle;
+      }
+      // Do a standard linear interpolation on the first half, between begin and
+      // middle.
+      final double t = textAlignVertical.y + 1;
+      return begin + (middle - begin) * t;
+    }
+
+    if (middle >= end) {
+      return middle;
+    }
+    // Do a standard linear interpolation on the second half, between middle and
+    // end.
+    final double t = textAlignVertical.y;
+    return middle + (end - middle) * t;
   }
 
   @override
@@ -1199,7 +1250,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = layout.inputBaseline;
+    baseline = _isOutlineAligned ? layout.outlineBaseline : layout.inputBaseline;
 
     if (icon != null) {
       double x;
@@ -3523,44 +3574,5 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<InputBorder>('enabledBorder', enabledBorder, defaultValue: defaultTheme.enabledBorder));
     properties.add(DiagnosticsProperty<InputBorder>('border', border, defaultValue: defaultTheme.border));
     properties.add(DiagnosticsProperty<bool>('alignLabelWithHint', alignLabelWithHint, defaultValue: defaultTheme.alignLabelWithHint));
-  }
-}
-
-/// The vertical alignment of text within an input.
-///
-/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
-/// of the input so that the top of the first line of text fits within the input
-/// and its padding. 0.0 aligns to the center of the input. 1.0 aligns so that
-/// the bottom of the last line of text aligns with the bottom interior edge of
-/// the input.
-///
-/// See also:
-///
-///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
-///  * [InputDecorator.textAlignVertical], which defines the alignment of
-///    prefix, input, and suffix, within the [InputDecorator].
-class TextAlignVertical {
-  /// Construct TextAlignVertical from any given y value.
-  const TextAlignVertical({
-    @required this.y,
-  }) : assert(y != null),
-       assert(y >= -1.0 && y <= 1.0);
-
-  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
-  /// locations of the top and bottom of the input text box.
-  final double y;
-
-  /// Aligns a TextField's input Text with the topmost location within the
-  /// TextField.
-  static const TextAlignVertical top = TextAlignVertical(y: -1.0);
-  /// Aligns a TextField's input Text to the center of the TextField.
-  static const TextAlignVertical center = TextAlignVertical(y: 0.0);
-  /// Aligns a TextField's input Text with the bottommost location within the
-  /// TextField.
-  static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);
-
-  @override
-  String toString() {
-    return '$runtimeType(y: $y)';
   }
 }

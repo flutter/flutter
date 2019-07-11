@@ -47,26 +47,19 @@ Future<int> runTests(
   bool web = false,
 }) async {
   // Compute the command-line arguments for package:test.
-  final List<String> testArgs = <String>[];
-  if (!terminal.supportsColor) {
-    testArgs.addAll(<String>['--no-color']);
-  }
-
-  if (machine) {
-    testArgs.addAll(<String>['-r', 'json']);
-  } else {
-    testArgs.addAll(<String>['-r', 'compact']);
-  }
-
-  testArgs.add('--concurrency=$concurrency');
-
-  for (String name in names) {
-    testArgs..add('--name')..add(name);
-  }
-
-  for (String plainName in plainNames) {
-    testArgs..add('--plain-name')..add(plainName);
-  }
+  final List<String> testArgs = <String>[
+    if (!terminal.supportsColor)
+      '--no-color',
+    if (machine)
+      ...<String>['-r', 'json']
+    else
+      ...<String>['-r', 'compact'],
+    '--concurrency=$concurrency',
+    for (String name in names)
+      ...<String>['--name', name],
+    for (String plainName in plainNames)
+      ...<String>['--plain-name', plainName],
+  ];
   if (web) {
     final String tempBuildDir = fs.systemTempDirectory
       .createTempSync('_flutter_test')
@@ -80,10 +73,11 @@ Future<int> runTests(
     if (!result) {
       throwToolExit('Failed to compile tests');
     }
-    testArgs.add('--platform=chrome');
-    testArgs.add('--precompiled=$tempBuildDir');
-    testArgs.add('--');
-    testArgs.addAll(testFiles);
+    testArgs
+      ..add('--platform=chrome')
+      ..add('--precompiled=$tempBuildDir')
+      ..add('--')
+      ..addAll(testFiles);
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.chrome],
       () {
@@ -94,8 +88,9 @@ Future<int> runTests(
     return exitCode;
   }
 
-  testArgs.add('--');
-  testArgs.addAll(testFiles);
+  testArgs
+    ..add('--')
+    ..addAll(testFiles);
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
@@ -105,7 +100,7 @@ Future<int> runTests(
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
-  loader.installHook(
+  final loader.FlutterPlatform platform = loader.installHook(
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -145,5 +140,6 @@ Future<int> runTests(
     return exitCode;
   } finally {
     fs.currentDirectory = saved;
+    await platform.close();
   }
 }

@@ -469,7 +469,7 @@ class RawFloatingCursorPoint {
     this.offset,
     @required this.state,
   }) : assert(state != null),
-       assert(state == FloatingCursorDragState.Update ? offset != null : true);
+       assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset offset;
