@@ -1221,16 +1221,6 @@ class ColorFilterLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
-  }
-
-  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.pushColorFilter(colorFilter);
     addChildrenToScene(builder, layerOffset);
