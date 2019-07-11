@@ -111,3 +111,46 @@ task:
         cd %ENGINE_PATH%/src
         python flutter/tools/gn --runtime-mode debug
         ninja -C out/host_debug
+
+task:
+  gke_container:
+   image: gcr.io/flutter-cirrus/build-engine-image:latest
+   cluster_name: build-32-cluster
+   zone: us-central1-a
+   namespace: default
+   cpu: 30 # can't use all 30-cores; system pods needs cores too
+   memory: 100Gb # similarly, can't use all 100Gb memory
+  env:
+    CIRRUS_WORKING_DIR: "/tmp/github_repo"
+    ENGINE_PATH: "/tmp/clean_engine"
+    DEPOT_TOOLS: "/tmp/depot_tools"
+    FLUTTER_ENGINE: "/tmp/clean_engine/src"
+    FRAMEWORK_PATH: "/tmp/master_framework"
+    PATH: "$FLUTTER_ENGINE/third_party/dart/tools/sdks/dart-sdk/bin:$DEPOT_TOOLS:$PATH"
+  depot_tools_script:
+    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+  gclient_sync_script: |
+    mkdir -p $ENGINE_PATH/src
+    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
+    cd $ENGINE_PATH/src
+    rm -rf flutter
+    rm -rf out
+    mv $CIRRUS_WORKING_DIR flutter
+    gclient sync
+
+  matrix:
+    - name: build_fuchsia_debug
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --unoptimized --fuchsia --full-dart-sdk
+        ninja -C out/fuchsia_debug_unopt
+    - name: build_fuchsia_profile
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto
+        ninja -C out/fuchsia_profile
+    - name: build_fuchsia_release
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode release --fuchsia --no-lto
+        ninja -C out/fuchsia_release
