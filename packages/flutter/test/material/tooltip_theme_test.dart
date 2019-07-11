@@ -2,11 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/services.dart';
 import 'package:flutter/src/material/tooltip_theme.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 // This file uses "as dynamic" in a few places to defeat the static
 // analysis. In general you want to avoid using this style in your
@@ -578,9 +582,261 @@ void main() {
   // test wait and show duration - theme widget
   testWidgets('', (WidgetTester tester) async {});
 
-  // test semantics - themedata
-  testWidgets('', (WidgetTester tester) async {});
+  testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
 
-  // test semantics = theme widget
-  testWidgets('', (WidgetTester tester) async {});
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: const Center(
+          child: Tooltip(
+            message: 'Foo',
+            child: Text('Bar'),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Foo\nBar',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics included by default - TooltipTheme', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TooltipTheme(
+          child: const Center(
+            child: Tooltip(
+              message: 'Foo',
+              child: Text('Bar'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Foo\nBar',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics excluded - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          tooltipTheme: const TooltipThemeData(
+            excludeFromSemantics: true,
+          ),
+        ),
+        home: const Center(
+          child: Tooltip(
+            message: 'Foo',
+            child: Text('Bar'),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Bar',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics excluded - TooltipTheme', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TooltipTheme(
+          excludeFromSemantics: true,
+          child: const Center(
+            child: Tooltip(
+              message: 'Foo',
+              child: Text('Bar'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
+              children: <TestSemantics>[
+                TestSemantics(
+                  label: 'Bar',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ],
+    ), ignoreRect: true, ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
+  });
+
+  testWidgets('has semantic events by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(),
+        home: Center(
+          child: Tooltip(
+            message: 'Foo',
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+              color: Colors.green[500],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+
+  testWidgets('has semantic events by default - TooltipTheme', (WidgetTester tester) async {
+    final List<dynamic> semanticEvents = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
+      semanticEvents.add(message);
+    });
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TooltipTheme(
+          child: Center(
+            child: Tooltip(
+              message: 'Foo',
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+                color: Colors.green[500],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byType(Tooltip));
+    final RenderObject object = tester.firstRenderObject(find.byType(Tooltip));
+
+    expect(semanticEvents, unorderedEquals(<dynamic>[
+      <String, dynamic>{
+        'type': 'longPress',
+        'nodeId': findDebugSemantics(object).id,
+        'data': <String, dynamic>{},
+      },
+      <String, dynamic>{
+        'type': 'tooltip',
+        'data': <String, dynamic>{
+          'message': 'Foo',
+        },
+      },
+    ]));
+    semantics.dispose();
+    SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+
+  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Tooltip(message: 'message',).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"message"',
+    ]);
+  });
+}
+
+SemanticsNode findDebugSemantics(RenderObject object) {
+  if (object.debugSemantics != null)
+    return object.debugSemantics;
+  return findDebugSemantics(object.parent);
 }
