@@ -158,12 +158,10 @@ class SkiaGoldClient extends GoldensClient {
       '--png-file', goldenFile.path,
     ];
 
-    final io.ProcessResult result = await io.Process.run(
+    await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
-
-    print(result.stdout);
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // So as not to turn the tree red in this initial implementation, this will
@@ -175,7 +173,6 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return 'b5c1b61c73b826eb66ea0cd4662ee05efb4af44c';
     if (!flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Flutter root could not be found: $flutterRoot');
