@@ -445,6 +445,7 @@ class PaintingContext extends ClipContext {
   }
 
   /// Blend further painting with a color filter.
+  ///
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `colorFilter` is the [ColorFilter] value to use when blending the
