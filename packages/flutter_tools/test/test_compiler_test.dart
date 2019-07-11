@@ -16,6 +16,7 @@ void main() {
     Testbed testbed;
     FakeTestCompiler testCompiler;
     MockResidentCompiler residentCompiler;
+    Directory tmpDir;
 
     setUp(() {
       testbed = Testbed(
@@ -30,7 +31,20 @@ void main() {
             residentCompiler,
           );
         },
+        overrides: <Type, Generator>{
+          FileSystem: () {
+            const LocalFileSystem fs = LocalFileSystem();
+            tmpDir = fs.systemTempDirectory.createTempSync('flutter_test_compiler_test.');
+            fs.currentDirectory = tmpDir;
+            return fs;
+          }
+        },
       );
+    });
+
+    tearDown(() {
+      tryToDelete(tmpDir);
+      testCompiler.dispose();
     });
 
     test('Reports a dill file when compile is successful', () => testbed.run(() async {

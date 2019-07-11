@@ -177,6 +177,7 @@ class TestCompiler {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible. Notice the lock.
+          ensureDirectoryExists(testLockFilePath);
           final File lockFile = fs.file(testLockFilePath);
           final RandomAccessFile lock = lockFile.openSync(mode: FileMode.write)..lockSync(FileLock.blockingExclusive);
           final File testFile = fs.file(testWithLockingFilePath);
