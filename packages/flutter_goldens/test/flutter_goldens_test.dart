@@ -64,9 +64,7 @@ void main() {
     SkiaGoldClient goldens;
 
     setUp(() {
-      final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
       goldens = SkiaGoldClient(
-        workDirectory,
         fs: fs,
         process: process,
         platform: platform,
@@ -75,9 +73,10 @@ void main() {
 
     group('auth', () {
       test('performs minimal work if already authorized', () async {
+        final Directory workDirectory = fs.directory('/workDirectory')..createSync(recursive: true);
         fs.file('/workDirectory/temp/auth_opt.json')..createSync(recursive: true);
         when(process.run(any)).thenAnswer((_) => Future<io.ProcessResult>.value(io.ProcessResult(123, 0, '', '')));
-        await goldens.auth();
+        await goldens.auth(workDirectory);
 
         // Verify that we spawned no process calls
         final VerificationResult verifyProcessRun =
@@ -188,6 +187,7 @@ void main() {
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
       comparator = FlutterSkiaGoldFileComparator(
         testDirectory.uri,
+        MockSkiaGoldClient(),
         fs: fs,
         platform: platform,
       );

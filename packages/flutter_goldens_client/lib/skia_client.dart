@@ -27,8 +27,7 @@ const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
 /// An extension of the [GoldensClient] class that interfaces with Skia Gold
 /// for golden file testing.
 class SkiaGoldClient extends GoldensClient {
-  SkiaGoldClient(
-    this.workDirectory, {
+  SkiaGoldClient({
     FileSystem fs = const LocalFileSystem(),
     ProcessManager process = const LocalProcessManager(),
     Platform platform = const LocalPlatform(),
@@ -44,7 +43,7 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
   /// be null.
-  final Directory workDirectory;
+  Directory _workDirectory;
 
   /// The path to the local [Directory] where the goldctl tool is hosted.
   ///
@@ -67,17 +66,19 @@ class SkiaGoldClient extends GoldensClient {
   /// The [workDirectory] parameter specifies the current directory that golden
   /// tests are executing in, relative to the library of the given test. It is
   /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
-  Future<void> auth() async {
+  Future<void> auth(Directory workDirectory) async {
+    assert(workDirectory != null);
+    _workDirectory = workDirectory;
     if (_clientIsAuthorized())
       return;
 
-    final File authorization = workDirectory.childFile('serviceAccount.json');
+    final File authorization = _workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
       'auth',
       '--service-account', authorization.path,
-      '--work-dir', workDirectory.childDirectory('temp').path,
+      '--work-dir', _workDirectory.childDirectory('temp').path,
     ];
 
     final io.ProcessResult authResults = await io.Process.run(
@@ -100,8 +101,8 @@ class SkiaGoldClient extends GoldensClient {
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
     final String commitHash = await _getCurrentCommit();
-    final File keys = workDirectory.childFile('keys.json');
-    final File failures = workDirectory.childFile('failures.json');
+    final File keys = _workDirectory.childFile('keys.json');
+    final File failures = _workDirectory.childFile('failures.json');
 
     await keys.writeAsString(_getKeysJSON());
     await failures.create();
@@ -109,7 +110,7 @@ class SkiaGoldClient extends GoldensClient {
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
       '--instance', 'flutter',
-      '--work-dir', workDirectory.childDirectory('temp').path,
+      '--work-dir', _workDirectory.childDirectory('temp').path,
       '--commit', commitHash,
       '--keys-file', keys.path,
       '--failure-file', failures.path,
@@ -152,15 +153,17 @@ class SkiaGoldClient extends GoldensClient {
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
-      '--work-dir', workDirectory.childDirectory('temp').path,
+      '--work-dir', _workDirectory.childDirectory('temp').path,
       '--test-name', testName.split(path.extension(testName.toString()))[0],
       '--png-file', goldenFile.path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
+
+    print(result.stdout);
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // So as not to turn the tree red in this initial implementation, this will
@@ -172,6 +175,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
+    return 'b5c1b61c73b826eb66ea0cd4662ee05efb4af44c';
     if (!flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Flutter root could not be found: $flutterRoot');
@@ -201,7 +205,7 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns a boolean value to prevent the client from re-authorizing itself
   /// for multiple tests.
   bool _clientIsAuthorized() {
-    final File authFile = workDirectory.childFile(super.fs.path.join(
+    final File authFile = _workDirectory.childFile(super.fs.path.join(
       'temp',
       'auth_opt.json',
     ));

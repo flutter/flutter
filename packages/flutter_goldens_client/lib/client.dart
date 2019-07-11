@@ -19,7 +19,7 @@ const String _kFlutterRootKey = 'FLUTTER_ROOT';
 /// An base class that provides shared information to the
 /// [FlutterGoldenFileComparator] as well as the [SkiaGoldClient] and
 /// [GoldensRepositoryClient].
-class GoldensClient {
+abstract class GoldensClient {
   /// Creates a handle to the local environment of golden file images.
   GoldensClient({
     this.fs = const LocalFileSystem(),

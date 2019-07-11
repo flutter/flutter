@@ -190,18 +190,17 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   /// The [fs] and [platform] parameters useful in tests, where the default file
   /// system and platform can be replaced by mock instances.
   FlutterSkiaGoldFileComparator(
-    Uri basedir, {
+    final Uri basedir,
+    this.skiaClient, {
     FileSystem fs = const LocalFileSystem(),
     Platform platform = const LocalPlatform(),
   }) : super(
     basedir,
     fs: fs,
     platform: platform,
-  ) {
-    _skiaClient = SkiaGoldClient(fs.directory(basedir));
-  }
+  );
 
-  SkiaGoldClient _skiaClient;
+  final SkiaGoldClient skiaClient;
 
   /// Creates a new [FlutterSkiaGoldFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
@@ -209,19 +208,18 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   /// The [goldens] and [defaultComparator] parameters are visible for testing
   /// purposes only.
   static Future<FlutterSkiaGoldFileComparator> fromDefaultComparator({
-    GoldensClient goldens,
+    SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
   }) async {
     defaultComparator ??= goldenFileComparator;
-    goldens ??= GoldensClient();
+    goldens ??= SkiaGoldClient();
 
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(goldens, defaultComparator);
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
-    final SkiaGoldClient skiaClient = SkiaGoldClient(baseDirectory);
-    await skiaClient.auth();
-    await skiaClient.imgtestInit();
-    return FlutterSkiaGoldFileComparator(baseDirectory.uri);
+    await goldens.auth(baseDirectory);
+    await goldens.imgtestInit();
+    return FlutterSkiaGoldFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
@@ -233,7 +231,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     if (!goldenFile.existsSync()) {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
-    return await _skiaClient.imgtestAdd(golden.path, goldenFile);
+    return await skiaClient.imgtestAdd(golden.path, goldenFile);
   }
 
   @override
