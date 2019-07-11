@@ -41,12 +41,16 @@ FLUTTER_EXPORT
 @property(nonatomic) FlutterMouseTrackingMode mouseTrackingMode;
 
 /**
- * Launches the Flutter engine with the provided project.
+ * Initializes a controller that will run the given project.
  *
  * @param project The project to run in this view controller. If nil, a default `FLEDartProject`
  *                will be used.
- * @return YES if the engine launched successfully.
  */
-- (BOOL)launchEngineWithProject:(nullable FLEDartProject*)project;
+- (nonnull instancetype)initWithProject:(nullable FLEDartProject*)project NS_DESIGNATED_INITIALIZER;
+
+- (nonnull instancetype)initWithNibName:(nullable NSString*)nibNameOrNil
+                                 bundle:(nullable NSBundle*)nibBundleOrNil
+    NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithCoder:(nonnull NSCoder*)nibNameOrNil NS_DESIGNATED_INITIALIZER;
 
 @end

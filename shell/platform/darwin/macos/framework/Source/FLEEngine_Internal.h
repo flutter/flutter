@@ -4,17 +4,27 @@
 
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEEngine.h"
 
+#import <Cocoa/Cocoa.h>
+
 #import "flutter/shell/platform/embedder/embedder.h"
 
 @interface FLEEngine ()
 
 /**
- * Informs the engine that the display region's size has changed.
- *
- * @param size The size of the display, in pixels.
- * @param pixelRatio The number of pixels per screen coordinate.
+ * True if the engine is currently running.
  */
-- (void)updateWindowMetricsWithSize:(CGSize)size pixelRatio:(double)pixelRatio;
+@property(nonatomic, readonly) BOOL running;
+
+/**
+ * The resource context used by the engine for texture uploads. FlutterViews associated with this
+ * engine should be created to share with this context.
+ */
+@property(nonatomic, readonly, nullable) NSOpenGLContext* resourceContext;
+
+/**
+ * Informs the engine that the associated view controller's view size has changed.
+ */
+- (void)updateWindowMetrics;
 
 /**
  * Dispatches the given pointer event data to engine.
