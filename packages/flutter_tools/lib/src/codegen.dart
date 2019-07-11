@@ -101,6 +101,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath,
     bool targetProductVm = false,
+    bool enableAsserts = false,
     // These arguments are currently unused.
     String sdkRoot,
     String packagesPath,
@@ -137,6 +138,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       extraFrontEndOptions: extraFrontEndOptions,
       incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
       targetProductVm: targetProductVm,
+      enableAsserts: enableAsserts,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
       fileSystemRoots: <String>[

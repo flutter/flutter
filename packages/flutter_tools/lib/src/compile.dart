@@ -223,6 +223,7 @@ class KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    bool enableAsserts = false,
     String initializeFromDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
@@ -287,6 +288,10 @@ class KernelCompiler {
       command.add('-Ddart.vm.product=true');
     } else if (aot) {
       command.add('-Ddart.vm.profile=true');
+    }
+    if (enableAsserts) {
+      // Tell front-end to check assertions during constant evaluation.
+      command.add('--enable-asserts');
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');

@@ -93,6 +93,7 @@ class BundleBuilder {
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
         packagesPath: packagesPath,
+        enableAsserts: buildMode == BuildMode.debug,
       );
       if (compilerOutput?.outputFilename == null) {
         throwToolExit('Compiler failed on $mainPath');
