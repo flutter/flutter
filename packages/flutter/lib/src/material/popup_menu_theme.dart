@@ -34,16 +34,16 @@ class PopupMenuEntryThemeData extends Diagnosticable {
     this.textStyle,
   });
 
-  /// Default value for [_PopupMenuRoute.color]
+  /// Default value for [_PopupMenuRoute.color].
   final Color surfaceContainerColor;
 
-  /// Default value for [_PopupMenuRoute.shape]
+  /// Default value for [_PopupMenuRoute.shape].
   final ShapeBorder shape;
 
-  /// Default value for [_PopupMenuRoute.elevation]
+  /// Default value for [_PopupMenuRoute.elevation].
   final double elevation;
 
-  /// Default value for [PopupMenuItem.textStyle]
+  /// Default value for [PopupMenuItem.textStyle].
   final TextStyle textStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -55,7 +55,8 @@ class PopupMenuEntryThemeData extends Diagnosticable {
     TextStyle textStyle,
   }) {
     return PopupMenuEntryThemeData(
-      surfaceContainerColor: surfaceContainerColor ?? this.surfaceContainerColor,
+      surfaceContainerColor:
+          surfaceContainerColor ?? this.surfaceContainerColor,
       shape: shape ?? this.shape,
       elevation: elevation ?? this.elevation,
       textStyle: textStyle ?? this.textStyle,
@@ -72,7 +73,8 @@ class PopupMenuEntryThemeData extends Diagnosticable {
     assert(t != null);
     if (a == null && b == null) return null;
     return PopupMenuEntryThemeData(
-      surfaceContainerColor: Color.lerp(a?.surfaceContainerColor, b?.surfaceContainerColor, t),
+      surfaceContainerColor:
+          Color.lerp(a?.surfaceContainerColor, b?.surfaceContainerColor, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
@@ -104,9 +106,13 @@ class PopupMenuEntryThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorProperty('surface container color', surfaceContainerColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(ColorProperty(
+        'surface container color', surfaceContainerColor,
+        defaultValue: null));
+    properties.add(
+        DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle,
+        defaultValue: null));
   }
 }

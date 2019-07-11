@@ -195,7 +195,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The text style of the entry.
   ///
-  /// Defaults to null.
+  /// Defaults to [blackMountainView].
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -204,13 +204,6 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// appropriate [DefaultTextStyle] is put in scope for the child. In either
   /// case, the text should be short enough that it won't wrap.
   final Widget child;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// Typically a single-line [ListTile] (for menus with icons) or a [Text]. An
-  /// appropriate [DefaultTextStyle] is put in scope for the child. In either
-  /// case, the text should be short enough that it won't wrap.
-
 
   @override
   bool represents(T value) => value == this.value;
