@@ -1,4 +1,4 @@
-Signature: b37a2e81e4f74e4a3c20b6843115d41e
+Signature: b1d2f51063722465da09e691bf164c84
 
 UNUSED LICENSES:
 
@@ -516,6 +516,7 @@ FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xcb.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib.h
 FILE: ../../../third_party/vulkan/include/vulkan/vulkan_xlib_xrandr.h
 FILE: ../../../third_party/wuffs/cmd/commonflags/commonflags.go
+FILE: ../../../third_party/wuffs/cmd/ractool/main.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/genlib.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/main.go
 FILE: ../../../third_party/wuffs/cmd/wuffs-c/release.go
@@ -586,6 +587,9 @@ FILE: ../../../third_party/wuffs/lib/rac/example_test.go
 FILE: ../../../third_party/wuffs/lib/rac/rac.go
 FILE: ../../../third_party/wuffs/lib/rac/writer.go
 FILE: ../../../third_party/wuffs/lib/rac/writer_test.go
+FILE: ../../../third_party/wuffs/lib/raczlib/raczlib.go
+FILE: ../../../third_party/wuffs/lib/raczlib/writer.go
+FILE: ../../../third_party/wuffs/lib/zlibcut/example_test.go
 FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut.go
 FILE: ../../../third_party/wuffs/lib/zlibcut/zlibcut_test.go
 FILE: ../../../third_party/wuffs/release/c/wuffs-unsupported-snapshot.c
