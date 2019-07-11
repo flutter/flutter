@@ -8,9 +8,392 @@ import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 
+// This file uses "as dynamic" in a few places to defeat the static
+// analysis. In general you want to avoid using this style in your
+// code, as it will cause the analyzer to be unable to help you catch
+// errors.
+//
+// In this case, we do it because we are trying to call internal
+// methods of the tooltip code in order to test it. Normally, the
+// state of a tooltip is a private class, but by using a GlobalKey we
+// can get a handle to that object and by using "as dynamic" we can
+// bypass the analyzer's type checks and call methods that we aren't
+// supposed to be able to know about.
+//
+// It's ok to do this in tests, but you really don't want to do it in
+// production code.
+
 const String tooltipText = 'TIP';
 
 void main() {
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              height: 100.0,
+              padding: EdgeInsets.all(0.0),
+              verticalOffset: 100.0,
+              preferBelow: false,
+            ),
+          ),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    /********************* 800x600 screen
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-100.0 height
+     *         |         * }-100.0 vertical offset
+     *         o         * y=300.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(100.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
+  });
+
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TooltipTheme(
+          height: 100.0,
+          padding: const EdgeInsets.all(0.0),
+          verticalOffset: 100.0,
+          preferBelow: false,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    /********************* 800x600 screen
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-100.0 height
+     *         |         * }-100.0 vertical offset
+     *         o         * y=300.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(100.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
+  });
+
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              height: 190.0,
+              padding: EdgeInsets.all(0.0),
+              verticalOffset: 100.0,
+              preferBelow: false,
+            ),
+          ),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 299.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    // we try to put it here but it doesn't fit:
+    /********************* 800x600 screen
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-190.0 height (starts at y=9.0)
+     *         |         * }-100.0 vertical offset
+     *         o         * y=299.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    // so we put it here:
+    /********************* 800x600 screen
+     *                   *
+     *                   *
+     *         o         * y=299.0
+     *        _|_        * }-100.0 vertical offset
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(190.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
+  });
+
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer above does not fit - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TooltipTheme(
+          height: 190.0,
+          padding: const EdgeInsets.all(0.0),
+          verticalOffset: 100.0,
+          preferBelow: false,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 299.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    // we try to put it here but it doesn't fit:
+    /********************* 800x600 screen
+     *        ___        * }- 10.0 margin
+     *       |___|       * }-190.0 height (starts at y=9.0)
+     *         |         * }-100.0 vertical offset
+     *         o         * y=299.0
+     *                   *
+     *                   *
+     *                   *
+     *********************/
+
+    // so we put it here:
+    /********************* 800x600 screen
+     *                   *
+     *                   *
+     *         o         * y=299.0
+     *        _|_        * }-100.0 vertical offset
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(190.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
+  });
+
+  testWidgets('Tooltip verticalOffset, preferBelow; center preferBelow fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              height: 190.0,
+              padding: EdgeInsets.all(0.0),
+              verticalOffset: 100.0,
+              preferBelow: true,
+            ),
+          ),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
+
+    /********************* 800x600 screen
+     *                   *
+     *                   *
+     *         o         * y=300.0
+     *        _|_        * }-100.0 vertical offset
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(190.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
+  });
+
+  testWidgets('Tooltip verticalOffset, preferBelow; center prefer below fits - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TooltipTheme(
+          height: 190.0,
+          padding: const EdgeInsets.all(0.0),
+          verticalOffset: 100.0,
+          preferBelow: true,
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Stack(
+                    children: <Widget>[
+                      Positioned(
+                        left: 400.0,
+                        top: 300.0,
+                        child: Tooltip(
+                          key: key,
+                          message: tooltipText,
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pumpAndSettle(); // faded in, show timer started (and at 0.0)
+
+    /********************* 800x600 screen
+     *                   *
+     *                   *
+     *         o         * y=300.0
+     *        _|_        * }-100.0 vertical offset
+     *       |___|       * }-190.0 height
+     *                   * }- 10.0 margin
+     *********************/
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(190.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
+  });
+
   testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
@@ -189,18 +572,6 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
   }, skip: isBrowser);
 
-  // test vertical offset = themedata
-  testWidgets('', (WidgetTester tester) async {});
-
-  // test vertical offset = themewidget
-  testWidgets('', (WidgetTester tester) async {});
-
-  // test preferbelow - themedata
-  testWidgets('', (WidgetTester tester) async {});
-
-  // test preferbelow - theme widget
-  testWidgets('', (WidgetTester tester) async {});
-
   // test wait and show duration - themedata
   testWidgets('', (WidgetTester tester) async {});
 
@@ -213,4 +584,3 @@ void main() {
   // test semantics = theme widget
   testWidgets('', (WidgetTester tester) async {});
 }
-// TODO: Add tests verifying theme behaviors
