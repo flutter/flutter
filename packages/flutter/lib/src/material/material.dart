@@ -338,8 +338,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   Color _darkThemeOverlayColor(BuildContext context, double elevation) {
     final ThemeData theme = Theme.of(context);
     if (elevation > 0.0 &&
-        theme.brightness == Brightness.dark &&
-        theme.applyDarkThemeElevationOverlay) {
+      theme.brightness == Brightness.dark &&
+      theme.applyDarkThemeElevationOverlay) {
 
       // Compute the opacity for the given elevation according to the spec:
       // https://material.io/design/color/dark-theme.html#properties
