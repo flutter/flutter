@@ -17,7 +17,7 @@ import 'transitions.dart';
 
 // Recognizes tap down by any pointer button unconditionally. When it receives a
 // PointerDownEvent, it immediately claims victor of arena and calls
-// `onAnyTapDown` without any checks.
+// [onAnyTapDown] without any checks.
 //
 // It is used by ModalBarrier to detect any taps on the overlay.
 class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
@@ -67,7 +67,7 @@ class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
 }
 
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
-  const _AnyTapGestureRecognizerFactory({ this.onAnyTapDown });
+  const _AnyTapGestureRecognizerFactory({this.onAnyTapDown});
 
   final VoidCallback onAnyTapDown;
 
@@ -81,7 +81,7 @@ class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGe
 }
 
 // A GestureDetector used by ModalBarrier. It only has one callback,
-// `onAnyTapDown`, which recognizes tap down unconditionally.
+// [onAnyTapDown], which recognizes tap down unconditionally.
 class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
     Key key,
