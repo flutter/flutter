@@ -44,7 +44,7 @@ static std::unique_ptr<const fml::Mapping> GetFileMapping(
 static std::shared_ptr<const fml::Mapping> SearchMapping(
     MappingCallback embedder_mapping_callback,
     const std::string& file_path,
-    const std::string& native_library_path,
+    const std::vector<std::string>& native_library_path,
     const char* native_library_symbol_name,
     bool is_executable) {
   // Ask the embedder. There is no fallback as we expect the embedders (via
@@ -61,9 +61,8 @@ static std::shared_ptr<const fml::Mapping> SearchMapping(
   }
 
   // Look in application specified native library if specified.
-  if (native_library_path.size() > 0) {
-    auto native_library =
-        fml::NativeLibrary::Create(native_library_path.c_str());
+  for (const std::string& path : native_library_path) {
+    auto native_library = fml::NativeLibrary::Create(path.c_str());
     auto symbol_mapping = std::make_unique<const fml::SymbolMapping>(
         native_library, native_library_symbol_name);
     if (symbol_mapping->GetMapping() != nullptr) {
