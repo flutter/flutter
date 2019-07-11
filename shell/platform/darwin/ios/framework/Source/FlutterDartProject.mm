@@ -70,7 +70,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
     if (hasExplicitBundle) {
       NSString* executablePath = bundle.executablePath;
       if ([[NSFileManager defaultManager] fileExistsAtPath:executablePath]) {
-        settings.application_library_path = executablePath.UTF8String;
+        settings.application_library_path.push_back(executablePath.UTF8String);
       }
     }
 
@@ -81,7 +81,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
       if (libraryPath.length > 0) {
         NSString* executablePath = [NSBundle bundleWithPath:libraryPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path = executablePath.UTF8String;
+          settings.application_library_path.push_back(executablePath.UTF8String);
         }
       }
     }
@@ -95,7 +95,7 @@ static flutter::Settings DefaultSettingsForProcess(NSBundle* bundle = nil) {
         NSString* executablePath =
             [NSBundle bundleWithPath:applicationFrameworkPath].executablePath;
         if (executablePath.length > 0) {
-          settings.application_library_path = executablePath.UTF8String;
+          settings.application_library_path.push_back(executablePath.UTF8String);
         }
       }
     }

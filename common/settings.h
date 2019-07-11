@@ -73,7 +73,10 @@ struct Settings {
   // libraries.
   MappingCallback dart_library_sources_kernel;
 
-  std::string application_library_path;
+  // Path to a library containing the application's compiled Dart code.
+  // This is a vector so that the embedder can provide fallback paths in
+  // case the primary path to the library can not be loaded.
+  std::vector<std::string> application_library_path;
 
   std::string application_kernel_asset;       // deprecated
   std::string application_kernel_list_asset;  // deprecated

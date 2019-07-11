@@ -173,6 +173,11 @@ public class FlutterMain {
                 shellArgs.add("--" + ISOLATE_SNAPSHOT_DATA_KEY + "=" + sIsolateSnapshotData);
             } else {
                 shellArgs.add("--" + AOT_SHARED_LIBRARY_NAME + "=" + sAotSharedLibraryName);
+
+                // Most devices can load the AOT shared library based on the library name
+                // with no directory path.  Provide a fully qualified path to the library
+                // as a workaround for devices where that fails.
+                shellArgs.add("--" + AOT_SHARED_LIBRARY_NAME + "=" + applicationInfo.nativeLibraryDir + File.separator + sAotSharedLibraryName);
             }
 
             shellArgs.add("--cache-dir-path=" + PathUtils.getCacheDirectory(applicationContext));
