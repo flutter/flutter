@@ -47,7 +47,6 @@ void main() {
         final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
           imageProvider, () => imageProvider.load(imageProvider),
         );
-
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
         final Completer<void> cacheCompleter = Completer<void>();
