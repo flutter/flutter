@@ -683,26 +683,35 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// Apply a semi-transparent white overlay on Material widgets when in dark themes.
+  /// Apply a semi-transparent white overlay on Material widgets when in dark
+  /// themes.
+  ///
+  /// A dark theme (where [brightness] is [Brightness.dark]) usually
+  /// has a dark background for surfaces. This can make the normal Material
+  /// drop shadows hard to see. To help with this, Material widgets should
+  /// lighten the background color by adding a semi-transparent white overlay
+  /// to indicate elevation. [applyDarkThemeElevationOverlay] turns the
+  /// application of this overlay on or off.
   ///
   /// If [true] a semi-transparent white overlay will be applied to the surface
-  /// color of [Material] widgets when the surrounding theme's brightness is dark.
-  /// The transparency is based off of the [elevation] as per the Material Dark
-  /// theme specification.
+  /// color of [Material] widgets when the surrounding theme's [brightness]
+  /// is [Brightness.dark]. The level of transparency is based off of
+  /// [Material.elevation] as per the Material Dark theme specification.
   ///
   /// If [false] the surface color will be used unmodified.
   ///
   /// Defaults to [false].
   ///
-  /// Note: this setting is just here to maintain backwards compatibility with
-  /// applications that were built before the Material Dark theme specification
+  /// Note: this setting is here to maintain backwards compatibility with
+  /// apps that were built before the Material Dark theme specification
   /// was published. New apps should set this to [true].
   ///
   /// See also:
   ///
-  ///  * [Material.applyDarkThemeElevationOverlay], which will override this
-  ///    setting on an individual widget.
-  ///  * <https://material.io/design/color/dark-theme.html>
+  ///  * [Material.elevation], which effects how transparent the overlay is.
+  ///  * [brightness], which determines whether the theme is light or dark.
+  ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
+  ///    the overlay should be applied.
   final bool applyDarkThemeElevationOverlay;
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].

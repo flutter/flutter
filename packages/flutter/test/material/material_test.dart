@@ -22,7 +22,6 @@ Widget buildMaterial({
   double elevation = 0.0,
   Color shadowColor = const Color(0xFF00FF00),
   Color color = const Color(0xFF0000FF),
-  bool applyDarkThemeElevationOverlay,
 }) {
   return Center(
     child: SizedBox(
@@ -30,7 +29,6 @@ Widget buildMaterial({
       width: 100.0,
       child: Material(
         color: color,
-        applyDarkThemeElevationOverlay: applyDarkThemeElevationOverlay,
         shadowColor: shadowColor,
         elevation: elevation,
         shape: const CircleBorder(),
@@ -220,7 +218,13 @@ void main() {
 
   group('Dark Theme', () {
     testWidgets('Light theme does not change background color', (WidgetTester tester) async {
-      await tester.pumpWidget(buildMaterial(color: const Color(0xFFFFFFFF)));
+      await tester.pumpWidget(Theme(
+        data: ThemeData(
+          brightness: Brightness.light,
+          applyDarkThemeElevationOverlay: true,
+        ),
+        child: buildMaterial(color: const Color(0xFFFFFFFF), elevation: 8.0))
+      );
       final RenderPhysicalShape model = getShadow(tester);
       expect(model.color, equals(const Color(0xFFFFFFFF)));
     });
@@ -230,25 +234,27 @@ void main() {
       // a given elevation
       const List<ElevationColor> elevationColors = <ElevationColor>[
         ElevationColor(0.0, Color(0xFF121212)),
-        ElevationColor(1.0, Color(0xFF1D1D1D)),
-        ElevationColor(2.0, Color(0xFF212121)),
+        ElevationColor(1.0, Color(0xFF1E1E1E)),
+        ElevationColor(2.0, Color(0xFF222222)),
         ElevationColor(3.0, Color(0xFF242424)),
-        ElevationColor(4.0, Color(0xFF262626)),
+        ElevationColor(4.0, Color(0xFF272727)),
         ElevationColor(6.0, Color(0xFF2C2C2C)),
-        ElevationColor(8.0, Color(0xFF2D2D2D)),
-        ElevationColor(12.0, Color(0xFF323232)),
+        ElevationColor(8.0, Color(0xFF2E2E2E)),
+        ElevationColor(12.0, Color(0xFF333333)),
         ElevationColor(16.0, Color(0xFF353535)),
-        ElevationColor(24.0, Color(0xFF373737)),
+        ElevationColor(24.0, Color(0xFF383838)),
       ];
 
       for (ElevationColor test in elevationColors) {
         await tester.pumpWidget(
           Theme(
-            data: ThemeData(brightness: Brightness.dark),
+            data: ThemeData(
+              brightness: Brightness.dark,
+              applyDarkThemeElevationOverlay: true
+            ),
             child: buildMaterial(
               color: const Color(0xFF121212),
               elevation: test.elevation,
-              applyDarkThemeElevationOverlay: true,
             ),
           )
         );
@@ -261,10 +267,12 @@ void main() {
     testWidgets('applyDarkThemeElevationOverlay set to false will not apply overlay', (WidgetTester tester) async {
       await tester.pumpWidget(
         Theme(
-          data: ThemeData(brightness: Brightness.dark),
+          data: ThemeData(
+            brightness: Brightness.dark,
+            applyDarkThemeElevationOverlay: false,
+          ),
           child: buildMaterial(
             color: const Color(0xFF121212),
-            applyDarkThemeElevationOverlay: false,
             elevation: 8.0
           ),
         )
@@ -284,7 +292,7 @@ void main() {
         )
       );
       RenderPhysicalShape model = getShadow(tester);
-      expect(model.color, equals(const Color(0xFF2D2D2D)));
+      expect(model.color, equals(const Color(0xFF2E2E2E)));
 
       await tester.pumpWidget(
         Theme(
