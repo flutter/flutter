@@ -148,7 +148,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         public void resizePlatformView(@NonNull PlatformViewsChannel.PlatformViewResizeRequest request, @NonNull Runnable onComplete) {
             ensureValidAndroidVersion();
 
-            VirtualDisplayController vdController = vdControllers.get(request.viewId);
+            final VirtualDisplayController vdController = vdControllers.get(request.viewId);
             if (vdController == null) {
                 throw new IllegalStateException("Trying to resize a platform view with unknown id: "
                     + request.viewId);
@@ -158,22 +158,18 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             int physicalHeight = toPhysicalPixels(request.newLogicalHeight);
             validateVirtualDisplayDimensions(physicalWidth, physicalHeight);
 
-            if (textInputPlugin != null) {
-                // Resizing involved moving the platform view to a new virtual display.
-                // Doing so potentially results in losing an active input connection.
-                // To make sure we preserve the input connection when resizing we lock it here
-                // and unlock after the resize is complete.
-                textInputPlugin.lockPlatformViewInputConnection();
-            }
+            // Resizing involved moving the platform view to a new virtual display. Doing so
+            // potentially results in losing an active input connection. To make sure we preserve
+            // the input connection when resizing we lock it here and unlock after the resize is
+            // complete.
+            lockInputConnection(vdController);
             vdController.resize(
                     physicalWidth,
                     physicalHeight,
                     new Runnable() {
                         @Override
                         public void run() {
-                            if (textInputPlugin != null) {
-                                textInputPlugin.unlockPlatformViewInputConnection();
-                            }
+                            unlockInputConnection(vdController);
                             onComplete.run();
                         }
                     }
@@ -364,6 +360,22 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             return null;
         }
         return controller.getView();
+    }
+
+    private void lockInputConnection(@NonNull VirtualDisplayController controller) {
+        if (textInputPlugin == null) {
+            return;
+        }
+        textInputPlugin.lockPlatformViewInputConnection();
+        controller.onInputConnectionLocked();
+    }
+
+    private void unlockInputConnection(@NonNull VirtualDisplayController controller) {
+        if (textInputPlugin == null) {
+            return;
+        }
+        textInputPlugin.unlockPlatformViewInputConnection();
+        controller.onInputConnectionUnlocked();
     }
 
     private static boolean validateDirection(int direction) {
