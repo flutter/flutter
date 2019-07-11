@@ -22,10 +22,4 @@
  */
 - (void)removeKeyResponder:(nonnull NSResponder*)responder;
 
-/**
- * Called when the engine wants to make the resource context current. This must be a context
- * that is in the same share group as this controller's view.
- */
-- (void)makeResourceContextCurrent;
-
 @end

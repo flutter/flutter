@@ -41,6 +41,11 @@
  */
 - (void)engineCallbackOnPlatformMessage:(const FlutterPlatformMessage*)message;
 
+/**
+ * Shuts the Flutter engine if it is running.
+ */
+- (void)shutDownEngine;
+
 @end
 
 #pragma mark -
@@ -120,20 +125,29 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
   // The embedding-API-level engine object.
   FlutterEngine _engine;
 
+  // The project being run by this engine.
+  FLEDartProject* _project;
+
+  // The context provided to the Flutter engine for resource loading.
+  NSOpenGLContext* _resourceContext;
+
   // A mapping of channel names to the registered handlers for those channels.
   NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
+
+  // Whether the engine can continue running after the view controller is removed.
+  BOOL _allowHeadlessExecution;
 }
 
-- (instancetype)init {
-  return [self initWithViewController:nil project:nil];
+- (instancetype)initWithName:(NSString*)labelPrefix project:(FLEDartProject*)project {
+  return [self initWithName:labelPrefix project:project allowHeadlessExecution:YES];
 }
 
-- (instancetype)initWithViewController:(FLEViewController*)viewController
-                               project:(FLEDartProject*)project {
+- (instancetype)initWithName:(NSString*)labelPrefix
+                     project:(FLEDartProject*)project
+      allowHeadlessExecution:(BOOL)allowHeadlessExecution {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
 
-  _viewController = viewController;
   _project = project ?: [[FLEDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
 
@@ -141,17 +155,16 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 }
 
 - (void)dealloc {
-  if (FlutterEngineShutdown(_engine) == kSuccess) {
-    _engine = NULL;
+  [self shutDownEngine];
+}
+
+- (BOOL)runWithEntrypoint:(NSString*)entrypoint {
+  if (self.running) {
+    return NO;
   }
-}
 
-- (void)setProject:(FLEDartProject*)project {
-  _project = project ?: [[FLEDartProject alloc] init];
-}
-
-- (BOOL)run {
-  if (_engine != NULL) {
+  if (!_allowHeadlessExecution && !_viewController) {
+    NSLog(@"Attempted to run an engine with no view controller without headless mode enabled.");
     return NO;
   }
 
@@ -175,6 +188,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
   flutterArguments.command_line_argc = static_cast<int>(arguments.size());
   flutterArguments.command_line_argv = &arguments[0];
   flutterArguments.platform_message_callback = (FlutterPlatformMessageCallback)OnPlatformMessage;
+  flutterArguments.custom_dart_entrypoint = entrypoint.UTF8String;
 
   FlutterEngineResult result = FlutterEngineRun(
       FLUTTER_ENGINE_VERSION, &rendererConfig, &flutterArguments, (__bridge void*)(self), &_engine);
@@ -182,7 +196,17 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
     NSLog(@"Failed to start Flutter engine: error %d", result);
     return NO;
   }
+  [self updateWindowMetrics];
   return YES;
+}
+
+- (void)setViewController:(FLEViewController*)controller {
+  _viewController = controller;
+  if (!controller && !_allowHeadlessExecution) {
+    [self shutDownEngine];
+    _resourceContext = nil;
+  }
+  [self updateWindowMetrics];
 }
 
 - (id<FlutterBinaryMessenger>)binaryMessenger {
@@ -193,11 +217,33 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 
 #pragma mark - Framework-internal methods
 
-- (void)updateWindowMetricsWithSize:(CGSize)size pixelRatio:(double)pixelRatio {
+- (BOOL)running {
+  return _engine != nullptr;
+}
+
+- (NSOpenGLContext*)resourceContext {
+  if (!_resourceContext) {
+    NSOpenGLPixelFormatAttribute attributes[] = {
+        NSOpenGLPFAColorSize, 24, NSOpenGLPFAAlphaSize, 8, NSOpenGLPFADoubleBuffer, 0,
+    };
+    NSOpenGLPixelFormat* pixelFormat = [[NSOpenGLPixelFormat alloc] initWithAttributes:attributes];
+    _resourceContext = [[NSOpenGLContext alloc] initWithFormat:pixelFormat shareContext:nil];
+  }
+  return _resourceContext;
+}
+
+- (void)updateWindowMetrics {
+  if (!_engine) {
+    return;
+  }
+  NSView* view = _viewController.view;
+  CGSize scaledSize = [view convertRectToBacking:view.bounds].size;
+  double pixelRatio = view.bounds.size.width == 0 ? 1 : scaledSize.width / view.bounds.size.width;
+
   const FlutterWindowMetricsEvent event = {
       .struct_size = sizeof(event),
-      .width = static_cast<size_t>(size.width),
-      .height = static_cast<size_t>(size.height),
+      .width = static_cast<size_t>(scaledSize.width),
+      .height = static_cast<size_t>(scaledSize.height),
       .pixel_ratio = pixelRatio,
   };
   FlutterEngineSendWindowMetricsEvent(_engine, &event);
@@ -237,7 +283,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
   if (!_viewController.flutterView) {
     return false;
   }
-  [_viewController makeResourceContextCurrent];
+  [self.resourceContext makeCurrentContext];
   return true;
 }
 
@@ -267,6 +313,19 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
   } else {
     binaryResponseHandler(nil);
   }
+}
+
+/**
+ * Note: Called from dealloc. Should not use accessors or other methods.
+ */
+- (void)shutDownEngine {
+  if (_engine) {
+    FlutterEngineResult result = FlutterEngineShutdown(_engine);
+    if (result != kSuccess) {
+      NSLog(@"Failed to shut down Flutter engine: error %d", result);
+    }
+  }
+  _engine = nullptr;
 }
 
 #pragma mark - FlutterBinaryMessenger

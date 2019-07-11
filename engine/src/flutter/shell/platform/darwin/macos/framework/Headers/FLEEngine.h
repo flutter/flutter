@@ -26,34 +26,46 @@ FLUTTER_EXPORT
 /**
  * Initializes an engine with the given viewController.
  *
- * @param viewController The view controller associated with this engine. If nil, the engine
- *                       will be run headless.
+ * @param labelPrefix Currently unused; in the future, may be used for labelling threads
+ *                    as with the iOS FlutterEngine.
  * @param project The project configuration. If nil, a default FLEDartProject will be used.
  */
-- (nonnull instancetype)initWithViewController:(nullable FLEViewController*)viewController
-                                       project:(nullable FLEDartProject*)project
-    NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithName:(nonnull NSString*)labelPrefix
+                             project:(nullable FLEDartProject*)project;
 
 /**
- * Runs `main()` from this engine's project.
+ * Initializes an engine with the given viewController.
  *
- * @return YES if the engine launched successfully.
+ * @param labelPrefix Currently unused; in the future, may be used for labelling threads
+ *                    as with the iOS FlutterEngine.
+ * @param project The project configuration. If nil, a default FLEDartProject will be used.
  */
-- (BOOL)run;
+- (nonnull instancetype)initWithName:(nonnull NSString*)labelPrefix
+                             project:(nullable FLEDartProject*)project
+              allowHeadlessExecution:(BOOL)allowHeadlessExecution NS_DESIGNATED_INITIALIZER;
+
+- (nonnull instancetype)init NS_UNAVAILABLE;
 
 /**
- * The `FLEDartProject` associated with this engine. If nil, a default will be used for `run`.
+ * Runs a Dart program on an Isolate from the main Dart library (i.e. the library that
+ * contains `main()`).
  *
- * TODO(stuartmorgan): Remove this once FLEViewController takes the project as an initializer
- * argument. Blocked on currently needing to create it from a XIB due to the view issues
- * described in https://github.com/google/flutter-desktop-embedding/issues/10.
+ * The first call to this method will create a new Isolate. Subsequent calls will return
+ * immediately.
+ *
+ * @param entrypoint The name of a top-level function from the same Dart
+ *   library that contains the app's main() function.  If this is nil, it will
+ *   default to `main()`.  If it is not the app's main() function, that function
+ *   must be decorated with `@pragma(vm:entry-point)` to ensure the method is not
+ *   tree-shaken by the Dart compiler.
+ * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
-@property(nonatomic, nullable) FLEDartProject* project;
+- (BOOL)runWithEntrypoint:(nullable NSString*)entrypoint;
 
 /**
  * The `FLEViewController` associated with this engine, if any.
  */
-@property(nonatomic, nullable, readonly, weak) FLEViewController* viewController;
+@property(nonatomic, nullable, weak) FLEViewController* viewController;
 
 /**
  * The `FlutterBinaryMessenger` for communicating with this engine.
