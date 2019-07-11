@@ -38,7 +38,7 @@ class IOSDeploy {
     // TODO(fujino): remove fallback once g3 updated
     const List<String> fallbackIosDeployPath = <String>[
       '/usr/bin/env',
-      'ios-deploy'
+      'ios-deploy',
     ];
     final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
     final List<String> launchCommand = <String>[
@@ -64,7 +64,7 @@ class IOSDeploy {
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv['DYLD_LIBRARY_PATH'] = cache.dyLdLibEntry.value;
+    iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -596,7 +596,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
           device.id,
         ],
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[cache.dyLdLibEntry]
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674

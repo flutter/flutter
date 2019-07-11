@@ -191,13 +191,13 @@ class CachedArtifacts extends Artifacts {
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
       case Artifact.idevicename:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, artifactFileName);
+        return cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
-        return fs.path.join(cache.getArtifactDirectory('ios-deploy').path, artifactFileName);
+        return cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.ideviceinstaller:
-        return fs.path.join(cache.getArtifactDirectory('ideviceinstaller').path, artifactFileName);
+        return cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
-        return fs.path.join(cache.getArtifactDirectory('usbmuxd').path, artifactFileName);
+        return cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -345,13 +345,13 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.idevicename:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
-        return fs.path.join(cache.getArtifactDirectory('libimobiledevice').path, artifactFileName);
+        return cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.ideviceinstaller:
-        return fs.path.join(cache.getArtifactDirectory('ideviceinstaller').path, artifactFileName);
+        return cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
-        return fs.path.join(cache.getArtifactDirectory('ios-deploy').path, artifactFileName);
+        return cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
-        return fs.path.join(cache.getArtifactDirectory('usbmuxd').path, artifactFileName);
+        return cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
