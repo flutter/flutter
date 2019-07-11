@@ -90,8 +90,8 @@ class TestCompiler {
     // If we created a copy of the test dill file for this process only, clean it up.
     if (testWithoutLockingFilePath != null) {
       final File testFile = fs.file(testWithoutLockingFilePath);
-      if (await testFile.exists()) {
-        await testFile.delete();
+      if (testFile.existsSync()) {
+        testFile.deleteSync();
       }
     }
   }
@@ -176,7 +176,8 @@ class TestCompiler {
         if (firstCompile || testWithLockSize < 0 || testWithLockSize < outputFile.lengthSync()) {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
-          // possible. Notice the lock.
+          // possible. Notice the lock file that is used to prevent different
+          // test processes from reading/writing the file at the same time.
           ensureDirectoryExists(testLockFilePath);
           final File lockFile = fs.file(testLockFilePath);
           final RandomAccessFile lock = lockFile.openSync(mode: FileMode.write)..lockSync(FileLock.blockingExclusive);
