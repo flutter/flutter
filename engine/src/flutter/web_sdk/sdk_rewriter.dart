@@ -27,7 +27,8 @@ import 'dart:_engine' as engine;
   ],
   <String>[
 r'''
-export 'src/engine.dart' show persistedPictureFactory, houdiniPictureFactory, webOnlyInitializeEngine;
+export 'src/engine.dart'
+    show persistedPictureFactory, houdiniPictureFactory, platformViewRegistry;
 ''',
 r'''
 export 'dart:_engine' show persistedPictureFactory, houdiniPictureFactory, webOnlyInitializeEngine;
