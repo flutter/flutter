@@ -129,27 +129,51 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   @override
   void performLayout() {
     double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
-    if (hasScrollBody && child != null) {
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
-    } else if (child != null) {
-      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-      double childExtent;
-      switch (constraints.axis) {
-        case Axis.horizontal:
-          childExtent = child.size.width;
-          break;
-        case Axis.vertical:
-          childExtent = child.size.height;
-          break;
-      }
-      extent = childExtent;
+    print(extent);
+    //if (!child.hasSize) {
+    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    //}
+
+    double childExtent;
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        childExtent = child.size.width;
+        break;
+      case Axis.vertical:
+        childExtent = child.size.height;
+        break;
     }
+    print(childExtent);
+
+    if(constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent) {
+      extent = childExtent;
+    } else {
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+    }
+
+    print('final extent: $extent');
+//    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+//    if (hasScrollBody && child != null) {
+//      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+//    } else if (child != null) {
+//      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+//      double childExtent;
+//      switch (constraints.axis) {
+//        case Axis.horizontal:
+//          childExtent = child.size.width;
+//          break;
+//        case Axis.vertical:
+//          childExtent = child.size.height;
+//          break;
+//      }
+//      extent = childExtent;
+//    }
     assert(extent.isFinite);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : extent,
+      scrollExtent: extent,//hasScrollBody ? constraints.viewportMainAxisExtent : extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
