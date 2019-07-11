@@ -51,6 +51,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Map<String, double> allResults = <String, double>{
       ...await _runMicrobench('lib/stocks/layout_bench.dart'),
       ...await _runMicrobench('lib/stocks/build_bench.dart'),
+      ...await _runMicrobench('lib/geometry/matrix_utils_transform_rect_bench.dart'),
       ...await _runMicrobench('lib/geometry/rrect_contains_bench.dart'),
       ...await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await _runMicrobench('lib/gestures/gesture_detector_bench.dart'),
