@@ -1,6 +1,7 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+// Synced 2019-05-30T14:20:57.833907.
 
 part of ui;
 
@@ -13,6 +14,49 @@ enum FontStyle {
   italic,
 }
 
+/// Where to vertically align the placeholder relative to the surrounding text.
+///
+/// Used by [ParagraphBuilder.addPlaceholder].
+enum PlaceholderAlignment {
+  /// Match the baseline of the placeholder with the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  baseline,
+
+  /// Align the bottom edge of the placeholder with the baseline such that the
+  /// placeholder sits on top of the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  aboveBaseline,
+
+  /// Align the top edge of the placeholder with the baseline specified
+  /// such that the placeholder hangs below the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  belowBaseline,
+
+  /// Align the top edge of the placeholder with the top edge of the font.
+  ///
+  /// When the placeholder is very tall, the extra space will hang from
+  /// the top and extend through the bottom of the line.
+  top,
+
+  /// Align the bottom edge of the placeholder with the top edge of the font.
+  ///
+  /// When the placeholder is very tall, the extra space will rise from the
+  /// bottom and extend through the top of the line.
+  bottom,
+
+  /// Align the middle of the placeholder with the middle of the text.
+  ///
+  /// When the placeholder is very tall, the extra space will grow equally
+  /// from the top and bottom of the line.
+  middle,
+}
+
 /// The thickness of the glyphs used to draw the text
 class FontWeight {
   const FontWeight._(this.index);
@@ -21,31 +65,31 @@ class FontWeight {
   final int index;
 
   /// Thin, the least thick
-  static const FontWeight w100 = const FontWeight._(0);
+  static const FontWeight w100 = FontWeight._(0);
 
   /// Extra-light
-  static const FontWeight w200 = const FontWeight._(1);
+  static const FontWeight w200 = FontWeight._(1);
 
   /// Light
-  static const FontWeight w300 = const FontWeight._(2);
+  static const FontWeight w300 = FontWeight._(2);
 
   /// Normal / regular / plain
-  static const FontWeight w400 = const FontWeight._(3);
+  static const FontWeight w400 = FontWeight._(3);
 
   /// Medium
-  static const FontWeight w500 = const FontWeight._(4);
+  static const FontWeight w500 = FontWeight._(4);
 
   /// Semi-bold
-  static const FontWeight w600 = const FontWeight._(5);
+  static const FontWeight w600 = FontWeight._(5);
 
   /// Bold
-  static const FontWeight w700 = const FontWeight._(6);
+  static const FontWeight w700 = FontWeight._(6);
 
   /// Extra-bold
-  static const FontWeight w800 = const FontWeight._(7);
+  static const FontWeight w800 = FontWeight._(7);
 
   /// Black, the most thick
-  static const FontWeight w900 = const FontWeight._(8);
+  static const FontWeight w900 = FontWeight._(8);
 
   /// The default font weight.
   static const FontWeight normal = w400;
@@ -54,7 +98,7 @@ class FontWeight {
   static const FontWeight bold = w700;
 
   /// A list of all the font weights.
-  static const List<FontWeight> values = const <FontWeight>[
+  static const List<FontWeight> values = <FontWeight>[
     w100,
     w200,
     w300,
@@ -110,6 +154,150 @@ class FontWeight {
   }
 }
 
+/// A feature tag and value that affect the selection of glyphs in a font.
+class FontFeature {
+  /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
+  /// change how the engine selects glyphs when rendering text.
+  ///
+  /// `feature` is the four-character tag that identifies the feature.
+  /// These tags are specified by font formats such as OpenType.
+  ///
+  /// `value` is the value that the feature will be set to.  The behavior
+  /// of the value depends on the specific feature.  Many features are
+  /// flags whose value can be 1 (when enabled) or 0 (when disabled).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  const FontFeature(this.feature, [this.value = 1])
+      : assert(feature != null),
+        assert(feature.length == 4),
+        assert(value != null),
+        assert(value >= 0);
+
+  /// Create a [FontFeature] object that enables the feature with the given tag.
+  const FontFeature.enable(String feature) : this(feature, 1);
+
+  /// Create a [FontFeature] object that disables the feature with the given tag.
+  const FontFeature.disable(String feature) : this(feature, 0);
+
+  /// Randomize the alternate forms used in text.
+  ///
+  /// For example, this can be used with suitably-prepared handwriting fonts to
+  /// vary the forms used for each character, so that, for instance, the word
+  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
+  /// and three different "s"s.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
+  const FontFeature.randomize()
+      : feature = 'rand',
+        value = 1;
+
+  /// Select a stylistic set.
+  ///
+  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
+  factory FontFeature.stylisticSet(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+  }
+
+  /// Use the slashed zero.
+  ///
+  /// Some fonts contain both a circular zero and a zero with a slash. This
+  /// enables the use of the latter form.
+  ///
+  /// This is overridden by [FontFeature.oldstyleFigures].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
+  const FontFeature.slashedZero()
+      : feature = 'zero',
+        value = 1;
+
+  /// Use oldstyle figures.
+  ///
+  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
+  /// this feature is enabled, render with descenders under the baseline instead
+  /// of being entirely above the baseline.
+  ///
+  /// This overrides [FontFeature.slashedZero].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
+  const FontFeature.oldstyleFigures()
+      : feature = 'onum',
+        value = 1;
+
+  /// Use proportional (varying width) figures.
+  ///
+  /// For fonts that have both proportional and tabular (monospace) figures,
+  /// this enables the proportional figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.tabularFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
+  const FontFeature.proportionalFigures()
+      : feature = 'pnum',
+        value = 1;
+
+  /// Use tabular (monospace) figures.
+  ///
+  /// For fonts that have both proportional (varying width) and tabular figures,
+  /// this enables the tabular figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.proportionalFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
+  const FontFeature.tabularFigures()
+      : feature = 'tnum',
+        value = 1;
+
+  /// The tag that identifies the effect of this feature.  Must consist of 4
+  /// ASCII characters (typically lowercase letters).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  final String feature;
+
+  /// The value assigned to this feature.
+  ///
+  /// Must be a positive integer.  Many features are Boolean values that accept
+  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
+  final int value;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final FontFeature typedOther = other;
+    return feature == typedOther.feature && value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => hashValues(feature, value);
+
+  @override
+  String toString() => 'FontFeature($feature, $value)';
+}
+
 /// Whether and how to align text horizontally.
 // The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.
 enum TextAlign {
@@ -143,43 +331,6 @@ enum TextAlign {
   end,
 }
 
-/// Converts [align] to its corresponding CSS value.
-///
-/// This value is used as the "text-align" CSS property, e.g.:
-///
-/// ```css
-/// text-align: right;
-/// ```
-String textAlignToCssValue(TextAlign align, TextDirection textDirection) {
-  switch (align) {
-    case TextAlign.left:
-      return 'left';
-    case TextAlign.right:
-      return 'right';
-    case TextAlign.center:
-      return 'center';
-    case TextAlign.justify:
-      return 'justify';
-    case TextAlign.start:
-      switch (textDirection) {
-        case TextDirection.ltr:
-          return null; // it's the default
-        case TextDirection.rtl:
-          return 'right';
-      }
-      break;
-    case TextAlign.end:
-      switch (textDirection) {
-        case TextDirection.ltr:
-          return 'end';
-        case TextDirection.rtl:
-          return 'left';
-      }
-      break;
-  }
-  throw AssertionError('Unsupported TextAlign value $align');
-}
-
 /// A horizontal line used for aligning text.
 enum TextBaseline {
   /// The horizontal line used to align the bottom of glyphs for alphabetic characters.
@@ -199,7 +350,7 @@ class TextDecoration {
     for (TextDecoration decoration in decorations) {
       mask |= decoration._mask;
     }
-    return new TextDecoration._(mask);
+    return TextDecoration._(mask);
   }
 
   final int _mask;
@@ -210,20 +361,22 @@ class TextDecoration {
   }
 
   /// Do not draw a decoration
-  static const TextDecoration none = const TextDecoration._(0x0);
+  static const TextDecoration none = TextDecoration._(0x0);
 
   /// Draw a line underneath each line of text
-  static const TextDecoration underline = const TextDecoration._(0x1);
+  static const TextDecoration underline = TextDecoration._(0x1);
 
   /// Draw a line above each line of text
-  static const TextDecoration overline = const TextDecoration._(0x2);
+  static const TextDecoration overline = TextDecoration._(0x2);
 
   /// Draw a line through each line of text
-  static const TextDecoration lineThrough = const TextDecoration._(0x4);
+  static const TextDecoration lineThrough = TextDecoration._(0x4);
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TextDecoration) return false;
+    if (other is! TextDecoration) {
+      return false;
+    }
     final TextDecoration typedOther = other;
     return _mask == typedOther._mask;
   }
@@ -233,12 +386,22 @@ class TextDecoration {
 
   @override
   String toString() {
-    if (_mask == 0) return 'TextDecoration.none';
+    if (_mask == 0) {
+      return 'TextDecoration.none';
+    }
     final List<String> values = <String>[];
-    if (_mask & underline._mask != 0) values.add('underline');
-    if (_mask & overline._mask != 0) values.add('overline');
-    if (_mask & lineThrough._mask != 0) values.add('lineThrough');
-    if (values.length == 1) return 'TextDecoration.${values[0]}';
+    if (_mask & underline._mask != 0) {
+      values.add('underline');
+    }
+    if (_mask & overline._mask != 0) {
+      values.add('overline');
+    }
+    if (_mask & lineThrough._mask != 0) {
+      values.add('lineThrough');
+    }
+    if (values.length == 1) {
+      return 'TextDecoration.${values[0]}';
+    }
     return 'TextDecoration.combine([${values.join(", ")}])';
   }
 }
@@ -261,22 +424,8 @@ enum TextDecorationStyle {
   wavy
 }
 
-/// Determines if lists [a] and [b] are deep equivalent.
-///
-/// Returns true if the lists are both null, or if they are both non-null, have
-/// the same length, and contain the same elements in the same order. Returns
-/// false otherwise.
-bool _listEquals<T>(List<T> a, List<T> b) {
-  if (a == null) return b == null;
-  if (b == null || a.length != b.length) return false;
-  for (int index = 0; index < a.length; index += 1) {
-    if (a[index] != b[index]) return false;
-  }
-  return true;
-}
-
 /// An opaque object that determines the size, position, and rendering of text.
-class TextStyle {
+abstract class TextStyle {
   /// Creates a new TextStyle object.
   ///
   /// * `color`: The color to use when painting the text. If this is specified, `foreground` must be null.
@@ -286,7 +435,7 @@ class TextStyle {
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto). If a `fontFamilyFallback` is
-  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the position of
+  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the postion of
   ///   the preferred font family. When a higher priority font cannot be found or does not contain a glyph, a lower
   ///   priority font will be used.
   /// * `fontFamilyFallback`: An ordered list of the names of the fonts to fallback on when a glyph cannot
@@ -298,12 +447,11 @@ class TextStyle {
   /// * `letterSpacing`: The amount of space (in logical pixels) to add between each letter.
   /// * `wordSpacing`: The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
   /// * `textBaseline`: The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
-  /// * `height`: The height of this text span, as a multiplier of the font size. Omitting `height` will allow the line height
-  ///   to take the height as defined by the font, which may not be exactly the height of the fontSize.
+  /// * `height`: The height of this text span, as a multiple of the font size.
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
-  TextStyle({
+  factory TextStyle({
     Color color,
     TextDecoration decoration,
     Color decorationColor,
@@ -323,281 +471,18 @@ class TextStyle {
     Paint foreground,
     List<Shadow> shadows,
     List<FontFeature> fontFeatures,
-  })  : assert(
-            color == null || foreground == null,
-            'Cannot provide both a color and a foreground\n'
-            'The color argument is just a shorthand for "foreground: new Paint()..color = color".'),
-        _color = color,
-        _decoration = decoration,
-        _decorationColor = decorationColor,
-        _decorationStyle = decorationStyle,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle,
-        _textBaseline = textBaseline,
-        // TODO(b/128311960): when font fallback is supported, we should check
-        //                    for it here.
-        _webOnlyIsFontFamilyProvided = fontFamily != null,
-        _fontFamily = fontFamily ?? '',
-        // TODO(b/128311960): add support for font family fallback.
-        _fontFamilyFallback = fontFamilyFallback,
-        _fontSize = fontSize,
-        _letterSpacing = letterSpacing,
-        _wordSpacing = wordSpacing,
-        _height = height,
-        _locale = locale,
-        _background = background,
-        _foreground = foreground,
-        _shadows = shadows;
+  }) = engine.EngineTextStyle;
 
-  final Color _color;
-  final TextDecoration _decoration;
-  final Color _decorationColor;
-  final TextDecorationStyle _decorationStyle;
-  final FontWeight _fontWeight;
-  final FontStyle _fontStyle;
-  final TextBaseline _textBaseline;
-  final bool _webOnlyIsFontFamilyProvided;
-  final String _fontFamily;
-  final List<String> _fontFamilyFallback;
-  final double _fontSize;
-  final double _letterSpacing;
-  final double _wordSpacing;
-  final double _height;
-  final Locale _locale;
-  final Paint _background;
-  final Paint _foreground;
-  final List<Shadow> _shadows;
+  int get hashCode;
 
-  String get _effectiveFontFamily {
-    if (engine.assertionsEnabled) {
-      // In widget tests we use a predictable-size font "Ahem". This makes
-      // widget tests predictable and less flaky.
-      if (engine.domRenderer.debugIsInWidgetTest) {
-        return 'Ahem';
-      }
-    }
-    if (_fontFamily == null || _fontFamily.isEmpty) {
-      return engine.DomRenderer.defaultFontFamily;
-    }
-    return _fontFamily;
-  }
+  bool operator ==(dynamic other);
 
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! TextStyle) return false;
-    final TextStyle typedOther = other;
-    return _color == typedOther._color &&
-        _decoration == typedOther._decoration &&
-        _decorationColor == typedOther._decorationColor &&
-        _decorationStyle == typedOther._decorationStyle &&
-        _fontWeight == typedOther._fontWeight &&
-        _fontStyle == typedOther._fontStyle &&
-        _textBaseline == typedOther._textBaseline &&
-        _fontFamily == typedOther._fontFamily &&
-        _fontSize == typedOther._fontSize &&
-        _letterSpacing == typedOther._letterSpacing &&
-        _wordSpacing == typedOther._wordSpacing &&
-        _height == typedOther._height &&
-        _locale == typedOther._locale &&
-        _background == typedOther._background &&
-        _foreground == typedOther._foreground &&
-        _listEquals<Shadow>(_shadows, typedOther._shadows) &&
-        _listEquals<String>(
-            _fontFamilyFallback, typedOther._fontFamilyFallback);
-  }
-
-  @override
-  int get hashCode => hashValues(
-        _color,
-        _decoration,
-        _decorationColor,
-        _decorationStyle,
-        _fontWeight,
-        _fontStyle,
-        _textBaseline,
-        _fontFamily,
-        _fontFamilyFallback,
-        _fontSize,
-        _letterSpacing,
-        _wordSpacing,
-        _height,
-        _locale,
-        _background,
-        _foreground,
-        _shadows,
-      );
-
-  @override
-  String toString() {
-    if (engine.assertionsEnabled) {
-      return 'TextStyle('
-          'color: ${_color != null ? _color : "unspecified"}, '
-          'decoration: ${_decoration ?? "unspecified"}, '
-          'decorationColor: ${_decorationColor ?? "unspecified"}, '
-          'decorationStyle: ${_decorationStyle ?? "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'textBaseline: ${_textBaseline ?? "unspecified"}, '
-          'fontFamily: ${_webOnlyIsFontFamilyProvided && _fontFamily != null ? _fontFamily : "unspecified"}, '
-          'fontFamilyFallback: ${_webOnlyIsFontFamilyProvided && _fontFamilyFallback != null && _fontFamilyFallback.isNotEmpty ? _fontFamilyFallback : "unspecified"}, '
-          'fontSize: ${_fontSize != null ? _fontSize.toStringAsFixed(1) : "unspecified"}, '
-          'letterSpacing: ${_letterSpacing != null ? "${_letterSpacing}x" : "unspecified"}, '
-          'wordSpacing: ${_wordSpacing != null ? "${_wordSpacing}x" : "unspecified"}, '
-          'height: ${_height != null ? "${_height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}, '
-          'background: ${_background ?? "unspecified"}, '
-          'foreground: ${_foreground ?? "unspecified"}, '
-          'shadows: ${_shadows ?? "unspecified"}'
-          ')';
-    } else {
-      return super.toString();
-    }
-  }
-}
-
-/// A feature tag and value that affect the selection of glyphs in a font.
-class FontFeature {
-  /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
-  /// change how the engine selects glyphs when rendering text.
-  ///
-  /// `feature` is the four-character tag that identifies the feature.
-  /// These tags are specified by font formats such as OpenType.
-  ///
-  /// `value` is the value that the feature will be set to.  The behavior
-  /// of the value depends on the specific feature.  Many features are
-  /// flags whose value can be 1 (when enabled) or 0 (when disabled).
-  ///
-  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
-  const FontFeature(this.feature, [ this.value = 1 ]) : assert(feature != null), assert(feature.length == 4), assert(value != null), assert(value >= 0);
-
-  /// Create a [FontFeature] object that enables the feature with the given tag.
-  const FontFeature.enable(String feature) : this(feature, 1);
-
-  /// Create a [FontFeature] object that disables the feature with the given tag.
-  const FontFeature.disable(String feature) : this(feature, 0);
-
-  /// Randomize the alternate forms used in text.
-  ///
-  /// For example, this can be used with suitably-prepared handwriting fonts to
-  /// vary the forms used for each character, so that, for instance, the word
-  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
-  /// and three different "s"s.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
-  const FontFeature.randomize() : feature = 'rand', value = 1;
-
-  /// Select a stylistic set.
-  ///
-  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
-  factory FontFeature.stylisticSet(int value) {
-    assert(value >= 1);
-    assert(value <= 20);
-    return FontFeature('ss${value.toString().padLeft(2, "0")}');
-  }
-
-  /// Use the slashed zero.
-  ///
-  /// Some fonts contain both a circular zero and a zero with a slash. This
-  /// enables the use of the latter form.
-  ///
-  /// This is overridden by [FontFeature.oldstyleFigures].
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
-  const FontFeature.slashedZero() : feature = 'zero', value = 1;
-
-  /// Use oldstyle figures.
-  ///
-  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
-  /// this feature is enabled, render with descenders under the baseline instead
-  /// of being entirely above the baseline.
-  ///
-  /// This overrides [FontFeature.slashedZero].
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
-  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
-
-  /// Use proportional (varying width) figures.
-  ///
-  /// For fonts that have both proportional and tabular (monospace) figures,
-  /// this enables the proportional figures.
-  ///
-  /// This is mutually exclusive with [FontFeature.tabularFigures].
-  ///
-  /// The default behavior varies from font to font.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
-  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
-
-  /// Use tabular (monospace) figures.
-  ///
-  /// For fonts that have both proportional (varying width) and tabular figures,
-  /// this enables the tabular figures.
-  ///
-  /// This is mutually exclusive with [FontFeature.proportionalFigures].
-  ///
-  /// The default behavior varies from font to font.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
-  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
-
-  /// The tag that identifies the effect of this feature.  Must consist of 4
-  /// ASCII characters (typically lowercase letters).
-  ///
-  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
-  final String feature;
-
-  /// The value assigned to this feature.
-  ///
-  /// Must be a positive integer.  Many features are Boolean values that accept
-  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
-  final int value;
-
-  static const int _kEncodedSize = 8;
-
-  void _encode(ByteData byteData) {
-    assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (int i = 0; i < 4; i++) {
-      byteData.setUint8(i, feature.codeUnitAt(i));
-    }
-    byteData.setInt32(4, value, _kFakeHostEndian);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final FontFeature typedOther = other;
-    return feature == typedOther.feature
-           && value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => hashValues(feature, value);
-
-  @override
-  String toString() => 'FontFeature($feature, $value)';
+  String toString();
 }
 
 /// An opaque object that determines the configuration used by
 /// [ParagraphBuilder] to position lines within a [Paragraph] of text.
-class ParagraphStyle {
+abstract class ParagraphStyle {
   /// Creates a new ParagraphStyle object.
   ///
   /// * `textAlign`: The alignment of the text within the lines of the
@@ -624,11 +509,13 @@ class ParagraphStyle {
   /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting
   ///   the text.
   ///
-  /// * `height`: The fallback height of the spans as a multiplier of the font
-  ///   size. The fallback height is used when no height is provided through
-  ///   [TextStyle.height]. Omitting `height` here and in [TextStyle] will allow
-  ///   the line height to take the height as defined by the font, which may not
-  ///   be exactly the height of the `fontSize`.
+  /// * `height`: The minimum height of the line boxes, as a multiple of the
+  ///   font size. The lines of the paragraph will be at least
+  ///   `(height + leading) * fontSize` tall when fontSize
+  ///   is not null. When fontSize is null, there is no minimum line height. Tall
+  ///   glyphs due to baseline alignment or large [TextStyle.fontSize] may cause
+  ///   the actual line height after layout to be taller than specified here.
+  ///   [fontSize] must be provided for this property to take effect.
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -650,7 +537,7 @@ class ParagraphStyle {
   ///   considered equivalent and turn off this behavior.
   ///
   /// * `locale`: The locale used to select region-specific glyphs.
-  ParagraphStyle({
+  factory ParagraphStyle({
     TextAlign textAlign,
     TextDirection textDirection,
     int maxLines,
@@ -662,125 +549,37 @@ class ParagraphStyle {
     StrutStyle strutStyle,
     String ellipsis,
     Locale locale,
-  })  : _textAlign = textAlign,
-        _textDirection = textDirection,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle,
-        _maxLines = maxLines,
-        _fontFamily = fontFamily,
-        _fontSize = fontSize,
-        _height = height,
-        // TODO(b/128317744): add support for strut style.
-        _strutStyle = strutStyle,
-        _ellipsis = ellipsis,
-        _locale = locale;
+  }) = engine.EngineParagraphStyle;
 
-  final TextAlign _textAlign;
-  final TextDirection _textDirection;
-  final FontWeight _fontWeight;
-  final FontStyle _fontStyle;
-  final int _maxLines;
-  final String _fontFamily;
-  final double _fontSize;
-  final double _height;
-  final StrutStyle _strutStyle;
-  final String _ellipsis;
-  final Locale _locale;
+  bool operator ==(dynamic other);
 
-  String get _effectiveFontFamily {
-    if (engine.assertionsEnabled) {
-      // In widget tests we use a predictable-size font "Ahem". This makes
-      // widget tests predictable and less flaky.
-      if (engine.domRenderer.debugIsInWidgetTest) {
-        return 'Ahem';
-      }
-    }
-    if (_fontFamily == null || _fontFamily.isEmpty) {
-      return engine.DomRenderer.defaultFontFamily;
-    }
-    return _fontFamily;
-  }
+  int get hashCode;
 
-  double get _webOnlyLineHeight {
-    if (_strutStyle == null || _strutStyle._height == null) {
-      // When there's no strut height, always use paragraph style height.
-      return _height;
-    }
-    if (_strutStyle._forceStrutHeight == true) {
-      // When strut height is forced, ignore paragraph style height.
-      return _strutStyle._height;
-    }
-    // In this case, strut height acts as a minimum height for all parts of the
-    // paragraph. So we take the max of strut height and paragraph style height.
-    return math.max(_strutStyle._height, _height);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final ParagraphStyle typedOther = other;
-    return _textAlign == typedOther._textAlign ||
-        _textDirection == typedOther._textDirection ||
-        _fontWeight == typedOther._fontWeight ||
-        _fontStyle == typedOther._fontStyle ||
-        _maxLines == typedOther._maxLines ||
-        _fontFamily == typedOther._fontFamily ||
-        _fontSize == typedOther._fontSize ||
-        _height == typedOther._height ||
-        _ellipsis == typedOther._ellipsis ||
-        _locale == typedOther._locale;
-  }
-
-  @override
-  int get hashCode =>
-      hashValues(_fontFamily, _fontSize, _height, _ellipsis, _locale);
-
-  @override
-  String toString() {
-    if (engine.assertionsEnabled) {
-      return '$runtimeType('
-          'textAlign: ${_textAlign ?? "unspecified"}, '
-          'textDirection: ${_textDirection ?? "unspecified"}, '
-          'fontWeight: ${_fontWeight ?? "unspecified"}, '
-          'fontStyle: ${_fontStyle ?? "unspecified"}, '
-          'maxLines: ${_maxLines ?? "unspecified"}, '
-          'fontFamily: ${_fontFamily ?? "unspecified"}, '
-          'fontSize: ${_fontSize != null ? _fontSize.toStringAsFixed(1) : "unspecified"}, '
-          'height: ${_height != null ? "${_height.toStringAsFixed(1)}x" : "unspecified"}, '
-          'ellipsis: ${_ellipsis != null ? "\"$_ellipsis\"" : "unspecified"}, '
-          'locale: ${_locale ?? "unspecified"}'
-          ')';
-    } else {
-      return super.toString();
-    }
-  }
+  String toString();
 }
 
-class StrutStyle {
+abstract class StrutStyle {
   /// Creates a new StrutStyle object.
   ///
   /// * `fontFamily`: The name of the font to use when painting the text (e.g.,
   ///   Roboto).
   ///
-  /// * `fontFamilyFallback`: An ordered list of font family names that will be
-  ///    searched for when the font in `fontFamily` cannot be found.
+  /// * `fontFamilyFallback`: An ordered list of font family names that will be searched for when
+  ///    the font in `fontFamily` cannot be found.
   ///
   /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting
   ///   the text.
   ///
-  /// * `height`: The minimum height of the line boxes, as a multiplier of the
+  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the
   ///   font size. The lines of the paragraph will be at least
-  ///   `(height + leading) * fontSize` tall when `fontSize` is not null. Omitting
-  ///   `height` will allow the minimum line height to take the height as defined
-  ///   by the font, which may not be exactly the height of the `fontSize`. When
-  ///   `fontSize` is null, there is no minimum line height. Tall glyphs due to
-  ///   baseline alignment or large [TextStyle.fontSize] may cause the actual line
-  ///   height after layout to be taller than specified here. The `fontSize` must
-  ///   be provided for this property to take effect.
+  ///   `(lineHeight + leading) * fontSize` tall when fontSize
+  ///   is not null. When fontSize is null, there is no minimum line height. Tall
+  ///   glyphs due to baseline alignment or large [TextStyle.fontSize] may cause
+  ///   the actual line height after layout to be taller than specified here.
+  ///   [fontSize] must be provided for this property to take effect.
   ///
   /// * `leading`: The minimum amount of leading between lines as a multiple of
-  ///   the font size. `fontSize` must be provided for this property to take effect.
+  ///   the font size. [fontSize] must be provided for this property to take effect.
   ///
   /// * `fontWeight`: The typeface thickness to use when painting the text
   ///   (e.g., bold).
@@ -789,13 +588,13 @@ class StrutStyle {
   ///   italics).
   ///
   /// * `forceStrutHeight`: When true, the paragraph will force all lines to be exactly
-  ///   `(height + leading) * fontSize` tall from baseline to baseline.
+  ///   `(lineHeight + leading) * fontSize` tall from baseline to baseline.
   ///   [TextStyle] is no longer able to influence the line height, and any tall
-  ///   glyphs may overlap with lines above. If a `fontFamily` is specified, the
+  ///   glyphs may overlap with lines above. If a [fontFamily] is specified, the
   ///   total ascent of the first line will be the min of the `Ascent + half-leading`
-  ///   of the `fontFamily` and `(height + leading) * fontSize`. Otherwise, it
+  ///   of the [fontFamily] and `(lineHeight + leading) * fontSize`. Otherwise, it
   ///   will be determined by the Ascent + half-leading of the first text.
-  StrutStyle({
+  factory StrutStyle({
     String fontFamily,
     List<String> fontFamilyFallback,
     double fontSize,
@@ -804,43 +603,11 @@ class StrutStyle {
     FontWeight fontWeight,
     FontStyle fontStyle,
     bool forceStrutHeight,
-  })  : _fontFamily = fontFamily,
-        _fontFamilyFallback = fontFamilyFallback,
-        _fontSize = fontSize,
-        _height = height,
-        _leading = leading,
-        _fontWeight = fontWeight,
-        _fontStyle = fontStyle,
-        _forceStrutHeight = forceStrutHeight;
+  }) = engine.EngineStrutStyle;
 
-  final String _fontFamily;
-  final List<String> _fontFamilyFallback;
-  final double _fontSize;
-  final double _height;
-  final double _leading;
-  final FontWeight _fontWeight;
-  final FontStyle _fontStyle;
-  final bool _forceStrutHeight;
+  int get hashCode;
 
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
-    final StrutStyle typedOther = other;
-    return _fontFamily == typedOther._fontFamily &&
-        _fontSize == typedOther._fontSize &&
-        _height == typedOther._height &&
-        _leading == typedOther._leading &&
-        _fontWeight == typedOther._fontWeight &&
-        _fontStyle == typedOther._fontStyle &&
-        _forceStrutHeight == typedOther._forceStrutHeight &&
-        _listEquals<String>(
-            _fontFamilyFallback, typedOther._fontFamilyFallback);
-  }
-
-  @override
-  int get hashCode => hashValues(_fontFamily, _fontFamilyFallback, _fontSize,
-      _height, _leading, _fontWeight, _fontStyle, _forceStrutHeight);
+  bool operator ==(dynamic other);
 }
 
 /// A direction in which text flows.
@@ -936,19 +703,6 @@ enum TextDirection {
   ltr,
 }
 
-/// Converts [textDirection] to its corresponding CSS value.
-///
-/// This value is used for the "direction" CSS property, e.g.:
-///
-/// ```css
-/// direction: rtl;
-/// ```
-String textDirectionToCssValue(TextDirection textDirection) {
-  return textDirection == TextDirection.ltr
-      ? null // it's the default
-      : 'rtl';
-}
-
 /// A rectangle enclosing a run of text.
 ///
 /// This is similar to [Rect] but includes an inherent [TextDirection].
@@ -990,7 +744,7 @@ class TextBox {
   final TextDirection direction;
 
   /// Returns a rect of the same size as this box.
-  Rect toRect() => new Rect.fromLTRB(left, top, right, bottom);
+  Rect toRect() => Rect.fromLTRB(left, top, right, bottom);
 
   /// The [left] edge of the box for left-to-right text; the [right] edge of the box for right-to-left text.
   ///
@@ -1012,8 +766,12 @@ class TextBox {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     final TextBox typedOther = other;
     return typedOther.left == left &&
         typedOther.top == top &&
@@ -1127,7 +885,9 @@ class TextPosition {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     final TextPosition typedOther = other;
     return typedOther.offset == offset && typedOther.affinity == affinity;
   }
@@ -1176,7 +936,9 @@ class ParagraphConstraints {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType) return false;
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     final ParagraphConstraints typedOther = other;
     return typedOther.width == width;
   }
@@ -1196,9 +958,8 @@ enum BoxHeightStyle {
   tight,
 
   /// The height of the boxes will be the maximum height of all runs in the
-  /// line. All boxes in the same line will be the same height.
-  ///
-  /// This does not guarantee that the boxes will cover the entire vertical height of the line
+  /// line. All boxes in the same line will be the same height. This does not
+  /// guarantee that the boxes will cover the entire vertical height of the line
   /// when there is additional line spacing.
   ///
   /// See [RectHeightStyle.includeLineSpacingTop], [RectHeightStyle.includeLineSpacingMiddle],
@@ -1244,55 +1005,10 @@ enum BoxWidthStyle {
 
   /// Adds up to two additional boxes as needed at the beginning and/or end
   /// of each line so that the widths of the boxes in line are the same width
-  /// as the widest line in the paragraph.
-  ///
-  /// The additional boxes on each line are only added when the relevant box
-  /// at the relevant edge of that line does not span the maximum width of
-  /// the paragraph.
+  /// as the widest line in the paragraph. The additional boxes on each line
+  /// are only added when the relevant box at the relevant edge of that line
+  /// does not span the maximum width of the paragraph.
   max,
-}
-
-/// Where to vertically align the placeholder relative to the surrounding text.
-///
-/// Used by [ParagraphBuilder.addPlaceholder].
-enum PlaceholderAlignment {
-  /// Match the baseline of the placeholder with the baseline.
-  ///
-  /// The [TextBaseline] to use must be specified and non-null when using this
-  /// alignment mode.
-  baseline,
-
-  /// Align the bottom edge of the placeholder with the baseline such that the
-  /// placeholder sits on top of the baseline.
-  ///
-  /// The [TextBaseline] to use must be specified and non-null when using this
-  /// alignment mode.
-  aboveBaseline,
-
-  /// Align the top edge of the placeholder with the baseline specified
-  /// such that the placeholder hangs below the baseline.
-  ///
-  /// The [TextBaseline] to use must be specified and non-null when using this
-  /// alignment mode.
-  belowBaseline,
-
-  /// Align the top edge of the placeholder with the top edge of the font.
-  ///
-  /// When the placeholder is very tall, the extra space will hang from
-  /// the top and extend through the bottom of the line.
-  top,
-
-  /// Align the bottom edge of the placeholder with the top edge of the font.
-  ///
-  /// When the placeholder is very tall, the extra space will rise from the
-  /// bottom and extend through the top of the line.
-  bottom,
-
-  /// Align the middle of the placeholder with the middle of the text.
-  ///
-  /// When the placeholder is very tall, the extra space will grow equally
-  /// from the top and bottom of the line.
-  middle,
 }
 
 /// A paragraph of text.
@@ -1304,72 +1020,22 @@ enum PlaceholderAlignment {
 ///
 /// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
 /// method.
-class Paragraph {
-  /// This class is created by the engine, and should not be instantiated
-  /// or extended directly.
-  ///
-  /// To create a [Paragraph] object, use a [ParagraphBuilder].
-  Paragraph._({
-    @required html.HtmlElement paragraphElement,
-    @required engine.ParagraphGeometricStyle paragraphGeometricStyle,
-    @required String plainText,
-    @required Paint paint,
-    @required TextAlign textAlign,
-    @required TextDirection textDirection,
-    @required Paint background,
-  })  : assert((plainText == null && paint == null) ||
-            (plainText != null && paint != null)),
-        _paragraphElement = paragraphElement,
-        _paragraphGeometricStyle = paragraphGeometricStyle,
-        _plainText = plainText,
-        _textAlign = textAlign,
-        _textDirection = textDirection,
-        _paint = paint,
-        _background = background;
-
-  final html.HtmlElement _paragraphElement;
-  final engine.ParagraphGeometricStyle _paragraphGeometricStyle;
-  final String _plainText;
-  final Paint _paint;
-  final TextAlign _textAlign;
-  final TextDirection _textDirection;
-  final Paint _background;
-
-  /// Do not use this method other than for painting on the [ParagraphSurface].
-  /// Instead use [ParagraphSurface] itself.
-  ///
-  /// It is likely that we will switch over to [Canvas] soon, and so this method
-  /// of painting should be considered deprecated.
-  html.HtmlElement webOnlyGetParagraphElement() => _paragraphElement;
-
-  /// The instance of [TextMeasurementService] to be used to measure this
-  /// paragraph.
-  engine.TextMeasurementService get _measurementService =>
-      engine.TextMeasurementService.forParagraph(this);
-
-  /// The measurement result of the last layout operation.
-  engine.MeasurementResult _measurementResult;
-
+abstract class Paragraph {
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get width => _measurementResult?.width ?? -1;
+  double get width;
 
   /// The amount of vertical space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get height => _measurementResult?.height ?? 0;
-
-  /// The amount of vertical space one line of this paragraph occupies.
-  ///
-  /// Valid only after [layout] has been called.
-  double get _lineHeight => _measurementResult?.lineHeight ?? 0;
+  double get height;
 
   /// The distance from the left edge of the leftmost glyph to the right edge of
   /// the rightmost glyph in the paragraph.
   ///
   /// Valid only after [layout] has been called.
-  double get longestLine => 0;
+  double get longestLine;
 
   /// {@template dart.ui.paragraph.minIntrinsicWidth}
   /// The minimum width that this paragraph could be without failing to paint
@@ -1377,7 +1043,7 @@ class Paragraph {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double get minIntrinsicWidth => _measurementResult?.minIntrinsicWidth ?? 0;
+  double get minIntrinsicWidth;
 
   /// {@template dart.ui.paragraph.maxIntrinsicWidth}
   /// Returns the smallest width beyond which increasing the width never
@@ -1385,20 +1051,23 @@ class Paragraph {
   /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double get maxIntrinsicWidth => _measurementResult?.maxIntrinsicWidth ?? 0;
+  double get maxIntrinsicWidth;
 
   /// {@template dart.ui.paragraph.alphabeticBaseline}
   /// The distance from the top of the paragraph to the alphabetic
   /// baseline of the first line, in logical pixels.
   /// {@endtemplate}
-  double get alphabeticBaseline => _measurementResult?.alphabeticBaseline ?? -1;
+  ///
+  /// Valid only after [layout] has been called.
+  double get alphabeticBaseline;
 
   /// {@template dart.ui.paragraph.ideographicBaseline}
   /// The distance from the top of the paragraph to the ideographic
   /// baseline of the first line, in logical pixels.
   /// {@endtemplate}
-  double get ideographicBaseline =>
-      _measurementResult?.ideographicBaseline ?? -1;
+  ///
+  /// Valid only after [layout] has been called.
+  double get ideographicBaseline;
 
   /// True if there is more vertical content, but the text was truncated, either
   /// because we reached `maxLines` lines of text or because the `maxLines` was
@@ -1407,128 +1076,12 @@ class Paragraph {
   ///
   /// See the discussion of the `maxLines` and `ellipsis` arguments at [new
   /// ParagraphStyle].
-  bool get didExceedMaxLines => _didExceedMaxLines;
-  bool _didExceedMaxLines = false;
-
-  ParagraphConstraints _lastUsedConstraints;
-
-  /// Returns horizontal alignment offset for single line text when rendering
-  /// directly into a canvas without css text alignment styling.
-  double webOnlyAlignOffset = 0.0;
+  bool get didExceedMaxLines;
 
   /// Computes the size and position of each glyph in the paragraph.
   ///
   /// The [ParagraphConstraints] control how wide the text is allowed to be.
-  void layout(ParagraphConstraints constraints) {
-    if (constraints == _lastUsedConstraints) {
-      return;
-    }
-
-    _measurementResult = _measurementService.measure(this, constraints);
-    _lastUsedConstraints = constraints;
-
-    if (_paragraphGeometricStyle.maxLines != null) {
-      _didExceedMaxLines = webOnlyMaxLinesHeight < height;
-    } else {
-      _didExceedMaxLines = false;
-    }
-
-    if (_webOnlyIsSingleLine && constraints != null) {
-      switch (_textAlign) {
-        case TextAlign.center:
-          webOnlyAlignOffset = (constraints.width - maxIntrinsicWidth) / 2.0;
-          break;
-        case TextAlign.right:
-          webOnlyAlignOffset = constraints.width - maxIntrinsicWidth;
-          break;
-        case TextAlign.start:
-          webOnlyAlignOffset = _textDirection == TextDirection.rtl
-              ? constraints.width - maxIntrinsicWidth
-              : 0.0;
-          break;
-        case TextAlign.end:
-          webOnlyAlignOffset = _textDirection == TextDirection.ltr
-              ? constraints.width - maxIntrinsicWidth
-              : 0.0;
-          break;
-        default:
-          webOnlyAlignOffset = 0.0;
-          break;
-      }
-    }
-  }
-
-  /// Returns the style that contains properties for layout computation.
-  engine.ParagraphGeometricStyle webOnlyGetParagraphGeometricStyle() =>
-      _paragraphGeometricStyle;
-
-  /// This paragraph's text as a plain string.
-  ///
-  /// This value is non-null only if the text is not rich. See
-  /// [ParagraphBuilder] for more details on what is considered "rich".
-  String webOnlyGetPlainText() => _plainText;
-
-  /// This paragraph's color as a [Paint] object.
-  ///
-  /// This value is non-null only if the text is not rich. See
-  /// [ParagraphBuilder] for more details on what is considered "rich".
-  Paint webOnlyGetPaint() => _paint;
-
-  /// The expected height of the paragraph when it respects [maxLines].
-  ///
-  /// If [maxLines] is null, then [maxLinesHeight] will also be null indicating
-  /// that there's no expected height for this paragraph in order to respect
-  /// [maxLines].
-  double get webOnlyMaxLinesHeight {
-    assert(webOnlyIsLaidOut);
-    if (_paragraphGeometricStyle.maxLines == null) {
-      return null;
-    }
-    // If this assertion fails, it means we somehow forgot to measure lineHeight
-    // when we actually needed it.
-    //
-    // See [TextMeasurement._measureMultiLineParagraph].
-    assert(_lineHeight != null);
-    return _paragraphGeometricStyle.maxLines * _lineHeight;
-  }
-
-  /// Whether or not this paragraph can be drawn on a single line.
-  bool get _webOnlyIsSingleLine => _measurementResult.isSingleLine;
-
-  /// Returns `true` if this paragraph can be directly painted to the canvas.
-  ///
-  /// For now, we can only draw paragraphs onto the canvas directly if they
-  /// are on a single line and do not use rich text. We also use fallback
-  /// for decorations, since Canvas doesn't support them.
-  // TODO(yjbanov): This is Engine-internal API. We should make it private.
-  bool get webOnlyDrawOnCanvas =>
-      _webOnlyIsSingleLine &&
-      _plainText != null &&
-      _paragraphGeometricStyle.ellipsis == null &&
-      _paragraphGeometricStyle.decoration == null &&
-      _paragraphGeometricStyle.letterSpacing == null &&
-      _paragraphGeometricStyle.wordSpacing == null &&
-      _background == null;
-
-  /// Whether this paragraph has been laid out.
-  // TODO(yjbanov): This is Engine-internal API. We should make it private.
-  bool get webOnlyIsLaidOut => _measurementResult != null;
-
-  /// Asserts that the properties used to measure paragraph layout are the same
-  /// as the properties of this paragraphs root style.
-  ///
-  /// Ignores properties that do not affect layout, such as
-  /// [ParagraphStyle.textAlign].
-  bool webOnlyDebugHasSameRootStyle(engine.ParagraphGeometricStyle style) {
-    assert(() {
-      if (style != _paragraphGeometricStyle) {
-        throw Exception('Attempted to measure a paragraph whose style is '
-            'different from the style of the ruler used to measure it.');
-      }
-      return true;
-    }());
-    return true;
-  }
+  void layout(ParagraphConstraints constraints);
 
   /// Returns a list of text boxes that enclose the given text range.
   ///
@@ -1537,54 +1090,25 @@ class Paragraph {
   /// parameters default to the tight option, which will provide close-fitting
   /// boxes and will not account for any line spacing.
   ///
-  /// Coordinates of the TextBox are relative to the upper-left corner of the paragraph,
-  /// where positive y values indicate down.
-  ///
   /// The [boxHeightStyle] and [boxWidthStyle] parameters must not be null.
   ///
   /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
   List<TextBox> getBoxesForRange(int start, int end,
       {BoxHeightStyle boxHeightStyle = BoxHeightStyle.tight,
-      BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight}) {
-    assert(boxHeightStyle != null);
-    assert(boxWidthStyle != null);
-    return _getBoxesForRange(
-        start, end, boxHeightStyle.index, boxWidthStyle.index);
-  }
+      BoxWidthStyle boxWidthStyle = BoxWidthStyle.tight});
 
-  List<TextBox> _getBoxesForRange(
-      int start, int end, int boxHeightStyle, int boxWidthStyle) {
-    if (_plainText == null) {
-      return [];
-    }
+  /// Returns the text position closest to the given offset.
+  ///
+  /// It does so by performing a binary search to find where the tap occurred
+  /// within the text.
+  TextPosition getPositionForOffset(Offset offset);
 
-    final int length = _plainText.length;
-    // Ranges that are out of bounds should return an empty list.
-    if (start < 0 || end < 0 || start > length || end > length) {
-      return [];
-    }
-
-    return _measurementService.measureBoxesForRange(
-      this,
-      _lastUsedConstraints,
-      start: start,
-      end: end,
-      alignOffset: webOnlyAlignOffset,
-      textDirection: _textDirection,
-    );
-  }
-
-  Paragraph webOnlyCloneWithText(String plainText) {
-    return Paragraph._(
-      plainText: plainText,
-      paragraphElement: _paragraphElement.clone(true),
-      paragraphGeometricStyle: _paragraphGeometricStyle,
-      paint: _paint,
-      textAlign: _textAlign,
-      textDirection: _textDirection,
-      background: _background,
-    );
-  }
+  /// Returns the [start, end] of the word at the given offset. Characters not
+  /// part of a word, such as spaces, symbols, and punctuation, have word breaks
+  /// on both sides. In such cases, this method will return [offset, offset+1].
+  /// Word boundaries are defined more precisely in Unicode Standard Annex #29
+  /// http://www.unicode.org/reports/tr29/#Word_Boundaries
+  List<int> getWordBoundary(int offset);
 
   /// Returns a list of text boxes that enclose all placeholders in the paragraph.
   ///
@@ -1592,74 +1116,7 @@ class Paragraph {
   ///
   /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
   /// where positive y values indicate down.
-  List<TextBox> getBoxesForPlaceholders() {
-    // TODO(garyq): Implement stub_ui version of this.
-    return const <TextBox>[];
-  }
-
-  /// Returns the text position closest to the given offset.
-  ///
-  /// It does so by performing a binary search to find where the tap occurred
-  /// within the text.
-  TextPosition getPositionForOffset(Offset offset) {
-    if (_plainText == null) {
-      return TextPosition(offset: 0);
-    }
-
-    final double dx = offset.dx - webOnlyAlignOffset;
-    final engine.TextMeasurementService instance = _measurementService;
-
-    int low = 0;
-    int high = _plainText.length;
-    do {
-      final int current = (low + high) ~/ 2;
-      final double width = instance.measureSubstringWidth(this, 0, current);
-      if (width < dx) {
-        low = current;
-      } else if (width > dx) {
-        high = current;
-      } else {
-        low = high = current;
-      }
-    } while (high - low > 1);
-
-    if (low == high) {
-      // The offset falls exactly in between the two letters.
-      return TextPosition(offset: high, affinity: TextAffinity.upstream);
-    }
-
-    final double lowWidth = instance.measureSubstringWidth(this, 0, low);
-    final double highWidth = instance.measureSubstringWidth(this, 0, high);
-
-    if (dx - lowWidth < highWidth - dx) {
-      // The offset is closer to the low index.
-      return TextPosition(offset: low, affinity: TextAffinity.downstream);
-    } else {
-      // The offset is closer to high index.
-      return TextPosition(offset: high, affinity: TextAffinity.upstream);
-    }
-  }
-
-  /// Returns the [start, end] of the word at the given offset. Characters not
-  /// part of a word, such as spaces, symbols, and punctuation, have word breaks
-  /// on both sides. In such cases, this method will return [offset, offset+1].
-  /// Word boundaries are defined more precisely in Unicode Standard Annex #29
-  /// http://www.unicode.org/reports/tr29/#Word_Boundaries
-  List<int> getWordBoundary(int offset) {
-    if (_plainText == null) {
-      return [offset, offset];
-    }
-
-    final int start = engine.WordBreaker.prevBreakIndex(_plainText, offset);
-    final int end = engine.WordBreaker.nextBreakIndex(_plainText, offset);
-    return [start, end];
-  }
-
-  // TODO(yjbanov): figure out if we need this.
-  // Redirecting the paint function in this way solves some dependency problems
-  // in the C++ code. If we straighten out the C++ dependencies, we can remove
-  // this indirection.
-//  void _paint(Canvas canvas, double x, double y) native 'Paragraph_paint';
+  List<TextBox> getBoxesForPlaceholders();
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
@@ -1676,51 +1133,16 @@ class Paragraph {
 ///
 /// After constructing a [Paragraph], call [Paragraph.layout] on it and then
 /// paint it with [Canvas.drawParagraph].
-class ParagraphBuilder {
-  /// Marks a call to the [pop] method in the [_ops] list.
-  static final _paragraphBuilderPop = Object();
-
-  final html.HtmlElement _paragraphElement =
-      engine.domRenderer.createElement('p');
-  final ParagraphStyle _paragraphStyle;
-  final List<dynamic> _ops = <dynamic>[];
-
+abstract class ParagraphBuilder {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
-  ParagraphBuilder(ParagraphStyle style) : _paragraphStyle = style {
-    // TODO(b/128317744): Implement support for strut font families.
-    _placeholderCount = 0;
-    List<String> strutFontFamilies;
-    if (style._strutStyle != null) {
-      strutFontFamilies = <String>[];
-      if (style._strutStyle._fontFamily != null) {
-        strutFontFamilies.add(style._strutStyle._fontFamily);
-      }
-      if (style._strutStyle._fontFamilyFallback != null) {
-        strutFontFamilies.addAll(style._strutStyle._fontFamilyFallback);
-      }
-    }
-    applyParagraphStyleToElement(
-        element: _paragraphElement, style: _paragraphStyle);
-  }
-
-  /// The number of placeholders currently in the paragraph.
-  int get placeholderCount => _placeholderCount;
-  int _placeholderCount;
-
-   /// The scales of the placeholders in the paragraph.
-  List<double> get placeholderScales => _placeholderScales;
-  List<double> _placeholderScales = <double>[];
+  factory ParagraphBuilder(ParagraphStyle style) =>
+      engine.EngineParagraphBuilder(style);
 
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
-  void pushStyle(TextStyle style) {
-    _ops.add(style);
-  }
-
-  // TODO(yjbanov): do we need to do this?
-  //  static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
+  void pushStyle(TextStyle style);
 
   /// Ends the effect of the most recent call to [pushStyle].
   ///
@@ -1728,16 +1150,25 @@ class ParagraphBuilder {
   /// added to the paragraph is affected by all the styles in the stack. Calling
   /// [pop] removes the topmost style in the stack, leaving the remaining styles
   /// in effect.
-  void pop() {
-    _ops.add(_paragraphBuilderPop);
-  }
+  void pop();
 
   /// Adds the given text to the paragraph.
   ///
   /// The text will be styled according to the current stack of text styles.
-  void addText(String text) {
-    _ops.add(text);
-  }
+  void addText(String text);
+
+  /// Applies the given paragraph style and returns a [Paragraph] containing the
+  /// added text and associated styling.
+  ///
+  /// After calling this function, the paragraph builder object is invalid and
+  /// cannot be used further.
+  Paragraph build();
+
+  /// The number of placeholders currently in the paragraph.
+  int get placeholderCount;
+
+  /// The scales of the placeholders in the paragraph.
+  List<double> get placeholderScales;
 
   /// Adds an inline placeholder space to the paragraph.
   ///
@@ -1782,520 +1213,14 @@ class ParagraphBuilder {
   /// Placeholders are represented by a unicode 0xFFFC "object replacement character"
   /// in the text buffer. For each placeholder, one object replacement character is
   /// added on to the text buffer.
-  void addPlaceholder(double width, double height, PlaceholderAlignment alignment, {
+  void addPlaceholder(
+    double width,
+    double height,
+    PlaceholderAlignment alignment, {
     double scale,
     double baselineOffset,
     TextBaseline baseline,
-  }) {
-    // TODO(garyq): Implement stub_ui version of this.
-    throw UnimplementedError();
-  }
-
-  /// Applies the given paragraph style and returns a [Paragraph] containing the
-  /// added text and associated styling.
-  ///
-  /// After calling this function, the paragraph builder object is invalid and
-  /// cannot be used further.
-  Paragraph build() {
-    return _tryBuildPlainText() ?? _buildRichText();
-  }
-
-  /// Attempts to build a [Paragraph] assuming it is plain text.
-  ///
-  /// A paragraph is considered plain if it is built using the following
-  /// sequence of ops:
-  ///
-  /// * Zero-or-more calls to [pushStyle].
-  /// * One-or-more calls to [addText].
-  /// * Zero-or-more calls to [pop].
-  ///
-  /// Any other sequence will result in `null` and should be treated as rich
-  /// text.
-  ///
-  /// Plain text is not the same as not having style. The text may be styled
-  /// arbitrarily. However, it may not mix multiple styles in the same
-  /// paragraph. Plain text is more efficient to lay out and measure than rich
-  /// text.
-  Paragraph _tryBuildPlainText() {
-    Color color;
-    TextDecoration decoration;
-    Color decorationColor;
-    TextDecorationStyle decorationStyle;
-    FontWeight fontWeight = _paragraphStyle._fontWeight;
-    FontStyle fontStyle = _paragraphStyle._fontStyle;
-    TextBaseline textBaseline;
-    String fontFamily = _paragraphStyle._fontFamily;
-    double fontSize = _paragraphStyle._fontSize;
-    TextAlign textAlign = _paragraphStyle._textAlign;
-    TextDirection textDirection = _paragraphStyle._textDirection;
-    double letterSpacing;
-    double wordSpacing;
-    double height;
-    Locale locale = _paragraphStyle._locale;
-    Paint background;
-    Paint foreground;
-
-    int i = 0;
-
-    // This loop looks expensive. However, in reality most of plain text
-    // paragraphs will have no calls to [pushStyle], skipping this loop
-    // entirely. Occasionally there will be one [pushStyle], which causes this
-    // loop to run once then move on to aggregating text.
-    while (i < _ops.length && _ops[i] is TextStyle) {
-      TextStyle style = _ops[i];
-      if (style._color != null) {
-        color = style._color;
-      }
-      if (style._decoration != null) {
-        decoration = style._decoration;
-      }
-      if (style._decorationColor != null) {
-        decorationColor = style._decorationColor;
-      }
-      if (style._decorationStyle != null) {
-        decorationStyle = style._decorationStyle;
-      }
-      if (style._fontWeight != null) {
-        fontWeight = style._fontWeight;
-      }
-      if (style._fontStyle != null) {
-        fontStyle = style._fontStyle;
-      }
-      if (style._textBaseline != null) {
-        textBaseline = style._textBaseline;
-      }
-      if (style._fontFamily != null) {
-        fontFamily = style._fontFamily;
-      }
-      if (style._fontSize != null) {
-        fontSize = style._fontSize;
-      }
-      if (style._letterSpacing != null) {
-        letterSpacing = style._letterSpacing;
-      }
-      if (style._wordSpacing != null) {
-        wordSpacing = style._wordSpacing;
-      }
-      if (style._height != null) {
-        height = style._height;
-      }
-      if (style._locale != null) {
-        locale = style._locale;
-      }
-      if (style._background != null) {
-        background = style._background;
-      }
-      if (style._foreground != null) {
-        foreground = style._foreground;
-      }
-      i++;
-    }
-
-    final TextStyle cumulativeStyle = TextStyle(
-      color: color,
-      decoration: decoration,
-      decorationColor: decorationColor,
-      decorationStyle: decorationStyle,
-      fontWeight: fontWeight,
-      fontStyle: fontStyle,
-      textBaseline: textBaseline,
-      fontFamily: fontFamily,
-      fontSize: fontSize,
-      letterSpacing: letterSpacing,
-      wordSpacing: wordSpacing,
-      height: height,
-      locale: locale,
-      background: background,
-      foreground: foreground,
-    );
-
-    Paint paint;
-    if (foreground != null) {
-      paint = foreground;
-    } else {
-      paint = Paint();
-      if (color != null) {
-        paint.color = color;
-      }
-    }
-
-    if (i >= _ops.length) {
-      // Empty paragraph.
-      applyTextStyleToElement(
-          element: _paragraphElement, style: cumulativeStyle);
-      return new Paragraph._(
-        paragraphElement: _paragraphElement,
-        paragraphGeometricStyle: engine.ParagraphGeometricStyle(
-          fontFamily: fontFamily,
-          fontWeight: fontWeight,
-          fontStyle: fontStyle,
-          fontSize: fontSize,
-          lineHeight: height,
-          maxLines: _paragraphStyle._maxLines,
-          letterSpacing: letterSpacing,
-          wordSpacing: wordSpacing,
-          decoration: _textDecorationToCssString(decoration, decorationStyle),
-          ellipsis: _paragraphStyle._ellipsis,
-        ),
-        plainText: '',
-        paint: paint,
-        textAlign: textAlign,
-        textDirection: textDirection,
-        background: cumulativeStyle._background,
-      );
-    }
-
-    if (_ops[i] is! String) {
-      // After a series of TextStyle ops there must be at least one text op.
-      // Otherwise, treat it as rich text.
-      return null;
-    }
-
-    // Accumulate text into one contiguous string.
-    final StringBuffer plainTextBuffer = StringBuffer();
-    while (i < _ops.length && _ops[i] is String) {
-      plainTextBuffer.write(_ops[i]);
-      i++;
-    }
-
-    // After a series of [addText] ops there should only be a tail of [pop]s and
-    // nothing else. Otherwise it's rich text and we return null;
-    for (; i < _ops.length; i++) {
-      if (_ops[i] != _paragraphBuilderPop) {
-        return null;
-      }
-    }
-
-    final String plainText = plainTextBuffer.toString();
-    engine.domRenderer.appendText(_paragraphElement, plainText);
-    applyTextStyleToElement(element: _paragraphElement, style: cumulativeStyle);
-    // Since this is a plain paragraph apply background color to paragraph tag
-    // instead of individual spans.
-    if (cumulativeStyle._background != null) {
-      applyTextBackgroundToElement(
-          element: _paragraphElement, style: cumulativeStyle);
-    }
-    return new Paragraph._(
-      paragraphElement: _paragraphElement,
-      paragraphGeometricStyle: engine.ParagraphGeometricStyle(
-        fontFamily: fontFamily,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        fontSize: fontSize,
-        lineHeight: height,
-        maxLines: _paragraphStyle._maxLines,
-        letterSpacing: letterSpacing,
-        wordSpacing: wordSpacing,
-        decoration: _textDecorationToCssString(decoration, decorationStyle),
-        ellipsis: _paragraphStyle._ellipsis,
-      ),
-      plainText: plainText,
-      paint: paint,
-      textAlign: textAlign,
-      textDirection: textDirection,
-      background: cumulativeStyle._background,
-    );
-  }
-
-  /// Builds a [Paragraph] as rich text.
-  Paragraph _buildRichText() {
-    List<dynamic> elementStack = <dynamic>[];
-    dynamic currentElement() =>
-        elementStack.isNotEmpty ? elementStack.last : _paragraphElement;
-    for (int i = 0; i < _ops.length; i++) {
-      dynamic op = _ops[i];
-      if (op is TextStyle) {
-        var span = engine.domRenderer.createElement('span');
-        applyTextStyleToElement(element: span, style: op);
-        if (op._background != null) {
-          applyTextBackgroundToElement(element: span, style: op);
-        }
-        engine.domRenderer.append(currentElement(), span);
-        elementStack.add(span);
-      } else if (op is String) {
-        engine.domRenderer.appendText(currentElement(), op);
-      } else if (identical(op, _paragraphBuilderPop)) {
-        elementStack.removeLast();
-      } else {
-        throw UnsupportedError('Unsupported ParagraphBuilder operation: $op');
-      }
-    }
-
-    return new Paragraph._(
-      paragraphElement: _paragraphElement,
-      paragraphGeometricStyle: engine.ParagraphGeometricStyle(
-        fontFamily: _paragraphStyle._fontFamily,
-        fontWeight: _paragraphStyle._fontWeight,
-        fontStyle: _paragraphStyle._fontStyle,
-        fontSize: _paragraphStyle._fontSize,
-        lineHeight: _paragraphStyle._height,
-        maxLines: _paragraphStyle._maxLines,
-        ellipsis: _paragraphStyle._ellipsis,
-      ),
-      plainText: null,
-      paint: null,
-      textAlign: _paragraphStyle._textAlign,
-      textDirection: _paragraphStyle._textDirection,
-      background: null,
-    );
-  }
-}
-
-/// Applies background color properties in text style to paragraph or span
-/// elements.
-void applyTextBackgroundToElement({
-  @required html.HtmlElement element,
-  @required TextStyle style,
-  TextStyle previousStyle,
-}) {
-  var newBackground = style._background;
-  if (previousStyle == null) {
-    if (newBackground != null) {
-      engine.domRenderer.setElementStyle(
-          element, 'background-color', newBackground.color.toCssString());
-    }
-  } else {
-    if (newBackground != previousStyle._background) {
-      engine.domRenderer.setElementStyle(
-          element, 'background-color', newBackground.color?.toCssString());
-    }
-  }
-}
-
-/// Applies a text [style] to an [element], translating the properties to their
-/// corresponding CSS equivalents.
-///
-/// If [previousStyle] is not null, updates only the mismatching attributes.
-void applyTextStyleToElement({
-  @required html.HtmlElement element,
-  @required TextStyle style,
-  TextStyle previousStyle,
-}) {
-  assert(element != null);
-  assert(style != null);
-  bool updateDecoration = false;
-  html.CssStyleDeclaration cssStyle = element.style;
-  if (previousStyle == null) {
-    var color = style._color;
-    if (style._foreground?.color != null) color = style._foreground.color;
-    if (color != null) {
-      cssStyle.color = color.toCssString();
-    }
-    if (style._fontSize != null) {
-      cssStyle.fontSize = '${style._fontSize.floor()}px';
-    }
-    if (style._fontWeight != null) {
-      cssStyle.fontWeight = webOnlyFontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != null) {
-      cssStyle.fontStyle =
-          style._fontStyle == FontStyle.normal ? 'normal' : 'italic';
-    }
-    if (style._effectiveFontFamily != null) {
-      cssStyle.fontFamily = style._effectiveFontFamily;
-    }
-    if (style._letterSpacing != null) {
-      cssStyle.letterSpacing = '${style._letterSpacing}px';
-    }
-    if (style._wordSpacing != null) {
-      cssStyle.wordSpacing = '${style._wordSpacing}px';
-    }
-    if (style._decoration != null) {
-      updateDecoration = true;
-    }
-  } else {
-    if (style._color != previousStyle._color ||
-        style._foreground != previousStyle._foreground) {
-      var color = style._color;
-      if (style._foreground?.color != null) {
-        color = style._foreground.color;
-      }
-      cssStyle.color = color?.toCssString();
-    }
-
-    if (style._fontSize != previousStyle._fontSize) {
-      cssStyle.fontSize =
-          style._fontSize != null ? '${style._fontSize.floor()}px' : null;
-    }
-
-    if (style._fontWeight != previousStyle._fontWeight) {
-      cssStyle.fontWeight = webOnlyFontWeightToCss(style._fontWeight);
-    }
-
-    if (style._fontStyle != previousStyle._fontStyle) {
-      cssStyle.fontStyle = style._fontStyle != null
-          ? style._fontStyle == FontStyle.normal ? 'normal' : 'italic'
-          : null;
-    }
-    if (style._fontFamily != previousStyle._fontFamily) {
-      cssStyle.fontFamily = style._fontFamily;
-    }
-    if (style._letterSpacing != previousStyle._letterSpacing) {
-      cssStyle.letterSpacing = '${style._letterSpacing}px';
-    }
-    if (style._wordSpacing != previousStyle._wordSpacing) {
-      cssStyle.wordSpacing = '${style._wordSpacing}px';
-    }
-    if (style._decoration != previousStyle._decoration ||
-        style._decorationStyle != previousStyle._decorationStyle ||
-        style._decorationColor != previousStyle._decorationColor) {
-      updateDecoration = true;
-    }
-  }
-
-  if (updateDecoration) {
-    if (style._decoration != null) {
-      String textDecoration =
-          _textDecorationToCssString(style._decoration, style._decorationStyle);
-      if (textDecoration != null) {
-        cssStyle.textDecoration = textDecoration;
-        var decorationColor = style._decorationColor;
-        if (decorationColor != null) {
-          cssStyle.textDecorationColor = decorationColor.toCssString();
-        }
-      }
-    }
-  }
-}
-
-/// Converts text decoration style to CSS text-decoration-style value.
-String _textDecorationToCssString(
-    TextDecoration decoration, TextDecorationStyle decorationStyle) {
-  StringBuffer decorations = new StringBuffer();
-  if (decoration != null) {
-    if (decoration.contains(TextDecoration.underline)) {
-      decorations.write('underline ');
-    }
-    if (decoration.contains(TextDecoration.overline)) {
-      decorations.write('overline ');
-    }
-    if (decoration.contains(TextDecoration.lineThrough)) {
-      decorations.write('line-through ');
-    }
-  }
-  if (decorationStyle != null) {
-    decorations.write(_decorationStyleToCssString(decorationStyle));
-  }
-  return decorations.isEmpty ? null : decorations.toString();
-}
-
-String _decorationStyleToCssString(TextDecorationStyle decorationStyle) {
-  switch (decorationStyle) {
-    case TextDecorationStyle.dashed:
-      return 'dashed';
-    case TextDecorationStyle.dotted:
-      return 'dotted';
-    case TextDecorationStyle.double:
-      return 'double';
-    case TextDecorationStyle.solid:
-      return 'solid';
-    case TextDecorationStyle.wavy:
-      return 'wavy';
-    default:
-      return null;
-  }
-}
-
-/// Applies a paragraph [style] to an [element], translating the properties to
-/// their corresponding CSS equivalents.
-///
-/// If [previousStyle] is not null, updates only the mismatching attributes.
-void applyParagraphStyleToElement({
-  @required html.HtmlElement element,
-  @required ParagraphStyle style,
-  ParagraphStyle previousStyle,
-}) {
-  assert(element != null);
-  assert(style != null);
-  // TODO(yjbanov): What do we do about ParagraphStyle._locale and ellipsis?
-  html.CssStyleDeclaration cssStyle = element.style;
-  if (previousStyle == null) {
-    if (style._textAlign != null) {
-      cssStyle.textAlign = textAlignToCssValue(
-          style._textAlign, style._textDirection ?? TextDirection.ltr);
-    }
-    if (style._webOnlyLineHeight != null) {
-      cssStyle.lineHeight = '${style._webOnlyLineHeight}';
-    }
-    if (style._textDirection != null) {
-      cssStyle.direction = textDirectionToCssValue(style._textDirection);
-    }
-    if (style._fontSize != null) {
-      cssStyle.fontSize = '${style._fontSize.floor()}px';
-    }
-    if (style._fontWeight != null) {
-      cssStyle.fontWeight = webOnlyFontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != null) {
-      cssStyle.fontStyle =
-          style._fontStyle == FontStyle.normal ? 'normal' : 'italic';
-    }
-    if (style._effectiveFontFamily != null) {
-      cssStyle.fontFamily = style._effectiveFontFamily;
-    }
-  } else {
-    if (style._textAlign != previousStyle._textAlign) {
-      cssStyle.textAlign = textAlignToCssValue(
-          style._textAlign, style._textDirection ?? TextDirection.ltr);
-    }
-    if (style._webOnlyLineHeight != style._webOnlyLineHeight) {
-      cssStyle.lineHeight = '${style._webOnlyLineHeight}';
-    }
-    if (style._textDirection != previousStyle._textDirection) {
-      cssStyle.direction = textDirectionToCssValue(style._textDirection);
-    }
-    if (style._fontSize != previousStyle._fontSize) {
-      cssStyle.fontSize =
-          style._fontSize != null ? '${style._fontSize.floor()}px' : null;
-    }
-    if (style._fontWeight != previousStyle._fontWeight) {
-      cssStyle.fontWeight = webOnlyFontWeightToCss(style._fontWeight);
-    }
-    if (style._fontStyle != previousStyle._fontStyle) {
-      cssStyle.fontStyle = style._fontStyle != null
-          ? (style._fontStyle == FontStyle.normal ? 'normal' : 'italic')
-          : null;
-    }
-    if (style._fontFamily != previousStyle._fontFamily) {
-      cssStyle.fontFamily = style._fontFamily;
-    }
-  }
-}
-
-/// Converts [fontWeight] to its CSS equivalent value.
-String webOnlyFontWeightToCss(FontWeight fontWeight) {
-  if (fontWeight == null) {
-    return null;
-  }
-
-  switch (fontWeight.index) {
-    case 0:
-      return '100';
-    case 1:
-      return '200';
-    case 2:
-      return '300';
-    case 3:
-      return 'normal';
-    case 4:
-      return '500';
-    case 5:
-      return '600';
-    case 6:
-      return 'bold';
-    case 7:
-      return '800';
-    case 8:
-      return '900';
-  }
-
-  assert(() {
-    throw AssertionError(
-      'Failed to convert font weight ${fontWeight} to CSS.',
-    );
-  }());
-
-  return '';
+  });
 }
 
 /// Loads a font from a buffer and makes it available for rendering text.

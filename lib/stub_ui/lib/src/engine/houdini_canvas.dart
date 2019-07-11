@@ -14,7 +14,8 @@ part of engine;
 /// This canvas produces paint commands for houdini_painter.js to apply. This
 /// class must be kept in sync with houdini_painter.js.
 class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
-  final html.Element rootElement = new html.Element.tag('flt-houdini');
+  @override
+  final html.Element rootElement = html.Element.tag('flt-houdini');
 
   /// The rectangle positioned relative to the parent layer's coordinate system
   /// where this canvas paints.
@@ -38,13 +39,13 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
   @override
   void clear() {
     super.clear();
-    _serializedCommands = <List>[];
+    _serializedCommands = <List<dynamic>>[];
     // TODO(yjbanov): we should measure if reusing old elements is beneficial.
     domRenderer.clearDom(rootElement);
   }
 
   /// Paint commands serialized for sending to the CSS custom painter.
-  List<List> _serializedCommands = <List>[];
+  List<List<dynamic>> _serializedCommands = <List<dynamic>>[];
 
   void apply(PaintCommand command) {
     // Some commands are applied purely in HTML DOM and do not need to be
@@ -68,8 +69,8 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void clipRect(ui.Rect rect) {
-    final clip = html.Element.tag('flt-clip-rect');
-    String cssTransform = matrix4ToCssTransform(
+    final html.Element clip = html.Element.tag('flt-clip-rect');
+    final String cssTransform = matrix4ToCssTransform(
         transformWithOffset(currentTransform, ui.Offset(rect.left, rect.top)));
     clip.style
       ..overflow = 'hidden'
@@ -89,14 +90,14 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void clipRRect(ui.RRect rrect) {
-    final outer = rrect.outerRect;
+    final ui.Rect outer = rrect.outerRect;
     if (rrect.isRect) {
       clipRect(outer);
       return;
     }
 
-    final clip = html.Element.tag('flt-clip-rrect');
-    final style = clip.style;
+    final html.Element clip = html.Element.tag('flt-clip-rrect');
+    final html.CssStyleDeclaration style = clip.style;
     style
       ..overflow = 'hidden'
       ..position = 'absolute'
@@ -204,9 +205,9 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
   void drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint) {
     // TODO(yjbanov): implement src rectangle
-    HtmlImage htmlImage = image as HtmlImage;
-    html.Element imageBox = html.Element.tag('flt-img');
-    String cssTransform = matrix4ToCssTransform(
+    final HtmlImage htmlImage = image;
+    final html.Element imageBox = html.Element.tag('flt-img');
+    final String cssTransform = matrix4ToCssTransform(
         transformWithOffset(currentTransform, ui.Offset(dst.left, dst.top)));
     imageBox.style
       ..position = 'absolute'
@@ -266,6 +267,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// and clip parameters.
   ///
   /// Classes that override this method must call `super.clear()`.
+  @override
   void clear() {
     _saveStack.clear();
     _elementStack.clear();
@@ -279,6 +281,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Saves current clip and transform on the save stack.
   ///
   /// Classes that override this method must call `super.save()`.
+  @override
   void save() {
     _saveStack.add(_SaveElementStackEntry(
       savedElement: currentElement,
@@ -289,6 +292,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Restores current clip and transform from the save stack.
   ///
   /// Classes that override this method must call `super.restore()`.
+  @override
   void restore() {
     if (_saveStack.isEmpty) {
       return;
@@ -305,6 +309,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Multiplies the [currentTransform] matrix by a translation.
   ///
   /// Classes that override this method must call `super.translate()`.
+  @override
   void translate(double dx, double dy) {
     _currentTransform.translate(dx, dy);
   }
@@ -312,6 +317,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Scales the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.scale()`.
+  @override
   void scale(double sx, double sy) {
     _currentTransform.scale(sx, sy);
   }
@@ -319,6 +325,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Rotates the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.rotate()`.
+  @override
   void rotate(double radians) {
     _currentTransform.rotate(_unitZ, radians);
   }
@@ -326,6 +333,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Skews the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.skew()`.
+  @override
   void skew(double sx, double sy) {
     // DO NOT USE Matrix4.skew(sx, sy)! It treats sx and sy values as radians,
     // but in our case they are transform matrix values.
@@ -339,6 +347,7 @@ mixin SaveElementStackTracking on EngineCanvas {
   /// Multiplies the [currentTransform] matrix by another matrix.
   ///
   /// Classes that override this method must call `super.transform()`.
+  @override
   void transform(Float64List matrix4) {
     _currentTransform.multiply(Matrix4.fromFloat64List(matrix4));
   }

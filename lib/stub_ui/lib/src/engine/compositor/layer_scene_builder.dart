@@ -32,28 +32,27 @@ class LayerSceneBuilder implements ui.SceneBuilder {
       double height = 0.0,
       ui.SceneHost sceneHost,
       bool hitTestable = true}) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 
   @override
-  void addPerformanceOverlay(int enabledOptions, ui.Rect bounds,
-      {Object webOnlyPaintedBy}) {
+  void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
     // We don't plan to implement this on the web.
     throw UnimplementedError();
   }
 
   @override
   void addPicture(ui.Offset offset, ui.Picture picture,
-      {bool isComplexHint = false,
-      bool willChangeHint = false,
-      Object webOnlyPaintedBy}) {
+      {bool isComplexHint = false, bool willChangeHint = false}) {
     currentLayer
         .add(PictureLayer(picture, offset, isComplexHint, willChangeHint));
   }
 
   @override
   void addRetained(ui.EngineLayer retainedLayer) {
-    if (currentLayer == null) return;
+    if (currentLayer == null) {
+      return;
+    }
     currentLayer.add(retainedLayer);
   }
 
@@ -62,8 +61,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
       {ui.Offset offset = ui.Offset.zero,
       double width = 0.0,
       double height = 0.0,
-      bool freeze = false,
-      Object webOnlyPaintedBy}) {
+      bool freeze = false}) {
     // TODO(b/128315641): implement addTexture.
   }
 
@@ -73,6 +71,7 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.Offset offset = ui.Offset.zero,
     double width = 0.0,
     double height = 0.0,
+    Object webOnlyPaintedBy,
   }) {
     // TODO(b/128317425): implement addPlatformView.
   }
@@ -84,68 +83,72 @@ class LayerSceneBuilder implements ui.SceneBuilder {
 
   @override
   void pop() {
-    if (currentLayer == null) return;
+    if (currentLayer == null) {
+      return;
+    }
     currentLayer = currentLayer.parent;
   }
 
   @override
   ui.BackdropFilterEngineLayer pushBackdropFilter(ui.ImageFilter filter,
-      {ui.BackdropFilterEngineLayer oldLayer}) {
-    throw new UnimplementedError();
+      {ui.EngineLayer oldLayer}) {
+    throw UnimplementedError();
   }
 
   @override
   ui.ClipPathEngineLayer pushClipPath(ui.Path path,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipPathEngineLayer oldLayer}) {
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.EngineLayer oldLayer}) {
     pushLayer(ClipPathLayer(path));
     return null;
   }
 
   @override
   ui.ClipRRectEngineLayer pushClipRRect(ui.RRect rrect,
-      {ui.Clip clipBehavior, ui.ClipRRectEngineLayer oldLayer}) {
+      {ui.Clip clipBehavior, ui.EngineLayer oldLayer}) {
     pushLayer(ClipRRectLayer(rrect));
     return null;
   }
 
   @override
   ui.ClipRectEngineLayer pushClipRect(ui.Rect rect,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipRectEngineLayer oldLayer}) {
+      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.EngineLayer oldLayer}) {
     pushLayer(ClipRectLayer(rect));
     return null;
   }
 
   @override
   ui.ColorFilterEngineLayer pushColorFilter(ui.ColorFilter filter,
-      {ui.ColorFilterEngineLayer oldLayer}) {
-    throw new UnimplementedError();
+      {ui.EngineLayer oldLayer}) {
+    throw UnimplementedError();
   }
 
   @override
-  ui.OffsetEngineLayer pushOffset(double dx, double dy, {ui.OffsetEngineLayer oldLayer}) {
-    final matrix = Matrix4.translationValues(dx, dy, 0.0);
-    final layer = TransformLayer(matrix);
+  ui.OffsetEngineLayer pushOffset(double dx, double dy,
+      {ui.EngineLayer oldLayer}) {
+    final Matrix4 matrix = Matrix4.translationValues(dx, dy, 0.0);
+    final TransformLayer layer = TransformLayer(matrix);
     pushLayer(layer);
     return layer;
   }
 
   @override
   ui.OpacityEngineLayer pushOpacity(int alpha,
-      {ui.OpacityEngineLayer oldLayer, ui.Offset offset = ui.Offset.zero}) {
+      {ui.EngineLayer oldLayer, ui.Offset offset = ui.Offset.zero}) {
     // TODO(het): Implement opacity
     pushOffset(0.0, 0.0);
     return null;
   }
 
   @override
-  ui.PhysicalShapeEngineLayer pushPhysicalShape(
-      {ui.Path path,
-      double elevation,
-      ui.Color color,
-      ui.Color shadowColor,
-      ui.Clip clipBehavior = ui.Clip.none,
-      ui.PhysicalShapeEngineLayer oldLayer}) {
-    final layer =
+  ui.PhysicalShapeEngineLayer pushPhysicalShape({
+    ui.Path path,
+    double elevation,
+    ui.Color color,
+    ui.Color shadowColor,
+    ui.Clip clipBehavior = ui.Clip.none,
+    ui.EngineLayer oldLayer,
+  }) {
+    final PhysicalShapeLayer layer =
         PhysicalShapeLayer(elevation, color, shadowColor, path, clipBehavior);
     pushLayer(layer);
     return layer;
@@ -154,16 +157,16 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   @override
   ui.ShaderMaskEngineLayer pushShaderMask(
       ui.Shader shader, ui.Rect maskRect, ui.BlendMode blendMode,
-      {ui.ShaderMaskEngineLayer oldLayer}) {
-    throw new UnimplementedError();
+      {ui.EngineLayer oldLayer}) {
+    throw UnimplementedError();
   }
 
   @override
-  ui.TransformEngineLayer pushTransform(Float64List matrix4, {ui.TransformEngineLayer oldLayer}) {
+  ui.TransformEngineLayer pushTransform(Float64List matrix4,
+      {ui.EngineLayer oldLayer}) {
     final Matrix4 matrix = Matrix4.fromList(matrix4);
-    final TransformLayer layer = TransformLayer(matrix);
-    pushLayer(layer);
-    return layer;
+    pushLayer(TransformLayer(matrix));
+    return null;
   }
 
   @override
@@ -187,9 +190,17 @@ class LayerSceneBuilder implements ui.SceneBuilder {
       return;
     }
 
-    if (currentLayer == null) return;
+    if (currentLayer == null) {
+      return;
+    }
 
     currentLayer.add(layer);
     currentLayer = layer;
+  }
+
+  @override
+  void setProperties(double width, double height, double insetTop,
+      double insetRight, double insetBottom, double insetLeft, bool focusable) {
+    throw UnimplementedError();
   }
 }

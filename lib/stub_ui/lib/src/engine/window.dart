@@ -90,6 +90,10 @@ class EngineWindow extends ui.Window {
     ByteData data,
     ui.PlatformMessageResponseCallback callback,
   ) {
+    // In widget tests we want to bypass processing of platform messages.
+    if (assertionsEnabled && ui.debugEmulateFlutterTesterEnvironment) {
+      return;
+    }
     if (_debugPrintPlatformMessages) {
       print('Sent platform message on channel: "$name"');
     }
@@ -124,11 +128,21 @@ class EngineWindow extends ui.Window {
             final Map<String, dynamic> arguments = decoded.arguments;
             domRenderer.setTitle(arguments['label']);
             domRenderer.setThemeColor(ui.Color(arguments['primaryColor']));
+            return;
         }
         break;
 
       case 'flutter/textinput':
         textEditing.handleTextInput(data);
+        return;
+
+      case 'flutter/platform_views':
+        handlePlatformViewCall(data, callback);
+        return;
+
+      case 'flutter/accessibility':
+        // In widget tests we want to bypass processing of platform messages.
+        accessibilityAnnouncements.handleMessage(data);
         break;
     }
 

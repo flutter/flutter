@@ -23,9 +23,3 @@ part of ui;
 List<int> saveCompilationTrace() {
   throw UnimplementedError();
 }
-
-// If we actually run on big endian machines, we'll need to do something smarter
-// here. We don't use [Endian.Host] because it's not a compile-time
-// constant and can't propagate into the set/get calls.
-const Endian _kFakeHostEndian = Endian.little;
-

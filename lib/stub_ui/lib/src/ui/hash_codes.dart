@@ -8,7 +8,7 @@ class _HashEnd {
   const _HashEnd();
 }
 
-const _HashEnd _hashEnd = const _HashEnd();
+const _HashEnd _hashEnd = _HashEnd();
 
 /// Combine up to twenty values' hashCodes into one value.
 ///

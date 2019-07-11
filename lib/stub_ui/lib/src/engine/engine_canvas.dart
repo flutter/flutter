@@ -1,6 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.ile.
+// found in the LICENSE file.
 
 part of engine;
 
@@ -64,7 +64,7 @@ abstract class EngineCanvas {
   void drawImageRect(
       ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint);
 
-  void drawParagraph(ui.Paragraph paragraph, ui.Offset offset);
+  void drawParagraph(EngineParagraph paragraph, ui.Offset offset);
 }
 
 /// Adds an [offset] transformation to a [transform] matrix and returns the
@@ -78,7 +78,7 @@ Matrix4 transformWithOffset(Matrix4 transform, ui.Offset offset) {
   }
 
   // Clone to avoid mutating transform.
-  Matrix4 effectiveTransform = transform.clone();
+  final Matrix4 effectiveTransform = transform.clone();
   effectiveTransform.translate(offset.dx, offset.dy, 0.0);
   return effectiveTransform;
 }
@@ -128,6 +128,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// and clip parameters.
   ///
   /// Classes that override this method must call `super.clear()`.
+  @override
   void clear() {
     _saveStack.clear();
     _clipStack = null;
@@ -141,16 +142,19 @@ mixin SaveStackTracking on EngineCanvas {
   /// Saves current clip and transform on the save stack.
   ///
   /// Classes that override this method must call `super.save()`.
+  @override
   void save() {
     _saveStack.add(_SaveStackEntry(
       transform: _currentTransform.clone(),
-      clipStack: _clipStack == null ? null : List.from(_clipStack),
+      clipStack:
+          _clipStack == null ? null : List<_SaveClipEntry>.from(_clipStack),
     ));
   }
 
   /// Restores current clip and transform from the save stack.
   ///
   /// Classes that override this method must call `super.restore()`.
+  @override
   void restore() {
     if (_saveStack.isEmpty) {
       return;
@@ -163,6 +167,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// Multiplies the [currentTransform] matrix by a translation.
   ///
   /// Classes that override this method must call `super.translate()`.
+  @override
   void translate(double dx, double dy) {
     _currentTransform.translate(dx, dy);
   }
@@ -170,6 +175,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// Scales the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.scale()`.
+  @override
   void scale(double sx, double sy) {
     _currentTransform.scale(sx, sy);
   }
@@ -177,6 +183,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// Rotates the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.rotate()`.
+  @override
   void rotate(double radians) {
     _currentTransform.rotate(_unitZ, radians);
   }
@@ -184,8 +191,9 @@ mixin SaveStackTracking on EngineCanvas {
   /// Skews the [currentTransform] matrix.
   ///
   /// Classes that override this method must call `super.skew()`.
+  @override
   void skew(double sx, double sy) {
-    final skewMatrix = Matrix4.identity();
+    final Matrix4 skewMatrix = Matrix4.identity();
     final Float64List storage = skewMatrix.storage;
     storage[1] = sy;
     storage[4] = sx;
@@ -195,6 +203,7 @@ mixin SaveStackTracking on EngineCanvas {
   /// Multiplies the [currentTransform] matrix by another matrix.
   ///
   /// Classes that override this method must call `super.transform()`.
+  @override
   void transform(Float64List matrix4) {
     _currentTransform.multiply(Matrix4.fromFloat64List(matrix4));
   }
@@ -204,8 +213,8 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipRect()`.
   @override
   void clipRect(ui.Rect rect) {
-    _clipStack ??= [];
-    _clipStack.add(new _SaveClipEntry.rect(rect, _currentTransform.clone()));
+    _clipStack ??= <_SaveClipEntry>[];
+    _clipStack.add(_SaveClipEntry.rect(rect, _currentTransform.clone()));
   }
 
   /// Adds a round rectangle to clipping stack.
@@ -213,8 +222,8 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipRRect()`.
   @override
   void clipRRect(ui.RRect rrect) {
-    _clipStack ??= [];
-    _clipStack.add(new _SaveClipEntry.rrect(rrect, _currentTransform.clone()));
+    _clipStack ??= <_SaveClipEntry>[];
+    _clipStack.add(_SaveClipEntry.rrect(rrect, _currentTransform.clone()));
   }
 
   /// Adds a path to clipping stack.
@@ -222,27 +231,27 @@ mixin SaveStackTracking on EngineCanvas {
   /// Classes that override this method must call `super.clipPath()`.
   @override
   void clipPath(ui.Path path) {
-    _clipStack ??= [];
-    _clipStack.add(new _SaveClipEntry.path(path, _currentTransform.clone()));
+    _clipStack ??= <_SaveClipEntry>[];
+    _clipStack.add(_SaveClipEntry.path(path, _currentTransform.clone()));
   }
 }
 
 html.Element _drawParagraphElement(
-  ui.Paragraph paragraph,
+  EngineParagraph paragraph,
   ui.Offset offset, {
   Matrix4 transform,
 }) {
-  assert(paragraph.webOnlyIsLaidOut);
+  assert(paragraph._isLaidOut);
 
-  html.Element paragraphElement =
-      paragraph.webOnlyGetParagraphElement().clone(true);
+  final html.Element paragraphElement = paragraph._paragraphElement.clone(true);
 
   final html.CssStyleDeclaration paragraphStyle = paragraphElement.style;
   paragraphStyle
     ..position = 'absolute'
     ..whiteSpace = 'pre-wrap'
     ..overflowWrap = 'break-word'
-    ..overflowY = 'hidden'
+    ..overflow = 'hidden'
+    ..height = '${paragraph.height}px'
     ..width = '${paragraph.width}px';
 
   if (transform != null) {
@@ -252,24 +261,14 @@ html.Element _drawParagraphElement(
           matrix4ToCssTransform(transformWithOffset(transform, offset));
   }
 
-  final ParagraphGeometricStyle style =
-      paragraph.webOnlyGetParagraphGeometricStyle();
+  final ParagraphGeometricStyle style = paragraph._geometricStyle;
 
   // TODO(flutter_web): https://github.com/flutter/flutter/issues/33223
   if (style.ellipsis != null &&
       (style.maxLines == null || style.maxLines == 1)) {
     paragraphStyle
-      ..height = '${paragraph.webOnlyMaxLinesHeight}px'
       ..whiteSpace = 'pre'
-      ..overflowX = 'hidden'
       ..textOverflow = 'ellipsis';
-  } else if (paragraph.didExceedMaxLines) {
-    paragraphStyle.height = '${paragraph.webOnlyMaxLinesHeight}px';
-  } else {
-    final double height = style.maxLines != null
-        ? paragraph.webOnlyMaxLinesHeight
-        : paragraph.height;
-    paragraphStyle.height = '${height}px';
   }
   return paragraphElement;
 }

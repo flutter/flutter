@@ -47,7 +47,7 @@ class Keyboard {
     _instance = null;
   }
 
-  final JSONMessageCodec _messageCodec = JSONMessageCodec();
+  static const JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
     final Map<String, dynamic> eventData = <String, dynamic>{

@@ -1,6 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.e.
+// found in the LICENSE file.
 
 part of engine;
 
@@ -12,20 +12,20 @@ void pathToSvg(ui.Path path, StringBuffer sb,
     for (PathCommand command in subPath.commands) {
       switch (command.type) {
         case PathCommandTypes.moveTo:
-          MoveTo moveTo = command;
+          final MoveTo moveTo = command;
           sb.write('M ${moveTo.x + offsetX} ${moveTo.y + offsetY}');
           break;
         case PathCommandTypes.lineTo:
-          LineTo lineTo = command;
+          final LineTo lineTo = command;
           sb.write('L ${lineTo.x + offsetX} ${lineTo.y + offsetY}');
           break;
         case PathCommandTypes.bezierCurveTo:
-          BezierCurveTo curve = command;
+          final BezierCurveTo curve = command;
           sb.write('C ${curve.x1 + offsetX} ${curve.y1 + offsetY} '
               '${curve.x2 + offsetX} ${curve.y2 + offsetY} ${curve.x3 + offsetX} ${curve.y3 + offsetY}');
           break;
         case PathCommandTypes.quadraticCurveTo:
-          QuadraticCurveTo quadraticCurveTo = command;
+          final QuadraticCurveTo quadraticCurveTo = command;
           sb.write(
               'Q ${quadraticCurveTo.x1 + offsetX} ${quadraticCurveTo.y1 + offsetY} '
               '${quadraticCurveTo.x2 + offsetX} ${quadraticCurveTo.y2 + offsetY}');
@@ -34,7 +34,7 @@ void pathToSvg(ui.Path path, StringBuffer sb,
           sb.write('Z');
           break;
         case PathCommandTypes.ellipse:
-          Ellipse ellipse = command;
+          final Ellipse ellipse = command;
           // Handle edge case where start and end points are the same by drawing
           // 2 half arcs.
           if ((ellipse.endAngle - ellipse.startAngle) % (2 * math.pi) == 0.0) {
@@ -73,12 +73,12 @@ void pathToSvg(ui.Path path, StringBuffer sb,
           }
           break;
         case PathCommandTypes.rRect:
-          RRectCommand rrectCommand = command;
-          ui.RRect rrect = rrectCommand.rrect;
-          var left = rrect.left + offsetX;
-          var right = rrect.right + offsetX;
-          var top = rrect.top + offsetY;
-          var bottom = rrect.bottom + offsetY;
+          final RRectCommand rrectCommand = command;
+          final ui.RRect rrect = rrectCommand.rrect;
+          double left = rrect.left + offsetX;
+          double right = rrect.right + offsetX;
+          double top = rrect.top + offsetY;
+          double bottom = rrect.bottom + offsetY;
           if (left > right) {
             left = right;
             right = rrect.left + offsetX;
@@ -87,14 +87,14 @@ void pathToSvg(ui.Path path, StringBuffer sb,
             top = bottom;
             bottom = rrect.top + offsetY;
           }
-          var trRadiusX = rrect.trRadiusX.abs();
-          var tlRadiusX = rrect.tlRadiusX.abs();
-          var trRadiusY = rrect.trRadiusY.abs();
-          var tlRadiusY = rrect.tlRadiusY.abs();
-          var blRadiusX = rrect.blRadiusX.abs();
-          var brRadiusX = rrect.brRadiusX.abs();
-          var blRadiusY = rrect.blRadiusY.abs();
-          var brRadiusY = rrect.brRadiusY.abs();
+          final double trRadiusX = rrect.trRadiusX.abs();
+          final double tlRadiusX = rrect.tlRadiusX.abs();
+          final double trRadiusY = rrect.trRadiusY.abs();
+          final double tlRadiusY = rrect.tlRadiusY.abs();
+          final double blRadiusX = rrect.blRadiusX.abs();
+          final double brRadiusX = rrect.brRadiusX.abs();
+          final double blRadiusY = rrect.blRadiusY.abs();
+          final double brRadiusY = rrect.brRadiusY.abs();
 
           sb.write('L ${left + trRadiusX} $top ');
           // Top side and top-right corner
@@ -124,19 +124,20 @@ void pathToSvg(ui.Path path, StringBuffer sb,
           );
           break;
         case PathCommandTypes.rect:
-          RectCommand rectCommand = command;
-          bool horizontalSwap = rectCommand.width < 0;
-          final left = offsetX +
+          final RectCommand rectCommand = command;
+          final bool horizontalSwap = rectCommand.width < 0;
+          final double left = offsetX +
               (horizontalSwap
                   ? rectCommand.x - rectCommand.width
                   : rectCommand.x);
-          final width = horizontalSwap ? -rectCommand.width : rectCommand.width;
-          bool verticalSwap = rectCommand.height < 0;
-          final top = offsetY +
+          final double width =
+              horizontalSwap ? -rectCommand.width : rectCommand.width;
+          final bool verticalSwap = rectCommand.height < 0;
+          final double top = offsetY +
               (verticalSwap
                   ? rectCommand.y - rectCommand.height
                   : rectCommand.y);
-          final height =
+          final double height =
               verticalSwap ? -rectCommand.height : rectCommand.height;
           sb.write('M $left $top ');
           sb.write('L ${left + width} $top ');
@@ -145,7 +146,7 @@ void pathToSvg(ui.Path path, StringBuffer sb,
           sb.write('L $left $top ');
           break;
         default:
-          throw new UnimplementedError('Unknown path command $command');
+          throw UnimplementedError('Unknown path command $command');
       }
     }
   }
@@ -164,27 +165,27 @@ void _writeEllipse(
     double endAngle,
     bool antiClockwise,
     {bool moveToStartPoint = false}) {
-  double cosRotation = math.cos(rotation);
-  double sinRotation = math.sin(rotation);
-  double x = math.cos(startAngle) * radiusX;
-  double y = math.sin(startAngle) * radiusY;
+  final double cosRotation = math.cos(rotation);
+  final double sinRotation = math.sin(rotation);
+  final double x = math.cos(startAngle) * radiusX;
+  final double y = math.sin(startAngle) * radiusY;
 
-  double startPx = cx + (cosRotation * x - sinRotation * y);
-  double startPy = cy + (sinRotation * x + cosRotation * y);
+  final double startPx = cx + (cosRotation * x - sinRotation * y);
+  final double startPy = cy + (sinRotation * x + cosRotation * y);
 
-  double xe = math.cos(endAngle) * radiusX;
-  double ye = math.sin(endAngle) * radiusY;
+  final double xe = math.cos(endAngle) * radiusX;
+  final double ye = math.sin(endAngle) * radiusY;
 
-  double endPx = cx + (cosRotation * xe - sinRotation * ye);
-  double endPy = cy + (sinRotation * xe + cosRotation * ye);
+  final double endPx = cx + (cosRotation * xe - sinRotation * ye);
+  final double endPy = cy + (sinRotation * xe + cosRotation * ye);
 
-  double delta = endAngle - startAngle;
-  bool largeArc = delta.abs() > math.pi;
+  final double delta = endAngle - startAngle;
+  final bool largeArc = delta.abs() > math.pi;
 
-  double rotationDeg = rotation / math.pi * 180.0;
+  final double rotationDeg = rotation / math.pi * 180.0;
   if (moveToStartPoint) {
     sb.write('M $startPx $startPy ');
   }
-  sb.write('A $radiusX $radiusY ${rotationDeg} '
+  sb.write('A $radiusX $radiusY $rotationDeg '
       '${largeArc ? 1 : 0} ${antiClockwise ? 0 : 1} $endPx $endPy');
 }

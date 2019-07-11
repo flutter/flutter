@@ -15,7 +15,7 @@ Future<void> _testPlatformInitializedFuture;
 Future<dynamic> ensureTestPlatformInitializedThenRunTest(
     dynamic Function() body) {
   if (_testPlatformInitializedFuture == null) {
-    engine.domRenderer.debugIsInWidgetTest = true;
+    debugEmulateFlutterTesterEnvironment = true;
 
     // Initializing the platform will ensure that the test font is loaded.
     _testPlatformInitializedFuture = webOnlyInitializePlatform(
@@ -46,7 +46,7 @@ Future<void> webOnlyInitializeTestDomRenderer({double devicePixelRatio = 3.0}) {
   engine.window.webOnlyDebugPhysicalSizeOverride =
       Size(800 * devicePixelRatio, 600 * devicePixelRatio);
   webOnlyScheduleFrameCallback = () {};
-  engine.domRenderer.debugIsInWidgetTest = true;
+  debugEmulateFlutterTesterEnvironment = true;
 
   if (_platformInitializedFuture != null) {
     return _platformInitializedFuture;

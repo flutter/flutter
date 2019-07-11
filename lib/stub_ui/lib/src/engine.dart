@@ -4,12 +4,10 @@
 
 library engine;
 
-import '../ui.dart' as ui;
-
 import 'dart:async';
-import 'dart:developer' as developer;
-import 'dart:collection';
+import 'dart:collection' show ListBase;
 import 'dart:convert' hide Codec;
+import 'dart:developer' as developer;
 import 'dart:html' as html;
 import 'dart:js' as js;
 import 'dart:js_util' as js_util;
@@ -18,21 +16,30 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 
+import '../ui.dart' as ui;
+
 part 'engine/alarm_clock.dart';
 part 'engine/assets.dart';
 part 'engine/bitmap_canvas.dart';
 part 'engine/browser_detection.dart';
 part 'engine/browser_location.dart';
+part 'engine/compositor/canvas.dart';
 part 'engine/compositor/engine_delegate.dart';
+part 'engine/compositor/initialization.dart';
 part 'engine/compositor/layer.dart';
 part 'engine/compositor/layer_scene_builder.dart';
 part 'engine/compositor/layer_tree.dart';
+part 'engine/compositor/matrix.dart';
+part 'engine/compositor/path.dart';
+part 'engine/compositor/picture.dart';
+part 'engine/compositor/picture_recorder.dart';
+part 'engine/compositor/platform_message.dart';
 part 'engine/compositor/raster_cache.dart';
 part 'engine/compositor/rasterizer.dart';
+part 'engine/compositor/recording_canvas.dart';
 part 'engine/compositor/runtime_delegate.dart';
 part 'engine/compositor/surface.dart';
 part 'engine/compositor/viewport_metrics.dart';
-part 'engine/compositor/platform_message.dart';
 part 'engine/conic.dart';
 part 'engine/dom_canvas.dart';
 part 'engine/dom_renderer.dart';
@@ -43,24 +50,31 @@ part 'engine/html_image_codec.dart';
 part 'engine/keyboard.dart';
 part 'engine/onscreen_logging.dart';
 part 'engine/path_to_svg.dart';
+part 'engine/platform_views.dart';
 part 'engine/pointer_binding.dart';
 part 'engine/recording_canvas.dart';
+part 'engine/semantics/accessibility.dart';
 part 'engine/semantics/checkable.dart';
 part 'engine/semantics/image.dart';
 part 'engine/semantics/incrementable.dart';
 part 'engine/semantics/label_and_value.dart';
+part 'engine/semantics/live_region.dart';
 part 'engine/semantics/scrollable.dart';
 part 'engine/semantics/semantics.dart';
 part 'engine/semantics/tappable.dart';
 part 'engine/semantics/text_field.dart';
+part 'engine/services/buffers.dart';
 part 'engine/services/message_codec.dart';
 part 'engine/services/message_codecs.dart';
+part 'engine/services/serialization.dart';
 part 'engine/shadow.dart';
+part 'engine/surface/backdrop_filter.dart';
 part 'engine/surface/clip.dart';
 part 'engine/surface/debug_canvas_reuse_overlay.dart';
 part 'engine/surface/offset.dart';
 part 'engine/surface/opacity.dart';
 part 'engine/surface/picture.dart';
+part 'engine/surface/platform_view.dart';
 part 'engine/surface/scene.dart';
 part 'engine/surface/surface.dart';
 part 'engine/surface/transform.dart';
@@ -68,6 +82,7 @@ part 'engine/test_embedding.dart';
 part 'engine/text/font_collection.dart';
 part 'engine/text/line_breaker.dart';
 part 'engine/text/measurement.dart';
+part 'engine/text/paragraph.dart';
 part 'engine/text/ruler.dart';
 part 'engine/text/unicode_range.dart';
 part 'engine/text/word_break_properties.dart';
@@ -110,7 +125,8 @@ void webOnlyInitializeEngine() {
     for (ui.VoidCallback listener in _hotRestartListeners) {
       listener();
     }
-    return Future.value(developer.ServiceExtensionResponse.result('OK'));
+    return Future<developer.ServiceExtensionResponse>.value(
+        developer.ServiceExtensionResponse.result('OK'));
   });
 
   _engineInitialized = true;
@@ -134,11 +150,11 @@ void webOnlyInitializeEngine() {
         // milliseconds as a double value, with sub-millisecond information
         // hidden in the fraction. So we first multiply it by 1000 to uncover
         // microsecond precision, and only then convert to `int`.
-        final highResTimeMicroseconds = (1000 * highResTime).toInt();
+        final int highResTimeMicroseconds = (1000 * highResTime).toInt();
 
         if (ui.window.onBeginFrame != null) {
-          ui.window.onBeginFrame(
-              new Duration(microseconds: highResTimeMicroseconds));
+          ui.window
+              .onBeginFrame(Duration(microseconds: highResTimeMicroseconds));
         }
 
         if (ui.window.onDrawFrame != null) {
@@ -156,5 +172,6 @@ void webOnlyInitializeEngine() {
 }
 
 class _NullTreeSanitizer implements html.NodeTreeSanitizer {
+  @override
   void sanitizeTree(html.Node node) {}
 }

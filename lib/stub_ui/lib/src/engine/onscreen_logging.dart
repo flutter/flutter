@@ -75,3 +75,73 @@ void _initialize() {
 
   html.document.body.append(_logElement);
 }
+
+/// Dump the current stack to the console using [print] and
+/// [defaultStackFilter].
+///
+/// The current stack is obtained using [StackTrace.current].
+///
+/// The `maxFrames` argument can be given to limit the stack to the given number
+/// of lines. By default, all non-filtered stack lines are shown.
+///
+/// The `label` argument, if present, will be printed before the stack.
+void debugPrintStack({String label, int maxFrames}) {
+  if (label != null) print(label);
+  Iterable<String> lines =
+      StackTrace.current.toString().trimRight().split('\n');
+  if (maxFrames != null) lines = lines.take(maxFrames);
+  print(defaultStackFilter(lines).join('\n'));
+}
+
+/// Converts a stack to a string that is more readable by omitting stack
+/// frames that correspond to Dart internals.
+///
+/// This function expects its input to be in the format used by
+/// [StackTrace.toString()]. The output of this function is similar to that
+/// format but the frame numbers will not be consecutive (frames are elided)
+/// and the final line may be prose rather than a stack frame.
+Iterable<String> defaultStackFilter(Iterable<String> frames) {
+  const List<String> filteredPackages = <String>[
+    'dart:async-patch',
+    'dart:async',
+    'dart:_runtime',
+  ];
+  final RegExp stackParser =
+      RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
+  final RegExp packageParser = RegExp(r'^([^:]+):(.+)$');
+  final List<String> result = <String>[];
+  final List<String> skipped = <String>[];
+  for (String line in frames) {
+    final Match match = stackParser.firstMatch(line);
+    if (match != null) {
+      assert(match.groupCount == 2);
+      if (filteredPackages.contains(match.group(2))) {
+        final Match packageMatch = packageParser.firstMatch(match.group(2));
+        if (packageMatch != null && packageMatch.group(1) == 'package') {
+          skipped.add(
+              'package ${packageMatch.group(2)}'); // avoid "package package:foo"
+        } else {
+          skipped.add('package ${match.group(2)}');
+        }
+        continue;
+      }
+    }
+    result.add(line);
+  }
+  if (skipped.length == 1) {
+    result.add('(elided one frame from ${skipped.single})');
+  } else if (skipped.length > 1) {
+    final List<String> where = Set<String>.from(skipped).toList()..sort();
+    if (where.length > 1) where[where.length - 1] = 'and ${where.last}';
+    if (where.length > 2) {
+      result.add('(elided ${skipped.length} frames from ${where.join(", ")})');
+    } else {
+      result.add('(elided ${skipped.length} frames from ${where.join(" ")})');
+    }
+  }
+  return result;
+}
+
+String debugIdentify(Object object) {
+  return '${object.runtimeType}(@${object.hashCode})';
+}

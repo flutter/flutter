@@ -26,9 +26,9 @@ class ElevationShadow {
   /// Valid values: 2, 3, 4, 6, 8, 12, 16, 24
   static void applyShadowElevation(html.CssStyleDeclaration style,
       {@required int dp, @required ui.Color color}) {
-    const keyUmbraOpacity = 0.2;
-    const keyPenumbraOpacity = 0.14;
-    const ambientShadowOpacity = 0.12;
+    const double keyUmbraOpacity = 0.2;
+    const double keyPenumbraOpacity = 0.14;
+    const double ambientShadowOpacity = 0.12;
 
     final String rgb = '${color.red}, ${color.green}, ${color.blue}';
     if (dp == 2) {
@@ -149,9 +149,9 @@ class ElevationShadow {
     final int green = color.green;
     final int blue = color.blue;
 
-    final penumbraColor = ui.Color.fromARGB(36, red, green, blue);
-    final ambientShadowColor = ui.Color.fromARGB(31, red, green, blue);
-    final umbraColor = ui.Color.fromARGB(51, red, green, blue);
+    final ui.Color penumbraColor = ui.Color.fromARGB(36, red, green, blue);
+    final ui.Color ambientShadowColor = ui.Color.fromARGB(31, red, green, blue);
+    final ui.Color umbraColor = ui.Color.fromARGB(51, red, green, blue);
 
     final List<CanvasShadow> result = <CanvasShadow>[];
     if (dp == 2) {

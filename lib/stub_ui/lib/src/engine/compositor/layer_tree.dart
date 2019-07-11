@@ -19,7 +19,7 @@ class LayerTree {
   /// to raster. If [ignoreRasterCache] is `true`, then there will be no
   /// attempt to register pictures to cache.
   void preroll(Frame frame, {bool ignoreRasterCache = false}) {
-    final context =
+    final PrerollContext context =
         PrerollContext(ignoreRasterCache ? null : frame.rasterCache);
     rootLayer.preroll(context, Matrix4.identity());
   }
@@ -29,7 +29,7 @@ class LayerTree {
   /// If [ignoreRasterCache] is `true`, then the raster cache will
   /// not be used.
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
-    final context = PaintContext(
+    final PaintContext context = PaintContext(
         frame.canvas, ignoreRasterCache ? null : frame.rasterCache);
     if (rootLayer.needsPainting) {
       rootLayer.paint(context);
@@ -40,7 +40,7 @@ class LayerTree {
 /// A single frame to be rendered.
 class Frame {
   /// The canvas to render this frame to.
-  final BitmapCanvas canvas;
+  final SkCanvas canvas;
 
   /// A cache of pre-rastered pictures.
   final RasterCache rasterCache;
@@ -61,7 +61,7 @@ class CompositorContext {
   RasterCache rasterCache;
 
   /// Acquire a frame using this compositor's settings.
-  Frame acquireFrame(BitmapCanvas canvas) {
+  Frame acquireFrame(SkCanvas canvas) {
     return Frame(canvas, rasterCache);
   }
 }

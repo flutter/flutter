@@ -40,7 +40,7 @@ class PrerollContext {
 /// A context shared by all layers during the paint pass.
 class PaintContext {
   /// The canvas to paint to.
-  final BitmapCanvas canvas;
+  final SkCanvas canvas;
 
   /// A raster cache potentially containing pre-rendered pictures.
   final RasterCache rasterCache;
@@ -59,8 +59,8 @@ abstract class ContainerLayer extends Layer {
   }
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    paintBounds = prerollChildren(context, matrix);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    paintBounds = prerollChildren(prerollContext, matrix);
   }
 
   /// Run [preroll] on all of the child layers.
@@ -69,8 +69,8 @@ abstract class ContainerLayer extends Layer {
   /// If all of the child layers have empty paint bounds, then the returned
   /// [Rect] is empty.
   ui.Rect prerollChildren(PrerollContext context, Matrix4 childMatrix) {
-    var childPaintBounds = ui.Rect.zero;
-    for (var layer in _layers) {
+    ui.Rect childPaintBounds = ui.Rect.zero;
+    for (Layer layer in _layers) {
       layer.preroll(context, childMatrix);
       if (childPaintBounds.isEmpty) {
         childPaintBounds = layer.paintBounds;
@@ -85,7 +85,7 @@ abstract class ContainerLayer extends Layer {
   void paintChildren(PaintContext context) {
     assert(needsPainting);
 
-    for (var layer in _layers) {
+    for (Layer layer in _layers) {
       if (layer.needsPainting) {
         layer.paint(context);
       }
@@ -101,22 +101,22 @@ class ClipPathLayer extends ContainerLayer {
   ClipPathLayer(this._clipPath);
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    final childPaintBounds = prerollChildren(context, matrix);
-    final clipBounds = _clipPath.getBounds();
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+    final ui.Rect clipBounds = _clipPath.getBounds();
     if (childPaintBounds.overlaps(clipBounds)) {
       paintBounds = childPaintBounds.intersect(clipBounds);
     }
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    context.canvas.save();
-    context.canvas.clipPath(_clipPath);
-    paintChildren(context);
-    context.canvas.restore();
+    paintContext.canvas.save();
+    paintContext.canvas.clipPath(_clipPath);
+    paintChildren(paintContext);
+    paintContext.canvas.restore();
   }
 }
 
@@ -128,21 +128,21 @@ class ClipRectLayer extends ContainerLayer {
   ClipRectLayer(this._clipRect);
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    final childPaintBounds = prerollChildren(context, matrix);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
     if (childPaintBounds.overlaps(_clipRect)) {
       paintBounds = childPaintBounds.intersect(_clipRect);
     }
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    context.canvas.save();
-    context.canvas.clipRect(_clipRect);
-    paintChildren(context);
-    context.canvas.restore();
+    paintContext.canvas.save();
+    paintContext.canvas.clipRect(_clipRect);
+    paintChildren(paintContext);
+    paintContext.canvas.restore();
   }
 }
 
@@ -154,35 +154,37 @@ class ClipRRectLayer extends ContainerLayer {
   ClipRRectLayer(this._clipRRect);
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    final childPaintBounds = prerollChildren(context, matrix);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
     if (childPaintBounds.overlaps(_clipRRect.outerRect)) {
       paintBounds = childPaintBounds.intersect(_clipRRect.outerRect);
     }
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    context.canvas.save();
-    context.canvas.clipRRect(_clipRRect);
-    paintChildren(context);
-    context.canvas.restore();
+    paintContext.canvas.save();
+    paintContext.canvas.clipRRect(_clipRRect);
+    paintChildren(paintContext);
+    paintContext.canvas.restore();
   }
 }
 
 /// A layer that transforms its child layers by the given transform matrix.
-class TransformLayer extends ContainerLayer implements ui.OffsetEngineLayer, ui.TransformEngineLayer {
+class TransformLayer extends ContainerLayer
+    implements ui.OffsetEngineLayer, ui.TransformEngineLayer {
   /// The matrix with which to transform the child layers.
   final Matrix4 _transform;
 
   TransformLayer(this._transform);
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
     final Matrix4 childMatrix = matrix * _transform;
-    final ui.Rect childPaintBounds = prerollChildren(context, childMatrix);
+    final ui.Rect childPaintBounds =
+        prerollChildren(prerollContext, childMatrix);
     paintBounds = _transformRect(_transform, childPaintBounds);
   }
 
@@ -223,13 +225,13 @@ class TransformLayer extends ContainerLayer implements ui.OffsetEngineLayer, ui.
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    context.canvas.save();
-    context.canvas.transform(_transform.storage);
-    paintChildren(context);
-    context.canvas.restore();
+    paintContext.canvas.save();
+    paintContext.canvas.transform(_transform.storage);
+    paintChildren(paintContext);
+    paintContext.canvas.restore();
   }
 }
 
@@ -250,10 +252,10 @@ class PictureLayer extends Layer {
   PictureLayer(this.picture, this.offset, this.isComplex, this.willChange);
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    final RasterCache cache = context.rasterCache;
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    final RasterCache cache = prerollContext.rasterCache;
     if (cache != null) {
-      final translateMatrix = Matrix4.identity()
+      final Matrix4 translateMatrix = Matrix4.identity()
         ..setTranslationRaw(offset.dx, offset.dy, 0);
       final Matrix4 cacheMatrix = translateMatrix * matrix;
       cache.prepare(picture, cacheMatrix, isComplex, willChange);
@@ -263,23 +265,24 @@ class PictureLayer extends Layer {
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(picture != null);
     assert(needsPainting);
 
-    context.canvas.save();
-    context.canvas.translate(offset.dx, offset.dy);
+    paintContext.canvas.save();
+    paintContext.canvas.translate(offset.dx, offset.dy);
 
-    if (context.rasterCache != null) {
-      final cacheMatrix = context.canvas.currentTransform;
-      final result = context.rasterCache.get(picture, cacheMatrix);
+    if (paintContext.rasterCache != null) {
+      final Matrix4 cacheMatrix = paintContext.canvas.currentTransform;
+      final RasterCacheResult result =
+          paintContext.rasterCache.get(picture, cacheMatrix);
       if (result.isValid) {
-        result.draw(context.canvas);
+        result.draw(paintContext.canvas);
         return;
       }
     }
-    context.canvas.drawPicture(picture);
-    context.canvas.restore();
+    paintContext.canvas.drawPicture(picture);
+    paintContext.canvas.restore();
   }
 }
 
@@ -287,7 +290,8 @@ class PictureLayer extends Layer {
 ///
 /// The shape clips its children to a given [Path], and casts a shadow based
 /// on the given elevation.
-class PhysicalShapeLayer extends ContainerLayer implements ui.PhysicalShapeEngineLayer {
+class PhysicalShapeLayer extends ContainerLayer
+    implements ui.PhysicalShapeEngineLayer {
   final double _elevation;
   final ui.Color _color;
   final ui.Color _shadowColor;
@@ -303,40 +307,40 @@ class PhysicalShapeLayer extends ContainerLayer implements ui.PhysicalShapeEngin
   );
 
   @override
-  void preroll(PrerollContext context, Matrix4 matrix) {
-    prerollChildren(context, matrix);
+  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+    prerollChildren(prerollContext, matrix);
     paintBounds =
         ElevationShadow.computeShadowRect(_path.getBounds(), _elevation);
   }
 
   @override
-  void paint(PaintContext context) {
+  void paint(PaintContext paintContext) {
     assert(needsPainting);
 
     if (_elevation != 0) {
-      drawShadow(context.canvas, _path, _shadowColor, _elevation,
+      drawShadow(paintContext.canvas, _path, _shadowColor, _elevation,
           _color.alpha != 0xff);
     }
 
-    final paint = (ui.Paint()..color = _color).webOnlyPaintData;
+    final ui.Paint paint = ui.Paint()..color = _color;
     if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      context.canvas.drawPath(_path, paint);
+      paintContext.canvas.drawPath(_path, paint);
     }
 
-    int saveCount = context.canvas.save();
+    final int saveCount = paintContext.canvas.save();
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
-        context.canvas.clipPath(_path);
+        paintContext.canvas.clipPath(_path);
         break;
       case ui.Clip.antiAlias:
         // TODO(het): This is supposed to be different from Clip.hardEdge in
         // that it anti-aliases the clip. The canvas clipPath() method
         // should support this.
-        context.canvas.clipPath(_path);
+        paintContext.canvas.clipPath(_path);
         break;
       case ui.Clip.antiAliasWithSaveLayer:
-        context.canvas.clipPath(_path);
-        context.canvas.saveLayer(paintBounds, null);
+        paintContext.canvas.clipPath(_path);
+        paintContext.canvas.saveLayer(paintBounds, null);
         break;
       case ui.Clip.none:
         break;
@@ -347,19 +351,19 @@ class PhysicalShapeLayer extends ContainerLayer implements ui.PhysicalShapeEngin
       // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
       // using saveLayer, we have to call drawPaint instead of drawPath as
       // anti-aliased drawPath will always have such artifacts.
-      context.canvas.drawPaint(paint);
+      paintContext.canvas.drawPaint(paint);
     }
 
-    paintChildren(context);
+    paintChildren(paintContext);
 
-    context.canvas.restoreToCount(saveCount);
+    paintContext.canvas.restoreToCount(saveCount);
   }
 
   /// Draws a shadow on the given [canvas] for the given [path].
   ///
   /// The blur of the shadow is decided by the [elevation], and the
   /// shadow is painted with the given [color].
-  static void drawShadow(BitmapCanvas canvas, ui.Path path, ui.Color color,
+  static void drawShadow(SkCanvas canvas, ui.Path path, ui.Color color,
       double elevation, bool transparentOccluder) {
     canvas.drawShadow(path, color, elevation, transparentOccluder);
   }

@@ -8,7 +8,7 @@ part of ui;
 Future<void> webOnlyInitializePlatform({
   engine.AssetManager assetManager,
 }) async {
-  if (!engine.domRenderer.debugIsInWidgetTest) {
+  if (!debugEmulateFlutterTesterEnvironment) {
     engine.window.webOnlyLocationStrategy = const engine.HashLocationStrategy();
   }
 
@@ -16,6 +16,12 @@ Future<void> webOnlyInitializePlatform({
   await webOnlySetAssetManager(assetManager);
   await _fontCollection.ensureFontsLoaded();
   engine.webOnlyInitializeEngine();
+
+  // This needs to be after `webOnlyInitializeEngine` because that is where the
+  // canvaskit script is added to the page.
+  if (engine.experimentalUseSkia) {
+    await engine.initializeSkia();
+  }
   _webOnlyIsInitialized = true;
 }
 
@@ -43,10 +49,31 @@ Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
     await _fontCollection.registerFonts(_assetManager);
   }
 
-  if (engine.domRenderer.debugIsInWidgetTest) {
+  if (debugEmulateFlutterTesterEnvironment) {
     _fontCollection.debugRegisterTestFonts();
   }
 }
+
+/// Flag that shows whether the Flutter Testing Behavior is enabled.
+///
+/// This flag can be used to decide if the code is running from a Flutter Test
+/// such as a Widget test.
+///
+/// For example in these tests we use a predictable-size font which makes widget
+/// tests less flaky.
+bool get debugEmulateFlutterTesterEnvironment =>
+    _debugEmulateFlutterTesterEnvironment;
+
+set debugEmulateFlutterTesterEnvironment(bool value) {
+  _debugEmulateFlutterTesterEnvironment = value;
+  if (_debugEmulateFlutterTesterEnvironment) {
+    const Size logicalSize = Size(800.0, 600.0);
+    engine.window.webOnlyDebugPhysicalSizeOverride =
+        logicalSize * window.devicePixelRatio;
+  }
+}
+
+bool _debugEmulateFlutterTesterEnvironment = false;
 
 /// This class handles downloading assets over the network.
 engine.AssetManager get webOnlyAssetManager => _assetManager;

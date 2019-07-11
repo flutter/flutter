@@ -5,7 +5,7 @@
 part of engine;
 
 /// Set this flag to true to see all the fired events in the console.
-const _debugLogPointerEvents = false;
+const bool _debugLogPointerEvents = false;
 
 /// The signature of a callback that handles pointer events.
 typedef PointerDataCallback = void Function(List<ui.PointerData>);
@@ -51,9 +51,7 @@ class PointerBinding {
   /// PointerBinding.instance.debugOverrideDetector(MyTestDetector());
   /// ```
   void debugOverrideDetector(PointerSupportDetector newDetector) {
-    if (newDetector == null) {
-      newDetector = const PointerSupportDetector();
-    }
+    newDetector ??= const PointerSupportDetector();
     // When changing the detector, we need to swap the adapter.
     if (newDetector != _detector) {
       _detector = newDetector;
@@ -76,7 +74,7 @@ class PointerBinding {
   }
 
   void _onPointerData(List<ui.PointerData> data) {
-    ui.PointerDataPacket packet = ui.PointerDataPacket(data: data);
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(data: data);
     ui.window.onPointerDataPacket(packet);
   }
 }
@@ -88,6 +86,7 @@ class PointerSupportDetector {
   bool get hasTouchEvents => js_util.hasProperty(html.window, 'TouchEvent');
   bool get hasMouseEvents => js_util.hasProperty(html.window, 'MouseEvent');
 
+  @override
   String toString() =>
       'pointers:$hasPointerEvents, touch:$hasTouchEvents, mouse:$hasMouseEvents';
 }
@@ -99,7 +98,7 @@ abstract class BaseAdapter {
 
   final DomRenderer domRenderer;
   PointerDataCallback _callback;
-  Map<int, bool> _isDownMap = {};
+  Map<int, bool> _isDownMap = <int, bool>{};
   bool _isButtonDown(int button) {
     return _isDownMap[button] == true;
   }
@@ -126,8 +125,10 @@ abstract class BaseAdapter {
   }
 
   void _addEventListener(String eventName, html.EventListener handler) {
-    html.EventListener loggedHandler = (html.Event event) {
-      if (_debugLogPointerEvents) print(event.type);
+    final html.EventListener loggedHandler = (html.Event event) {
+      if (_debugLogPointerEvents) {
+        print(event.type);
+      }
       // Report the event to semantics. This information is used to debounce
       // browser gestures. Semantics tells us whether it is safe to forward
       // the event to the framework.
@@ -164,9 +165,10 @@ class PointerAdapter extends BaseAdapter {
   PointerAdapter(PointerDataCallback callback, DomRenderer domRenderer)
       : super(callback, domRenderer);
 
+  @override
   void _setup() {
     _addEventListener('pointerdown', (html.Event event) {
-      int pointerButton = _pointerButtonFromHtmlEvent(event);
+      final int pointerButton = _pointerButtonFromHtmlEvent(event);
       if (_isButtonDown(pointerButton)) {
         // TODO(flutter_web): Remove this temporary fix for right click
         // on web platform once context guesture is implemented.
@@ -181,15 +183,19 @@ class PointerAdapter extends BaseAdapter {
       // button to -1 as opposed to mouse move which sets it to 2.
       // This check is currently defaulting to primary button for now.
       // Change this when context gesture is implemented in flutter framework.
-      if (!_isButtonDown(_pointerButtonFromHtmlEvent(event))) return;
+      if (!_isButtonDown(_pointerButtonFromHtmlEvent(event))) {
+        return;
+      }
       _callback(_convertEventToPointerData(ui.PointerChange.move, event));
     });
 
     _addEventListener('pointerup', (html.Event event) {
       // The pointer could have been released by a `pointerout` event, in which
       // case `pointerup` should have no effect.
-      int pointerButton = _pointerButtonFromHtmlEvent(event);
-      if (!_isButtonDown(pointerButton)) return;
+      final int pointerButton = _pointerButtonFromHtmlEvent(event);
+      if (!_isButtonDown(pointerButton)) {
+        return;
+      }
       _updateButtonDownState(pointerButton, false);
       _callback(_convertEventToPointerData(ui.PointerChange.up, event));
     });
@@ -201,7 +207,9 @@ class PointerAdapter extends BaseAdapter {
     });
 
     _addWheelEventListener((html.WheelEvent event) {
-      if (_debugLogPointerEvents) print(event.type);
+      if (_debugLogPointerEvents) {
+        print(event.type);
+      }
       _callback(_convertWheelEventToPointerData(event));
       // Prevent default so mouse wheel event doesn't get converted to
       // a scroll event that semantic nodes would process.
@@ -213,10 +221,10 @@ class PointerAdapter extends BaseAdapter {
     ui.PointerChange change,
     html.PointerEvent evt,
   ) {
-    List<html.PointerEvent> allEvents = _expandEvents(evt);
-    List<ui.PointerData> data = List(allEvents.length);
+    final List<html.PointerEvent> allEvents = _expandEvents(evt);
+    final List<ui.PointerData> data = List<ui.PointerData>(allEvents.length);
     for (int i = 0; i < allEvents.length; i++) {
-      html.PointerEvent event = allEvents[i];
+      final html.PointerEvent event = allEvents[i];
       data[i] = ui.PointerData(
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
@@ -238,14 +246,15 @@ class PointerAdapter extends BaseAdapter {
     // For browsers that don't support `getCoalescedEvents`, we fallback to
     // using the original event.
     if (js_util.hasProperty(event, 'getCoalescedEvents')) {
-      var coalescedEvents = event.getCoalescedEvents();
+      final List<html.PointerEvent> coalescedEvents =
+          event.getCoalescedEvents();
       // Some events don't perform coalescing, so they return an empty list. In
       // that case, we also fallback to using the original event.
       if (coalescedEvents.isNotEmpty) {
         return coalescedEvents;
       }
     }
-    return [event];
+    return <html.PointerEvent>[event];
   }
 
   ui.PointerDeviceKind _pointerTypeToDeviceKind(String pointerType) {
@@ -273,6 +282,7 @@ class TouchAdapter extends BaseAdapter {
   TouchAdapter(PointerDataCallback callback, DomRenderer domRenderer)
       : super(callback, domRenderer);
 
+  @override
   void _setup() {
     _addEventListener('touchstart', (html.Event event) {
       _updateButtonDownState(_kPrimaryMouseButton, true);
@@ -281,7 +291,9 @@ class TouchAdapter extends BaseAdapter {
 
     _addEventListener('touchmove', (html.Event event) {
       event.preventDefault(); // Prevents standard overscroll on iOS/Webkit.
-      if (!_isButtonDown(_kPrimaryMouseButton)) return;
+      if (!_isButtonDown(_kPrimaryMouseButton)) {
+        return;
+      }
       _callback(_convertEventToPointerData(ui.PointerChange.move, event));
     });
 
@@ -301,7 +313,8 @@ class TouchAdapter extends BaseAdapter {
   ) {
     final html.TouchList touches = event.changedTouches;
     final List<ui.PointerData> data = List<ui.PointerData>(touches.length);
-    for (int i = 0, len = touches.length; i < len; i++) {
+    final int len = touches.length;
+    for (int i = 0; i < len; i++) {
       final html.Touch touch = touches[i];
       data[i] = ui.PointerData(
         change: change,
@@ -329,9 +342,10 @@ class MouseAdapter extends BaseAdapter {
   MouseAdapter(PointerDataCallback callback, DomRenderer domRenderer)
       : super(callback, domRenderer);
 
+  @override
   void _setup() {
     _addEventListener('mousedown', (html.Event event) {
-      int pointerButton = _pointerButtonFromHtmlEvent(event);
+      final int pointerButton = _pointerButtonFromHtmlEvent(event);
       if (_isButtonDown(pointerButton)) {
         // TODO(flutter_web): Remove this temporary fix for right click
         // on web platform once context guesture is implemented.
@@ -342,7 +356,9 @@ class MouseAdapter extends BaseAdapter {
     });
 
     _addEventListener('mousemove', (html.Event event) {
-      if (!_isButtonDown(_pointerButtonFromHtmlEvent(event))) return;
+      if (!_isButtonDown(_pointerButtonFromHtmlEvent(event))) {
+        return;
+      }
       _callback(_convertEventToPointerData(ui.PointerChange.move, event));
     });
 
@@ -352,7 +368,9 @@ class MouseAdapter extends BaseAdapter {
     });
 
     _addWheelEventListener((html.WheelEvent event) {
-      if (_debugLogPointerEvents) print(event.type);
+      if (_debugLogPointerEvents) {
+        print(event.type);
+      }
       _callback(_convertWheelEventToPointerData(event));
       event.preventDefault();
     });
@@ -362,7 +380,7 @@ class MouseAdapter extends BaseAdapter {
     ui.PointerChange change,
     html.MouseEvent event,
   ) {
-    return [
+    return <ui.PointerData>[
       ui.PointerData(
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
@@ -383,10 +401,10 @@ class MouseAdapter extends BaseAdapter {
 /// Convert a floating number timestamp (in milliseconds) to a [Duration] by
 /// splitting it into two integer components: milliseconds + microseconds.
 Duration _eventTimeStampToDuration(num milliseconds) {
-  int ms = milliseconds.toInt();
-  int micro =
+  final int ms = milliseconds.toInt();
+  final int micro =
       ((milliseconds - ms) * Duration.microsecondsPerMillisecond).toInt();
-  return new Duration(milliseconds: ms, microseconds: micro);
+  return Duration(milliseconds: ms, microseconds: micro);
 }
 
 bool _isWheelDeviceAdded = false;

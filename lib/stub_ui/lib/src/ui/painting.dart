@@ -29,7 +29,7 @@ class Color {
   /// Bits 16-23 are the red value.
   /// Bits 8-15 are the green value.
   /// Bits 0-7 are the blue value.
-  const Color(int value) : _value = (value & 0xFFFFFFFF);
+  const Color(int value) : _value = value & 0xFFFFFFFF;
 
   /// Construct a color from the lower 8 bits of four integers.
   const Color.fromARGB(int a, int r, int g, int b)
@@ -84,7 +84,7 @@ class Color {
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with a (which ranges from 0 to 255).
   Color withAlpha(int a) {
-    return new Color.fromARGB(a, red, green, blue);
+    return Color.fromARGB(a, red, green, blue);
   }
 
   /// Returns a new color that matches this color with the alpha channel
@@ -97,24 +97,26 @@ class Color {
   /// Returns a new color that matches this color with the red channel replaced
   /// with r.
   Color withRed(int r) {
-    return new Color.fromARGB(alpha, r, green, blue);
+    return Color.fromARGB(alpha, r, green, blue);
   }
 
   /// Returns a new color that matches this color with the green channel
   /// replaced with g.
   Color withGreen(int g) {
-    return new Color.fromARGB(alpha, red, g, blue);
+    return Color.fromARGB(alpha, red, g, blue);
   }
 
   /// Returns a new color that matches this color with the blue channel replaced
   /// with b.
   Color withBlue(int b) {
-    return new Color.fromARGB(alpha, red, green, b);
+    return Color.fromARGB(alpha, red, green, b);
   }
 
   // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
   static double _linearizeColorComponent(double component) {
-    if (component <= 0.03928) return component / 12.92;
+    if (component <= 0.03928) {
+      return component / 12.92;
+    }
     return math.pow((component + 0.055) / 1.055, 2.4);
   }
 
@@ -156,10 +158,16 @@ class Color {
   /// an [AnimationController].
   static Color lerp(Color a, Color b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return _scaleAlpha(b, t);
-    if (b == null) return _scaleAlpha(a, 1.0 - t);
-    return new Color.fromARGB(
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a == null) {
+      return _scaleAlpha(b, t);
+    }
+    if (b == null) {
+      return _scaleAlpha(a, 1.0 - t);
+    }
+    return Color.fromARGB(
       lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
       lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
       lerpDouble(a.green, b.green, t).toInt().clamp(0, 255),
@@ -185,7 +193,7 @@ class Color {
     int backAlpha = background.alpha;
     if (backAlpha == 0xff) {
       // Opaque background case
-      return new Color.fromARGB(
+      return Color.fromARGB(
         0xff,
         (alpha * foreground.red + invAlpha * background.red) ~/ 0xff,
         (alpha * foreground.green + invAlpha * background.green) ~/ 0xff,
@@ -196,7 +204,7 @@ class Color {
       backAlpha = (backAlpha * invAlpha) ~/ 0xff;
       final int outAlpha = alpha + backAlpha;
       assert(outAlpha != 0x00);
-      return new Color.fromARGB(
+      return Color.fromARGB(
         outAlpha,
         (foreground.red * alpha + background.red * backAlpha) ~/ outAlpha,
         (foreground.green * alpha + background.green * backAlpha) ~/ outAlpha,
@@ -207,12 +215,17 @@ class Color {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
     final Color typedOther = other;
     return value == typedOther.value;
   }
 
+  @override
   int get hashCode => _value.hashCode;
 
   /// Converts color to a css compatible attribute value.
@@ -221,17 +234,17 @@ class Color {
     if ((0xff000000 & _value) == 0xff000000) {
       return toCssStringRgbOnly();
     } else {
-      var alpha = ((_value >> 24) & 0xFF) / 255.0;
-      StringBuffer sb = new StringBuffer();
-      sb.write("rgba(");
+      final double alpha = ((_value >> 24) & 0xFF) / 255.0;
+      final StringBuffer sb = StringBuffer();
+      sb.write('rgba(');
       sb.write(((_value >> 16) & 0xFF).toString());
-      sb.write(",");
+      sb.write(',');
       sb.write(((_value >> 8) & 0xFF).toString());
-      sb.write(",");
+      sb.write(',');
       sb.write((_value & 0xFF).toString());
-      sb.write(",");
+      sb.write(',');
       sb.write(alpha.toString());
-      sb.write(")");
+      sb.write(')');
       return sb.toString();
     }
   }
@@ -242,7 +255,7 @@ class Color {
   /// with the paint opacity.
   // webOnly
   String toCssStringRgbOnly() {
-    var paddedValue = '00000${_value.toRadixString(16)}';
+    final String paddedValue = '00000${_value.toRadixString(16)}';
     return '#${paddedValue.substring(paddedValue.length - 6)}';
   }
 
@@ -909,7 +922,7 @@ class PaintData {
 
   // Internal for recording canvas use.
   PaintData clone() {
-    return new PaintData()
+    return PaintData()
       ..blendMode = blendMode
       ..filterQuality = filterQuality
       ..maskFilter = maskFilter
@@ -929,7 +942,7 @@ class PaintData {
 /// Most APIs on [Canvas] take a [Paint] object to describe the style
 /// to use for that operation.
 class Paint {
-  PaintData _paintData = new PaintData();
+  PaintData _paintData = PaintData();
 
   /// A blend mode to apply when a shape is drawn or a layer is composited.
   ///
@@ -1044,18 +1057,11 @@ class Paint {
   bool get invertColors {
     return false;
   }
-  set invertColors(bool value) {
-  }
 
-  double get strokeMiterLimit {
-    return null;
-  }
-  set strokeMiterLimit(double value) {
-    assert(value != null);
-  }
+  set invertColors(bool value) {}
 
   Color _color = _defaultPaintColor;
-  static const Color _defaultPaintColor = const Color(0xFF000000);
+  static const Color _defaultPaintColor = Color(0xFF000000);
 
   /// The shader to use when stroking or filling a shape.
   ///
@@ -1074,37 +1080,6 @@ class Paint {
       _frozen = false;
     }
     _paintData.shader = value;
-  }
-
-
-  /// The [ImageFilter] to use when drawing raster images.
-  ///
-  /// For example, to blur an image using [Canvas.drawImage], apply an
-  /// [ImageFilter.blur]:
-  ///
-  /// ```dart
-  /// import 'dart:ui' as ui;
-  ///
-  /// ui.Image image;
-  ///
-  /// void paint(Canvas canvas, Size size) {
-  ///   canvas.drawImage(
-  ///     image,
-  ///     Offset.zero,
-  ///     Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: .5, sigmaY: .5),
-  ///   );
-  /// }
-  /// ```
-  ///
-  /// See also:
-  ///
-  ///  * [MaskFilter], which is used for drawing geometry.
-  ImageFilter get imageFilter {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
-    return null;
-  }
-  set imageFilter(ImageFilter value) {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
   }
 
   /// A mask filter (for example, a blur) to apply to a shape after it has been
@@ -1150,6 +1125,46 @@ class Paint {
     _paintData.colorFilter = value;
   }
 
+  // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33605
+  double get strokeMiterLimit {
+    return null;
+  }
+
+  set strokeMiterLimit(double value) {
+    assert(value != null);
+  }
+
+  /// The [ImageFilter] to use when drawing raster images.
+  ///
+  /// For example, to blur an image using [Canvas.drawImage], apply an
+  /// [ImageFilter.blur]:
+  ///
+  /// ```dart
+  /// import 'dart:ui' as ui;
+  ///
+  /// ui.Image image;
+  ///
+  /// void paint(Canvas canvas, Size size) {
+  ///   canvas.drawImage(
+  ///     image,
+  ///     Offset.zero,
+  ///     Paint()..imageFilter = ui.ImageFilter.blur(sigmaX: .5, sigmaY: .5),
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [MaskFilter], which is used for drawing geometry.
+  ImageFilter get imageFilter {
+    // TODO(flutter/flutter#35156): Implement ImageFilter.
+    return null;
+  }
+
+  set imageFilter(ImageFilter value) {
+    // TODO(flutter/flutter#35156): Implement ImageFilter.
+  }
+
   // True if Paint instance has used in RecordingCanvas.
   bool _frozen = false;
 
@@ -1164,7 +1179,7 @@ class Paint {
   @override
   String toString() {
     if (engine.assertionsEnabled) {
-      StringBuffer result = new StringBuffer();
+      final StringBuffer result = StringBuffer();
       String semicolon = '';
       result.write('Paint(');
       if (style == PaintingStyle.stroke) {
@@ -1206,7 +1221,7 @@ abstract class Shader {
   /// Creates a fill style to be used in painting.
   Object createPaintStyle(html.CanvasRenderingContext2D ctx);
 
-  List webOnlySerializeToCssPaint() {
+  List<dynamic> webOnlySerializeToCssPaint() {
     throw UnsupportedError('CSS paint not implemented for this shader type');
   }
 }
@@ -1241,7 +1256,8 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    Float64List matrix4,
+    Float64List
+        matrix4, // TODO(flutter_web): see https://github.com/flutter/flutter/issues/32819
   ]) =>
       _GradientLinear(from, to, colors, colorStops, tileMode);
 
@@ -1350,7 +1366,7 @@ class _GradientSweep extends Gradient {
 
   @override
   Object createPaintStyle(_) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 
   final Offset center;
@@ -1365,11 +1381,11 @@ class _GradientSweep extends Gradient {
 void _validateColorStops(List<Color> colors, List<double> colorStops) {
   if (colorStops == null) {
     if (colors.length != 2)
-      throw new ArgumentError(
+      throw ArgumentError(
           '"colors" must have length 2 if "colorStops" is omitted.');
   } else {
     if (colors.length != colorStops.length)
-      throw new ArgumentError(
+      throw ArgumentError(
           '"colors" and "colorStops" arguments must have equal length.');
   }
 }
@@ -1397,7 +1413,8 @@ class _GradientLinear extends Gradient {
 
   @override
   html.CanvasGradient createPaintStyle(html.CanvasRenderingContext2D ctx) {
-    var gradient = ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
+    final html.CanvasGradient gradient =
+        ctx.createLinearGradient(from.dx, from.dy, to.dx, to.dy);
     if (colorStops == null) {
       assert(colors.length == 2);
       gradient.addColorStop(0, colors[0].toCssString());
@@ -1412,7 +1429,7 @@ class _GradientLinear extends Gradient {
 
   @override
   List<dynamic> webOnlySerializeToCssPaint() {
-    List<dynamic> serializedColors = <dynamic>[];
+    final List<dynamic> serializedColors = <dynamic>[];
     for (int i = 0; i < colors.length; i++) {
       serializedColors.add(colors[i].toCssString());
     }
@@ -1443,7 +1460,7 @@ class _GradientRadial extends Gradient {
 
   @override
   Object createPaintStyle(_) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 }
 
@@ -1463,7 +1480,7 @@ class _GradientConical extends Gradient {
 
   @override
   Object createPaintStyle(_) {
-    throw new UnimplementedError();
+    throw UnimplementedError();
   }
 }
 
@@ -1550,7 +1567,7 @@ class ColorFilter {
   @override
   int get hashCode => hashValues(_color, _blendMode);
 
-  List webOnlySerializeToCssPaint() {
+  List<dynamic> webOnlySerializeToCssPaint() {
     throw UnsupportedError('ColorFilter for CSS paint not yet supported');
   }
 
@@ -1622,7 +1639,9 @@ class MaskFilter {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! MaskFilter) return false;
+    if (other is! MaskFilter) {
+      return false;
+    }
     final MaskFilter typedOther = other;
     return _style == typedOther._style && _sigma == typedOther._sigma;
   }
@@ -1647,7 +1666,7 @@ enum FilterQuality {
 
   /// Fastest possible filtering, albeit also the lowest quality.
   ///
-  /// Typically this implies nearest-neighbor filtering.
+  /// Typically this implies nearest-neighbour filtering.
   none,
 
   /// Better quality than [none], faster than [medium].
@@ -1676,20 +1695,24 @@ enum FilterQuality {
 ///    this class.
 class ImageFilter {
   /// Creates an image filter that applies a Gaussian blur.
-  ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0}) {
-    _initBlur(sigmaX, sigmaY);
+  ImageFilter.blur({this.sigmaX = 0.0, this.sigmaY = 0.0})
+      : matrix4 = null,
+        filterQuality = FilterQuality.low;
+
+  ImageFilter.matrix(this.matrix4, {this.filterQuality = FilterQuality.low})
+      : sigmaX = 0.0,
+        sigmaY = 0.0 {
+    // TODO(flutter_web): add implementation.
+    throw UnimplementedError(
+        'ImageFilter.matrix not implemented for web platform.');
+    //    if (matrix4.length != 16)
+    //      throw ArgumentError('"matrix4" must have 16 entries.');
   }
 
-  /// Creates an image filter that applies a matrix transformation.
-  ///
-  /// For example, applying a positive scale matrix (see [Matrix4.diagonal3])
-  /// when used with [BackdropFilter] would magnify the background image.
-  ImageFilter.matrix(Float64List matrix4,
-      {FilterQuality filterQuality = FilterQuality.low}) {}
-
-  void _initBlur(double sigmaX, double sigmaY) {
-    // TODO(b/128318717): Implement me.
-  }
+  final Float64List matrix4;
+  final FilterQuality filterQuality;
+  final double sigmaX;
+  final double sigmaY;
 }
 
 /// The format in which image bytes should be returned when using
@@ -1763,7 +1786,7 @@ abstract class FrameInfo {
   FrameInfo._();
 
   /// The duration this frame should be shown.
-  Duration get duration => new Duration(milliseconds: _durationMillis);
+  Duration get duration => Duration(milliseconds: _durationMillis);
   int get _durationMillis => 0;
 
   /// The [Image] object for this frame.
@@ -1808,17 +1831,14 @@ class Codec {
 /// Instantiates an image codec [Codec] object.
 ///
 /// [list] is the binary image data (e.g a PNG or GIF binary data).
-/// The data can be for either static or animated images. The following image
-/// formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The data can be for either static or animated images.
 ///
-/// The [targetWidth] and [targetHeight] arguments are ignored.
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list, {
-  int targetWidth,
-  int targetHeight,
-}) {
+Future<Codec> instantiateImageCodec(Uint8List list,
+    {double decodedCacheRatioCap = double.infinity}) {
   return engine.futurize((engine.Callback<Codec> callback) =>
       _instantiateImageCodec(list, callback, null));
 }
@@ -1863,13 +1883,13 @@ Future<void> _decodeImageFromListAsync(
 /// [pixels] is the pixel data in the encoding described by [format].
 ///
 /// [rowBytes] is the number of bytes consumed by each row of pixels in the
-/// data buffer.  If unspecified, it defaults to [width] multiplied by the
+/// data buffer.  If unspecified, it defaults to [width] multipled by the
 /// number of bytes per pixel in the provided [format].
 void decodeImageFromPixels(Uint8List pixels, int width, int height,
     PixelFormat format, ImageDecoderCallback callback,
     {int rowBytes}) {
   final _ImageInfo imageInfo =
-      new _ImageInfo(width, height, format.index, rowBytes);
+      _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = engine.futurize(
       (engine.Callback<Codec> callback) =>
           _instantiateImageCodec(pixels, callback, imageInfo));
@@ -1942,7 +1962,7 @@ class Shadow {
   ///
   /// This class does not provide a way to disable shadows to avoid inconsistencies
   /// in shadow blur rendering, primarily as a method of reducing test flakiness.
-  /// [toPaint] should be overridden in subclasses to provide this functionality.
+  /// [toPaint] should be overriden in subclasses to provide this functionality.
   Paint toPaint() {
     return Paint()
       ..color = color
@@ -1980,9 +2000,15 @@ class Shadow {
   /// {@endtemplate}
   static Shadow lerp(Shadow a, Shadow b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
-    if (a == null) return b.scale(t);
-    if (b == null) return a.scale(1.0 - t);
+    if (a == null && b == null) {
+      return null;
+    }
+    if (a == null) {
+      return b.scale(t);
+    }
+    if (b == null) {
+      return a.scale(1.0 - t);
+    }
     return Shadow(
       color: Color.lerp(a.color, b.color, t),
       offset: Offset.lerp(a.offset, b.offset, t),
@@ -1997,7 +2023,9 @@ class Shadow {
   /// {@macro dart.ui.shadow.lerp}
   static List<Shadow> lerpList(List<Shadow> a, List<Shadow> b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null) {
+      return null;
+    }
     a ??= <Shadow>[];
     b ??= <Shadow>[];
     final List<Shadow> result = <Shadow>[];
@@ -2006,14 +2034,20 @@ class Shadow {
       result.add(Shadow.lerp(a[i], b[i], t));
     for (int i = commonLength; i < a.length; i += 1)
       result.add(a[i].scale(1.0 - t));
-    for (int i = commonLength; i < b.length; i += 1) result.add(b[i].scale(t));
+    for (int i = commonLength; i < b.length; i += 1) {
+      result.add(b[i].scale(t));
+    }
     return result;
   }
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other)) return true;
-    if (other is! Shadow) return false;
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! Shadow) {
+      return false;
+    }
     final Shadow typedOther = other;
     return color == typedOther.color &&
         offset == typedOther.offset &&

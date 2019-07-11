@@ -273,8 +273,8 @@ class RecordingCanvas {
   void drawImage(ui.Image image, ui.Offset offset, ui.Paint paint) {
     _hasArbitraryPaint = true;
     _didDraw = true;
-    var left = offset.dx;
-    var top = offset.dy;
+    final double left = offset.dx;
+    final double top = offset.dy;
     _paintBounds.growLTRB(left, top, left + image.width, top + image.height);
     _commands.add(PaintDrawImage(image, offset, paint.webOnlyPaintData));
   }
@@ -287,17 +287,21 @@ class RecordingCanvas {
   }
 
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    if (!paragraph.webOnlyIsLaidOut) {
+    final EngineParagraph engineParagraph = paragraph;
+    if (!engineParagraph._isLaidOut) {
       // Ignore non-laid out paragraphs. This matches Flutter's behavior.
       return;
     }
 
     _didDraw = true;
+    if (engineParagraph._geometricStyle.ellipsis != null) {
+      _hasArbitraryPaint = true;
+    }
     final double left = offset.dx;
     final double top = offset.dy;
     _paintBounds.growLTRB(
-        left, top, left + paragraph.width, top + paragraph.height);
-    _commands.add(PaintDrawParagraph(paragraph, offset));
+        left, top, left + engineParagraph.width, top + engineParagraph.height);
+    _commands.add(PaintDrawParagraph(engineParagraph, offset));
   }
 
   void drawShadow(ui.Path path, ui.Color color, double elevation,
@@ -345,6 +349,7 @@ class PaintSave extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(const <int>[1]);
   }
@@ -367,6 +372,7 @@ class PaintRestore extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(const <int>[2]);
   }
@@ -392,6 +398,7 @@ class PaintTranslate extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<num>[3, dx, dy]);
   }
@@ -417,6 +424,7 @@ class PaintScale extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<num>[4, sx, sy]);
   }
@@ -441,6 +449,7 @@ class PaintRotate extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<num>[5, radians]);
   }
@@ -465,6 +474,7 @@ class PaintTransform extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[6]..addAll(matrix4));
   }
@@ -490,6 +500,7 @@ class PaintSkew extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<num>[7, sx, sy]);
   }
@@ -514,6 +525,7 @@ class PaintClipRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[8, _serializeRectToCssPaint(rect)]);
   }
@@ -538,6 +550,7 @@ class PaintClipRRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       9,
@@ -565,6 +578,7 @@ class PaintClipPath extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[10, path.webOnlySerializeToCssPaint()]);
   }
@@ -590,6 +604,7 @@ class PaintDrawColor extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[11, color.toCssString(), blendMode.index]);
   }
@@ -616,6 +631,7 @@ class PaintDrawLine extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       12,
@@ -647,6 +663,7 @@ class PaintDrawPaint extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[13, _serializePaintToCssPaint(paint)]);
   }
@@ -672,6 +689,7 @@ class PaintDrawRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       14,
@@ -701,6 +719,7 @@ class PaintDrawRRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       15,
@@ -731,6 +750,7 @@ class PaintDrawDRRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       16,
@@ -761,6 +781,7 @@ class PaintDrawOval extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       17,
@@ -791,6 +812,7 @@ class PaintDrawCircle extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       18,
@@ -822,6 +844,7 @@ class PaintDrawPath extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       19,
@@ -854,6 +877,7 @@ class PaintDrawShadow extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     serializedCommands.add(<dynamic>[
       20,
@@ -891,6 +915,7 @@ class PaintDrawImage extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     if (assertionsEnabled) {
       throw UnsupportedError('drawImage not serializable');
@@ -920,6 +945,7 @@ class PaintDrawImageRect extends PaintCommand {
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     if (assertionsEnabled) {
       throw UnsupportedError('drawImageRect not serializable');
@@ -928,7 +954,7 @@ class PaintDrawImageRect extends PaintCommand {
 }
 
 class PaintDrawParagraph extends PaintCommand {
-  final ui.Paragraph paragraph;
+  final EngineParagraph paragraph;
   final ui.Offset offset;
 
   PaintDrawParagraph(this.paragraph, this.offset);
@@ -941,12 +967,13 @@ class PaintDrawParagraph extends PaintCommand {
   @override
   String toString() {
     if (assertionsEnabled) {
-      return 'DrawParagraph(${paragraph.webOnlyGetPlainText()}, $offset)';
+      return 'DrawParagraph(${paragraph._plainText}, $offset)';
     } else {
       return super.toString();
     }
   }
 
+  @override
   void serializeToCssPaint(List<List<dynamic>> serializedCommands) {
     if (assertionsEnabled) {
       throw UnsupportedError('drawParagraph not serializable');
@@ -954,7 +981,7 @@ class PaintDrawParagraph extends PaintCommand {
   }
 }
 
-List _serializePaintToCssPaint(ui.PaintData paint) {
+List<dynamic> _serializePaintToCssPaint(ui.PaintData paint) {
   return <dynamic>[
     paint.blendMode?.index,
     paint.style?.index,
@@ -969,7 +996,7 @@ List _serializePaintToCssPaint(ui.PaintData paint) {
   ];
 }
 
-List _serializeRectToCssPaint(ui.Rect rect) {
+List<dynamic> _serializeRectToCssPaint(ui.Rect rect) {
   return <dynamic>[
     rect.left,
     rect.top,
@@ -978,7 +1005,7 @@ List _serializeRectToCssPaint(ui.Rect rect) {
   ];
 }
 
-List _serializeRRectToCssPaint(ui.RRect rrect) {
+List<dynamic> _serializeRRectToCssPaint(ui.RRect rrect) {
   return <dynamic>[
     rrect.left,
     rrect.top,
@@ -1006,11 +1033,11 @@ class Subpath {
   Subpath(this.startX, this.startY) : commands = <PathCommand>[];
 
   Subpath shift(ui.Offset offset) {
-    final result = Subpath(startX + offset.dx, startY + offset.dy)
+    final Subpath result = Subpath(startX + offset.dx, startY + offset.dy)
       ..currentX = currentX + offset.dx
       ..currentY = currentY + offset.dy;
 
-    for (final command in commands) {
+    for (final PathCommand command in commands) {
       result.commands.add(command.shifted(offset));
     }
 
@@ -1037,14 +1064,14 @@ class Subpath {
 
 /// ! Houdini implementation relies on indices here. Keep in sync.
 class PathCommandTypes {
-  static const moveTo = 0;
-  static const lineTo = 1;
-  static const ellipse = 2;
-  static const close = 3;
-  static const quadraticCurveTo = 4;
-  static const bezierCurveTo = 5;
-  static const rect = 6;
-  static const rRect = 7;
+  static const int moveTo = 0;
+  static const int lineTo = 1;
+  static const int ellipse = 2;
+  static const int close = 3;
+  static const int quadraticCurveTo = 4;
+  static const int bezierCurveTo = 5;
+  static const int rect = 6;
+  static const int rRect = 7;
 }
 
 abstract class PathCommand {
@@ -1053,7 +1080,7 @@ abstract class PathCommand {
 
   PathCommand shifted(ui.Offset offset);
 
-  List serializeToCssPaint();
+  List<dynamic> serializeToCssPaint();
 }
 
 class MoveTo extends PathCommand {
@@ -1064,7 +1091,7 @@ class MoveTo extends PathCommand {
 
   @override
   MoveTo shifted(ui.Offset offset) {
-    return new MoveTo(x + offset.dx, y + offset.dy);
+    return MoveTo(x + offset.dx, y + offset.dy);
   }
 
   @override
@@ -1094,7 +1121,7 @@ class LineTo extends PathCommand {
   }
 
   @override
-  List serializeToCssPaint() {
+  List<dynamic> serializeToCssPaint() {
     return <dynamic>[2, x, y];
   }
 
@@ -1474,8 +1501,8 @@ class _PaintBounds {
   }
 
   void saveTransformsAndClip() {
-    _clipStack ??= [];
-    _transforms ??= [];
+    _clipStack ??= <ui.Rect>[];
+    _transforms ??= <Matrix4>[];
     _transforms.add(_currentMatrix?.clone());
     _clipStack.add(_clipRectInitialized
         ? ui.Rect.fromLTRB(_currentClipLeft, _currentClipTop, _currentClipRight,
@@ -1536,7 +1563,7 @@ class _PaintBounds {
   String toString() {
     if (assertionsEnabled) {
       final ui.Rect bounds = computeBounds();
-      return '_PaintBounds(${bounds} of size ${bounds.size})';
+      return '_PaintBounds($bounds of size ${bounds.size})';
     } else {
       return super.toString();
     }

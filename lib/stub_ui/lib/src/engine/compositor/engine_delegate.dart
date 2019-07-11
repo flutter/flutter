@@ -4,7 +4,7 @@
 
 part of engine;
 
-const assetChannel = 'flutter/assets';
+const String assetChannel = 'flutter/assets';
 
 class Engine extends RuntimeDelegate {
   final Animator _animator;
@@ -15,6 +15,7 @@ class Engine extends RuntimeDelegate {
   Engine(this._animator, this._runtimeController, this._assetManager,
       this._delegate);
 
+  @override
   String get defaultRouteName => _initialRoute ?? '/';
 
   String _initialRoute;
@@ -23,7 +24,7 @@ class Engine extends RuntimeDelegate {
 
   ViewportMetrics _viewportMetrics;
   set viewportMetrics(ViewportMetrics metrics) {
-    final dimensionsChanged =
+    final bool dimensionsChanged =
         _viewportMetrics.physicalHeight != metrics.physicalHeight ||
             _viewportMetrics.physicalWidth != metrics.physicalWidth;
     _viewportMetrics = metrics;
@@ -38,14 +39,18 @@ class Engine extends RuntimeDelegate {
     }
   }
 
+  @override
   void scheduleFrame({bool regenerateLayerTree = true}) {
     _animator.requestFrame(regenerateLayerTree);
   }
 
+  @override
   void render(LayerTree layerTree) {
-    if (layerTree == null) return;
+    if (layerTree == null) {
+      return;
+    }
 
-    final frameSize = ui.Size(
+    final ui.Size frameSize = ui.Size(
         _viewportMetrics.physicalWidth, _viewportMetrics.physicalHeight);
 
     if (frameSize.isEmpty) {
@@ -56,6 +61,7 @@ class Engine extends RuntimeDelegate {
     _animator.render(layerTree);
   }
 
+  @override
   void handlePlatformMessage(PlatformMessage message) {
     if (message.channel == assetChannel) {
       handleAssetPlatformMessage(message);
@@ -65,12 +71,14 @@ class Engine extends RuntimeDelegate {
   }
 
   void handleAssetPlatformMessage(PlatformMessage message) {
-    final response = message.response;
-    if (response == null) return;
+    final PlatformMessageResponse response = message.response;
+    if (response == null) {
+      return;
+    }
 
-    final asset = utf8.decode(message.data.buffer.asUint8List());
+    final String asset = utf8.decode(message.data.buffer.asUint8List());
     if (_assetManager != null) {
-      _assetManager.load(asset).then((data) {
+      _assetManager.load(asset).then((ByteData data) {
         if (data != null) {
           response.complete(data.buffer.asUint8List());
         } else {
@@ -82,6 +90,7 @@ class Engine extends RuntimeDelegate {
     }
   }
 
+  @override
   FontCollection getFontCollection() => null;
 }
 

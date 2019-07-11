@@ -64,7 +64,7 @@ abstract class WordBreaker {
       return false;
     }
 
-    CharProperty immediateRight = getCharProperty(text, index);
+    final CharProperty immediateRight = getCharProperty(text, index);
     CharProperty immediateLeft = getCharProperty(text, index - 1);
 
     // Do not break within CRLF.
@@ -79,7 +79,9 @@ abstract class WordBreaker {
       CharProperty.Newline,
       CharProperty.CR,
       CharProperty.LF,
-    )) return true;
+    )) {
+      return true;
+    }
 
     // WB3b: ÷ (Newline | CR | LF)
     if (_oneOf(
@@ -87,7 +89,9 @@ abstract class WordBreaker {
       CharProperty.Newline,
       CharProperty.CR,
       CharProperty.LF,
-    )) return true;
+    )) {
+      return true;
+    }
 
     // WB3c: ZWJ	×	\p{Extended_Pictographic}
     // TODO(flutter_web): What's the right way to implement this?
@@ -95,7 +99,9 @@ abstract class WordBreaker {
     // Keep horizontal whitespace together.
     // WB3d: WSegSpace × WSegSpace
     if (immediateLeft == CharProperty.WSegSpace &&
-        immediateRight == CharProperty.WSegSpace) return false;
+        immediateRight == CharProperty.WSegSpace) {
+      return false;
+    }
 
     // Ignore Format and Extend characters, except after sot, CR, LF, and
     // Newline.
@@ -129,7 +135,9 @@ abstract class WordBreaker {
 
     // Do not break between most letters.
     // WB5: (ALetter | Hebrew_Letter) × (ALetter | Hebrew_Letter)
-    if (_isAHLetter(immediateLeft) && _isAHLetter(immediateRight)) return false;
+    if (_isAHLetter(immediateLeft) && _isAHLetter(immediateRight)) {
+      return false;
+    }
 
     // Some tests beyond this point require more context. We need to get that
     // context while also respecting rule WB4. So ignore Format, Extend and ZWJ.
@@ -186,23 +194,31 @@ abstract class WordBreaker {
 
     // WB7a: Hebrew_Letter × Single_Quote
     if (immediateLeft == CharProperty.HebrewLetter &&
-        immediateRight == CharProperty.SingleQuote) return false;
+        immediateRight == CharProperty.SingleQuote) {
+      return false;
+    }
 
     // WB7b: Hebrew_Letter × Double_Quote Hebrew_Letter
     if (immediateLeft == CharProperty.HebrewLetter &&
         immediateRight == CharProperty.DoubleQuote &&
-        nextRight == CharProperty.HebrewLetter) return false;
+        nextRight == CharProperty.HebrewLetter) {
+      return false;
+    }
 
     // WB7c: Hebrew_Letter Double_Quote × Hebrew_Letter
     if (nextLeft == CharProperty.HebrewLetter &&
         immediateLeft == CharProperty.DoubleQuote &&
-        immediateRight == CharProperty.HebrewLetter) return false;
+        immediateRight == CharProperty.HebrewLetter) {
+      return false;
+    }
 
     // Do not break within sequences of digits, or digits adjacent to letters
     // (“3a”, or “A3”).
     // WB8: Numeric × Numeric
     if (immediateLeft == CharProperty.Numeric &&
-        immediateRight == CharProperty.Numeric) return false;
+        immediateRight == CharProperty.Numeric) {
+      return false;
+    }
 
     // WB9: AHLetter × Numeric
     if (_isAHLetter(immediateLeft) && immediateRight == CharProperty.Numeric)
@@ -240,7 +256,9 @@ abstract class WordBreaker {
     // Do not break between Katakana.
     // WB13: Katakana × Katakana
     if (immediateLeft == CharProperty.Katakana &&
-        immediateRight == CharProperty.Katakana) return false;
+        immediateRight == CharProperty.Katakana) {
+      return false;
+    }
 
     // Do not break from extenders.
     // WB13a: (AHLetter | Numeric | Katakana | ExtendNumLet) × ExtendNumLet
@@ -294,11 +312,21 @@ abstract class WordBreaker {
     CharProperty choice4,
     CharProperty choice5,
   ]) {
-    if (value == choice1) return true;
-    if (value == choice2) return true;
-    if (choice3 != null && value == choice3) return true;
-    if (choice4 != null && value == choice4) return true;
-    if (choice5 != null && value == choice5) return true;
+    if (value == choice1) {
+      return true;
+    }
+    if (value == choice2) {
+      return true;
+    }
+    if (choice3 != null && value == choice3) {
+      return true;
+    }
+    if (choice4 != null && value == choice4) {
+      return true;
+    }
+    if (choice5 != null && value == choice5) {
+      return true;
+    }
     return false;
   }
 

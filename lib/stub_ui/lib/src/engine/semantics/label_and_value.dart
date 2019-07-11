@@ -76,6 +76,10 @@ class LabelAndValue extends RoleManager {
     semanticsObject.element
         .setAttribute('aria-label', combinedValue.toString());
 
+    if (semanticsObject.hasFlag(ui.SemanticsFlag.isHeader)) {
+      semanticsObject.setAriaRole('heading', true);
+    }
+
     if (_auxiliaryValueElement == null) {
       _auxiliaryValueElement = html.Element.tag('flt-semantics-value');
       // Absolute positioning and sizing of leaf text elements confuses
@@ -103,6 +107,7 @@ class LabelAndValue extends RoleManager {
       _auxiliaryValueElement = null;
     }
     semanticsObject.element.attributes.remove('aria-label');
+    semanticsObject.setAriaRole('heading', false);
   }
 
   @override
