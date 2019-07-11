@@ -11,7 +11,7 @@ import '../rendering/mock_canvas.dart';
 const String tooltipText = 'TIP';
 
 void main() {
-  testWidgets('Can tooltip decoration be customized by ThemeData.tooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -22,7 +22,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Theme(
           data: ThemeData(
-            tooltipTheme: TooltipThemeData(
+            tooltipTheme: const TooltipThemeData(
               decoration: customDecoration,
             ),
           ),
@@ -57,7 +57,7 @@ void main() {
     ));
   }, skip: isBrowser);
 
-  testWidgets('Can tooltip decoration be customized by TooltipTheme', (WidgetTester tester) async {
+  testWidgets('Tooltip decoration - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
       shape: StadiumBorder(),
@@ -99,11 +99,95 @@ void main() {
     ));
   }, skip: isBrowser);
 
-  // test semantics - themedata
-  testWidgets('', (WidgetTester tester) async {});
+  testWidgets('Tooltip height and padding - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const double customTooltipHeight = 100.0;
+    const double customPaddingVal = 20.0;
 
-  // test semantics = theme widget
-  testWidgets('', (WidgetTester tester) async {});
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              height: customTooltipHeight,
+              padding: EdgeInsets.all(customPaddingVal),
+            ),
+          ),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: key,
+                    message: tooltipText,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pumpAndSettle();
+
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Padding),
+    ));
+    final RenderBox content = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Center),
+    ));
+
+    expect(tip.size.height, equals(customTooltipHeight));
+    expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingVal));
+    expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
+  }, skip: isBrowser);
+
+  testWidgets('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const double customTooltipHeight = 100.0;
+    const double customPaddingVal = 20.0;
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: TooltipTheme(
+          height: customTooltipHeight,
+          padding: const EdgeInsets.all(customPaddingVal),
+          child: Overlay(
+            initialEntries: <OverlayEntry>[
+              OverlayEntry(
+                builder: (BuildContext context) {
+                  return Tooltip(
+                    key: key,
+                    message: tooltipText,
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pumpAndSettle();
+
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Padding),
+    ));
+    final RenderBox content = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Center),
+    ));
+
+    expect(tip.size.height, equals(customTooltipHeight));
+    expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingVal));
+    expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
+  }, skip: isBrowser);
 
   // test vertical offset = themedata
   testWidgets('', (WidgetTester tester) async {});
@@ -121,6 +205,12 @@ void main() {
   testWidgets('', (WidgetTester tester) async {});
 
   // test wait and show duration - theme widget
+  testWidgets('', (WidgetTester tester) async {});
+
+  // test semantics - themedata
+  testWidgets('', (WidgetTester tester) async {});
+
+  // test semantics = theme widget
   testWidgets('', (WidgetTester tester) async {});
 }
 // TODO: Add tests verifying theme behaviors
