@@ -398,7 +398,7 @@ void main() {
 
     expect(log, hasLength(1));
     expect(log.last, isMethodCall(
-      'pushRoute',
+      'routePushed',
       arguments: <String, dynamic>{'previousRouteName': null, 'routeName': '/'},
     ));
 
@@ -408,7 +408,7 @@ void main() {
 
     expect(log, hasLength(2));
     expect(log.last, isMethodCall(
-      'pushRoute',
+      'routePushed',
       arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
     ));
 
@@ -418,7 +418,7 @@ void main() {
 
     expect(log, hasLength(3));
     expect(log.last, isMethodCall(
-      'popRoute',
+      'routePopped',
       arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
     ));
   });
@@ -511,7 +511,7 @@ void main() {
 
     expect(log, hasLength(1));
     expect(log.last, isMethodCall(
-      'pushRoute',
+      'routePushed',
       arguments: <String, dynamic>{'previousRouteName': null, 'routeName': '/'},
     ));
 
@@ -521,7 +521,7 @@ void main() {
 
     expect(log, hasLength(2));
     expect(log.last, isMethodCall(
-      'pushRoute',
+      'routePushed',
       arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
     ));
 
@@ -531,7 +531,7 @@ void main() {
 
     expect(log, hasLength(3));
     expect(log.last, isMethodCall(
-      'pushRoute',
+      'routeReplaced',
       arguments: <String, dynamic>{'previousRouteName': '/A', 'routeName': '/B'},
     ));
   });
