@@ -81,10 +81,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
 
   /// Returns the golden [File] identified by the given [Uri].
   @protected
-  File getGoldenFile(Uri uri){
+  File getGoldenFile(Uri uri) {
     assert(basedir.scheme == 'file');
-    assert(uri.scheme == 'file');
-    return fs.directory(basedir).childFile(fs.file(uri).path);
+    final File goldenFile = fs.directory(basedir).childFile(fs.file(uri).path);
+    assert(goldenFile.uri.scheme == 'file');
+    return goldenFile;
   }
 }
 
