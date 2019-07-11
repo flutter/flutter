@@ -1479,13 +1479,13 @@ enum PlaceholderAlignment {
   /// alignment mode.
   belowBaseline,
 
-  /// Align the top edge of the placeholder with the top edge of the font.
+  /// Align the top edge of the placeholder with the top edge of the text.
   ///
   /// When the placeholder is very tall, the extra space will hang from
   /// the top and extend through the bottom of the line.
   top,
 
-  /// Align the bottom edge of the placeholder with the top edge of the font.
+  /// Align the bottom edge of the placeholder with the bottom edge of the text.
   ///
   /// When the placeholder is very tall, the extra space will rise from the
   /// bottom and extend through the top of the line.
