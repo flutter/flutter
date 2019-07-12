@@ -403,6 +403,8 @@ class FlutterDriver {
       return;
     }
 
+    _log.warning('Peer connection is closed! Try to restore the connection...');
+
     final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
     final WebSocket ws = await WebSocket.connect(webSocketUrl);
     _peer = rpc.Peer(IOWebSocketChannel(ws).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
