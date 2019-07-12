@@ -450,8 +450,8 @@ void Engine::UpdateIsolateDescription(const std::string isolate_name,
   delegate_.UpdateIsolateDescription(isolate_name, isolate_port);
 }
 
-void Engine::SetNeedsReportTimings(bool value) {
-  delegate_.SetNeedsReportTimings(value);
+void Engine::SetNeedsReportTimings(bool needs_reporting) {
+  delegate_.SetNeedsReportTimings(needs_reporting);
 }
 
 FontCollection& Engine::GetFontCollection() {
