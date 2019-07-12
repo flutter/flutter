@@ -585,22 +585,22 @@ flutter:
       expect(getGradleVersionFor('2.0.0'), '2.13');
       expect(getGradleVersionFor('2.1.2'), '2.13');
 
-      expect(getGradleVersionFor('2.1.3'), '4.10.2');
-      expect(getGradleVersionFor('2.2.3'), '4.10.2');
+      expect(getGradleVersionFor('2.1.3'), '2.14.1');
+      expect(getGradleVersionFor('2.2.3'), '2.14.1');
 
-      expect(getGradleVersionFor('2.3.0'), '4.10.2');
+      expect(getGradleVersionFor('2.3.0'), '3.3');
 
-      expect(getGradleVersionFor('3.0.0'), '4.10.2');
+      expect(getGradleVersionFor('3.0.0'), '4.1');
 
-      expect(getGradleVersionFor('3.1.0'), '4.10.2');
+      expect(getGradleVersionFor('3.1.0'), '4.4');
 
-      expect(getGradleVersionFor('3.2.0'), '4.10.2');
-      expect(getGradleVersionFor('3.2.1'), '4.10.2');
+      expect(getGradleVersionFor('3.2.0'), '4.6');
+      expect(getGradleVersionFor('3.2.1'), '4.6');
 
       expect(getGradleVersionFor('3.3.0'), '4.10.2');
       expect(getGradleVersionFor('3.3.2'), '4.10.2');
 
-      expect(getGradleVersionFor('3.4.0'), '4.10.2');
+      expect(getGradleVersionFor('3.4.0'), '5.1.1');
     });
   });
 }

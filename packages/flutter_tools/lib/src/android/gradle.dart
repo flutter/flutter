@@ -360,8 +360,25 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: '2.0.0', max: '2.1.2')) {
     return '2.13';
   }
-  // The rest of plugin versions are backward compatible.
-  return defaultGradleVersion;
+  if (isWithinVersionRange(androidPluginVersion, min: '2.1.3', max: '2.2.3')) {
+    return '2.14.1';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '2.3.0', max: '2.9.9')) {
+    return '3.3';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.0.0', max: '3.0.9')) {
+    return '4.1';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.1.0', max: '3.1.9')) {
+    return '4.4';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.2.0', max: '3.2.1')) {
+    return '4.6';
+  }
+  if (isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
+    return '4.10.2';
+  }
+  return '5.1.1';
 }
 
 final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
