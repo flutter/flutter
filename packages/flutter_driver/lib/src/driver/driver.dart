@@ -409,6 +409,7 @@ class FlutterDriver {
 
     final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
     final WebSocket ws = await WebSocket.connect(webSocketUrl);
+    ws.done.then((dynamic _) => _checkCloseCode(ws));
     _peer = rpc.Peer(
         IOWebSocketChannel(ws).cast(),
         onUnhandledError: _unhandledJsonRpcError,
@@ -1119,6 +1120,12 @@ String _getWebSocketUrl(String url) {
   return uri.toString();
 }
 
+void _checkCloseCode(WebSocket ws) {
+  if (ws.closeCode != 1000 && ws.closeCode != null) {
+    _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
+  }
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
@@ -1131,14 +1138,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws1 = await WebSocket.connect(webSocketUrl);
       ws2 = await WebSocket.connect(webSocketUrl);
 
-      void checkCloseStatus(WebSocket ws) {
-        if (ws.closeCode != 1000 && ws.closeCode != null) {
-          _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
-        }
-      }
-
-      ws1.done.then((dynamic _) => checkCloseStatus(ws1));
-      ws2.done.then((dynamic _) => checkCloseStatus(ws2));
+      ws1.done.then((dynamic _) => _checkCloseCode(ws1));
+      ws2.done.then((dynamic _) => _checkCloseCode(ws2));
 
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
