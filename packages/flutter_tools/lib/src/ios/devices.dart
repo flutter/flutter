@@ -124,7 +124,7 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    if (platform.isMacOS) {
+    if (!platform.isMacOS) {
       printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
       _installerPath = null;
       _iproxyPath = null;

@@ -235,7 +235,7 @@ class Cache {
         paths.add(currentPath);
       }
     }
-    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBARY_PATH', paths.join(':'));
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
     return _dyLdLibEntry;
   }
   MapEntry<String, String> _dyLdLibEntry;
