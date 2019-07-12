@@ -16,11 +16,11 @@ import 'package:process/process.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// An base class that provides shared information to the
-/// [FlutterGoldenFileComparator] as well as the [SkiaGoldClient] and
-/// [GoldensRepositoryClient].
-abstract class GoldensClient {
-  /// Creates a handle to the local environment of golden file images.
+/// A class that represents a clone of the https://github.com/flutter/goldens
+/// repository, nested within the `bin/cache` directory of the caller's Flutter
+/// repository.
+class GoldensClient {
+  /// Create a handle to a local clone of the goldens repository.
   GoldensClient({
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
@@ -46,32 +46,17 @@ abstract class GoldensClient {
   /// subprocesses.
   final ProcessManager process;
 
+  RandomAccessFile _lock;
+
   /// The local [Directory] where the Flutter repository is hosted.
   ///
   /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
-  /// The local [Directory] where the goldens files are located.
+  /// The local [Directory] where the goldens repository is hosted.
   ///
   /// Uses the [fs] file system.
-  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
-}
-
-/// A class that represents a clone of the https://github.com/flutter/goldens
-/// repository, nested within the `bin/cache` directory of the caller's Flutter
-/// repository.
-class GoldensRepositoryClient extends GoldensClient {
-  GoldensRepositoryClient({
-    FileSystem fs = const LocalFileSystem(),
-    ProcessManager process = const LocalProcessManager(),
-    Platform platform = const LocalPlatform(),
-  }) : super(
-    fs: fs,
-    process: process,
-    platform: platform,
-  );
-
-  RandomAccessFile _lock;
+  Directory get repositoryRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
   /// file testing.
@@ -104,46 +89,46 @@ class GoldensRepositoryClient extends GoldensClient {
     }
   }
 
-  Future<String> _getCurrentCommit() async {
-    if (!comparisonRoot.existsSync()) {
-      return null;
-    } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: comparisonRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-    }
-  }
-
   Future<String> _getGoldensCommit() async {
     final File versionFile = flutterRoot.childFile(fs.path.join('bin', 'internal', 'goldens.version'));
     return (await versionFile.readAsString()).trim();
   }
 
+  Future<String> _getCurrentCommit() async {
+    if (!repositoryRoot.existsSync()) {
+      return null;
+    } else {
+      final io.ProcessResult revParse = await process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: repositoryRoot.path,
+      );
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    }
+  }
+
   Future<void> _initRepository() async {
-    await comparisonRoot.create(recursive: true);
+    await repositoryRoot.create(recursive: true);
     await _runCommands(
       <String>[
         'git init',
         'git remote add upstream https://github.com/flutter/goldens.git',
         'git remote set-url --push upstream git@github.com:flutter/goldens.git',
       ],
-      workingDirectory: comparisonRoot,
+      workingDirectory: repositoryRoot,
     );
   }
 
   Future<void> _checkCanSync() async {
     final io.ProcessResult result = await process.run(
       <String>['git', 'status', '--porcelain'],
-      workingDirectory: comparisonRoot.path,
+      workingDirectory: repositoryRoot.path,
     );
     if (result.stdout.trim().isNotEmpty) {
       final StringBuffer buf = StringBuffer();
       buf
-        ..writeln('flutter_goldens git checkout at ${comparisonRoot.path} has local changes and cannot be synced.')
+        ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
-        ..writeln('cd ${comparisonRoot.path}')
+        ..writeln('cd ${repositoryRoot.path}')
         ..writeln('git reset --hard HEAD')
         ..writeln('git clean -x -d -f -f');
       throw NonZeroExitCode(1, buf.toString());
@@ -157,7 +142,7 @@ class GoldensRepositoryClient extends GoldensClient {
         'git fetch upstream $commit',
         'git reset --hard FETCH_HEAD',
       ],
-      workingDirectory: comparisonRoot,
+      workingDirectory: repositoryRoot,
     );
   }
 
@@ -189,7 +174,6 @@ class GoldensRepositoryClient extends GoldensClient {
     _lock = null;
   }
 }
-
 /// Exception that signals a process' exit with a non-zero exit code.
 class NonZeroExitCode implements Exception {
   /// Create an exception that represents a non-zero exit code.

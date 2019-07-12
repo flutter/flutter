@@ -141,6 +141,7 @@ void main() {
         'card_theme.custom_shape.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   },  skip: isBrowser);
 }
