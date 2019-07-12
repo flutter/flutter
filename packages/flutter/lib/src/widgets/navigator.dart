@@ -1820,10 +1820,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _cancelActivePointers();
   }
 
-  /// Method which sends the route name changes over System Channels.
+  /// Notifies the platform of a route change.
   ///
-  /// There are two methods: 'pushRoute', 'popRoute'. 'pushRoute' is also used
-  /// for notifying the route replacements.
+  /// There are three methods: 'routePushed', 'routePopped', 'routeReplaced'.
   ///
   /// See also [SystemChannels.navigation], which handles subsequent navigation
   /// requests.
