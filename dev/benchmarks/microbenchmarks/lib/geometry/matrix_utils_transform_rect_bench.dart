@@ -25,6 +25,14 @@ void main() {
     );
   }
 
+  // The number of transforms (and perspective transforms) provided as data
+  // should be relatively prime to the number of rectangles or points provided
+  // so that the benchmark loops end up applying each transform to each point
+  // or rect. Benchmarks don't have asserts enabled, but essentially:
+  //  assert(_rects.length.gcd(_transforms.length) == 1);
+  //  assert(_rects.length.gcd(_perspectiveTransforms.length) == 1);
+  //  assert(_offsets.length.gcd(_perspectiveTransforms.length) == 1);
+  //  assert(_offsets.length.gcd(_transforms.length) == 1);
   final List<Matrix4> _transforms = <Matrix4>[
     Matrix4.identity()..scale(1.2, 1.3, 1.0)..rotateZ(0.1),
     Matrix4.identity()..translate(12.0, 13.0, 10.0),
@@ -49,10 +57,6 @@ void main() {
     const Offset(-1.1, -1.2),
     const Offset(-1.5, -1.8),
   ];
-  assert(_rects.length.gcd(_transforms.length) == 1);
-  assert(_rects.length.gcd(_perspectiveTransforms.length) == 1);
-  assert(_offsets.length.gcd(_perspectiveTransforms.length) == 1);
-  assert(_offsets.length.gcd(_transforms.length) == 1);
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {
