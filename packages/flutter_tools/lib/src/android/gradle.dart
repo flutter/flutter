@@ -135,12 +135,12 @@ Future<void> checkGradleDependencies() async {
 /// Tries to migrate [settings.gradle] by removing the code that load plugins as
 /// Gradle subprojects. If this file was modified by the developer, then prints
 /// an error message indicating how to migrate the file manually.
-Future<void> _removePluginsFromSettingsGradle(Directory androidDirectory) async {
+void _removePluginsFromSettingsGradle(Directory androidDirectory) {
   final File currentFile = androidDirectory.childFile('settings.gradle');
-  if (!await currentFile.exists()) {
+  if (!currentFile.existsSync()) {
     return;
   }
-  final String currentFileContent = await currentFile.readAsString();
+  final String currentFileContent = currentFile.readAsStringSync();
   if (!currentFileContent.contains('.flutter-plugins')) {
     return;
   }
@@ -151,22 +151,30 @@ Future<void> _removePluginsFromSettingsGradle(Directory androidDirectory) async 
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
   final File deprecatedFile = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'deprecated_settings.gradle'));
-  assert(await deprecatedFile.exists());
+  assert(deprecatedFile.existsSync());
 
-  final String deprecatedFileContent = await deprecatedFile.readAsString();
-  if (currentFileContent.trimRight() != deprecatedFileContent.trimRight()) {
+  // Get the `settings.gradle` content variants that should be patched.
+  final List<String> deprecatedFilesContent = deprecatedFile.readAsStringSync().split(';EOF');
+  bool exactMatch = false;
+  for (String deprecatedFileContent in deprecatedFilesContent) {
+    if (currentFileContent.trimRight() == deprecatedFileContent.trimRight()) {
+      exactMatch = true;
+      break;
+    }
+  }
+  if (!exactMatch) {
     status.cancel();
     printError('*******************************************************************************************');
     printError('Flutter tried to update the file `$relativeFile`, but failed due to local edits.');
     // Print how to manually update the file.
-    printError(await fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-        'gradle', 'manual_migration_settings.gradle.md')).readAsString());
+    printError(fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+        'gradle', 'manual_migration_settings.gradle.md')).readAsStringSync());
     printError('*******************************************************************************************');
     throwToolExit('Please update the file and run this command again.');
   }
 
-  await fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-        'gradle', 'new_settings.gradle')).copy(currentFile.path);
+  fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+        'gradle', 'new_settings.gradle')).copySync(currentFile.path);
   status.stop();
 }
 
@@ -178,7 +186,7 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   updateLocalProperties(project: flutterProject);
 
   final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
-  await _removePluginsFromSettingsGradle(hostAppGradleRoot);
+  _removePluginsFromSettingsGradle(hostAppGradleRoot);
 
   if (flutterProject.manifest.isPlugin && isLibrary) {
     return GradleProject(

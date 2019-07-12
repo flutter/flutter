@@ -1,4 +1,4 @@
-To manually update `android/settings.gradle`, follow these steps:
+To manually update `settings.gradle`, follow these steps:
 
     1. Open the file
     2. Remove the following code from the file:
