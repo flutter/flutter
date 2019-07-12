@@ -13,7 +13,6 @@ import 'package:build_daemon/data/server_log.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
-import 'package:webdev/src/webdev.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -129,7 +128,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   StreamSubscription<BuildResults> _buildResults;
   BuildDaemonClient _client;
-  WebDevHandle _webDevHandle;
+  dynamic _webDevHandle;
 
   StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
@@ -234,14 +233,13 @@ class ResidentWebRunner extends ResidentRunner {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-    _webDevHandle = await (await connectToWebdev(
-      targetPort,
-      daemonPort(fs.currentDirectory.path),
-      'web',
-      _client.buildResults,
-      optionalHandler: _assetHandler,
-    )).first;
-    print('HERE');
+    // _webDevHandle = await (await connectToWebdev(
+    //   targetPort,
+    //   daemonPort(fs.currentDirectory.path),
+    //   'web',
+    //   _client.buildResults,
+    //   optionalHandler: _assetHandler,
+    // )).first;
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -254,7 +252,7 @@ class ResidentWebRunner extends ResidentRunner {
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     // When a tab is closed we exit an app.
-    unawaited(_webDevHandle.onTabClose.first.then((_) {
+    unawaited(_webDevHandle.onTabClose.first.then((dynamic _) {
       appFinished();
     }));
     // Cleanup old subscriptions.
