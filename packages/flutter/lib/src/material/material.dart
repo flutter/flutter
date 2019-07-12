@@ -267,7 +267,7 @@ class Material extends StatefulWidget {
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
-  /// [shadowColor] and the dark theme overlay if in a dark theme.
+  /// [shadowColor] and the elevation overlay if it is applied.
   ///
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
@@ -317,7 +317,7 @@ class Material extends StatefulWidget {
 }
 
 // Apply a semi-transparent white on surface colors to
-// indicate the level of elevation..
+// indicate the level of elevation.
 Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
   final ThemeData theme = Theme.of(context);
   if (elevation > 0.0 &&
