@@ -21,7 +21,7 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   artifacts_cache:
     folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
@@ -298,7 +298,7 @@ task:
     fingerprint_script: echo %OS% & type bin\internal\engine.version
   artifacts_cache:
     folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
     - flutter config --no-analytics
     - flutter doctor -v
