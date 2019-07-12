@@ -87,6 +87,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   bool skip = false,
   bool expectFlaky = false,
   Duration timeout = _kLongTimeout,
+  bool Function(String) removeLine,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -103,13 +104,19 @@ Future<void> runCommand(String executable, List<String> arguments, {
   );
 
   Future<List<List<int>>> savedStdout, savedStderr;
+  final Stream<List<int>> stdoutSource = process.stdout
+    .transform<String>(const Utf8Decoder())
+    .transform(const LineSplitter())
+    .where((String line) => removeLine == null || !removeLine(line))
+    .map((String line) => '$line\n')
+    .transform(const Utf8Encoder());
   if (printOutput) {
     await Future.wait<void>(<Future<void>>[
-      stdout.addStream(process.stdout),
+      stdout.addStream(stdoutSource),
       stderr.addStream(process.stderr),
     ]);
   } else {
-    savedStdout = process.stdout.toList();
+    savedStdout = stdoutSource.toList();
     savedStderr = process.stderr.toList();
   }
 

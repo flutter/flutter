@@ -140,7 +140,7 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'reloadSources',
         'alias': 'Flutter Tools',
       });
@@ -166,7 +166,7 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'hotRestart',
         'alias': 'Flutter Tools',
       });
@@ -204,7 +204,7 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'compileExpression',
         'alias': 'Flutter Tools',
       });
@@ -1468,6 +1468,16 @@ class FlutterView extends ServiceObject {
           'isolateId': _uiIsolate.id,
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        });
+  }
+
+  Future<void> setSemanticsEnabled(bool enabled) async {
+    assert(enabled != null);
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
+        params: <String, dynamic>{
+          'isolateId': _uiIsolate.id,
+          'viewId': id,
+          'enabled': enabled,
         });
   }
 

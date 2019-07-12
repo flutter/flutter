@@ -388,6 +388,12 @@ class TextField extends StatefulWidget {
   final VoidCallback onEditingComplete;
 
   /// {@macro flutter.widgets.editableText.onSubmitted}
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText.onSubmitted] for an example of how to handle moving to
+  ///    the next/previous field when using [TextInputAction.next] and
+  ///    [TextInputAction.previous] for [textInputAction].
   final ValueChanged<String> onSubmitted;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
@@ -762,6 +768,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleTapUp(TapUpDetails details) {
+    _editableTextKey.currentState.hideToolbar();
     if (widget.selectionEnabled) {
       switch (Theme.of(context).platform) {
         case TargetPlatform.iOS:
