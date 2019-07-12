@@ -20,7 +20,7 @@ dependencies:
   intl: 0.15.8
   json_rpc_2: 2.1.0
   linter: 0.1.93
-  meta: 1.1.6
+  meta: 1.1.7
   multicast_dns: 0.1.1
   mustache: 1.1.1
   package_config: 1.0.5

@@ -9,7 +9,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   file: 5.0.8+1
-  meta: 1.1.6
+  meta: 1.1.7
   platform: 2.2.0
   process: 3.0.9
   flutter_goldens_client:

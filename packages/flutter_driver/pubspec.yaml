@@ -10,7 +10,7 @@ environment:
 dependencies:
   file: 5.0.8+1
   json_rpc_2: 2.1.0
-  meta: 1.1.6
+  meta: 1.1.7
   path: 1.6.2
   web_socket_channel: 1.0.14
   vm_service_client: 0.2.6+2
