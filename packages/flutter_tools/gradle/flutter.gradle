@@ -889,7 +889,6 @@ class FlutterPluginTask extends DefaultTask {
             executable flutterExecutable.absolutePath
             workingDir pluginDir
             args "build", "aar"
-            args "--no-pub"
             args "--quiet"
             args "--suppress-analytics"
             args "--output-dir", "${intermediateDir}"
