@@ -150,7 +150,7 @@ void main() {
       final OperationResult result = await residentRunner.restart(fullRestart: false);
       expect(result.fatal, true);
       expect(result.code, 1);
-      verify(flutterUsage.sendEvent('unhandled_exception', 'hot_mode', parameters: <String, String>{
+      verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
         reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
         reloadExceptionSdkName: 'Example',
         reloadExceptionEmulator: 'false',
@@ -194,7 +194,7 @@ void main() {
       final OperationResult result = await residentRunner.restart(fullRestart: true);
       expect(result.fatal, true);
       expect(result.code, 1);
-      verify(flutterUsage.sendEvent('unhandled_exception', 'hot_mode', parameters: <String, String>{
+      verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
         reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
         reloadExceptionSdkName: 'Example',
         reloadExceptionEmulator: 'false',
