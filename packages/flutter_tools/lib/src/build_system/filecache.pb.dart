@@ -38,8 +38,8 @@ class FileHash extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static FileHash create() => FileHash._();
 
-  @$core.override
-  FileHash createEmptyInstance() => create();
+  //@$core.override
+  FileHash createEmptyInstance() => create(); // ignore: annotate_overrides
   static $pb.PbList<FileHash> createRepeated() => $pb.PbList<FileHash>();
   static FileHash getDefault() => _defaultInstance ??= create()..freeze();
   static FileHash _defaultInstance;
@@ -78,8 +78,8 @@ class FileStorage extends $pb.GeneratedMessage {
   @$core.pragma('dart2js:noInline')
   static FileStorage create() => FileStorage._();
 
-  @$core.override
-  FileStorage createEmptyInstance() => create();
+  // @$core.override
+  FileStorage createEmptyInstance() => create(); // ignore: annotate_overrides
 
   static $pb.PbList<FileStorage> createRepeated() => $pb.PbList<FileStorage>();
 
