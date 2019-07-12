@@ -113,22 +113,6 @@ TEST(MessageLoopTaskQueue, WakeUpIndependentOfTime) {
   ASSERT_TRUE(num_wakes == 2);
 }
 
-TEST(MessageLoopTaskQueue, WakeUpWithMaxIfNoInvocations) {
-  auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
-  auto queue_id = task_queue->CreateTaskQueue();
-  fml::AutoResetWaitableEvent ev;
-
-  task_queue->SetWakeable(queue_id,
-                          new TestWakeable([&ev](fml::TimePoint wake_time) {
-                            ASSERT_TRUE(wake_time == fml::TimePoint::Max());
-                            ev.Signal();
-                          }));
-
-  std::vector<fml::closure> invocations;
-  task_queue->GetTasksToRunNow(queue_id, fml::FlushType::kAll, invocations);
-  ev.Wait();
-}
-
 TEST(MessageLoopTaskQueue, WokenUpWithNewerTime) {
   auto task_queue = fml::MessageLoopTaskQueues::GetInstance();
   auto queue_id = task_queue->CreateTaskQueue();

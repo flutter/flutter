@@ -45,6 +45,8 @@ class MessageLoopImpl : public Wakeable,
 
   void DoTerminate();
 
+  virtual TaskQueueId GetTaskQueueId() const;
+
   void SwapTaskQueues(const fml::RefPtr<MessageLoopImpl>& other);
 
  protected:

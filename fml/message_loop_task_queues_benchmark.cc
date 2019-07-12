@@ -35,13 +35,13 @@ static void BM_RegisterAndGetTasks(benchmark::State& state) {
                             &tasks_registered]() {
         for (int j = 0; j < num_tasks_per_queue; j++) {
           task_queue->RegisterTask(
-              task_runner_id, [] {}, past);
+              TaskQueueId(task_runner_id), [] {}, past);
         }
         tasks_registered.CountDown();
         tasks_registered.Wait();
         std::vector<fml::closure> invocations;
-        task_queue->GetTasksToRunNow(task_runner_id, fml::FlushType::kAll,
-                                     invocations);
+        task_queue->GetTasksToRunNow(TaskQueueId(task_runner_id),
+                                     fml::FlushType::kAll, invocations);
         assert(invocations.size() == num_tasks_per_queue);
         tasks_done.CountDown();
       });
