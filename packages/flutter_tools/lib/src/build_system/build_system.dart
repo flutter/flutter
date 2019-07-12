@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
@@ -26,6 +27,9 @@ import 'targets/macos.dart';
 import 'targets/windows.dart';
 
 export 'source.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
@@ -150,7 +154,7 @@ class Target {
     FileHashStore fileHashStore,
   ) async {
     final Map<String, ChangeType> updates = <String, ChangeType>{};
-    final File stamp = _findStampFile(environment);
+    final File stamp = findStampFile(environment);
     final Set<String> previousInputs = <String>{};
     final List<String> previousOutputs = <String>[];
 
@@ -246,7 +250,7 @@ class Target {
 
   /// Invoke to remove the stamp file if the [buildAction] threw an exception;
   void clearStamp(Environment environment) {
-    final File stamp = _findStampFile(environment);
+    final File stamp = findStampFile(environment);
     if (stamp.existsSync()) {
       stamp.deleteSync();
     }
@@ -257,7 +261,7 @@ class Target {
     List<File> outputs,
     Environment environment,
   ) {
-    final File stamp = _findStampFile(environment);
+    final File stamp = findStampFile(environment);
     final List<String> inputPaths = <String>[];
     for (File input in inputs) {
       inputPaths.add(input.resolveSymbolicLinksSync());
@@ -321,12 +325,12 @@ class Target {
       'outputs': resolveOutputs(environment, implicit: false)
           .map((File file) => file.path)
           .toList(),
-      'stamp': _findStampFile(environment).absolute.path,
+      'stamp': findStampFile(environment).absolute.path,
     };
   }
 
   /// Locate the stamp file for a particular target name and environment.
-  File _findStampFile(Environment environment) {
+  File findStampFile(Environment environment) {
     final String fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
@@ -529,6 +533,16 @@ class BuildSystem {
       buildInstance.exceptionMeasurements,
       buildInstance.stepTimings,
     );
+  }
+
+  /// Return the stamp files for a previously run build.
+  List<File> stampFilesFor(String name, Environment environment) {
+    final Target target = _getNamedTarget(name);
+    final List<File> result = <File>[];
+    target.fold(result, (List<File> files, Target current) {
+      result.add(current.findStampFile(environment));
+    });
+    return result;
   }
 
   /// Describe the target `name` and all of its dependencies.

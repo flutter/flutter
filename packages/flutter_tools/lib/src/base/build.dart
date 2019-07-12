@@ -17,7 +17,6 @@ import '../project.dart';
 import '../usage.dart';
 import 'context.dart';
 import 'file_system.dart';
-import 'fingerprint.dart';
 import 'process.dart';
 
 GenSnapshot get genSnapshot => context.get<GenSnapshot>();
@@ -330,7 +329,6 @@ class JITSnapshotter {
       mainPath, compilationTraceFilePath, engineVmSnapshotData, engineIsolateSnapshotData,
     ];
 
-    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
@@ -342,12 +340,7 @@ class JITSnapshotter {
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final Set<String> outputPaths = <String>{
-      isolateSnapshotData,
-      isolateSnapshotInstructions,
-    };
-
-    // There are a couple special cases below where we create a snapshot
+    /// There are a couple special cases below where we create a snapshot
     // with only the data section, which only contains interpreted code.
     bool supportsAppJit = true;
 
@@ -391,25 +384,6 @@ class JITSnapshotter {
       printError('Missing input files: $missingInputs from $inputPaths');
       return 1;
     }
-
-    // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
-      properties: <String, String>{
-        'buildMode': buildMode.toString(),
-        'targetPlatform': platform.toString(),
-        'entryPoint': mainPath,
-        'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-      },
-      depfilePaths: <String>[],
-    );
-    // TODO(jonahwilliams): re-enable once this can be proved correct.
-    // if (await fingerprinter.doesFingerprintMatch()) {
-    //   printTrace('Skipping JIT snapshot build. Fingerprint match.');
-    //   return 0;
-    // }
-
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode = await genSnapshot.run(
       snapshotType: snapshotType,
@@ -424,9 +398,6 @@ class JITSnapshotter {
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     await outputDir.childFile('gen_snapshot.d').writeAsString('gen_snapshot.d: $genSnapshotPath\n');
-
-    // Compute and record build fingerprint.
-    await fingerprinter.writeFingerprint();
     return 0;
   }
 

@@ -7,6 +7,8 @@ import 'package:pool/pool.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
+import '../../plugins.dart';
+import '../../project.dart';
 import '../build_system.dart';
 
 /// The copying logic for flutter assets.
@@ -76,6 +78,23 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
       }
     }));
 }
+
+/// Re-generates the flutter plugins file.
+Future<void> flutterPluginsAction(Map<String, ChangeType> updates, Environment environment) async {
+  final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+  refreshPluginsList(project);
+}
+
+const Target flutterPlugins = Target(
+  name: 'flutter_plugins',
+  buildAction: flutterPluginsAction,
+  inputs: <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml')
+  ],
+  outputs: <Source>[
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
+  ]
+);
 
 /// Copy the assets used in the application into a build directory.
 const Target copyAssets = Target(
