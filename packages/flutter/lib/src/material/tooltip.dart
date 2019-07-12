@@ -244,6 +244,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       height: widget.height,
       padding: widget.padding,
       decoration: widget.decoration,
+      textStyle: widget.textStyle,
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
