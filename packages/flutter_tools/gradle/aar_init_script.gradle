@@ -15,7 +15,7 @@ void configureProject(Project project, File outputDir) {
     project.apply plugin: "maven"
 
     project.android.libraryVariants.all { variant ->
-        addAarTask(project, outputDir, variant)
+        addAarTask(project, variant)
     }
     // Snapshot versions include the timestamp in the artifact name.
     project.version = project.version.replace("-SNAPSHOT", "")
@@ -23,11 +23,10 @@ void configureProject(Project project, File outputDir) {
     project.uploadArchives {
         repositories {
             mavenDeployer {
-                repository(url: "file://${outputDir}/repo")
+                repository(url: "file://${outputDir}/outputs/repo")
             }
         }
     }
-
     Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
     if (!usesFlutterPlugin) {
         // Plugins don't include their dependencies under the assumption that the parent project adds them.
@@ -54,7 +53,7 @@ String getFlutterRoot(Project project) {
     return project.property("flutter-root")
 }
 
-void addAarTask(Project project, File outputDir, variant) {
+void addAarTask(Project project, variant) {
     String variantName = variant.name.capitalize()
     String taskName = "assembleAar${variantName}"
     project.tasks.create(name: taskName) {
@@ -89,11 +88,15 @@ void addAarTask(Project project, File outputDir, variant) {
 }
 
 projectsEvaluated {
-    // In plugin projects, the Android library is the root project.
+    // Plugin projects don't have subprojects.
+    // TODO(blasten): Have a more robust way of detecting plugins.
     if (rootProject.subprojects.empty) {
         if (rootProject.hasProperty("output-dir")) {
-            rootProject.buildDir = rootProject.file(rootProject.property("output-dir"))
+            rootProject.buildDir = rootProject.property("output-dir")
+        } else {
+            rootProject.buildDir = "../build";
         }
+        // In plugin projects, the Android library is the root project.
         configureProject(rootProject, rootProject.buildDir)
         return
     }
@@ -106,7 +109,9 @@ projectsEvaluated {
     assert androidLibrarySubproject != null
 
     if (appSubproject.hasProperty("output-dir")) {
-        appSubproject.buildDir = appSubproject.file(appSubproject.property("output-dir"))
+        appSubproject.buildDir = appSubproject.property("output-dir")
+    } else {
+        appSubproject.buildDir = "../build/host"
     }
     configureProject(androidLibrarySubproject, appSubproject.buildDir)
 }

@@ -180,6 +180,13 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
   await _removePluginsFromSettingsGradle(hostAppGradleRoot);
 
+  if (flutterProject.manifest.isPlugin && isLibrary) {
+    return GradleProject(
+      <String>['debug', 'profile', 'release'],
+      <String>[], // Plugins don't have flavors.
+      flutterProject.directory.childDirectory('build').path,
+    );
+  }
   final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);
   GradleProject project;
   try {
@@ -207,9 +214,8 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
     // Fall back to the default
     project = GradleProject(
       <String>['debug', 'profile', 'release'],
-      <String>[], flutterProject.android.gradleAppOutV1Directory,
-        flutterProject.android.gradleAppBundleOutV1Directory,
-        flutterProject.android.gradleAppBundleOutV1Directory,
+      <String>[],
+      fs.path.join(flutterProject.android.hostAppGradleRoot.path, 'app', 'build')
     );
   }
   status.stop();
@@ -336,6 +342,8 @@ bool isWithinVersionRange(String targetVersion, {String min, String max}) {
   return true;
 }
 
+const String defaultGradleVersion = '4.10.2';
+
 /// Returns the Gradle version that is required by the given Android Gradle plugin version.
 String getGradleVersionFor(String androidPluginVersion) {
   // Pick the largest Gradle version from
@@ -352,28 +360,10 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (isWithinVersionRange(androidPluginVersion, min: '2.0.0', max: '2.1.2')) {
     return '2.13';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '2.1.3', max: '2.2.3')) {
-    return '2.14.1';
-  }
-  if (isWithinVersionRange(androidPluginVersion, min: '2.3.0', max: '2.9.9')) {
-    return '3.3';
-  }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.0.0', max: '3.0.9')) {
-    return '4.1';
-  }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.1.0', max: '3.1.9')) {
-    return '4.4';
-  }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.2.0', max: '3.2.1')) {
-    return '4.6';
-  }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
-    return '4.10.1';
-  }
-  return '5.1.1';
+  // The rest of plugin versions are backward compatible.
+  return defaultGradleVersion;
 }
 
-const String defaultGradleVersion = '4.10.2';
 final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
 
 /// Returns the Gradle version that the current Android plugin depends on when found,
@@ -514,6 +504,10 @@ Future<void> buildGradleAar({
     throwToolExit('AARs can only be built for plugin or module projects.');
   }
 
+  if (outputDir != null && outputDir.isNotEmpty) {
+    gradleProject.buildDirectory = outputDir;
+  }
+
   final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
   if (aarTask == null) {
     _printUndefinedTask(gradleProject, androidBuildInfo.buildInfo);
@@ -533,18 +527,11 @@ Future<void> buildGradleAar({
     gradlePath,
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
+    '-Poutput-dir=${gradleProject.buildDirectory}',
   ];
 
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
-  }
-
-  Directory repoDirectory;
-  if (outputDir != null && outputDir.isNotEmpty) {
-    command.add('-Poutput-dir=$outputDir');
-    repoDirectory = fs.directory(fs.path.join(outputDir, 'repo'));
-  } else {
-    repoDirectory = gradleProject.repoDirectory;
   }
 
   if (androidBuildInfo.targetArchs.isNotEmpty) {
@@ -578,6 +565,8 @@ Future<void> buildGradleAar({
   if (exitCode != 0) {
     throwToolExit('Gradle task $aarTask failed with exit code $exitCode', exitCode: exitCode);
   }
+
+  final Directory repoDirectory = gradleProject.repoDirectory;
   if (!repoDirectory.existsSync()) {
     throwToolExit('Gradle task $aarTask failed to produce $repoDirectory', exitCode: exitCode);
   }
@@ -855,14 +844,12 @@ class GradleProject {
   GradleProject(
     this.buildTypes,
     this.productFlavors,
-    this.apkDirectory,
-    this.bundleDirectory,
-    this.repoDirectory,
+    this.buildDirectory,
   );
 
   factory GradleProject.fromAppProperties(String properties, String tasks) {
     // Extract build directory.
-    final String buildDir = properties
+    final String buildDirectory = properties
         .split('\n')
         .firstWhere((String s) => s.startsWith('buildDir: '))
         .substring('buildDir: '.length)
@@ -896,17 +883,34 @@ class GradleProject {
     return GradleProject(
         buildTypes.toList(),
         productFlavors.toList(),
-        fs.directory(fs.path.join(buildDir, 'outputs', 'apk')),
-        fs.directory(fs.path.join(buildDir, 'outputs', 'bundle')),
-        fs.directory(fs.path.join(buildDir, 'repo')),
+        buildDirectory,
       );
   }
 
+  /// The build types such as [release] or [debug].
   final List<String> buildTypes;
+
+  /// The product flavors defined in build.gradle.
   final List<String> productFlavors;
-  final Directory apkDirectory;
-  final Directory bundleDirectory;
-  final Directory repoDirectory;
+
+  /// The build directory. This is typically <project>build/.
+  String buildDirectory;
+
+  /// The directory where the APK artifact is generated.
+  Directory get apkDirectory {
+    return fs.directory(fs.path.join(buildDirectory, 'outputs', 'apk'));
+  }
+
+  /// The directory where the app bundle artifact is generated.
+  Directory get bundleDirectory {
+    return fs.directory(fs.path.join(buildDirectory, 'outputs', 'bundle'));
+  }
+
+  /// The directory where the repo is generated.
+  /// Only applicable to AARs.
+  Directory get repoDirectory {
+    return fs.directory(fs.path.join(buildDirectory, 'outputs', 'repo'));
+  }
 
   String _buildTypeFor(BuildInfo buildInfo) {
     final String modeName = camelCase(buildInfo.modeName);

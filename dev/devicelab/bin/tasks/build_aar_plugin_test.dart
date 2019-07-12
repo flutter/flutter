@@ -46,8 +46,8 @@ Future<void> main() async {
 
       final String repoPath = path.join(
         projectDir.path,
-        'android',
         'build',
+        'outputs',
         'repo',
       );
 

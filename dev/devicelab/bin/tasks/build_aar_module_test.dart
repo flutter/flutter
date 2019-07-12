@@ -64,6 +64,7 @@ Future<void> main() async {
         projectDir.path,
         'build',
         'host',
+        'outputs',
         'repo',
       );
 
