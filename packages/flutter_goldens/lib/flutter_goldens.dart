@@ -240,10 +240,15 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment whether goldens tests should be
   /// performed against Skia Gold.
   static bool isAvailableOnPlatform(Platform platform) {
-    final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
-    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
-    return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
+    //final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
+    //final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+    //final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
+    final String goldServiceAccount = platform.environment['GOLD_SERVICE_ACCOUNT'] ?? '';
+    return //cirrusCI.isNotEmpty
+      //&& cirrusPR.isEmpty
+      //&& cirrusBranch == 'master'
+      //&&
+      goldServiceAccount.isNotEmpty;
   }
 
   /// Prepends the golden Uri with the library name that encloses the current

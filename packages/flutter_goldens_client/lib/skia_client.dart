@@ -163,10 +163,12 @@ class SkiaGoldClient extends GoldensClient {
       '--png-file', goldenFile.path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
+
+    print(result.stdout);
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // So as not to turn the tree red in this initial implementation, this will
@@ -178,17 +180,18 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    if (!flutterRoot.existsSync()) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Flutter root could not be found: $flutterRoot');
-      throw NonZeroExitCode(1, buf.toString());
-    } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
-        workingDirectory: flutterRoot.path,
-      );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-    }
+    return 'e91822da24c013aa6f21d03ed3af3587923d9fd2';
+//    if (!flutterRoot.existsSync()) {
+//      final StringBuffer buf = StringBuffer()
+//        ..writeln('Flutter root could not be found: $flutterRoot');
+//      throw NonZeroExitCode(1, buf.toString());
+//    } else {
+//      final io.ProcessResult revParse = await process.run(
+//        <String>['git', 'rev-parse', 'HEAD'],
+//        workingDirectory: flutterRoot.path,
+//      );
+//      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+//    }
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
