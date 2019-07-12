@@ -128,11 +128,15 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
-    print(extent);
-    //if (!child.hasSize) {
+    print(constraints.viewportMainAxisExtent);
+    print(constraints.precedingScrollExtent);
+    print(constraints.overlap);
+    double extent = (constraints.viewportMainAxisExtent - constraints.precedingScrollExtent) - math.min(constraints.overlap, 0.0);
+      //(constraints.viewportMainAxisExtent - constraints.precedingScrollExtent) - math.min(constraints.overlap, 0.0);
+      // OG: constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    print('Starting extent: $extent');
     child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    //}
+
 
     double childExtent;
     switch (constraints.axis) {
@@ -143,14 +147,14 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
         childExtent = child.size.height;
         break;
     }
-    print(childExtent);
+    print('Independent child size: $childExtent');
 
     if(constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent) {
       extent = childExtent;
     } else {
       child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
     }
-
+    print('final child extent: ${child.size.height}');
     print('final extent: $extent');
 //    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 //    if (hasScrollBody && child != null) {
