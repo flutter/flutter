@@ -58,10 +58,11 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     );
   }
 
-  // For [_pendingLoader] we don't need the value(worker isolate), just future
-  // itself that is used as indicator that successive load requests should be
-  // add to the list of pending load requests [_pendingLoadRequests].
+  // For [_pendingLoader] we don't need the value(worker isolate), just the future
+  // itself that is used as an indicator that successive load requests should be
+  // added to the list of pending load requests [_pendingLoadRequests].
   static Future<void> _pendingLoader;
+  static RawReceivePort _loaderErrorHandler;
   static List<_PendingLoadRequest> _pendingLoadRequests;
   static SendPort _requestPort;
 
@@ -69,13 +70,14 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
   ) async {
+    RawReceivePort downloadResponseHandler;
     try {
       assert(key == this);
 
       final Uri resolved = Uri.base.resolve(key.url);
 
       final Completer<TransferableTypedData> bytesCompleter = Completer<TransferableTypedData>();
-      final RawReceivePort downloadResponseHandler = RawReceivePort((_DownloadResponse response) {
+      downloadResponseHandler = RawReceivePort((_DownloadResponse response) {
         if (response.bytes != null) {
           if (bytesCompleter.isCompleted) {
             // If an uncaught error occurred in the worker isolate, we'll have
@@ -92,7 +94,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         }
       });
 
-      // This will keep reference to [debugNetworkImageHttpClientProvider] tree-shaken
+      // This will keep references to [debugNetworkImageHttpClientProvider] tree-shaken
       // out of release builds.
       HttpClientProvider httpClientProvider;
       assert(() { httpClientProvider = debugNetworkImageHttpClientProvider; return true; }());
@@ -107,26 +109,26 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         if (_pendingLoader == null) {
           // If worker isolate creation was not started, start creation now.
           assert(_pendingLoadRequests == null);
+          assert(_loaderErrorHandler == null);
           _pendingLoadRequests = <_PendingLoadRequest>[];
           _pendingLoader = _setupIsolate()..then((Isolate isolate) {
-              final RawReceivePort handleError = RawReceivePort((List<dynamic> errorAndStackTrace) {
-                _cleanupDueToError(errorAndStackTrace[0]);
-              });
-              isolate.addErrorListener(handleError.sendPort);
-              isolate.resume(isolate.pauseCapability);
-            }).catchError((dynamic error, StackTrace stackTrace) {
-              _cleanupDueToError(error);
+            _loaderErrorHandler = RawReceivePort((List<dynamic> errorAndStackTrace) {
+              _cleanupDueToError(errorAndStackTrace[0]);
             });
+            isolate.addErrorListener(_loaderErrorHandler.sendPort);
+            isolate.resume(isolate.pauseCapability);
+          }).catchError((dynamic error, StackTrace stackTrace) {
+            _cleanupDueToError(error);
+          });
         }
         // Record download request so it can either send a request when isolate is ready or handle errors.
         _pendingLoadRequests.add(_PendingLoadRequest(
             (SendPort sendPort) { sendPort.send(downloadRequest); },
-            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error.toString())); }
+            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error.toString())); },
         ));
       }
 
       final TransferableTypedData transferable = await bytesCompleter.future;
-      downloadResponseHandler.close();
 
       final Uint8List bytes = transferable.materialize().asUint8List();
       if (bytes.isEmpty)
@@ -135,6 +137,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       return await PaintingBinding.instance.instantiateImageCodec(bytes);
     } finally {
       chunkEvents.close();
+      downloadResponseHandler.close();
     }
   }
 
@@ -144,6 +147,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     }
     _pendingLoadRequests = null;
     _pendingLoader = null;
+    _loaderErrorHandler.close();
+    _loaderErrorHandler = null;
   }
 
 
@@ -159,6 +164,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         assert(_pendingLoadRequests.isEmpty);
         _pendingLoader = null;
         _pendingLoadRequests = null;
+        _loaderErrorHandler.close();
+        _loaderErrorHandler = null;
         return;
       }
 
