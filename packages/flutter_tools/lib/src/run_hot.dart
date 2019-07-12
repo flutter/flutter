@@ -516,6 +516,9 @@ class HotRunner extends ResidentRunner {
         final OperationResult result = await _restartFromSources(reason: reason, benchmarkMode: benchmarkMode,);
         if (!result.isOk)
           return result;
+      } on rpc.RpcException {
+        await _measureJsonRpcException(flutterDevices, fullRestart);
+        return OperationResult(1, 'hotRestart not supported', fatal: true);
       } finally {
         status.cancel();
       }
@@ -945,4 +948,30 @@ class ProjectFileInvalidator {
     printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
     return invalidatedFiles;
   }
+}
+
+// This is an error case we would like to know more about.
+Future<void> _measureJsonRpcException(List<FlutterDevice> flutterDevices, bool fullRestart) async {
+    String targetPlatform;
+    String deviceSdk;
+    final String hostOs = platform.operatingSystem;
+    if (flutterDevices.length == 1) {
+      final Device device = flutterDevices.first.device;
+      targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+      deviceSdk = await device.sdkNameAndVersion;
+    } else if (flutterDevices.length > 1) {
+      targetPlatform = 'multiple';
+      deviceSdk = 'multiple';
+    } else {
+      targetPlatform = 'unknown';
+      deviceSdk = 'unknown';
+    }
+    flutterUsage.sendEvent('hot_reload_rpc_exception', fullRestart == true ? 'restart': 'reload',
+      parameters: <String, String>{
+        'targetPlatform': targetPlatform,
+        'deviceSdk': deviceSdk,
+        'hostOs': hostOs,
+        'restart': fullRestart.toString(),
+      },
+    );
 }

@@ -844,13 +844,16 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message);
+  OperationResult(this.code, this.message, { this.fatal = false });
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
+
+  /// Whether this error should cause the runner to exit.
+  final bool fatal;
 
   bool get isOk => code == 0;
 
@@ -906,8 +909,14 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGINT.watch().listen((io.ProcessSignal signal) {
+      _cleanUp(signal);
+      io.exit(0);
+    });
+    io.ProcessSignal.SIGTERM.watch().listen((io.ProcessSignal signal) {
+      _cleanUp(signal);
+      io.exit(0);
+    });
     if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart)
       return;
     io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
@@ -990,6 +999,9 @@ class TerminalHandler {
           return false;
         }
         final OperationResult result = await residentRunner.restart(fullRestart: false);
+        if (result.fatal) {
+          throwToolExit(result.message);
+        }
         if (!result.isOk) {
           printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
@@ -1000,6 +1012,9 @@ class TerminalHandler {
           return false;
         }
         final OperationResult result = await residentRunner.restart(fullRestart: true);
+        if (result.fatal) {
+          throwToolExit(result.message);
+        }
         if (!result.isOk) {
           printStatus('Try again after fixing the above error(s).', emphasis: true);
         }
@@ -1051,7 +1066,7 @@ class TerminalHandler {
       await _commonTerminalInputHandler(command);
     } catch (error, st) {
       printError('$error\n$st');
-      await _cleanUpAndExit(null);
+      await _cleanUp(null);
     } finally {
       _processingUserRequest = false;
     }
@@ -1073,11 +1088,10 @@ class TerminalHandler {
     }
   }
 
-  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
+  Future<void> _cleanUp(io.ProcessSignal signal) async {
     terminal.singleCharMode = false;
     await subscription.cancel();
     await residentRunner.cleanupAfterSignal();
-    io.exit(0);
   }
 }
 
