@@ -203,12 +203,12 @@ class Material extends StatefulWidget {
   /// The z-coordinate at which to place this material relative to its parent.
   ///
   /// This controls the size of the shadow below the material and the opacity
-  /// of the dark theme overlay color.
+  /// of the elevation overlay color if it is applied.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
-  /// Defaults to 0. Changing this value will cause the shadow and the dark theme
+  /// Defaults to 0. Changing this value will cause the shadow and the elevation
   /// overlay to animate over [animationDuration].
   ///
   /// The value is non-negative.
@@ -217,7 +217,7 @@ class Material extends StatefulWidget {
   ///
   ///   * [ThemeData.applyElevationOverlay] which controls the whether
   ///     an overlay color will be applied to indicate elevation.
-  ///   * [color] which may have a dark theme overlay applied.
+  ///   * [color] which may have an elevation overlay applied.
   ///
   /// {@endtemplate}
   final double elevation;
