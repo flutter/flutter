@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 
 import '../src/common.dart';
 
@@ -64,5 +63,5 @@ void main() {
 
     await expectXcodeBackendFails(localEngineDebugBuildModeRelease);
     await expectXcodeBackendFails(localEngineProfileBuildeModeRelease);
-  }, skip: !platform.isMacOS);
+  }, skip: true); // #35707 non-hermetic test requires precache to have run.
 }

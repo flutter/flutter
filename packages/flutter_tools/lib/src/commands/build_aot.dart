@@ -127,10 +127,13 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
           final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>['lipo']
-            ..addAll(dylibs)
-            ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
-          );
+          await runCheckedAsync(<String>[
+            'lipo',
+            ...dylibs,
+            '-create',
+            '-output',
+            fs.path.join(outputPath, 'App.framework', 'App'),
+          ]);
         } else {
           status?.cancel();
           exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {

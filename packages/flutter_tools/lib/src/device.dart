@@ -161,11 +161,71 @@ class DeviceManager {
 
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
+    return <String>[
+      for (DeviceDiscovery discoverer in _platformDiscoverers)
+        ...await discoverer.getDiagnostics(),
+    ];
+  }
+
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user.
+  ///
+  /// * If the user specified '-d all', then return all connected devices which
+  /// support the current project, except for fuchsia and web.
+  ///
+  /// * If the user specified a device id, then do nothing as the list is already
+  /// filtered by [getDevices].
+  ///
+  /// * If the user did not specify a device id and there is more than one
+  /// device connected, then filter out unsupported devices and prioritize
+  /// ephemeral devices.
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    List<Device> devices = await getDevices().toList();
+
+    // Always remove web and fuchsia devices from `--all`. This setting
+    // currently requires devices to share a frontend_server and resident
+    // runnner instance. Both web and fuchsia require differently configured
+    // compilers, and web requires an entirely different resident runner.
+    if (hasSpecifiedAllDevices) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+              await device.targetPlatform != TargetPlatform.web_javascript)
+            device
+      ];
     }
-    return diagnostics;
+
+    // If there is no specified device, the remove all devices which are not
+    // supported by the current application. For example, if there was no
+    // 'android' folder then don't attempt to launch with an Android device.
+    if (devices.length > 1 && !hasSpecifiedDeviceId) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (device.isSupportedForProject(flutterProject))
+            device
+      ];
+    }
+
+    // If there are still multiple devices and the user did not specify to run
+    // all, then attempt to prioritize ephemeral devices. For example, if the
+    // use only typed 'flutter run' and both an Android device and desktop
+    // device are availible, choose the Android device.
+    if (devices.length > 1 && !hasSpecifiedAllDevices) {
+      // Note: ephemeral is nullable for device types where this is not well
+      // defined.
+      if (devices.any((Device device) => device.ephemeral == true)) {
+        devices = devices
+            .where((Device device) => device.ephemeral == true)
+            .toList();
+      }
+    }
+    return devices;
+  }
+
+  /// Returns whether the device is supported for the project.
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
   }
 }
 
@@ -346,8 +406,8 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
+    bool usesTerminalUi = true,
   });
 
   /// Whether this device implements support for hot reload.

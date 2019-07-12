@@ -245,7 +245,7 @@ void main() {
         final FlutterProject project = await someProject();
 
         when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
-          'SWIFT_VERSION': '3.0',
+          'SWIFT_VERSION': '4.0',
         });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {

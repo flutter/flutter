@@ -20,6 +20,7 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
+final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
@@ -30,6 +31,7 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
   'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
+  'tool_coverage': _runToolCoverage,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
   'integration_tests': _runIntegrationTests,
@@ -176,6 +178,58 @@ Future<bq.BigqueryApi> _getBigqueryApi() async {
   }
 }
 
+// Partition tool tests into two groups, see explanation on `_runToolCoverage`.
+List<List<String>> _partitionToolTests() {
+  final List<String> pending = <String>[];
+  final String toolTestDir = path.join(toolRoot, 'test');
+  for (FileSystemEntity entity in Directory(toolTestDir).listSync(recursive: true)) {
+    if (entity is File && entity.path.endsWith('_test.dart')) {
+      final String relativePath = path.relative(entity.path, from: toolRoot);
+      pending.add(relativePath);
+    }
+  }
+  // Shuffle the tests to avoid giving an expensive test directory like
+  // integration to a single run of tests.
+  pending..shuffle();
+  final int aboutHalf = pending.length ~/ 2;
+  final List<String> groupA = pending.take(aboutHalf).toList();
+  final List<String> groupB = pending.skip(aboutHalf).toList();
+  return <List<String>>[groupA, groupB];
+}
+
+// Tools tests run with coverage enabled have much higher memory usage than
+// our current CI infrastructure can support. We partition the tests into
+// two sets and run them in separate invocations of dart to reduce peak memory
+// usage. codecov.io automatically handles merging different coverage files
+// together, so producing separate files is OK.
+//
+// See: https://github.com/flutter/flutter/issues/35025
+Future<void> _runToolCoverage() async {
+  final List<List<String>> tests = _partitionToolTests();
+  // Precompile tests to speed up subsequent runs.
+  await runCommand(
+    pub,
+    <String>['run', 'build_runner', 'build'],
+    workingDirectory: toolRoot,
+  );
+
+  // The name of this subshard has to match the --file path provided at
+  // the end of this test script in `.cirrus.yml`.
+  const List<String> subshards = <String>['A', 'B'];
+  for (int i = 0; i < tests.length; i++) {
+    final List<String> testGroup = tests[i];
+    await runCommand(
+      dart,
+      <String>[path.join('tool', 'tool_coverage.dart'), '--', ...testGroup],
+      workingDirectory: toolRoot,
+      environment: <String, String>{
+        'FLUTTER_ROOT': flutterRoot,
+        'SUBSHARD': subshards[i],
+      }
+    );
+  }
+}
+
 Future<void> _runToolTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
@@ -186,7 +240,8 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
-  if (noUseBuildRunner) {
+  // reduce overhead of build_runner in the create case.
+  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
@@ -204,22 +259,23 @@ Future<void> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
-/// examples apps finish without crashing. It does not actually
+/// Verifies that AOT, APK, and IPA (if on macOS) builds the
+/// examples apps without crashing. It does not actually
 /// launch the apps. That happens later in the devicelab. This is
 /// just a smoke-test. In particular, this will verify we can build
 /// when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
-  final List<String> paths = <String>[
-    path.join('examples', 'hello_world'),
-    path.join('examples', 'flutter_gallery'),
-    path.join('examples', 'flutter_view'),
-  ];
-  for (String path in paths) {
-    await _flutterBuildAot(path);
-    await _flutterBuildApk(path);
-    await _flutterBuildIpa(path);
+  final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
+  await for (FileSystemEntity fileEntity in exampleDirectories) {
+    if (fileEntity is! Directory) {
+      continue;
+    }
+    final String examplePath = fileEntity.path;
+
+    await _flutterBuildAot(examplePath);
+    await _flutterBuildApk(examplePath);
+    await _flutterBuildIpa(examplePath);
   }
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
@@ -469,6 +525,19 @@ Future<void> _buildRunnerTest(
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
 
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'create':
+      args.addAll(<String>['--tags', 'create']);
+      break;
+    case 'tool':
+      args.addAll(<String>['-x', 'integration', '-x', 'create']);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -485,6 +554,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
@@ -512,6 +582,20 @@ Future<void> _pubRunTest(
         toolsArgs += ' --enable-asserts';
     pubEnvironment['FLUTTER_TOOL_ARGS'] = toolsArgs.trim();
   }
+
+  final String subShard = Platform.environment['SUBSHARD'];
+  switch (subShard) {
+    case 'integration':
+      args.addAll(<String>['--tags', 'integration']);
+      break;
+    case 'tool':
+      args.addAll(<String>['--exclude-tags', 'integration']);
+      break;
+    case 'create':
+      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      break;
+  }
+
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
     final Stream<String> testOutput = runAndGetStdout(
@@ -525,7 +609,7 @@ Future<void> _pubRunTest(
     await runCommand(
       pub,
       args,
-      workingDirectory:workingDirectory,
+      workingDirectory: workingDirectory,
     );
   }
 }
@@ -676,11 +760,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '-v', '--platform=chrome'];
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
-
-  args.addAll(tests);
+  final List<String> args = <String>[
+    'test',
+    '-v',
+    '--platform=chrome',
+    ...?flutterTestArgs,
+    ...tests,
+  ];
 
   // TODO(jonahwilliams): fix relative path issues to make this unecessary.
   final Directory oldCurrent = Directory.current;
@@ -713,9 +799,11 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
-  final List<String> args = <String>['test']..addAll(options);
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
+  final List<String> args = <String>[
+    'test',
+    ...options,
+    ...?flutterTestArgs,
+  ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
   if (shouldProcessOutput) {

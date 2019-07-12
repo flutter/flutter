@@ -528,22 +528,18 @@ class _CompoundBorder extends ShapeBorder {
       final ShapeBorder merged = ours.add(other, reversed: reversed)
                              ?? other.add(ours, reversed: !reversed);
       if (merged != null) {
-        final List<ShapeBorder> result = <ShapeBorder>[];
-        result.addAll(borders);
+        final List<ShapeBorder> result = <ShapeBorder>[...borders];
         result[reversed ? result.length - 1 : 0] = merged;
         return _CompoundBorder(result);
       }
     }
     // We can't, so fall back to just adding the new border to the list.
-    final List<ShapeBorder> mergedBorders = <ShapeBorder>[];
-    if (reversed)
-      mergedBorders.addAll(borders);
-    if (other is _CompoundBorder)
-      mergedBorders.addAll(other.borders);
-    else
-      mergedBorders.add(other);
-    if (!reversed)
-      mergedBorders.addAll(borders);
+    final List<ShapeBorder> mergedBorders = <ShapeBorder>[
+      if (reversed) ...borders,
+      if (other is _CompoundBorder) ...other.borders
+      else other,
+      if (!reversed) ...borders,
+    ];
     return _CompoundBorder(mergedBorders);
   }
 

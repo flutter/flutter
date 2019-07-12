@@ -117,11 +117,12 @@ class AnimatedBezierState extends State<AnimatedBezier>
   AnimationController controller;
   CurvedAnimation curve;
   bool isPlaying = false;
-  List<List<Point>> pointList = <List<Point>>[]
-    ..add(<Point>[])
-    ..add(<Point>[])
-    ..add(<Point>[])
-    ..add(<Point>[]);
+  List<List<Point>> pointList = <List<Point>>[
+    <Point>[],
+    <Point>[],
+    <Point>[],
+    <Point>[],
+  ];
   bool isReversed = false;
 
   List<PathDetail> _playForward() {

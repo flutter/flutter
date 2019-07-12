@@ -639,7 +639,7 @@ class RenderIndexedStack extends RenderStack {
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (index != null)
+    if (index != null && firstChild != null)
       visitor(_childAtIndex());
   }
 

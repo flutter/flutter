@@ -434,6 +434,48 @@ void main() {
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
   });
 
+  testWidgets('Tab contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: CupertinoTabScaffold(
+        resizeToAvoidBottomInset: false,
+        tabBar: _buildTabBar(),
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      )
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            viewInsets: EdgeInsets.only(bottom: 20.0),
+          ),
+          child: child
+        ),
+      ),
+    );
+
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
     BuildContext innerContext;
 

@@ -44,11 +44,19 @@ void main() {
         final ImageCache otherCache = ImageCache();
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
-        otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
+        final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
+          imageProvider, () => imageProvider.load(imageProvider),
+        );
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
-        await completer.future;
+        final Completer<void> cacheCompleter = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          completer.complete();
+        }));
+        cacheStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+          cacheCompleter.complete();
+        }));
+        await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
 
         expect(otherCache.currentSize, 1);
         expect(imageCache.currentSize, 1);
@@ -202,10 +210,10 @@ void main() {
       });
 
       test('Notifies listeners of chunk events', () async {
-        final List<List<int>> chunks = <List<int>>[];
+        final List<Uint8List> chunks = <Uint8List>[];
         const int chunkSize = 8;
         for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
-          chunks.add(kTransparentImage.skip(offset).take(chunkSize).toList());
+          chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
         }
         final Completer<void> imageAvailable = Completer<void>();
         final MockHttpClientRequest request = MockHttpClientRequest();
@@ -225,7 +233,7 @@ void main() {
           final void Function() onDone = invocation.namedArguments[#onDone];
           final bool cancelOnError = invocation.namedArguments[#cancelOnError];
 
-          return Stream<List<int>>.fromIterable(chunks).listen(
+          return Stream<Uint8List>.fromIterable(chunks).listen(
             onData,
             onDone: onDone,
             onError: onError,

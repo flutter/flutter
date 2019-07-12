@@ -82,7 +82,11 @@ class WindowsDevice extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
-      await buildWindows(FlutterProject.current().windows, debuggingOptions.buildInfo);
+      await buildWindows(
+        FlutterProject.current().windows,
+        debuggingOptions.buildInfo,
+        target: mainPath,
+      );
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[

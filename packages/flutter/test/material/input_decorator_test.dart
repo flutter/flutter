@@ -2280,6 +2280,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);

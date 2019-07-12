@@ -315,7 +315,7 @@ void _defineTests() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

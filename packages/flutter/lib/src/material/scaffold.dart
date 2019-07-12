@@ -1881,6 +1881,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     @required bool removeRightPadding,
     @required bool removeBottomPadding,
     bool removeBottomInset = false,
+    bool maintainBottomViewPadding = false,
   }) {
     MediaQueryData data = MediaQuery.of(context).removePadding(
       removeLeft: removeLeftPadding,
@@ -1890,6 +1891,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
     if (removeBottomInset)
       data = data.removeViewInsets(removeBottom: true);
+
+    if (maintainBottomViewPadding && data.viewInsets.bottom != 0.0) {
+      data = data.copyWith(
+        padding: data.padding.copyWith(bottom: data.viewPadding.bottom)
+      );
+    }
 
     if (child != null) {
       children.add(
@@ -1995,7 +2002,6 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
 
     final List<LayoutId> children = <LayoutId>[];
-
     _addIfNonNull(
       children,
       widget.body != null && widget.extendBody ? _BodyBuilder(body: widget.body) : widget.body,
@@ -2057,6 +2063,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: widget.bottomNavigationBar != null || widget.persistentFooterButtons != null,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
 
@@ -2085,6 +2092,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: false,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
 
@@ -2097,18 +2105,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeTopPadding: true,
         removeRightPadding: false,
         removeBottomPadding: false,
+        maintainBottomViewPadding: !_resizeToAvoidBottomInset,
       );
     }
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
-      final List<Widget> bottomSheets = <Widget>[];
-      if (_dismissedBottomSheets.isNotEmpty)
-        bottomSheets.addAll(_dismissedBottomSheets);
-      if (_currentBottomSheet != null)
-        bottomSheets.add(_currentBottomSheet._widget);
       final Widget stack = Stack(
-        children: bottomSheets,
         alignment: Alignment.bottomCenter,
+        children: <Widget>[
+          ..._dismissedBottomSheets,
+          if (_currentBottomSheet != null) _currentBottomSheet._widget,
+        ],
       );
       _addIfNonNull(
         children,

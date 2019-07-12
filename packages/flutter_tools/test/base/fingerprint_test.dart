@@ -211,7 +211,8 @@ void main() {
       expect(await fingerprinter.doesFingerprintMatch(), isFalse);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatformDisabledCache,
-    }..addAll(contextOverrides));
+      ...contextOverrides,
+    });
 
     final Platform mockPlatformEnabledCache = MockPlatform();
     mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
@@ -231,7 +232,8 @@ void main() {
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatformEnabledCache,
-    }..addAll(contextOverrides));
+      ...contextOverrides,
+    });
 
     testUsingContext('fails to write fingerprint if inputs are missing', () async {
       final Fingerprinter fingerprinter = Fingerprinter(

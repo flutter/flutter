@@ -235,7 +235,7 @@ Future<Process> startProcess(
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
-    <String>[executable]..addAll(arguments),
+    <String>[executable, ...arguments],
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );

@@ -34,6 +34,8 @@ void main() {
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('ja', 'JP'),
@@ -84,11 +86,16 @@ void main() {
         style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: 'A',
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       textAlign: TextAlign.start,
       textDirection: TextDirection.ltr,
       locale: const Locale('en', 'US'),
       offset: ViewportOffset.fixed(10.0),
       textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(
+        offset: 0,
+      ),
     );
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
@@ -114,6 +121,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 4,
         affinity: TextAffinity.upstream,
@@ -187,6 +196,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 4,
         affinity: TextAffinity.upstream,
@@ -258,6 +269,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection(
         baseOffset: 0,
         extentOffset: 3,
@@ -297,6 +310,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       selection: const TextSelection.collapsed(
         offset: 2,
         affinity: TextAffinity.upstream,
@@ -345,11 +360,16 @@ void main() {
       onSelectionChanged: (TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
         currentSelection = selection;
       },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       text: const TextSpan(
         text: 'test\ntest',
         style: TextStyle(
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
       ),
     );
 
@@ -429,6 +449,8 @@ void main() {
           height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
         ),
       ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     layout(editable);
@@ -461,6 +483,8 @@ void main() {
         selectionChangedCount++;
         updatedSelection = selection;
       },
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
       text: text,
     );
 
@@ -483,6 +507,8 @@ void main() {
         updatedSelection = selection;
       },
       text: text,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     layout(editable2);
@@ -510,6 +536,8 @@ void main() {
       offset: ViewportOffset.zero(),
       textSelectionDelegate: delegate,
       hasFocus: true,
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
     );
 
     expect(editable.hasFocus, true);
