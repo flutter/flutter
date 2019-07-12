@@ -273,8 +273,7 @@ void main() {
           Theme(
             data: ThemeData(
               applyElevationOverlay: true,
-              colorScheme: ColorScheme.dark().copyWith(
-                  surface: const Color(0xFF121212)),
+              colorScheme: ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
             ),
             child: buildMaterial(
                 color: Colors.cyan,
