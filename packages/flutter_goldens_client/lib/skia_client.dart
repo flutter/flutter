@@ -72,6 +72,11 @@ class SkiaGoldClient extends GoldensClient {
     if (_clientIsAuthorized())
       return;
 
+    if (_serviceAccount.isEmpty) {
+      final StringBuffer buf = StringBuffer()..writeln('Gold service accout is unavailable.');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+
     final File authorization = _workDirectory.childFile('serviceAccount.json');
     await authorization.writeAsString(_serviceAccount);
 
