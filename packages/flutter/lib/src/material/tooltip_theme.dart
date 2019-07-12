@@ -180,7 +180,7 @@ class TooltipThemeData extends Diagnosticable {
 /// Values specified here are used for [Tooltip] properties that are not
 /// given an explicit non-null value.
 class TooltipTheme extends InheritedWidget {
-  /// Creates a toggle buttons theme that controls the configurations for
+  /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
   TooltipTheme({
     Key key,

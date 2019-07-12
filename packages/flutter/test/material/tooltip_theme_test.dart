@@ -576,11 +576,167 @@ void main() {
     expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
   }, skip: isBrowser);
 
-  // test wait and show duration - themedata
-  testWidgets('', (WidgetTester tester) async {});
+  testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    const Duration customWaitDuration = Duration(milliseconds: 500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
 
-  // test wait and show duration - theme widget
-  testWidgets('', (WidgetTester tester) async {});
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              waitDuration: customWaitDuration,
+            ),
+          ),
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text(tooltipText), findsNothing); // Should not appear yet
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text(tooltipText), findsOneWidget); // Should appear after customWaitDuration
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+
+    // Wait for it to disappear.
+    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    expect(find.text(tooltipText), findsNothing);
+    await gesture.removePointer();
+  });
+
+  testWidgets('Tooltip waitDuration - TooltipTheme', (WidgetTester tester) async {
+    const Duration customWaitDuration = Duration(milliseconds: 500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TooltipTheme(
+          waitDuration: customWaitDuration,
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text(tooltipText), findsNothing); // Should not appear yet
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text(tooltipText), findsOneWidget); // Should appear after customWaitDuration
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+
+    // Wait for it to disappear.
+    await tester.pump(const Duration(milliseconds: 0)); // Should immediately disappear
+    expect(find.text(tooltipText), findsNothing);
+    await gesture.removePointer();
+  });
+
+  testWidgets('Tooltip showDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    const Duration customShowDuration = Duration(milliseconds: 3000);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Theme(
+          data: ThemeData(
+            tooltipTheme: const TooltipThemeData(
+              showDuration: customShowDuration,
+            ),
+          ),
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gesture.up();
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2000)); // Tooltip should remain
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pumpAndSettle(); // Tooltip should fade out after
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip showDuration - TooltipTheme', (WidgetTester tester) async {
+    const Duration customShowDuration = Duration(milliseconds: 3000);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: TooltipTheme(
+          showDuration: customShowDuration,
+          child: Center(
+            child: Tooltip(
+              message: tooltipText,
+              child: Container(
+                width: 100.0,
+                height: 100.0,
+              ),
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(tooltip));
+    await tester.pump();
+    await tester.pump(kLongPressTimeout);
+    await gesture.up();
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2000)); // Tooltip should remain
+    expect(find.text(tooltipText), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1000));
+    await tester.pumpAndSettle(); // Tooltip should fade out after
+    expect(find.text(tooltipText), findsNothing);
+  });
 
   testWidgets('Semantics included by default - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
