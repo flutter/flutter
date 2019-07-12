@@ -972,7 +972,7 @@ Future<void> _measureJsonRpcException(List<FlutterDevice> flutterDevices, bool f
       deviceSdk = 'unknown';
       emulator = false;
     }
-    flutterUsage.sendEvent('unhandled_exception', 'hot_mode',
+    flutterUsage.sendEvent('hot', 'exception',
       parameters: <String, String>{
         reloadExceptionTargetPlatform: targetPlatform,
         reloadExceptionSdkName: deviceSdk,
