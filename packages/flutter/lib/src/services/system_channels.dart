@@ -32,7 +32,7 @@ class SystemChannels {
   /// framework notifies the engine about the route changes.
   ///
   ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///  is replaces entire screen.)
+  ///  replaces the entire screen.)
   ///
   ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
   ///  such as time picker is closed.)
