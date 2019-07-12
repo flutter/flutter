@@ -546,6 +546,36 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
     });
+    test('Two unicode scalar values are handled properly', () {
+      final RawKeyEvent keyAQEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'glfw',
+        'keyCode': 65,
+        'scanCode': 0x00000026,
+        'codePoint': 'aq',
+        'modifiers': 0x0,
+      });
+      // The expected keyId is the combination of both unicode scalar values.
+      int expectedKeyId = ('a'.codeUnitAt(0) << 16) | 'q'.codeUnitAt(0);
+      final RawKeyEventDataLinux data = keyAQEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey.keyId, equals(expectedKeyId));
+      expect(data.keyLabel, equals('aq'));
+    });
+    test('More than two unicode scalar values raise an assertion', () {
+      final RawKeyEvent keyAQEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'glfw',
+        'keyCode': 65,
+        'scanCode': 0x00000026,
+        'codePoint': 'aqs',
+        'modifiers': 0x0,
+      }); 
+      final RawKeyEventDataLinux data = keyAQEvent.data;
+      expect(() => data.logicalKey, throwsAssertionError);
+    });
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
