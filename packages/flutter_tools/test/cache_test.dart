@@ -115,7 +115,7 @@ void main() {
       when(artifact2.dyLdLibPath).thenReturn('/path/to/gamma:/path/to/delta:/path/to/epsilon');
       when(artifact3.dyLdLibPath).thenReturn(''); // Empty output
       final Cache cache = Cache(artifacts: <CachedArtifact>[artifact1, artifact2, artifact3]);
-      expect(cache.dyLdLibEntry.key, 'DYLD_LIBARY_PATH');
+      expect(cache.dyLdLibEntry.key, 'DYLD_LIBRARY_PATH');
       expect(
         cache.dyLdLibEntry.value,
         '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon',
