@@ -518,7 +518,7 @@ class HotRunner extends ResidentRunner {
           return result;
       } on rpc.RpcException {
         await _measureJsonRpcException(flutterDevices, fullRestart);
-        return OperationResult(1, 'hotRestart not supported', fatal: true);
+        return OperationResult(1, 'hot restart failed to complete', fatal: true);
       } finally {
         status.cancel();
       }
@@ -548,6 +548,9 @@ class HotRunner extends ResidentRunner {
             showTime = false;
           },
         );
+      } on rpc.RpcException {
+        await _measureJsonRpcException(flutterDevices, fullRestart);
+        return OperationResult(1, 'hot reload failed to complete', fatal: true);
       } finally {
         status.cancel();
       }
@@ -954,24 +957,27 @@ class ProjectFileInvalidator {
 Future<void> _measureJsonRpcException(List<FlutterDevice> flutterDevices, bool fullRestart) async {
     String targetPlatform;
     String deviceSdk;
-    final String hostOs = platform.operatingSystem;
+    bool emulator;
     if (flutterDevices.length == 1) {
       final Device device = flutterDevices.first.device;
       targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
       deviceSdk = await device.sdkNameAndVersion;
+      emulator = await device.isLocalEmulator;
     } else if (flutterDevices.length > 1) {
       targetPlatform = 'multiple';
       deviceSdk = 'multiple';
+      emulator = false;
     } else {
       targetPlatform = 'unknown';
       deviceSdk = 'unknown';
+      emulator = false;
     }
-    flutterUsage.sendEvent('hot_reload_rpc_exception', fullRestart == true ? 'restart': 'reload',
+    flutterUsage.sendEvent('unhandled_exception', 'hot_mode',
       parameters: <String, String>{
-        'targetPlatform': targetPlatform,
-        'deviceSdk': deviceSdk,
-        'hostOs': hostOs,
-        'restart': fullRestart.toString(),
+        reloadExceptionTargetPlatform: targetPlatform,
+        reloadExceptionSdkName: deviceSdk,
+        reloadExceptionEmulator: emulator.toString(),
+        reloadExceptionFullRestart: fullRestart.toString(),
       },
     );
 }

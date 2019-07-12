@@ -1067,6 +1067,7 @@ class TerminalHandler {
     } catch (error, st) {
       printError('$error\n$st');
       await _cleanUp(null);
+      rethrow;
     } finally {
       _processingUserRequest = false;
     }
@@ -1090,7 +1091,7 @@ class TerminalHandler {
 
   Future<void> _cleanUp(io.ProcessSignal signal) async {
     terminal.singleCharMode = false;
-    await subscription.cancel();
+    await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
   }
 }
