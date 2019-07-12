@@ -55,6 +55,7 @@ void main() {
         ),
       );
     },
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -109,6 +110,7 @@ void main() {
         ),
       );
     },
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -155,6 +157,7 @@ void main() {
         ),
       );
     },
+    skip: !isLinux,
   );
 
 }

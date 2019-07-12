@@ -62,7 +62,7 @@ void main() {
         version: null,
       ),
     );
-  });
+  }, skip: !isLinux);
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -147,7 +147,7 @@ void main() {
         version: null,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -200,7 +200,7 @@ void main() {
         version: null,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -239,7 +239,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -267,7 +267,8 @@ void main() {
         version: null,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -297,7 +298,8 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -328,7 +330,8 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -382,7 +385,8 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
@@ -420,7 +424,8 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -474,7 +479,8 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: true); // Should only be on linux (skip: !isLinux).
+                  // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -515,7 +521,7 @@ void main() {
         version: 0,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -557,7 +563,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -654,7 +660,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -702,7 +708,7 @@ void main() {
         version: 2,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   // This tests if multiple Text.rich widgets are able to inline nest within each other.
   testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
@@ -834,7 +840,7 @@ void main() {
         version: 2,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -944,7 +950,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1054,7 +1060,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1164,7 +1170,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget top', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1274,7 +1280,7 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget middle', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1384,5 +1390,5 @@ void main() {
         version: 1,
       ),
     );
-  });
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 }

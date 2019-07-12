@@ -1438,6 +1438,7 @@ void main() {
           'bottom_navigation_bar.shifting_transition.$pump.png',
           version: 2,
         ),
+        skip: !isLinux,
       );
     }
   }, skip: isBrowser);
