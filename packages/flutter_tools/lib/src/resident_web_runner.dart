@@ -219,7 +219,6 @@ class ResidentWebRunner extends ResidentRunner {
     _client = await _startBuildDaemon(workingDirectory);
     // Register the current build targets.
     _registerBuildTargets(_client);
-    _client.startBuild();
 
     // Listen to build results to log error messages.
     _buildResults = _client.buildResults.listen((BuildResults data) {
@@ -229,6 +228,7 @@ class ResidentWebRunner extends ResidentRunner {
           printTrace(data.results.toString());
       }
     });
+    _client.startBuild();
     final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
       .readAsStringSync());
 
@@ -240,7 +240,12 @@ class ResidentWebRunner extends ResidentRunner {
       daemonAssetPort: daemonAssetPort,
       buildResults: _client.buildResults,
     );
-    print('adaasdad');
+    print('1');
+    final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
+    print('2');
+    appConnection.runMain();
+    print('3');
+    _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -256,13 +261,7 @@ class ResidentWebRunner extends ResidentRunner {
     // unawaited(_flutterWebServer.chrome.chromeConnection.onTabClose.first.then((dynamic _) {
     //   appFinished();
     // }));
-    // Cleanup old subscriptions.
-    print('Getting connected apps');
-    final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
-    print('Getting debug connection');
-    _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
-    appConnection.runMain();
-    print("Got debug conneciton");
+    // Cleanup old subscriptions
     try {
       await _debugConnection.vmService.streamCancel('Stdout');
     } catch (_) {}

@@ -66,13 +66,11 @@ class FlutterWebServer {
       reloadConfiguration: ReloadConfiguration.none,
       serveDevTools: true,
       verbose: false,
+      handler: _assetHandler,
     );
     final HttpServer server = await HttpMultiServer.bind(_kHostName, port);
-    Cascade cascade = Cascade();
-    cascade = cascade.add(dwds.handler);
-    cascade = cascade.add(_assetHandler);
-    shelf_io.serveRequests(server, cascade.handler);
-    final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/',);
+    shelf_io.serveRequests(server, dwds.handler);
+    final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
     return FlutterWebServer._(
       server,
       dwds,

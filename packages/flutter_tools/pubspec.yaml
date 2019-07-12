@@ -149,6 +149,10 @@ dependency_overrides:
     git:
       url: git@github.com:dart-lang/build
       path: build_runner
+  build_web_compilers:
+    git:
+      url: git@github.com:dart-lang/build
+      path: build_web_compilers
   meta: 1.1.7
   vm_service_lib: 3.20.0+02
 
