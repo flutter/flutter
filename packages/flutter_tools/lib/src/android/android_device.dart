@@ -378,10 +378,14 @@ class AndroidDevice extends Device {
       printError('$installResult');
       return false;
     }
-
-    await runAdbCheckedAsync(<String>[
-      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
-    ]);
+    try {
+      await runAdbCheckedAsync(<String>[
+        'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
+      ]);
+    } catch (error) {
+      printError('adb shell failed to write the SHA hash: $error.');
+      return false;
+    }
     return true;
   }
 
@@ -390,7 +394,13 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final String uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
+    String uninstallOut;
+    try {
+      uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
+    } catch (error) {
+      printError('adb uninstall failed: $error');
+      return false;
+    }
     final RegExp failureExp = RegExp(r'^Failure.*$', multiLine: true);
     final String failure = failureExp.stringMatch(uninstallOut);
     if (failure != null) {
@@ -615,13 +625,18 @@ class AndroidDevice extends Device {
 
   static final RegExp _timeRegExp = RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
-  /// Return the most recent timestamp in the Android log or null if there is
+  /// Return the most recent timestamp in the Android log or [null] if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
-    final String output = runAdbCheckedSync(<String>[
-      'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
-    ]);
-
+    String output;
+    try {
+      output = runAdbCheckedSync(<String>[
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+      ]);
+    } catch (error) {
+      printError('Unexpected failure from adb: $error.');
+      return null;
+    }
     final Match timeMatch = _timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
   }
@@ -940,9 +955,15 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
 
-    final String stdout = runCheckedSync(device.adbCommandForDevice(
-      <String>['forward', '--list']
-    ));
+    String stdout;
+    try {
+      stdout = runCheckedSync(device.adbCommandForDevice(
+        <String>['forward', '--list']
+      ));
+    } catch (error) {
+      printError('Unexpected failure from adb: $error.');
+      return ports;
+    }
 
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {

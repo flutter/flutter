@@ -34,10 +34,15 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
-    final RunResult runResult = await runCheckedAsync(
-      <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
-      workingDirectory: Cache.flutterRoot,
-    );
+    RunResult runResult;
+    try {
+      runResult = await runCheckedAsync(
+        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        workingDirectory: Cache.flutterRoot,
+      );
+    } catch (error) {
+      throwToolExit('git tag failed: $error.');
+    }
     return runResult.toString().split('\n');
   }
 

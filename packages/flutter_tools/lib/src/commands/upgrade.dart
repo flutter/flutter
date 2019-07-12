@@ -132,11 +132,12 @@ class UpgradeCommandRunner {
     } else {
       tag = 'v${gitTagVersion.x}.${gitTagVersion.y}.${gitTagVersion.z}';
     }
-    final RunResult runResult = await runCheckedAsync(<String>[
-      'git', 'reset', '--hard', tag,
-    ], workingDirectory: Cache.flutterRoot);
-    if (runResult.exitCode != 0) {
-      throwToolExit('Failed to restore branch from hotfix.');
+    try {
+      await runCheckedAsync(<String>[
+        'git', 'reset', '--hard', tag,
+      ], workingDirectory: Cache.flutterRoot);
+    } catch (error) {
+      throwToolExit('git reset failed: $error.');
     }
   }
 

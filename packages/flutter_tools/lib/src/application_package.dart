@@ -122,8 +122,15 @@ class AndroidApk extends ApplicationPackage {
       'AndroidManifest.xml',
     ];
 
-    final ApkManifestData data = ApkManifestData
-        .parseFromXmlDump(runCheckedSync(aaptArgs));
+    String apptStdout;
+    try {
+      apptStdout = runCheckedSync(aaptArgs);
+    } catch (error) {
+      printError('Unexpected failure from aapt: $error.');
+      return null;
+    }
+
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout);
 
     if (data == null) {
       printError('Unable to read manifest info from ${apk.path}.');
