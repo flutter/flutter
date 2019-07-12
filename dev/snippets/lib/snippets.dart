@@ -5,9 +5,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:dart_style/dart_style.dart';
-import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:dart_style/dart_style.dart';
 
 import 'configuration.dart';
 
@@ -129,12 +128,13 @@ class SnippetGenerator {
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
       'serial': '',
-      'id': metadata['id'],
+      'id': '',
       'app': '',
     };
     if (type == SnippetType.application) {
       substitutions
-        ..['serial'] = metadata['serial']?.toString() ?? '0'
+        ..['serial'] = metadata['serial'].toString() ?? '0'
+        ..['id'] = injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent
         ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
     }
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
@@ -209,15 +209,9 @@ class SnippetGenerator {
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
   /// [SnippetType.application].
-  String generate(
-    File input,
-    SnippetType type, {
-    String template,
-    File output,
-    @required Map<String, Object> metadata,
-  }) {
+  String generate(File input, SnippetType type, {String template, String id, File output, Map<String, Object> metadata}) {
     assert(template != null || type != SnippetType.application);
-    assert(metadata != null && metadata['id'] != null);
+    assert(id != null || type != SnippetType.application);
     assert(input != null);
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
@@ -233,6 +227,7 @@ class SnippetGenerator {
               'The template $template was not found in the templates directory ${templatesDir.path}');
           exit(1);
         }
+        snippetData.add(_ComponentTuple('id', <String>[id]));
         final String templateContents = _loadFileAsUtf8(templateFile);
         String app = interpolateTemplate(snippetData, templateContents);
 
@@ -244,7 +239,7 @@ class SnippetGenerator {
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        final File outputFile = output ?? getOutputFile(metadata['id']);
+        final File outputFile = output ?? getOutputFile(id);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
 
@@ -257,7 +252,7 @@ class SnippetGenerator {
         );
         metadata ??= <String, Object>{};
         metadata.addAll(<String, Object>{
-          'id': metadata['id'],
+          'id': id,
           'file': path.basename(outputFile.path),
           'description': description?.mergedContent,
         });

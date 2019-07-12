@@ -14,7 +14,6 @@ import 'src/build_runner/web_compilation_delegate.dart';
 
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
-import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
@@ -62,7 +61,6 @@ Future<void> main(List<String> args) async {
 
   await runner.run(args, <FlutterCommand>[
     AnalyzeCommand(verboseHelp: verboseHelp),
-    AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),
     ChannelCommand(verboseHelp: verboseHelp),

@@ -14,13 +14,10 @@ import 'dart/sdk.dart';
 import 'globals.dart';
 
 enum Artifact {
-  /// The tool which compiles a dart kernel file into native code.
   genSnapshot,
-  /// The flutter tester binary.
   flutterTester,
   snapshotDart,
   flutterFramework,
-  /// The framework directory of the macOS desktop.
   flutterMacOSFramework,
   vmSnapshotData,
   isolateSnapshotData,
@@ -28,24 +25,12 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  /// The root directory of the dartk SDK.
   engineDartSdkPath,
-  /// The dart binary used to execute any of the required snapshots.
   engineDartBinary,
-  /// The dart snapshot of the dart2js compiler.
   dart2jsSnapshot,
-  /// The dart snapshot of the dartdev compiler.
   dartdevcSnapshot,
-  /// The dart snpashot of the kernel worker compiler.
   kernelWorkerSnapshot,
-  /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
-  /// The root of the Linux desktop sources.
-  linuxDesktopPath,
-  /// The root of the Windows desktop sources.
-  windowsDesktopPath,
-  /// The root of the sky_engine package
-  skyEnginePath,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -62,10 +47,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.flutterFramework:
       return 'Flutter.framework';
     case Artifact.flutterMacOSFramework:
-      if (platform != TargetPlatform.darwin_x64)  {
-        throw Exception('${getNameForTargetPlatform(platform)} does not support'
-            ' macOS desktop development');
-      }
       return 'FlutterMacOS.framework';
     case Artifact.vmSnapshotData:
       return 'vm_isolate_snapshot.bin';
@@ -93,20 +74,6 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dartdevc.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
-    case Artifact.linuxDesktopPath:
-      if (platform != TargetPlatform.linux_x64)  {
-        throw Exception('${getNameForTargetPlatform(platform)} does not support'
-            ' Linux desktop development');
-      }
-      return '';
-    case Artifact.windowsDesktopPath:
-      if (platform != TargetPlatform.windows_x64)  {
-        throw Exception('${getNameForTargetPlatform(platform)} does not support'
-            ' Windows desktop development');
-      }
-      return '';
-    case Artifact.skyEnginePath:
-      return 'sky_engine';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -242,14 +209,9 @@ class CachedArtifacts extends Artifacts {
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.flutterMacOSFramework:
-      case Artifact.linuxDesktopPath:
-      case Artifact.windowsDesktopPath:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
-      case Artifact.skyEnginePath:
-        final Directory dartPackageDirectory = cache.getCacheDir('pkg');
-        return fs.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -340,12 +302,6 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
-      case Artifact.linuxDesktopPath:
-        return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
-      case Artifact.windowsDesktopPath:
-        return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
-      case Artifact.skyEnginePath:
-        return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

@@ -809,25 +809,23 @@ void main() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
-          return MaterialApp(
-            home: MediaQuery(
-              data: const MediaQueryData(devicePixelRatio: 1.0),
-              child: Directionality(
-                textDirection: TextDirection.ltr,
-                child: Center(
-                  child: Material(
-                    child: EditableText(
-                      backgroundCursorColor: Colors.grey,
-                      controller: currentController,
-                      focusNode: focusNode,
-                      style: Typography(platform: TargetPlatform.android)
-                          .black
-                          .subhead,
-                      cursorColor: Colors.blue,
-                      selectionControls: materialTextSelectionControls,
-                      keyboardType: TextInputType.text,
-                      onChanged: (String value) { },
-                    ),
+          return MediaQuery(
+            data: const MediaQueryData(devicePixelRatio: 1.0),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Center(
+                child: Material(
+                  child: EditableText(
+                    backgroundCursorColor: Colors.grey,
+                    controller: currentController,
+                    focusNode: focusNode,
+                    style: Typography(platform: TargetPlatform.android)
+                        .black
+                        .subhead,
+                    cursorColor: Colors.blue,
+                    selectionControls: materialTextSelectionControls,
+                    keyboardType: TextInputType.text,
+                    onChanged: (String value) { },
                   ),
                 ),
               ),

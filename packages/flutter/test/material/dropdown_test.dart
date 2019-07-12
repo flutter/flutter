@@ -144,6 +144,7 @@ void main() {
         'dropdown_test.default.png',
         version: 0,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -159,6 +160,7 @@ void main() {
         'dropdown_test.expanded.png',
         version: 0,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 

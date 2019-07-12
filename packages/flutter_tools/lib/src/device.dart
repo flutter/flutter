@@ -406,8 +406,8 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool ipv6 = false,
     bool usesTerminalUi = true,
+    bool ipv6 = false,
   });
 
   /// Whether this device implements support for hot reload.

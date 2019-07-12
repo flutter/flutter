@@ -4713,14 +4713,13 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
-///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
-///
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with, shown above. The color of the button in the menu
-/// changes to indicate which one has been selected.
+/// as it is interacted with. The color of the button in the menu changes to
+/// indicate which one has been selected.
+///
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
 ///
 /// ```dart main
 /// import 'package:flutter/material.dart';

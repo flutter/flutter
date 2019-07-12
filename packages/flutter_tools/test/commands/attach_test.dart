@@ -24,18 +24,15 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
+  final StreamLogger logger = StreamLogger();
   group('attach', () {
-    StreamLogger logger;
-    FileSystem testFileSystem;
+    final FileSystem testFileSystem = MemoryFileSystem(
+      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle
+          .posix,
+    );
 
     setUp(() {
       Cache.disableLocking();
-      logger = StreamLogger();
-      testFileSystem = MemoryFileSystem(
-      style: platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
-      );
       testFileSystem.directory('lib').createSync();
       testFileSystem.file(testFileSystem.path.join('lib', 'main.dart')).createSync();
     });
@@ -111,8 +108,7 @@ void main() {
         const String outputDill = '/tmp/output.dill';
 
         final MockHotRunner mockHotRunner = MockHotRunner();
-        when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
-            .thenAnswer((_) async => 0);
+        when(mockHotRunner.attach()).thenAnswer((_) async => 0);
 
         final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
@@ -123,7 +119,7 @@ void main() {
             dillOutputPath: anyNamed('dillOutputPath'),
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
-            usesTerminalUi: anyNamed('usesTerminalUi'),
+            usesTerminalUI: anyNamed('usesTerminalUI'),
             flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
@@ -155,7 +151,7 @@ void main() {
             dillOutputPath: outputDill,
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
-            usesTerminalUi: anyNamed('usesTerminalUi'),
+            usesTerminalUI: anyNamed('usesTerminalUI'),
             flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
@@ -223,14 +219,14 @@ void main() {
         .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any))
         .thenAnswer((_) async => null);
-      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
-          .thenAnswer((_) async => 0);
+      when(mockHotRunner.attach())
+        .thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
         any,
         target: anyNamed('target'),
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
-        usesTerminalUi: anyNamed('usesTerminalUi'),
+        usesTerminalUI: anyNamed('usesTerminalUI'),
         flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).thenReturn(mockHotRunner);
@@ -260,7 +256,7 @@ void main() {
         target: foo.path,
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
-        usesTerminalUi: anyNamed('usesTerminalUi'),
+        usesTerminalUI: anyNamed('usesTerminalUI'),
         flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).called(1);

@@ -21,7 +21,6 @@ import 'base/platform.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
@@ -68,7 +67,6 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      BuildSystem: () => BuildSystem(),
       Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),

@@ -1196,45 +1196,6 @@ class ClipPathLayer extends ContainerLayer {
   }
 }
 
-/// A composite layer that applies a [ColorFilter] to its children.
-class ColorFilterLayer extends ContainerLayer {
-  /// Creates a layer that applies a [ColorFilter] to its children.
-  ///
-  /// The [ColorFilter] property must be non-null before the compositing phase
-  /// of the pipeline.
-  ColorFilterLayer({
-    @required ColorFilter colorFilter,
-  }) : _colorFilter = colorFilter,
-       assert(colorFilter != null);
-
-  /// The color filter to apply to children.
-  ///
-  /// The scene must be explicitly recomposited after this property is changed
-  /// (as described at [Layer]).
-  ColorFilter get colorFilter => _colorFilter;
-  ColorFilter _colorFilter;
-  set colorFilter(ColorFilter value) {
-    if (value != _colorFilter) {
-      _colorFilter = value;
-      markNeedsAddToScene();
-    }
-  }
-
-  @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushColorFilter(colorFilter);
-    addChildrenToScene(builder, layerOffset);
-    builder.pop();
-    return null; // this does not return an engine layer yet.
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
-  }
-}
-
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///

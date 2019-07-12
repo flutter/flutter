@@ -414,16 +414,9 @@ tasks:
 
   platform_channel_sample_test_ios:
     description: >
-      Runs a driver test on the Platform Channel sample app on iPhone 6 Objective-C project.
+      Runs a driver test on the Platform Channel sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-
-  platform_channel_sample_test_swift:
-    description: >
-      Runs a driver test on the Platform Channel sample app on iPhone 6 Swift project.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   platform_view_ios__start_up:
     description: >

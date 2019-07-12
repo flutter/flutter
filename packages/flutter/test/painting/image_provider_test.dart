@@ -44,19 +44,11 @@ void main() {
         final ImageCache otherCache = ImageCache();
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
         final MemoryImage imageProvider = MemoryImage(bytes);
-        final ImageStreamCompleter cacheStream = otherCache.putIfAbsent(
-          imageProvider, () => imageProvider.load(imageProvider),
-        );
+        otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        final Completer<void> cacheCompleter = Completer<void>();
-        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-          completer.complete();
-        }));
-        cacheStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
-          cacheCompleter.complete();
-        }));
-        await Future.wait(<Future<void>>[completer.future, cacheCompleter.future]);
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+        await completer.future;
 
         expect(otherCache.currentSize, 1);
         expect(imageCache.currentSize, 1);

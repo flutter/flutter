@@ -92,21 +92,19 @@ Widget overlayWithEntry(OverlayEntry entry) {
 }
 
 Widget boilerplate({ Widget child }) {
-  return MaterialApp(
-    home: Localizations(
-      locale: const Locale('en', 'US'),
-      delegates: <LocalizationsDelegate<dynamic>>[
-        WidgetsLocalizationsDelegate(),
-        MaterialLocalizationsDelegate(),
-      ],
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: MediaQuery(
-          data: const MediaQueryData(size: Size(800.0, 600.0)),
-          child: Center(
-            child: Material(
-              child: child,
-            ),
+  return Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      WidgetsLocalizationsDelegate(),
+      MaterialLocalizationsDelegate(),
+    ],
+    child: Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(size: Size(800.0, 600.0)),
+        child: Center(
+          child: Material(
+            child: child,
           ),
         ),
       ),
@@ -416,7 +414,7 @@ void main() {
         version: 0,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -448,7 +446,7 @@ void main() {
         version: 0,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -501,6 +499,7 @@ void main() {
         'text_field_opacity_test.0.png',
         version: 2,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -5337,66 +5336,6 @@ void main() {
 
       // Long press again keeps the selection menu visible.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
-      await tester.pump();
-      expect(find.text('PASTE'), findsOneWidget);
-    },
-  );
-
-  testWidgets(
-    'A single tap hides the selection menu',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: '',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                controller: controller,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Long press shows the selection menu.
-      await tester.longPress(find.byType(TextField));
-      await tester.pump();
-      expect(find.text('PASTE'), findsOneWidget);
-
-      // Tap hides the selection menu.
-      await tester.tap(find.byType(TextField));
-      await tester.pump();
-      expect(find.text('PASTE'), findsNothing);
-    },
-  );
-
-  testWidgets(
-    'Long press on an autofocused field shows the selection menu',
-    (WidgetTester tester) async {
-      final TextEditingController controller = TextEditingController(
-        text: '',
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: Center(
-              child: TextField(
-                autofocus: true,
-                controller: controller,
-              ),
-            ),
-          ),
-        ),
-      );
-      // This extra pump allows the selection set by autofocus to propagate to
-      // the RenderEditable.
-      await tester.pump();
-
-      // Long press shows the selection menu.
-      expect(find.text('PASTE'), findsNothing);
-      await tester.longPress(find.byType(TextField));
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
     },

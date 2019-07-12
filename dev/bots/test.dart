@@ -240,8 +240,7 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
-  // reduce overhead of build_runner in the create case.
-  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
+  if (noUseBuildRunner) {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
@@ -259,23 +258,22 @@ Future<void> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-/// Verifies that AOT, APK, and IPA (if on macOS) builds the
-/// examples apps without crashing. It does not actually
+/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
+/// examples apps finish without crashing. It does not actually
 /// launch the apps. That happens later in the devicelab. This is
 /// just a smoke-test. In particular, this will verify we can build
 /// when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
-  final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
-  await for (FileSystemEntity fileEntity in exampleDirectories) {
-    if (fileEntity is! Directory) {
-      continue;
-    }
-    final String examplePath = fileEntity.path;
-
-    await _flutterBuildAot(examplePath);
-    await _flutterBuildApk(examplePath);
-    await _flutterBuildIpa(examplePath);
+  final List<String> paths = <String>[
+    path.join('examples', 'hello_world'),
+    path.join('examples', 'flutter_gallery'),
+    path.join('examples', 'flutter_view'),
+  ];
+  for (String path in paths) {
+    await _flutterBuildAot(path);
+    await _flutterBuildApk(path);
+    await _flutterBuildIpa(path);
   }
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
@@ -554,7 +552,6 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
-      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
@@ -591,9 +588,6 @@ Future<void> _pubRunTest(
     case 'tool':
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
-    case 'create':
-      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
-      break;
   }
 
   if (useFlutterTestFormatter) {
@@ -609,7 +603,7 @@ Future<void> _pubRunTest(
     await runCommand(
       pub,
       args,
-      workingDirectory: workingDirectory,
+      workingDirectory:workingDirectory,
     );
   }
 }

@@ -481,7 +481,7 @@ void main() {
         version: 2,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -514,7 +514,7 @@ void main() {
         version: 2,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -2901,6 +2901,7 @@ void main() {
         'text_field_test.disabled.png',
         version: 0,
       ),
+      skip: !isLinux,
     );
   });
 
@@ -3649,31 +3650,5 @@ void main() {
         expect(tester.getTopLeft(find.byType(EditableText)).dy, closeTo(329.0, .0001));
       });
     });
-
-    testWidgets(
-      'Long press on an autofocused field shows the selection menu',
-      (WidgetTester tester) async {
-        await tester.pumpWidget(
-          CupertinoApp(
-            home: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints.loose(const Size(200, 200)),
-                child: const CupertinoTextField(
-                  autofocus: true,
-                ),
-              ),
-            ),
-          ),
-        );
-        // This extra pump allows the selection set by autofocus to propagate to
-        // the RenderEditable.
-        await tester.pump();
-
-        // Long press shows the selection menu.
-        await tester.longPressAt(textOffsetToPosition(tester, 0));
-        await tester.pump();
-        expect(find.text('Paste'), findsOneWidget);
-      },
-    );
   });
 }

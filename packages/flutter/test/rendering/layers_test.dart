@@ -250,15 +250,6 @@ void main() {
     });
   });
 
-  test('mutating ColorFilterLayer fields triggers needsAddToScene', () {
-    final ColorFilterLayer layer = ColorFilterLayer(
-      colorFilter: const ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
-    );
-    checkNeedsAddToScene(layer, () {
-      layer.colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color);
-    });
-  });
-
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
     const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);

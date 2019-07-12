@@ -22,7 +22,6 @@ import 'transitions.dart';
 //   @override
 //   MyWidgetState createState() => MyWidgetState();
 // }
-// void setState(VoidCallback fn) { }
 
 /// An interpolation between two [BoxConstraints].
 ///
@@ -232,6 +231,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
     Key key,
     this.curve = Curves.linear,
     @required this.duration,
+    this.reverseDuration,
   }) : assert(curve != null),
        assert(duration != null),
        super(key: key);
@@ -242,6 +242,12 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// The duration over which to animate the parameters of this container.
   final Duration duration;
 
+  /// The duration over which to animate the parameters of this container when
+  /// the animation is going in the reverse direction.
+  ///
+  /// Defaults to [duration] if not specified.
+  final Duration reverseDuration;
+
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState();
 
@@ -249,6 +255,7 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
@@ -309,6 +316,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     super.initState();
     _controller = AnimationController(
       duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
       debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
       vsync: this,
     );
@@ -323,6 +331,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     if (widget.curve != oldWidget.curve)
       _updateCurve();
     _controller.duration = widget.duration;
+    _controller.reverseDuration = widget.reverseDuration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
@@ -512,42 +521,9 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=yI-8QHpGIP4}
 ///
-/// Here's an illustration (implemented below) of what using this widget looks
-/// like, using a [curve] of [Curves.fastOutSlowIn].
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
-///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
-/// The following example (depicted above) transitions an AnimatedContainer
-/// between two states. It adjusts the [height], [width], [color], and
-/// [alignment] properties when tapped.
-///
-/// ```dart
-/// bool selected = false;
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return GestureDetector(
-///     onTap: () {
-///       setState(() {
-///         selected = !selected;
-///       });
-///     },
-///     child: Center(
-///       child: AnimatedContainer(
-///         width: selected ? 200.0 : 100.0,
-///         height: selected ? 100.0 : 200.0,
-///         color: selected ? Colors.red : Colors.blue,
-///         alignment: selected ? Alignment.center : AlignmentDirectional.topCenter,
-///         duration: Duration(seconds: 2),
-///         curve: Curves.fastOutSlowIn,
-///         child: FlutterLogo(size: 75),
-///       ),
-///     ),
-///   );
-/// }
-/// ```
-/// {@end-tool}
 ///
 /// See also:
 ///
@@ -580,6 +556,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
@@ -594,7 +571,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
           ? constraints?.tighten(width: width, height: height)
             ?? BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The [child] contained by the container.
   ///
@@ -736,9 +713,10 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -807,8 +785,9 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
     this.child,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(alignment != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// How to align the child.
   ///
@@ -907,9 +886,10 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -920,13 +900,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     Rect rect,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
        height = rect.height,
        right = null,
        bottom = null,
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1058,9 +1039,10 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1212,8 +1194,9 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
     @required this.opacity,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1287,12 +1270,13 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
     this.maxLines,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(style != null),
        assert(child != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The widget below this widget in the tree.
   ///
@@ -1402,6 +1386,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.animateShadowColor = true,
     Curve curve = Curves.linear,
     @required Duration duration,
+    Duration reverseDuration,
   }) : assert(child != null),
        assert(shape != null),
        assert(clipBehavior != null),
@@ -1411,7 +1396,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shadowColor != null),
        assert(animateColor != null),
        assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration);
+       super(key: key, curve: curve, duration: duration, reverseDuration: reverseDuration);
 
   /// The widget below this widget in the tree.
   ///

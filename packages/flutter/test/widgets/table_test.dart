@@ -19,24 +19,6 @@ class TestStatefulWidgetState extends State<TestStatefulWidget> {
   Widget build(BuildContext context) => Container();
 }
 
-class TestChildWidget extends StatefulWidget {
-  const TestChildWidget({ Key key }) : super(key: key);
-
-  @override
-  TestChildState createState() => TestChildState();
-}
-
-class TestChildState extends State<TestChildWidget> {
-  bool toggle = true;
-
-  void toggleMe() {
-    setState(() { toggle = !toggle; });
-  }
-
-  @override
-  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
-}
-
 void main() {
   testWidgets('Table widget - empty', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -872,33 +854,6 @@ void main() {
       ),
     );
   });
-
-  // Regression test for https://github.com/flutter/flutter/issues/31473.
-  testWidgets(
-    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
-        ),
-      );
-      expect(find.text('CRASHHH'), findsNothing);
-
-      final TestChildState state = tester.state(find.byType(TestChildWidget));
-      state.toggleMe();
-
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
-        ),
-      );
-
-      // Should not crash.
-      expect(find.text('CRASHHH'), findsOneWidget);
-    }
-  );
 
   // TODO(ianh): Test handling of TableCell object
 }

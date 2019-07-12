@@ -75,6 +75,7 @@ void main() {
         'bottom_app_bar.custom_shape.1.png',
         version: null,
       ),
+      skip: !isLinux,
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
@@ -84,6 +85,7 @@ void main() {
         'bottom_app_bar.custom_shape.2.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 
