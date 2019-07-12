@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 
@@ -43,12 +44,18 @@ void main() {
     _MockDevice nonEphemeralOne;
     _MockDevice nonEphemeralTwo;
     _MockDevice unsupported;
+    _MockDevice webDevice;
+    _MockDevice fuchsiaDevice;
 
     setUp(() {
       ephemeral = _MockDevice('ephemeral', 'ephemeral', true);
       nonEphemeralOne = _MockDevice('nonEphemeralOne', 'nonEphemeralOne', false);
       nonEphemeralTwo = _MockDevice('nonEphemeralTwo', 'nonEphemeralTwo', false);
       unsupported = _MockDevice('unsupported', 'unsupported', true, false);
+      webDevice = _MockDevice('webby', 'webby')
+        ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
+      fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
+        ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia);
     });
 
     testUsingContext('chooses ephemeral device', () async {
@@ -72,6 +79,36 @@ void main() {
       ];
 
       final DeviceManager deviceManager = TestDeviceManager(devices);
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+      ]);
+    });
+
+    testUsingContext('Removes web and fuchsia from --all', () async {
+      final List<Device> devices = <Device>[
+        webDevice,
+        fuchsiaDevice,
+      ];
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      deviceManager.specifiedDeviceId = 'all';
+
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[]);
+    });
+
+    testUsingContext('Removes unsupported devices from --all', () async {
+      final List<Device> devices = <Device>[
+        nonEphemeralOne,
+        nonEphemeralTwo,
+        unsupported,
+      ];
+      final DeviceManager deviceManager = TestDeviceManager(devices);
+      deviceManager.specifiedDeviceId = 'all';
+
       final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
 
       expect(filtered, <Device>[
@@ -105,6 +142,9 @@ class _MockDevice extends Device {
 
   @override
   final String name;
+
+  @override
+  Future<TargetPlatform> targetPlatform = Future<TargetPlatform>.value(TargetPlatform.android_arm);
 
   @override
   void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

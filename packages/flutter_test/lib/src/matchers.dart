@@ -84,7 +84,7 @@ const Matcher findsOneWidget = _FindsWidgetMatcher(1, 1);
 ///  * [findsOneWidget], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Offstage] widget ancestor.
 ///
 /// It's important to use a full finder, since by default finders exclude
@@ -101,7 +101,7 @@ Matcher findsNWidgets(int n) => _FindsWidgetMatcher(n, n);
 ///  * [isOnstage], the opposite.
 const Matcher isOffstage = _IsOffstage();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Offstage] widget ancestors.
 ///
 /// See also:
@@ -109,7 +109,7 @@ const Matcher isOffstage = _IsOffstage();
 ///  * [isOffstage], the opposite.
 const Matcher isOnstage = _IsOnstage();
 
-/// Asserts that the [Finder] locates the a single widget that has at
+/// Asserts that the [Finder] locates a single widget that has at
 /// least one [Card] widget ancestor.
 ///
 /// See also:
@@ -117,7 +117,7 @@ const Matcher isOnstage = _IsOnstage();
 ///  * [isNotInCard], the opposite.
 const Matcher isInCard = _IsInCard();
 
-/// Asserts that the [Finder] locates the a single widget that has no
+/// Asserts that the [Finder] locates a single widget that has no
 /// [Card] widget ancestors.
 ///
 /// This is equivalent to `isNot(isInCard)`.
@@ -1712,7 +1712,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _getTestNameUri(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1734,19 +1734,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
-
-  Uri _getTestNameUri(Uri key, int version) {
-    return version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
+  Description describe(Description description) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 

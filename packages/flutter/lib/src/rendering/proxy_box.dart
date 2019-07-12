@@ -2311,7 +2311,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2325,7 +2325,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
