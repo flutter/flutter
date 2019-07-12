@@ -118,3 +118,8 @@ export 'src/material/tooltip.dart';
 export 'src/material/typography.dart';
 export 'src/material/user_accounts_drawer_header.dart';
 export 'widgets.dart';
+
+void please_ignore_me() {
+  print('blah blah');
+}
+
