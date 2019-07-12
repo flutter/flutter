@@ -6,12 +6,13 @@
 import 'dart:async';
 
 import 'package:build_daemon/client.dart';
-import 'package:build_daemon/constants.dart';
+import 'package:build_daemon/constants.dart' hide BuildMode;
+import 'package:build_daemon/constants.dart' as daemon show BuildMode;
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
-import 'package:shelf/shelf.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
 import 'application_package.dart';
@@ -20,7 +21,6 @@ import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -32,6 +32,7 @@ import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
+import 'web/server.dart';
 
 Future<BuildDaemonClient> connectClient(
   String workingDirectory,
@@ -51,13 +52,13 @@ Future<BuildDaemonClient> connectClient(
       buildScript,
       'daemon',
       '--skip-build-script-check',
-      '-v',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
       '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
     ],
     logHandler: logHandler,
+    buildMode: daemon.BuildMode.Manual,
   );
 }
 
@@ -128,12 +129,13 @@ class ResidentWebRunner extends ResidentRunner {
 
   StreamSubscription<BuildResults> _buildResults;
   BuildDaemonClient _client;
-  dynamic _webDevHandle;
+  FlutterWebServer _flutterWebServer;
+  DebugConnection _debugConnection;
 
   StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
 
-  vmservice.VmService get _vmService => _webDevHandle.vmService;
+  vmservice.VmService get _vmService => _debugConnection.vmService;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -148,9 +150,10 @@ class ResidentWebRunner extends ResidentRunner {
   Future<void> _cleanup() async {
     await _buildResults?.cancel();
     await _client?.close();
-    await _webDevHandle.close();
+    await _debugConnection?.close();
     await _resultSub?.cancel();
     await _stdOutSub?.cancel();
+    await _flutterWebServer?.stop();
   }
 
   @override
@@ -211,8 +214,6 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    final int targetPort = await os.findFreePort();
-    printTrace('Connecting to $targetPort');
     /// Start the build daemon and run an initial build.
     final String workingDirectory = fs.currentDirectory.path;
     _client = await _startBuildDaemon(workingDirectory);
@@ -228,18 +229,18 @@ class ResidentWebRunner extends ResidentRunner {
           printTrace(data.results.toString());
       }
     });
+    final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
+      .readAsStringSync());
 
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-    // _webDevHandle = await (await connectToWebdev(
-    //   targetPort,
-    //   daemonPort(fs.currentDirectory.path),
-    //   'web',
-    //   _client.buildResults,
-    //   optionalHandler: _assetHandler,
-    // )).first;
+    _flutterWebServer = await FlutterWebServer.start(
+      daemonAssetPort: daemonAssetPort,
+      buildResults: _client.buildResults,
+    );
+    print('adaasdad');
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -252,102 +253,31 @@ class ResidentWebRunner extends ResidentRunner {
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     // When a tab is closed we exit an app.
-    unawaited(_webDevHandle.onTabClose.first.then((dynamic _) {
-      appFinished();
-    }));
+    // unawaited(_flutterWebServer.chrome.chromeConnection.onTabClose.first.then((dynamic _) {
+    //   appFinished();
+    // }));
     // Cleanup old subscriptions.
+    print('Getting connected apps');
+    final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
+    print('Getting debug connection');
+    _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
+    appConnection.runMain();
+    print("Got debug conneciton");
     try {
-      await _webDevHandle.vmService.streamCancel('Stdout');
+      await _debugConnection.vmService.streamCancel('Stdout');
     } catch (_) {}
     try {
-      await _webDevHandle.vmService.streamListen('Stdout');
+      await _debugConnection.vmService.streamListen('Stdout');
     } catch (_) {}
-    _stdOutSub = _webDevHandle.vmService.onStdoutEvent.listen((vmservice.Event log) {
+    _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
       printStatus(utf8.decode(base64.decode(log.bytes)));
     });
-
-    // Response with debug info!
-    // How does this map from the existing code?
     connectionInfoCompleter?.complete(DebugConnectionInfo(
-      wsUri: _webDevHandle.wsUri,
+      wsUri: Uri.parse(_debugConnection.wsUri),
     ));
-    _webDevHandle.runMain();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;
-  }
-
-  Future<Response> _assetHandler(Request request) async {
-    final String generated = fs.path.join(
-      flutterProject.dartTool.path,
-      'build',
-      'flutter_web',
-      flutterProject.manifest.appName,
-    );
-    if (request.url.path.contains('main.dart.js')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.dart.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('stack_trace_mapper')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'web',
-        'dart_stack_trace_mapper.js'
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('require.js')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-        'lib',
-        'dev_compiler',
-        'kernel',
-        'amd',
-        'require.js'
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('.bootstrap.js')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.dart.bootstrap.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('dart_sdk')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
-    } else if (request.url.path.contains('main_web_entrypoint.digests')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.digests',
-      ));
-      return Response.ok(file.readAsBytesSync());
-    } else if (request.url.path.contains('assets')) {
-      final String assetPath = request.url.path.replaceFirst('assets/', '');
-      final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
-      return Response.ok(file.readAsBytesSync());
-    }
-    return Response.notFound('');
   }
 
   @override
@@ -368,7 +298,6 @@ class ResidentWebRunner extends ResidentRunner {
     );
     _client.startBuild();
     await for (BuildResults results in _client.buildResults) {
-      // TODO(jonahwilliams): spend some time here to figure out ideal loig.c
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == 'web';
       });
@@ -476,14 +405,6 @@ class ResidentWebRunner extends ResidentRunner {
   }
 }
 
-/// Returns the port of the daemon asset server.
-int daemonPort(String workingDirectory) {
-  final File portFile = fs.file(_assetServerPortFilePath(workingDirectory));
-  if (!portFile.existsSync()) {
-    throw Exception('Unable to read daemon asset port file.');
-  }
-  return int.parse(portFile.readAsStringSync());
+String assetServerPortFilePath(String workingDirectory) {
+  return fs.path.join(daemonWorkspace(workingDirectory), '.asset_server_port');
 }
-
-String _assetServerPortFilePath(String workingDirectory) =>
-    '${daemonWorkspace(workingDirectory)}/.asset_server_port';

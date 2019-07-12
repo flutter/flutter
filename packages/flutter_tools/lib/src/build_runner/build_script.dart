@@ -170,15 +170,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
 
 /// The entrypoint to this build script.
 Future<void> main(List<String> args, [SendPort sendPort]) async {
-  try {
-    core.overrideGeneratedOutputDirectory('flutter_web');
-    final int result = await build_runner.run(args, builders);
-    sendPort?.send(result);
-  } catch (err, st) {
-    print(err.toString());
-    print(st.toString());
-    sendPort?.send(999);
-  }
+  core.overrideGeneratedOutputDirectory('flutter_web');
+  final int result = await build_runner.run(args, builders);
+  sendPort?.send(result);
 }
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.

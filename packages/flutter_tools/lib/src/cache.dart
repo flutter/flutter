@@ -14,7 +14,6 @@ import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A tag for a set of development artifacts that need to be cached.
@@ -503,45 +502,6 @@ class FlutterWebSdk extends CachedArtifact {
         }
         entity.copySync(newPath);
       }
-    }
-    // Snapshot flutter_web build script.
-    final Status status = logger.startProgress(
-      'snapshotting flutter_web build script',
-      timeout: null,
-    );
-    try {
-      final String buildScriptPath = fs.path.join(
-        Cache.flutterRoot,
-        'packages',
-        'flutter_tools',
-        'lib',
-        'src',
-        'build_runner',
-        'build_script.dart',
-      );
-      final String packagesPath = fs.path.join(
-        Cache.flutterRoot,
-        'packages',
-        'flutter_tools',
-        '.packages',
-      );
-      final String outputPath = fs.path.join(
-        location.path,
-        'flutter_web_build.snapshot',
-      );
-      await processManager.run(<String>[
-        'dart',
-        buildScriptPath,
-        '--snapshot=$outputPath',
-        '--snashot-kind=app-jit',
-        '--packages=$packagesPath',
-      ]);
-    } catch (err) {
-      printError(
-          'Failed to snapshot builders for flutter web: compilers may'
-          ' take longer to initialize.');
-    } finally {
-      status.cancel();
     }
   }
 }

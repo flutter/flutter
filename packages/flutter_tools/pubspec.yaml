@@ -20,7 +20,7 @@ dependencies:
   intl: 0.15.8
   json_rpc_2: 2.1.0
   linter: 0.1.93
-  meta: 1.1.6
+  meta: any
   multicast_dns: 0.1.1
   mustache: 1.1.1
   package_config: 1.0.5
@@ -135,11 +135,21 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# dependency_overrides:
-#   dwds:
-#     path: /Users/jonahwilliams/Documents/webdev/dwds
-#   webdev:
-#     path: /Users/jonahwilliams/Documents/webdev/webdev
-#   vm_service_lib: 3.20.0+02
+# Just for testing
+dependency_overrides:
+  dwds:
+    git:
+      url: git@github.com:dart-lang/webdev.git
+      path: dwds
+  build_daemon:
+    git:
+      url: git@github.com:dart-lang/build
+      path: build_daemon
+  build_runner:
+    git:
+      url: git@github.com:dart-lang/build
+      path: build_runner
+  meta: 1.1.7
+  vm_service_lib: 3.20.0+02
 
 # PUBSPEC CHECKSUM: 6603
