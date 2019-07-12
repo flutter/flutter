@@ -847,6 +847,7 @@ void main() {
           'date_picker_test.datetime.initial.png',
           version: 1,
         ),
+        skip: !isLinux
       );
 
       // Slightly drag the hour component to make the current hour off-center.
@@ -859,6 +860,7 @@ void main() {
           'date_picker_test.datetime.drag.png',
           version: 1,
         ),
+        skip: !isLinux
       );
     });
   });

@@ -24,6 +24,7 @@ void main() {
         'invert_colors_test.0.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -45,6 +46,7 @@ void main() {
         'invert_colors_test.1.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 }

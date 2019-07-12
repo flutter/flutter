@@ -280,6 +280,7 @@ void main() {
         'radio.ink_ripple.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 }
