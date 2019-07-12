@@ -19,16 +19,16 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
   ///
-  /// The [toolkit], [scanCode], [codePoint], [keyCode], and [modifiers],
+  /// The [toolkit], [scanCode], [unicodeScalarValuesProduced], [keyCode], and [modifiers],
   /// arguments must not be null.
   const RawKeyEventDataLinux({
     @required this.keyHelper,
-    this.codePoint = '',
+    this.unicodeScalarValuesProduced = '',
     this.scanCode = 0,
     this.keyCode = 0,
     this.modifiers = 0,
   }) : assert(scanCode != null),
-       assert(codePoint != null),
+       assert(unicodeScalarValuesProduced != null),
        assert(keyCode != null),
        assert(modifiers != null),
        assert(keyHelper != null);
@@ -39,10 +39,11 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
   final KeyHelper keyHelper;
 
-  /// The name of the printable key. This is typically the character that [keyCode] would
-  /// produce without any modifier keys. For dead keys, it is typically the diacritic
-  /// it would add to a character. Defaults to an empty string, asserted to be not null.
-  final String codePoint;
+  /// A string with one or more unicode scalar values in a single keystroke. Two values are handled
+  /// at most. Otherwise, an assertion will be raised. This is typically the character
+  /// that [keyCode] would produce without any modifier keys. For dead keys, it is typically
+  /// the diacritic it would add to a character. Defaults to an empty string, asserted to be not null.
+  final String unicodeScalarValuesProduced;
 
   /// The hardware scan code id corresponding to this key event.
   ///
@@ -53,7 +54,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The hardware key code corresponding to this key event.
   ///
   /// This is the physical key that was pressed, not the Unicode character.
-  /// See [codePoint] for the unmodified Unicode character.
+  /// See [unicodeScalarValuesProduced] for the unmodified Unicode character.
   /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int keyCode;
 
@@ -62,7 +63,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String get keyLabel => codePoint.isEmpty ? null : codePoint;
+  String get keyLabel => unicodeScalarValuesProduced.isEmpty ? null : unicodeScalarValuesProduced;
 
   @override
   PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
@@ -84,10 +85,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
       // Not covering length > 2 case since > 1 is already unlikely.
-      assert(codePoint.length <= 2);
-      int codeUnit = codePoint.codeUnitAt(0);
-      if (codePoint.length == 2) {
-        final int secondCode = codePoint.codeUnitAt(1);
+      assert(unicodeScalarValuesProduced.length <= 2);
+      int codeUnit = unicodeScalarValuesProduced.codeUnitAt(0);
+      if (unicodeScalarValuesProduced.length == 2) {
+        final int secondCode = unicodeScalarValuesProduced.codeUnitAt(1);
         codeUnit = (codeUnit << 16) | secondCode;
       }
 
@@ -129,7 +130,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   String toString() {
     return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' codePoint: $codePoint, modifiers: $modifiers, modifiers down: $modifiersPressed)';
+        ' unicodeScalarValuesProduced: $unicodeScalarValuesProduced, modifiers: $modifiers, modifiers down: $modifiersPressed)';
   }
 }
 

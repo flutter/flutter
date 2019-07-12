@@ -469,7 +469,7 @@ void main() {
           'toolkit': 'glfw',
           'keyCode': 65,
           'scanCode': 0x00000026,
-          'codePoint': 'a',
+          'unicodeScalarValuesProduced': 'a',
           'modifiers': modifier,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -503,7 +503,7 @@ void main() {
           'toolkit': 'glfw',
           'keyCode': 65,
           'scanCode': 0x00000026,
-          'codePoint': 'a',
+          'unicodeScalarValuesProduced': 'a',
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -538,7 +538,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'codePoint': 'q',
+        'unicodeScalarValuesProduced': 'q',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = keyAEvent.data;
@@ -553,7 +553,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'codePoint': 'aq',
+        'unicodeScalarValuesProduced': 'aq',
         'modifiers': 0x0,
       });
       // The expected keyId is the combination of both unicode scalar values.
@@ -570,7 +570,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'codePoint': 'aqs',
+        'unicodeScalarValuesProduced': 'aqs',
         'modifiers': 0x0,
       }); 
       final RawKeyEventDataLinux data = keyAQEvent.data;
@@ -583,7 +583,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 256,
         'scanCode': 0x00000009,
-        'codePoint': '',
+        'unicodeScalarValuesProduced': '',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = escapeKeyEvent.data;
@@ -598,7 +598,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 340,
         'scanCode': 0x00000032,
-        'codePoint': '',
+        'unicodeScalarValuesProduced': '',
       });
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
