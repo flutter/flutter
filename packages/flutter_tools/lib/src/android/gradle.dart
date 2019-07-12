@@ -145,7 +145,7 @@ void _removePluginsFromSettingsGradle(Directory androidDirectory) {
     return;
   }
   final String relativeFile = fs.path.relative(currentFile.path);
-  final Status status = logger.startProgress('Updating `$relativeFile`...',
+  final Status status = logger.startProgress('✏️  Updating `$relativeFile`...',
       timeout: timeoutConfiguration.fastOperation);
 
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
@@ -157,7 +157,7 @@ void _removePluginsFromSettingsGradle(Directory androidDirectory) {
   final List<String> deprecatedFilesContent = deprecatedFile.readAsStringSync().split(';EOF');
   bool exactMatch = false;
   for (String deprecatedFileContent in deprecatedFilesContent) {
-    if (currentFileContent.trimRight() == deprecatedFileContent.trimRight()) {
+    if (currentFileContent.trim() == deprecatedFileContent.trim()) {
       exactMatch = true;
       break;
     }
@@ -176,6 +176,7 @@ void _removePluginsFromSettingsGradle(Directory androidDirectory) {
   fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
         'gradle', 'new_settings.gradle')).copySync(currentFile.path);
   status.stop();
+  printStatus('✅ `$relativeFile` updated successfully.');
 }
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
