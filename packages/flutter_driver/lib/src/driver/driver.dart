@@ -1125,9 +1125,22 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
     try {
       ws1 = await WebSocket.connect(webSocketUrl);
       ws2 = await WebSocket.connect(webSocketUrl);
+
+      void checkCloseStatus(WebSocket ws) {
+        if (ws.closeCode != 1000 && ws.closeCode != null) {
+          _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
+        }
+      }
+
+      ws1.done.then((dynamic _) => checkCloseStatus(ws1));
+      ws2.done.then((dynamic _) => checkCloseStatus(ws2));
+
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
+        rpc.Peer(
+            IOWebSocketChannel(ws2).cast(),
+            onUnhandledError: _unhandledJsonRpcError,
+        )..listen(),
       );
     } catch (e) {
       await ws1?.close();
