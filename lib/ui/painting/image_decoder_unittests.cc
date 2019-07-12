@@ -91,9 +91,16 @@ static sk_sp<SkData> OpenFixtureAsSkData(const char* name) {
     delete reinterpret_cast<fml::FileMapping*>(context);
   };
 
-  return SkData::MakeWithProc(fixture_mapping->GetMapping(),
-                              fixture_mapping->GetSize(), on_release,
-                              fixture_mapping.release());
+  auto data = SkData::MakeWithProc(fixture_mapping->GetMapping(),
+                                   fixture_mapping->GetSize(), on_release,
+                                   fixture_mapping.get());
+
+  if (!data) {
+    return nullptr;
+  }
+  // The data is now owned by Skia.
+  fixture_mapping.release();
+  return data;
 }
 
 TEST_F(ImageDecoderFixtureTest, CanCreateImageDecoder) {
