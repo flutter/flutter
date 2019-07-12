@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -201,8 +202,8 @@ class Material extends StatefulWidget {
   /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material relative to its parent.
   ///
-  /// This controls the size of the shadow below the material and the dark
-  /// theme overlay color if inside a dark theme.
+  /// This controls the size of the shadow below the material and the opacity
+  /// of the dark theme overlay color.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
@@ -214,8 +215,9 @@ class Material extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ThemeData.applyDarkThemeElevationOverlay] which controls the whether
+  ///   * [ThemeData.applyElevationOverlay] which controls the whether
   ///     an overlay color will be applied to indicate elevation.
+  ///   * [color] which may have a dark theme overlay applied.
   ///
   /// {@endtemplate}
   final double elevation;
@@ -225,9 +227,10 @@ class Material extends StatefulWidget {
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
   ///
-  /// If inside a dark theme and [ThemeData.applyDarkThemeElevationOverlay]
-  /// is [true], a semi-transparent white will be composited on top this color
-  /// to indicate the elevation.
+  /// To support dark themes, if the surrounding
+  /// [ThemeData.applyElevationOverlay] is [true] and
+  /// this color is [ThemeData.colorScheme.surface] then a semi-transparent
+  /// white will be composited on top this color to indicate the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
@@ -313,6 +316,24 @@ class Material extends StatefulWidget {
   static const double defaultSplashRadius = 35.0;
 }
 
+// Apply a semi-transparent white on surface colors to
+// indicate the level of elevation..
+Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
+  final ThemeData theme = Theme.of(context);
+  if (elevation > 0.0 &&
+    theme.applyElevationOverlay &&
+    background == theme.colorScheme.surface) {
+
+    // Compute the opacity for the given elevation
+    // This formula matches the values in the spec:
+    // https://material.io/design/color/dark-theme.html#properties
+    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
+    final Color overlay = Colors.white.withOpacity(opacity);
+    return Color.alphaBlend(overlay, background);
+  }
+  return background;
+}
+
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
@@ -334,35 +355,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     return color;
   }
 
-  // Lighten a color based on elevation by applying a transparent white overlay.
-  Color _darkThemeOverlayColor(BuildContext context, double elevation) {
-    final ThemeData theme = Theme.of(context);
-    if (elevation > 0.0 &&
-      theme.brightness == Brightness.dark &&
-      theme.applyDarkThemeElevationOverlay) {
-
-      // Compute the opacity for the given elevation according to the spec:
-      // https://material.io/design/color/dark-theme.html#properties
-      final double opacity =
-      elevation <=  1.0 ? 0.05
-          : elevation <=  2.0 ? 0.07
-          : elevation <=  3.0 ? 0.08
-          : elevation <=  4.0 ? 0.09
-          : elevation <=  6.0 ? 0.11
-          : elevation <=  8.0 ? 0.12
-          : elevation <= 12.0 ? 0.14
-          : elevation <= 16.0 ? 0.15
-          : 0.16;
-
-      return Colors.white.withOpacity(opacity);
-    }
-    return Colors.transparent;
-  }
-
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _getBackgroundColor(context);
-    final Color elevationOverlayColor = _darkThemeOverlayColor(context, widget.elevation);
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
       'If Material type is not MaterialType.transparency, a color must '
@@ -409,7 +404,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
-        color: backgroundColor,
+        color: _elevationOverlayColor(context, backgroundColor, widget.elevation),
         shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
@@ -435,7 +430,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor,
-      elevationOverlayColor: elevationOverlayColor,
       shadowColor: widget.shadowColor,
       child: contents,
     );
@@ -685,7 +679,6 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     @required this.elevation,
     @required this.color,
     @required this.shadowColor,
-    this.elevationOverlayColor,
     Curve curve = Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
@@ -728,9 +721,6 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
   /// The target shadow color.
   final Color shadowColor;
 
-  /// The target elevation overlay color.
-  final Color elevationOverlayColor;
-
   @override
   _MaterialInteriorState createState() => _MaterialInteriorState();
 
@@ -746,14 +736,12 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
 
 class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> {
   Tween<double> _elevation;
-  ColorTween _elevationOverlayColor;
   ColorTween _shadowColor;
   ShapeBorderTween _border;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value));
-    _elevationOverlayColor = visitor(_elevationOverlayColor, widget.elevationOverlayColor, (dynamic value) => ColorTween(begin: value));
     _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value));
     _border = visitor(_border, widget.shape, (dynamic value) => ShapeBorderTween(begin: value));
   }
@@ -761,11 +749,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   @override
   Widget build(BuildContext context) {
     final ShapeBorder shape = _border.evaluate(animation);
-    final ThemeData theme = Theme.of(context);
-    Color color = widget.color;
-    if (theme.brightness == Brightness.dark && theme.applyDarkThemeElevationOverlay) {
-      color = Color.alphaBlend(_elevationOverlayColor.evaluate(animation), color);
-    }
+    final double elevation = _elevation.evaluate(animation);
     return PhysicalShape(
       child: _ShapeBorderPaint(
         child: widget.child,
@@ -777,8 +761,8 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
         textDirection: Directionality.of(context),
       ),
       clipBehavior: widget.clipBehavior,
-      elevation: _elevation.evaluate(animation),
-      color: color,
+      elevation: elevation,
+      color: _elevationOverlayColor(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

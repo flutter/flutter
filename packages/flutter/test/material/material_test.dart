@@ -217,95 +217,73 @@ void main() {
   });
 
   group('Dark Theme', () {
-    testWidgets('Light theme does not change background color', (WidgetTester tester) async {
+
+    testWidgets('applyElevationOverlay set to false does not change surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
-        data: ThemeData(
-          brightness: Brightness.light,
-          applyDarkThemeElevationOverlay: true,
-        ),
-        child: buildMaterial(color: const Color(0xFFFFFFFF), elevation: 8.0))
+          data: ThemeData(
+            applyElevationOverlay: false,
+            colorScheme: ColorScheme.dark().copyWith(surface: surfaceColor),
+          ),
+          child: buildMaterial(color: surfaceColor, elevation: 8.0))
       );
       final RenderPhysicalShape model = getShadow(tester);
-      expect(model.color, equals(const Color(0xFFFFFFFF)));
+      expect(model.color, equals(surfaceColor));
     });
 
-    testWidgets('Dark theme overlays a transparent white on background color', (WidgetTester tester) async {
-      // The colors we should get with a base background of 0xFF121212 for
+    testWidgets('applyElevationOverlay set to true overlays a transparent white on surface color', (WidgetTester tester) async {
+      // The colors we should get with a base surface color of 0xFF121212 for
       // a given elevation
       const List<ElevationColor> elevationColors = <ElevationColor>[
         ElevationColor(0.0, Color(0xFF121212)),
         ElevationColor(1.0, Color(0xFF1E1E1E)),
         ElevationColor(2.0, Color(0xFF222222)),
-        ElevationColor(3.0, Color(0xFF242424)),
-        ElevationColor(4.0, Color(0xFF272727)),
-        ElevationColor(6.0, Color(0xFF2C2C2C)),
-        ElevationColor(8.0, Color(0xFF2E2E2E)),
-        ElevationColor(12.0, Color(0xFF333333)),
+        ElevationColor(3.0, Color(0xFF252525)),
+        ElevationColor(4.0, Color(0xFF282828)),
+        ElevationColor(6.0, Color(0xFF2B2B2B)),
+        ElevationColor(8.0, Color(0xFF2D2D2D)),
+        ElevationColor(12.0, Color(0xFF323232)),
         ElevationColor(16.0, Color(0xFF353535)),
-        ElevationColor(24.0, Color(0xFF383838)),
+        ElevationColor(24.0, Color(0xFF393939)),
       ];
+      const Color surfaceColor = Color(0xFF121212);
 
       for (ElevationColor test in elevationColors) {
         await tester.pumpWidget(
-          Theme(
-            data: ThemeData(
-              brightness: Brightness.dark,
-              applyDarkThemeElevationOverlay: true
-            ),
-            child: buildMaterial(
-              color: const Color(0xFF121212),
-              elevation: test.elevation,
-            ),
-          )
+            Theme(
+              data: ThemeData(
+                applyElevationOverlay: true,
+                colorScheme: ColorScheme.dark().copyWith(surface: surfaceColor),
+              ),
+              child: buildMaterial(
+                color: surfaceColor,
+                elevation: test.elevation,
+              ),
+            )
         );
-        await tester.pumpAndSettle(); // wait for the elevation animation to finish
+        await tester
+            .pumpAndSettle(); // wait for the elevation animation to finish
         final RenderPhysicalShape model = getShadow(tester);
         expect(model.color, equals(test.color));
       }
     });
 
-    testWidgets('applyDarkThemeElevationOverlay set to false will not apply overlay', (WidgetTester tester) async {
+    testWidgets('overlay will only apply to materials using colorScheme.surface', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Theme(
-          data: ThemeData(
-            brightness: Brightness.dark,
-            applyDarkThemeElevationOverlay: false,
-          ),
-          child: buildMaterial(
-            color: const Color(0xFF121212),
-            elevation: 8.0
-          ),
-        )
+          Theme(
+            data: ThemeData(
+              applyElevationOverlay: true,
+              colorScheme: ColorScheme.dark().copyWith(
+                  surface: const Color(0xFF121212)),
+            ),
+            child: buildMaterial(
+                color: Colors.cyan,
+                elevation: 8.0
+            ),
+          )
       );
       final RenderPhysicalShape model = getShadow(tester);
-      expect(model.color, equals(const Color(0xFF121212)));
-    });
-
-    testWidgets('applyDarkThemeElevationOverlay not set will be taken from ThemeData', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Theme(
-          data: ThemeData(brightness: Brightness.dark, applyDarkThemeElevationOverlay: true),
-          child: buildMaterial(
-            color: const Color(0xFF121212),
-            elevation: 8.0,
-          ),
-        )
-      );
-      RenderPhysicalShape model = getShadow(tester);
-      expect(model.color, equals(const Color(0xFF2E2E2E)));
-
-      await tester.pumpWidget(
-        Theme(
-          data: ThemeData(brightness: Brightness.dark, applyDarkThemeElevationOverlay: false),
-          child: buildMaterial(
-            color: const Color(0xFF121212),
-            elevation: 8.0,
-          ),
-        )
-      );
-      await tester.pumpAndSettle();
-      model = getShadow(tester);
-      expect(model.color, equals(const Color(0xFF121212)));
+      expect(model.color, equals(Colors.cyan));
     });
 
   });
