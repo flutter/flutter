@@ -37,10 +37,10 @@ class ResidentWebRunner extends ResidentRunner {
   }) : super(
           flutterDevices,
           target: target,
-          usesTerminalUI: true,
-          stayResident: true,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
+          usesTerminalUi: true,
+          stayResident: true,
         );
 
   WebAssetServer _server;
@@ -50,11 +50,13 @@ class ResidentWebRunner extends ResidentRunner {
   final FlutterProject flutterProject;
 
   @override
+  bool get canHotReload => false;
+
+  @override
   Future<int> attach(
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     connectionInfoCompleter?.complete(DebugConnectionInfo());
-    setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;
@@ -72,17 +74,6 @@ class ResidentWebRunner extends ResidentRunner {
     await _connection?.sendCommand('Browser.close');
     _connection = null;
     await _server?.dispose();
-  }
-
-  @override
-  Future<void> handleTerminalCommand(String code) async {
-    if (code == 'R') {
-      // If hot restart is not supported for all devices, ignore the command.
-      if (!canHotRestart) {
-        return;
-      }
-      await restart(fullRestart: true);
-    }
   }
 
   @override
