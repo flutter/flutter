@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../base/context.dart';
+import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
 import 'cocoapods.dart';
@@ -13,6 +14,8 @@ CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class CocoaPodsValidator extends DoctorValidator {
   const CocoaPodsValidator() : super('CocoaPods subvalidator');
+
+  bool get hasHomebrew => os.which('brew') != null;
 
   @override
   Future<ValidationResult> validate() async {
@@ -43,6 +46,11 @@ class CocoaPodsValidator extends DoctorValidator {
         messages.add(ValidationMessage.hint(
             userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
       }
+    }
+
+    // Only check/report homebrew status if CocoaPods isn't installed.
+    if (status == ValidationType.missing && !hasHomebrew) {
+      messages.add(ValidationMessage.hint(userMessages.cocoaPodsBrewMissing));
     }
 
     return ValidationResult(status, messages);
