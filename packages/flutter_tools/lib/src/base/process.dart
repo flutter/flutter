@@ -263,26 +263,20 @@ Future<RunResult> runCheckedAsync(
   return result;
 }
 
-bool exitsHappy(
-  List<String> cli, {
-  Map<String, String> environment,
-}) {
+bool exitsHappy(List<String> cli) {
   _traceCommand(cli);
   try {
-    return processManager.runSync(cli, environment: environment).exitCode == 0;
+    return processManager.runSync(cli).exitCode == 0;
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;
   }
 }
 
-Future<bool> exitsHappyAsync(
-  List<String> cli, {
-  Map<String, String> environment,
-}) async {
+Future<bool> exitsHappyAsync(List<String> cli) async {
   _traceCommand(cli);
   try {
-    return (await processManager.run(cli, environment: environment)).exitCode == 0;
+    return (await processManager.run(cli)).exitCode == 0;
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;

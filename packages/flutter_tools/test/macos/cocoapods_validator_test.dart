@@ -23,7 +23,7 @@ void main() {
     });
 
     testUsingContext('Emits installed status when CocoaPods is installed', () async {
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
@@ -33,7 +33,7 @@ void main() {
     testUsingContext('Emits missing status when CocoaPods is not installed', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{
@@ -43,7 +43,7 @@ void main() {
     testUsingContext('Emits partial status when CocoaPods is installed with unknown version', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -52,7 +52,7 @@ void main() {
 
     testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -62,9 +62,17 @@ void main() {
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
-      const CocoaPodsValidator workflow = CocoaPodsValidator();
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      CocoaPods: () => cocoaPods,
+    });
+
+    testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget(hasHomebrew: false);
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       CocoaPods: () => cocoaPods,
     });
@@ -72,3 +80,12 @@ void main() {
 }
 
 class MockCocoaPods extends Mock implements CocoaPods {}
+
+class CocoaPodsTestTarget extends CocoaPodsValidator {
+  CocoaPodsTestTarget({
+    this.hasHomebrew = true,
+  });
+
+  @override
+  final bool hasHomebrew;
+}
