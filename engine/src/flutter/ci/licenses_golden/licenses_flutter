@@ -124,6 +124,7 @@ FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.h
 FILE: ../../../flutter/fml/memory/weak_ptr_unittest.cc
+FILE: ../../../flutter/fml/merged_queues_runner.cc
 FILE: ../../../flutter/fml/message.cc
 FILE: ../../../flutter/fml/message.h
 FILE: ../../../flutter/fml/message_loop.cc
@@ -133,6 +134,7 @@ FILE: ../../../flutter/fml/message_loop_impl.h
 FILE: ../../../flutter/fml/message_loop_task_queues.cc
 FILE: ../../../flutter/fml/message_loop_task_queues.h
 FILE: ../../../flutter/fml/message_loop_task_queues_benchmark.cc
+FILE: ../../../flutter/fml/message_loop_task_queues_merge_unmerge_unittests.cc
 FILE: ../../../flutter/fml/message_loop_task_queues_unittests.cc
 FILE: ../../../flutter/fml/message_loop_unittests.cc
 FILE: ../../../flutter/fml/message_unittests.cc
