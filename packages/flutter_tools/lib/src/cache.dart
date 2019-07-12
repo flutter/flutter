@@ -26,7 +26,7 @@ class DevelopmentArtifact {
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should not be usable on stable branches.
+  /// Whether this artifact should be unavailable on stable branches.
   final bool unstable;
 
   /// Artifacts required for Android development.
@@ -35,7 +35,7 @@ class DevelopmentArtifact {
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
-  /// Artifacts required for web development,
+  /// Artifacts required for web development.
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
@@ -44,13 +44,13 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Windows.
   static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
-  /// Artifacts required for desktop linux.
+  /// Artifacts required for desktop Linux.
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
   static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
-  /// Artifacts required by all developments.
+  /// Artifacts required by any development platform.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The vaulues of DevelopmentArtifacts.
