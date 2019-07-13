@@ -57,7 +57,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('main.app.dill').path,
+      mainPath: environment.buildDir.childFile('app.dill').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       iosArch: iosArchs.single,
@@ -73,7 +73,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
-        mainPath: environment.buildDir.childFile('main.app.dill').path,
+        mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
         iosArch: iosArch,
@@ -312,7 +312,7 @@ const Target copyAssetsFramework = Target(
 const Target aotAssemblyProfile = Target(
   name: 'aot_assembly_profile',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -334,7 +334,7 @@ const Target aotAssemblyProfile = Target(
 const Target aotAssemblyRelease = Target(
   name: 'aot_assembly_release',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -357,7 +357,9 @@ const Target aotAssemblyRelease = Target(
 const Target debugIosApplication = Target(
   name: 'debug_ios_application',
   buildAction: copyBlob,
-  inputs: <Source>[],
+  inputs: <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill'),
+  ],
   outputs: <Source>[
     Source.pattern('{PROJECT_DIR}/ios/Flutter/App.framework/flutter_assets/kernel_blob.bin'),
   ],

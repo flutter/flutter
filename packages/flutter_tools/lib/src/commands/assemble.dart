@@ -55,6 +55,10 @@ abstract class AssembleBase extends FlutterCommand {
       ],
     );
     argParser.addOption(
+      'project-dir',
+      help: 'The root directory of the project to build.'
+    );
+    argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.'
     );
@@ -94,9 +98,12 @@ abstract class AssembleBase extends FlutterCommand {
 
   /// The environmental configuration for a build invocation.
   Environment get environment {
-    final FlutterProject flutterProject = FlutterProject.current();
+    final Directory projectDirectory = argResults['project-dir'] == null
+        ? fs.currentDirectory
+        : fs.directory(argResults['project-dir']);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(projectDirectory);
     final Environment result = Environment(
-      buildDir: fs.directory(getBuildDirectory()),
+      buildDir: fs.directory(fs.path.join(projectDirectory.path, getBuildDirectory())),
       projectDir: flutterProject.directory,
       defines: _parseDefines(argResults['define']),
     );

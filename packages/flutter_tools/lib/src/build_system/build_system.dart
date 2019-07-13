@@ -491,10 +491,13 @@ class BuildSystem {
     macoReleaseApplication.name: macoReleaseApplication,
     unpackLinux.name: unpackLinux,
     unpackWindows.name: unpackWindows,
+    // Generic Flutter
     copyAssets.name: copyAssets,
     kernelSnapshot.name: kernelSnapshot,
     aotElfProfile.name: aotElfProfile,
     aotElfRelease.name: aotElfRelease,
+    // iOS rules
+    copyAssetsFramework.name: copyAssetsFramework,
     aotAssemblyProfile.name: aotAssemblyProfile,
     aotAssemblyRelease.name: aotAssemblyRelease,
     releaseIosApplication.name: releaseIosApplication,

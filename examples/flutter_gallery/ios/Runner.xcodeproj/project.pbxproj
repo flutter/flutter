@@ -265,7 +265,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/bin/flutter\" assemble run --project-dir=\"$SOURCE_ROOT/..\" -dBuildMode=debug debug_ios_application";
 		};
 		9935C741A3A9624590A8630E /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;

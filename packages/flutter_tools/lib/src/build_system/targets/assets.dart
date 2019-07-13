@@ -92,7 +92,8 @@ const Target flutterPlugins = Target(
     Source.pattern('{PROJECT_DIR}/pubspec.yaml')
   ],
   outputs: <Source>[
-    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
+    // TODO(jonahwilliams): make this unconditional.
+    // Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
   ]
 );
 
