@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -246,6 +247,16 @@ void main() {
       expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
     });
 
+    testUsingContext('r - hotReload supported and fails fatally', () async {
+      when(mockResidentRunner.canHotReload).thenReturn(true);
+      when(mockResidentRunner.hotMode).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: false))
+        .thenAnswer((Invocation invocation) async {
+          return OperationResult(1, 'fail', fatal: true);
+        });
+      expect(terminalHandler.processTerminalInput('r'), throwsA(isInstanceOf<ToolExit>()));
+    });
+
     testUsingContext('r - hotReload unsupported', () async {
       when(mockResidentRunner.canHotReload).thenReturn(false);
       await terminalHandler.processTerminalInput('r');
@@ -279,6 +290,16 @@ void main() {
       final BufferLogger bufferLogger = logger;
 
       expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
+    });
+
+    testUsingContext('R - hotRestart supported and fails fatally', () async {
+      when(mockResidentRunner.canHotRestart).thenReturn(true);
+      when(mockResidentRunner.hotMode).thenReturn(true);
+      when(mockResidentRunner.restart(fullRestart: true))
+        .thenAnswer((Invocation invocation) async {
+          return OperationResult(1, 'fail', fatal: true);
+        });
+      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('R - hot restart unsupported', () async {
