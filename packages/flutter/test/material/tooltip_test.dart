@@ -450,7 +450,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
         key: key,
-        textStyle: TextStyle(
+        textStyle: const TextStyle(
           color: Colors.orange,
           decoration: TextDecoration.underline
         ),
