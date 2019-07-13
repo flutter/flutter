@@ -79,8 +79,14 @@ class Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    const LocalFileSystem().file('/Users/xster/Downloads/analytics.logs').writeAsString(
+      'Suppress analytics env var is set to $suppressEnvFlag\n', mode: FileMode.append,
+    );
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
+      const LocalFileSystem().file('/Users/xster/Downloads/analytics.logs').writeAsString(
+        'Constructor setting suppress on because of version $version bot $isRunningOnBot env $suppressEnvFlag\n', mode: FileMode.append,
+      );
       // If we think we're running on a CI system, suppress sending analytics.
       suppressAnalytics = true;
     }
@@ -103,6 +109,9 @@ class Usage {
   /// Suppress analytics for this session.
   set suppressAnalytics(bool value) {
     _suppressAnalytics = value;
+    const LocalFileSystem().file('/Users/xster/Downloads/analytics.logs').writeAsString(
+      'Suppress analytics is being set to $value by\n${StackTrace.current}\n', mode: FileMode.append,
+    );
   }
 
   /// Enable or disable reporting analytics.
@@ -115,6 +124,9 @@ class Usage {
   String get clientId => _analytics.clientId;
 
   void sendCommand(String command, { Map<String, String> parameters }) {
+    const LocalFileSystem().file('/Users/xster/Downloads/analytics.logs').writeAsString(
+      'Sending screen $command with $parameters with suppression $suppressAnalytics\n', mode: FileMode.append,
+    );
     if (suppressAnalytics)
       return;
 
