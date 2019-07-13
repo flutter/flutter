@@ -2466,9 +2466,10 @@ typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
 ///
-/// The [onPointerEnter], [onPointerHover], and [onPointerExit] events are only
-/// relevant to and fired by pointers that can hover (e.g. mouse pointers, but
-/// not most touch pointers).
+/// See also:
+///
+///  * [RenderMouseListener], which contains events of mouse pointers, including
+///    [onPointerEnter], [onPointerLeave], and [onPointerHover].
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2476,18 +2477,99 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
-    PointerEnterEventListener onPointerEnter,
-    PointerHoverEventListener onPointerHover,
-    PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
+  }) : super(behavior: behavior, child: child);
+
+  /// Called when a pointer comes into contact with the screen (for touch
+  /// pointers), or has its button pressed (for mouse pointers) at this widget's
+  /// location.
+  PointerDownEventListener onPointerDown;
+
+  /// Called when a pointer that triggered an [onPointerDown] changes position.
+  PointerMoveEventListener onPointerMove;
+
+  /// Called when a pointer that triggered an [onPointerDown] is no longer in
+  /// contact with the screen.
+  PointerUpEventListener onPointerUp;
+
+  /// Called when the input from a pointer that triggered an [onPointerDown] is
+  /// no longer directed towards this receiver.
+  PointerCancelEventListener onPointerCancel;
+
+  /// Called when a pointer signal occurs over this object.
+  PointerSignalEventListener onPointerSignal;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    assert(debugHandleEvent(event, entry));
+    // The onPointerEnter, onPointerHover, and onPointerExit events are are
+    // triggered from within the MouseTracker, not here.
+    if (onPointerDown != null && event is PointerDownEvent)
+      return onPointerDown(event);
+    if (onPointerMove != null && event is PointerMoveEvent)
+      return onPointerMove(event);
+    if (onPointerUp != null && event is PointerUpEvent)
+      return onPointerUp(event);
+    if (onPointerCancel != null && event is PointerCancelEvent)
+      return onPointerCancel(event);
+    if (onPointerSignal != null && event is PointerSignalEvent)
+      return onPointerSignal(event);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> listeners = <String>[];
+    if (onPointerDown != null)
+      listeners.add('down');
+    if (onPointerMove != null)
+      listeners.add('move');
+    if (onPointerUp != null)
+      listeners.add('up');
+    if (onPointerCancel != null)
+      listeners.add('cancel');
+    if (onPointerSignal != null)
+      listeners.add('signal');
+    if (listeners.isEmpty)
+      listeners.add('<none>');
+    properties.add(IterableProperty<String>('listeners', listeners));
+    // TODO(jacobr): add raw listeners to the diagnostics data.
+  }
+}
+
+/// Calls callbacks in response to events of mouse pointers, including
+/// [onPointerEnter], [onPointerHover], and [onPointerExit].
+///
+/// If it has a child, defers to the child for sizing behavior.
+///
+/// If it does not have a child, grows to fit the parent-provided constraints.
+///
+/// See also:
+///
+///  * [RenderPointerListener], which contains events of all kinds of pointers,
+///    including [onPointerDown], [onPointerUp], and [onPointerMove].
+class RenderMouseListener extends RenderProxyBox {
+  /// Creates a render object that forwards pointer events to callbacks.
+  ///
+  /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
+  RenderMouseListener({
+    PointerEnterEventListener onPointerEnter,
+    PointerHoverEventListener onPointerHover,
+    PointerExitEventListener onPointerExit,
+    RenderBox child,
   }) : _onPointerEnter = onPointerEnter,
        _onPointerHover = onPointerHover,
        _onPointerExit = onPointerExit,
-       super(behavior: behavior, child: child) {
+       super(child) {
     if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
@@ -2497,14 +2579,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
-
-  /// Called when a pointer comes into contact with the screen (for touch
-  /// pointers), or has its button pressed (for mouse pointers) at this widget's
-  /// location.
-  PointerDownEventListener onPointerDown;
-
-  /// Called when a pointer that triggered an [onPointerDown] changes position.
-  PointerMoveEventListener onPointerMove;
 
   /// Called when a hovering pointer enters the region for this widget.
   ///
@@ -2544,17 +2618,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
   PointerExitEventListener _onPointerExit;
-
-  /// Called when a pointer that triggered an [onPointerDown] is no longer in
-  /// contact with the screen.
-  PointerUpEventListener onPointerUp;
-
-  /// Called when the input from a pointer that triggered an [onPointerDown] is
-  /// no longer directed towards this receiver.
-  PointerCancelEventListener onPointerCancel;
-
-  /// Called when a pointer signal occurs over this object.
-  PointerSignalEventListener onPointerSignal;
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2675,42 +2738,15 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
-  void handleEvent(PointerEvent event, HitTestEntry entry) {
-    assert(debugHandleEvent(event, entry));
-    // The onPointerEnter, onPointerHover, and onPointerExit events are are
-    // triggered from within the MouseTracker, not here.
-    if (onPointerDown != null && event is PointerDownEvent)
-      return onPointerDown(event);
-    if (onPointerMove != null && event is PointerMoveEvent)
-      return onPointerMove(event);
-    if (onPointerUp != null && event is PointerUpEvent)
-      return onPointerUp(event);
-    if (onPointerCancel != null && event is PointerCancelEvent)
-      return onPointerCancel(event);
-    if (onPointerSignal != null && event is PointerSignalEvent)
-      return onPointerSignal(event);
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
-    if (onPointerDown != null)
-      listeners.add('down');
-    if (onPointerMove != null)
-      listeners.add('move');
     if (onPointerEnter != null)
       listeners.add('enter');
     if (onPointerHover != null)
       listeners.add('hover');
     if (onPointerExit != null)
       listeners.add('exit');
-    if (onPointerUp != null)
-      listeners.add('up');
-    if (onPointerCancel != null)
-      listeners.add('cancel');
-    if (onPointerSignal != null)
-      listeners.add('signal');
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(IterableProperty<String>('listeners', listeners));

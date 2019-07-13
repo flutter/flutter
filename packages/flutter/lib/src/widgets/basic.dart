@@ -5410,11 +5410,11 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// it does not have a child, it grows to fit the parent instead.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
-/// This example makes a [Container] react to being entered by a mouse
-/// pointer, showing a count of the number of entries and exits.
+/// This example makes a [Container] react to being clicked by a mouse
+/// pointer, showing a count of the number of pointer downs and ups.
 ///
 /// ```dart imports
-/// import 'package:flutter/gestures.dart';
+/// import 'package:flutter/widgets.dart';
 /// ```
 ///
 /// ```dart
@@ -5423,19 +5423,13 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// double x = 0.0;
 /// double y = 0.0;
 ///
-/// void _incrementCounter(PointerEnterEvent details) {
+/// void _incrementCounter(PointerEvent details) {
+///   _updateLocation(details);
 ///   setState(() {
 ///     _enterCounter++;
 ///   });
 /// }
-///
-/// void _decrementCounter(PointerExitEvent details) {
-///   setState(() {
-///     _exitCounter++;
-///   });
-/// }
-///
-/// void _updateLocation(PointerHoverEvent details) {
+/// void _updateLocation(PointerEvent details) {
 ///   setState(() {
 ///     x = details.position.dx;
 ///     y = details.position.dy;
@@ -5444,27 +5438,30 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: ConstrainedBox(
-///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///       child: Listener(
-///         onPointerEnter: _incrementCounter,
-///         onPointerHover: _updateLocation,
-///         onPointerExit: _decrementCounter,
-///         child: Container(
-///           color: Colors.lightBlueAccent,
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             children: <Widget>[
-///               Text('You have pointed at this box this many times:'),
-///               Text(
-///                 '$_enterCounter Entries\n$_exitCounter Exits',
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///               Text(
-///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///               ),
-///             ],
+///   return Directionality(
+///     textDirection: TextDirection.ltr,
+///     child: Center(
+///       child: ConstrainedBox(
+///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///         child: Listener(
+///           onPointerDown: _incrementCounter,
+///           onPointerMove: _updateLocation,
+///           onPointerUp: _incrementCounter,
+///           child: Container(
+///             color: Colors.lightBlueAccent,
+///             child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 Text('You have pressed or released this many times:'),
+///                 Text(
+///                   '$_enterCounter Entries\n$_exitCounter Exits',
+///                   style: Theme.of(context).textTheme.display1,
+///                 ),
+///                 Text(
+///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///                 ),
+///               ],
+///             ),
 ///           ),
 ///         ),
 ///       ),
@@ -5476,8 +5473,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [MouseTracker] an object that tracks mouse locations in the [GestureBinding].
-class Listener extends SingleChildRenderObjectWidget {
+///  * [MouseRegion] a similar widget that tracks mouse locations when
+///    no button is pressed.
+class Listener extends StatelessWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
@@ -5485,8 +5483,11 @@ class Listener extends SingleChildRenderObjectWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
+    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
     this.onPointerEnter,
+    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
     this.onPointerExit,
+    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
     this.onPointerHover,
     this.onPointerUp,
     this.onPointerCancel,
@@ -5494,7 +5495,8 @@ class Listener extends SingleChildRenderObjectWidget {
     this.behavior = HitTestBehavior.deferToChild,
     Widget child,
   }) : assert(behavior != null),
-       super(key: key, child: child);
+       _child = child,
+       super(key: key);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -5545,17 +5547,64 @@ class Listener extends SingleChildRenderObjectWidget {
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
+  // The widget listened by the listener.
+  //
+  // The reason why we don't expose it is that once deprecated methods are
+  // removed, Listener will no longer need to store child, but pass child to
+  // super instead.
+  final Widget _child;
+
   @override
-  _ListenerElement createElement() => _ListenerElement(this);
+  Widget build(BuildContext context) {
+    Widget result = _child;
+    if (onPointerEnter != null ||
+        onPointerExit != null ||
+        onPointerHover != null) {
+      result = MouseRegion(
+        onPointerEnter: onPointerEnter,
+        onPointerExit: onPointerExit,
+        onPointerHover: onPointerHover,
+        child: result,
+      );
+    }
+    result = _PointerListener(
+      onPointerDown: onPointerDown,
+      onPointerUp: onPointerUp,
+      onPointerMove: onPointerMove,
+      onPointerCancel: onPointerCancel,
+      onPointerSignal: onPointerSignal,
+      behavior: behavior,
+      child: result,
+    );
+    return result;
+  }
+}
+
+class _PointerListener extends SingleChildRenderObjectWidget {
+  const _PointerListener({
+    Key key,
+    this.onPointerDown,
+    this.onPointerMove,
+    this.onPointerUp,
+    this.onPointerCancel,
+    this.onPointerSignal,
+    this.behavior = HitTestBehavior.deferToChild,
+    Widget child,
+  }) : assert(behavior != null),
+       super(key: key, child: child);
+
+  final PointerDownEventListener onPointerDown;
+  final PointerMoveEventListener onPointerMove;
+  final PointerUpEventListener onPointerUp;
+  final PointerCancelEventListener onPointerCancel;
+  final PointerSignalEventListener onPointerSignal;
+  final HitTestBehavior behavior;
 
   @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
       onPointerMove: onPointerMove,
-      onPointerEnter: onPointerEnter,
-      onPointerHover: onPointerHover,
-      onPointerExit: onPointerExit,
       onPointerUp: onPointerUp,
       onPointerCancel: onPointerCancel,
       onPointerSignal: onPointerSignal,
@@ -5568,9 +5617,6 @@ class Listener extends SingleChildRenderObjectWidget {
     renderObject
       ..onPointerDown = onPointerDown
       ..onPointerMove = onPointerMove
-      ..onPointerEnter = onPointerEnter
-      ..onPointerHover = onPointerHover
-      ..onPointerExit = onPointerExit
       ..onPointerUp = onPointerUp
       ..onPointerCancel = onPointerCancel
       ..onPointerSignal = onPointerSignal
@@ -5585,12 +5631,6 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
-    if (onPointerEnter != null)
-      listeners.add('enter');
-    if (onPointerExit != null)
-      listeners.add('exit');
-    if (onPointerHover != null)
-      listeners.add('hover');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)
@@ -5602,20 +5642,163 @@ class Listener extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that calls callbacks in response to mouse events.
+///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
+/// If it has a child, this widget defers to the child for sizing behavior. If
+/// it does not have a child, it grows to fit the parent instead.
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+/// This example makes a [Container] react to being entered by a mouse
+/// pointer, showing a count of the number of entries and exits.
+///
+/// ```dart imports
+/// import 'package:flutter/widgets.dart';
+/// ```
+///
+/// ```dart
+/// int _enterCounter = 0;
+/// int _exitCounter = 0;
+/// double x = 0.0;
+/// double y = 0.0;
+///
+/// void _incrementCounter(PointerEvent details) {
+///   setState(() {
+///     _enterCounter++;
+///   });
+/// }
+///
+/// void _updateLocation(PointerHoverEvent details) {
+///   setState(() {
+///     x = details.position.dx;
+///     y = details.position.dy;
+///   });
+/// }
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: ConstrainedBox(
+///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///       child: MouseRegion(
+///         onPointerEnter: _incrementCounter,
+///         onPointerHover: _updateLocation,
+///         onPointerExit: _incrementCounter,
+///         child: Container(
+///           color: Colors.lightBlueAccent,
+///           child: Column(
+///             mainAxisAlignment: MainAxisAlignment.center,
+///             children: <Widget>[
+///               Text('You have entered or exited this box this many times:'),
+///               Text(
+///                 '$_enterCounter Entries\n$_exitCounter Exits',
+///                 style: Theme.of(context).textTheme.display1,
+///               ),
+///               Text(
+///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///               ),
+///             ],
+///           ),
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [Listener], a similar widget that tracks pointer events when
+///    the pointer have buttons pressed.
+class MouseRegion extends SingleChildRenderObjectWidget {
+  /// Creates a widget that forwards point events to callbacks.
+  const MouseRegion({
+    Key key,
+    this.onPointerEnter,
+    this.onPointerExit,
+    this.onPointerHover,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// Called when a pointer enters the region for this widget.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer enters
+  /// the region defined by this widget, or when the widget appears under the
+  /// pointer.
+  final PointerEnterEventListener onPointerEnter;
+
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  final PointerHoverEventListener onPointerHover;
+
+  /// Called when a pointer leaves the region for this widget.
+  ///
+  /// This is only fired for pointers which report their location when not down
+  /// (e.g. mouse pointers, but not most touch pointers).
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget, or when the widget disappears from
+  /// under the pointer.
+  final PointerExitEventListener onPointerExit;
+
+  @override
+  _ListenerElement createElement() => _ListenerElement(this);
+
+  @override
+  RenderMouseListener createRenderObject(BuildContext context) {
+    return RenderMouseListener(
+      onPointerEnter: onPointerEnter,
+      onPointerHover: onPointerHover,
+      onPointerExit: onPointerExit,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderMouseListener renderObject) {
+    renderObject
+      ..onPointerEnter = onPointerEnter
+      ..onPointerHover = onPointerHover
+      ..onPointerExit = onPointerExit;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> listeners = <String>[];
+    if (onPointerEnter != null)
+      listeners.add('enter');
+    if (onPointerExit != null)
+      listeners.add('exit');
+    if (onPointerHover != null)
+      listeners.add('hover');
+    properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+  }
+}
+
 class _ListenerElement extends SingleChildRenderObjectElement {
   _ListenerElement(SingleChildRenderObjectWidget widget) : super(widget);
 
   @override
   void activate() {
     super.activate();
-    final RenderPointerListener renderPointerListener = renderObject;
-    renderPointerListener.postActivate();
+    final RenderMouseListener renderMouseListener = renderObject;
+    renderMouseListener.postActivate();
   }
 
   @override
   void deactivate() {
-    final RenderPointerListener renderPointerListener = renderObject;
-    renderPointerListener.preDeactivate();
+    final RenderMouseListener renderMouseListener = renderObject;
+    renderMouseListener.preDeactivate();
     super.deactivate();
   }
 }

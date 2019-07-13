@@ -1,13 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
 
@@ -41,7 +38,7 @@ class HoverClientState extends State<HoverClient> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
+    return MouseRegion(
       onPointerEnter: _onEnter,
       onPointerExit: _onExit,
       child: widget.child,
@@ -72,41 +69,7 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 }
 
 void main() {
-  testWidgets('Events bubble up the tree', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-
-    await tester.pumpWidget(
-      Listener(
-        onPointerDown: (_) {
-          log.add('top');
-        },
-        child: Listener(
-          onPointerDown: (_) {
-            log.add('middle');
-          },
-          child: DecoratedBox(
-            decoration: const BoxDecoration(),
-            child: Listener(
-              onPointerDown: (_) {
-                log.add('bottom');
-              },
-              child: const Text('X', textDirection: TextDirection.ltr),
-            ),
-          ),
-        ),
-      )
-    );
-
-    await tester.tap(find.text('X'));
-
-    expect(log, equals(<String>[
-      'bottom',
-      'middle',
-      'top',
-    ]));
-  });
-
-  group('Listener hover detection', () {
+  group('MouseRegion hover detection', () {
     setUp((){
       HoverClientState.numExits = 0;
       HoverClientState.numEntries = 0;
@@ -117,7 +80,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Listener(
+        child: MouseRegion(
           child: Container(
             color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
             width: 100.0,
@@ -144,7 +107,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Listener(
+        child: MouseRegion(
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -173,7 +136,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Listener(
+        child: MouseRegion(
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -231,7 +194,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Listener(
+            MouseRegion(
               onPointerEnter: (PointerEnterEvent details) => enter1.add(details),
               onPointerHover: (PointerHoverEvent details) => move1.add(details),
               onPointerExit: (PointerExitEvent details) => exit1.add(details),
@@ -240,7 +203,7 @@ void main() {
                 width: 200,
                 height: 200,
                 padding: const EdgeInsets.all(50.0),
-                child: Listener(
+                child: MouseRegion(
                   key: key2,
                   onPointerEnter: (PointerEnterEvent details) => enter2.add(details),
                   onPointerHover: (PointerHoverEvent details) => move2.add(details),
@@ -252,9 +215,8 @@ void main() {
           ],
         ),
       );
-      final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseListener renderListener1 = listeners[0];
-      final RenderMouseListener renderListener2 = listeners[1];
+      final RenderMouseListener renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderMouseListener renderListener2 = tester.renderObject(find.byKey(key2));
       Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
@@ -315,7 +277,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Listener(
+            MouseRegion(
               key: key1,
               child: Container(
                 width: 100.0,
@@ -325,7 +287,7 @@ void main() {
               onPointerHover: (PointerHoverEvent details) => move1.add(details),
               onPointerExit: (PointerExitEvent details) => exit1.add(details),
             ),
-            Listener(
+            MouseRegion(
               key: key2,
               child: Container(
                 width: 100.0,
@@ -338,9 +300,8 @@ void main() {
           ],
         ),
       );
-      final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseListener renderListener1 = listeners[0];
-      final RenderMouseListener renderListener2 = listeners[1];
+      final RenderMouseListener renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderMouseListener renderListener2 = tester.renderObject(find.byKey(key2));
       final Offset center1 = tester.getCenter(find.byKey(key1));
       final Offset center2 = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center1);
@@ -397,23 +358,23 @@ void main() {
 
     testWidgets('needsCompositing set when parent class needsCompositing is set', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Listener(
+        MouseRegion(
           onPointerEnter: (PointerEnterEvent _) {},
           child: const Opacity(opacity: 0.5, child: Placeholder()),
         ),
       );
 
-      RenderPointerListener listener = tester.renderObject(find.byType(Listener).first);
+      RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion).first);
       expect(listener.needsCompositing, isTrue);
 
       await tester.pumpWidget(
-        Listener(
+        MouseRegion(
           onPointerEnter: (PointerEnterEvent _) {},
           child: const Placeholder(),
         ),
       );
 
-      listener = tester.renderObject(find.byType(Listener).first);
+      listener = tester.renderObject(find.byType(MouseRegion).first);
       expect(listener.needsCompositing, isFalse);
     });
 
@@ -430,7 +391,7 @@ void main() {
           home: Center(
             child: Transform.scale(
               scale: scaleFactor,
-              child: Listener(
+              child: MouseRegion(
                 onPointerEnter: (PointerEnterEvent event) {
                   events.add(event);
                 },
@@ -494,12 +455,10 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: Listener(
-            onPointerDown: (PointerDownEvent _) { },
-          ),
+          child: const MouseRegion(),
         ),
       );
-      final RenderPointerListener listener = tester.renderObject(find.byType(Listener));
+      final RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion));
       expect(listener.needsCompositing, isFalse);
       // No TransformLayer for `Transform.scale` is added because composting is
       // not required and therefore the transform is executed on the canvas
@@ -510,8 +469,7 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: Listener(
-            onPointerDown: (PointerDownEvent _) { },
+          child: MouseRegion(
             onPointerHover: (PointerHoverEvent _) { },
           ),
         ),
@@ -524,8 +482,7 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: Listener(
-            onPointerDown: (PointerDownEvent _) { },
+          child: const MouseRegion(
           ),
         ),
       );
@@ -568,7 +525,7 @@ void main() {
       await gesture.removePointer();
     });
 
-    testWidgets("Listener activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
+    testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
       final GlobalKey feedbackKey = GlobalKey();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
@@ -606,7 +563,7 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Listener(
+          child: MouseRegion(
             onPointerEnter: (PointerEnterEvent e) => enter.add(e),
             onPointerHover: (PointerHoverEvent e) => hover.add(e),
             onPointerExit: (PointerExitEvent e) => exit.add(e),
@@ -645,323 +602,4 @@ void main() {
       expect(exit.single.delta, const Offset(0.0, 0.0));
     });
   });
-
-  group('transformed events', () {
-    testWidgets('simple offset for touch/signal', (WidgetTester tester) async {
-      final List<PointerEvent> events = <PointerEvent>[];
-      final Key key = UniqueKey();
-
-      await tester.pumpWidget(
-        Center(
-          child: Listener(
-            onPointerDown: (PointerDownEvent event) {
-              events.add(event);
-            },
-            onPointerUp: (PointerUpEvent event) {
-            events.add(event);
-            },
-            onPointerMove: (PointerMoveEvent event) {
-              events.add(event);
-            },
-            onPointerSignal: (PointerSignalEvent event) {
-              events.add(event);
-            },
-            child: Container(
-              key: key,
-              color: Colors.red,
-              height: 100,
-              width: 100,
-            ),
-          ),
-        ),
-      );
-      const Offset moved = Offset(20, 30);
-      final Offset center = tester.getCenter(find.byKey(key));
-      final Offset topLeft = tester.getTopLeft(find.byKey(key));
-      final TestGesture gesture = await tester.startGesture(center);
-      await gesture.moveBy(moved);
-      await gesture.up();
-
-      expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
-
-      final Matrix4 expectedTransform = Matrix4.translationValues(-topLeft.dx, -topLeft.dy, 0);
-
-      expect(center, isNot(const Offset(50, 50)));
-
-      expect(down.localPosition, const Offset(50, 50));
-      expect(down.position, center);
-      expect(down.delta, Offset.zero);
-      expect(down.localDelta, Offset.zero);
-      expect(down.transform, expectedTransform);
-
-      expect(move.localPosition, const Offset(50, 50) + moved);
-      expect(move.position, center + moved);
-      expect(move.delta, moved);
-      expect(move.localDelta, moved);
-      expect(move.transform, expectedTransform);
-
-      expect(up.localPosition, const Offset(50, 50) + moved);
-      expect(up.position, center + moved);
-      expect(up.delta, Offset.zero);
-      expect(up.localDelta, Offset.zero);
-      expect(up.transform, expectedTransform);
-
-      events.clear();
-      await scrollAt(center, tester);
-      expect(events.single.localPosition, const Offset(50, 50));
-      expect(events.single.position, center);
-      expect(events.single.delta, Offset.zero);
-      expect(events.single.localDelta, Offset.zero);
-      expect(events.single.transform, expectedTransform);
-    });
-
-    testWidgets('scaled for touch/signal', (WidgetTester tester) async {
-      final List<PointerEvent> events = <PointerEvent>[];
-      final Key key = UniqueKey();
-
-      const double scaleFactor = 2;
-
-      await tester.pumpWidget(
-        Align(
-          alignment: Alignment.topLeft,
-          child: Transform(
-            transform: Matrix4.identity()..scale(scaleFactor),
-            child: Listener(
-              onPointerDown: (PointerDownEvent event) {
-                events.add(event);
-              },
-              onPointerUp: (PointerUpEvent event) {
-                events.add(event);
-              },
-              onPointerMove: (PointerMoveEvent event) {
-                events.add(event);
-              },
-              onPointerSignal: (PointerSignalEvent event) {
-                events.add(event);
-              },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
-            ),
-          ),
-        ),
-      );
-      const Offset moved = Offset(20, 30);
-      final Offset center = tester.getCenter(find.byKey(key));
-      final TestGesture gesture = await tester.startGesture(center);
-      await gesture.moveBy(moved);
-      await gesture.up();
-
-      expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
-
-      final Matrix4 expectedTransform = Matrix4.identity()
-        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
-
-      expect(center, isNot(const Offset(50, 50)));
-
-      expect(down.localPosition, const Offset(50, 50));
-      expect(down.position, center);
-      expect(down.delta, Offset.zero);
-      expect(down.localDelta, Offset.zero);
-      expect(down.transform, expectedTransform);
-
-      expect(move.localPosition, const Offset(50, 50) + moved / scaleFactor);
-      expect(move.position, center + moved);
-      expect(move.delta, moved);
-      expect(move.localDelta, moved / scaleFactor);
-      expect(move.transform, expectedTransform);
-
-      expect(up.localPosition, const Offset(50, 50) + moved / scaleFactor);
-      expect(up.position, center + moved);
-      expect(up.delta, Offset.zero);
-      expect(up.localDelta, Offset.zero);
-      expect(up.transform, expectedTransform);
-
-      events.clear();
-      await scrollAt(center, tester);
-      expect(events.single.localPosition, const Offset(50, 50));
-      expect(events.single.position, center);
-      expect(events.single.delta, Offset.zero);
-      expect(events.single.localDelta, Offset.zero);
-      expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
-    });
-
-    testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
-      final List<PointerEvent> events = <PointerEvent>[];
-      final Key key = UniqueKey();
-
-      const double scaleFactor = 2;
-
-      await tester.pumpWidget(
-        Center(
-          child: Transform(
-            transform: Matrix4.identity()..scale(scaleFactor),
-            child: Listener(
-              onPointerDown: (PointerDownEvent event) {
-                events.add(event);
-              },
-              onPointerUp: (PointerUpEvent event) {
-                events.add(event);
-              },
-              onPointerMove: (PointerMoveEvent event) {
-                events.add(event);
-              },
-              onPointerSignal: (PointerSignalEvent event) {
-                events.add(event);
-              },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
-            ),
-          ),
-        ),
-      );
-      const Offset moved = Offset(20, 30);
-      final Offset center = tester.getCenter(find.byKey(key));
-      final Offset topLeft = tester.getTopLeft(find.byKey(key));
-      final TestGesture gesture = await tester.startGesture(center);
-      await gesture.moveBy(moved);
-      await gesture.up();
-
-      expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
-
-      final Matrix4 expectedTransform = Matrix4.identity()
-        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
-        ..translate(-topLeft.dx, -topLeft.dy, 0);
-
-      expect(center, isNot(const Offset(50, 50)));
-
-      expect(down.localPosition, const Offset(50, 50));
-      expect(down.position, center);
-      expect(down.delta, Offset.zero);
-      expect(down.localDelta, Offset.zero);
-      expect(down.transform, expectedTransform);
-
-      expect(move.localPosition, const Offset(50, 50) + moved / scaleFactor);
-      expect(move.position, center + moved);
-      expect(move.delta, moved);
-      expect(move.localDelta, moved / scaleFactor);
-      expect(move.transform, expectedTransform);
-
-      expect(up.localPosition, const Offset(50, 50) + moved / scaleFactor);
-      expect(up.position, center + moved);
-      expect(up.delta, Offset.zero);
-      expect(up.localDelta, Offset.zero);
-      expect(up.transform, expectedTransform);
-
-      events.clear();
-      await scrollAt(center, tester);
-      expect(events.single.localPosition, const Offset(50, 50));
-      expect(events.single.position, center);
-      expect(events.single.delta, Offset.zero);
-      expect(events.single.localDelta, Offset.zero);
-      expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
-    });
-
-    testWidgets('rotated for touch/signal', (WidgetTester tester) async {
-      final List<PointerEvent> events = <PointerEvent>[];
-      final Key key = UniqueKey();
-
-      await tester.pumpWidget(
-        Center(
-          child: Transform(
-            transform: Matrix4.identity()
-              ..rotateZ(math.pi / 2), // 90 degrees clockwise around Container origin
-            child: Listener(
-              onPointerDown: (PointerDownEvent event) {
-                events.add(event);
-              },
-              onPointerUp: (PointerUpEvent event) {
-                events.add(event);
-              },
-              onPointerMove: (PointerMoveEvent event) {
-                events.add(event);
-              },
-              onPointerSignal: (PointerSignalEvent event) {
-                events.add(event);
-              },
-              child: Container(
-                key: key,
-                color: Colors.red,
-                height: 100,
-                width: 100,
-              ),
-            ),
-          ),
-        ),
-      );
-      const Offset moved = Offset(20, 30);
-      final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
-      final TestGesture gesture = await tester.startGesture(downPosition);
-      await gesture.moveBy(moved);
-      await gesture.up();
-
-      expect(events, hasLength(3));
-      final PointerDownEvent down = events[0];
-      final PointerMoveEvent move = events[1];
-      final PointerUpEvent up = events[2];
-
-      const Offset offset = Offset((800 - 100) / 2, (600 - 100) / 2);
-      final Matrix4 expectedTransform = Matrix4.identity()
-        ..rotateZ(-math.pi / 2)
-        ..translate(-offset.dx, -offset.dy, 0.0);
-
-      final Offset localDownPosition = const Offset(50, 50) + const Offset(5, -10);
-      expect(down.localPosition, within(distance: 0.001, from: localDownPosition));
-      expect(down.position, downPosition);
-      expect(down.delta, Offset.zero);
-      expect(down.localDelta, Offset.zero);
-      expect(down.transform, expectedTransform);
-
-      const Offset localDelta = Offset(30, -20);
-      expect(move.localPosition, within(distance: 0.001, from: localDownPosition + localDelta));
-      expect(move.position, downPosition + moved);
-      expect(move.delta, moved);
-      expect(move.localDelta, localDelta);
-      expect(move.transform, expectedTransform);
-
-      expect(up.localPosition, within(distance: 0.001, from: localDownPosition + localDelta));
-      expect(up.position, downPosition + moved);
-      expect(up.delta, Offset.zero);
-      expect(up.localDelta, Offset.zero);
-      expect(up.transform, expectedTransform);
-
-      events.clear();
-      await scrollAt(downPosition, tester);
-      expect(events.single.localPosition, within(distance: 0.001, from: localDownPosition));
-      expect(events.single.position, downPosition);
-      expect(events.single.delta, Offset.zero);
-      expect(events.single.localDelta, Offset.zero);
-      expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
-    });
-  });
-}
-
-Future<void> scrollAt(Offset position, WidgetTester tester) {
-  final TestPointer testPointer = TestPointer(1, PointerDeviceKind.mouse);
-  // Create a hover event so that |testPointer| has a location when generating the scroll.
-  testPointer.hover(position);
-  final HitTestResult result = tester.hitTestOnBinding(position);
-  return tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
 }
