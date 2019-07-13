@@ -554,6 +554,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
