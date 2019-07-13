@@ -13,6 +13,7 @@ import 'asset.dart';
 import 'base/build.dart';
 import 'base/config.dart';
 import 'base/context.dart';
+import 'base/features.dart';
 import 'base/flags.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
@@ -79,6 +80,7 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FeatureFlags: () => const FlutterFeatureFlags(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/features.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../convert.dart';
@@ -26,6 +28,26 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       hide: !verboseHelp,
       help: 'Print config values as json.');
+    argParser.addFlag(
+      flutterWebFeature.setting.configSetting,
+      help: 'Enable or disable flutter web on master and dev channels.',
+      negatable: true,
+    );
+    argParser.addFlag(
+      flutterLinuxDesktopFeature.setting.configSetting,
+      help: 'Enable or disable flutter linux desktop on the master channel.',
+      negatable: true,
+    );
+    argParser.addFlag(
+      flutterWindowsDesktopFeature.setting.configSetting,
+      help: 'Enable or disable flutter windows desktop on the master channel.',
+      negatable: true,
+    );
+    argParser.addFlag(
+      flutterMacOSDesktopFeature.setting.configSetting,
+      help: 'Enable or disable flutter macOS desktop on the master channel.',
+      negatable: true,
+    );
   }
 
   @override
