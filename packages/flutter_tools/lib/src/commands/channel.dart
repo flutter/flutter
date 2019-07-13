@@ -51,15 +51,34 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listChannels({ bool showAll, bool verbose }) async {
+  String _formatChannels(String currentBranch, String channel) {
+    return channel == currentBranch ? '* $channel' : '  $channel';
+  }
+
+  /// Sort the channels by stability.
+  ///
+  /// It needs to check that the length of the list is the correct one
+  /// because it may receive an incomplete array, since is used as an accumulator.
+  List<String> _sortOfficialChannelsByStability(List<String> officialChannels) {
+    if (officialChannels.length == FlutterVersion.officialChannels.length) {
+      final List<String> result = List<String>(FlutterVersion.officialChannels.length);
+      for (String channel in officialChannels) {
+        final int index = FlutterVersion.officialChannels.toList().indexOf(channel);
+        result[index] = channel;
+      }
+      return result;
+    }
+    return null;
+  }
+
+  Future<void> _listChannels({bool showAll, bool verbose}) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
     final Set<String> seenChannels = <String>{};
-    final List<String> orderedByStabilityChannels = List<String>.filled(FlutterVersion.officialChannels.length, '');
+    final List<String> officialChannels = <String>[];
     final List<String> rawOutput = <String>[];
 
-    int counter = 0;
     showAll = showAll || currentChannel != currentBranch;
 
     printStatus('Flutter channels:');
@@ -67,11 +86,13 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        if (verbose)
+        if (verbose) {
           rawOutput.add(line);
+        }
         final List<String> split = line.split('/');
-        if (split.length < 2)
+        if (split.length < 2) {
           return null;
+        }
         final String branchName = split[1];
         if (seenChannels.contains(branchName)) {
           return null;
@@ -79,19 +100,17 @@ class ChannelCommand extends FlutterCommand {
         seenChannels.add(branchName);
 
         if (!branchName.startsWith('HEAD ')) {
-          if (showAll)
+          if (showAll) {
             return '  $branchName';
-          if (FlutterVersion.officialChannels.containsKey(branchName)) {
-            final String prefix = branchName == currentBranch ? '* ' : '  ';
-            orderedByStabilityChannels[FlutterVersion.officialChannels[branchName]] = '$prefix$branchName';
-            counter++;
+          }
+          if (FlutterVersion.officialChannels.contains(branchName)) {
+            officialChannels.add(branchName);
           }
         }
-        if(counter == orderedByStabilityChannels.length) {
-          counter = -1;
-          return orderedByStabilityChannels.join('\n');
-        }
-        return null;
+
+        return _sortOfficialChannelsByStability(officialChannels)
+            ?.map((String channel) => _formatChannels(currentBranch, channel))
+            ?.join('\n');
       },
     );
     if (result != 0) {
@@ -105,7 +124,7 @@ class ChannelCommand extends FlutterCommand {
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
       printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
-    } else if (!FlutterVersion.officialChannels.containsKey(branchName)) {
+    } else if (!FlutterVersion.officialChannels.contains(branchName)) {
       printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     return _checkout(branchName);

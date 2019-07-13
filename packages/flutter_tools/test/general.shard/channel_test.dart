@@ -52,24 +52,6 @@ void main() {
       expect(testLogger.statusText, contains('Flutter channels:'));
     }
 
-    Future<void> simpleChannelTestOrderedByStability(List<String> args) async {
-      final ChannelCommand command = ChannelCommand();
-      final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(args);
-      expect(testLogger.errorText, hasLength(0));
-      // The bots may return an empty list of channels (network hiccup?)
-      // and when run locally the list of branches might be different
-      // so we check for the header text rather than any specific channel name.
-      final List<String> tmpChannels = testLogger.statusText.toString().split('\n');
-      final List<String> channels = tmpChannels.sublist(1, tmpChannels.length - 1);
-
-      expect(testLogger.statusText, contains('Flutter channels:'));
-      expect(channels[0], '  master');
-      expect(channels[1], '  dev');
-      expect(channels[2], '  beta');
-      expect(channels[3], '  stable');
-    }
-
     testUsingContext('list', () async {
       await simpleChannelTest(<String>['channel']);
     });
@@ -78,8 +60,16 @@ void main() {
       await simpleChannelTest(<String>['channel', '-v']);
     });
 
-    testUsingContext('list ordered by stability', () async {
-      await simpleChannelTestOrderedByStability(<String>['channel']);
+    testUsingContext('list sorted by stability', () async {
+      await simpleChannelTest(<String>['channel']);
+
+      final List<String> tmpChannels = testLogger.statusText.toString().split('\n');
+      final List<String> channels = tmpChannels.sublist(1, tmpChannels.length - 1);
+
+      expect(channels[0], contains('master'));
+      expect(channels[1], contains('dev'));
+      expect(channels[2], contains('beta'));
+      expect(channels[3], contains('stable'));
     });
 
     testUsingContext('removes duplicates', () async {

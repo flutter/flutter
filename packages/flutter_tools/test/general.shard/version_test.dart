@@ -31,7 +31,7 @@ void main() {
     mockCache = MockCache();
   });
 
-  for (String channel in FlutterVersion.officialChannels.keys) {
+  for (String channel in FlutterVersion.officialChannels) {
     DateTime getChannelUpToDateVersion() {
       return _testClock.ago(FlutterVersion.versionAgeConsideredUpToDate(channel) ~/ 2);
     }
