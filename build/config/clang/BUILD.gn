@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("clang.gni")
+import("//build/toolchain/clang.gni")
 
 # Enables some extra Clang-specific warnings. Some third-party code won't
 # compile with these so may want to remove this config.
@@ -12,8 +13,18 @@ config("extra_warnings") {
 
     # Warns when a const char[] is converted to bool.
     "-Wstring-conversion",
-    "-Wthread-safety",
   ]
+  if (enable_bitcode) {
+    # Xcode clang throws up warnings about the way we do mutexes.
+    cflags += [
+      "-Wno-thread-safety",
+      "-Wno-thread-safety-analysis",
+    ]
+  } else {
+    cflags += [
+      "-Wthread-safety",
+    ]
+  }
 
   defines = [ "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }

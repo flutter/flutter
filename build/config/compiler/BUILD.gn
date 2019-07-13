@@ -176,6 +176,14 @@ config("compiler") {
     # These flags are shared between the C compiler and linker.
     common_mac_flags = []
 
+    if (enable_bitcode) {
+      if (is_debug) {
+        common_mac_flags += [ "-fembed-bitcode-marker" ]
+      } else {
+        common_mac_flags += [ "-fembed-bitcode" ]
+      }
+    }
+
     # CPU architecture.
     if (current_cpu == "x64") {
       common_mac_flags += [
@@ -651,7 +659,7 @@ if (is_win) {
   default_warning_flags += [
     # Enables.
     "-Wendif-labels",  # Weird old-style text after an #endif.
-    "-Werror",  # Warnings as errors.
+    "-Werror", # Warnings as errors.
 
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
@@ -803,12 +811,16 @@ if (is_win) {
     # Don't emit the GCC version ident directives, they just end up in the
     # .comment section taking up binary size.
     "-fno-ident",
-
-    # Put data and code in their own sections, so that unused symbols
-    # can be removed at link time with --gc-sections.
-    "-fdata-sections",
-    "-ffunction-sections",
   ]
+
+  if (!enable_bitcode) {
+    common_optimize_on_cflags += [
+      # Put data and code in their own sections, so that unused symbols
+      # can be removed at link time with --gc-sections.
+      "-fdata-sections",
+      "-ffunction-sections",
+    ]
+  }
   common_optimize_on_ldflags = []
 
   if (is_android) {

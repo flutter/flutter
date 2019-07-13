@@ -13,4 +13,7 @@ declare_args() {
 
   # Generate code with instrumentation for code coverage generation using LLVM.
   enable_coverage = false
+
+  # Set this flag to enable bitcode. Only valid for iOS ARM builds.
+  enable_bitcode = false
 }
