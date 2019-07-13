@@ -154,13 +154,18 @@ Future<void> main() async {
         Directory(path.join(hostApp.path, 'gradle', 'wrapper')),
       );
 
+      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+
       await inDirectory(hostApp, () async {
         if (!Platform.isWindows) {
           await exec('chmod', <String>['+x', 'gradlew']);
         }
         await exec(gradlewExecutable,
           <String>['app:assembleDebug'],
-          environment: <String, String>{ 'JAVA_HOME': javaHome },
+          environment: <String, String>{
+            'JAVA_HOME': javaHome,
+            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+          },
         );
       });
 
@@ -173,10 +178,17 @@ Future<void> main() async {
         'debug',
         'app-debug.apk',
       )));
-
       if (!existingAppBuilt) {
         return TaskResult.failure('Failed to build existing app .apk');
       }
+
+      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
+      if (!analyticsOutput.contains(
+        'screenView {cd24: android-arm64, cd25: true, viewName: build/bundle}'
+      )) {
+        return TaskResult.failure('Building outer app did not produce analytics');
+      }
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());

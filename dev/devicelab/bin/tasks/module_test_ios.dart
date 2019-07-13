@@ -219,6 +219,8 @@ Future<void> main() async {
         hostApp,
       );
 
+      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+
       await inDirectory(hostApp, () async {
         await exec('pod', <String>['install']);
         await exec(
@@ -236,6 +238,9 @@ Future<void> main() async {
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
           ],
+          environment: <String, String> {
+            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+          }
         );
       });
 
@@ -244,9 +249,15 @@ Future<void> main() async {
         'Host.app',
         'Host',
       )));
-
       if (!existingAppBuilt) {
         return TaskResult.failure('Failed to build existing app .app');
+      }
+
+      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
+      if (!analyticsOutput.contains(
+        'screenView {cd24: ios, cd25: true, viewName: build/bundle}'
+      )) {
+        return TaskResult.failure('Building outer app did not produce analytics');
       }
 
       return TaskResult.success(null);

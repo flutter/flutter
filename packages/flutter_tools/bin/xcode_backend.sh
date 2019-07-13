@@ -249,7 +249,7 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                  \
+  FLUTTER_PLATFORM_SCRIPT=true RunCommand "${FLUTTER_ROOT}/bin/flutter"     \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \

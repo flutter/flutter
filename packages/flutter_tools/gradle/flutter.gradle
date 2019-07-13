@@ -223,7 +223,7 @@ class FlutterPlugin implements Plugin<Project> {
                             initWith debug
                         }
                     }
-                    
+
                     pluginProject.android.buildTypes.each {
                         def buildMode = buildModeFor(it)
                         addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
@@ -652,6 +652,8 @@ abstract class BaseFlutterTask extends DefaultTask {
         project.exec {
             executable flutterExecutable.absolutePath
             workingDir sourceDir
+            environment 'FLUTTER_PLATFORM_SCRIPT', 'true'
+
             if (localEngine != null) {
                 args "--local-engine", localEngine
                 args "--local-engine-src-path", localEngineSrcPath
