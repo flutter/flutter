@@ -288,7 +288,7 @@ void main() {
           },
         ));
         expect(await imageAvailable.future,
-            matches(r'Exception: HTTP request failed, statusCode: 502, .*/flutter/packages/flutter/baz'));
+            matches(r'Exception: HTTP request failed, statusCode: 502, .*/baz'));
       }, skip: isBrowser);
     });
   });
