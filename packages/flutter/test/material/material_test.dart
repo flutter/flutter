@@ -216,14 +216,14 @@ void main() {
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
-  group('Dark Theme', () {
+  group('Elevation Overlay', () {
 
     testWidgets('applyElevationOverlay set to false does not change surface color', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
           data: ThemeData(
             applyElevationOverlay: false,
-            colorScheme: ColorScheme.dark().copyWith(surface: surfaceColor),
+            colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
           ),
           child: buildMaterial(color: surfaceColor, elevation: 8.0))
       );
@@ -253,7 +253,7 @@ void main() {
             Theme(
               data: ThemeData(
                 applyElevationOverlay: true,
-                colorScheme: ColorScheme.dark().copyWith(surface: surfaceColor),
+                colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
               ),
               child: buildMaterial(
                 color: surfaceColor,
@@ -273,7 +273,7 @@ void main() {
           Theme(
             data: ThemeData(
               applyElevationOverlay: true,
-              colorScheme: ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
+              colorScheme: const ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
             ),
             child: buildMaterial(
                 color: Colors.cyan,
