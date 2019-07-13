@@ -592,7 +592,7 @@ Future<void> _pubRunTest(
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
     case 'create':
-      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      args.addAll(<String>[path.join('test', 'general.shard', 'commands', 'create_test.dart')]);
       break;
   }
 
