@@ -115,6 +115,32 @@ enum BuildMode {
   release,
 }
 
+const List<String> _kBuildModes = <String>[
+  'debug',
+  'profile',
+  'release',
+  'dynamic-profile',
+  'dynamic-release',
+];
+
+/// Return the name for the build mode, or "any" if null.
+String getNameForBuildMode(BuildMode buildMode) {
+  return _kBuildModes[buildMode.index];
+}
+
+/// Returns the [BuildMode] for a particular `name`.
+BuildMode getBuildModeForName(String name) {
+  switch (name) {
+    case 'debug':
+      return BuildMode.debug;
+    case 'profile':
+      return BuildMode.profile;
+    case 'release':
+      return BuildMode.release;
+  }
+  return null;
+}
+
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
   if (buildNumber == null) {
     return null;
