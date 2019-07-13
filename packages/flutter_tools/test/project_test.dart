@@ -40,7 +40,19 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<Exception>()),
+          throwsA(isInstanceOf<ToolExit>()),
+        );
+      });
+
+      testInMemory('fails on pubspec.yaml parse failure', () async {
+        final Directory directory = fs.directory('myproject');
+        directory.childFile('pubspec.yaml')
+          ..createSync(recursive: true)
+          ..writeAsStringSync(parseErrorPubspec);
+
+        expect(
+          () => FlutterProject.fromDirectory(directory),
+          throwsA(isInstanceOf<ToolExit>()),
         );
       });
 
@@ -52,7 +64,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<Exception>()),
+          throwsA(isInstanceOf<ToolExit>()),
         );
       });
 
@@ -573,6 +585,14 @@ String get invalidPubspec => '''
 name: hello
 flutter:
   invalid:
+''';
+
+String get parseErrorPubspec => '''
+name: hello
+# Whitespace is important.
+flutter:
+    something:
+  something_else:
 ''';
 
 String projectFileWithBundleId(String id, {String qualifier}) {
