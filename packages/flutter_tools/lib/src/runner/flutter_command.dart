@@ -389,6 +389,7 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+
           await _sendUsage(commandResult, startTime, endTime);
         }
       },

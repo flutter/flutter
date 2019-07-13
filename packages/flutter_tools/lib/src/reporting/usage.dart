@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
