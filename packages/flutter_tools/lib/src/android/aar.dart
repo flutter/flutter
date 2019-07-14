@@ -13,6 +13,7 @@ import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
 
+/// Builds the AAR and POM files for the current Flutter module or plugin.
 Future<void> buildAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
@@ -27,10 +28,13 @@ Future<void> buildAar({
             'for details on how to upgrade the project.'
     );
   }
-
-  // Validate that we can find an android sdk.
-  if (androidSdk == null)
-    throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
+  if (!project.manifest.isModule && !project.manifest.isPlugin) {
+    throwToolExit('AARs can only be built for plugin or module projects.');
+  }
+  // Validate that we can find an Android SDK.
+  if (androidSdk == null) {
+    throwToolExit('No Android SDK found. Try setting the `ANDROID_SDK_ROOT` environment variable.');
+  }
 
   await buildGradleAar(
     project: project,

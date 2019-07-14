@@ -17,6 +17,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../flutter_manifest.dart';
@@ -132,9 +133,9 @@ Future<void> checkGradleDependencies() async {
   progress.stop();
 }
 
-/// Tries to migrate [settings.gradle] by removing the code that load plugins as
-/// Gradle subprojects. If this file was modified by the developer, then prints
-/// an error message indicating how to migrate the file manually.
+/// Tries to patch [settings.gradle].
+/// If the file is successfully patched, rename the previous file as [.settings.gradle].
+/// Otherwise, print an error message indicating how to patch the file manually.
 void _removePluginsFromSettingsGradle(Directory androidDirectory) {
   final File currentFile = androidDirectory.childFile('settings.gradle');
   if (!currentFile.existsSync()) {
@@ -172,9 +173,11 @@ void _removePluginsFromSettingsGradle(Directory androidDirectory) {
     printError('*******************************************************************************************');
     throwToolExit('Please update the file and run this command again.');
   }
-
+  // Rename `settings.gradle` as `.settings.gradle`.
+  currentFile.renameSync(fs.path.join(androidDirectory.path, '.settings.gradle'));
+  // Copy the new file.
   fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-        'gradle', 'new_settings.gradle')).copySync(currentFile.path);
+      'gradle', 'new_settings.gradle')).copySync(currentFile.path);
   status.stop();
   printStatus('✅ `$relativeFile` updated successfully.');
 }
@@ -309,82 +312,46 @@ distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersio
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
-bool isWithinVersionRange(String targetVersion, {String min, String max}) {
-  final List<String> targetParts = targetVersion.split('.');
-  final List<String> minParts = min.split('.');
-  final List<String> maxParts = max.split('.');
-
-  if (targetParts.length != minParts.length) {
-    return false;
-  }
-  if (targetParts.length != maxParts.length) {
-    return false;
-  }
-  // This is true while the consumed version parts are equal to the
-  // corresponding min version parts.
-  bool minEqual = true;
-  // This is true while the consumed version parts are equal to the
-  // corresponding max version parts.
-  bool maxEqual = true;
-  for (int i = 0; i < targetParts.length; i++) {
-    final int targetPartValue = int.parse(targetParts[i]);
-    final int minPartValue = int.parse(minParts[i]);
-    final int maxPartValue = int.parse(maxParts[i]);
-
-    if (targetPartValue < minPartValue) {
-      if (minEqual) {
-        return false;
-      }
-      minEqual = false;
-    } else if (targetPartValue > minPartValue) {
-      minEqual = false;
-    }
-    if (targetPartValue > maxPartValue) {
-      if (maxEqual) {
-        return false;
-      }
-      maxEqual = false;
-    } else if (targetPartValue < maxPartValue) {
-      maxEqual = false;
-    }
-  }
-  return true;
+bool _isWithinVersionRange(String targetVersion, {String min, String max}) {
+  final Version parsedTargetVersion = Version.parse(targetVersion);
+  return parsedTargetVersion >= Version.parse(min) &&
+      parsedTargetVersion <= Version.parse(max);
 }
 
 const String defaultGradleVersion = '4.10.2';
 
-/// Returns the Gradle version that is required by the given Android Gradle plugin version.
+/// Returns the Gradle version that is required by the given Android Gradle plugin version
+/// by picking the largest compatible version from
+/// https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
 String getGradleVersionFor(String androidPluginVersion) {
-  // Pick the largest Gradle version from
-  // https://developer.android.com/studio/releases/gradle-plugin#updating-gradle
-  if (isWithinVersionRange(androidPluginVersion, min: '1.0.0', max: '1.1.3')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '1.0.0', max: '1.1.3')) {
     return '2.3';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '1.2.0', max: '1.3.1')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '1.2.0', max: '1.3.1')) {
     return '2.9';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '1.5.0', max: '1.5.0')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '1.5.0', max: '1.5.0')) {
     return '2.2.1';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '2.0.0', max: '2.1.2')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '2.0.0', max: '2.1.2')) {
     return '2.13';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '2.1.3', max: '2.2.3')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '2.1.3', max: '2.2.3')) {
     return '2.14.1';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '2.3.0', max: '2.9.9')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '2.3.0', max: '2.9.9')) {
     return '3.3';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.0.0', max: '3.0.9')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '3.0.0', max: '3.0.9')) {
     return '4.1';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.1.0', max: '3.1.9')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '3.1.0', max: '3.1.9')) {
     return '4.4';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.2.0', max: '3.2.1')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '3.2.0', max: '3.2.1')) {
     return '4.6';
   }
-  if (isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
+  if (_isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
     return '4.10.2';
   }
   return '5.1.1';

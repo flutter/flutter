@@ -220,6 +220,6 @@ Future<void> main() async {
 
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw 'Expected file `$file` to exit.';
+    throw FileSystemException('Expected file to exit.', file);
   }
 }

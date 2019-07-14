@@ -542,29 +542,6 @@ flutter:
   });
 
   group('gradle version', () {
-    test('should have the same number of parts as the plugin version', () {
-      expect(isWithinVersionRange('1', min: '1.0', max: '1.0'), isFalse);
-      expect(isWithinVersionRange('1.0', min: '1', max: '1.0'), isFalse);
-      expect(isWithinVersionRange('1.0', min: '1.0', max: '1'), isFalse);
-      expect(isWithinVersionRange('1.0', min: '1.0', max: '1.0'), isTrue);
-    });
-
-    test('can be compared against an Android plugin', () {
-      expect(isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.0.0'), isTrue);
-      expect(isWithinVersionRange('1.0.0', min: '1.0.0', max: '1.0.9'), isTrue);
-      expect(isWithinVersionRange('1.0.2', min: '1.0.0', max: '1.0.9'), isTrue);
-      expect(isWithinVersionRange('1.0.8', min: '1.0.0', max: '1.0.9'), isTrue);
-
-      expect(isWithinVersionRange('1.0.9', min: '1.0.0', max: '1.0.9'), isTrue);
-      expect(isWithinVersionRange('1.1.0', min: '1.0.0', max: '1.0.9'), isFalse);
-      expect(isWithinVersionRange('1.0.10', min: '1.0.0', max: '1.0.9'), isFalse);
-
-      expect(isWithinVersionRange('1.0.0', min: '0.0.0', max: '100.0.0'), isTrue);
-      expect(isWithinVersionRange('50.0.0', min: '0.0.0', max: '100.0.0'), isTrue);
-      expect(isWithinVersionRange('50.10000.0', min: '0.0.0', max: '100.0.0'), isTrue);
-      expect(isWithinVersionRange('50.10000.1000', min: '0.0.0', max: '100.0.0'), isTrue);
-    });
-
     test('should be compatible with the Android plugin version', () {
       // Granular versions.
       expect(getGradleVersionFor('1.0.0'), '2.3');

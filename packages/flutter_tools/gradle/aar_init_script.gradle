@@ -18,6 +18,9 @@ void configureProject(Project project, File outputDir) {
         addAarTask(project, variant)
     }
     // Snapshot versions include the timestamp in the artifact name.
+    // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
+    // This version isn't relevant in Flutter since the pub version is used
+    // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
     project.uploadArchives {

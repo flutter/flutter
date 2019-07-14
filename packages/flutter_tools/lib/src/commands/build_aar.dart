@@ -20,10 +20,10 @@ class BuildAarCommand extends BuildSubCommand {
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
-        help: 'The target platform for which the app is compiled.',
+        help: 'The target platform for which the project is compiled.',
       )
       ..addOption('output-dir',
-        help: 'The absolute path to the directory where the \'repo\' is generated.'
+        help: 'The absolute path to the directory where the repository is generated.'
               'By default, this is \'<current-directory>android/build\'. ',
       );
   }
@@ -38,8 +38,10 @@ class BuildAarCommand extends BuildSubCommand {
   };
 
   @override
-  final String description = 'Build a repo directory containing an AAR file and a POM file.\n\n'
-      'The POM file is used to include the dependencies that the AAR was compiled against.';
+  final String description = 'Build a repository containing an AAR and a POM file.\n\n'
+      'The POM file is used to include the dependencies that the AAR was compiled against.\n\n'
+      'To learn more about how to use these artifacts, see '
+      'https://docs.gradle.org/current/userguide/repository_types.html#sub:maven_local';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
