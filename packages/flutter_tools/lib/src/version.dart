@@ -38,7 +38,9 @@ class FlutterVersion {
     return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
-  /// This maps the officialChannels ordered by stability.
+  /// This maps the officialChannels sorted by stability.
+  ///
+  /// Beware: The order is important
   static const Set<String> officialChannels = <String>{
     'master',
     'dev',
