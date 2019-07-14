@@ -15,7 +15,10 @@ const Target debugIosApplication = Target(
   dependencies: <Target>[
     copyAssets,
     kernelSnapshot,
-  ]
+  ],
+  defines: <String, String>{
+    kBuildMode: 'debug',
+  },
 );
 
 /// Create an iOS profile application.
@@ -27,7 +30,10 @@ const Target profileIosApplication = Target(
   dependencies: <Target>[
     copyAssets,
     aotAssemblyProfile,
-  ]
+  ],
+  defines: <String, String>{
+    kBuildMode: 'profile',
+  },
 );
 
 /// Create an iOS debug application.
@@ -39,5 +45,8 @@ const Target releaseIosApplication = Target(
   dependencies: <Target>[
     copyAssets,
     aotAssemblyRelease,
-  ]
+  ],
+  defines: <String, String>{
+    kBuildMode: 'release',
+  },
 );

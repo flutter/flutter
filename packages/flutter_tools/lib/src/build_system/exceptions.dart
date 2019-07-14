@@ -93,3 +93,16 @@ class MissingDefineException implements Exception {
         'but it was not provided';
   }
 }
+
+class ConflictingDefineException implements Exception {
+  ConflictingDefineException(this.define, this.left, this.right);
+
+  final String define;
+  final String left;
+  final String right;
+
+  @override
+  String toString() {
+    return 'Define $define had conflicting values of $left and $right';
+  }
+}

@@ -41,6 +41,8 @@ void main() {
       'foobar',
       'example',
     );
+    final ConflictingDefineException conflictingDefineException = ConflictingDefineException(
+        'a', 'b', 'c');
 
     expect(
         missingInputException.toString(),
@@ -67,6 +69,10 @@ void main() {
     expect(
         missingDefineException.toString(),
         'Target example required define foobar but it was not provided'
+    );
+    expect(
+        conflictingDefineException.toString(),
+        'Define a had conflicting values of b and c'
     );
   });
 }

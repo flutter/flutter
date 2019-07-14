@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/macos/cocoapods.dart';
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
+import '../../build_info.dart';
 import '../../globals.dart';
+import '../../project.dart';
 import '../build_system.dart';
+import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 
@@ -73,6 +78,50 @@ const Target unpackMacos = Target(
   buildAction: copyFramework,
 );
 
+/// Tell cocoapods to re-fetch dependencies.
+Future<void> podInstallAction(Map<String, ChangeType> updates, Environment environment) async {
+  if (environment.defines[kBuildMode] == null) {
+    throw MissingDefineException(kBuildMode, 'pod_install_debug_macos');
+  }
+  // If there is no podfile do not perform any pods actions.
+  if (!environment.projectDir.childDirectory('macos')
+      .childFile('Podfile').existsSync()) {
+    return;
+  }
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+  final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
+      mode: buildMode, platform: TargetPlatform.darwin_x64);
+
+  await cocoaPods.processPods(
+    xcodeProject: project.macos,
+    engineDir: enginePath,
+    isSwift: project.ios.isSwift,
+    dependenciesChanged: true,
+  );
+}
+
+/// Invoke cocoapods to install dependencies
+const Target podInstallDebug = Target(
+  name: 'pod_install_macos',
+  buildAction: podInstallAction,
+  inputs: <Source>[
+    Source.artifact(Artifact.flutterMacOSPodspec,
+        platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
+    Source.pattern('{PROJECT_DIR}/macos/Podfile', optional: true),
+    Source.pattern('{PROJECT_DIR}/macos/Runner.xcodeproj/project.pbxproj'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
+  ],
+  outputs: <Source>[
+    // No outputs because we assume that cocoapods tracks these.
+  ],
+  dependencies: <Target>[
+    unpackMacos,
+    flutterPlugins,
+  ],
+);
+
 /// Build a macOS application.
 const Target macosApplication = Target(
   name: 'debug_macos_application',
@@ -80,10 +129,15 @@ const Target macosApplication = Target(
   inputs: <Source>[],
   outputs: <Source>[],
   dependencies: <Target>[
+    flutterPlugins,
     unpackMacos,
     kernelSnapshot,
     copyAssets,
-  ]
+    podInstallDebug,
+  ],
+  defines: <String, String>{
+    kBuildMode: 'debug',
+  }
 );
 
 /// Build a macOS release application.
@@ -93,8 +147,13 @@ const Target macoReleaseApplication = Target(
   inputs: <Source>[],
   outputs: <Source>[],
   dependencies: <Target>[
+    flutterPlugins,
     unpackMacos,
     aotElfRelease,
     copyAssets,
-  ]
+    podInstallDebug,
+  ],
+  defines: <String, String>{
+    kBuildMode: 'release',
+  }
 );

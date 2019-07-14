@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
@@ -26,6 +27,9 @@ import 'targets/macos.dart';
 import 'targets/windows.dart';
 
 export 'source.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
@@ -122,6 +126,7 @@ class Target {
     @required this.inputs,
     @required this.outputs,
     @required this.buildAction,
+    this.defines = const <String, String>{},
     this.dependencies = const <Target>[],
   });
 
@@ -142,6 +147,14 @@ class Target {
 
   /// The action which performs this build step.
   final BuildAction buildAction;
+
+  /// A set of default defines which are automatically applied to an action.
+  ///
+  /// When a build is performed, all defaults and user provided defines are
+  /// aggregated and combined into a single map.
+  ///
+  /// It is an error if the same define is provided with a different value.
+  final Map<String, String> defines;
 
   /// Collect hashes for all inputs to determine if any have changed.
   Future<Map<String, ChangeType>> computeChanges(
@@ -531,6 +544,31 @@ class BuildSystem {
     );
   }
 
+  /// Collect any default defines provided by the targets.
+  ///
+  /// Throws a [ConflictingDefineException] if there are multiple different
+  /// values for the same key.
+  Map<String, String> collectDefines(String name, Map<String, String> initial) {
+    final Target target = _getNamedTarget(name);
+    checkCycles(target);
+    Map<String, String> fold(Map<String, String> accumulation, Target current) {
+      if (current.defines != null) {
+        for (MapEntry<String, String> entry in current.defines.entries) {
+          if (accumulation.containsKey(entry.key)) {
+            final String previousValue = accumulation[entry.key];
+            if (previousValue != entry.value) {
+              throw ConflictingDefineException(entry.key, previousValue, entry.value);
+            }
+          } else {
+            accumulation[entry.key] = entry.value;
+          }
+        }
+      }
+      return accumulation;
+    }
+    return target.fold(initial, fold);
+  }
+
   /// Describe the target `name` and all of its dependencies.
   List<Map<String, Object>> describe(
     String name,
@@ -549,6 +587,16 @@ class BuildSystem {
         <String, Map<String, Object>>{};
     final Map<String, Map<String, Object>> targets = target.fold(result, fold);
     return targets.values.toList();
+  }
+
+  /// Return the stamp files for a previously run build.
+  List<File> stampFilesFor(String name, Environment environment) {
+    final Target target = _getNamedTarget(name);
+    final List<File> result = <File>[];
+    target.fold(result, (List<File> files, Target current) {
+      result.add(current._findStampFile(environment));
+    });
+    return result;
   }
 
   // Returns the corresponding target or throws.

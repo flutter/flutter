@@ -54,7 +54,7 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
     targetProductVm: buildMode == BuildMode.release,
     outputFilePath: environment
       .buildDir
-      .childFile('main.app.dill')
+      .childFile('app.dill')
       .path,
     depFilePath: null,
     mainPath: targetFile,
@@ -79,7 +79,7 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   final int snapshotExitCode = await snapshotter.build(
     platform: targetPlatform,
     buildMode: buildMode,
-    mainPath: environment.buildDir.childFile('main.app.dill').path,
+    mainPath: environment.buildDir.childFile('app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     outputPath: outputPath,
   );
@@ -132,7 +132,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('main.app.dill').path,
+      mainPath: environment.buildDir.childFile('app.dill').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       iosArch: iosArchs.single,
@@ -148,7 +148,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       pending.add(snapshotter.build(
         platform: targetPlatform,
         buildMode: buildMode,
-        mainPath: environment.buildDir.childFile('main.app.dill').path,
+        mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
         iosArch: iosArch,
@@ -182,7 +182,7 @@ const Target kernelSnapshot = Target(
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
   ],
   outputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
   ],
   dependencies: <Target>[],
   buildAction: compileKernel,
@@ -192,7 +192,7 @@ const Target kernelSnapshot = Target(
 const Target aotElfProfile = Target(
   name: 'aot_elf_profile',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -211,10 +211,10 @@ const Target aotElfProfile = Target(
 );
 
 /// Generate an ELF binary from a dart kernel file in release mode.
-const Target aotElfRelease= Target(
+const Target aotElfRelease = Target(
   name: 'aot_elf_release',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -236,7 +236,7 @@ const Target aotElfRelease= Target(
 const Target aotAssemblyProfile = Target(
   name: 'aot_assembly_profile',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -246,9 +246,6 @@ const Target aotAssemblyProfile = Target(
     ),
   ],
   outputs: <Source>[
-    // TODO(jonahwilliams): are these used or just a side effect?
-    // Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
-    // Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
     Source.pattern('{BUILD_DIR}/App.framework/App'),
   ],
   dependencies: <Target>[
@@ -261,7 +258,7 @@ const Target aotAssemblyProfile = Target(
 const Target aotAssemblyRelease = Target(
   name: 'aot_assembly_release',
   inputs: <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -271,9 +268,6 @@ const Target aotAssemblyRelease = Target(
     ),
   ],
   outputs: <Source>[
-    // TODO(jonahwilliams): are these used or just a side effect?
-    // Source.pattern('{BUILD_DIR}/snapshot_assembly.S'),
-    // Source.pattern('{BUILD_DIR}/snapshot_assembly.o'),
     Source.pattern('{BUILD_DIR}/App.framework/App'),
   ],
   dependencies: <Target>[

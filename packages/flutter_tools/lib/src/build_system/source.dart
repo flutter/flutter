@@ -39,7 +39,7 @@ class SourceVisitor {
   /// Visit a [Source] which contains a file uri.
   ///
   /// The uri may that may include constants defined in an [Environment].
-  void visitPattern(String pattern) {
+  void visitPattern(String pattern, bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.
     final List<String> segments = <String>[];
@@ -104,6 +104,9 @@ class SourceVisitor {
         }
       }
     } else {
+      if (optional && !fs.isFileSync(filePath)) {
+        return;
+      }
       sources.add(fs.file(fs.path.normalize(filePath)));
     }
   }
@@ -138,7 +141,7 @@ class SourceVisitor {
 abstract class Source {
   /// This source is a file-uri which contains some references to magic
   /// environment variables.
-  const factory Source.pattern(String pattern) = _PatternSource;
+  const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
 
   /// This source is produced by invoking the provided function.
   const factory Source.function(InputFunction function) = _FunctionSource;
@@ -202,12 +205,13 @@ class _FunctionSource implements Source {
 }
 
 class _PatternSource implements Source {
-  const _PatternSource(this.value);
+  const _PatternSource(this.value, { this.optional = false });
 
   final String value;
+  final bool optional;
 
   @override
-  void accept(SourceVisitor visitor) => visitor.visitPattern(value);
+  void accept(SourceVisitor visitor) => visitor.visitPattern(value, optional);
 
   @override
   bool get implicit => value.contains('*');

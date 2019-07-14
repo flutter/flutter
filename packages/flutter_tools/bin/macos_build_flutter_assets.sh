@@ -17,10 +17,6 @@ EchoError() {
   echo "$@" 1>&2
 }
 
-# Set the working directory to the project root
-project_path="${SOURCE_ROOT}/.."
-RunCommand pushd "${project_path}" > /dev/null
-
 # Set the verbose flag.
 verbose_flag=""
 if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
@@ -32,18 +28,6 @@ target_path="lib/main.dart"
 if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
 fi
-
-# Set the track widget creation flag.
-track_widget_creation_flag=""
-if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-  track_widget_creation_flag="--track-widget-creation"
-fi
-
-# Copy the framework and handle local engine builds.
-framework_name="FlutterMacOS.framework"
-ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
-framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
-flutter_framework="${framework_path}/${framework_name}"
 
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
@@ -63,22 +47,21 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-  flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/${framework_name}"
 fi
-
-RunCommand mkdir -p -- "$ephemeral_dir"
-RunCommand rm -rf -- "${ephemeral_dir}/${framework_name}"
-RunCommand cp -Rp -- "${flutter_framework}" "${ephemeral_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
-RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+# Select the correc target for the given build mode
+target_name="debug_macos_application"
+
+RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
     ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=darwin-x64                                            \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
-    ${track_widget_creation_flag}                                           \
+    assemble                                                                \
+    -dTargetFile="${target_path}"                                           \
+    --xcfilelist-path="${SOURCE_ROOT}"                                      \
+    --project-dir="${SOURCE_ROOT}/.."                                       \
     ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}
+    ${local_engine_flag}                                                    \
+    ${target_name}                                                          \
+

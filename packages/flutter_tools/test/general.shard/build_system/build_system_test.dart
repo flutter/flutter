@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
 import 'package:flutter_tools/src/build_system/filecache.pb.dart' as pb;
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
@@ -252,6 +253,34 @@ void main() {
 
       expect(secondChanges, <String, ChangeType>{});
     }));
+
+    test('fails if conflicting defines are set', () async {
+      const Target b = Target(
+        name: 'b',
+        buildAction: null,
+        defines: <String, String>{
+          kBuildMode: 'profile',
+        },
+        dependencies: <Target>[],
+        inputs: <Source>[],
+        outputs: <Source>[]
+      );
+      const Target a = Target(
+        name: 'a',
+        buildAction: null,
+        defines: <String, String>{
+          kBuildMode: 'debug',
+        },
+        dependencies: <Target>[
+          b,
+        ],
+        inputs: <Source>[],
+        outputs: <Source>[]
+      );
+      final BuildSystem buildSystem = BuildSystem(<String, Target>{'a': a, 'b': b});
+
+      expect(() => buildSystem.collectDefines('a', <String, String>{}), throwsA(isInstanceOf<ConflictingDefineException>()));
+    });
   });
 
   group('FileCache', () {
