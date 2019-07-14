@@ -52,7 +52,8 @@ fi
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
-# Select the correc target for the given build mode
+# Select the correct target for the given build mode
+# TODO(jonahwilliams): switch over build mode when macOS supports release + profile.
 target_name="debug_macos_application"
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter"                                    \
