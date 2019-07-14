@@ -66,6 +66,7 @@ void main() {
       final List<String> tmpChannels = testLogger.statusText.toString().split('\n');
       final List<String> channels = tmpChannels.sublist(1, tmpChannels.length - 1);
 
+      expect(channels.length, 4);
       expect(channels[0], contains('master'));
       expect(channels[1], contains('dev'));
       expect(channels[2], contains('beta'));

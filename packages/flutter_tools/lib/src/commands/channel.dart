@@ -56,19 +56,13 @@ class ChannelCommand extends FlutterCommand {
   }
 
   /// Sort the channels by stability.
-  ///
-  /// It needs to check that the length of the list is the correct one
-  /// because it may receive an incomplete array, since is used as an accumulator.
   List<String> _sortOfficialChannelsByStability(List<String> officialChannels) {
-    if (officialChannels.length == FlutterVersion.officialChannels.length) {
-      final List<String> result = List<String>(FlutterVersion.officialChannels.length);
-      for (String channel in officialChannels) {
-        final int index = FlutterVersion.officialChannels.toList().indexOf(channel);
-        result[index] = channel;
-      }
-      return result;
+    final List<String> result = List<String>(FlutterVersion.officialChannels.length);
+    for (String channel in officialChannels) {
+      final int index = FlutterVersion.officialChannels.toList().indexOf(channel);
+      result[index] = channel;
     }
-    return null;
+    return result;
   }
 
   Future<void> _listChannels({bool showAll, bool verbose}) async {
@@ -78,6 +72,8 @@ class ChannelCommand extends FlutterCommand {
     final Set<String> seenChannels = <String>{};
     final List<String> officialChannels = <String>[];
     final List<String> rawOutput = <String>[];
+
+    bool done = false;
 
     showAll = showAll || currentChannel != currentBranch;
 
@@ -108,9 +104,16 @@ class ChannelCommand extends FlutterCommand {
           }
         }
 
-        return _sortOfficialChannelsByStability(officialChannels)
-            ?.map((String channel) => _formatChannels(currentBranch, channel))
-            ?.join('\n');
+        // It needs to check that the length of officialChannels is correct
+        // because it works as an accumulator, plus when printed once
+        // we simply skip the rest of the branches it may find.
+        if (!done && officialChannels.length == FlutterVersion.officialChannels.length) {
+          done = true;
+          return _sortOfficialChannelsByStability(officialChannels)
+              .map((String channel) => _formatChannels(currentBranch, channel))
+              .join('\n');
+        }
+        return null;
       },
     );
     if (result != 0) {
