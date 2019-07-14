@@ -31,6 +31,7 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
     .projectDir
     .childDirectory('macos')
     .childDirectory('Flutter')
+    .childDirectory('ephemeral')
     .childDirectory('FlutterMacOS.framework');
   if (targetDirectory.existsSync()) {
     targetDirectory.deleteSync(recursive: true);
@@ -46,7 +47,7 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
   }
 }
 
-const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
+const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
 
 /// Copies the macOS desktop framework to the copy directory.
 const Target unpackMacos = Target(
