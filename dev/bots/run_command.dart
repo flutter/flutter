@@ -108,6 +108,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
     .transform<String>(const Utf8Decoder())
     .transform(const LineSplitter())
     .where((String line) => removeLine == null || !removeLine(line))
+    .map((String line) => '$line\n')
     .transform(const Utf8Encoder());
   if (printOutput) {
     await Future.wait<void>(<Future<void>>[
