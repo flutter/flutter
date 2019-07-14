@@ -81,21 +81,16 @@ class MacOSDevice extends Device {
     bool ipv6 = false,
   }) async {
     // Stop any running applications with the same executable.
+    String executable;
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
-      await buildMacOS(
+      executable = await buildMacOS(
         flutterProject: FlutterProject.current(),
         buildInfo: debuggingOptions?.buildInfo,
         targetOverride: mainPath,
       );
     }
-
-    // Ensure that the executable is locatable.
-    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
-    if (executable == null) {
-      printError('Unable to find executable to run');
-      return LaunchResult.failed();
-    }
+    package.hackExecutable = executable;
 
     // Make sure to call stop app after we've built.
     await stopApp(package);
@@ -110,9 +105,9 @@ class MacOSDevice extends Device {
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
-      await processManager.run(<String>[
-        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
-      ]);
+      // await processManager.run(<String>[
+      //   'open', executable,
+      // ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
@@ -126,8 +121,7 @@ class MacOSDevice extends Device {
   // currently we rely on killing the isolate taking down the application.
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
-    // Assume debug for now.
-    return killProcess(app.executable(BuildMode.debug));
+    return killProcess(app.hackExecutable ?? app.executable(BuildMode.debug));
   }
 
   @override

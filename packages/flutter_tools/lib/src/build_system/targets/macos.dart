@@ -47,6 +47,38 @@ Future<void> copyFramework(Map<String, ChangeType> updates,
   }
 }
 
+/// Copies the compiled app dill file and renames it to a .bin for macOS.
+Future<void> copyKernelBlob(Map<String, ChangeType> updates, Environment environment) async {
+  final File sourceFile = environment.buildDir.childFile('app.dill');
+  final File destinationFile = environment.buildDir
+      .childDirectory('flutter_assets')
+      .childFile('kernel_blob.bin');
+  sourceFile.copySync(destinationFile.path);
+}
+
+/// Tell cocoapods to re-fetch dependencies.
+Future<void> podInstallAction(Map<String, ChangeType> updates, Environment environment) async {
+  if (environment.defines[kBuildMode] == null) {
+    throw MissingDefineException(kBuildMode, 'pod_install_debug_macos');
+  }
+  // If there is no podfile do not perform any pods actions.
+  if (!environment.projectDir.childDirectory('macos')
+      .childFile('Podfile').existsSync()) {
+    return;
+  }
+  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+  final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+  final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
+      mode: buildMode, platform: TargetPlatform.darwin_x64);
+
+  await cocoaPods.processPods(
+    xcodeProject: project.macos,
+    engineDir: enginePath,
+    isSwift: true,
+    dependenciesChanged: true,
+  );
+}
+
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
 
 /// Copies the macOS desktop framework to the copy directory.
@@ -79,29 +111,6 @@ const Target unpackMacos = Target(
   buildAction: copyFramework,
 );
 
-/// Tell cocoapods to re-fetch dependencies.
-Future<void> podInstallAction(Map<String, ChangeType> updates, Environment environment) async {
-  if (environment.defines[kBuildMode] == null) {
-    throw MissingDefineException(kBuildMode, 'pod_install_debug_macos');
-  }
-  // If there is no podfile do not perform any pods actions.
-  if (!environment.projectDir.childDirectory('macos')
-      .childFile('Podfile').existsSync()) {
-    return;
-  }
-  final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-  final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
-  final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
-      mode: buildMode, platform: TargetPlatform.darwin_x64);
-
-  await cocoaPods.processPods(
-    xcodeProject: project.macos,
-    engineDir: enginePath,
-    isSwift: project.ios.isSwift,
-    dependenciesChanged: true,
-  );
-}
-
 /// Invoke cocoapods to install dependencies
 const Target podInstallDebug = Target(
   name: 'pod_install_macos',
@@ -124,11 +133,15 @@ const Target podInstallDebug = Target(
 );
 
 /// Build a macOS application.
-const Target macosApplication = Target(
+const Target debugMacosApplication = Target(
   name: 'debug_macos_application',
-  buildAction: null,
-  inputs: <Source>[],
-  outputs: <Source>[],
+  buildAction: copyKernelBlob,
+  inputs: <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill')
+  ],
+  outputs: <Source>[
+    Source.pattern('{BUILD_DIR}/flutter_assets/kernel_blob.bin'),
+  ],
   dependencies: <Target>[
     flutterPlugins,
     unpackMacos,

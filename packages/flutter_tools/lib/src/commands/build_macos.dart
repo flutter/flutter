@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../globals.dart';
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -60,11 +61,12 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!flutterProject.macos.existsSync()) {
       throwToolExit('No macOS desktop project configured.');
     }
-    await buildMacOS(
+    final String executable = await buildMacOS(
       flutterProject: flutterProject,
       buildInfo: buildInfo,
       targetOverride: targetFile,
     );
+    printStatus('build macOS application at $executable');
     return null;
   }
 }

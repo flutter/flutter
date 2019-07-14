@@ -45,6 +45,9 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   }
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
   final String targetFile = environment.defines[kTargetFile] ?? fs.path.join('lib', 'main.dart');
+  final String packagesPath = environment.projectDir.childFile('.packages').path;
+  final PackageUriMapper packageUriMapper = PackageUriMapper(targetFile,
+      packagesPath, null, null);
 
   final CompilerOutput output = await compiler.compile(
     sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
@@ -57,7 +60,8 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
       .childFile('app.dill')
       .path,
     depFilePath: null,
-    mainPath: targetFile,
+    packagesPath: packagesPath,
+    mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
   );
   if (output.errorCount != 0) {
     throw Exception('Errors during snapshot creation: $output');
@@ -97,6 +101,9 @@ List<File> listDartSources(Environment environment) {
   final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
+    if (!libDirectory.existsSync()) {
+      continue;
+    }
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         dartFiles.add(entity);

@@ -31,7 +31,7 @@ abstract class MacOSApp extends ApplicationPackage {
   /// which is expected to start the application and send the observatory
   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final _ExecutableAndId executableAndId = _executableFromBundle(applicationBinary);
+    final ExecutableAndId executableAndId = executableFromBundle(applicationBinary);
     final Directory applicationBundle = fs.directory(applicationBinary);
     return PrebuiltMacOSApp(
       bundleDir: applicationBundle,
@@ -41,8 +41,10 @@ abstract class MacOSApp extends ApplicationPackage {
     );
   }
 
+  String hackExecutable;
+
   /// Look up the executable name for a macOS application bundle.
-  static _ExecutableAndId _executableFromBundle(Directory applicationBundle) {
+  static ExecutableAndId executableFromBundle(Directory applicationBundle) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError('File "${applicationBundle.path}" does not exist.');
@@ -75,7 +77,7 @@ abstract class MacOSApp extends ApplicationPackage {
     if (!fs.file(executable).existsSync()) {
       printError('Could not find macOS binary at $executable');
     }
-    return _ExecutableAndId(executable, id);
+    return ExecutableAndId(executable, id);
   }
 
   @override
@@ -140,13 +142,13 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
+    final ExecutableAndId executableAndId = MacOSApp.executableFromBundle(fs.directory(directory));
     return executableAndId.executable;
   }
 }
 
-class _ExecutableAndId {
-  _ExecutableAndId(this.executable, this.id);
+class ExecutableAndId {
+  ExecutableAndId(this.executable, this.id);
 
   final String executable;
   final String id;

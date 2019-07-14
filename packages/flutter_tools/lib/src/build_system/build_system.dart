@@ -496,7 +496,7 @@ class BuildSystem {
   /// All currently registered targets.
   static final Map<String, Target> _defaultTargets = <String, Target>{
     unpackMacos.name: unpackMacos,
-    macosApplication.name: macosApplication,
+    debugMacosApplication.name: debugMacosApplication,
     macoReleaseApplication.name: macoReleaseApplication,
     unpackLinux.name: unpackLinux,
     unpackWindows.name: unpackWindows,
@@ -645,12 +645,12 @@ class _BuildInstance {
       final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
       if (updates.isEmpty) {
         skipped = true;
-        printStatus('Skipping target: ${target.name}');
+        printTrace('Skipping target: ${target.name}');
       } else {
-        printStatus('${target.name}: Starting');
+        printTrace('${target.name}: Starting');
         // build actions may be null.
         await target?.buildAction(updates, environment);
-        printStatus('${target.name}: Complete');
+        printTrace('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment);
         // Update hashes for output files.

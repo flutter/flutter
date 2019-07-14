@@ -10,14 +10,8 @@ import 'build_system.dart';
  /// Generates an .xcfilelist from a previous build for the input and output files.
 void generateXcFileList(String targetName, Environment environment, String path) {
   final List<File> stamps = buildSystem.stampFilesFor(targetName, environment);
-  final StringBuffer inputFileListBuffer = StringBuffer();
-  final StringBuffer outputFileListBuffer = StringBuffer();
-  // Cannot include plist in the xcfilelist.
-  bool notIntermediate(String path) {
-    return !path.contains('plist') &&
-           !path.contains('.flutter-plugins') &&
-           !path.contains(environment.buildDir.path);
-  }
+  final Set<String> inputFiles = <String>{};
+  final Set<String> outputFiles = <String>{};
   for (File file in stamps) {
     if (!file.existsSync()) {
       continue;
@@ -25,17 +19,37 @@ void generateXcFileList(String targetName, Environment environment, String path)
     final Map<String, Object> data = json.decode(file.readAsStringSync());
     (data['inputs'] as List<Object>)
       .cast<String>()
-      .where(notIntermediate)
-      .forEach(inputFileListBuffer.writeln);
+      .where((String path) {
+        // Cannot include plist, plugins, or intermediates in the input xcfilelist.
+        return !path.contains('plist') &&
+               !path.contains(fs.path.split(environment.buildDir.path).last) &&
+               !path.contains('flutter-plugins') &&
+               !path.contains('project.pbxproj') &&
+               !path.contains('xcconfig');
+      })
+      .forEach(inputFiles.add);
     (data['outputs'] as List<Object>)
       .cast<String>()
-      .where(notIntermediate)
-      .forEach(outputFileListBuffer.writeln);
+      .where((String value) {
+        return !value.contains('flutter-plugins') &&
+               !value.contains('ephemeral');
+      })
+      .forEach(outputFiles.add);
   }
-  fs.file(fs.path.join(path, 'FlutterInputs.xcfilelist'))
-    ..createSync(recursive: true)
-    ..writeAsStringSync(inputFileListBuffer.toString());
-  fs.file(fs.path.join(path, 'FlutterOutputs.xcfilelist'))
-    ..createSync(recursive: true)
-    ..writeAsStringSync(outputFileListBuffer.toString());
+  // XCode is dumb and will assume that if the file was edited that the inputs
+  // changed.
+  final String inputSource = inputFiles.join('\n');
+  final String outputSource = outputFiles.join('\n');
+  final File inputFile = fs.file(fs.path.join(path, 'FlutterInputs.xcfilelist'));
+  final File outputFile = fs.file(fs.path.join(path, 'FlutterOutputs.xcfilelist'));
+  if (!inputFile.existsSync() || inputFile.readAsStringSync() != inputSource) {
+    fs.file(inputFile)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(inputSource);
+  }
+  if (!outputFile.existsSync() || outputFile.readAsStringSync() != outputSource) {
+    fs.file(outputFile)
+      ..createSync(recursive: true)
+      ..writeAsStringSync(outputSource);
+  }
 }
