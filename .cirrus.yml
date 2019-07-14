@@ -72,8 +72,7 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
-        DEPOT_TOOLS: "tmp/depot_tools"
-        GOLDCTL: "$DEPOT_TOOLS/goldctl"
+        GOLDCTL: "$CIRRUS_WORKING_DIR/tmp/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
         SUBSHARD: framework_other
       goldctl_script: ./dev/bots/download_goldctl.sh
@@ -492,8 +491,7 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
-        DEPOT_TOOLS: "tmp/depot_tools"
-        GOLDCTL: "$DEPOT_TOOLS/goldctl"
+        GOLDCTL: "$CIRRUS_WORKING_DIR/tmp/depot_tools/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       goldctl_script: ./dev/bots/download_goldctl.sh
       test_all_script:
