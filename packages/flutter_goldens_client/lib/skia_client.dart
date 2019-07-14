@@ -67,10 +67,11 @@ class SkiaGoldClient extends GoldensClient {
   /// tests are executing in, relative to the library of the given test. It is
   /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
   Future<void> auth(Directory workDirectory) async {
-    assert(workDirectory != null);
-    _workDirectory = workDirectory;
     if (_clientIsAuthorized())
       return;
+
+    assert(workDirectory != null);
+    _workDirectory = workDirectory;
 
     if (_serviceAccount.isEmpty) {
       final StringBuffer buf = StringBuffer()..writeln('Gold service accout is unavailable.');
@@ -105,6 +106,9 @@ class SkiaGoldClient extends GoldensClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
+    if (_clientIsInitialized())
+      return;
+
     final String commitHash = await _getCurrentCommit();
     final File keys = _workDirectory.childFile('keys.json');
     final File failures = _workDirectory.childFile('failures.json');
@@ -215,5 +219,13 @@ class SkiaGoldClient extends GoldensClient {
       'auth_opt.json',
     ));
     return authFile.existsSync();
+  }
+
+  /// Returns a boolean value to prevent the client from re-authorizing itself
+  /// for multiple tests.
+  bool _clientIsInitialized() {
+    final File keysFile = _workDirectory.childFile('keys.json');
+    final File failureFile = _workDirectory.childFile('failures.json');
+    return keysFile.existsSync() && failureFile.existsSync();
   }
 }
