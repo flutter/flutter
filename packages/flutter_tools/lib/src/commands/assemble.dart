@@ -94,6 +94,7 @@ class AssembleCommand extends FlutterCommand {
     } on ConflictingDefineException catch (err) {
       throwToolExit(err.toString());
     }
+    printStatus('building with defines: ${environment.defines}');
     final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
     ));

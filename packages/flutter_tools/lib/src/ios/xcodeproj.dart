@@ -47,6 +47,7 @@ Future<void> updateGeneratedXcodeProperties({
   String targetOverride,
   bool useMacOSConfig = false,
   bool setSymroot = true,
+  Directory buildDirOverride,
 }) async {
   final StringBuffer localsBuffer = StringBuffer();
 
@@ -63,7 +64,7 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+  localsBuffer.writeln('FLUTTER_BUILD_DIR=${buildDirOverride?.path ?? getBuildDirectory()}');
 
   if (setSymroot) {
     localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');

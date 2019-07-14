@@ -8,6 +8,8 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../build_system/build_system.dart';
+import '../build_system/targets/dart.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
@@ -26,6 +28,11 @@ Future<void> buildMacOS({
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
+  // HACK.
+  final Environment environment = Environment(projectDir: flutterProject.directory, defines: <String, String>{
+    kBuildMode: 'debug',
+    kTargetFile: fs.path.absolute('lib/main.dart' ?? targetOverride),
+  });
   // Write configuration to an xconfig file in a standard location.
   await updateGeneratedXcodeProperties(
     project: flutterProject,
@@ -33,6 +40,7 @@ Future<void> buildMacOS({
     targetOverride: targetOverride,
     useMacOSConfig: true,
     setSymroot: false,
+    buildDirOverride: environment.buildDir,
   );
   await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
 
@@ -50,9 +58,9 @@ Future<void> buildMacOS({
     '-workspace', flutterProject.macos.xcodeWorkspace.path,
     '-configuration', '$config',
     '-scheme', 'Runner',
-    '-derivedDataPath', flutterBuildDir.absolute.path,
-    'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-    'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+    '-derivedDataPath', environment.buildDir.absolute.path,
+    'OBJROOT=${fs.path.join(environment.buildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+    'SYMROOT=${fs.path.join(environment.buildDir.absolute.path, 'Build', 'Products')}',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building macOS application...',
