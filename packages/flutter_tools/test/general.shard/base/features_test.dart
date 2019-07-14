@@ -71,8 +71,17 @@ void main() {
       expect(combined.environmentOverride, 'a');
       expect(combined.configSetting, 'c');
     });
+    
+    test('default feature flag instance has all flags disabled', () {
+      const FeatureFlags featureFlags = FeatureFlags();
 
-    /// Fbutter Web
+      expect(featureFlags.isWebEnabled, false);
+      expect(featureFlags.isMacOSEnabled, false);
+      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isWindowsEnabled, false);
+    });
+
+    /// Flutter Web
 
     test('flutter web off by default on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
