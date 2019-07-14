@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../base/announce.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -26,6 +27,10 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       hide: !verboseHelp,
       help: 'Print config values as json.');
+    argParser.addFlag(kFlutterAnnounceConfig,
+      negatable: false,
+      help: 'Enable or disable automatic announcements on certain Flutter commands.'
+    );
   }
 
   @override
