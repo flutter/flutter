@@ -71,7 +71,7 @@ void main() {
       expect(combined.environmentOverride, 'a');
       expect(combined.configSetting, 'c');
     });
-    
+
     test('default feature flag instance has all flags disabled', () {
       const FeatureFlags featureFlags = FeatureFlags();
 
