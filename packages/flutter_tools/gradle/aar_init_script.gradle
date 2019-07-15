@@ -91,9 +91,7 @@ void addAarTask(Project project, variant) {
 }
 
 projectsEvaluated {
-    // Plugin projects don't have subprojects.
-    // TODO(blasten): Have a more robust way of detecting plugins.
-    if (rootProject.subprojects.empty) {
+    if (rootProject.property("is-plugin").toBoolean()) {
         if (rootProject.hasProperty("output-dir")) {
             rootProject.buildDir = rootProject.property("output-dir")
         } else {

@@ -494,10 +494,12 @@ Future<void> buildGradleAar({
   @required String target,
   @required String outputDir,
 }) async {
+  final FlutterManifest manifest = project.manifest;
+
   GradleProject gradleProject;
-  if (project.manifest.isModule) {
+  if (manifest.isModule) {
     gradleProject = await _gradleAppProject();
-  } else if (project.manifest.isPlugin) {
+  } else if (manifest.isPlugin) {
     gradleProject = await _gradleLibraryProject();
   } else {
     throwToolExit('AARs can only be built for plugin or module projects.');
@@ -527,6 +529,7 @@ Future<void> buildGradleAar({
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${gradleProject.buildDirectory}',
+    '-Pis-plugin=${manifest.isPlugin}',
   ];
 
   if (target != null && target.isNotEmpty) {
