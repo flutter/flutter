@@ -261,11 +261,14 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
     // `_initialButtons` must be assigned here instead of `handlePrimaryPointer`,
     // because `acceptGesture` might be called before `handlePrimaryPointer`,
     // which relies on `_initialButtons` to create `TapDownDetails`.
-    _initialButtons = event.buttons;
+    if(state == GestureRecognizerState.ready) {
+      _initialButtons = event.buttons;
+    }
+
+    super.addAllowedPointer(event);
   }
 
   @override
