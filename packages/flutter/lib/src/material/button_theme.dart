@@ -562,10 +562,11 @@ class ButtonThemeData extends Diagnosticable {
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
   ///
-  ///  * [ButtonTextTheme.normal], [Colors.white] if [getBrightness] is dark,
-  ///    otherwise [Colors.black87].
-  ///  * ButtonTextTheme.accent], [colorScheme.secondary].
-  ///  * [ButtonTextTheme.primary], if [getFillColor] is dark then [Colors.white],
+  ///  * [ButtonTextTheme.normal]: [Colors.white] is used if [getBrightness]
+  ///    resolves to [Brightness.dark]. [Colors.black87] is used if
+  ///    [getBrightness] resolves to [Brightness.light].
+  ///  * [ButtonTextTheme.accent]: [colorScheme.secondary].
+  ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
   ///    [colorScheme.primary], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
