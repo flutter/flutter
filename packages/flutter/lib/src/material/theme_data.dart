@@ -660,7 +660,7 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
-  /// A theme for customizing the various properties of [Tooltip]s.
+  /// A theme for customizing the visual properties of [Tooltip]s.
   ///
   /// This is the value returned from [Tooltip.of].
   final TooltipThemeData tooltipTheme;

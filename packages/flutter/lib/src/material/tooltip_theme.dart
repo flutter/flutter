@@ -114,15 +114,15 @@ class TooltipThemeData extends Diagnosticable {
 
   /// Linearly interpolate between two tooltip themes.
   static TooltipThemeData lerp(TooltipThemeData a, TooltipThemeData b, double t) {
-    assert(t != null);
-    assert(a?.preferBelow == b?.preferBelow);
-    assert(a?.excludeFromSemantics == b?.excludeFromSemantics);
     if (a == null && b == null)
       return null;
+    assert(t != null);
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
+      preferBelow: t < 0.5 ? a.preferBelow: b.preferBelow,
+      excludeFromSemantics: t < 0.5 ? a.excludeFromSemantics : b.excludeFromSemantics,
       decoration: Decoration.lerp(a?.decoration, b?.decoration, t),
       textStyle: TextStyle.lerp(a?.textStyle, b?.textStyle, t),
     );
@@ -207,15 +207,17 @@ class TooltipTheme extends InheritedWidget {
        ),
        super(key: key, child: child);
 
-  /// Specifies the properties for descendant [Tooltip] widgets.
+  /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The closest instance of this class' [data] value that encloses the given
+  /// context. If there is no ancestor, it returns [ThemeData.tooltipTheme].
+  /// Applications can assume that the returned value will not be null.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TooltipTheme theme = TooltipTheme.of(context);
+  /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
     final TooltipTheme tooltipTheme = context.inheritFromWidgetOfExactType(TooltipTheme);

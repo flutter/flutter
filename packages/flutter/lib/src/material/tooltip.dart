@@ -34,13 +34,18 @@ import 'tooltip_theme.dart';
 /// See also:
 ///
 ///  * <https://material.io/design/components/tooltips.html>
+///  * [TooltipTheme] or [ThemeData.tooltipTheme]
 class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
-  /// By default, tooltips prefer to appear below the [child] widget when the
-  /// user long presses on the widget.
+  /// By default, tooltips should adhere to the
+  /// [Material specifications](https://material.io/design/components/tooltips.html#spec).
+  /// If the optional constructor parameters are not defined, the values
+  /// provided by [TooltipTheme.of] will be used if a [TooltipTheme] is present
+  /// or specified in [ThemeData].
   ///
-  /// All of the arguments except [child] and [decoration] must not be null.
+  /// All parameters that are defined in the constructor will
+  /// override the default values _and_ the values in [TooltipTheme.of].
   const Tooltip({
     Key key,
     @required this.message,
@@ -425,7 +430,7 @@ class _TooltipOverlay extends StatelessWidget {
 
     final BoxDecoration defaultDecoration = BoxDecoration(
       color: Colors.grey[700].withOpacity(0.9),
-      borderRadius: BorderRadius.circular(4.0),
+      borderRadius: const BorderRadius.all(Radius.circular(4)),
     );
 
     return Positioned.fill(
