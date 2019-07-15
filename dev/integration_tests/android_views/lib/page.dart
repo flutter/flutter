@@ -4,9 +4,19 @@
 
 import 'package:flutter/material.dart';
 
+/// The base class of all the testing pages
+//
+/// A testing page has to override this in order to be put as one of the items in the main page.
 abstract class Page extends StatelessWidget {
-  const Page(this.title, this.valueKey);
+  const Page(this.title, this.tileKey);
 
+  /// The title of the testing page
+  ///
+  /// It will be shown on the main page as the text on the link which opens the page.
   final String title;
-  final ValueKey<String> valueKey;
+  
+  /// The key of the ListTile that navigates to the page.
+  ///
+  /// Used by the integration test to navigate to the corresponding page.
+  final ValueKey<String> tileKey;
 }
