@@ -6,7 +6,7 @@ const String kViewType = 'simple_view';
 
 class SimplePlatformView extends StatelessWidget {
   
-  const SimplePlatformView({this.key, this.onPlatformViewCreated}):super(key: key);
+  const SimplePlatformView({Key key, this.onPlatformViewCreated}):super(key: key);
   
   final Function onPlatformViewCreated;
   @override

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'motion_event_page.dart';
+import 'mutation_page.dart';
 import 'page.dart';
 
 final List<Page> _allPages = <Page>[
   const MotionEventsPage(),
+  const MutationCompositionPage(),
 ];
 
 void main() {
