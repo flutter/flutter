@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/macos/cocoapods.dart';
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../globals.dart';
+import '../../macos/cocoapods.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
