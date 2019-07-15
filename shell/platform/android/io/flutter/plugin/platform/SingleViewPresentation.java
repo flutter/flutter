@@ -96,7 +96,11 @@ class SingleViewPresentation extends Presentation {
             Object createParams,
             OnFocusChangeListener focusChangeListener
     ) {
-        super(outerContext, display);
+        // By default alpha is not preserved for the VD's contents.
+        // We make the window translucent as a side effect of doing so is preserving alpha.
+        // There should not be extra performance cost for setting the window to be translucent as
+        // there is only a single window within the VD.
+        super(outerContext, display, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         this.viewFactory = viewFactory;
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         this.viewId = viewId;
@@ -108,6 +112,7 @@ class SingleViewPresentation extends Presentation {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         );
     }
+
 
     /**
      * Creates a presentation that will attach an already existing view as
@@ -124,7 +129,11 @@ class SingleViewPresentation extends Presentation {
             OnFocusChangeListener focusChangeListener,
             boolean startFocused
     ) {
-        super(outerContext, display);
+        // By default alpha is not preserved for the VD's contents.
+        // We make the window translucent as a side effect of doing so is preserving alpha.
+        // There should not be extra performance cost for setting the window to be translucent as
+        // there is only a single window within the VD.
+        super(outerContext, display, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         viewFactory = null;
         this.state = state;
