@@ -10,12 +10,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -399,6 +401,23 @@ flutter:
       ProcessManager: () => mockProcessManager,
     });
   });
+
+  group('installApp', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    final AndroidDevice device = AndroidDevice('1234');
+
+    testUsingContext('returns false if installation failed', () async {
+      when(mockProcessManager.run(argThat(contains('forward'))))
+          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+
+      final bool result = await device.installApp(AndroidPackageTest());
+      expect(result, isFalse);
+
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+  });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -600,4 +619,11 @@ class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
 
   @override
   void add(List<int> data) {}
+}
+
+class AndroidPackageTest extends ApplicationPackage {
+  AndroidPackageTest() : super(id: 'app-id');
+
+  @override
+  String get name => 'app-package';
 }
