@@ -76,7 +76,7 @@ class Testbed {
       : _setup = setup,
         _overrides = overrides;
 
-  final Future<void> Function() _setup;
+  final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.

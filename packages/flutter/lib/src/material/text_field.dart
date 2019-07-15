@@ -35,6 +35,107 @@ typedef InputCounterWidgetBuilder = Widget Function(
   @required bool isFocused,
 });
 
+class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
+  _TextFieldSelectionGestureDetectorBuilder({
+    @required _TextFieldState state
+  }) : _state = state,
+       super(delegate: state);
+
+  final _TextFieldState _state;
+
+  @override
+  void onTapDown(TapDownDetails details) {
+    super.onTapDown(details);
+    _state._startSplash(details.globalPosition);
+  }
+
+  @override
+  void onForcePressStart(ForcePressDetails details) {
+    super.onForcePressStart(details);
+    if (delegate.selectionEnabled && shouldShowSelectionToolbar) {
+      editableText.showToolbar();
+    }
+  }
+
+  @override
+  void onForcePressEnd(ForcePressDetails details) {
+    // Not required.
+  }
+
+  @override
+  void onSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
+    if (delegate.selectionEnabled) {
+      switch (Theme.of(_state.context).platform) {
+        case TargetPlatform.iOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          renderEditable.selectWordsInRange(
+            from: details.globalPosition - details.offsetFromOrigin,
+            to: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+      }
+    }
+  }
+
+  @override
+  void onSingleTapUp(TapUpDetails details) {
+    editableText.hideToolbar();
+    if (delegate.selectionEnabled) {
+      switch (Theme.of(_state.context).platform) {
+        case TargetPlatform.iOS:
+          renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          renderEditable.selectPosition(cause: SelectionChangedCause.tap);
+          break;
+      }
+    }
+    _state._requestKeyboard();
+    _state._confirmCurrentSplash();
+    if (_state.widget.onTap != null)
+      _state.widget.onTap();
+  }
+
+  @override
+  void onSingleTapCancel() {
+    _state._cancelCurrentSplash();
+  }
+
+  @override
+  void onSingleLongTapStart(LongPressStartDetails details) {
+    if (delegate.selectionEnabled) {
+      switch (Theme.of(_state.context).platform) {
+        case TargetPlatform.iOS:
+          renderEditable.selectPositionAt(
+            from: details.globalPosition,
+            cause: SelectionChangedCause.longPress,
+          );
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+          Feedback.forLongPress(_state.context);
+          break;
+      }
+    }
+    _state._confirmCurrentSplash();
+  }
+
+  @override
+  void onDragSelectionStart(DragStartDetails details) {
+    super.onDragSelectionStart(details);
+    _state._startSplash(details.globalPosition);
+  }
+}
+
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -388,6 +489,12 @@ class TextField extends StatefulWidget {
   final VoidCallback onEditingComplete;
 
   /// {@macro flutter.widgets.editableText.onSubmitted}
+  ///
+  /// See also:
+  ///
+  ///  * [EditableText.onSubmitted] for an example of how to handle moving to
+  ///    the next/previous field when using [TextInputAction.next] and
+  ///    [TextInputAction.previous] for [textInputAction].
   final ValueChanged<String> onSubmitted;
 
   /// {@macro flutter.widgets.editableText.inputFormatters}
@@ -525,9 +632,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
-  final GlobalKey<EditableTextState> _editableTextKey = GlobalKey<EditableTextState>();
-
+class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin implements TextSelectionGestureDetectorBuilderDelegate {
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
 
@@ -543,9 +648,20 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  bool _shouldShowSelectionToolbar = true;
-
   bool _showSelectionHandles = false;
+
+  _TextFieldSelectionGestureDetectorBuilder _selectionGestureDetectorBuilder;
+
+  // API for TextSelectionGestureDetectorBuilderDelegate.
+  @override
+  bool forcePressEnabled;
+
+  @override
+  final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+
+  @override
+  bool get selectionEnabled => widget.selectionEnabled;
+  // End of API for TextSelectionGestureDetectorBuilderDelegate.
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -615,6 +731,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   @override
   void initState() {
     super.initState();
+    _selectionGestureDetectorBuilder = _TextFieldSelectionGestureDetectorBuilder(state: this);
     if (widget.controller == null)
       _controller = TextEditingController();
   }
@@ -644,7 +761,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.dispose();
   }
 
-  EditableTextState get _editableText => _editableTextKey.currentState;
+  EditableTextState get _editableText => editableTextKey.currentState;
 
   void _requestKeyboard() {
     _editableText?.requestKeyboard();
@@ -653,7 +770,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   bool _shouldShowSelectionHandles(SelectionChangedCause cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_shouldShowSelectionToolbar)
+    if (!_selectionGestureDetectorBuilder.shouldShowSelectionToolbar)
       return false;
 
     if (cause == SelectionChangedCause.keyboard)
@@ -701,7 +818,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   InteractiveInkFeature _createInkFeature(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
     final ThemeData themeData = Theme.of(context);
-    final BuildContext editableContext = _editableTextKey.currentContext;
+    final BuildContext editableContext = editableTextKey.currentContext;
     final RenderBox referenceBox = InputDecorator.containerOf(editableContext) ?? editableContext.findRenderObject();
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color = themeData.splashColor;
@@ -730,133 +847,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     );
 
     return splash;
-  }
-
-  RenderEditable get _renderEditable => _editableTextKey.currentState.renderEditable;
-
-  void _handleTapDown(TapDownDetails details) {
-    _renderEditable.handleTapDown(details);
-    _startSplash(details.globalPosition);
-
-    // The selection overlay should only be shown when the user is interacting
-    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
-    // trigger the selection overlay.
-    // For backwards-compatibility, we treat a null kind the same as touch.
-    final PointerDeviceKind kind = details.kind;
-    _shouldShowSelectionToolbar =
-        kind == null ||
-        kind == PointerDeviceKind.touch ||
-        kind == PointerDeviceKind.stylus;
-  }
-
-  void _handleForcePressStarted(ForcePressDetails details) {
-    if (widget.selectionEnabled) {
-      _renderEditable.selectWordsInRange(
-        from: details.globalPosition,
-        cause: SelectionChangedCause.forcePress,
-      );
-      if (_shouldShowSelectionToolbar) {
-        _editableTextKey.currentState.showToolbar();
-      }
-    }
-  }
-
-  void _handleSingleTapUp(TapUpDetails details) {
-    _editableTextKey.currentState.hideToolbar();
-    if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          _renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          _renderEditable.selectPosition(cause: SelectionChangedCause.tap);
-          break;
-      }
-    }
-    _requestKeyboard();
-    _confirmCurrentSplash();
-    if (widget.onTap != null)
-      widget.onTap();
-  }
-
-  void _handleSingleTapCancel() {
-    _cancelCurrentSplash();
-  }
-
-  void _handleSingleLongTapStart(LongPressStartDetails details) {
-    if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          _renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-          Feedback.forLongPress(context);
-          break;
-      }
-    }
-    _confirmCurrentSplash();
-  }
-
-  void _handleSingleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (widget.selectionEnabled) {
-      switch (Theme.of(context).platform) {
-        case TargetPlatform.iOS:
-          _renderEditable.selectPositionAt(
-            from: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          _renderEditable.selectWordsInRange(
-            from: details.globalPosition - details.offsetFromOrigin,
-            to: details.globalPosition,
-            cause: SelectionChangedCause.longPress,
-          );
-          break;
-      }
-    }
-  }
-
-  void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (widget.selectionEnabled) {
-      if (_shouldShowSelectionToolbar)
-        _editableTextKey.currentState.showToolbar();
-    }
-  }
-
-  void _handleDoubleTapDown(TapDownDetails details) {
-    if (widget.selectionEnabled) {
-      _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      if (_shouldShowSelectionToolbar) {
-        _editableText.showToolbar();
-      }
-    }
-  }
-
-  void _handleMouseDragSelectionStart(DragStartDetails details) {
-    _renderEditable.selectPositionAt(
-      from: details.globalPosition,
-      cause: SelectionChangedCause.drag,
-    );
-    _startSplash(details.globalPosition);
-  }
-
-  void _handleMouseDragSelectionUpdate(
-      DragStartDetails startDetails,
-      DragUpdateDetails updateDetails,
-  ) {
-    _renderEditable.selectPositionAt(
-      from: startDetails.globalPosition,
-      to: updateDetails.globalPosition,
-      cause: SelectionChangedCause.drag,
-    );
   }
 
   void _startSplash(Offset globalPosition) {
@@ -927,7 +917,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(LengthLimitingTextInputFormatter(widget.maxLength));
 
-    bool forcePressEnabled;
     TextSelectionControls textSelectionControls;
     bool paintCursorAboveText;
     bool cursorOpacityAnimates;
@@ -965,7 +954,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
     Widget child = RepaintBoundary(
       child: EditableText(
-        key: _editableTextKey,
+        key: editableTextKey,
         readOnly: widget.readOnly,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,
@@ -1040,17 +1029,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onPointerExit: _handlePointerExit,
         child: IgnorePointer(
           ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-          child: TextSelectionGestureDetector(
-            onTapDown: _handleTapDown,
-            onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
-            onSingleTapUp: _handleSingleTapUp,
-            onSingleTapCancel: _handleSingleTapCancel,
-            onSingleLongTapStart: _handleSingleLongTapStart,
-            onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-            onSingleLongTapEnd: _handleSingleLongTapEnd,
-            onDoubleTapDown: _handleDoubleTapDown,
-            onDragSelectionStart: _handleMouseDragSelectionStart,
-            onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+          child: _selectionGestureDetectorBuilder.buildGestureDetector(
             behavior: HitTestBehavior.translucent,
             child: child,
           ),
