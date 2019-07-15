@@ -177,7 +177,7 @@ void main() {
 
 /// Copy templates from real flutter root into fake memory file system.
 MemoryFileSystem populateTemplates(String fakeFlutterRoot, String realFlutterRoot) {
-  final MemoryFileSystem memoryFileSystem = MemoryFileSystem(style: FileSystemStyle.posix);
+  final MemoryFileSystem memoryFileSystem = MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
   const LocalFileSystem localFileSystem = LocalFileSystem();
   final Directory templateDirectory = localFileSystem
       .directory(memoryFileSystem.path.join(realFlutterRoot, 'packages', 'flutter_tools', 'templates'));
