@@ -15,7 +15,7 @@ const int _kNumWarmUp = 10000;
 
 void main() {
   assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
-  print('MatrixUtils.transformRect benchmark...');
+  print('MatrixUtils.transformRect and .transformPoint benchmark...');
 
   Matrix4 _makePerspective(double radius, double angle, double perspective) {
     return MatrixUtils.createCylindricalProjectionTransform(
@@ -124,13 +124,13 @@ void main() {
     name: 'MatrixUtils_affine_transformRect_iteration',
   );
   printer.addResult(
-    description: 'MatrixUtils.TransformPointPerspective',
+    description: 'MatrixUtils.transformPointPerspective',
     value: pointMicrosecondsPerspective * scale,
     unit: 'ns per iteration',
     name: 'MatrixUtils_persp_transformPoint_iteration',
   );
   printer.addResult(
-    description: 'MatrixUtils.TransformPointAffine',
+    description: 'MatrixUtils.transformPointAffine',
     value: pointMicrosecondsAffine * scale,
     unit: 'ns per iteration',
     name: 'MatrixUtils_affine_transformPoint_iteration',
