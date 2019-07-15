@@ -28,11 +28,11 @@ class ConfigCommand extends FlutterCommand {
       hide: !verboseHelp,
       help: 'Print config values as json.');
     for (Feature feature in allFeatures) {
-      if (feature.setting.configSetting == null) {
+      if (feature.configSetting == null) {
         continue;
       }
       argParser.addFlag(
-        feature.setting.configSetting,
+        feature.configSetting,
         help: feature.generateHelpMessage(),
         negatable: true,
       );

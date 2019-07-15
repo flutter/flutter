@@ -37,40 +37,14 @@ void main() {
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
-      expect(featureSetting.environmentOverride, null);
-      expect(featureSetting.configSetting, null);
     });
 
     test('has safe defaults', () {
       const Feature feature = Feature(name: 'example');
 
       expect(feature.name, 'example');
-      expect(feature.setting.available, false);
-      expect(feature.setting.enabledByDefault, false);
-      expect(feature.setting.environmentOverride, null);
-      expect(feature.setting.configSetting, null);
-    });
-
-    test('combineWith', () {
-      const FeatureSetting one = FeatureSetting(
-        available: true,
-        enabledByDefault: true,
-        environmentOverride: 'a',
-        configSetting: 'b'
-      );
-      const FeatureSetting two = FeatureSetting(
-        available: null,
-        enabledByDefault: false,
-        environmentOverride: null,
-        configSetting: 'c'
-      );
-
-      final FeatureSetting combined = two.combineWith(one);
-
-      expect(combined.available, true);
-      expect(combined.enabledByDefault, false);
-      expect(combined.environmentOverride, 'a');
-      expect(combined.configSetting, 'c');
+      expect(feature.environmentOverride, null);
+      expect(feature.configSetting, null);
     });
 
     test('flutter web help string', () {

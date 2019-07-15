@@ -56,10 +56,8 @@ const List<Feature> allFeatures = <Feature>[
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
   name: 'Flutter Web',
-  setting: FeatureSetting(
-    configSetting: 'flutter-web',
-    environmentOverride: 'FLUTTER_WEB',
-  ),
+  configSetting: 'flutter-web',
+  environmentOverride: 'FLUTTER_WEB',
   master: FeatureSetting(
     available: true,
     enabledByDefault: false,
@@ -73,10 +71,8 @@ const Feature flutterWebFeature = Feature(
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
   name: 'Flutter Desktop for macOS',
-  setting: FeatureSetting(
-    configSetting: 'flutter-macos-desktop',
-    environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  ),
+  configSetting: 'flutter-macos-desktop',
+  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,
     enabledByDefault: false,
@@ -86,10 +82,8 @@ const Feature flutterMacOSDesktopFeature = Feature(
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
   name: 'Flutter Desktop for Linux',
-  setting: FeatureSetting(
-    configSetting: 'flutter-linux-desktop',
-    environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  ),
+  configSetting: 'flutter-linux-desktop',
+  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,
     enabledByDefault: false,
@@ -99,10 +93,8 @@ const Feature flutterLinuxDesktopFeature = Feature(
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
   name: 'Flutter Desktop for Windows',
-  setting: FeatureSetting(
-    configSetting: 'flutter-windows-desktop',
-    environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  ),
+  configSetting: 'flutter-windows-desktop',
+  environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,
     enabledByDefault: false,
@@ -144,19 +136,18 @@ class FlutterFeatureFlags implements FeatureFlags {
         featureSetting = feature.master;
         break;
     }
-    featureSetting = featureSetting.combineWith(feature.setting);
     if (!featureSetting.available) {
       return false;
     }
     bool isEnabled = featureSetting.enabledByDefault;
-    if (featureSetting.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(featureSetting.configSetting);
+    if (feature.configSetting != null) {
+      final bool configOverride = Config.instance.getValue(feature.configSetting);
       if (configOverride != null) {
         isEnabled = configOverride;
       }
     }
-    if (featureSetting.environmentOverride != null) {
-      if (platform.environment[featureSetting.environmentOverride] != null) {
+    if (feature.environmentOverride != null) {
+      if (platform.environment[feature.environmentOverride] != null) {
         isEnabled = true;
       }
     }
@@ -172,17 +163,16 @@ class FlutterFeatureFlags implements FeatureFlags {
 /// The top level feature settings can be provided to apply to all channels.
 /// Otherwise, more specific settings take precidence over higher level
 /// settings.
-///
-/// For example, to e
 class Feature {
   /// Creates a [Feature].
   const Feature({
     @required this.name,
+    this.environmentOverride,
+    this.configSetting,
     this.master = const FeatureSetting(),
     this.dev = const FeatureSetting(),
     this.beta = const FeatureSetting(),
     this.stable = const FeatureSetting(),
-    this.setting = const FeatureSetting(),
   });
 
   /// The user visible name for this feature.
@@ -200,12 +190,23 @@ class Feature {
   /// The settings for the stable branch.
   final FeatureSetting stable;
 
-  /// The top-level deault features.
-  final FeatureSetting setting;
+  /// The name of an environment variable that can override the setting.
+  ///
+  /// The environment variable only needs to be "set", that is contain a
+  /// non empty string. This is only intended for usage by CI and not
+  /// as an advertised method to enable a feature.
+  ///
+  /// If not provided, defaults to `null` meaning there is no override.
+  final String environmentOverride;
+
+  /// The name of a setting that can be used to enable this feature.
+  ///
+  /// If not provided, defaults to `null` meaning there is no config setting.
+  final String configSetting;
 
   /// A help message for the `flutter config` command, or null if unsupported.
   String generateHelpMessage() {
-    if (setting.configSetting == null) {
+    if (configSetting == null) {
       return null;
     }
     final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
@@ -229,8 +230,6 @@ class FeatureSetting {
   const FeatureSetting({
     this.available = false,
     this.enabledByDefault = false,
-    this.environmentOverride,
-    this.configSetting,
   });
 
   /// Whether the feature is available on this channel.
@@ -243,30 +242,4 @@ class FeatureSetting {
   ///
   /// If not provided, defaults to `false`.
   final bool enabledByDefault;
-
-  /// The name of an environment variable that can override the setting.
-  ///
-  /// The environment variable only needs to be "set", that is contain a
-  /// non empty string. This is only intended for usage by CI and not
-  /// as an advertised method to enable a feature.
-  ///
-  /// If not provided, defaults to `null` meaning there is no override.
-  final String environmentOverride;
-
-  /// The name of a setting that can be used to enable this feature.
-  ///
-  /// If not provided, defaults to `null` meaning there is no config setting.
-  final String configSetting;
-
-  /// A utility to combine two feature settings.
-  ///
-  /// The current object takes precedence with its non-null values.
-  FeatureSetting combineWith(FeatureSetting other) {
-    return FeatureSetting(
-      available: available ?? other.available,
-      enabledByDefault: enabledByDefault ?? other.enabledByDefault,
-      environmentOverride: environmentOverride ?? other.environmentOverride,
-      configSetting: configSetting ?? other.configSetting,
-    );
-  }
 }
