@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
 
-/// Tests that [settings.gradle] is patched when possible.
+/// Tests that [settings_aar.gradle] is created when possible.
 Future<void> main() async {
   await task(() async {
 
@@ -37,32 +37,7 @@ Future<void> main() async {
 
       section('Override settings.gradle V1');
 
-      final String relativeSettingsGradle = path.join('android', 'settings.gradle');
-      final File settingsGradle = File(path.join(projectDir.path, 'android', 'settings.gradle'));
-      final File oldSettingsGradle = File(path.join(projectDir.path, 'android', '.settings.gradle'));
-
-      const String deprecatedFileContentV1 = '''
-include ':app'
-
-def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
-
-def plugins = new Properties()
-def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
-if (pluginsFile.exists()) {
-    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
-}
-
-plugins.each { name, path ->
-    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
-    include ":\$name"
-    project(":\$name").projectDir = pluginDirectory
-}
-''';
-      settingsGradle.writeAsStringSync(deprecatedFileContentV1, flush: true);
-
-      if(oldSettingsGradle.existsSync()) {
-        return TaskResult.failure('Unexpected file: `.settings.gradle`.');
-      }
+      final String relativeNewSettingsGradle = path.join('android', 'settings_aar.gradle');
 
       section('Build APK');
 
@@ -70,27 +45,30 @@ plugins.each { name, path ->
       await inDirectory(projectDir, () async {
         stdout = await evalFlutter(
           'build',
-          options: <String>['apk', '--flavor', 'does-not-exist'],
+          options: <String>[
+            'apk',
+            '--flavor', 'does-not-exist',
+          ],
           canFail: true, // The flavor doesn't exist.
+          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
       const String newFileContent = 'include \':app\'';
 
-      if (settingsGradle.readAsStringSync().trim() != newFileContent) {
-        return TaskResult.failure('Expected to patch `settings.gradle` V1.');
+      final File settingsGradle = File(path.join(projectDir.path, 'android', 'settings.gradle'));
+      final File newSettingsGradle = File(path.join(projectDir.path, 'android', 'settings_aar.gradle'));
+
+      if (!newSettingsGradle.existsSync()) {
+        return TaskResult.failure('Expected file: `${newSettingsGradle.path}`.');
       }
 
-      if (!oldSettingsGradle.existsSync()) {
-        return TaskResult.failure('Expected file: `.settings.gradle`.');
+      if (newSettingsGradle.readAsStringSync().trim() != newFileContent) {
+        return TaskResult.failure('Expected to create `${newSettingsGradle.path}` V1.');
       }
 
-      if (oldSettingsGradle.readAsStringSync() != deprecatedFileContentV1) {
-        return TaskResult.failure('Expected content from previous V1 file in: `.settings.gradle`.');
-      }
-
-      if (!stdout.contains('Updating `$relativeSettingsGradle`') ||
-          !stdout.contains('`$relativeSettingsGradle` updated successfully')) {
+      if (!stdout.contains('Creating `$relativeNewSettingsGradle`') ||
+          !stdout.contains('`$relativeNewSettingsGradle` created successfully')) {
         return TaskResult.failure('Expected update message in stdout.');
       }
 
@@ -114,32 +92,28 @@ plugins.each { name, path ->
 }
 ''';
       settingsGradle.writeAsStringSync(deprecatedFileContentV2, flush: true);
-      oldSettingsGradle.deleteSync();
+      newSettingsGradle.deleteSync();
 
       section('Build APK');
 
       await inDirectory(projectDir, () async {
         stdout = await evalFlutter(
           'build',
-          options: <String>['apk', '--flavor', 'does-not-exist'],
+          options: <String>[
+            'apk',
+            '--flavor', 'does-not-exist',
+          ],
           canFail: true, // The flavor doesn't exist.
+          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
-      if (settingsGradle.readAsStringSync().trim() != newFileContent) {
-        return TaskResult.failure('Expected to patch `settings.gradle` V2.');
+      if (newSettingsGradle.readAsStringSync().trim() != newFileContent) {
+        return TaskResult.failure('Expected to create `${newSettingsGradle.path}` V2.');
       }
 
-      if (!oldSettingsGradle.existsSync()) {
-        return TaskResult.failure('Expected file: `.settings.gradle`.');
-      }
-
-      if (oldSettingsGradle.readAsStringSync() != deprecatedFileContentV2) {
-        return TaskResult.failure('Expected content from previous V2 file in: `.settings.gradle`.');
-      }
-
-      if (!stdout.contains('Updating `$relativeSettingsGradle`') ||
-          !stdout.contains('`$relativeSettingsGradle` updated successfully')) {
+      if (!stdout.contains('Creating `$relativeNewSettingsGradle`') ||
+          !stdout.contains('`$relativeNewSettingsGradle` created successfully')) {
         return TaskResult.failure('Expected update message in stdout.');
       }
 
@@ -164,7 +138,7 @@ plugins.each { name, path ->
 // some custom logic
 ''';
       settingsGradle.writeAsStringSync(customDeprecatedFileContent, flush: true);
-      oldSettingsGradle.deleteSync();
+      newSettingsGradle.deleteSync();
 
       section('Build APK');
 
@@ -172,30 +146,30 @@ plugins.each { name, path ->
       await inDirectory(projectDir, () async {
         stdout = await evalFlutter(
           'build',
-          options: <String>['apk', '--flavor', 'does-not-exist'],
+          options: <String>[
+            'apk',
+            '--flavor', 'does-not-exist',
+          ],
           canFail: true, // The flavor doesn't exist.
-          stderr: stderr
+          stderr: stderr,
+          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
-      if (settingsGradle.readAsStringSync().trim() == newFileContent) {
-        return TaskResult.failure('Expected `settings.gradle` to remain unchangeds.');
+      if (newSettingsGradle.existsSync()) {
+        return TaskResult.failure('Unexpected file: `${newSettingsGradle.path}`.');
       }
 
-      if (oldSettingsGradle.existsSync()) {
-        return TaskResult.failure('Unexpected file: `.settings.gradle`.');
-      }
-
-      if (!stdout.contains('Updating `$relativeSettingsGradle`')) {
+      if (!stdout.contains('Creating `$relativeNewSettingsGradle`')) {
         return TaskResult.failure('Expected update message in stdout.');
       }
 
-      if (stdout.contains('`$relativeSettingsGradle` updated successfully')) {
+      if (stdout.contains('`$relativeNewSettingsGradle` created successfully')) {
         return TaskResult.failure('Unexpected message in stdout.');
       }
 
-      if (!stderr.toString().contains('Flutter tried to update the file '
-          '`$relativeSettingsGradle`, but failed due to local edits')) {
+      if (!stderr.toString().contains('Flutter tried to create the file '
+          '`$relativeNewSettingsGradle`, but failed.')) {
         return TaskResult.failure('Expected failure message in stdout.');
       }
 

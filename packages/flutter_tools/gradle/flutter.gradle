@@ -380,6 +380,22 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
+        if (project.state.failure) {
+            return
+        }
+        project.dependencies {
+            String configuration;
+            if (project.getConfigurations().findByName("compileOnly")) {
+                configuration = "${variantName}CompileOnly";
+            } else {
+                configuration = "${variantName}Provided";
+            }
+
+            add(configuration, files)
+        }
+    }
+
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
         String configuration;
         // `compile` dependencies are now `api` dependencies.
@@ -611,23 +627,51 @@ class FlutterPlugin implements Plugin<Project> {
             project.android.libraryVariants.all addFlutterDeps
         }
 
-        addPluginTasks(project)
+        if (System.getenv('ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR') == 'true') {
+            addPluginTasks(project)
 
-        List<String> tasksToExecute = project.gradle.startParameter.taskNames
-        Set buildTypes = getBuildTypesForTasks(project, tasksToExecute)
-        if (tasksToExecute.contains("clean")) {
-            // Because the plugins are built during configuration, the task "clean"
-            // cannot run in conjunction with an assembly task.
-            if (!buildTypes.empty) {
-                throw new GradleException("Can't run the clean task along with other assemble tasks")
+            List<String> tasksToExecute = project.gradle.startParameter.taskNames
+            Set buildTypes = getBuildTypesForTasks(project, tasksToExecute)
+            if (tasksToExecute.contains("clean")) {
+                // Because the plugins are built during configuration, the task "clean"
+                // cannot run in conjunction with an assembly task.
+                if (!buildTypes.empty) {
+                    throw new GradleException("Can't run the clean task along with other assemble tasks")
+                }
             }
-        }
-        // Build plugins when a task "assembly*" will be called later.
-        if (!buildTypes.empty) {
-            // Build the plugin during configuration.
-            // This is required when Jetifier is enabled, otherwise the implementation dependency
-            // cannot be added.
-            buildPlugins(project, buildTypes)
+            // Build plugins when a task "assembly*" will be called later.
+            if (!buildTypes.empty) {
+                // Build the plugin during configuration.
+                // This is required when Jetifier is enabled, otherwise the implementation dependency
+                // cannot be added.
+                buildPlugins(project, buildTypes)
+            }
+        } else {
+            File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+            Properties plugins = readPropertiesIfExist(pluginsFile)
+            plugins.each { name, _ ->
+                def pluginProject = project.rootProject.findProject(":$name")
+                if (pluginProject != null) {
+                    project.dependencies {
+                        if (project.getConfigurations().findByName("implementation")) {
+                            implementation pluginProject
+                        } else {
+                            compile pluginProject
+                        }
+                    }
+                    pluginProject.afterEvaluate {
+                        pluginProject.android.buildTypes {
+                            profile {
+                                initWith debug
+                            }
+                        }
+                        pluginProject.android.buildTypes.each {
+                            def buildMode = buildModeFor(it)
+                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                        }
+                    }
+                }
+            }
         }
     }
 }

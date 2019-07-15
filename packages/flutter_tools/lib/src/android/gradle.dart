@@ -133,27 +133,28 @@ Future<void> checkGradleDependencies() async {
   progress.stop();
 }
 
-/// Tries to patch [settings.gradle].
-/// If the file is successfully patched, rename the previous file as [.settings.gradle].
-/// Otherwise, print an error message indicating how to patch the file manually.
-void _removePluginsFromSettingsGradle(Directory androidDirectory) {
-  final File currentFile = androidDirectory.childFile('settings.gradle');
-  if (!currentFile.existsSync()) {
+/// Tries to create [settings_aar.gradle] in an app project by removing the subprojects
+/// from the existing [settings.gradle] file. This operation will fail if the existing
+/// [settings.gradle] file has local edits.
+void _createSettingsAarGradle(Directory androidDirectory) {
+  final File newSettingsFile = androidDirectory.childFile('settings_aar.gradle');
+  if (newSettingsFile.existsSync()) {
     return;
   }
-  final String currentFileContent = currentFile.readAsStringSync();
-  if (!currentFileContent.contains('.flutter-plugins')) {
+  final File currentSettingsFile = androidDirectory.childFile('settings.gradle');
+  if (!currentSettingsFile.existsSync()) {
     return;
   }
-  final String relativeFile = fs.path.relative(currentFile.path);
-  final Status status = logger.startProgress('✏️  Updating `$relativeFile`...',
+  final String currentFileContent = currentSettingsFile.readAsStringSync();
+
+  final String newSettingsRelativeFile = fs.path.relative(newSettingsFile.path);
+  final Status status = logger.startProgress('✏️  Creating `$newSettingsRelativeFile`...',
       timeout: timeoutConfiguration.fastOperation);
 
   final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
   final File deprecatedFile = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'deprecated_settings.gradle'));
   assert(deprecatedFile.existsSync());
-
   // Get the `settings.gradle` content variants that should be patched.
   final List<String> deprecatedFilesContent = deprecatedFile.readAsStringSync().split(';EOF');
   bool exactMatch = false;
@@ -166,20 +167,18 @@ void _removePluginsFromSettingsGradle(Directory androidDirectory) {
   if (!exactMatch) {
     status.cancel();
     printError('*******************************************************************************************');
-    printError('Flutter tried to update the file `$relativeFile`, but failed due to local edits.');
+    printError('Flutter tried to create the file `$newSettingsRelativeFile`, but failed.');
     // Print how to manually update the file.
     printError(fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
         'gradle', 'manual_migration_settings.gradle.md')).readAsStringSync());
     printError('*******************************************************************************************');
-    throwToolExit('Please update the file and run this command again.');
+    throwToolExit('Please create the file and run this command again.');
   }
-  // Rename `settings.gradle` as `.settings.gradle`.
-  currentFile.renameSync(fs.path.join(androidDirectory.path, '.settings.gradle'));
   // Copy the new file.
   fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-      'gradle', 'new_settings.gradle')).copySync(currentFile.path);
+      'gradle', 'new_settings.gradle')).copySync(newSettingsFile.path);
   status.stop();
-  printStatus('✅ `$relativeFile` updated successfully.');
+  printStatus('✅ `$newSettingsRelativeFile` created successfully.');
 }
 
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
@@ -189,10 +188,13 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
 
+  final FlutterManifest manifest = flutterProject.manifest;
   final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
-  _removePluginsFromSettingsGradle(hostAppGradleRoot);
-
-  if (flutterProject.manifest.isPlugin && isLibrary) {
+  if (_gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] == 'true' &&
+      !manifest.isPlugin && !manifest.isModule) {
+    _createSettingsAarGradle(hostAppGradleRoot);
+  }
+  if (manifest.isPlugin && isLibrary) {
     return GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], // Plugins don't have flavors.
@@ -537,11 +539,15 @@ Future<void> buildGradleAar({
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
 
+  final Map<String, String> gradleEnv = Map<String, String>.from(_gradleEnv);
+  gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] = 'true';
+
   try {
     exitCode = await runCommandAndStreamOutput(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
+      environment: gradleEnv,
       mapFunction: (String line) {
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -681,6 +687,9 @@ Future<void> _buildGradleProjectV2(
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
+  }
+  if (_gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] == 'true') {
+    command.add('--settings-file=settings_aar.gradle');
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
@@ -826,7 +835,6 @@ Map<String, String> get _gradleEnv {
     // Use java bundled with Android Studio.
     env['JAVA_HOME'] = javaPath;
   }
-
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
   env['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';

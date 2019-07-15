@@ -1,7 +1,7 @@
 To manually update `settings.gradle`, follow these steps:
 
-    1. Open the file
-    2. Remove the following code from the file:
+    1. Copy `settings.gradle` as `settings_aar.gradle`
+    2. Remove the following code from `settings_aar.gradle`:
 
             def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 

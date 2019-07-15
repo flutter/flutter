@@ -33,7 +33,11 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--androidx', 'hello'],
+          options: <String>[
+            '--org', 'io.flutter.devicelab',
+            '--androidx',
+            'hello',
+          ],
         );
       });
 
@@ -61,7 +65,12 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['apk', '--target-platform', 'android-arm', '--verbose'],
+          options: <String>[
+            'apk',
+            '--target-platform', 'android-arm',
+            '--verbose',
+          ],
+          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
@@ -95,7 +104,13 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['apk', '--target-platform', 'android-arm', '--debug', '--verbose'],
+          options: <String>[
+            'apk',
+            '--target-platform', 'android-arm',
+            '--debug',
+            '--verbose',
+          ],
+          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
