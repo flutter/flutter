@@ -314,9 +314,8 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
-    return null; // this does not have an engine layer.
   }
 }
 
@@ -2504,9 +2503,9 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     if (!selection.active)
-      return null;
+      return;
 
     final RenderObject selected = selection.current;
     final List<_TransformedRect> candidates = <_TransformedRect>[];
@@ -2529,7 +2528,6 @@ class _InspectorOverlayLayer extends Layer {
       _picture = _buildPicture(state);
     }
     builder.addPicture(layerOffset, _picture);
-    return null; // this does not have an engine layer.
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
