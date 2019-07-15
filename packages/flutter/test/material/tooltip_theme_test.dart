@@ -398,6 +398,64 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
+  testWidgets('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        tooltipTheme: TooltipThemeData(
+          textStyle: TextStyle(
+            color: Colors.orange,
+            decoration: TextDecoration.underline
+          ),
+        ),
+      ),
+      home: Tooltip(
+        key: key,
+        message: tooltipText,
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+          color: Colors.green[500],
+        ),
+      ),
+    ));
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    expect(textStyle.color, Colors.orange);
+    expect(textStyle.fontFamily, null);
+    expect(textStyle.decoration, TextDecoration.underline);
+  });
+
+  testWidgets('Tooltip message textStyle - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: TooltipTheme(
+        child: Tooltip(
+          textStyle: TextStyle(
+            color: Colors.orange,
+            decoration: TextDecoration.underline
+          ),
+          key: key,
+          message: tooltipText,
+          child: Container(
+            width: 100.0,
+            height: 100.0,
+            color: Colors.green[500],
+          ),
+        ),
+      ),
+    ));
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    expect(textStyle.color, Colors.orange);
+    expect(textStyle.fontFamily, null);
+    expect(textStyle.decoration, TextDecoration.underline);
+  });
+
   testWidgets('Tooltip decoration - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const Decoration customDecoration = ShapeDecoration(
