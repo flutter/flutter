@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/features.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
-import '../../src/common.dart';
-import '../../src/testbed.dart';
+import '../src/common.dart';
+import '../src/testbed.dart';
 
 void main() {
   group('Features', () {
@@ -45,6 +45,26 @@ void main() {
       expect(feature.name, 'example');
       expect(feature.environmentOverride, null);
       expect(feature.configSetting, null);
+    });
+
+    test('retrieves the correct setting for each branch', () {
+      final FeatureSetting masterSetting = FeatureSetting(available: nonconst(true));
+      final FeatureSetting devSetting = FeatureSetting(available: nonconst(true));
+      final FeatureSetting betaSetting = FeatureSetting(available: nonconst(true));
+      final FeatureSetting stableSetting = FeatureSetting(available: nonconst(true));
+      final Feature feature = Feature(
+        name: 'example',
+        master: masterSetting,
+        dev: devSetting,
+        beta: betaSetting,
+        stable: stableSetting,
+      );
+
+      expect(feature.getSettingForChannel('master'), masterSetting);
+      expect(feature.getSettingForChannel('dev'), devSetting);
+      expect(feature.getSettingForChannel('beta'), betaSetting);
+      expect(feature.getSettingForChannel('stable'), stableSetting);
+      expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
 
     test('flutter web help string', () {
@@ -404,3 +424,4 @@ class MockFlutterVerion extends Mock implements FlutterVersion {}
 class MockFlutterConfig extends Mock implements Config {}
 class MockPlatform extends Mock implements Platform {}
 
+T nonconst<T>(T item) => item;

@@ -4,10 +4,10 @@
 
 import 'package:meta/meta.dart';
 
-import '../version.dart';
-import 'config.dart';
-import 'context.dart';
-import 'platform.dart';
+import 'base/config.dart';
+import 'base/context.dart';
+import 'base/platform.dart';
+import 'version.dart';
 
 /// The current [FeatureFlags] implementation.
 ///
@@ -120,22 +120,7 @@ class FlutterFeatureFlags implements FeatureFlags {
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
-    FeatureSetting featureSetting;
-    switch (currentChannel) {
-      case 'stable':
-        featureSetting = feature.stable;
-        break;
-      case 'beta':
-        featureSetting = feature.beta;
-        break;
-      case 'dev':
-        featureSetting = feature.dev;
-        break;
-      case 'master':
-      default:
-        featureSetting = feature.master;
-        break;
-    }
+    final FeatureSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
@@ -147,7 +132,7 @@ class FlutterFeatureFlags implements FeatureFlags {
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride] != null) {
+      if (platform.environment[feature.environmentOverride]?.toLowerCase() != 'true') {
         isEnabled = true;
       }
     }
@@ -155,7 +140,7 @@ class FlutterFeatureFlags implements FeatureFlags {
   }
 }
 
-/// A [Feature] is process for conditionally enabling tool features.
+/// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
 /// a "safe" value, such as being off.
@@ -222,6 +207,21 @@ class Feature {
       buffer.write('${channels.join(', ')} channels.');
     }
     return buffer.toString();
+  }
+
+  /// Retrieve the correct setting for the provided `channel`.
+  FeatureSetting getSettingForChannel(String channel) {
+    switch (channel) {
+      case 'stable':
+        return stable;
+      case 'beta':
+        return beta;
+      case 'dev':
+        return dev;
+      case 'master':
+      default:
+        return master;
+    }
   }
 }
 

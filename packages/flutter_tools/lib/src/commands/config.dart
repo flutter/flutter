@@ -6,8 +6,8 @@ import 'dart:async';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
-import '../base/features.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../usage.dart';
