@@ -125,10 +125,10 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further.
-  final bool hasScrollBody;
+  bool hasScrollBody;
 
   /// Doc
-  final bool fillOverscroll;
+  bool fillOverscroll;
 
   @override
   void performLayout() {
