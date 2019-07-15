@@ -59,12 +59,11 @@ plugin_pods.map { |r|
     pod r[:name], :path => File.join(symlink, 'ios')
 }
 
-# Ensure that ENABLE_BITCODE is set to NO, add a #include to Generated.xcconfig, and
+# Add an #include to Generated.xcconfig, and
 # add a run script to the Build Phases.
 post_install do |installer|
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|
-            config.build_settings['ENABLE_BITCODE'] = 'NO'
             next if  config.base_configuration_reference == nil
             xcconfig_path = config.base_configuration_reference.real_path
             File.open(xcconfig_path, 'a+') do |file|
