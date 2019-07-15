@@ -391,7 +391,8 @@ Future<void> _runTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
-      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .map((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
 
     print('Running tests for: ${tests.join(';')}');
@@ -554,6 +555,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
@@ -591,7 +593,7 @@ Future<void> _pubRunTest(
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
     case 'create':
-      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      args.addAll(<String>[path.join('test', 'general.shard', 'commands', 'create_test.dart')]);
       break;
   }
 
