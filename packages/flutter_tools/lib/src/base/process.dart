@@ -183,8 +183,8 @@ Future<int> runCommandAndStreamOutput(
     .listen((String line) {
       if (mapFunction != null)
         line = mapFunction(line);
-        if (line != null)
-      printError('$prefix$line', wrap: false);
+      if (line != null)
+        printError('$prefix$line', wrap: false);
     });
 
   // Wait for stdout to be fully processed before completing with the exit code (non-detached case),
