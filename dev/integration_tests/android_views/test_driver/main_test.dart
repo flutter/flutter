@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'dart:io' show Platform;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
@@ -14,22 +14,20 @@ Future<void> main() async {
     driver = await FlutterDriver.connect();
   });
 
-  tearDownAll((){
+  tearDownAll(() {
     driver.close();
   });
 
-  group('motion event tests', () {
-
-    test('MotionEvents recomposition', () async {
-    
-      final SerializableFinder linkToOpenMotionEventPage = find.byValueKey('MotionEventPage');
-      await driver.tap(linkToOpenMotionEventPage);
-      await driver.waitFor(find.byValueKey('MotionEventPageLoaded'));
-      final String errorMessage = await driver.requestData('run test');
-      expect(errorMessage, '');
-      driver?.close();
+  group('MotionEvents tests ', () {
+    test('recomposition', () async {
+      if (Platform.isAndroid) {
+        final SerializableFinder linkToOpenMotionEventPage =
+        find.byValueKey('MotionEventPage');
+        await driver.tap(linkToOpenMotionEventPage);
+        await driver.waitFor(find.byValueKey('MotionEventPageLoaded'));
+        final String errorMessage = await driver.requestData('run test');
+        expect(errorMessage, '');
+      }
     });
   });
-
 }
-

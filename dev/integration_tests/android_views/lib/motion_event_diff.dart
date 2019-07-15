@@ -106,7 +106,8 @@ void diffPointerCoordsList(StringBuffer diffBuffer,
 
 void diffPointerCoords(Map<String, dynamic> expected,
     Map<String, dynamic> actual, int pointerIdx, StringBuffer diffBuffer) {
-  diffMaps(expected, actual, diffBuffer, messagePrefix: '[pointerCoord $pointerIdx] ');
+  diffMaps(expected, actual, diffBuffer,
+      messagePrefix: '[pointerCoord $pointerIdx] ');
 }
 
 void diffMaps(
@@ -123,10 +124,8 @@ void diffMaps(
     return;
   }
   for (String key in expected.keys) {
-    if (excludeKeys.contains(key))
-      continue;
-    if (doublesApproximatelyMatch(expected[key], actual[key]))
-      continue;
+    if (excludeKeys.contains(key)) continue;
+    if (doublesApproximatelyMatch(expected[key], actual[key])) continue;
 
     if (expected[key] != actual[key]) {
       diffBuffer.write(
