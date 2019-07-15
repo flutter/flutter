@@ -107,6 +107,10 @@ void main() {
   });
 
   group('Listener hover detection', () {
+    // TODO(tongmu): Remover this group of test after the deprecated callbacks
+    // onPointer{Enter,Hover,Exit} are removed. They were kept for compatibility,
+    // and the tests have been copied to mouse_region_test.
+    // https://github.com/flutter/flutter/issues/36085
     setUp((){
       HoverClientState.numExits = 0;
       HoverClientState.numEntries = 0;
@@ -183,7 +187,7 @@ void main() {
           onPointerExit: (PointerExitEvent details) => exit = details,
         ),
       ));
-      final RenderMouseListener renderListener = tester.renderObject(find.byType(MouseRegion));
+      final RenderMouseListener renderListener = tester.renderObject(find.byType(Mouse));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
@@ -252,7 +256,7 @@ void main() {
           ],
         ),
       );
-      final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
+      final List<RenderObject> listeners = tester.renderObjectList(find.byType(Mouse)).toList();
       final RenderMouseListener renderListener1 = listeners[0];
       final RenderMouseListener renderListener2 = listeners[1];
       Offset center = tester.getCenter(find.byKey(key2));
@@ -338,7 +342,7 @@ void main() {
           ],
         ),
       );
-      final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
+      final List<RenderObject> listeners = tester.renderObjectList(find.byType(Mouse)).toList();
       final RenderMouseListener renderListener1 = listeners[0];
       final RenderMouseListener renderListener2 = listeners[1];
       final Offset center1 = tester.getCenter(find.byKey(key1));

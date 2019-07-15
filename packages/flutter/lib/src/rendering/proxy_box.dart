@@ -2511,8 +2511,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    // The onPointerEnter, onPointerHover, and onPointerExit events are are
-    // triggered from within the MouseTracker, not here.
+    // The onEnter, onHover, and onExit events are triggered from within
+    // MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -2547,7 +2547,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 }
 
 /// Calls callbacks in response to events of mouse pointers, including
-/// [onPointerEnter], [onPointerHover], and [onPointerExit].
+/// [onEnter], [onHover], and [onExit].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
@@ -2562,19 +2562,19 @@ class RenderMouseListener extends RenderProxyBox {
   ///
   /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   RenderMouseListener({
-    PointerEnterEventListener onPointerEnter,
-    PointerHoverEventListener onPointerHover,
-    PointerExitEventListener onPointerExit,
+    PointerEnterEventListener onEnter,
+    PointerHoverEventListener onHover,
+    PointerExitEventListener onExit,
     RenderBox child,
-  }) : _onPointerEnter = onPointerEnter,
-       _onPointerHover = onPointerHover,
-       _onPointerExit = onPointerExit,
+  }) : _onEnter = onEnter,
+       _onHover = onHover,
+       _onExit = onExit,
        super(child) {
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+    if (_onEnter != null || _onHover != null || _onExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onEnter,
+        onHover: _onHover,
+        onExit: _onExit,
       );
     }
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
@@ -2584,40 +2584,40 @@ class RenderMouseListener extends RenderProxyBox {
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer enters
   /// the region defined by this widget.
-  PointerEnterEventListener get onPointerEnter => _onPointerEnter;
-  set onPointerEnter(PointerEnterEventListener value) {
-    if (_onPointerEnter != value) {
-      _onPointerEnter = value;
+  PointerEnterEventListener get onEnter => _onEnter;
+  set onEnter(PointerEnterEventListener value) {
+    if (_onEnter != value) {
+      _onEnter = value;
       _updateAnnotations();
     }
   }
-  PointerEnterEventListener _onPointerEnter;
+  PointerEnterEventListener _onEnter;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
   ///
   /// Typically only triggered for mouse pointers.
-  PointerHoverEventListener get onPointerHover => _onPointerHover;
-  set onPointerHover(PointerHoverEventListener value) {
-    if (_onPointerHover != value) {
-      _onPointerHover = value;
+  PointerHoverEventListener get onHover => _onHover;
+  set onHover(PointerHoverEventListener value) {
+    if (_onHover != value) {
+      _onHover = value;
       _updateAnnotations();
     }
   }
-  PointerHoverEventListener _onPointerHover;
+  PointerHoverEventListener _onHover;
 
   /// Called when a hovering pointer leaves the region for this widget.
   ///
   /// If this is a mouse pointer, this will fire when the mouse pointer leaves
   /// the region defined by this widget.
-  PointerExitEventListener get onPointerExit => _onPointerExit;
-  set onPointerExit(PointerExitEventListener value) {
-    if (_onPointerExit != value) {
-      _onPointerExit = value;
+  PointerExitEventListener get onExit => _onExit;
+  set onExit(PointerExitEventListener value) {
+    if (_onExit != value) {
+      _onExit = value;
       _updateAnnotations();
     }
   }
-  PointerExitEventListener _onPointerExit;
+  PointerExitEventListener _onExit;
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2630,7 +2630,7 @@ class RenderMouseListener extends RenderProxyBox {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+    assert(_hoverAnnotation == null || _onEnter != _hoverAnnotation.onEnter || _onHover != _hoverAnnotation.onHover || _onExit != _hoverAnnotation.onExit,
       "Shouldn't call _updateAnnotations if nothing has changed.");
     bool changed = false;
     final bool hadHoverAnnotation = _hoverAnnotation != null;
@@ -2638,11 +2638,11 @@ class RenderMouseListener extends RenderProxyBox {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       changed = true;
     }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+    if (_onEnter != null || _onHover != null || _onExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
+        onEnter: _onEnter,
+        onHover: _onHover,
+        onExit: _onExit,
       );
       if (attached) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
@@ -2741,11 +2741,11 @@ class RenderMouseListener extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
-    if (onPointerEnter != null)
+    if (onEnter != null)
       listeners.add('enter');
-    if (onPointerHover != null)
+    if (onHover != null)
       listeners.add('hover');
-    if (onPointerExit != null)
+    if (onExit != null)
       listeners.add('exit');
     if (listeners.isEmpty)
       listeners.add('<none>');

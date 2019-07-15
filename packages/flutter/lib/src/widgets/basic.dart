@@ -5473,7 +5473,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [MouseRegion] a similar widget that tracks mouse locations when
+///  * [Mouse], a similar widget that tracks mouse locations even when
 ///    no button is pressed.
 class Listener extends StatelessWidget {
   /// Creates a widget that forwards point events to callbacks.
@@ -5560,10 +5560,10 @@ class Listener extends StatelessWidget {
     if (onPointerEnter != null ||
         onPointerExit != null ||
         onPointerHover != null) {
-      result = MouseRegion(
-        onPointerEnter: onPointerEnter,
-        onPointerExit: onPointerExit,
-        onPointerHover: onPointerHover,
+      result = Mouse(
+        onEnter: onPointerEnter,
+        onExit: onPointerExit,
+        onHover: onPointerHover,
         child: result,
       );
     }
@@ -5683,10 +5683,10 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///   return Center(
 ///     child: ConstrainedBox(
 ///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///       child: MouseRegion(
-///         onPointerEnter: _incrementCounter,
-///         onPointerHover: _updateLocation,
-///         onPointerExit: _incrementCounter,
+///       child: Mouse(
+///         onEnter: _incrementCounter,
+///         onHover: _updateLocation,
+///         onExit: _incrementCounter,
 ///         child: Container(
 ///           color: Colors.lightBlueAccent,
 ///           child: Column(
@@ -5714,13 +5714,13 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when
 ///    the pointer have buttons pressed.
-class MouseRegion extends SingleChildRenderObjectWidget {
+class Mouse extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
-  const MouseRegion({
+  const Mouse({
     Key key,
-    this.onPointerEnter,
-    this.onPointerExit,
-    this.onPointerHover,
+    this.onEnter,
+    this.onExit,
+    this.onHover,
     Widget child,
   }) : super(key: key, child: child);
 
@@ -5732,14 +5732,14 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// If this is a mouse pointer, this will fire when the mouse pointer enters
   /// the region defined by this widget, or when the widget appears under the
   /// pointer.
-  final PointerEnterEventListener onPointerEnter;
+  final PointerEnterEventListener onEnter;
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
   ///
   /// This is only fired for pointers which report their location when not down
   /// (e.g. mouse pointers, but not most touch pointers).
-  final PointerHoverEventListener onPointerHover;
+  final PointerHoverEventListener onHover;
 
   /// Called when a pointer leaves the region for this widget.
   ///
@@ -5749,7 +5749,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// If this is a mouse pointer, this will fire when the mouse pointer leaves
   /// the region defined by this widget, or when the widget disappears from
   /// under the pointer.
-  final PointerExitEventListener onPointerExit;
+  final PointerExitEventListener onExit;
 
   @override
   _ListenerElement createElement() => _ListenerElement(this);
@@ -5757,29 +5757,29 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   @override
   RenderMouseListener createRenderObject(BuildContext context) {
     return RenderMouseListener(
-      onPointerEnter: onPointerEnter,
-      onPointerHover: onPointerHover,
-      onPointerExit: onPointerExit,
+      onEnter: onEnter,
+      onHover: onHover,
+      onExit: onExit,
     );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderMouseListener renderObject) {
     renderObject
-      ..onPointerEnter = onPointerEnter
-      ..onPointerHover = onPointerHover
-      ..onPointerExit = onPointerExit;
+      ..onEnter = onEnter
+      ..onHover = onHover
+      ..onExit = onExit;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final List<String> listeners = <String>[];
-    if (onPointerEnter != null)
+    if (onEnter != null)
       listeners.add('enter');
-    if (onPointerExit != null)
+    if (onExit != null)
       listeners.add('exit');
-    if (onPointerHover != null)
+    if (onHover != null)
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
   }
