@@ -72,11 +72,11 @@ void main() {
       home: Material(
         child: Column(
           children: <Widget>[
-            PopupMenuButton(
+            PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 final List<PopupMenuEntry<Object>> list = <PopupMenuEntry<Object>>[
-                  PopupMenuItem(
+                  PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text(''),
                   ),
@@ -130,11 +130,11 @@ void main() {
       home: Material(
         child: Column(
           children: <Widget>[
-            PopupMenuButton(
+            PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
                 final List<PopupMenuEntry<Object>> list = <PopupMenuEntry<Object>>[
-                  PopupMenuItem(
+                  PopupMenuItem<void>(
                     key: popupItemKey,
                     child: const Text(''),
                   ),
@@ -195,17 +195,17 @@ void main() {
       home: Material(
         child: Column(
           children: <Widget>[
-            PopupMenuButton(
+            PopupMenuButton<void>(
               key: popupButtonKey,
               elevation: elevation,
               color: surfaceContainerColor,
               shape: shape,
               itemBuilder: (BuildContext context) {
                 final List<PopupMenuEntry<Object>> list = <PopupMenuEntry<Object>>[
-                  PopupMenuItem(
+                  PopupMenuItem<void>(
                     key: popupItemKey,
                     textStyle: textStyle,
-                    child: const Text('8'),
+                    child: const Text(''),
                   ),
                 ];
                 return list;
