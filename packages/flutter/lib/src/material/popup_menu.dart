@@ -936,7 +936,6 @@ class PopupMenuButton<T> extends StatefulWidget {
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
-    final PopupMenuThemeData popupMenuTheme = Theme.of(context).popupMenuTheme;
     final RenderBox button = context.findRenderObject();
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     final RelativeRect position = RelativeRect.fromRect(
