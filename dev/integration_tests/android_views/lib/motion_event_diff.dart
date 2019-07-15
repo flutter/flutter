@@ -123,9 +123,9 @@ void diffMaps(
     return;
   }
   for (String key in expected.keys) {
-    if (excludeKeys.contains(key)) 
+    if (excludeKeys.contains(key))
       continue;
-    if (doublesApproximatelyMatch(expected[key], actual[key])) 
+    if (doublesApproximatelyMatch(expected[key], actual[key]))
       continue;
 
     if (expected[key] != actual[key]) {
