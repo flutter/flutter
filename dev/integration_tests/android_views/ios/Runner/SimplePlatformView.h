@@ -10,7 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface FLTGoogleMapFactory : NSObject <FlutterPlatformViewFactory>
+@interface SimplePlatformViewFactory : NSObject <FlutterPlatformViewFactory>
 - (instancetype)initWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar;
 @end
 
