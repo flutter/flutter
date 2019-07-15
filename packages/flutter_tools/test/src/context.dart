@@ -238,6 +238,9 @@ class MockOperatingSystemUtils implements OperatingSystemUtils {
   ProcessResult makeExecutable(File file) => null;
 
   @override
+  void chmod(FileSystemEntity entity, String mode) { }
+
+  @override
   File which(String execName) => null;
 
   @override
