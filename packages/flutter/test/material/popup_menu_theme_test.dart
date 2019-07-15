@@ -7,26 +7,26 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('PopupMenuEntryThemeData copyWith, ==, hashCode basics', () {
-    expect(const PopupMenuEntryThemeData(),
-        const PopupMenuEntryThemeData().copyWith());
-    expect(const PopupMenuEntryThemeData().hashCode,
-        const PopupMenuEntryThemeData().copyWith().hashCode);
+  test('PopupMenuThemeData copyWith, ==, hashCode basics', () {
+    expect(const PopupMenuThemeData(),
+        const PopupMenuThemeData().copyWith());
+    expect(const PopupMenuThemeData().hashCode,
+        const PopupMenuThemeData().copyWith().hashCode);
   });
 
-  test('PopupMenuEntryThemeData null fields by default', () {
-    const PopupMenuEntryThemeData popupMenuEntryTheme =
-        PopupMenuEntryThemeData();
-    expect(popupMenuEntryTheme.surfaceContainerColor, null);
-    expect(popupMenuEntryTheme.shape, null);
-    expect(popupMenuEntryTheme.elevation, null);
-    expect(popupMenuEntryTheme.textStyle, null);
+  test('PopupMenuThemeData null fields by default', () {
+    const PopupMenuThemeData popupMenuTheme =
+        PopupMenuThemeData();
+    expect(popupMenuTheme.color, null);
+    expect(popupMenuTheme.shape, null);
+    expect(popupMenuTheme.elevation, null);
+    expect(popupMenuTheme.textStyle, null);
   });
 
-  testWidgets('Default PopupMenuEntryThemeData debugFillProperties',
+  testWidgets('Default PopupMenuThemeData debugFillProperties',
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    const PopupMenuEntryThemeData().debugFillProperties(builder);
+    const PopupMenuThemeData().debugFillProperties(builder);
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
@@ -36,11 +36,11 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuEntryThemeData implements debugFillProperties',
+  testWidgets('PopupMenuThemeData implements debugFillProperties',
       (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    PopupMenuEntryThemeData(
-      surfaceContainerColor: const Color(0xFFFFFFFF),
+    PopupMenuThemeData(
+      color: const Color(0xFFFFFFFF),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2.0)),
       elevation: 2.0,
       textStyle: const TextStyle(color: Color(0xffffffff)),
@@ -52,14 +52,14 @@ void main() {
         .toList();
 
     expect(description, <String>[
-      'surface container color: Color(0xffffffff)',
+      'color: Color(0xffffffff)',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
       'text style: TextStyle(inherit: true, color: Color(0xffffffff))'
     ]);
   });
 
-  testWidgets('Passing no PopupMenuEntryThemeData returns defaults',
+  testWidgets('Passing no PopupMenuThemeData returns defaults',
       (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -93,8 +93,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupButtonApp),
             matching: find.byType(Material),
           )
@@ -106,8 +105,7 @@ void main() {
 
     final AnimatedDefaultTextStyle text =
         tester.widget<AnimatedDefaultTextStyle>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupItemKey),
             matching: find.byType(AnimatedDefaultTextStyle),
           )
@@ -117,15 +115,15 @@ void main() {
     expect(text.style.color, const Color(0xdd000000));
   });
 
-  testWidgets('PopupMenuEntry uses values from PopupMenuEntryThemeData',
+  testWidgets('PopupMenuEntry uses values from PopupMenuThemeData',
       (WidgetTester tester) async {
-    final PopupMenuEntryThemeData popupMenuEntryTheme = _popupMenuEntryTheme();
+    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(popupMenuEntryTheme: popupMenuEntryTheme),
+      theme: ThemeData(popupMenuTheme: popupMenuTheme),
       key: popupButtonApp,
       home: Material(
         child: Column(
@@ -151,46 +149,43 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupButtonApp),
             matching: find.byType(Material),
           )
           .last,
     );
-    expect(button.color, popupMenuEntryTheme.surfaceContainerColor);
-    expect(button.shape, popupMenuEntryTheme.shape);
-    expect(button.elevation, popupMenuEntryTheme.elevation);
+    expect(button.color, popupMenuTheme.color);
+    expect(button.shape, popupMenuTheme.shape);
+    expect(button.elevation, popupMenuTheme.elevation);
 
     final AnimatedDefaultTextStyle text =
         tester.widget<AnimatedDefaultTextStyle>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupItemKey),
             matching: find.byType(AnimatedDefaultTextStyle),
           )
           .last,
     );
-    expect(text.style, popupMenuEntryTheme.textStyle);
+    expect(text.style, popupMenuTheme.textStyle);
   });
 
   testWidgets('PopupMenuEntry widget properties take priority over theme',
       (WidgetTester tester) async {
-    final PopupMenuEntryThemeData popupMenuEntryTheme = _popupMenuEntryTheme();
+    final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
 
-    const Color surfaceContainerColor = Colors.purple;
+    const Color color = Colors.purple;
     const ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(
-        color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
+    const TextStyle textStyle = TextStyle(color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
 
     await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(popupMenuEntryTheme: popupMenuEntryTheme),
+      theme: ThemeData(popupMenuTheme: popupMenuTheme),
       key: popupButtonApp,
       home: Material(
         child: Column(
@@ -198,7 +193,7 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               elevation: elevation,
-              color: surfaceContainerColor,
+              color: color,
               shape: shape,
               itemBuilder: (BuildContext context) {
                 final List<PopupMenuEntry<Object>> list = <PopupMenuEntry<Object>>[
@@ -220,21 +215,19 @@ void main() {
     await tester.pumpAndSettle();
 
     final Material button = tester.widget<Material>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupButtonApp),
             matching: find.byType(Material),
           )
           .last,
     );
-    expect(button.color, surfaceContainerColor);
+    expect(button.color, color);
     expect(button.shape, shape);
     expect(button.elevation, elevation);
 
     final AnimatedDefaultTextStyle text =
         tester.widget<AnimatedDefaultTextStyle>(
-      find
-          .descendant(
+      find.descendant(
             of: find.byKey(popupItemKey),
             matching: find.byType(AnimatedDefaultTextStyle),
           )
@@ -244,12 +237,11 @@ void main() {
   });
 }
 
-PopupMenuEntryThemeData _popupMenuEntryTheme() {
-  return PopupMenuEntryThemeData(
-    surfaceContainerColor: Colors.orange,
+PopupMenuThemeData _popupMenuTheme() {
+  return PopupMenuThemeData(
+    color: Colors.orange,
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
     elevation: 12.0,
-    textStyle: const TextStyle(
-        color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
   );
 }

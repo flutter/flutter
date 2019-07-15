@@ -170,7 +170,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
-    PopupMenuEntryThemeData popupMenuEntryTheme,
+    PopupMenuThemeData popupMenuTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -270,7 +270,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
-    popupMenuEntryTheme ??= const PopupMenuEntryThemeData();
+    popupMenuTheme ??= const PopupMenuThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -328,7 +328,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
-      popupMenuEntryTheme: popupMenuEntryTheme,
+      popupMenuTheme: popupMenuTheme,
     );
   }
 
@@ -398,7 +398,7 @@ class ThemeData extends Diagnosticable {
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
-    @required this.popupMenuEntryTheme,
+    @required this.popupMenuTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -452,7 +452,7 @@ class ThemeData extends Diagnosticable {
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
-       assert(popupMenuEntryTheme != null);
+       assert(popupMenuTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -740,7 +740,7 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the color, shape, elevation, and text style of a
   /// menu.
-  final PopupMenuEntryThemeData popupMenuEntryTheme;
+  final PopupMenuThemeData popupMenuTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -799,7 +799,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
-    PopupMenuEntryThemeData popupMenuEntryTheme,
+    PopupMenuThemeData popupMenuTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -858,7 +858,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
-      popupMenuEntryTheme: popupMenuEntryTheme ?? this.popupMenuEntryTheme,
+      popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
     );
   }
 
@@ -995,7 +995,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
-      popupMenuEntryTheme: PopupMenuEntryThemeData.lerp(a.popupMenuEntryTheme, b.popupMenuEntryTheme, t),
+      popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
     );
   }
 
@@ -1060,7 +1060,7 @@ class ThemeData extends Diagnosticable {
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
-           (otherData.popupMenuEntryTheme == popupMenuEntryTheme);
+           (otherData.popupMenuTheme == popupMenuTheme);
   }
 
   @override
@@ -1124,7 +1124,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme,
       snackBarTheme,
       bottomSheetTheme,
-      popupMenuEntryTheme,
+      popupMenuTheme,
     ];
     return hashList(values);
   }
@@ -1185,7 +1185,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
-    properties.add(DiagnosticsProperty<PopupMenuEntryThemeData>('popupMenuEntryTheme', popupMenuEntryTheme, defaultValue: defaultData.popupMenuEntryTheme));
+    properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
   }
 }
 
