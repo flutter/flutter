@@ -20,7 +20,7 @@ const String kEventsFileName = 'touchEvents';
 
 class MotionEventsPage extends Page {
   const MotionEventsPage()
-      : super('Place circle', const ValueKey<String>('MotionEventsListTile'));
+      : super('Motion Event Tests', const ValueKey<String>('MotionEventsListTile'));
 
   @override
   Widget build(BuildContext context) {
