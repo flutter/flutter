@@ -28,6 +28,7 @@ void main() {
     MockFlutterView mockFlutterView;
     ResidentRunner residentRunner;
     MockDevice mockDevice;
+    MockIsolate mockIsolate;
 
     setUp(() {
       testbed = Testbed(setup: () {
@@ -44,6 +45,7 @@ void main() {
       mockVMService = MockVMService();
       mockDevFS = MockDevFS();
       mockFlutterView = MockFlutterView();
+      mockIsolate = MockIsolate();
       // DevFS Mocks
       when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
       when(mockDevFS.sources).thenReturn(<Uri>[]);
@@ -73,7 +75,7 @@ void main() {
         mockFlutterView
       ]);
       when(mockFlutterDevice.device).thenReturn(mockDevice);
-      when(mockFlutterView.uiIsolate).thenReturn(MockIsolate());
+      when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
       when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
       when(mockFlutterDevice.observatoryUris).thenReturn(<Uri>[
         testUri,
@@ -96,6 +98,12 @@ void main() {
       when(mockVMService.done).thenAnswer((Invocation invocation) {
         final Completer<void> result = Completer<void>.sync();
         return result.future;
+      });
+      when(mockIsolate.resume()).thenAnswer((Invocation invocation) {
+        return Future<Map<String, Object>>.value(null);
+      });
+      when(mockIsolate.flutterExit()).thenAnswer((Invocation invocation) {
+        return Future<Map<String, Object>>.value(null);
       });
     });
 
@@ -203,6 +211,40 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => MockUsage(),
     }));
+
+    group('FlutterDevice' , () {
+      test('Will not exit a paused isolate', () => testbed.run(() async {
+        final TestFlutterDevice flutterDevice = TestFlutterDevice(
+          mockDevice,
+          <FlutterView>[ mockFlutterView ],
+        );
+        final MockServiceEvent mockServiceEvent = MockServiceEvent();
+        when(mockServiceEvent.isPauseEvent).thenReturn(true);
+        when(mockIsolate.pauseEvent).thenReturn(mockServiceEvent);
+        when(mockDevice.supportsFlutterExit).thenReturn(true);
+
+        await flutterDevice.exitApps();
+
+        verifyNever(mockIsolate.flutterExit());
+        verify(mockDevice.stopApp(any)).called(1);
+      }));
+
+      test('Will exit an un-paused isolate', () => testbed.run(() async {
+        final TestFlutterDevice flutterDevice = TestFlutterDevice(
+          mockDevice,
+          <FlutterView> [mockFlutterView ],
+        );
+
+        final MockServiceEvent mockServiceEvent = MockServiceEvent();
+        when(mockServiceEvent.isPauseEvent).thenReturn(false);
+        when(mockIsolate.pauseEvent).thenReturn(mockServiceEvent);
+        when(mockDevice.supportsFlutterExit).thenReturn(true);
+
+        await flutterDevice.exitApps();
+
+        verify(mockIsolate.flutterExit()).called(1);
+      }));
+    });
   });
 }
 
@@ -213,3 +255,12 @@ class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockUsage extends Mock implements Usage {}
+class MockServiceEvent extends Mock implements ServiceEvent {}
+class TestFlutterDevice extends FlutterDevice {
+  TestFlutterDevice(Device device, this.views)
+    : super(device, buildMode: BuildMode.debug, trackWidgetCreation: false);
+
+  @override
+  final List<FlutterView> views;
+}
+

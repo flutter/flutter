@@ -175,8 +175,20 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty)
       return;
     final List<Future<void>> futures = <Future<void>>[];
+    // If any of the flutter views are paused, we might not be able to
+    // cleanly exit since the service extension may not have been registered.
+    if (flutterViews.any((FlutterView view) {
+      return view != null &&
+             view.uiIsolate != null &&
+             view.uiIsolate.pauseEvent.isPauseEvent;
+      }
+    )) {
+      await device.stopApp(package);
+      return;
+    }
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
+        assert(!view.uiIsolate.pauseEvent.isPauseEvent);
         futures.add(view.uiIsolate.flutterExit());
       }
     }
