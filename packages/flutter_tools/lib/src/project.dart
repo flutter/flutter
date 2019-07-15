@@ -16,6 +16,7 @@ import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'desktop.dart';
 import 'flutter_manifest.dart';
+import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
@@ -177,9 +178,16 @@ class FlutterProject {
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
   static FlutterManifest _readManifest(String path) {
-    final FlutterManifest manifest = FlutterManifest.createFromPath(path);
-    if (manifest == null)
+    FlutterManifest manifest;
+    try {
+      manifest = FlutterManifest.createFromPath(path);
+    } on YamlException catch (e) {
+      printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      printError('$e');
+    }
+    if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
+    }
     return manifest;
   }
 
