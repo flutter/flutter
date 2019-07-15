@@ -169,6 +169,8 @@ class TooltipThemeData extends Diagnosticable {
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('decoration', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('textStyle', textStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: null));
     properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: null));
   }
