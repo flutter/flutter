@@ -1,4 +1,4 @@
-Signature: d00add53bf97e8de9aea1ace575551a3
+Signature: dac48fc0f5d00e2d95aeae26964db399
 
 UNUSED LICENSES:
 
@@ -1597,6 +1597,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FSAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-MSVC-GCE-CPU-AVX2-x86_64-Debug-All-MSRTC.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-iOS-Clang-iPadPro-GPU-PowerVRGT7800-arm64-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-iOS-Clang-iPhone6-GPU-PowerVRGX6450-arm64-Release-All-Metal.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_dm.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_get_hashes.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.json
@@ -5368,8 +5369,6 @@ FILE: ../../../third_party/skia/src/shaders/SkShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShader.cpp
 FILE: ../../../third_party/skia/src/utils/SkBase64.cpp
 FILE: ../../../third_party/skia/src/utils/SkCamera.cpp
-FILE: ../../../third_party/skia/src/utils/SkMetaData.cpp
-FILE: ../../../third_party/skia/src/utils/SkMetaData.h
 FILE: ../../../third_party/skia/src/utils/SkParse.cpp
 FILE: ../../../third_party/skia/src/utils/SkParseColor.cpp
 FILE: ../../../third_party/skia/src/xml/SkDOM.cpp
