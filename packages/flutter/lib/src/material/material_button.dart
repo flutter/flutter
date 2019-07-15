@@ -263,7 +263,7 @@ class MaterialButton extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///   * [ButtonTextTheme], uses [Brightness] to determine text color.
+  ///  * [ButtonTextTheme], uses [Brightness] to determine text color.
   final Brightness colorBrightness;
 
   /// The button's label.
