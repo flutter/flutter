@@ -42,8 +42,9 @@ void main() {
     });
 
     test('has safe defaults', () {
-      const Feature feature = Feature();
+      const Feature feature = Feature(name: 'example');
 
+      expect(feature.name, 'example');
       expect(feature.setting.available, false);
       expect(feature.setting.enabledByDefault, false);
       expect(feature.setting.environmentOverride, null);
@@ -72,7 +73,23 @@ void main() {
       expect(combined.configSetting, 'c');
     });
 
-    /// Fbutter Web
+    test('flutter web help string', () {
+      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter Web on master, dev channels.');
+    });
+
+    test('flutter macOS desktop help string', () {
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for macOS on the master channel.');
+    });
+
+    test('flutter Linux desktop help string', () {
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Linux on the master channel.');
+    });
+
+    test('flutter Windows desktop help string', () {
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Windows on the master channel.');
+    });
+
+    /// Flutter Web
 
     test('flutter web off by default on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');

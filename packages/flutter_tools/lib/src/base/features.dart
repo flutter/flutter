@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../version.dart';
 import 'config.dart';
 import 'context.dart';
@@ -51,6 +53,7 @@ const List<Feature> allFeatures = <Feature>[
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
+  name: 'Flutter Web',
   setting: FeatureSetting(
     configSetting: 'flutter-web',
     environmentOverride: 'FLUTTER_WEB',
@@ -67,6 +70,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
+  name: 'Flutter Desktop for macOS',
   setting: FeatureSetting(
     configSetting: 'flutter-macos-desktop',
     environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
@@ -79,6 +83,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
+  name: 'Flutter Desktop for Linux',
   setting: FeatureSetting(
     configSetting: 'flutter-linux-desktop',
     environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
@@ -91,6 +96,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
+  name: 'Flutter Desktop for Windows',
   setting: FeatureSetting(
     configSetting: 'flutter-windows-desktop',
     environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
@@ -169,12 +175,16 @@ class FlutterFeatureFlags implements FeatureFlags {
 class Feature {
   /// Creates a [Feature].
   const Feature({
+    @required this.name,
     this.master = const FeatureSetting(),
     this.dev = const FeatureSetting(),
     this.beta = const FeatureSetting(),
     this.stable = const FeatureSetting(),
     this.setting = const FeatureSetting(),
   });
+
+  /// The user visible name for this feature.
+  final String name;
 
   /// The settings for the master branch and other unknown channels.
   final FeatureSetting master;
@@ -190,6 +200,26 @@ class Feature {
 
   /// The top-level deault features.
   final FeatureSetting setting;
+
+  /// A help message for the `flutter config` command, or null if unsupported.
+  String generateHelpMessage() {
+    if (setting.configSetting == null) {
+      return null;
+    }
+    final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
+    final List<String> channels = <String>[
+      if (master.available) 'master',
+      if (dev.available) 'dev',
+      if (beta.available) 'beta',
+      if (stable.available) 'stable',
+    ];
+    if (channels.length == 1) {
+      buffer.write('the ${channels.single} channel.');
+    } else {
+      buffer.write('${channels.join(', ')} channels.');
+    }
+    return buffer.toString();
+  }
 }
 
 /// A description of the conditions to enable a feature.
