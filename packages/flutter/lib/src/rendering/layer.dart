@@ -524,10 +524,12 @@ class ContainerLayer extends Layer {
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
-      informationCollector: () sync* {
-        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
-        yield ErrorDescription('which occupies the same area at a higher elevation.');
+      informationCollector: () {
+        return <DiagnosticsNode>[
+          child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty),
+          predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty),
+          ErrorDescription('which occupies the same area at a higher elevation.'),
+        ];
       }
     ));
     return <PictureLayer>[
@@ -615,16 +617,18 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    Iterable<S> result = Iterable<S>.empty();
     if (firstChild == null)
-      return;
+      return result;
     Layer child = lastChild;
     while (true) {
-      yield* child.findAll<S>(regionOffset);
+      result = result.followedBy(child.findAll<S>(regionOffset));
       if (child == firstChild)
         break;
       child = child.previousSibling;
     }
+    return result;
   }
 
   @override
@@ -1006,10 +1010,10 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1087,10 +1091,10 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipRRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1168,10 +1172,10 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1189,6 +1193,45 @@ class ClipPathLayer extends ContainerLayer {
     if (enabled)
       builder.pop();
     return null; // this does not return an engine layer yet.
+  }
+}
+
+/// A composite layer that applies a [ColorFilter] to its children.
+class ColorFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies a [ColorFilter] to its children.
+  ///
+  /// The [ColorFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ColorFilterLayer({
+    @required ColorFilter colorFilter,
+  }) : _colorFilter = colorFilter,
+       assert(colorFilter != null);
+
+  /// The color filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ColorFilter get colorFilter => _colorFilter;
+  ColorFilter _colorFilter;
+  set colorFilter(ColorFilter value) {
+    if (value != _colorFilter) {
+      _colorFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    builder.pushColorFilter(colorFilter);
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+    return null; // this does not return an engine layer yet.
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
   }
 }
 
@@ -1264,12 +1307,12 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null) {
-      return;
+      return Iterable<S>.empty();
     }
-    yield* super.findAll<S>(transformedOffset);
+    return super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1582,10 +1625,10 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Iterable<S> findAll<S>(Offset regionOffset) {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return Iterable<S>.empty();
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -2031,20 +2074,21 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    final Iterable<S> childResults = super.findAll<S>(regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
-      return;
+      return childResults;
     }
     if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      yield typedResult;
+      return childResults.followedBy(<S>[typedResult]);
     }
+    return childResults;
   }
 
   @override

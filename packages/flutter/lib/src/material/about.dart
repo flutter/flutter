@@ -192,6 +192,7 @@ void showLicensePage({
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
+      applicationIcon: applicationIcon,
       applicationLegalese: applicationLegalese,
     )
   ));
@@ -275,7 +276,7 @@ class AboutDialog extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                if (icon != null) IconTheme(data: const IconThemeData(size: 48.0), child: icon),
+                if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -341,6 +342,7 @@ class LicensePage extends StatefulWidget {
     Key key,
     this.applicationName,
     this.applicationVersion,
+    this.applicationIcon,
     this.applicationLegalese,
   }) : super(key: key);
 
@@ -356,6 +358,14 @@ class LicensePage extends StatefulWidget {
   ///
   /// Defaults to the empty string.
   final String applicationVersion;
+
+  /// The icon to show below the application name.
+  ///
+  /// By default no icon is shown.
+  ///
+  /// Typically this will be an [ImageIcon] widget. It should honor the
+  /// [IconTheme]'s [IconThemeData.size].
+  final Widget applicationIcon;
 
   /// A string to show in small print.
   ///
@@ -455,6 +465,7 @@ class _LicensePageState extends State<LicensePage> {
     assert(debugCheckHasMaterialLocalizations(context));
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
+    final Widget icon = widget.applicationIcon ?? _defaultApplicationIcon(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
@@ -474,6 +485,7 @@ class _LicensePageState extends State<LicensePage> {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
                 children: <Widget>[
                   Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
+                  if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
                   Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
                   Container(height: 18.0),
                   Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
