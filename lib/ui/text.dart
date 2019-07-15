@@ -103,6 +103,77 @@ class FontWeight {
 }
 
 /// A feature tag and value that affect the selection of glyphs in a font.
+///
+/// {@tool sample}
+///
+/// This example shows usage of several OpenType font features, including
+/// Small Caps (smcp), old-style figures, fractional ligatures and stylistic
+/// sets.
+///
+/// ```dart
+///class TypePage extends StatelessWidget {
+///  // The Cardo, Milonga and Raleway Dots fonts can be downloaded from
+///  // Google Fonts (https://www.google.com/fonts).
+///
+///  final titleStyle = TextStyle(
+///    fontSize: 18,
+///    fontFeatures: [FontFeature.enable('smcp')],
+///    color: Colors.blueGrey[600],
+///  );
+///
+///  @override
+///  Widget build(BuildContext context) {
+///    return Scaffold(
+///      body: Center(
+///        child: Column(
+///          mainAxisAlignment: MainAxisAlignment.center,
+///          children: <Widget>[
+///            Spacer(flex: 5),
+///            Text('regular numbers have their place:', style: titleStyle),
+///            Text('The 1972 cup final was a 1-1 draw.',
+///                style: TextStyle(
+///                  fontFamily: 'Cardo',
+///                  fontSize: 24,
+///                )),
+///            Spacer(),
+///            Text('but old-style figures blend well with lower case:',
+///                style: titleStyle),
+///            Text('The 1972 cup final was a 1-1 draw.',
+///                style: TextStyle(
+///                    fontFamily: 'Cardo',
+///                    fontSize: 24,
+///                    fontFeatures: [FontFeature.oldstyleFigures()])),
+///            Spacer(),
+///            Divider(),
+///            Spacer(),
+///            Text('fractions look better with a custom ligature:',
+///                style: titleStyle),
+///            Text('Add 1/2 tsp of flour and stir.',
+///                style: TextStyle(
+///                    fontFamily: 'Milonga',
+///                    fontSize: 24,
+///                    fontFeatures: [FontFeature.enable('frac')])),
+///            Spacer(),
+///            Divider(),
+///            Spacer(),
+///            Text('multiple stylistic sets in one font:', style: titleStyle),
+///            Text('Raleway Dots',
+///                style: TextStyle(fontFamily: 'Raleway Dots', fontSize: 48)),
+///            Text('Raleway Dots',
+///                style: TextStyle(
+///                  fontFeatures: [FontFeature.stylisticSet(1)],
+///                  fontFamily: 'Raleway Dots',
+///                  fontSize: 48,
+///                )),
+///            Spacer(flex: 5),
+///          ],
+///        ),
+///      ),
+///    );
+///  }
+///}
+/// ```
+/// {@end-tool}
 class FontFeature {
   /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
   /// change how the engine selects glyphs when rendering text.
