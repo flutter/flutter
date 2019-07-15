@@ -30,6 +30,24 @@ import '../widgets/semantics_tester.dart';
 const String tooltipText = 'TIP';
 
 void main() {
+  test('TooltipThemeData copyWith, ==, hashCode basics', () {
+    expect(const TooltipThemeData(), const TooltipThemeData().copyWith());
+    expect(const TooltipThemeData().hashCode, const TooltipThemeData().copyWith().hashCode);
+  });
+
+  test('TooltipThemeData defaults', () {
+    const TooltipThemeData theme = TooltipThemeData();
+    expect(theme.height, null);
+    expect(theme.padding, null);
+    expect(theme.verticalOffset, null);
+    expect(theme.preferBelow, null);
+    expect(theme.excludeFromSemantics, null);
+    expect(theme.decoration, null);
+    expect(theme.textStyle, null);
+    expect(theme.waitDuration, null);
+    expect(theme.showDuration, null);
+  });
+
   testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const TooltipThemeData().debugFillProperties(builder);
