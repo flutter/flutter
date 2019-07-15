@@ -114,6 +114,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   RenderSliverFillRemaining({
     RenderBox child,
     this.hasScrollBody = true,
+    this.fillOverscroll = false,
   }) : assert(hasScrollBody != null),
        super(child: child);
 
@@ -124,60 +125,46 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further.
-  bool hasScrollBody;
+  final bool hasScrollBody;
+
+  /// Doc
+  final bool fillOverscroll;
 
   @override
   void performLayout() {
-    print(constraints.viewportMainAxisExtent);
-    print(constraints.precedingScrollExtent);
-    print(constraints.overlap);
-    double extent = (constraints.viewportMainAxisExtent - constraints.precedingScrollExtent) - math.min(constraints.overlap, 0.0);
-      //(constraints.viewportMainAxisExtent - constraints.precedingScrollExtent) - math.min(constraints.overlap, 0.0);
-      // OG: constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
-    print('Starting extent: $extent');
-    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-
-
+    final double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
     double childExtent;
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        childExtent = child.size.width;
-        break;
-      case Axis.vertical:
-        childExtent = child.size.height;
-        break;
-    }
-    print('Independent child size: $childExtent');
 
-    if(constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent) {
-      extent = childExtent;
+    if(!hasScrollBody && child != null) {
+      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+      switch (constraints.axis) {
+        case Axis.horizontal:
+          childExtent = child.size.width;
+          break;
+        case Axis.vertical:
+          childExtent = child.size.height;
+          break;
+      }
+      if(constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent) {
+        extent = childExtent;
+      } else {
+        child.layout(constraints.asBoxConstraints(
+          minExtent: extent,
+          maxExtent: fillOverscroll ? maxExtent : extent),
+          parentUsesSize: true,
+        );
+      }
     } else {
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent), parentUsesSize: true);
     }
-    print('final child extent: ${child.size.height}');
-    print('final extent: $extent');
-//    double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
-//    if (hasScrollBody && child != null) {
-//      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
-//    } else if (child != null) {
-//      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-//      double childExtent;
-//      switch (constraints.axis) {
-//        case Axis.horizontal:
-//          childExtent = child.size.width;
-//          break;
-//        case Axis.vertical:
-//          childExtent = child.size.height;
-//          break;
-//      }
-//      extent = childExtent;
-//    }
+
     assert(extent.isFinite);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: extent,//hasScrollBody ? constraints.viewportMainAxisExtent : extent,
+      scrollExtent: hasScrollBody ? maxExtent : extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
