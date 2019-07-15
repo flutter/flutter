@@ -71,7 +71,8 @@ class PopupMenuEntryThemeData extends Diagnosticable {
   static PopupMenuEntryThemeData lerp(
       PopupMenuEntryThemeData a, PopupMenuEntryThemeData b, double t) {
     assert(t != null);
-    if (a == null && b == null) return null;
+    if (a == null && b == null)
+      return null;
     return PopupMenuEntryThemeData(
       surfaceContainerColor:
           Color.lerp(a?.surfaceContainerColor, b?.surfaceContainerColor, t),
@@ -93,8 +94,10 @@ class PopupMenuEntryThemeData extends Diagnosticable {
 
   @override
   bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    if (other.runtimeType != runtimeType) return false;
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
     final PopupMenuEntryThemeData typedOther = other;
     return typedOther.elevation == elevation &&
         typedOther.surfaceContainerColor == surfaceContainerColor &&
