@@ -4,7 +4,7 @@ import 'motion_event_page.dart';
 import 'page.dart';
 
 final List<Page> _allPages = <Page>[
-  const MotionEventPage(),
+  const MotionEventsPage(),
 ];
 
 void main() {
@@ -20,7 +20,7 @@ class Home extends StatelessWidget {
         itemCount: _allPages.length,
         itemBuilder: (_, int index) => ListTile(
           title: Text(_allPages[index].title),
-          key: _allPages[index].valueKey,
+          key: _allPages[index].tileKey,
           onTap: () => _pushPage(context, _allPages[index]),
         ),
       ),

@@ -18,13 +18,13 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 
 const String kEventsFileName = 'touchEvents';
 
-class MotionEventPage extends Page {
-  const MotionEventPage()
-      : super('Place circle', const ValueKey<String>('MotionEventPage'));
+class MotionEventsPage extends Page {
+  const MotionEventsPage()
+      : super('Place circle', const ValueKey<String>('MotionEventsListTile'));
 
   @override
   Widget build(BuildContext context) {
-    return MotionEventBody();
+    return MotionEventsBody();
   }
 }
 
@@ -44,12 +44,12 @@ class FutureDataHandler {
 
 FutureDataHandler driverDataHandler = FutureDataHandler();
 
-class MotionEventBody extends StatefulWidget {
+class MotionEventsBody extends StatefulWidget {
   @override
-  State createState() => MotionEventBodyState();
+  State createState() => MotionEventsBodyState();
 }
 
-class MotionEventBodyState extends State<MotionEventBody> {
+class MotionEventsBodyState extends State<MotionEventsBody> {
   static const int kEventsBufferSize = 1000;
 
   MethodChannel viewChannel;
@@ -67,7 +67,7 @@ class MotionEventBodyState extends State<MotionEventBody> {
         SizedBox(
           height: 300.0,
           child: AndroidView(
-              key: const ValueKey<String>('MotionEventPageLoaded'),
+              key: const ValueKey<String>('PlatformView'),
               viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated),
         ),
@@ -103,9 +103,7 @@ class MotionEventBodyState extends State<MotionEventBody> {
             RaisedButton(
               key: const ValueKey<String>('play'),
               child: const Text('PLAY FILE'),
-              onPressed: () {
-                playEventsFile();
-              },
+              onPressed: () { playEventsFile(); },
             ),
           ],
         ),
@@ -121,8 +119,7 @@ class MotionEventBodyState extends State<MotionEventBody> {
       final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data);
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
-          .map<Map<String, dynamic>>(
-              (Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
+          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
           .toList();
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel.invokeMethod<void>('pipeTouchEvents');
@@ -141,8 +138,10 @@ class MotionEventBodyState extends State<MotionEventBody> {
       for (int i = 0; i < flutterViewEvents.length; ++i) {
         final String currentDiff =
             diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
-        if (currentDiff.isEmpty) continue;
-        if (diff.isNotEmpty) diff.write(', ');
+        if (currentDiff.isEmpty) 
+          continue;
+        if (diff.isNotEmpty) 
+          diff.write(', ');
         diff.write(currentDiff);
       }
       return diff.toString();
@@ -167,8 +166,7 @@ class MotionEventBodyState extends State<MotionEventBody> {
       final Directory outDir = await getExternalStorageDirectory();
       // This test only runs on Android so we can assume path separator is '/'.
       final File file = File('${outDir.path}/$kEventsFileName');
-      await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes),
-          flush: true);
+      await file.writeAsBytes(data.buffer.asUint8List(0, data.lengthInBytes), flush: true);
       showMessage(context, 'Saved original events to ${file.path}');
     } catch (e) {
       showMessage(context, 'Failed saving ${e.toString()}');
@@ -286,11 +284,9 @@ class TouchEventDiff extends StatelessWidget {
       buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
-    final List<Map<dynamic, dynamic>> coords =
-        event['pointerCoords'].cast<Map<dynamic, dynamic>>();
+    final List<Map<dynamic, dynamic>> coords = event['pointerCoords'].cast<Map<dynamic, dynamic>>();
     for (int i = 0; i < coords.length; i++) {
-      buffer.write(
-          'p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
+      buffer.write('p$i x: ${coords[i]['x']} y: ${coords[i]['y']}, pressure: ${coords[i]['pressure']} ');
     }
     print(buffer.toString());
   }

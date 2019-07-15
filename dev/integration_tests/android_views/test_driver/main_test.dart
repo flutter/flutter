@@ -21,10 +21,10 @@ Future<void> main() async {
   group('MotionEvents tests ', () {
     test('recomposition', () async {
       if (Platform.isAndroid) {
-        final SerializableFinder linkToOpenMotionEventPage =
-        find.byValueKey('MotionEventPage');
-        await driver.tap(linkToOpenMotionEventPage);
-        await driver.waitFor(find.byValueKey('MotionEventPageLoaded'));
+        final SerializableFinder motionEventsListTile =
+        find.byValueKey('MotionEventsListTile');
+        await driver.tap(motionEventsListTile);
+        await driver.waitFor(find.byValueKey('PlatformView'));
         final String errorMessage = await driver.requestData('run test');
         expect(errorMessage, '');
       }
