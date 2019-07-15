@@ -202,7 +202,7 @@ class DeviceManager {
     if (devices.length > 1 && !hasSpecifiedDeviceId) {
       devices = <Device>[
         for (Device device in devices)
-          if (device.isSupportedForProject(flutterProject))
+          if (isDeviceSupportedForProject(device, flutterProject))
             device
       ];
     }
@@ -224,6 +224,8 @@ class DeviceManager {
   }
 
   /// Returns whether the device is supported for the project.
+  ///
+  /// This exists to allow the check to be overriden for google3 clients.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
