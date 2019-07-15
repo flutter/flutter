@@ -30,6 +30,50 @@ import '../widgets/semantics_tester.dart';
 const String tooltipText = 'TIP';
 
 void main() {
+  testWidgets('Default TooltipThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const TooltipThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+  testWidgets('TooltipThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const TooltipThemeData(
+      height: 15.0,
+      padding: EdgeInsets.all(20.0),
+      verticalOffset: 10.0,
+      preferBelow: false,
+      excludeFromSemantics: true,
+      decoration: BoxDecoration(color: Color(0xffffffff)),
+      textStyle: TextStyle(decoration: TextDecoration.underline),
+      waitDuration: Duration(milliseconds: 100),
+      showDuration: Duration(milliseconds: 200),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'height: 15.0',
+      'padding: EdgeInsets.all(20.0)',
+      'vertical offset: 10.0',
+      'position: above',
+      'semantics: excluded',
+      'decoration: BoxDecoration(color: Color(0xffffffff))',
+      'textStyle: TextStyle(inherit: true, decoration: TextDecoration.underline)',
+      'wait duration: 0:00:00.100000',
+      'show duration: 0:00:00.200000'
+    ]);
+  });
+
   testWidgets('Tooltip verticalOffset, preferBelow; center prefer above fits - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
