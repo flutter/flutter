@@ -1221,11 +1221,10 @@ class ColorFilterLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushColorFilter(colorFilter);
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    _engineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
