@@ -75,7 +75,7 @@ public class FlutterZoomSplashView extends FrameLayout {
   }
 
   public void transitionToFlutter(Runnable onTransitionComplete) {
-    Log.d(TAG, "Animating transitin.");
+    Log.d(TAG, "Animating transition.");
     this.onTransitionComplete = onTransitionComplete;
     animateWhiteUnderlay();
     animateLogoOverlay();
