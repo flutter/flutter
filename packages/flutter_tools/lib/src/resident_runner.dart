@@ -177,7 +177,15 @@ class FlutterDevice {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
-        futures.add(view.uiIsolate.flutterExit());
+        if (view.uiIsolate.pauseEvent.isPauseEvent) {
+          // Do nothing. while we could resume the isolate, there would be
+          // timing issues in waiting for the uiIsolate to come up and register
+          // the extensions. We could fix this by defining the isolate exit
+          // at the engine level.
+          continue;
+        } else {
+          futures.add(view.uiIsolate.flutterExit());
+        }
       }
     }
     // The flutterExit message only returns if it fails, so just wait a few
