@@ -5926,6 +5926,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -5976,6 +5977,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
+      multiline: multiline,
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
@@ -6086,6 +6088,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
+      multiline: properties.multiline,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
@@ -6151,6 +6154,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..focused = properties.focused
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
+      ..multiline = properties.multiline
       ..hidden = properties.hidden
       ..image = properties.image
       ..liveRegion = properties.liveRegion

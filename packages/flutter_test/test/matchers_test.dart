@@ -604,6 +604,7 @@ void main() {
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
