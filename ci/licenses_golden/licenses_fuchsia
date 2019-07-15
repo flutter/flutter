@@ -1,4 +1,4 @@
-Signature: abcf1f09668465f3d505ff1478c8d932
+Signature: 26d5a4cb9ce7ef9ca6d6e08c19e1ff3f
 
 UNUSED LICENSES:
 
@@ -1791,7 +1791,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/inspect/property.d
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/bitfield64.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/block.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/heap.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/little_big_slab.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/util.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_fields.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_inspect/lib/src/vmo/vmo_holder.dart
@@ -1935,7 +1934,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.gfx/tokens.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/events.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keyboard.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/keys.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.input2/modifiers.fidl
@@ -3192,7 +3190,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/token_manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/client.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/server.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peripheral.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types_deprecated.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/status.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.cobalt/cobalt_controller.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/presentation_info.fidl
