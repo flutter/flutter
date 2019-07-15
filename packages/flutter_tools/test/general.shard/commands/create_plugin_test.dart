@@ -9,8 +9,8 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
 
-import '../src/common.dart';
-import '../src/testbed.dart';
+import '../../src/common.dart';
+import '../../src/testbed.dart';
 
 void main() {
   group('Create --plugin', () {
@@ -34,7 +34,7 @@ void main() {
           fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
           fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
           fs.path.join('usr', 'local', 'bin', 'adb'),
-          fs.path.join('Android', 'platform-tools', 'foo'),
+          fs.path.join('Android', 'platform-tools', 'adb.exe'),
         ];
         for (String path in paths) {
           fs.file(path).createSync(recursive: true);
