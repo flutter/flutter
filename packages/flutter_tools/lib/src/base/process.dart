@@ -181,9 +181,9 @@ Future<int> runCommandAndStreamOutput(
     .transform<String>(const LineSplitter())
     .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
-      if (mapFunction != null) 
+      if (mapFunction != null)
         line = mapFunction(line);
-        if (line != null) 
+        if (line != null)
       printError('$prefix$line', wrap: false);
     });
 
