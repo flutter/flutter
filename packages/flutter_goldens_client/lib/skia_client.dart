@@ -69,7 +69,6 @@ class SkiaGoldClient extends GoldensClient {
   Future<void> auth(Directory workDirectory) async {
     assert(workDirectory != null);
     _workDirectory = workDirectory;
-    
     if (_clientIsAuthorized())
       return;
 
