@@ -31,7 +31,11 @@ Future<void> main() async {
       await inDirectory(tempDir, () async {
         await flutter(
           'create',
-          options: <String>['--org', 'io.flutter.devicelab', '--template', 'plugin', 'hello'],
+          options: <String>[
+            '--org', 'io.flutter.devicelab',
+            '--template', 'plugin',
+            'hello',
+          ],
         );
       });
 
@@ -86,7 +90,11 @@ Future<void> main() async {
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['aar', '--verbose', '--debug'],
+          options: <String>[
+            'aar',
+            '--verbose',
+            '--debug',
+          ],
         );
       });
 

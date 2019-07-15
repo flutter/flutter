@@ -65,6 +65,10 @@ final RegExp androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
 
 final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
   r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
+  r'|To fix the issue, run:'
+  r'`export ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR=true` on Linux or MacOS.'
+  r'`set ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR=true` on Windows.'
+  r'Finally, run this command again.'
   r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
   r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
