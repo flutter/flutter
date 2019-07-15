@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'page.dart';
+import 'simple_platform_view.dart';
 
 MethodChannel channel = const MethodChannel('android_views_integration');
 
@@ -28,52 +29,49 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Opacity(
-        opacity: 0.2,
-        child: Opacity(
-            opacity: 0.5,
-            child: Transform.rotate(
-              angle: 0,
-              child: ClipPath(
-                clipper: PathClipper(),
-                child: Transform.translate(
-                  offset: Offset(0, 100),
-                  child: UiKitView()
-                ),
-              ),
-            )),
-      );
+    return ClipRRect(
+      clipper: RRectClipper(),
+      child: ClipRect(
+        clipper: RectClipper(),
+        child: Transform.scale(
+          scale: 0.5,
+          child: Opacity(
+            opacity: 0.2,
+            child: Opacity(
+                opacity: 0.5,
+                child: Transform.rotate(
+                  angle: 2.3,
+                  child: ClipPath(
+                    clipper: PathClipper(),
+                    child: Transform.translate(
+                      offset: const Offset(0, 30),
+                      child: const SimplePlatformView(
+                          key: ValueKey<String>('platform_view')),
+                    ),
+                  ),
+                )),
+          ),
+        ),
+      ),
+    );
   }
-
- 
 }
-
-
 
 class PathClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
-    // TODO: implement shouldReclip
     return true;
   }
 
   @override
   Path getClip(Size size) {
-    Path path = Path();
-    path.moveTo(50, 50);
-    path.lineTo(500, 50);
-    path.lineTo(500, 500);
-    path.quadraticBezierTo(600, 700, 700, 600);
-    path.cubicTo(400, 700, 800, 560, 300, 800);
+    final Path path = Path();
+    path.moveTo(20, 20);
+    path.lineTo(20, 50);
+    path.lineTo(40, 50);
+    path.quadraticBezierTo(50, 50, 60, 40);
+    path.cubicTo(60, 40, 70, 40, 60, 30);
     path.close();
-
-    path.lineTo(100, 800);
-    path.lineTo(100, 100);
-
-    // path.quadraticBezierTo(100, 100, 150 , 105);
-    // path.conicTo(110, 110, 220, 220, 5);
-    // path.cubicTo(250,250 , 260, 260, 280, 280);
-    // path.close();
     return path;
   }
 }
@@ -81,12 +79,25 @@ class PathClipper extends CustomClipper<Path> {
 class RectClipper extends CustomClipper<Rect> {
   @override
   bool shouldReclip(CustomClipper<Rect> oldClipper) {
-    // TODO: implement shouldReclip
     return true;
   }
 
   @override
   Rect getClip(Size size) {
-    return Rect.fromLTRB(50, 200, 1000, 1300);
+    return const Rect.fromLTRB(100, 20, 200, 200);
+  }
+}
+
+class RRectClipper extends CustomClipper<RRect> {
+  @override
+  bool shouldReclip(CustomClipper<RRect> oldClipper) {
+    return true;
+  }
+
+  @override
+  RRect getClip(Size size) {
+    return RRect.fromLTRBAndCorners(20, 100, 80, 200,
+        topLeft: const Radius.circular(10),
+        bottomRight: const Radius.circular(10));
   }
 }
