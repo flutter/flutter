@@ -114,12 +114,11 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<String> playEventsFile() async {
     const StandardMessageCodec codec = StandardMessageCodec();
     try {
-      final ByteData data = await rootBundle
-          .load('packages/assets_for_android_views/assets/touchEvents');
+      final ByteData data = await rootBundle.load('packages/assets_for_android_views/assets/touchEvents');
       final List<dynamic> unTypedRecordedEvents = codec.decodeMessage(data);
       final List<Map<String, dynamic>> recordedEvents = unTypedRecordedEvents
           .cast<Map<dynamic, dynamic>>()
-          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) => e.cast<String, dynamic>())
+          .map<Map<String, dynamic>>((Map<dynamic, dynamic> e) =>e.cast<String, dynamic>())
           .toList();
       await channel.invokeMethod<void>('pipeFlutterViewEvents');
       await viewChannel.invokeMethod<void>('pipeTouchEvents');
@@ -136,16 +135,15 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
 
       final StringBuffer diff = StringBuffer();
       for (int i = 0; i < flutterViewEvents.length; ++i) {
-        final String currentDiff =
-            diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
-        if (currentDiff.isEmpty) 
+        final String currentDiff = diffMotionEvents(flutterViewEvents[i], embeddedViewEvents[i]);
+        if (currentDiff.isEmpty)
           continue;
-        if (diff.isNotEmpty) 
+        if (diff.isNotEmpty)
           diff.write(', ');
         diff.write(currentDiff);
       }
       return diff.toString();
-    } catch (e) {
+    } catch(e) {
       return e.toString();
     }
   }
@@ -246,6 +244,7 @@ class TouchEventDiff extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     Color color;
     final String diff = diffMotionEvents(originalEvent, synthesizedEvent);
     String msg;
@@ -281,7 +280,7 @@ class TouchEventDiff extends StatelessWidget {
 
     buffer.write('$actionName ');
     if (maskedAction == 5 || maskedAction == 6) {
-      buffer.write('pointer: ${getPointerIdx(action)} ');
+     buffer.write('pointer: ${getPointerIdx(action)} ');
     }
 
     final List<Map<dynamic, dynamic>> coords = event['pointerCoords'].cast<Map<dynamic, dynamic>>();
