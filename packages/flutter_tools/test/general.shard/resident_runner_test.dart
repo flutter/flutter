@@ -226,6 +226,7 @@ void main() {
         await flutterDevice.exitApps();
 
         verifyNever(mockIsolate.flutterExit());
+        verify(mockDevice.stopApp(any)).called(1);
       }));
 
       test('Will exit an un-paused isolate', () => testbed.run(() async {
