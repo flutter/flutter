@@ -62,11 +62,14 @@ class IOSDeploy {
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
 
+    // Detach from the ios-deploy process once it' outputs 'autoexit', signaling that the 
+    // App has been started and LLDB is in "autopilot" mode.
     return await runCommandAndStreamOutput(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
       environment: iosDeployEnv,
+      detachFilter: RegExp('.*autoexit.*')
     );
   }
 
