@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/features.dart';
-
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../base/features.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';

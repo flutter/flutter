@@ -9,7 +9,9 @@ import 'config.dart';
 import 'context.dart';
 import 'platform.dart';
 
-/// The current [FeatureFlags] interface.
+/// The current [FeatureFlags] implementation.
+///
+/// If not injected, a default implementation is provided.
 FeatureFlags get featureFlags => context.get<FeatureFlags>() ?? const FeatureFlags();
 
 /// The interface used to determine if a particular [Feature] is enabled.

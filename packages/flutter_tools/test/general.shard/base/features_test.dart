@@ -89,6 +89,15 @@ void main() {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Windows on the master channel.');
     });
 
+    test('default feature flag instance has all flags disabled', () {
+      const FeatureFlags featureFlags = FeatureFlags();
+
+      expect(featureFlags.isWebEnabled, false);
+      expect(featureFlags.isMacOSEnabled, false);
+      expect(featureFlags.isLinuxEnabled, false);
+      expect(featureFlags.isWindowsEnabled, false);
+    });
+
     /// Flutter Web
 
     test('flutter web off by default on master', () => testbed.run(() {
