@@ -392,7 +392,7 @@ Future<void> _runTests() async {
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
       .where((Directory dir) => dir.path.endsWith('widgets') == false)
-      .map((Directory dir) => path.join('test', path.basename(dir.path)))
+      .map((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
 
     print('Running tests for: ${tests.join(';')}');
