@@ -402,7 +402,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
-        tooltipTheme: TooltipThemeData(
+        tooltipTheme: const TooltipThemeData(
           textStyle: TextStyle(
             color: Colors.orange,
             decoration: TextDecoration.underline
@@ -433,7 +433,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: TooltipTheme(
         child: Tooltip(
-          textStyle: TextStyle(
+          textStyle: const TextStyle(
             color: Colors.orange,
             decoration: TextDecoration.underline
           ),
