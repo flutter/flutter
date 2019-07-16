@@ -167,3 +167,14 @@ void platform_messages_no_response() {
   };
   signalNativeTest();
 }
+
+@pragma('vm:entry-point')
+void null_platform_messages() {
+  window.onPlatformMessage =
+      (String name, ByteData data, PlatformMessageResponseCallback callback) {
+    // This checks if the platform_message null data is converted to Flutter null.
+    signalNativeMessage((null == data).toString());
+    callback(data);
+  };
+  signalNativeTest();
+}
