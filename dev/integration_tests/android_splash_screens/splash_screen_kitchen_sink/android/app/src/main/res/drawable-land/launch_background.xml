@@ -7,7 +7,7 @@
     <item>
         <bitmap
             android:gravity="center"
-            android:src="@mipmap/flutter_launch_square"
+            android:src="@mipmap/flutter_splash_screen"
             />
     </item>
 </layer-list>

@@ -101,17 +101,10 @@ TaskFunction createFlutterCreateOfflineTest() {
   };
 }
 
-TaskFunction createAndroidSplashScreenTransitionTest() {
-  return DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_trans_rotate',
-    'lib/main.dart',
-  );
-}
-
 TaskFunction createAndroidSplashScreenKitchenSinkTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
-    'lib/main.dart',
+    'test_driver/main.dart',
   );
 }
 
