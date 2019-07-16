@@ -51,6 +51,46 @@ void main() {
      expect(description, <String>[]);
   });
 
+  testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ToggleButtonsThemeData(
+      color: Color(0xfffffff0),
+      selectedColor: Color(0xfffffff1),
+      disabledColor: Color(0xfffffff2),
+      fillColor: Color(0xfffffff3),
+      focusColor: Color(0xfffffff4),
+      highlightColor: Color(0xfffffff5),
+      hoverColor: Color(0xfffffff6),
+      splashColor: Color(0xfffffff7),
+      borderColor: Color(0xfffffff8),
+      selectedBorderColor: Color(0xfffffff9),
+      disabledBorderColor: Color(0xfffffffa),
+      borderRadius: BorderRadius.all(Radius.circular(4.0)),
+      borderWidth: 2.0,
+    ).debugFillProperties(builder);
+
+     final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+     expect(description, <String>[
+      'color: Color(0xfffffff0)',
+      'selectedColor: Color(0xfffffff1)',
+      'disabledColor: Color(0xfffffff2)',
+      'fillColor: Color(0xfffffff3)',
+      'focusColor: Color(0xfffffff4)',
+      'highlightColor: Color(0xfffffff5)',
+      'hoverColor: Color(0xfffffff6)',
+      'splashColor: Color(0xfffffff7)',
+      'borderColor: Color(0xfffffff8)',
+      'selectedBorderColor: Color(0xfffffff9)',
+      'disabledBorderColor: Color(0xfffffffa)',
+      'borderRadius: BorderRadius.circular(4.0)',
+      'borderWidth: 2.0',
+    ]);
+  });
+
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
