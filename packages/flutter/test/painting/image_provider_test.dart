@@ -249,6 +249,47 @@ void main() {
         ));
         expect(await imageAvailable.future, isTrue);
       }, skip: isBrowser);
+
+      test('Handles http stream errors', () async {
+        debugNetworkImageHttpClientProvider = respondErrorOnAny;
+
+        final Completer<String> imageAvailable = Completer<String>();
+        final ImageProvider imageProvider = NetworkImage(nonconst('bar'));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        final List<ImageChunkEvent> events = <ImageChunkEvent>[];
+
+        result.addListener(ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) {
+            imageAvailable.complete(null);
+          },
+          onChunk: (ImageChunkEvent event) {
+            events.add(event);
+          },
+          onError: (dynamic error, StackTrace stackTrace) {
+            imageAvailable.complete(error);
+          },
+        ));
+        final String error = await imageAvailable.future;
+        expect(error, 'failed chunk');
+      }, skip: isBrowser);
+
+      test('Handles http connection errors', () async {
+        debugNetworkImageHttpClientProvider = respondErrorOnConnection;
+
+        final Completer<String> imageAvailable = Completer<String>();
+        final ImageProvider imageProvider = NetworkImage(nonconst('baz'));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener(ImageStreamListener(
+              (ImageInfo image, bool synchronousCall) {
+            imageAvailable.complete(null);
+          },
+          onError: (dynamic error, StackTrace stackTrace) {
+            imageAvailable.complete(error);
+          },
+        ));
+        expect(await imageAvailable.future,
+            matches(r'Exception: HTTP request failed, statusCode: 502, .*/baz'));
+      }, skip: isBrowser);
     });
   });
 }
@@ -355,10 +396,55 @@ HttpClient respondOnAnyWithHeaders() {
   return httpClient;
 }
 
+HttpClient respondErrorOnConnection() {
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpClient httpClient = MockHttpClient();
+  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+  when(response.statusCode).thenReturn(HttpStatus.badGateway);
+  return httpClient;
+}
+
+HttpClient respondErrorOnAny() {
+  const int chunkSize = 8;
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpClient httpClient = MockHttpClient();
+  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+  when(response.statusCode).thenReturn(HttpStatus.ok);
+  when(response.contentLength).thenReturn(kTransparentImage.length);
+  when(response.listen(
+    any,
+    onDone: anyNamed('onDone'),
+    onError: anyNamed('onError'),
+    cancelOnError: anyNamed('cancelOnError'),
+  )).thenAnswer((Invocation invocation) {
+    final void Function(Uint8List) onData = invocation.positionalArguments[0];
+    final void Function(Object) onError = invocation.namedArguments[#onError];
+    final void Function() onDone = invocation.namedArguments[#onDone];
+    final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+    return createRottenChunks(chunkSize).listen(
+      onData,
+      onDone: onDone,
+      onError: onError,
+      cancelOnError: cancelOnError,
+    );
+  });
+  return httpClient;
+}
+
 List<Uint8List> createChunks(int chunkSize) {
   final List<Uint8List> chunks = <Uint8List>[];
   for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
     chunks.add(Uint8List.fromList(kTransparentImage.skip(offset).take(chunkSize).toList()));
   }
   return chunks;
+}
+
+Stream<Uint8List> createRottenChunks(int chunkSize) async* {
+  yield Uint8List.fromList(kTransparentImage.take(chunkSize).toList());
+  throw 'failed chunk';
 }
