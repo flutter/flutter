@@ -57,7 +57,7 @@ class HotRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
+    bool usesTerminalUi = true,
     this.benchmarkMode = false,
     this.applicationBinary,
     this.hostIsIde = false,
@@ -69,10 +69,11 @@ class HotRunner extends ResidentRunner {
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI,
+             usesTerminalUi: usesTerminalUi,
              projectRootPath: projectRootPath,
              packagesFilePath: packagesFilePath,
              stayResident: stayResident,
+             hotMode: true,
              ipv6: ipv6);
 
   final bool benchmarkMode;
@@ -194,11 +195,6 @@ class HotRunner extends ResidentRunner {
         printTrace('Connected to $view.');
     }
 
-    if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
-    }
-
     appStartedCompleter?.complete();
 
     if (benchmarkMode) {
@@ -262,32 +258,6 @@ class HotRunner extends ResidentRunner {
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
     );
-  }
-
-  @override
-  Future<void> handleTerminalCommand(String code) async {
-    final String lower = code.toLowerCase();
-    if (lower == 'r') {
-      OperationResult result;
-      if (code == 'R') {
-        // If hot restart is not supported for all devices, ignore the command.
-        if (!canHotRestart) {
-          return;
-        }
-        result = await restart(fullRestart: true);
-      } else {
-        result = await restart(fullRestart: false);
-      }
-      if (!result.isOk) {
-        printStatus('Try again after fixing the above error(s).', emphasis: true);
-      }
-    } else if (lower == 'l') {
-      final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
-      printStatus('Connected ${pluralize('view', views.length)}:');
-      for (FlutterView v in views) {
-        printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
-      }
-    }
   }
 
   Future<List<Uri>> _initDevFS() async {
@@ -546,6 +516,9 @@ class HotRunner extends ResidentRunner {
         final OperationResult result = await _restartFromSources(reason: reason, benchmarkMode: benchmarkMode,);
         if (!result.isOk)
           return result;
+      } on rpc.RpcException {
+        await _measureJsonRpcException(flutterDevices, fullRestart);
+        return OperationResult(1, 'hot restart failed to complete', fatal: true);
       } finally {
         status.cancel();
       }
@@ -575,6 +548,9 @@ class HotRunner extends ResidentRunner {
             showTime = false;
           },
         );
+      } on rpc.RpcException {
+        await _measureJsonRpcException(flutterDevices, fullRestart);
+        return OperationResult(1, 'hot reload failed to complete', fatal: true);
       } finally {
         status.cancel();
       }
@@ -975,4 +951,33 @@ class ProjectFileInvalidator {
     printTrace('Scanned through $scanned files in ${stopwatch.elapsedMilliseconds}ms');
     return invalidatedFiles;
   }
+}
+
+// This is an error case we would like to know more about.
+Future<void> _measureJsonRpcException(List<FlutterDevice> flutterDevices, bool fullRestart) async {
+    String targetPlatform;
+    String deviceSdk;
+    bool emulator;
+    if (flutterDevices.length == 1) {
+      final Device device = flutterDevices.first.device;
+      targetPlatform = getNameForTargetPlatform(await device.targetPlatform);
+      deviceSdk = await device.sdkNameAndVersion;
+      emulator = await device.isLocalEmulator;
+    } else if (flutterDevices.length > 1) {
+      targetPlatform = 'multiple';
+      deviceSdk = 'multiple';
+      emulator = false;
+    } else {
+      targetPlatform = 'unknown';
+      deviceSdk = 'unknown';
+      emulator = false;
+    }
+    flutterUsage.sendEvent('hot', 'exception',
+      parameters: <String, String>{
+        reloadExceptionTargetPlatform: targetPlatform,
+        reloadExceptionSdkName: deviceSdk,
+        reloadExceptionEmulator: emulator.toString(),
+        reloadExceptionFullRestart: fullRestart.toString(),
+      },
+    );
 }

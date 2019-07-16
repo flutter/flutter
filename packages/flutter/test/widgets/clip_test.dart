@@ -61,6 +61,25 @@ class _UpdateCountedClipPath extends ClipPath {
 }
 
 void main() {
+  testWidgets('ClipRect with a FittedBox child sized to zero works with semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: ClipRect(
+          child: FittedBox(
+            child: SizedBox.fromSize(
+              size: Size.zero,
+              child: Semantics(
+                image: true,
+                label: 'Image',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(FittedBox), findsOneWidget);
+  });
+
   testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(const _UpdateCountedClipRect());
 
