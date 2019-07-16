@@ -378,6 +378,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// ```dart
 /// StreamBuilder<int>(
 ///   stream: _lot?.bids, // a Stream<int> or null
+///   initialData: 100, // initial seed value
 ///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
 ///     if (snapshot.hasError)
 ///       return Text('Error: ${snapshot.error}');
@@ -587,6 +588,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// ```dart
 /// FutureBuilder<String>(
 ///   future: _calculation, // a previously-obtained Future<String> or null
+///   initialData: 'some_initial_value',
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ///       case ConnectionState.none:
