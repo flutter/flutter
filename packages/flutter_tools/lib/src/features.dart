@@ -56,7 +56,7 @@ const List<Feature> allFeatures = <Feature>[
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
   name: 'Flutter Web',
-  configSetting: 'flutter-web',
+  configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureSetting(
     available: true,
@@ -71,7 +71,7 @@ const Feature flutterWebFeature = Feature(
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
   name: 'Flutter Desktop for macOS',
-  configSetting: 'flutter-macos-desktop',
+  configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,
@@ -82,7 +82,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
   name: 'Flutter Desktop for Linux',
-  configSetting: 'flutter-linux-desktop',
+  configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,
@@ -93,7 +93,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
   name: 'Flutter Desktop for Windows',
-  configSetting: 'flutter-windows-desktop',
+  configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureSetting(
     available: true,

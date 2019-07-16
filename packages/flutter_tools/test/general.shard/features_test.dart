@@ -102,7 +102,7 @@ void main() {
 
     test('flutter web enabled with config on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when<bool>(mockFlutterConfig.getValue('flutter-web')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-web')).thenReturn(true);
 
       expect(featureFlags.isWebEnabled, true);
     }));
@@ -122,7 +122,7 @@ void main() {
 
     test('flutter web enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when<bool>(mockFlutterConfig.getValue('flutter-web')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-web')).thenReturn(true);
 
       expect(featureFlags.isWebEnabled, true);
     }));
@@ -142,7 +142,7 @@ void main() {
 
     test('flutter web not enabled with config on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when<bool>(mockFlutterConfig.getValue('flutter-web')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-web')).thenReturn(true);
 
       expect(featureFlags.isWebEnabled, false);
     }));
@@ -162,7 +162,7 @@ void main() {
 
     test('flutter web not enabled with config on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when<bool>(mockFlutterConfig.getValue('flutter-web')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-web')).thenReturn(true);
 
       expect(featureFlags.isWebEnabled, false);
     }));
@@ -184,7 +184,7 @@ void main() {
 
     test('flutter macos desktop enabled with config on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when<bool>(mockFlutterConfig.getValue('flutter-macos-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-macos-desktop')).thenReturn(true);
 
       expect(featureFlags.isMacOSEnabled, true);
     }));
@@ -265,7 +265,7 @@ void main() {
 
     test('flutter linux desktop enabled with config on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when<bool>(mockFlutterConfig.getValue('flutter-linux-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-linux-desktop')).thenReturn(true);
 
       expect(featureFlags.isLinuxEnabled, true);
     }));
@@ -285,7 +285,7 @@ void main() {
 
     test('flutter linux desktop not enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when<bool>(mockFlutterConfig.getValue('flutter-linux-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-linux-desktop')).thenReturn(true);
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -305,7 +305,7 @@ void main() {
 
     test('fflutter linux desktop not enabled with config on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when<bool>(mockFlutterConfig.getValue('flutter-linux-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-linux-desktop')).thenReturn(true);
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -325,7 +325,7 @@ void main() {
 
     test('flutter linux desktop not enabled with config on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when<bool>(mockFlutterConfig.getValue('flutter-linux-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-linux-desktop')).thenReturn(true);
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -346,7 +346,7 @@ void main() {
 
     test('flutter windows desktop enabled with config on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when<bool>(mockFlutterConfig.getValue('flutter-windows-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-windows-desktop')).thenReturn(true);
 
       expect(featureFlags.isWindowsEnabled, true);
     }));
@@ -366,7 +366,7 @@ void main() {
 
     test('flutter windows desktop not enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when<bool>(mockFlutterConfig.getValue('flutter-windows-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-windows-desktop')).thenReturn(true);
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
@@ -386,7 +386,7 @@ void main() {
 
     test('fflutter windows desktop not enabled with config on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when<bool>(mockFlutterConfig.getValue('flutter-windows-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-windows-desktop')).thenReturn(true);
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
@@ -406,7 +406,7 @@ void main() {
 
     test('flutter windows desktop not enabled with config on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when<bool>(mockFlutterConfig.getValue('flutter-windows-desktop')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-windows-desktop')).thenReturn(true);
 
       expect(featureFlags.isWindowsEnabled, false);
     }));

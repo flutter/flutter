@@ -85,7 +85,7 @@ class Usage {
         })
         .map((Feature feature) => feature.configSetting)
         .join(',');
-    _analytics.setSessionValue(kSessionHostOsDetails, enabledFeatures);
+    _analytics.setSessionValue(enabledFlutterFeatures, enabledFeatures);
 
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (platform.environment.containsKey('FLUTTER_HOST')) {
