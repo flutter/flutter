@@ -116,6 +116,20 @@ void main() {
         nonEphemeralTwo,
       ]);
     });
+
+    testUsingContext('uses DeviceManager.isDeviceSupportedForProject instead of device.isSupportedForProject', () async {
+      final List<Device> devices = <Device>[
+        unsupported,
+      ];
+      final TestDeviceManager deviceManager = TestDeviceManager(devices);
+      deviceManager.isAlwaysSupportedOverride = true;
+
+      final List<Device> filtered = await deviceManager.findTargetDevices(FlutterProject.current());
+
+      expect(filtered, <Device>[
+        unsupported,
+      ]);
+    });
   });
 }
 
@@ -123,10 +137,19 @@ class TestDeviceManager extends DeviceManager {
   TestDeviceManager(this.allDevices);
 
   final List<Device> allDevices;
+  bool isAlwaysSupportedOverride;
 
   @override
   Stream<Device> getAllConnectedDevices() {
     return Stream<Device>.fromIterable(allDevices);
+  }
+
+  @override
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    if (isAlwaysSupportedOverride != null) {
+      return isAlwaysSupportedOverride;
+    }
+    return super.isDeviceSupportedForProject(device, flutterProject);
   }
 }
 
