@@ -93,8 +93,6 @@ class InlineSpanSemanticsInformation {
   @override
   int get hashCode => hashValues(text, semanticsLabel, recognizer, isPlaceholder);
 
-
-
   @override
   String toString() => '$runtimeType{text: $text, semanticsLabel: $semanticsLabel, recognizer: $recognizer}';
 }
@@ -239,8 +237,8 @@ abstract class InlineSpan extends DiagnosticableTree {
     return buffer.toString();
   }
 
-  /// Flattens the [InlineSpan] tree to a list of plain text strings and
-  /// semantics labels.
+  /// Flattens the [InlineSpan] tree to a list of
+  /// [InlineSpanSemanticsInformation] objects.
   ///
   /// [PlaceholderSpan]s in the tree will be represented with a
   /// [InlineSpanSemanticsInformation.placeholder] value.
@@ -250,8 +248,8 @@ abstract class InlineSpan extends DiagnosticableTree {
     return collector;
   }
 
-  /// Walks the [InlineSpan] tree and accumulates the plain text representation
-  /// and semantics labels to a list.
+  /// Walks the [InlineSpan] tree and accumulates a list of
+  /// [InlineSpanSemanticsInformation] objects.
   ///
   /// This method should not be directly called.  Use
   /// [getSemanticsInformation] instead.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment;
 
@@ -737,18 +738,22 @@ class RenderParagraph extends RenderBox
 
   /// Combines _semanticsInfo entries where permissible, determined by
   /// [InlineSpanSemanticsInformation.requiresOwnNode].
-  Iterable<InlineSpanSemanticsInformation> _combineSemanticsInfo() sync* {
+  List<InlineSpanSemanticsInformation> _combineSemanticsInfo() {
     assert(_semanticsInfo != null);
+    final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
     String workingText = '';
     String workingLabel;
     for (InlineSpanSemanticsInformation info in _semanticsInfo) {
       if (info.requiresOwnNode) {
         if (workingText != null) {
-          yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
+          combined.add(InlineSpanSemanticsInformation(
+            workingText,
+            semanticsLabel: workingLabel ?? workingText,
+          ));
           workingText = '';
           workingLabel = null;
         }
-        yield info;
+        combined.add(info);
       } else {
         workingText += info.text;
         workingLabel ??= '';
@@ -760,10 +765,14 @@ class RenderParagraph extends RenderBox
       }
     }
     if (workingText != null) {
-      yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel);
+      combined.add(InlineSpanSemanticsInformation(
+        workingText,
+        semanticsLabel: workingLabel,
+      ));
     } else {
       assert(workingLabel != null);
     }
+    return combined;
   }
 
   @override
