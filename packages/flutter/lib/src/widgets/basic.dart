@@ -5483,12 +5483,15 @@ class Listener extends StatelessWidget {
     Key key,
     this.onPointerDown,
     this.onPointerMove,
-    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
-    this.onPointerEnter,
-    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
-    this.onPointerExit,
-    @Deprecated('Use MouseRegion for mouse-specific pointer events instead')
-    this.onPointerHover,
+    // We have to ignore the lint rule here in order to use deprecated
+    // parameters and keep backward compatibility. These parameters should be
+    // removed after v1.11 stable.
+    @Deprecated('Use Mouse.onEnter instead')
+    this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
+    @Deprecated('Use Mouse.onExit instead')
+    this.onPointerExit, // ignore: deprecated_member_use_from_same_package
+    @Deprecated('Use Mouse.onHover instead')
+    this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,

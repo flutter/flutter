@@ -884,8 +884,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.deactivate();
   }
 
-  void _handlePointerEnter(PointerEnterEvent event) => _handleHover(true);
-  void _handlePointerExit(PointerExitEvent event) => _handleHover(false);
+  void _handleMouseEnter(PointerEnterEvent event) => _handleHover(true);
+  void _handleMouseExit(PointerExitEvent event) => _handleHover(false);
 
   void _handleHover(bool hovering) {
     if (hovering != _isHovering) {
@@ -1024,9 +1024,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: Listener(
-        onPointerEnter: _handlePointerEnter,
-        onPointerExit: _handlePointerExit,
+      child: Mouse(
+        onEnter: _handleMouseEnter,
+        onExit: _handleMouseExit,
         child: IgnorePointer(
           ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
           child: _selectionGestureDetectorBuilder.buildGestureDetector(
