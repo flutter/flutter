@@ -9,6 +9,14 @@ import 'simple_platform_view.dart';
 
 MethodChannel channel = const MethodChannel('android_views_integration');
 
+/// Testing the mutation composition of the platform views
+///
+/// We use this page to generate screenshot to perform a golden test.
+/// The page contains 3 mutation compositions:
+///   1. a complex mutation composition including clip rect
+///   2. a clip rrect mutation
+///   3. a clip path mutation.
+/// A set of `Container` widgets are shown next to the platform views with the same mutation composition for the manual sanity test purpose. 
 class MutationCompositionPage extends Page {
   const MutationCompositionPage()
       : super('Mutation Composition Tests',
@@ -33,25 +41,25 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
         children: [
           Column(
             children: <Widget>[
-              composition1(platformViewToMutate('0')),
-              composition2(platformViewToMutate('1')),
-              composition3(platformViewToMutate('2'))
+              _compositionComplex(_platformViewToMutate('0')),
+              _compositionClipRect(_platformViewToMutate('1')),
+              _compositionClipPath(_platformViewToMutate('2'))
             ],
           ),
           Column(
             children: <Widget>[
-              composition1(containerToMutate()),
-              composition2(containerToMutate()),
-              composition3(containerToMutate())
+              _compositionComplex(_containerToMutate()),
+              _compositionClipRect(_containerToMutate()),
+              _compositionClipPath(_containerToMutate())
             ],
           )
         ],
       ),
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
     );
   }
 
-  Widget composition1(Widget child) {
+  Widget _compositionComplex(Widget child) {
     return Transform.scale(
       scale: 0.5,
       child: Opacity(
@@ -72,20 +80,21 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
     );
   }
 
-  Widget composition2(Widget child) {
+  Widget _compositionClipRect(Widget child) {
     return ClipRRect(clipper: RRectClipper(), child: child);
   }
 
-  Widget composition3(Widget child) {
+  Widget _compositionClipPath(Widget child) {
     return ClipPath(clipper: PathClipper(), child: child);
   }
-
-  Widget containerToMutate() {
+  
+  // A `Container` widget that matches the testing platform view.
+  Widget _containerToMutate() {
     return Container(
-        width: 150, height: 150, child: Container(color: Color(0xFF0000FF)));
+        width: 150, height: 150, child: Container(color: const Color(0xFF0000FF)));
   }
 
-  Widget platformViewToMutate(String id) {
+  Widget _platformViewToMutate(String id) {
     return Container(
         width: 150,
         height: 150,
@@ -93,6 +102,7 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
   }
 }
 
+/// A sample `PathClipper` used for testing.
 class PathClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
@@ -112,6 +122,7 @@ class PathClipper extends CustomClipper<Path> {
   }
 }
 
+/// A sample `RectClipper` used for testing.
 class RectClipper extends CustomClipper<Rect> {
   @override
   bool shouldReclip(CustomClipper<Rect> oldClipper) {
@@ -124,6 +135,7 @@ class RectClipper extends CustomClipper<Rect> {
   }
 }
 
+/// A sample `RRectClipper` used for testing.
 class RRectClipper extends CustomClipper<RRect> {
   @override
   bool shouldReclip(CustomClipper<RRect> oldClipper) {
