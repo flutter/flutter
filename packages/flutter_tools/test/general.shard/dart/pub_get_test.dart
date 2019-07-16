@@ -200,9 +200,6 @@ class MockStream<T> implements Stream<T> {
   Stream<T> where(bool test(T event)) => MockStream<T>();
 
   @override
-  Stream<S> map<S>(S Function(T) _) => MockStream<S>();
-
-  @override
   StreamSubscription<T> listen(void onData(T event), { Function onError, void onDone(), bool cancelOnError }) {
     return MockStreamSubscription<T>();
   }
