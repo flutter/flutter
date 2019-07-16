@@ -121,7 +121,7 @@ TEST_F(DartLifecycleTest, ShuttingDownTheVMShutsDownAllIsolates) {
     ASSERT_TRUE(DartVMRef::IsInstanceRunning());
     ASSERT_EQ(last_launch_count + 1, DartVM::GetVMLaunchCount());
 
-    const size_t isolate_count = 100;
+    const size_t isolate_count = 5;
 
     fml::CountDownLatch latch(isolate_count);
     auto vm_data = vm_ref.GetVMData();

@@ -22,15 +22,34 @@ fonts_dir_flag = '--font-directory=%s' % fonts_dir
 time_sensitve_test_flag = '--gtest_filter="-*TimeSensitiveTest*"'
 
 def IsMac():
-  sys.platform == 'darwin'
+  return sys.platform == 'darwin'
 
 
 def IsLinux():
-  sys.platform.startswith('linux')
+  return sys.platform.startswith('linux')
 
 
 def IsWindows():
-  sys.platform.startswith(('cygwin', 'win'))
+  return sys.platform.startswith(('cygwin', 'win'))
+
+
+def ExecutableSuffix():
+  return '.exe' if IsWindows() else ''
+
+def FindExecutablePath(path):
+  if os.path.exists(path):
+    return path
+
+  if IsWindows():
+    exe_path = path + '.exe'
+    if os.path.exists(exe_path):
+      return exe_path
+
+    bat_path = path + '.bat'
+    if os.path.exists(bat_path):
+      return bat_path
+
+  raise Exception('Executable %s does not exist!' % path)
 
 
 def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildroot_dir):
@@ -38,25 +57,24 @@ def RunEngineExecutable(build_dir, executable_name, filter, flags=[], cwd=buildr
     print 'Skipping %s due to filter.' % executable_name
     return
 
+  executable = FindExecutablePath(os.path.join(build_dir, executable_name))
+  
   print 'Running %s in %s' % (executable_name, cwd)
-  
-  executable = os.path.join(build_dir, executable_name)
-  assert os.path.exists(executable), '%s does not exist!' % executable
-  
   test_command = [ executable ] + flags
-  print ' '.join(test_command)
-  
+  print ' '.join(test_command) 
   subprocess.check_call(test_command, cwd=cwd)
 
 
 def RunCCTests(build_dir, filter):
-  print "Running Engine Unit-tests."    
+  print "Running Engine Unit-tests."
 
   RunEngineExecutable(build_dir, 'client_wrapper_glfw_unittests', filter)
 
   RunEngineExecutable(build_dir, 'client_wrapper_unittests', filter)
 
-  RunEngineExecutable(build_dir, 'embedder_unittests', filter)
+  # https://github.com/flutter/flutter/issues/36294
+  if not IsWindows():
+    RunEngineExecutable(build_dir, 'embedder_unittests', filter)
 
   RunEngineExecutable(build_dir, 'flow_unittests', filter)
 
@@ -64,13 +82,17 @@ def RunCCTests(build_dir, filter):
 
   RunEngineExecutable(build_dir, 'runtime_unittests', filter)
 
-  RunEngineExecutable(build_dir, 'shell_unittests', filter)
+  # https://github.com/flutter/flutter/issues/36295
+  if not IsWindows():
+    RunEngineExecutable(build_dir, 'shell_unittests', filter)
 
   RunEngineExecutable(build_dir, 'ui_unittests', filter)
 
+  # These unit-tests are Objective-C and can only run on Darwin.
   if IsMac():
     RunEngineExecutable(build_dir, 'flutter_channels_unittests', filter)
 
+  # https://github.com/flutter/flutter/issues/36296
   if IsLinux():
     RunEngineExecutable(build_dir, 'txt_unittests', filter, [ fonts_dir_flag ])
 
@@ -146,7 +168,7 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   variant_out_dir = os.path.join(out_dir, 'host_debug_unopt')
 
   ninja_command = [
-    'autoninja',
+    'ninja',
     '-C',
     variant_out_dir,
     'flutter/sky/packages'
@@ -176,7 +198,7 @@ def RunDartTests(build_dir, filter):
   EnsureDebugUnoptSkyPackagesAreBuilt();
 
   # Now that we have the Sky packages at the hardcoded location, run `pub get`.
-  RunPubGet(build_dir, dart_tests_dir)
+  RunEngineExecutable(build_dir, os.path.join('dart-sdk', 'bin', 'pub'), '', flags=['get'], cwd=dart_tests_dir)
 
   dart_tests = glob.glob('%s/*.dart' % dart_tests_dir)
 
@@ -192,10 +214,12 @@ def RunTests(build_dir, filter, run_engine_tests, run_dart_tests, run_benchmarks
   if run_engine_tests:
     RunCCTests(build_dir, filter)
 
-  if run_dart_tests:
+  # https://github.com/flutter/flutter/issues/36301
+  if run_dart_tests and not IsWindows():
     RunDartTests(build_dir, filter)
 
-  if run_benchmarks:
+  # https://github.com/flutter/flutter/issues/36300
+  if run_benchmarks and not IsWindows():
     RunEngineBenchmarks(build_dir, filter)
 
 
