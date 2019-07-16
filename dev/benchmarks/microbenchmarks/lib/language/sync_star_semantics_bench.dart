@@ -139,7 +139,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
   return result;
 }
 
-/// TODO(jonahwilliams): use class from framework when landed.
+// TODO(jonahwilliams): use class from framework when landed.
 class InlineSpanSemanticsInformation {
   const InlineSpanSemanticsInformation(
     this.text, {
