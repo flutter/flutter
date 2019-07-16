@@ -29,9 +29,10 @@ class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
 
 void main() {
-  final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform());
-  osx.operatingSystem = 'macos';
-
+  final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
+  macPlatform.operatingSystem = 'macos';
+  final FakePlatform linuxPlatform = FakePlatform.fromPlatform(const LocalPlatform());
+  linuxPlatform.operatingSystem = 'linux';
   group('getAttachedDevices', () {
     MockIMobileDevice mockIMobileDevice;
 
@@ -44,6 +45,23 @@ void main() {
       expect(await IOSDevice.getAttachedDevices(), isEmpty);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+    });
+
+    testUsingContext('throws assertion error if platform is not mac os', () async {
+      when(mockIMobileDevice.isInstalled).thenReturn(true);
+      const String deviceId = '123';
+      const String deviceName = 'nexus7';
+      const String sdkVersion = '1.2.3';
+      when(mockIMobileDevice.getAvailableDeviceIDs())
+          .thenAnswer((Invocation invocation) => Future<String>.value(deviceId));
+      when(mockIMobileDevice.getInfoForDevice(deviceId, 'DeviceName'))
+          .thenAnswer((Invocation invocation) => Future<String>.value(deviceName));
+      when(mockIMobileDevice.getInfoForDevice(deviceId, 'ProductVersion'))
+          .thenAnswer((Invocation invocation) => Future<String>.value(sdkVersion));
+      expect(() async { await IOSDevice.getAttachedDevices(); }, throwsA(isInstanceOf<AssertionError>()));
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+      Platform: () => linuxPlatform,
     });
 
     testUsingContext('returns no devices if none are attached', () async {
@@ -79,6 +97,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       expect(devices[1].name, 'Puits sans fond');
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
 
     testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
@@ -98,6 +117,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       expect(devices[0].name, 'La tele me regarde');
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
   });
 
@@ -149,8 +169,8 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       expect(lines, <String>['A is for ari', 'I is for ichigo']);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
-
     testUsingContext('includes multi-line Flutter logs in the output', () async {
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
@@ -185,9 +205,9 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       expect(device.category, Category.mobile);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
   });
-
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
     fs.file('pubspec.yaml')
       ..createSync()
@@ -203,8 +223,8 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    Platform: () => macPlatform,
   });
-
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
@@ -214,6 +234,7 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    Platform: () => macPlatform,
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
@@ -224,5 +245,6 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    Platform: () => macPlatform,
   });
 }
