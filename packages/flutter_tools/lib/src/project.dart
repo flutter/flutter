@@ -260,6 +260,9 @@ abstract class XcodeBasedProject {
   /// The Flutter-managed Xcode config file for [mode].
   File xcodeConfigFor(String mode);
 
+  /// The script to run as part of the module pod build phase.
+  File get moduleBuildPhaseScript;
+
   /// The CocoaPods 'Podfile'.
   File get podfile;
 
@@ -316,6 +319,9 @@ class IosProject implements XcodeBasedProject {
 
   @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
+
+  @override
+  File get moduleBuildPhaseScript => _flutterLibRoot.childDirectory('Flutter').childFile('flutter_build_phase.sh');
 
   @override
   File get podfile => hostAppRoot.childFile('Podfile');
@@ -660,6 +666,9 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
+
+  @override
+  File get moduleBuildPhaseScript => managedDirectory.childFile('flutter_build_phase.sh');
 
   @override
   File get podfile => _macOSDirectory.childFile('Podfile');
