@@ -6620,6 +6620,93 @@ void main() {
     },
   );
 
+  // Regression test for: https://github.com/flutter/flutter/issues/34640.
+  testWidgets('selection handles respect Theme', (WidgetTester tester) async {
+    Iterable<RenderBox> boxes;
+    const Color parentSelectionHandleColor = Color.fromARGB(255, 100, 100, 100);
+    const Color expectedSelectionHandleColor = Color.fromARGB(255, 10, 200, 255);
+    const Color newSelectionHandleColor = Color.fromARGB(255, 1, 20, 25);
+
+    final TextEditingController controller = TextEditingController(text: 'XXXXX   XXXXX');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textSelectionHandleColor: parentSelectionHandleColor,
+        ),
+        home: Material(
+          child: Theme(
+            data: ThemeData(
+              textSelectionHandleColor: expectedSelectionHandleColor,
+            ),
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+
+    Future<void> selectWord() async {
+      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+      final RenderEditable renderEditable = state.renderEditable;
+
+      await tester.tapAt(const Offset(20, 10));
+      renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+      return await tester.pumpAndSettle();
+    }
+
+    Iterable<RenderBox> renderBoxes() => tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(GestureDetector),
+      ),
+    );
+
+    await selectWord();
+    boxes = renderBoxes();
+    expect(boxes.length, 2);
+    for (RenderBox box in boxes) {
+      expect(box, paints..rect(color: expectedSelectionHandleColor));
+    }
+
+    // Currently this does not reflect theme changes.
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          textSelectionHandleColor: parentSelectionHandleColor,
+        ),
+        home: Material(
+          child: Theme(
+            data: ThemeData(
+              textSelectionHandleColor: newSelectionHandleColor,
+            ),
+            child: TextField(controller: controller),
+          ),
+        ),
+      ),
+    );
+
+    boxes = renderBoxes();
+    expect(boxes.length, 2);
+    for (RenderBox box in boxes) {
+      expect(box, paints..rect(color: expectedSelectionHandleColor));
+      expect(box, isNot(paints..rect(color: newSelectionHandleColor)));
+    }
+
+    // Cancel selection
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(seconds: 1));
+
+    // Select again, now the color should update.
+    await selectWord();
+    boxes = renderBoxes();
+    expect(boxes.length, 2);
+    for (RenderBox box in boxes) {
+      expect(box, isNot(paints..rect(color: expectedSelectionHandleColor)));
+      expect(box, paints..rect(color: newSelectionHandleColor));
+    }
+  });
+
   testWidgets(
     'Mouse tap does not show handles nor toolbar',
         (WidgetTester tester) async {
