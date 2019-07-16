@@ -30,6 +30,7 @@ void main() {
           focusNode: focusNode,
           style: textStyle,
           cursorColor: cursorColor,
+          textSelectionHandleColor: Colors.blue,
           cursorWidth: 10.0,
           cursorRadius: const Radius.circular(2.0),
         ))));
@@ -54,6 +55,7 @@ void main() {
           focusNode: FocusNode(),
           style: Typography(platform: TargetPlatform.android).black.subhead,
           cursorColor: Colors.blue,
+          textSelectionHandleColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
           keyboardType: TextInputType.text,
           onChanged: (String value) {
@@ -112,6 +114,7 @@ void main() {
           style: Typography(platform: TargetPlatform.android).black.subhead,
           cursorColor: Colors.blue,
           selectionControls: materialTextSelectionControls,
+          textSelectionHandleColor: Colors.blue,
           keyboardType: TextInputType.text,
           onChanged: (String value) {
             changedValue = value;
@@ -384,6 +387,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
@@ -471,6 +475,7 @@ void main() {
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
+              textSelectionHandleColor: Colors.blue,
               cursorColor: cursorColor,
             ),
           ),
@@ -525,6 +530,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
@@ -591,6 +597,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               autofocus: true,
@@ -710,6 +717,7 @@ void main() {
             const SizedBox(width: 10, height: 10),
             EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               key: editableTextKey,
               controller: TextEditingController(),
               focusNode: FocusNode(),

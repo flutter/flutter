@@ -94,7 +94,7 @@ abstract class TextSelectionControls {
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, Color color, double textLineHeight);
 
   /// Get the anchor point of the handle relative to itself. The anchor point is
   /// the point that is aligned with a specific point in the text. A handle
@@ -274,6 +274,7 @@ class TextSelectionOverlay {
     @required this.endHandleLayerLink,
     @required this.renderObject,
     this.selectionControls,
+    @required this.textSelectionHandleColor,
     bool handlesVisible = false,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -281,6 +282,7 @@ class TextSelectionOverlay {
   }) : assert(value != null),
        assert(context != null),
        assert(handlesVisible != null),
+       assert(textSelectionHandleColor != null),
        _handlesVisible = handlesVisible,
        _value = value {
     final OverlayState overlay = Overlay.of(context);
@@ -316,6 +318,11 @@ class TextSelectionOverlay {
   // moves? Not sure what cases I need to handle, or how to handle them.
   /// The editable line in which the selected text is being displayed.
   final RenderEditable renderObject;
+
+  /// The color used to paint the text selection handle.
+  ///
+  /// Must not be null.
+  final Color textSelectionHandleColor;
 
   /// Builds text selection handles and toolbar.
   final TextSelectionControls selectionControls;
@@ -513,6 +520,7 @@ class TextSelectionOverlay {
         endHandleLayerLink: endHandleLayerLink,
         renderObject: renderObject,
         selection: _selection,
+        selectionHandleColor: textSelectionHandleColor,
         selectionControls: selectionControls,
         position: position,
         dragStartBehavior: dragStartBehavior,
@@ -591,6 +599,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
     @required this.renderObject,
     @required this.onSelectionHandleChanged,
     @required this.onSelectionHandleTapped,
+    @required this.selectionHandleColor,
     @required this.selectionControls,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : super(key: key);
@@ -602,6 +611,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   final RenderEditable renderObject;
   final ValueChanged<TextSelection> onSelectionHandleChanged;
   final VoidCallback onSelectionHandleTapped;
+  final Color selectionHandleColor;
   final TextSelectionControls selectionControls;
   final DragStartBehavior dragStartBehavior;
 
@@ -785,6 +795,7 @@ class _TextSelectionHandleOverlayState
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
+                widget.selectionHandleColor,
                 widget.renderObject.preferredLineHeight,
               ),
             ),

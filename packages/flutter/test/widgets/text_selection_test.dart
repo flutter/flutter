@@ -541,6 +541,7 @@ class FakeEditableText extends EditableText {
     controller: TextEditingController(),
     focusNode: FocusNode(),
     backgroundCursorColor: Colors.white,
+    textSelectionHandleColor: Colors.blue,
     cursorColor: Colors.white,
     style: const TextStyle(),
   );

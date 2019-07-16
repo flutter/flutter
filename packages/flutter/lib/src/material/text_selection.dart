@@ -11,7 +11,6 @@ import 'debug.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'theme.dart';
 
 const double _kHandleSize = 22.0;
 
@@ -185,14 +184,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style text selection handles.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, Color color, double textHeight) {
     final Widget handle = SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: CustomPaint(
-        painter: _TextSelectionHandlePainter(
-          color: Theme.of(context).textSelectionHandleColor
-        ),
+        painter: _TextSelectionHandlePainter(color: color),
       ),
     );
 

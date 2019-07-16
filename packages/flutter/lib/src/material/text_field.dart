@@ -974,6 +974,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         minLines: widget.minLines,
         expands: widget.expands,
         selectionColor: themeData.textSelectionColor,
+        textSelectionHandleColor: themeData.textSelectionHandleColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,
         onChanged: widget.onChanged,
         onSelectionChanged: _handleSelectionChanged,

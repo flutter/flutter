@@ -51,6 +51,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               textInputAction: action,
@@ -80,6 +81,7 @@ void main() {
           child: EditableText(
             controller: controller,
             backgroundCursorColor: Colors.grey,
+            textSelectionHandleColor: Colors.blue,
             focusNode: focusNode,
             style: textStyle,
             cursorColor: cursorColor,
@@ -109,6 +111,7 @@ void main() {
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               focusNode: focusNode,
               style: textStyle,
               cursorColor: cursorColor,
@@ -247,6 +250,7 @@ void main() {
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               focusNode: focusNode,
               keyboardType: TextInputType.multiline,
               style: textStyle,
@@ -279,6 +283,7 @@ void main() {
         MaterialApp(
           home: EditableText(
             backgroundCursorColor: Colors.grey,
+            textSelectionHandleColor: Colors.blue,
             controller: controller,
             focusNode: focusNode,
             style: style,
@@ -340,6 +345,7 @@ void main() {
             child: EditableText(
               controller: controller,
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               focusNode: focusNode,
               maxLines: null,
               style: textStyle,
@@ -372,6 +378,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               maxLines: null,
@@ -406,6 +413,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               keyboardType: TextInputType.phone,
@@ -440,6 +448,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               maxLines: 3, // Sets multiline keyboard implicitly.
@@ -473,6 +482,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               maxLines: 1, // Sets text keyboard implicitly.
@@ -500,6 +510,7 @@ void main() {
       MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
+          textSelectionHandleColor: Colors.blue,
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -538,6 +549,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: FocusNode(),
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -578,6 +590,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -608,6 +621,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -645,6 +659,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -685,6 +700,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -725,6 +741,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -765,6 +782,7 @@ void main() {
     final Widget widget = MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: TextEditingController(),
         focusNode: focusNode,
         style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -818,6 +836,7 @@ void main() {
                   child: Material(
                     child: EditableText(
                       backgroundCursorColor: Colors.grey,
+                      textSelectionHandleColor: Colors.blue,
                       controller: currentController,
                       focusNode: focusNode,
                       style: Typography(platform: TargetPlatform.android)
@@ -883,6 +902,7 @@ void main() {
             autofocus: true,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
@@ -926,6 +946,7 @@ void main() {
             node: focusScopeNode,
             child: EditableText(
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               controller: controller,
               focusNode: focusNode,
               style: textStyle,
@@ -968,6 +989,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1051,6 +1073,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1144,6 +1167,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1246,6 +1270,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1347,6 +1372,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1445,6 +1471,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         obscureText: true,
         controller: controller,
         focusNode: focusNode,
@@ -1497,6 +1524,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1541,6 +1569,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: EditableText(
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         obscureText: true,
         focusNode: focusNode,
@@ -1590,6 +1619,7 @@ void main() {
       return tester.pumpWidget(MaterialApp(
         home: EditableText(
           backgroundCursorColor: Colors.grey,
+          textSelectionHandleColor: Colors.blue,
           controller: controller,
           focusNode: focusNode,
           style: textStyle,
@@ -1607,7 +1637,7 @@ void main() {
           TextSelection.collapsed(offset: controller.text.length);
 
       controls = MockTextSelectionControls();
-      when(controls.buildHandle(any, any, any)).thenReturn(Container());
+      when(controls.buildHandle(any, any, any, any)).thenReturn(Container());
       when(controls.buildToolbar(any, any, any, any, any, any))
           .thenReturn(Container());
     });
@@ -1802,6 +1832,7 @@ void main() {
       child: EditableText(
         controller: controller,
         backgroundCursorColor: Colors.red,
+        textSelectionHandleColor: Colors.blue,
         cursorColor: Colors.red,
         focusNode: FocusNode(),
         style: textStyle,
@@ -1851,6 +1882,7 @@ void main() {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: EditableText(
+            textSelectionHandleColor: Colors.blue,
             controller: controller,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -1889,6 +1921,7 @@ void main() {
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
+            textSelectionHandleColor: Colors.blue,
             keyboardAppearance: Brightness.dark,
           ),
         ),
@@ -1915,6 +1948,7 @@ void main() {
       home: EditableText(
         autofocus: true,
         backgroundCursorColor: Colors.grey,
+        textSelectionHandleColor: Colors.blue,
         controller: controller,
         focusNode: focusNode,
         style: textStyle,
@@ -1962,6 +1996,7 @@ void main() {
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
+            textSelectionHandleColor: Colors.blue,
             selectionControls: materialTextSelectionControls,
             keyboardType: TextInputType.text,
           ),
@@ -2129,6 +2164,7 @@ void main() {
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
             backgroundCursorColor: Colors.grey,
+            textSelectionHandleColor: Colors.blue,
             selectionControls: materialTextSelectionControls,
             keyboardType: TextInputType.text,
             textAlign: TextAlign.right,
@@ -2192,6 +2228,7 @@ void main() {
               style: Typography(platform: TargetPlatform.iOS).black.subhead,
               cursorColor: Colors.blue,
               backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: Colors.blue,
               selectionControls: cupertinoTextSelectionControls,
               keyboardType: TextInputType.text,
             ),
@@ -2366,6 +2403,7 @@ class CustomStyleEditableText extends EditableText {
           controller: controller,
           cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
+          textSelectionHandleColor: Colors.blue,
           focusNode: focusNode,
           style: style,
         );

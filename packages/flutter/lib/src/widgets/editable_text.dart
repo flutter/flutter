@@ -292,6 +292,7 @@ class EditableText extends StatefulWidget {
     bool showCursor,
     this.showSelectionHandles = false,
     this.selectionColor,
+    @required this.textSelectionHandleColor,
     this.selectionControls,
     TextInputType keyboardType,
     this.textInputAction,
@@ -322,6 +323,7 @@ class EditableText extends StatefulWidget {
        assert(readOnly != null),
        assert(style != null),
        assert(cursorColor != null),
+       assert(textSelectionHandleColor != null),
        assert(cursorOpacityAnimates != null),
        assert(paintCursorAboveText != null),
        assert(backgroundCursorColor != null),
@@ -614,6 +616,11 @@ class EditableText extends StatefulWidget {
 
   /// The color to use when painting the selection.
   final Color selectionColor;
+
+  /// The color to use when painting the selection handle.
+  ///
+  /// Must not be null.
+  final Color textSelectionHandleColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
   ///
@@ -1290,6 +1297,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         startHandleLayerLink: _startHandleLayerLink,
         endHandleLayerLink: _endHandleLayerLink,
         renderObject: renderObject,
+        textSelectionHandleColor: widget.textSelectionHandleColor,
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
         dragStartBehavior: widget.dragStartBehavior,

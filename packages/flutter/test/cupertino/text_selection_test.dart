@@ -18,6 +18,7 @@ void main() {
       return CupertinoApp(
         home: EditableText(
           key: key,
+          textSelectionHandleColor: CupertinoColors.activeBlue,
           controller: controller,
           focusNode: FocusNode(),
           style: const TextStyle(),

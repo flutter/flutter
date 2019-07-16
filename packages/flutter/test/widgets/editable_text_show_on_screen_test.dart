@@ -27,6 +27,7 @@ void main() {
             children: <Widget>[
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -69,6 +70,7 @@ void main() {
               ),
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 scrollPadding: const EdgeInsets.all(50.0),
                 controller: controller,
                 focusNode: focusNode,
@@ -115,6 +117,7 @@ void main() {
               ),
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -165,6 +168,7 @@ void main() {
               ),
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -259,6 +263,7 @@ void main() {
             children: <Widget>[
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 maxLines: null, // multi-line
                 controller: controller,
                 focusNode: focusNode,
@@ -315,6 +320,7 @@ void main() {
               ),
               EditableText(
                 backgroundCursorColor: Colors.grey,
+                textSelectionHandleColor: Colors.blue,
                 scrollPadding: const EdgeInsets.only(bottom: 300.0),
                 controller: controller,
                 focusNode: focusNode,

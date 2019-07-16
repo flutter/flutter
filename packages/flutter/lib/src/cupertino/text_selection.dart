@@ -14,7 +14,6 @@ import 'localizations.dart';
 
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
-const Color _kHandlesColor = Color(0xFF136FE0);
 const double _kSelectionHandleOverlap = 1.5;
 const double _kSelectionHandleRadius = 5.5;
 
@@ -249,12 +248,13 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter();
+  const _TextSelectionHandlePainter(this.color);
+  final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
-        ..color = _kHandlesColor
+        ..color = color
         ..strokeWidth = 2.0;
     canvas.drawCircle(
       const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
@@ -280,6 +280,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
+
   /// Returns the size of the Cupertino handle.
   @override
   Size getHandleSize(double textLineHeight) {
@@ -373,15 +374,15 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS text selection edges.
   @override
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type, Color color, double textLineHeight) {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = getHandleSize(textLineHeight);
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: const CustomPaint(
-        painter: _TextSelectionHandlePainter(),
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(color),
       ),
     );
 

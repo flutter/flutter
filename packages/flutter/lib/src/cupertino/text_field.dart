@@ -32,6 +32,7 @@ const BoxDecoration _kDefaultRoundedBorderDecoration = BoxDecoration(
 );
 
 // Value extracted via color reader from iOS simulator.
+const Color _kHandlesColor = Color(0xFF136FE0);
 const Color _kSelectionHighlightColor = Color(0x667FAACF);
 const Color _kInactiveTextColor = Color(0xFFC2C2C2);
 const Color _kDisabledBackground = Color(0xFFFAFAFA);
@@ -820,6 +821,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           minLines: widget.minLines,
           expands: widget.expands,
           selectionColor: _kSelectionHighlightColor,
+          textSelectionHandleColor: _kHandlesColor,
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
