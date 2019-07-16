@@ -58,8 +58,8 @@ const String reloadExceptionSdkName = 'cd28';
 const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
 
-const String enabledFlutterFeatures = 'cd31';
-// Next ID: cd32
+const String enabledFlutterFeatures = 'cd32';
+// Next ID: cd33
 
 Usage get flutterUsage => Usage.instance;
 
