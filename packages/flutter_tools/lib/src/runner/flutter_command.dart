@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' as io;
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -424,6 +425,7 @@ abstract class FlutterCommand extends Command<void> {
           break;
       }
     }
+    additionalUsageValues[kCommandHasTerminal] = io.stdout.hasTerminal ? 'true' : 'false';
     flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
 
     // Send timing.
