@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/version.dart';
-
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../convert.dart';
@@ -13,6 +11,7 @@ import '../features.dart';
 import '../globals.dart';
 import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
+import '../version.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
