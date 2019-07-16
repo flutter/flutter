@@ -14,7 +14,6 @@ import 'text_style.dart';
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
-@Deprecated('Use InlineSpanSemanticsInformation.')
 class Accumulator {
   /// [Accumulator] may be initialized with a specified value, otherwise, it will
   /// initialize to zero.
