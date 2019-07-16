@@ -572,7 +572,7 @@ void main() {
         'scanCode': 0x00000026,
         'unicodeScalarValuesProduced': 'aqs',
         'modifiers': 0x0,
-      }); 
+      });
       final RawKeyEventDataLinux data = keyAQEvent.data;
       expect(() => data.logicalKey, throwsAssertionError);
     });
