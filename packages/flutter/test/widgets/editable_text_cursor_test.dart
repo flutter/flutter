@@ -95,7 +95,7 @@ void main() {
         version: 3,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -149,7 +149,7 @@ void main() {
         version: 3,
       ),
     );
-  });
+  }, skip: !isLinux);
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -759,5 +759,6 @@ void main() {
       ),
     );
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, skip: !isLinux);
+
 }

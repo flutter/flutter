@@ -805,6 +805,9 @@ void main() {
         ),
       );
     },
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -839,7 +842,10 @@ void main() {
         ),
       );
     },
-  );
+    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
+    // is fixed.
+    skip: !isLinux,
+   );
 
 
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {

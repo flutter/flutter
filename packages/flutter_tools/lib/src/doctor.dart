@@ -72,8 +72,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
         if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
           GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
-        if (iosWorkflow.appliesToHostPlatform)
-          iosValidator,
         if (webWorkflow.appliesToHostPlatform)
           const WebValidator(),
         // Add desktop doctors to workflow if the flag is enabled.

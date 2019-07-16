@@ -84,6 +84,7 @@ void main() {
         'bottom_app_bar_theme.custom_shape.png',
         version: null,
       ),
+      skip: !isLinux,
     );
   }, skip: isBrowser);
 
