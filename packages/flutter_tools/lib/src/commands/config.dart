@@ -56,9 +56,6 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
-
-  @override
   String get usageFooter {
     // List all config settings.
     String values = config.keys.map<String>((String key) {
@@ -100,6 +97,15 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
 
+    for (Feature feature in allFeatures) {
+      if (feature.configSetting == null) {
+        continue;
+      }
+      if (argResults.wasParsed(feature.configSetting)) {
+        _updateConfig(feature.configSetting, argResults[feature.configSetting]);
+      }
+    }
+
     if (argResults.arguments.isEmpty)
       printStatus(usage);
 
@@ -124,8 +130,9 @@ class ConfigCommand extends FlutterCommand {
     printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, String keyValue) {
-    if (keyValue.isEmpty) {
+  void _updateConfig(String keyName, Object keyValue) {
+    if ((keyValue is String && keyValue.isEmpty) ||
+        (keyValue is bool && !keyValue)) {
       config.removeValue(keyName);
       printStatus('Removing "$keyName" value.');
     } else {

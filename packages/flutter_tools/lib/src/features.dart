@@ -132,7 +132,7 @@ class FlutterFeatureFlags implements FeatureFlags {
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() != 'true') {
+      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
         isEnabled = true;
       }
     }

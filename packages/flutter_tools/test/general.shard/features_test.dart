@@ -109,7 +109,7 @@ void main() {
 
     test('flutter web enabled with environment variable on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
 
       expect(featureFlags.isWebEnabled, true);
     }));
@@ -129,7 +129,7 @@ void main() {
 
     test('flutter web enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
 
       expect(featureFlags.isWebEnabled, true);
     }));
@@ -149,7 +149,7 @@ void main() {
 
     test('flutter web not enabled with environment variable on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
 
       expect(featureFlags.isWebEnabled, false);
     }));
@@ -191,7 +191,7 @@ void main() {
 
     test('flutter macos desktop enabled with environment variable on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isMacOSEnabled, true);
     }));
@@ -211,7 +211,7 @@ void main() {
 
     test('flutter macos desktop not enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isMacOSEnabled, false);
     }));
@@ -231,7 +231,7 @@ void main() {
 
     test('flutter macos desktop not enabled with environment variable on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isMacOSEnabled, false);
     }));
@@ -251,7 +251,7 @@ void main() {
 
     test('flutter macos desktop not enabled with environment variable on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isMacOSEnabled, false);
     }));
@@ -272,7 +272,7 @@ void main() {
 
     test('flutter linux desktop enabled with environment variable on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isLinuxEnabled, true);
     }));
@@ -292,7 +292,7 @@ void main() {
 
     test('flutter linux desktop not enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -312,7 +312,7 @@ void main() {
 
     test('flutter linux desktop not enabled with environment variable on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -332,7 +332,7 @@ void main() {
 
     test('flutter linux desktop not enabled with environment variable on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isLinuxEnabled, false);
     }));
@@ -353,7 +353,7 @@ void main() {
 
     test('flutter windows desktop enabled with environment variable on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isWindowsEnabled, true);
     }));
@@ -373,7 +373,7 @@ void main() {
 
     test('flutter windows desktop not enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
@@ -393,7 +393,7 @@ void main() {
 
     test('flutter windows desktop not enabled with environment variable on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
@@ -413,7 +413,7 @@ void main() {
 
     test('flutter windows desktop not enabled with environment variable on stable', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('stable');
-      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'enabled'});
+      when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isWindowsEnabled, false);
     }));
