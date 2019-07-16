@@ -91,7 +91,7 @@ class BuildSystemConfig {
 /// Example: aot_elf has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
-/// ### Targes should declare all outputs produced
+/// ### Targets should declare all outputs produced
 ///
 /// If a target produces an output it should be listed, even if it is not
 /// intended to be consumed by another target.
