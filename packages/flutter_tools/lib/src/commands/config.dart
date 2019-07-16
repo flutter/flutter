@@ -102,7 +102,9 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults.wasParsed(feature.configSetting)) {
-        _updateConfig(feature.configSetting, argResults[feature.configSetting]);
+        final bool keyValue = argResults[feature.configSetting];
+        config.setValue(feature.configSetting, keyValue);
+        printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
       }
     }
 
@@ -130,9 +132,8 @@ class ConfigCommand extends FlutterCommand {
     printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
-  void _updateConfig(String keyName, Object keyValue) {
-    if ((keyValue is String && keyValue.isEmpty) ||
-        (keyValue is bool && !keyValue)) {
+  void _updateConfig(String keyName, String keyValue) {
+    if (keyValue.isEmpty) {
       config.removeValue(keyName);
       printStatus('Removing "$keyName" value.');
     } else {
