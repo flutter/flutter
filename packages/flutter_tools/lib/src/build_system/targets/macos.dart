@@ -27,6 +27,7 @@ class UnpackMacOS extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
     Source.artifact(Artifact.flutterMacOSFramework),
   ];
 

@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -19,6 +20,11 @@ void main() {
   const BuildSystem buildSystem = BuildSystem();
   Environment environment;
   MockPlatform mockPlatform;
+
+  setUpAll(() {
+    Cache.disableLocking();
+    Cache.flutterRoot = '';
+  });
 
   setUp(() {
     mockPlatform = MockPlatform();
@@ -44,11 +50,12 @@ void main() {
         fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
         fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
         fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+        fs.file('packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
       ];
       for (File input in inputs) {
         input.createSync(recursive: true);
       }
-      when(processManager.runSync(any)).thenAnswer((Invocation invocation) {
+      when(processManager.run(any)).thenAnswer((Invocation invocation) async {
         final List<String> arguments = invocation.positionalArguments.first;
         final Directory source = fs.directory(arguments[arguments.length - 2]);
         final Directory target = fs.directory(arguments.last)

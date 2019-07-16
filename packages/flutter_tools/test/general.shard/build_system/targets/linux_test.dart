@@ -20,6 +20,7 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
+    Cache.flutterRoot = '';
   });
 
   setUp(() {
@@ -39,6 +40,7 @@ void main() {
       fs.file('bin/cache/artifacts/engine/linux-x64/flutter_glfw.h').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
       fs.file('bin/cache/artifacts/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
+      fs.file('packages/flutter_tools/lib/src/build_system/targets/linux.dart').createSync(recursive: true);
       fs.directory('linux').createSync();
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,

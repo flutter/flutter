@@ -16,6 +16,7 @@ class UnpackLinux extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/linux.dart'),
     Source.artifact(Artifact.linuxDesktopPath),
   ];
 
@@ -37,6 +38,9 @@ class UnpackLinux extends Target {
   Future<void> build(List<File> inputFiles, Environment environment) async {
     final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
     for (File input in inputFiles) {
+      if (fs.path.basename(input.path) == 'linux.dart') {
+        continue;
+      }
       final String outputPath = fs.path.join(
         environment.projectDir.path,
         'linux',

@@ -16,6 +16,7 @@ class UnpackWindows extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
     Source.artifact(Artifact.windowsDesktopPath),
   ];
 
@@ -41,6 +42,9 @@ class UnpackWindows extends Target {
     // This path needs to match the prefix in the rule below.
     final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
     for (File input in inputFiles) {
+      if (fs.path.basename(input.path) == 'windows.dart') {
+        continue;
+      }
       final String outputPath = fs.path.join(
         environment.projectDir.path,
         'windows',

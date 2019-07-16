@@ -52,6 +52,15 @@ void main() {
     expect(visitor.sources.single.path, fs.path.absolute(path));
   }));
 
+  test('can substitute {FLUTTER_ROOT}/foo', () => testbed.run(() {
+    final String path = fs.path.join(environment.flutterRootDir.path, 'foo');
+    fs.file(path).createSync();
+    const Source barSource = Source.pattern('{FLUTTER_ROOT}/foo');
+    barSource.accept(visitor);
+
+    expect(visitor.sources.single.path, fs.path.absolute(path));
+  }));
+
   test('can substitute Artifact', () => testbed.run(() {
     final String path = fs.path.join(
       Cache.instance.getArtifactDirectory('engine').path,

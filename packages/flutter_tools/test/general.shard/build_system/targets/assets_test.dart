@@ -19,6 +19,8 @@ void main() {
       environment = Environment(
         projectDir: fs.currentDirectory,
       );
+      fs.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+        ..createSync(recursive: true);
       fs.file(fs.path.join('assets', 'foo', 'bar.png'))
         ..createSync(recursive: true);
       fs.file('.packages')
@@ -29,8 +31,8 @@ void main() {
 name: example
 
 flutter:
-assets:
-  - assets/foo/bar.png
+  assets:
+    - assets/foo/bar.png
 ''');
     });
   });

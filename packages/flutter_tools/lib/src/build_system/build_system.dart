@@ -397,6 +397,7 @@ class Environment {
       rootBuildDir: rootBuildDir,
       cacheDir: Cache.instance.getRoot(),
       defines: defines,
+      flutterRootDir: fs.directory(Cache.flutterRoot),
     );
   }
 
@@ -406,6 +407,7 @@ class Environment {
     @required this.rootBuildDir,
     @required this.cacheDir,
     @required this.defines,
+    @required this.flutterRootDir,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -437,6 +439,11 @@ class Environment {
   /// Defaults to `{FLUTTER_ROOT}/bin/cache`. The root of the artifact cache for
   /// the flutter tool.
   final Directory cacheDir;
+
+  /// The `FLUTTER_ROOT` environment variable.
+  ///
+  /// Defaults to to the value of [Cache.flutterRoot].
+  final Directory flutterRootDir;
 
   /// Additional configuration passed to the build targets.
   ///

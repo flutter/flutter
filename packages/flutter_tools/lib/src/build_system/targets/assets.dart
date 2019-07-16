@@ -60,6 +60,7 @@ class CopyAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.behavior(AssetBehavior()),
   ];

@@ -85,6 +85,8 @@ flutter_tools:lib/''');
         fs.path.join('lib', 'foo.dart'),
         fs.path.join('lib', 'bar.dart'),
         fs.path.join('lib', 'fizz'),
+        fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'dart.dart'),
+        fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'ios.dart'),
       ];
       for (String path in paths) {
         fs.file(path).createSync(recursive: true);
@@ -98,7 +100,7 @@ flutter_tools:lib/''');
   test('kernel_snapshot Produces correct output directory', () => testbed.run(() async {
     await buildSystem.build(const KernelSnapshot(), androidEnvironment);
 
-    expect(fs.file(fs.path.join(androidEnvironment.buildDir.path,'main.app.dill')).existsSync(), true);
+    expect(fs.file(fs.path.join(androidEnvironment.buildDir.path,'app.dill')).existsSync(), true);
   }));
 
   test('kernel_snapshot throws error if missing build mode', () => testbed.run(() async {
@@ -111,7 +113,7 @@ flutter_tools:lib/''');
   test('aot_elf_profile Produces correct output directory', () => testbed.run(() async {
     await buildSystem.build(const AotElfProfile(), androidEnvironment);
 
-    expect(fs.file(fs.path.join(androidEnvironment.buildDir.path, 'main.app.dill')).existsSync(), true);
+    expect(fs.file(fs.path.join(androidEnvironment.buildDir.path, 'app.dill')).existsSync(), true);
     expect(fs.file(fs.path.join(androidEnvironment.buildDir.path, 'app.so')).existsSync(), true);
   }));
 

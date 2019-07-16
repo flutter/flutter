@@ -21,10 +21,10 @@ void main() {
 
   setUpAll(() {
     Cache.disableLocking();
+    Cache.flutterRoot = '';
   });
 
   setUp(() {
-    Cache.flutterRoot = '';
     platform = MockPlatform();
     when(platform.isWindows).thenReturn(true);
     when(platform.isMacOS).thenReturn(false);
@@ -46,6 +46,7 @@ void main() {
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_glfw.h').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat').createSync();
       fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
+      fs.file(r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart').createSync(recursive: true);
       fs.directory('windows').createSync();
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),

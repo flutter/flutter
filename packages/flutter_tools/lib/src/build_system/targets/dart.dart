@@ -58,6 +58,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
@@ -66,7 +67,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
   ];
 
   @override
@@ -119,7 +120,7 @@ abstract class AotElfBase extends Target {
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
       buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('main.app.dill').path,
+      mainPath: environment.buildDir.childFile('app.dill').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
     );
@@ -138,7 +139,8 @@ class AotElfProfile extends AotElfBase {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
@@ -168,7 +170,8 @@ class AotElfRelease extends AotElfBase {
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/main.app.dill'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
+    Source.pattern('{BUILD_DIR}/app.dill'),
     Source.pattern('{PROJECT_DIR}/.packages'),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.skyEnginePath),
