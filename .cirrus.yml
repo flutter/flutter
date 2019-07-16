@@ -139,18 +139,8 @@ task:
     gclient sync
 
   matrix:
-    - name: build_fuchsia_debug
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --unoptimized --fuchsia --full-dart-sdk
-        ninja -C out/fuchsia_debug_unopt
     - name: build_fuchsia_profile
       compile_host_script: |
         cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto
-        ninja -C out/fuchsia_profile
-    - name: build_fuchsia_release
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode release --fuchsia --no-lto
-        ninja -C out/fuchsia_release
+        ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto --unopt
+        ninja -C out/fuchsia_profile_unopt
