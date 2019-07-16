@@ -10,16 +10,17 @@ import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
 void main() {
-  Testbed testbed;
   const BuildSystem buildSystem = BuildSystem();
   Environment environment;
+  Testbed testbed;
 
   setUp(() {
     testbed = Testbed(setup: () {
       environment = Environment(
         projectDir: fs.currentDirectory,
       );
-      fs.file('packages/flutter_tools/lib/src/build_system/targets/assets.dart')
+      fs.file(fs.path.join('packages', 'flutter_tools', 'lib', 'src',
+          'build_system', 'targets', 'assets.dart'))
         ..createSync(recursive: true);
       fs.file(fs.path.join('assets', 'foo', 'bar.png'))
         ..createSync(recursive: true);
