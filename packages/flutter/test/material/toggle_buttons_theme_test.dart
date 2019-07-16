@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -16,6 +17,40 @@ Widget boilerplate({Widget child}) {
 }
 
 void main() {
+  test('ToggleButtonsThemeData copyWith, ==, hashCode basics', () {
+    expect(const ToggleButtonsThemeData(), const ToggleButtonsThemeData().copyWith());
+    expect(const ToggleButtonsThemeData().hashCode, const ToggleButtonsThemeData().copyWith().hashCode);
+  });
+
+   test('ToggleButtonsThemeData defaults', () {
+    const ToggleButtonsThemeData theme = ToggleButtonsThemeData();
+    expect(theme.color, null);
+    expect(theme.selectedColor, null);
+    expect(theme.disabledColor, null);
+    expect(theme.fillColor, null);
+    expect(theme.focusColor, null);
+    expect(theme.highlightColor, null);
+    expect(theme.hoverColor, null);
+    expect(theme.splashColor, null);
+    expect(theme.borderColor, null);
+    expect(theme.selectedBorderColor, null);
+    expect(theme.disabledBorderColor, null);
+    expect(theme.borderRadius, null);
+    expect(theme.borderWidth, null);
+  });
+
+   testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const ToggleButtonsThemeData().debugFillProperties(builder);
+
+     final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+     expect(description, <String>[]);
+  });
+
   testWidgets(
     'Theme text/icon colors for enabled, selected and disabled states',
     (WidgetTester tester) async {

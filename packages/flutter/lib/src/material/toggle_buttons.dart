@@ -174,6 +174,8 @@ class ToggleButtons extends StatelessWidget {
     assert(children.length == isSelected.length),
     super(key: key);
 
+  static const double _defaultBorderWidth = 1.0;
+
   /// The corresponding widget values in the toggle buttons.
   ///
   /// These are typically [Icon] or [Text] widgets. The selection state
@@ -275,7 +277,7 @@ class ToggleButtons extends StatelessWidget {
   final BorderRadius borderRadius;
 
   BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
-    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius;
+    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
 
     if (
       index == 0 && textDirection == TextDirection.ltr ||
@@ -298,23 +300,24 @@ class ToggleButtons extends StatelessWidget {
   }
 
   BorderRadius _getClipBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
-    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius;
+    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
+    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
 
     if (
       index == 0 && textDirection == TextDirection.ltr ||
       index == children.length - 1 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topLeft: resultingBorderRadius.topLeft - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
-        bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
+        topLeft: resultingBorderRadius.topLeft - Radius.circular(resultingBorderWidth / 2.0),
+        bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(resultingBorderWidth / 2.0),
       );
     } else if (
       index == children.length - 1 && textDirection == TextDirection.ltr ||
       index == 0 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
-        topRight: resultingBorderRadius.topRight - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
-        bottomRight: resultingBorderRadius.bottomRight - Radius.circular(borderWidth ?? toggleButtonsTheme.borderWidth / 2.0),
+        topRight: resultingBorderRadius.topRight - Radius.circular(resultingBorderWidth / 2.0),
+        bottomRight: resultingBorderRadius.bottomRight - Radius.circular(resultingBorderWidth / 2.0),
       );
     }
     return BorderRadius.zero;
@@ -328,20 +331,21 @@ class ToggleButtons extends StatelessWidget {
     if (!renderBorder)
       return BorderSide.none;
 
+    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
       return BorderSide(
         color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
         color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
         color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     }
   }
@@ -354,20 +358,21 @@ class ToggleButtons extends StatelessWidget {
     if (!renderBorder)
       return BorderSide.none;
 
+    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
     if (onPressed != null && isSelected[index]) {
       return BorderSide(
         color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
         color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
         color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     }
   }
@@ -383,20 +388,21 @@ class ToggleButtons extends StatelessWidget {
     if (index != children.length - 1)
       return null;
 
+    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
     if (onPressed != null && (isSelected[index])) {
       return BorderSide(
         color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
         color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
         color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
-        width: borderWidth ?? toggleButtonsTheme.borderWidth,
+        width: resultingBorderWidth,
       );
     }
   }

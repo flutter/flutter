@@ -36,8 +36,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
     this.borderColor,
     this.selectedBorderColor,
     this.disabledBorderColor,
-    this.borderRadius = BorderRadius.zero,
-    this.borderWidth = 1.0,
+    this.borderRadius,
+    this.borderWidth,
   });
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
