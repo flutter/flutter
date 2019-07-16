@@ -53,7 +53,7 @@ class _TestAppState extends State<TestApp> {
         ),
         body: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: FutureBuilder<TestStepResult>.withoutInitialData(
+          child: FutureBuilder<TestStepResult>(
             future: _result,
             builder: _buildTestResultWidget,
           ),

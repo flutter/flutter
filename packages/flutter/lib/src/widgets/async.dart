@@ -224,15 +224,20 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, false, null, error);
 
   /// The current state of the connection to the asynchronous computation.
+  ///
+  /// This property exists independently of the [data] and [error] properties.
+  /// In other words, a snapshot can exist with any combination of
+  /// (`connectionState`/`data`) or (`connectionState`/`error`) tuples.
+  ///
+  /// This is guaranteed to be non-null.
   final ConnectionState connectionState;
 
   /// Whether this snapshot contains [data].
   ///
   /// This can be false even when the asynchronous computation has completed
   /// successfully ([connectionState] is [ConnectionState.done]), if the
-  /// computation did not return a value. For example, a [Future<void>] or a
-  /// [Future<Null>] will complete with no data even if it completes
-  /// successfully.
+  /// computation did not return a value. For example, a [Future<void>] will
+  /// complete with no data even if it completes successfully.
   ///
   /// If this property is false, then attempting to access the [data] property
   /// will throw an exception.
@@ -251,8 +256,10 @@ class AsyncSnapshot<T> {
   T get data {
     if (hasData)
       return _data;
-    if (hasError)
+    if (hasError) {
+      // TODO(tvolkert): preserve the stack trace (https://github.com/dart-lang/sdk/issues/30741)
       throw error;
+    }
     throw StateError('Snapshot has neither data nor error');
   }
   final T _data;
@@ -279,13 +286,21 @@ class AsyncSnapshot<T> {
   bool get hasError => error != null;
 
   @override
-  String toString() => '$runtimeType($connectionState, $hasData, $_data, $error)';
+  String toString() {
+    final StringBuffer buffer = StringBuffer()..write('$runtimeType')..write('(');
+    if (hasData)
+      buffer.write('data: $_data');
+    else if (hasError)
+      buffer.write('error: $error');
+    buffer.write(')');
+    return buffer.toString();
+  }
 
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! AsyncSnapshot<T>)
+    if (runtimeType != other.runtimeType)
       return false;
     final AsyncSnapshot<T> typedOther = other;
     return connectionState == typedOther.connectionState
@@ -359,9 +374,10 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// [new StreamBuilder.withoutInitialData] constructor may be used. Doing so
 /// may cause the first frame to have a snapshot that contains no data.
 ///
-/// The `StreamBuilder<void>` and `StreamBuilder<Null>` types will produce
-/// snapshots that contain no data. An example stream of snapshots would be the
-/// following:
+/// ## `StreamBuilder<void>`
+///
+/// The `StreamBuilder<void>` type will produce snapshots that contain no data.
+/// An example stream of snapshots would be the following:
 ///
 /// * `AsyncSnapshot<void>.withoutData(ConnectionState.waiting)`
 /// * `AsyncSnapshot<void>.withoutData(ConnectionState.active)`
@@ -406,7 +422,10 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// snapshot of interaction with the specified `stream` and whose build
   /// strategy is given by [builder].
   ///
-  /// The [initialData] argument is used to create the initial snapshot.
+  /// The [initialData] argument is used to create the initial snapshot. For
+  /// cases where there is no initial snapshot or the initial snapshot is not
+  /// yet available, callers may construct a [StreamBuilder] without an initial
+  /// snapshot using [new StreamBuilder.withoutInitialData].
   ///
   /// The [builder] must not be null.
   const StreamBuilder({
@@ -463,8 +482,13 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// constructor. When a builder was constructed in this way, attempting to
   /// access the [initialData] property will throw a [StateError].
   T get initialData {
-    if (!hasInitialData)
-      throw StateError('No initial data');
+    if (!hasInitialData) {
+      throw StateError(
+        'StreamBuilder was created without initial data, yet the initialData '
+        'property was accessed. If you wish your StreamBuilder to have initial '
+        'data, create it using the default constructor.',
+      );
+    }
     return _initialData;
   }
   final T _initialData;
@@ -531,32 +555,17 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ## Builder contract
 ///
-/// For a future that completes successfully with data, assuming [initialData]
-/// is null, the [builder] will be called with either both or only the latter of
-/// the following snapshots:
+/// For a future that completes successfully with data, the [builder] will be
+/// called with either both or only the latter of the following snapshots:
 ///
-/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<String>.withoutData(ConnectionState.waiting)`
 /// * `AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
 ///
 /// If that same future instead completed with an error, the [builder] would be
 /// called with either both or only the latter of:
 ///
-/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
-///
-/// The initial snapshot data can be controlled by specifying [initialData]. You
-/// would use this facility to ensure that if the [builder] is invoked before
-/// the future completes, the snapshot carries data of your choice rather than
-/// the default null value. On the other hand, if the [builder] is invoked
-/// before the future completes, and the use case calls for a snapshot that
-/// carries no data, then callers may use [new FutureBuilder.withoutInitialData].
-///
-/// For a future that completes successfully with data on a widget that was
-/// constructed with [new FutureBuilder.withoutInitialData], the [builder] will
-/// be called with either both or only the latter of the following snapshots:
-///
 /// * `AsyncSnapshot<String>.withoutData(ConnectionState.waiting)`
-/// * `AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
+/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
 ///
 /// The data and error fields of the snapshot change only as the connection
 /// state field transitions from `waiting` to `done`, and they will be retained
@@ -570,14 +579,15 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// In general, the latter will be produced only when the new future is
 /// non-null, and the former only when the old future is non-null.
 ///
-/// The `FutureBuilder<void>` and `FutureBuilder<Null>` types will produce
-/// snapshots that contain no data:
-///
-/// * `AsyncSnapshot<String>.withoutData(ConnectionState.done)`
-///
 /// A [FutureBuilder] behaves identically to a [StreamBuilder] configured with
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
+///
+/// ## `Future<void>`
+///
+/// The `FutureBuilder<void>` type will produce snapshots that contain no data:
+///
+/// * `AsyncSnapshot<String>.withoutData(ConnectionState.done)`
 ///
 /// {@tool sample}
 ///
@@ -587,8 +597,13 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// ```dart
 /// FutureBuilder<String>(
-///   future: _calculation, // a previously-obtained Future<String> or null
-///   initialData: 'some_initial_value',
+///   // A previously-obtained `Future<String>` or null.
+///   //
+///   // This MUST NOT be created during the call to the `build()` method that
+///   // creates the `FutureBuilder`. Doing so will cause a new future to be
+///   // instantiated every time `build()` is called (potentially every frame).
+///   future: _calculation,
+///
 ///   builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
 ///     switch (snapshot.connectionState) {
 ///       case ConnectionState.none:
@@ -611,6 +626,7 @@ class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
   ///
+  // ignore: deprecated_member_use_from_same_package
   /// The [initialData] argument specifies the data that will be used to create
   /// the snapshots provided to [builder] until a non-null [future] has
   /// completed.
@@ -619,33 +635,21 @@ class FutureBuilder<T> extends StatefulWidget {
   const FutureBuilder({
     Key key,
     this.future,
-    @required T initialData,
+    @Deprecated(
+      "Don't provide initialData to FutureBuilder. Instead, check for "
+      'ConnectionState.none or ConnectionState.waiting in your build() '
+      'method to know whether the future has completed or not.',
+    )
+    this.initialData,  // ignore: deprecated_member_use_from_same_package
     @required this.builder,
   }) : assert(builder != null),
-       hasInitialData = true,
-       _initialData = initialData,
-       super(key: key);
-
-  /// Creates a widget that builds itself based on the latest snapshot of
-  /// interaction with a [Future].
-  ///
-  /// The snapshots that will be provided to [builder] until a non-null
-  /// [future] has completed will contain no data.
-  ///
-  /// The [builder] argument must not be null.
-  const FutureBuilder.withoutInitialData({
-    Key key,
-    this.future,
-    @required this.builder,
-  }) : assert(builder != null),
-       hasInitialData = false,
-       _initialData = null,
        super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.
   ///
   /// If no future has yet completed, including in the case where [future] is
+  // ignore: deprecated_member_use_from_same_package
   /// null, the snapshot provided to the [builder] will contain [initialData]
   /// if this widget was created with initial data or will contain no data if
   /// this widget was created without initial data.
@@ -688,21 +692,9 @@ class FutureBuilder<T> extends StatefulWidget {
   ///    [AsyncSnapshot.hasError] will be true and [AsyncSnapshot.error] will be
   ///    set to the error object.
   ///
-  ///    In the case of [future] being a [Future<void>] or a [Future<Null>],
-  ///    the snapshot will not contain data even if the future completed
-  ///    successfully.
+  ///    In the case of [future] being a [Future<void>], the snapshot will not
+  ///    contain data even if the future completed successfully.
   final AsyncWidgetBuilder<T> builder;
-
-  /// Whether this builder's initial snapshot contains data.
-  ///
-  /// If this is false, then attempting to access [initialData] will throw an
-  /// error.
-  ///
-  /// See also:
-  ///
-  ///  * [AsyncSnapshot.hasData], the corresponding property that will be set
-  ///    in the initial snapshot.
-  final bool hasInitialData;
 
   /// The data that will be used to create the snapshots provided until a
   /// non-null [future] has completed.
@@ -711,14 +703,12 @@ class FutureBuilder<T> extends StatefulWidget {
   /// the [builder] will contain no data, regardless of [initialData]. (The
   /// error itself will be available in [AsyncSnapshot.error], and
   /// [AsyncSnapshot.hasError] will be true.)
-  ///
-  /// If [hasInitialData] is false, this will throw a [StateError].
-  T get initialData {
-    if (!hasInitialData)
-      throw StateError('No initial data');
-    return _initialData;
-  }
-  final T _initialData;
+  @Deprecated(
+    "Don't use FutureBuilder.initialData. Instead, check for "
+    'ConnectionState.none or ConnectionState.waiting in your build() '
+    'method to know whether the future has completed or not.',
+  )
+  final T initialData;
 
   @override
   State<FutureBuilder<T>> createState() => _FutureBuilderState<T>();
@@ -735,9 +725,11 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = widget.hasInitialData
-        ? AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData)
-        : AsyncSnapshot<T>.withoutData(ConnectionState.none);
+    // ignore: deprecated_member_use_from_same_package
+    _snapshot = widget.initialData == null
+        ? AsyncSnapshot<T>.withoutData(ConnectionState.none)
+        // ignore: deprecated_member_use_from_same_package
+        : AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
     _subscribe();
   }
 
@@ -814,13 +806,7 @@ class _TypeLiteral<T> {
   const _TypeLiteral();
 
   /// Returns whether the specified type represents a "void" type.
-  ///
-  /// Currently in the Dart language, both the `Null` type and the `void` type
-  /// represents "void" types (types that contain no value).
-  static bool isVoidType(Type type) {
-    return type == const _TypeLiteral<Null>().type  // ignore: prefer_void_to_null
-        || type == const _TypeLiteral<void>().type;
-  }
+  static bool isVoidType(Type type) => type == const _TypeLiteral<void>().type;
 
   /// The [Type] (`T`) represented by this [_TypeLiteral].
   Type get type => T;
