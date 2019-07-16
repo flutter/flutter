@@ -20,7 +20,7 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 class MutationCompositionPage extends Page {
   const MutationCompositionPage()
       : super('Mutation Composition Tests',
-            const ValueKey<String>('MutationPage'));
+            const ValueKey<String>('MutationPageListTile'));
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +29,9 @@ class MutationCompositionPage extends Page {
 }
 
 class MutationCompositionBody extends StatefulWidget {
+
+  const MutationCompositionBody():super(key: const ValueKey<String>('MutationPage'));
+
   @override
   State createState() => MutationCompositionBodyState();
 }
@@ -98,7 +101,7 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
     return Container(
         width: 150,
         height: 150,
-        child: SimplePlatformView(key: ValueKey<String>('platform_view+$id')));
+        child: SimplePlatformView(key: ValueKey<String>('PlatformView$id')));
   }
 }
 

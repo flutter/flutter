@@ -30,4 +30,13 @@ Future<void> main() async {
       }
     });
   });
+
+  group('Composition tests', (){
+    test('mutations', () async {
+        final SerializableFinder motionEventsListTile =
+        find.byValueKey('MutationPageListTile');
+        await driver.tap(motionEventsListTile);
+        await driver.waitFor(find.byValueKey('PlatformView0'));
+     });
+  });
 }
