@@ -12,7 +12,7 @@ import 'version.dart';
 /// The current [FeatureFlags] implementation.
 ///
 /// If not injected, a default implementation is provided.
-FeatureFlags get featureFlags => context.get<FeatureFlags>() ?? const FeatureFlags();
+FeatureFlags get featureFlags => context.get<FeatureFlags>();
 
 /// The interface used to determine if a particular [Feature] is enabled.
 ///
@@ -24,25 +24,39 @@ FeatureFlags get featureFlags => context.get<FeatureFlags>() ?? const FeatureFla
 class FeatureFlags {
   const FeatureFlags();
 
-  /// Whether flutter web is enabled.
-  ///
-  /// Defaults to `false`.
-  bool get isWebEnabled => false;
+  /// Whether flutter desktop for linux is enabled.
+  bool get isLinuxEnabled => _isEnabled(flutterLinuxDesktopFeature);
 
   /// Whether flutter desktop for macOS is enabled.
-  ///
-  /// Defaults to `false`.
-  bool get isMacOSEnabled => false;
+  bool get isMacOSEnabled => _isEnabled(flutterMacOSDesktopFeature);
+
+  /// Whether flutter web is enabled.
+  bool get isWebEnabled => _isEnabled(flutterWebFeature);
 
   /// Whether flutter desktop for Windows is enabled.
-  ///
-  /// Defaults to `false`.
-  bool get isWindowsEnabled => false;
+  bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether flutter desktop for linux is enabled.
-  ///
-  /// Defaults to `false`.
-  bool get isLinuxEnabled => false;
+  // Calculate whether a particular feature is enabled for the current channel.
+  static bool _isEnabled(Feature feature) {
+    final String currentChannel = FlutterVersion.instance.channel;
+    final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
+    if (!featureSetting.available) {
+      return false;
+    }
+    bool isEnabled = featureSetting.enabledByDefault;
+    if (feature.configSetting != null) {
+      final bool configOverride = Config.instance.getValue(feature.configSetting);
+      if (configOverride != null) {
+        isEnabled = configOverride;
+      }
+    }
+    if (feature.environmentOverride != null) {
+      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+        isEnabled = true;
+      }
+    }
+    return isEnabled;
+  }
 }
 
 /// All current Flutter feature flags.
@@ -100,45 +114,6 @@ const Feature flutterWindowsDesktopFeature = Feature(
     enabledByDefault: false,
   ),
 );
-
-/// A [FeatureFlags] that looks up values based on [Feature] definitions.
-class ConfigFeatureFlags implements FeatureFlags {
-  const ConfigFeatureFlags();
-
-  @override
-  bool get isLinuxEnabled => _isEnabled(flutterLinuxDesktopFeature);
-
-  @override
-  bool get isMacOSEnabled => _isEnabled(flutterMacOSDesktopFeature);
-
-  @override
-  bool get isWebEnabled => _isEnabled(flutterWebFeature);
-
-  @override
-  bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
-
-  // Calculate whether a particular feature is enabled for the current channel.
-  static bool _isEnabled(Feature feature) {
-    final String currentChannel = FlutterVersion.instance.channel;
-    final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
-    if (!featureSetting.available) {
-      return false;
-    }
-    bool isEnabled = featureSetting.enabledByDefault;
-    if (feature.configSetting != null) {
-      final bool configOverride = Config.instance.getValue(feature.configSetting);
-      if (configOverride != null) {
-        isEnabled = configOverride;
-      }
-    }
-    if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
-        isEnabled = true;
-      }
-    }
-    return isEnabled;
-  }
-}
 
 /// A [Feature] is a process for conditionally enabling tool features.
 ///

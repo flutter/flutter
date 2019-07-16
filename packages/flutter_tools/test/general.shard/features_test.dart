@@ -26,7 +26,7 @@ void main() {
       when(mockPlatform.environment).thenReturn(const <String, String>{});
       testbed = Testbed(overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVerion,
-        FeatureFlags: () => const ConfigFeatureFlags(),
+        FeatureFlags: () => const FeatureFlags(),
         Config: () => mockFlutterConfig,
         Platform: () => mockPlatform,
       });
@@ -91,15 +91,6 @@ void main() {
 
     test('flutter Windows desktop help string', () {
       expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Windows on the master channel.');
-    });
-
-    test('default feature flag instance has all flags disabled', () {
-      const FeatureFlags featureFlags = FeatureFlags();
-
-      expect(featureFlags.isWebEnabled, false);
-      expect(featureFlags.isMacOSEnabled, false);
-      expect(featureFlags.isLinuxEnabled, false);
-      expect(featureFlags.isWindowsEnabled, false);
     });
 
     /// Flutter Web
