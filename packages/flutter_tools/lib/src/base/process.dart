@@ -129,11 +129,6 @@ Future<Process> runCommand(
 /// If [filter] is non-null, all lines that do not match it are removed. If
 /// [mapFunction] is present, all lines that match [filter] are also forwarded
 /// to [mapFunction] for further processing.
-///
-/// If [detachFilter] is non-null, the returned future will complete with exit code `0`
-/// when the process outputs something matching [detachFilter] to stderr. The process will
-/// continue in the background, and the final exit code will not be reported. [filter] is
-/// not considered on lines matching [detachFilter].
 Future<int> runCommandAndStreamOutput(
   List<String> cmd, {
   String workingDirectory,
@@ -143,9 +138,7 @@ Future<int> runCommandAndStreamOutput(
   RegExp filter,
   StringConverter mapFunction,
   Map<String, String> environment,
-  RegExp detachFilter,
 }) async {
-  final Completer<int> result = Completer<int>();
   final Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
@@ -155,15 +148,6 @@ Future<int> runCommandAndStreamOutput(
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .map((String line) {
-      if (detachFilter != null && detachFilter.hasMatch(line) && !result.isCompleted) {
-        // Detach from the process, assuming it will eventually complete successfully.
-        // Output printed after detaching (incl. stdout and stderr) will still be
-        // processed by [filter] and [mapFunction].
-        result.complete(0);
-      }
-      return line;
-    })
     .where((String line) => filter == null || filter.hasMatch(line))
     .listen((String line) {
       if (mapFunction != null)
@@ -187,28 +171,19 @@ Future<int> runCommandAndStreamOutput(
         printError('$prefix$line', wrap: false);
     });
 
-  // Wait for stdout to be fully processed before completing with the exit code (non-detached case),
-  // because process.exitCode may complete first causing flaky tests. If the process detached,
-  // we at least have a predictable output for stdout, although (unavoidably) not for stderr.
-  Future<void> readOutput() async {
-    await waitGroup<void>(<Future<void>>[
-      stdoutSubscription.asFuture<void>(),
-      stderrSubscription.asFuture<void>(),
-    ]);
+  // Wait for stdout to be fully processed
+  // because process.exitCode may complete first causing flaky tests.
+  await waitGroup<void>(<Future<void>>[
+    stdoutSubscription.asFuture<void>(),
+    stderrSubscription.asFuture<void>(),
+  ]);
 
-    await waitGroup<void>(<Future<void>>[
-      stdoutSubscription.cancel(),
-      stderrSubscription.cancel(),
-    ]);
+  await waitGroup<void>(<Future<void>>[
+    stdoutSubscription.cancel(),
+    stderrSubscription.cancel(),
+  ]);
 
-    // Complete the future if the we did not detach the process yet.
-    if (!result.isCompleted) {
-      result.complete(process.exitCode);
-    }
-  }
-
-  unawaited(readOutput());
-  return result.future;
+  return await process.exitCode;
 }
 
 /// Runs the [command] interactively, connecting the stdin/stdout/stderr
