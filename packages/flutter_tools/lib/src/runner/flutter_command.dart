@@ -27,7 +27,7 @@ import '../device.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/usage.dart';
 import '../version.dart';
 import 'flutter_command_runner.dart';
 
