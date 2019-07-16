@@ -1,3 +1,6 @@
+# CocoaPods 1.7.2 brings with it the final version of CDN support for the trunk specs repo.
+# source 'https://cdn.cocoapods.org/'
+
 # Uncomment this line to define a global platform for your project
 # platform :ios, '9.0'
 
