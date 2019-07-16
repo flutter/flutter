@@ -58,11 +58,11 @@ const Feature flutterWebFeature = Feature(
   name: 'Flutter Web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
-  master: FeatureSetting(
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
-  dev: FeatureSetting(
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -73,7 +73,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
   name: 'Flutter Desktop for macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  master: FeatureSetting(
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -84,7 +84,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
   name: 'Flutter Desktop for Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  master: FeatureSetting(
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -95,15 +95,15 @@ const Feature flutterWindowsDesktopFeature = Feature(
   name: 'Flutter Desktop for Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
-  master: FeatureSetting(
+  master: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
 );
 
 /// A [FeatureFlags] that looks up values based on [Feature] definitions.
-class FlutterFeatureFlags implements FeatureFlags {
-  const FlutterFeatureFlags();
+class ConfigFeatureFlags implements FeatureFlags {
+  const ConfigFeatureFlags();
 
   @override
   bool get isLinuxEnabled => _isEnabled(flutterLinuxDesktopFeature);
@@ -120,7 +120,7 @@ class FlutterFeatureFlags implements FeatureFlags {
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
-    final FeatureSetting featureSetting = feature.getSettingForChannel(currentChannel);
+    final FeatureChannelSetting featureSetting = feature.getSettingForChannel(currentChannel);
     if (!featureSetting.available) {
       return false;
     }
@@ -154,32 +154,32 @@ class Feature {
     @required this.name,
     this.environmentOverride,
     this.configSetting,
-    this.master = const FeatureSetting(),
-    this.dev = const FeatureSetting(),
-    this.beta = const FeatureSetting(),
-    this.stable = const FeatureSetting(),
+    this.master = const FeatureChannelSetting(),
+    this.dev = const FeatureChannelSetting(),
+    this.beta = const FeatureChannelSetting(),
+    this.stable = const FeatureChannelSetting(),
   });
 
   /// The user visible name for this feature.
   final String name;
 
   /// The settings for the master branch and other unknown channels.
-  final FeatureSetting master;
+  final FeatureChannelSetting master;
 
   /// The settings for the dev branch.
-  final FeatureSetting dev;
+  final FeatureChannelSetting dev;
 
   /// The settings for the beta branch.
-  final FeatureSetting beta;
+  final FeatureChannelSetting beta;
 
   /// The settings for the stable branch.
-  final FeatureSetting stable;
+  final FeatureChannelSetting stable;
 
   /// The name of an environment variable that can override the setting.
   ///
-  /// The environment variable only needs to be "set", that is contain a
-  /// non empty string. This is only intended for usage by CI and not
-  /// as an advertised method to enable a feature.
+  /// The environment variable needs to be set to the value 'true'. This is
+  /// only intended for usage by CI and not as an advertised method to enable
+  /// a feature.
   ///
   /// If not provided, defaults to `null` meaning there is no override.
   final String environmentOverride;
@@ -210,7 +210,7 @@ class Feature {
   }
 
   /// Retrieve the correct setting for the provided `channel`.
-  FeatureSetting getSettingForChannel(String channel) {
+  FeatureChannelSetting getSettingForChannel(String channel) {
     switch (channel) {
       case 'stable':
         return stable;
@@ -225,9 +225,9 @@ class Feature {
   }
 }
 
-/// A description of the conditions to enable a feature.
-class FeatureSetting {
-  const FeatureSetting({
+/// A description of the conditions to enable a feature for a particular channel.
+class FeatureChannelSetting {
+  const FeatureChannelSetting({
     this.available = false,
     this.enabledByDefault = false,
   });

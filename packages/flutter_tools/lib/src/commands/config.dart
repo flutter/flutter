@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/version.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../convert.dart';
@@ -37,6 +39,11 @@ class ConfigCommand extends FlutterCommand {
         negatable: true,
       );
     }
+    argParser.addFlag(
+      'clear-features',
+      help: 'Remove all configured features and restore them to the default values.',
+      negatable: false,
+    );
   }
 
   @override
@@ -57,10 +64,26 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   String get usageFooter {
-    // List all config settings.
-    String values = config.keys.map<String>((String key) {
-      return '  $key: ${config.getValue(key)}';
-    }).join('\n');
+    // List all config settings. for feature flags, include whether they
+    // are available.
+    final Map<String, Feature> featuresByName = <String, Feature>{};
+    final String channel = FlutterVersion.instance.channel;
+    for (Feature feature in allFeatures) {
+      if (feature.configSetting != null) {
+        featuresByName[feature.configSetting] = feature;
+      }
+    }
+    String values = config.keys
+        .map<String>((String key) {
+          String configFooter = '';
+          if (featuresByName.containsKey(key)) {
+            final FeatureChannelSetting setting = featuresByName[key].getSettingForChannel(channel);
+            if (!setting.available) {
+              configFooter = '(Unavailable)';
+            }
+          }
+          return '  $key: ${config.getValue(key)} $configFooter';
+        }).join('\n');
     if (values.isEmpty)
       values = '  No settings have been configured.';
     return
@@ -76,6 +99,15 @@ class ConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['machine']) {
       await handleMachine();
+      return null;
+    }
+
+    if (argResults['clear-features']) {
+      for (Feature feature in allFeatures) {
+        if (feature.configSetting != null) {
+          config.removeValue(feature.configSetting);
+        }
+      }
       return null;
     }
 

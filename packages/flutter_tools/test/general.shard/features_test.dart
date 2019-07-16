@@ -26,14 +26,14 @@ void main() {
       when(mockPlatform.environment).thenReturn(const <String, String>{});
       testbed = Testbed(overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVerion,
-        FeatureFlags: () => const FlutterFeatureFlags(),
+        FeatureFlags: () => const ConfigFeatureFlags(),
         Config: () => mockFlutterConfig,
         Platform: () => mockPlatform,
       });
     });
 
     test('setting has safe defaults', () {
-      const FeatureSetting featureSetting = FeatureSetting();
+      const FeatureChannelSetting featureSetting = FeatureChannelSetting();
 
       expect(featureSetting.available, false);
       expect(featureSetting.enabledByDefault, false);
@@ -48,10 +48,10 @@ void main() {
     });
 
     test('retrieves the correct setting for each branch', () {
-      final FeatureSetting masterSetting = FeatureSetting(available: nonconst(true));
-      final FeatureSetting devSetting = FeatureSetting(available: nonconst(true));
-      final FeatureSetting betaSetting = FeatureSetting(available: nonconst(true));
-      final FeatureSetting stableSetting = FeatureSetting(available: nonconst(true));
+      final FeatureChannelSetting masterSetting = FeatureChannelSetting(available: nonconst(true));
+      final FeatureChannelSetting devSetting = FeatureChannelSetting(available: nonconst(true));
+      final FeatureChannelSetting betaSetting = FeatureChannelSetting(available: nonconst(true));
+      final FeatureChannelSetting stableSetting = FeatureChannelSetting(available: nonconst(true));
       final Feature feature = Feature(
         name: 'example',
         master: masterSetting,
@@ -66,6 +66,16 @@ void main() {
       expect(feature.getSettingForChannel('stable'), stableSetting);
       expect(feature.getSettingForChannel('unknown'), masterSetting);
     });
+
+    test('env variables are only enabled with "true" string', () => testbed.run(() {
+      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'hello'});
+
+      expect(featureFlags.isWebEnabled, false);
+
+      when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
+
+      expect(featureFlags.isWebEnabled, true);
+    }));
 
     test('flutter web help string', () {
       expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter Web on master, dev channels.');

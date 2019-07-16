@@ -29,6 +29,13 @@ void main() {
       expect(config.keys, contains('foo'));
     });
 
+    test('get set bool value', () async {
+      expect(config.getValue('foo'), null);
+      config.setValue('foo', true);
+      expect(config.getValue('foo'), true);
+      expect(config.keys, contains('foo'));
+    });
+
     test('containsKey', () async {
       expect(config.containsKey('foo'), false);
       config.setValue('foo', 'bar');
