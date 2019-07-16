@@ -48,48 +48,56 @@ class AssetBehavior extends SourceBehavior {
   }
 }
 
-/// Copies the asset files from the [copyAssets] rule into place.
-Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment environment) async {
-  final Directory output = environment
-    .buildDir
-    .childDirectory('flutter_assets');
-  if (output.existsSync()) {
-    output.deleteSync(recursive: true);
-  }
-  output.createSync(recursive: true);
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-  await assetBundle.build(
-    manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
-    packagesPath: environment.projectDir.childFile('.packages').path,
-  );
-  // Limit number of open files to avoid running out of file descriptors.
-  final Pool pool = Pool(64);
-  await Future.wait<void>(
-    assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final PoolResource resource = await pool.request();
-      try {
-        final File file = fs.file(fs.path.join(output.path, entry.key));
-        file.parent.createSync(recursive: true);
-        await file.writeAsBytes(await entry.value.contentsAsBytes());
-      } finally {
-        resource.release();
-      }
-    }));
-}
+/// Copy the assets defined in the flutter manifest into a build directory.
+class CopyAssets extends Target {
+  const CopyAssets();
 
-/// Copy the assets used in the application into a build directory.
-const Target copyAssets = Target(
-  name: 'copy_assets',
-  inputs: <Source>[
+  @override
+  String get name => 'copy_assets';
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.behavior(AssetBehavior()),
-  ],
-  outputs: <Source>[
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/flutter_assets/AssetManifest.json'),
     Source.pattern('{BUILD_DIR}/flutter_assets/FontManifest.json'),
     Source.pattern('{BUILD_DIR}/flutter_assets/LICENSE'),
     Source.behavior(AssetBehavior()), // <- everything in this subdirectory.
-  ],
-  dependencies: <Target>[],
-  buildAction: copyAssetsInvocation,
-);
+  ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final Directory output = environment
+      .buildDir
+      .childDirectory('flutter_assets');
+    if (output.existsSync()) {
+      output.deleteSync(recursive: true);
+    }
+    output.createSync(recursive: true);
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    await assetBundle.build(
+      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+    );
+    // Limit number of open files to avoid running out of file descriptors.
+    final Pool pool = Pool(64);
+    await Future.wait<void>(
+      assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+        final PoolResource resource = await pool.request();
+        try {
+          final File file = fs.file(fs.path.join(output.path, entry.key));
+          file.parent.createSync(recursive: true);
+          await file.writeAsBytes(await entry.value.contentsAsBytes());
+        } finally {
+          resource.release();
+        }
+      }));
+  }
+}

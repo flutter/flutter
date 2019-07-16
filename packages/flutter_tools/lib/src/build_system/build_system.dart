@@ -18,19 +18,8 @@ import '../globals.dart';
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
-import 'targets/assets.dart';
-import 'targets/dart.dart';
-import 'targets/ios.dart';
-import 'targets/linux.dart';
-import 'targets/macos.dart';
-import 'targets/windows.dart';
 
 export 'source.dart';
-
-/// The function signature of a build target which can be invoked to perform
-/// the underlying task.
-typedef BuildAction = FutureOr<void> Function(
-    Map<String, ChangeType> inputs, Environment environment);
 
 /// A description of the update to each input file.
 enum ChangeType {
@@ -102,7 +91,7 @@ class BuildSystemConfig {
 /// Example: aot_elf has a dependency on the dill and packages file
 /// produced by the kernel_snapshot step.
 ///
-/// ### Targest should declare all outputs produced
+/// ### Targes should declare all outputs produced
 ///
 /// If a target produces an output it should be listed, even if it is not
 /// intended to be consumed by another target.
@@ -116,32 +105,27 @@ class BuildSystemConfig {
 /// exercise the rule, ensuring that the existing input and output verification
 /// logic can run, as well as verifying it correctly handles provided defines
 /// and meets any additional contracts present in the target.
-class Target {
-  const Target({
-    @required this.name,
-    @required this.inputs,
-    @required this.outputs,
-    @required this.buildAction,
-    this.dependencies = const <Target>[],
-  });
-
+abstract class Target {
+  const Target();
   /// The user-readable name of the target.
   ///
   /// This information is surfaced in the assemble commands and used as an
   /// argument to build a particular target.
-  final String name;
+  String get name;
 
   /// The dependencies of this target.
-  final List<Target> dependencies;
+  List<Target> get dependencies;
 
   /// The input [Source]s which are diffed to determine if a target should run.
-  final List<Source> inputs;
+  List<Source> get inputs;
 
   /// The output [Source]s which we attempt to verify are correctly produced.
-  final List<Source> outputs;
+  List<Source> get outputs;
 
   /// The action which performs this build step.
-  final BuildAction buildAction;
+  Future<void> build(List<File> inputFiles, Environment environment);
+
+  // final BuildAction buildAction;
 
   /// Collect hashes for all inputs to determine if any have changed.
   Future<Map<String, ChangeType>> computeChanges(
@@ -477,36 +461,14 @@ class BuildResult {
 
 /// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
-  BuildSystem([Map<String, Target> targets])
-    : targets = targets ?? _defaultTargets;
+  const BuildSystem();
 
-  /// All currently registered targets.
-  static final Map<String, Target> _defaultTargets = <String, Target>{
-    unpackMacos.name: unpackMacos,
-    macosApplication.name: macosApplication,
-    macoReleaseApplication.name: macoReleaseApplication,
-    unpackLinux.name: unpackLinux,
-    unpackWindows.name: unpackWindows,
-    copyAssets.name: copyAssets,
-    kernelSnapshot.name: kernelSnapshot,
-    aotElfProfile.name: aotElfProfile,
-    aotElfRelease.name: aotElfRelease,
-    aotAssemblyProfile.name: aotAssemblyProfile,
-    aotAssemblyRelease.name: aotAssemblyRelease,
-    releaseIosApplication.name: releaseIosApplication,
-    profileIosApplication.name: profileIosApplication,
-    debugIosApplication.name: debugIosApplication,
-  };
-
-  final Map<String, Target> targets;
-
-  /// Build the target `name` and all of its dependencies.
+  /// Build `target` and all of its dependencies.
   Future<BuildResult> build(
-    String name,
+    Target target,
     Environment environment,
-    BuildSystemConfig buildSystemConfig,
+    { BuildSystemConfig buildSystemConfig = const BuildSystemConfig() }
   ) async {
-    final Target target = _getNamedTarget(name);
     environment.buildDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
@@ -529,35 +491,6 @@ class BuildSystem {
       buildInstance.exceptionMeasurements,
       buildInstance.stepTimings,
     );
-  }
-
-  /// Describe the target `name` and all of its dependencies.
-  List<Map<String, Object>> describe(
-    String name,
-    Environment environment,
-  ) {
-    final Target target = _getNamedTarget(name);
-    environment.buildDir.createSync(recursive: true);
-    checkCycles(target);
-    // Cheat a bit and re-use the same map.
-    Map<String, Map<String, Object>> fold(Map<String, Map<String, Object>> accumulation, Target current) {
-      accumulation[current.name] = current.toJson(environment);
-      return accumulation;
-    }
-
-    final Map<String, Map<String, Object>> result =
-        <String, Map<String, Object>>{};
-    final Map<String, Map<String, Object>> targets = target.fold(result, fold);
-    return targets.values.toList();
-  }
-
-  // Returns the corresponding target or throws.
-  Target _getNamedTarget(String name) {
-    final Target target = targets[name];
-    if (target == null) {
-      throw Exception('No registered target:$name.');
-    }
-    return target;
   }
 }
 
@@ -601,7 +534,7 @@ class _BuildInstance {
       } else {
         printStatus('${target.name}: Starting');
         // build actions may be null.
-        await target?.buildAction(updates, environment);
+        await target?.build(inputs, environment);
         printStatus('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment);
