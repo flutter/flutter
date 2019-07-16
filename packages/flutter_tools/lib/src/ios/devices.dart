@@ -48,7 +48,7 @@ class IOSDeploy {
       '--bundle',
       bundlePath,
       '--no-wifi',
-      '--noninteractive',
+      '--justlaunch',
     ];
     if (launchArguments.isNotEmpty) {
       launchCommand.add('--args');
@@ -66,14 +66,11 @@ class IOSDeploy {
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
     iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
-    // Detach from the ios-deploy process once it' outputs 'autoexit', signaling that the
-    // App has been started and LLDB is in "autopilot" mode.
     return await runCommandAndStreamOutput(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
       environment: iosDeployEnv,
-      detachFilter: RegExp('.*autoexit.*')
     );
   }
 
