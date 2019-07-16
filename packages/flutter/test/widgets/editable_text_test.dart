@@ -17,6 +17,16 @@ import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
+final TextEditingController controller = TextEditingController();
+final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
+final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
+const TextStyle textStyle = TextStyle();
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+
+enum HandlePositionInViewport {
+  leftEdge, rightEdge, within,
+}
+
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
@@ -2415,12 +2425,18 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   }, skip: isBrowser);
 }
-const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-const TextStyle textStyle = TextStyle();
-final TextEditingController controller = TextEditingController();
-final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 
-final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
+class MockTextSelectionControls extends Mock implements TextSelectionControls {
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+}
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
@@ -2448,21 +2464,5 @@ class CustomStyleEditableTextState extends EditableTextState {
       style: const TextStyle(fontStyle: FontStyle.italic),
       text: widget.controller.value.text,
     );
-  }
-}
-
-enum HandlePositionInViewport {
-  leftEdge, rightEdge, within,
-}
-
-class MockTextSelectionControls extends Mock implements TextSelectionControls {
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return Offset.zero;
-  }
-
-  @override
-  Size getHandleSize(double textLineHeight) {
-    return Size.zero;
   }
 }

@@ -6669,7 +6669,7 @@ void main() {
       expect(box, paints..rect(color: expectedSelectionHandleColor));
     }
 
-    // Currently this does not reflect theme changes.
+    // Currently visible handles do not reflect theme changes.
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
