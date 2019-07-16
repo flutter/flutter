@@ -217,9 +217,13 @@ class FlutterPlugin implements Plugin<Project> {
         return project.buildDir
     }
 
+    private Properties getPluginList(Project project) {
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        return readPropertiesIfExist(pluginsFile)
+    }
+
     private void addPluginTasks(Project project) {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, ".flutter-plugins")
-        Properties plugins = readPropertiesIfExist(pluginsFile)
+        Properties plugins = getPluginList(project)
         project.android.buildTypes.each { buildType ->
             plugins.each { name, path ->
                 String buildModeValue = buildType.debuggable ? "debug" : "release"
@@ -384,16 +388,13 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.state.failure) {
             return
         }
-        project.dependencies {
-            String configuration;
-            if (project.getConfigurations().findByName("compileOnly")) {
-                configuration = "${variantName}CompileOnly";
-            } else {
-                configuration = "${variantName}Provided";
-            }
-
-            add(configuration, files)
+        String configuration;
+        if (project.getConfigurations().findByName("compileOnly")) {
+            configuration = "${variantName}CompileOnly";
+        } else {
+            configuration = "${variantName}Provided";
         }
+        project.dependencies.add(configuration, files)
     }
 
     private static void addApiDependencies(Project project, String variantName, Object dependency, Closure config = null) {
@@ -647,9 +648,7 @@ class FlutterPlugin implements Plugin<Project> {
                 buildPlugins(project, buildTypes)
             }
         } else {
-            File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-            Properties plugins = readPropertiesIfExist(pluginsFile)
-            plugins.each { name, _ ->
+            getPluginList(project).each { name, _ ->
                 def pluginProject = project.rootProject.findProject(":$name")
                 if (pluginProject != null) {
                     project.dependencies {
@@ -669,7 +668,13 @@ class FlutterPlugin implements Plugin<Project> {
                             def buildMode = buildModeFor(it)
                             addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
                         }
+                        pluginProject.android.buildTypes.whenObjectAdded {
+                            def buildMode = buildModeFor(it)
+                            addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files( flutterJar ?: baseJar[buildMode] ))
+                        }
                     }
+                } else {
+                    project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
                 }
             }
         }
