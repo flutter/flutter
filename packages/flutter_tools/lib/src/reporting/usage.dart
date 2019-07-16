@@ -68,7 +68,7 @@ class Usage {
 
     final String logFilePath = platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
 
-    _analytics = logFilePath == null ?
+    _analytics = logFilePath == null || logFilePath.isEmpty ?
         AnalyticsIO(
           _kFlutterUA,
           settingsName,
@@ -88,6 +88,7 @@ class Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    _analytics.sendScreenView('version is $version, is bot $isRunningOnBot, suppressed $suppressEnvFlag');
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.
