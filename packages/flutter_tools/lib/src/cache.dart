@@ -26,7 +26,7 @@ class DevelopmentArtifact {
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should be unavailable on stable branches.
+  /// Whether this artifact should not be usable on stable branches.
   final bool unstable;
 
   /// Artifacts required for Android development.
@@ -35,7 +35,7 @@ class DevelopmentArtifact {
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
-  /// Artifacts required for web development.
+  /// Artifacts required for web development,
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
@@ -44,16 +44,16 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Windows.
   static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
-  /// Artifacts required for desktop Linux.
+  /// Artifacts required for desktop linux.
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
   static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
-  /// Artifacts required by any development platform.
+  /// Artifacts required by all developments.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
-  /// The vaulues of DevelopmentArtifacts.
+  /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     android,
     iOS,
@@ -83,6 +83,9 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
+      for (String artifactName in IosUsbArtifacts.artifactNames) {
+        _artifacts.add(IosUsbArtifacts(artifactName, this));
+      }
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -221,6 +224,22 @@ class Cache {
     return getCacheArtifacts().childDirectory(name);
   }
 
+  MapEntry<String, String> get dyLdLibEntry {
+    if (_dyLdLibEntry != null) {
+      return _dyLdLibEntry;
+    }
+    final List<String> paths = <String>[];
+    for (CachedArtifact artifact in _artifacts) {
+      final String currentPath = artifact.dyLdLibPath;
+      if (currentPath.isNotEmpty) {
+        paths.add(currentPath);
+      }
+    }
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
+    return _dyLdLibEntry;
+  }
+  MapEntry<String, String> _dyLdLibEntry;
+
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.
   Directory getWebSdkDirectory() {
@@ -327,6 +346,9 @@ abstract class CachedArtifact {
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
   String get stampName => name;
+
+  /// Returns a string to be set as environment DYLD_LIBARY_PATH variable
+  String get dyLdLibPath => '';
 
   /// All development artifacts this cache provides.
   final Set<DevelopmentArtifact> developmentArtifacts;
@@ -887,6 +909,39 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
       return Future<void>.value();
     }
     return _doUpdate();
+  }
+}
+
+/// Cached iOS/USB binary artifacts.
+class IosUsbArtifacts extends CachedArtifact {
+  IosUsbArtifacts(String name, Cache cache) : super(
+    name,
+    cache,
+    // This is universal to ensure every command checks for them first
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+  );
+
+  static const List<String> artifactNames = <String>[
+    'libimobiledevice',
+    'usbmuxd',
+    'libplist',
+    'openssl',
+    'ideviceinstaller',
+    'ios-deploy',
+  ];
+
+  @override
+  String get dyLdLibPath {
+    return cache.getArtifactDirectory(name).path;
+  }
+
+  @override
+  Future<void> updateInner() {
+    if (!platform.isMacOS) {
+      return Future<void>.value();
+    }
+    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
+    return _downloadZipArchive('Downloading $name...', archiveUri, location);
   }
 }
 

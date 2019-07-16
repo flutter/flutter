@@ -740,6 +740,7 @@ void main() {
         'floating_action_button_test.clip.png',
         version: 2,
       ),
+      skip: !isLinux,
     );
   });
 

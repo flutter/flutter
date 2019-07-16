@@ -49,7 +49,13 @@ const String kCommandBuildBundleTargetPlatform = 'cd24';
 const String kCommandBuildBundleIsModule = 'cd25';
 
 const String kCommandResult = 'cd26';
-// Next ID: cd27
+const String kCommandHasTerminal = 'cd31';
+
+const String reloadExceptionTargetPlatform = 'cd27';
+const String reloadExceptionSdkName = 'cd28';
+const String reloadExceptionEmulator = 'cd29';
+const String reloadExceptionFullRestart = 'cd30';
+// Next ID: cd32
 
 Usage get flutterUsage => Usage.instance;
 
