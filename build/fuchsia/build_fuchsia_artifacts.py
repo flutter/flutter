@@ -7,13 +7,15 @@
 """ Builds all Fuchsia artifacts vended by Flutter.
 """
 
-import subprocess
-import os
+import argparse
 import errno
-import sys
+import os
 import shutil
+import subprocess
+import sys
 
-_src_root_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
+_script_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
+_src_root_dir = os.path.join(_script_dir, '..', '..')
 _out_dir = os.path.join(_src_root_dir, 'out')
 _bucket_directory = os.path.join(_out_dir, 'fuchsia_bucket')
 
@@ -83,9 +85,42 @@ def BuildBucket():
   CopyToBucket('fuchsia_debug/icudtl.dat', 'flutter/debug/icudtl.dat')
   CopyToBucket('fuchsia_profile/icudtl.dat', 'flutter/profile/icudtl.dat')
   CopyToBucket('fuchsia_release/icudtl.dat', 'flutter/release/icudtl.dat')
+  
+def ProcessCIPDPakcage(upload):
+  # Copy the CIPD YAML template from the source directory to be next to the bucket
+  # we are about to package.
+  cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
+  CopyFiles(cipd_yaml, os.path.join(_bucket_directory, 'fuchsia.cipd.yaml'))
 
+  if upload:
+    command = [
+      'cipd',
+      'create',
+      '-pkg-def',
+      'fuchsia.cipd.yaml',
+      '-ref',
+      'latest',
+    ]
+  else:
+    command = [
+      'cipd',
+      'pkg-build',
+      '-pkg-def',
+      'fuchsia.cipd.yaml',
+      '-out',
+      os.path.join(_bucket_directory, 'fuchsia.cipd')
+    ]
+
+  subprocess.check_call(command, cwd=_bucket_directory)
 
 def main():
+  parser = argparse.ArgumentParser();
+
+  parser.add_argument('--upload', default=False, action='store_true',
+      help='If set, uploads the CIPD package and tags it as the latest.')
+
+  args = parser.parse_args()
+
   common_flags = [
     '--fuchsia',
     # The source does not require LTO and LTO is not wired up for targets.
@@ -123,6 +158,8 @@ def main():
   BuildNinjaTargets('fuchsia_release', targets_to_build)
 
   BuildBucket()
+
+  ProcessCIPDPakcage(args.upload)
 
 
 if __name__ == '__main__':
