@@ -232,7 +232,7 @@ class _DownloadRequest {
 
 // We set `autoUncompress` to false to ensure that we can trust the value of
 // the `Content-Length` HTTP header. We automatically uncompress the content
-// in our call to [consolidateHttpClientResponseBytes].
+// in our call to [consolidateHttpClientResponseBytesTransferable].
 final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 const Duration _idleDuration = Duration(seconds: 60);
 
@@ -260,7 +260,7 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
         throw Exception(
             'HTTP request failed, statusCode: ${response?.statusCode}, ${downloadRequest.uri}');
       }
-      final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
+      final TransferableTypedData transferable = await consolidateHttpClientResponseBytesTransferable(
           response,
           onBytesReceived: (int cumulative, int total) {
              downloadRequest.sendPort.send(_DownloadResponse.chunkEvent(

@@ -15,7 +15,7 @@ import 'package:mockito/mockito.dart';
 import '../flutter_test_alternative.dart';
 
 void main() {
-  group(consolidateHttpClientResponseBytes, () {
+  group(consolidateHttpClientResponseBytesTransferable, () {
     final Uint8List chunkOne = Uint8List.fromList(<int>[0, 1, 2, 3, 4, 5]);
     final Uint8List chunkTwo = Uint8List.fromList(<int>[6, 7, 8, 9, 10]);
     MockHttpClientResponse response;
@@ -47,7 +47,7 @@ void main() {
     test('Converts an HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
-      final List<int> bytes = (await consolidateHttpClientResponseBytes(response))
+      final List<int> bytes = (await consolidateHttpClientResponseBytesTransferable(response))
           .materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -55,7 +55,7 @@ void main() {
 
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
-      final List<int> bytes = (await consolidateHttpClientResponseBytes(response))
+      final List<int> bytes = (await consolidateHttpClientResponseBytesTransferable(response))
           .materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -63,7 +63,7 @@ void main() {
 
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
-      final List<int> bytes = (await consolidateHttpClientResponseBytes(response))
+      final List<int> bytes = (await consolidateHttpClientResponseBytesTransferable(response))
           .materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
@@ -73,7 +73,7 @@ void main() {
       final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
       when(response.contentLength).thenReturn(syntheticTotal);
       final List<int> records = <int>[];
-      await consolidateHttpClientResponseBytes(
+      await consolidateHttpClientResponseBytesTransferable(
         response,
         onBytesReceived: (int cumulative, int total) {
           records.addAll(<int>[cumulative, total]);
@@ -111,13 +111,13 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(response),
+      expect(consolidateHttpClientResponseBytesTransferable(response),
           throwsA(isInstanceOf<Exception>()));
     });
 
     test('Propagates error to Future return value if onBytesReceived throws', () async {
       when(response.contentLength).thenReturn(-1);
-      final Future<TransferableTypedData> result = consolidateHttpClientResponseBytes(
+      final Future<TransferableTypedData> result = consolidateHttpClientResponseBytesTransferable(
         response,
         onBytesReceived: (int cumulative, int total) {
           throw 'misbehaving callback';
@@ -158,14 +158,14 @@ void main() {
       test('Uncompresses GZIP bytes if autoUncompress is true and response.compressionState is compressed', () async {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = (await consolidateHttpClientResponseBytes(response)).materialize().asUint8List();
+        final List<int> bytes = (await consolidateHttpClientResponseBytesTransferable(response)).materialize().asUint8List();
         expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       });
 
       test('returns gzipped bytes if autoUncompress is false and response.compressionState is compressed', () async {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = (await consolidateHttpClientResponseBytes(response, autoUncompress: false)).materialize().asUint8List();
+        final List<int> bytes = (await consolidateHttpClientResponseBytesTransferable(response, autoUncompress: false)).materialize().asUint8List();
         expect(bytes, gzipped);
       });
 
@@ -173,7 +173,7 @@ void main() {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
         when(response.contentLength).thenReturn(gzipped.length);
         final List<int> records = <int>[];
-        await consolidateHttpClientResponseBytes(
+        await consolidateHttpClientResponseBytesTransferable(
           response,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);
@@ -193,7 +193,7 @@ void main() {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.decompressed);
         when(response.contentLength).thenReturn(syntheticTotal);
         final List<int> records = <int>[];
-        await consolidateHttpClientResponseBytes(
+        await consolidateHttpClientResponseBytesTransferable(
           response,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);

@@ -23,7 +23,7 @@ import 'dart:typed_data';
 /// returned to the client and the total size of the response may not be known
 /// until the request has been fully processed).
 ///
-/// This is used in [consolidateHttpClientResponseBytes].
+/// This is used in [consolidateHttpClientResponseBytesTransferable].
 typedef BytesReceivedCallback = void Function(int cumulative, int total);
 
 /// Efficiently converts the response body of an [HttpClientResponse] into a
@@ -44,7 +44,7 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// bytes from this method (assuming the response is sending compressed bytes),
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
-Future<TransferableTypedData> consolidateHttpClientResponseBytes(
+Future<TransferableTypedData> consolidateHttpClientResponseBytesTransferable(
   HttpClientResponse response, {
   bool autoUncompress = true,
   BytesReceivedCallback onBytesReceived,
@@ -94,6 +94,17 @@ Future<TransferableTypedData> consolidateHttpClientResponseBytes(
   }, onError: completer.completeError, cancelOnError: true);
 
   return completer.future;
+}
+
+@Deprecated('Use consolidateHttpClientReponseBytesTransferable instead')
+Future<Uint8List> consolidateHttpClientResponseBytes(
+    HttpClientResponse response, {
+      bool autoUncompress = true,
+      BytesReceivedCallback onBytesReceived,
+    }) async {
+  return (await consolidateHttpClientResponseBytesTransferable(response,
+      autoUncompress: autoUncompress,
+      onBytesReceived: onBytesReceived)).materialize().asUint8List();
 }
 
 class _OutputBuffer extends ByteConversionSinkBase {

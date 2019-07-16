@@ -121,9 +121,8 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-    final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(response);
-    final Uint8List bytes = transferable.materialize().asUint8List();
-    return bytes.buffer.asByteData();
+    final TransferableTypedData transferable = await consolidateHttpClientResponseBytesTransferable(response);
+    return transferable.materialize().asByteData();
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
