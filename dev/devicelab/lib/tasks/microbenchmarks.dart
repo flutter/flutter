@@ -31,6 +31,7 @@ TaskFunction createMicrobenchmarkTask() {
           final List<String> options = <String>[
             '-v',
             // --release doesn't work on iOS due to code signing issues
+            '--profile',
             '-d',
             device.deviceId,
           ];
