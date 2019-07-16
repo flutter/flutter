@@ -866,6 +866,7 @@ class FlutterPlatform extends PlatformPlugin {
       'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
+      'APP_NAME': flutterProject?.manifest?.appName ?? '',
     };
     if (buildTestAssets) {
       environment['UNIT_TEST_ASSETS'] = fs.path.join(
