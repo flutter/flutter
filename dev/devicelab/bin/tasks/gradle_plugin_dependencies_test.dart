@@ -44,7 +44,7 @@ Future<void> main() async {
       section('Add plugin that have conflicting dependencies');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
+      String content = pubspec.readAsStringSync();
 
       // `flutter_local_notifications` uses `androidx.core:core:1.0.1`
       // `firebase_core` and `firebase_messaging` use `androidx.core:core:1.0.0`.
@@ -52,7 +52,7 @@ Future<void> main() async {
         '\ndependencies:\n',
         '\ndependencies:\n  flutter_local_notifications: 0.7.1+3\n  firebase_core:\n  firebase_messaging:\n',
       );
-      await pubspec.writeAsString(content, flush: true);
+      pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {
         await flutter(
           'packages',

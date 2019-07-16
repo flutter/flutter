@@ -54,7 +54,10 @@ const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
 const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
-// Next ID: cd31
+
+const String kCommandBuildAarTargetPlatform = 'cd31';
+const String kCommandBuildAarProjectType = 'cd32';
+// Next ID: cd33
 
 Usage get flutterUsage => Usage.instance;
 

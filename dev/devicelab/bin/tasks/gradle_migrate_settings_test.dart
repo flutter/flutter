@@ -181,9 +181,3 @@ plugins.each { name, path ->
     }
   });
 }
-
-void checkFileExists(String file) {
-  if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
-  }
-}

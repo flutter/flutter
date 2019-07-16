@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
 final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
 
-/// Tests that AARs can be built on plugin projects.
+/// Tests that AARs can be built on module projects.
 Future<void> main() async {
   await task(() async {
 
@@ -38,12 +38,12 @@ Future<void> main() async {
       section('Add plugins');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
+      String content = pubspec.readAsStringSync();
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  device_info:\n  package_info:\n',
       );
-      await pubspec.writeAsString(content, flush: true);
+      pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {
         await flutter(
           'packages',

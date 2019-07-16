@@ -43,12 +43,12 @@ Future<void> main() async {
       section('Add plugin that uses support libraries');
 
       final File pubspec = File(path.join(projectDir.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
+      String content = pubspec.readAsStringSync();
       content = content.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n  firebase_auth: 0.7.0\n',
       );
-      await pubspec.writeAsString(content, flush: true);
+      pubspec.writeAsStringSync(content, flush: true);
       await inDirectory(projectDir, () async {
         await flutter(
           'packages',
