@@ -9,6 +9,7 @@ import android.app.Presentation;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -96,11 +97,7 @@ class SingleViewPresentation extends Presentation {
             Object createParams,
             OnFocusChangeListener focusChangeListener
     ) {
-        // By default alpha is not preserved for the VD's contents.
-        // We make the window translucent as a side effect of doing so is preserving alpha.
-        // There should not be extra performance cost for setting the window to be translucent as
-        // there is only a single window within the VD.
-        super(outerContext, display, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        super(outerContext, display);
         this.viewFactory = viewFactory;
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         this.viewId = viewId;
@@ -129,11 +126,7 @@ class SingleViewPresentation extends Presentation {
             OnFocusChangeListener focusChangeListener,
             boolean startFocused
     ) {
-        // By default alpha is not preserved for the VD's contents.
-        // We make the window translucent as a side effect of doing so is preserving alpha.
-        // There should not be extra performance cost for setting the window to be translucent as
-        // there is only a single window within the VD.
-        super(outerContext, display, android.R.style.Theme_Translucent_NoTitleBar_Fullscreen);
+        super(outerContext, display);
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         viewFactory = null;
         this.state = state;
@@ -148,6 +141,8 @@ class SingleViewPresentation extends Presentation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // This makes sure we preserve alpha for the VD's content.
+        getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
         if (state.fakeWindowViewGroup == null) {
             state.fakeWindowViewGroup = new FakeWindowViewGroup(getContext());
         }
