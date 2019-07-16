@@ -14,7 +14,7 @@ abstract class Page extends StatelessWidget {
   ///
   /// It will be shown on the main page as the text on the link which opens the page.
   final String title;
-  
+
   /// The key of the ListTile that navigates to the page.
   ///
   /// Used by the integration test to navigate to the corresponding page.
