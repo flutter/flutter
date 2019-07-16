@@ -121,7 +121,7 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-    final TransferableTypedData transferable = await consolidateHttpClientResponseBytesTransferable(response);
+    final TransferableTypedData transferable = await getHttpClientResponseBytes(response);
     return transferable.materialize().asByteData();
   }
 
