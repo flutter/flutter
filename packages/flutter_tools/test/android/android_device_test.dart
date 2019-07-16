@@ -17,7 +17,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -367,7 +366,7 @@ flutter:
 
     testUsingContext('returns the generated host port from stdout', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect(await forwarder.forward(123), equals(456));
     }, overrides: <Type, Generator>{
@@ -376,7 +375,7 @@ flutter:
 
     testUsingContext('returns the supplied host port when stdout is empty', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       expect(await forwarder.forward(123, hostPort: 456), equals(456));
     }, overrides: <Type, Generator>{
@@ -385,7 +384,7 @@ flutter:
 
     testUsingContext('returns the supplied host port when stdout is the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect(await forwarder.forward(123, hostPort: 456), equals(456));
     }, overrides: <Type, Generator>{
@@ -394,29 +393,34 @@ flutter:
 
     testUsingContext('throws an error when stdout is not blank nor the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
       expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
-  });
 
-  group('installApp', () {
-    final ProcessManager mockProcessManager = MockProcessManager();
-    final AndroidDevice device = AndroidDevice('1234');
+    testUsingContext('forwardedPorts returns empty list when forward failed', () {
+      when(mockProcessManager.runSync(argThat(contains('forward'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
 
-    testUsingContext('returns false if installation failed', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
-
-      final bool result = await device.installApp(AndroidPackageTest());
-      expect(result, isFalse);
-
+      expect(forwarder.forwardedPorts, equals(const <ForwardedPort>[]));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+  });
 
+  group('lastLogcatTimestamp', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    final AndroidDevice device = AndroidDevice('1234');
+
+    testUsingContext('returns null if shell command failed', () async {
+      when(mockProcessManager.runSync(argThat(contains('logcat'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+      expect(device.lastLogcatTimestamp, isNull);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 }
 

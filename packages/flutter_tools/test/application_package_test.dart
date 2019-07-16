@@ -129,6 +129,15 @@ void main() {
         ),
       );
     }, overrides: overrides);
+
+    testUsingContext('returns null when failed to extract manifest', () async {
+      final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
+      when(sdk.latestVersion).thenReturn(sdkVersion);
+      when(mockProcessManager.runSync(argThat(contains('logcat'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+
+      expect(AndroidApk.fromApk(null), isNull);
+    }, overrides: overrides);
   });
 
   group('ApkManifestData', () {

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' hide Platform;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -40,8 +41,12 @@ class VersionCommand extends FlutterCommand {
         <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
         workingDirectory: Cache.flutterRoot,
       );
-    } catch (error) {
-      throwToolExit('git tag failed: $error.');
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'Unable to get the tags. '
+        'This might be due to git not being installed or an internal error'
+        '\nError: $error.'
+      );
     }
     return runResult.toString().split('\n');
   }

@@ -382,7 +382,7 @@ class AndroidDevice extends Device {
       await runAdbCheckedAsync(<String>[
         'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
       ]);
-    } catch (error) {
+    } on ProcessException catch (error) {
       printError('adb shell failed to write the SHA hash: $error.');
       return false;
     }
@@ -634,7 +634,7 @@ class AndroidDevice extends Device {
         'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
       ]);
     } catch (error) {
-      printError('Unexpected failure from adb: $error.');
+      printError('Failed to extract the most recent timestamp from the Android log: $error.');
       return null;
     }
     final Match timeMatch = _timeRegExp.firstMatch(output);
@@ -961,7 +961,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
         <String>['forward', '--list']
       ));
     } catch (error) {
-      printError('Unexpected failure from adb: $error.');
+      printError('Failed to list forwarded ports: $error.');
       return ports;
     }
 

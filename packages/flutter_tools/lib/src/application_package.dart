@@ -114,19 +114,17 @@ class AndroidApk extends ApplicationPackage {
       return null;
     }
 
-    final List<String> aaptArgs = <String>[
-       aaptPath,
-      'dump',
-      'xmltree',
-      apk.path,
-      'AndroidManifest.xml',
-    ];
-
     String apptStdout;
     try {
-      apptStdout = runCheckedSync(aaptArgs);
+      apptStdout = runCheckedSync(<String>[
+        aaptPath,
+        'dump',
+        'xmltree',
+        apk.path,
+        'AndroidManifest.xml',
+      ]);
     } catch (error) {
-      printError('Unexpected failure from aapt: $error.');
+      printError('Failed to extract manifest from APK: $error.');
       return null;
     }
 

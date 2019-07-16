@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' hide Platform;
 
 import 'package:meta/meta.dart';
 
@@ -98,8 +99,14 @@ class UpgradeCommandRunner {
         'git', 'status', '-s'
       ], workingDirectory: Cache.flutterRoot);
       return result.stdout.trim().isNotEmpty;
-    } catch (e) {
-      throwToolExit('git status failed: $e');
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'The tool could not verify the status of the current flutter checkout. '
+        'This might be due to git not being installed or an internal error.'
+        'If it is okay to ignore potential local changes, then re-run this'
+        'command with --force.'
+        '\nError: $error.'
+      );
     }
     return false;
   }
@@ -136,8 +143,13 @@ class UpgradeCommandRunner {
       await runCheckedAsync(<String>[
         'git', 'reset', '--hard', tag,
       ], workingDirectory: Cache.flutterRoot);
-    } catch (error) {
-      throwToolExit('git reset failed: $error.');
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'Unable to upgrade Flutter: The tool could not update to the version $tag. '
+        'This may be due to git not being installed or an internal error.'
+        'Please ensure that git is installed on your computer and retry again.'
+        '\nError: $error.'
+      );
     }
   }
 

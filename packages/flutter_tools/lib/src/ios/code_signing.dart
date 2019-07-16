@@ -163,7 +163,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
       <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
     );
   } catch (error) {
-    printTrace('Unexpected failure from find-identity: $error.');
+    printTrace('Couldn\'t find the certificate: $error.');
     return null;
   }
 
