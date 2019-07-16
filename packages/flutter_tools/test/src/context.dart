@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -302,7 +302,7 @@ class MockUsage implements Usage {
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
 
   @override
-  void sendException(dynamic exception, StackTrace trace) { }
+  void sendException(dynamic exception) { }
 
   @override
   Stream<Map<String, dynamic>> get onSend => null;

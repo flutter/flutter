@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -23,8 +24,8 @@ import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../services.dart';
-import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
@@ -42,35 +43,99 @@ class IOSDeviceNotFoundError implements Exception {
 }
 
 class IMobileDevice {
-  const IMobileDevice();
+  IMobileDevice()
+      : _ideviceIdPath = artifacts.getArtifactPath(Artifact.ideviceId, platform: TargetPlatform.ios)
+          ?? 'idevice_id', // TODO(fujino): remove fallback once g3 updated
+        _ideviceinfoPath = artifacts.getArtifactPath(Artifact.ideviceinfo, platform: TargetPlatform.ios)
+          ?? 'ideviceinfo', // TODO(fujino): remove fallback once g3 updated
+        _idevicenamePath = artifacts.getArtifactPath(Artifact.idevicename, platform: TargetPlatform.ios)
+          ?? 'idevicename', // TODO(fujino): remove fallback once g3 updated
+        _idevicesyslogPath = artifacts.getArtifactPath(Artifact.idevicesyslog, platform: TargetPlatform.ios)
+          ?? 'idevicesyslog', // TODO(fujino): remove fallback once g3 updated
+        _idevicescreenshotPath = artifacts.getArtifactPath(Artifact.idevicescreenshot, platform: TargetPlatform.ios)
+          ?? 'idevicescreenshot' { // TODO(fujino): remove fallback once g3 updated
+        }
+  final String _ideviceIdPath;
+  final String _ideviceinfoPath;
+  final String _idevicenamePath;
+  final String _idevicesyslogPath;
+  final String _idevicescreenshotPath;
 
-  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
+  bool get isInstalled {
+    _isInstalled ??= exitsHappy(
+      <String>[
+        _ideviceIdPath,
+        '-h'
+      ],
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
+    );
+    return _isInstalled;
+  }
+  bool _isInstalled;
 
   /// Returns true if libimobiledevice is installed and working as expected.
   ///
   /// Older releases of libimobiledevice fail to work with iOS 10.3 and above.
   Future<bool> get isWorking async {
-    if (!isInstalled)
-      return false;
+    if (_isWorking != null) {
+      return _isWorking;
+    }
+    if (!isInstalled) {
+      _isWorking = false;
+      return _isWorking;
+    }
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    final Map<String, String> executionEnv = Map<String, String>.fromEntries(
+      <MapEntry<String, String>>[cache.dyLdLibEntry]
+    );
+    final ProcessResult ideviceResult = (await runAsync(
+      <String>[
+        _ideviceinfoPath,
+        '-u',
+        fakeIphoneId
+      ],
+      environment: executionEnv,
+    )).processResult;
     if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
-      return false;
+      _isWorking = false;
+      return _isWorking;
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isEmpty)
-      return true;
-
-    // Check that we can look up the names of any attached devices.
-    return await exitsHappyAsync(<String>['idevicename']);
+    final ProcessResult result = (await runAsync(
+      <String>[
+        _ideviceIdPath,
+        '-l',
+      ],
+      environment: executionEnv,
+    )).processResult;
+    if (result.exitCode == 0 && result.stdout.isEmpty) {
+      _isWorking = true;
+    } else {
+      // Check that we can look up the names of any attached devices.
+      _isWorking = await exitsHappyAsync(
+        <String>[_idevicenamePath],
+        environment: executionEnv,
+      );
+    }
+    return _isWorking;
   }
+  bool _isWorking;
 
   Future<String> getAvailableDeviceIDs() async {
     try {
-      final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
+      final ProcessResult result = await processManager.run(
+        <String>[
+          _ideviceIdPath,
+          '-l'
+        ],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry]
+        ),
+      );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout;
@@ -81,7 +146,18 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
+      final ProcessResult result = await processManager.run(
+        <String>[
+          _ideviceinfoPath,
+          '-u',
+          deviceID,
+          '-k',
+          key
+        ],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry]
+        ),
+      );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
@@ -93,11 +169,30 @@ class IMobileDevice {
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
+  Future<Process> startLogger(String deviceID) {
+    return runCommand(
+      <String>[
+        _idevicesyslogPath,
+        '-u',
+        deviceID,
+      ],
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
+    );
+  }
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
+    return runCheckedAsync(
+      <String>[
+        _idevicescreenshotPath,
+        outputFile.path
+      ],
+      environment: Map<String, String>.fromEntries(
+        <MapEntry<String, String>>[cache.dyLdLibEntry]
+      ),
+    );
   }
 }
 

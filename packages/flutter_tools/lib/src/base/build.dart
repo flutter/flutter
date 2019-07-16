@@ -15,7 +15,8 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/usage.dart';
+
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
