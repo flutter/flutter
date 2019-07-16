@@ -35,7 +35,6 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     fml::RefPtr<const DartSnapshot> shared_snapshot,
     TaskRunners task_runners,
     std::unique_ptr<Window> window,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::WeakPtr<ImageDecoder> image_decoder,
     std::string advisory_script_uri,
@@ -57,18 +56,17 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
   // being prepared to run.
   auto root_embedder_data = std::make_unique<std::shared_ptr<DartIsolate>>(
       std::make_shared<DartIsolate>(
-          settings,                      // settings
-          std::move(isolate_snapshot),   // isolate snapshot
-          std::move(shared_snapshot),    // shared snapshot
-          task_runners,                  // task runners
-          std::move(snapshot_delegate),  // snapshot delegate
-          std::move(io_manager),         // IO manager
-          std::move(image_decoder),      // Image Decoder
-          advisory_script_uri,           // advisory URI
-          advisory_script_entrypoint,    // advisory entrypoint
-          nullptr,                       // child isolate preparer
-          isolate_create_callback,       // isolate create callback
-          isolate_shutdown_callback      // isolate shutdown callback
+          settings,                     // settings
+          std::move(isolate_snapshot),  // isolate snapshot
+          std::move(shared_snapshot),   // shared snapshot
+          task_runners,                 // task runners
+          std::move(io_manager),        // IO manager
+          std::move(image_decoder),     // Image Decoder
+          advisory_script_uri,          // advisory URI
+          advisory_script_entrypoint,   // advisory entrypoint
+          nullptr,                      // child isolate preparer
+          isolate_create_callback,      // isolate create callback
+          isolate_shutdown_callback     // isolate shutdown callback
           ));
 
   std::tie(vm_isolate, embedder_isolate) = CreateDartVMAndEmbedderObjectPair(
@@ -106,7 +104,6 @@ DartIsolate::DartIsolate(const Settings& settings,
                          fml::RefPtr<const DartSnapshot> isolate_snapshot,
                          fml::RefPtr<const DartSnapshot> shared_snapshot,
                          TaskRunners task_runners,
-                         fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                          fml::WeakPtr<IOManager> io_manager,
                          fml::WeakPtr<ImageDecoder> image_decoder,
                          std::string advisory_script_uri,
@@ -117,7 +114,6 @@ DartIsolate::DartIsolate(const Settings& settings,
     : UIDartState(std::move(task_runners),
                   settings.task_observer_add,
                   settings.task_observer_remove,
-                  std::move(snapshot_delegate),
                   std::move(io_manager),
                   std::move(image_decoder),
                   advisory_script_uri,
@@ -599,7 +595,6 @@ Dart_Isolate DartIsolate::DartCreateAndStartServiceIsolate(
           vm_data->GetSharedSnapshot(),   // shared snapshot
           null_task_runners,              // task runners
           nullptr,                        // window
-          {},                             // snapshot delegate
           {},                             // IO Manager
           {},                             // Image Decoder
           DART_VM_SERVICE_ISOLATE_NAME,   // script uri
@@ -712,7 +707,6 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
             (*raw_embedder_isolate)->GetIsolateSnapshot(),  // isolate_snapshot
             (*raw_embedder_isolate)->GetSharedSnapshot(),   // shared_snapshot
             null_task_runners,                              // task_runners
-            fml::WeakPtr<SnapshotDelegate>{},               // snapshot_delegate
             fml::WeakPtr<IOManager>{},                      // io_manager
             fml::WeakPtr<ImageDecoder>{},                   // io_manager
             advisory_script_uri,         // advisory_script_uri

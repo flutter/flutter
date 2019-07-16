@@ -41,7 +41,6 @@ TEST_F(DartIsolateTest, RootIsolateCreationAndShutdown) {
       vm_data->GetSharedSnapshot(),       // shared snapshot
       std::move(task_runners),            // task runners
       nullptr,                            // window
-      {},                                 // snapshot delegate
       {},                                 // io manager
       {},                                 // image decoder
       "main.dart",                        // advisory uri
@@ -75,7 +74,6 @@ TEST_F(DartIsolateTest, IsolateShutdownCallbackIsInIsolateScope) {
       vm_data->GetSharedSnapshot(),       // shared snapshot
       std::move(task_runners),            // task runners
       nullptr,                            // window
-      {},                                 // snapshot delegate
       {},                                 // io manager
       {},                                 // image decoder
       "main.dart",                        // advisory uri
@@ -186,7 +184,6 @@ static void RunDartCodeInIsolate(DartVMRef& vm_ref,
       vm_data->GetSharedSnapshot(),       // shared snapshot
       std::move(task_runners),            // task runners
       nullptr,                            // window
-      {},                                 // snapshot delegate
       {},                                 // io manager
       {},                                 // image decoder
       "main.dart",                        // advisory uri

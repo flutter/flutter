@@ -14,7 +14,6 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/lib/ui/io_manager.h"
-#include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_snapshot.h"
@@ -47,7 +46,6 @@ class DartIsolate : public UIDartState {
       fml::RefPtr<const DartSnapshot> shared_snapshot,
       TaskRunners task_runners,
       std::unique_ptr<Window> window,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
       fml::WeakPtr<IOManager> io_manager,
       fml::WeakPtr<ImageDecoder> image_decoder,
       std::string advisory_script_uri,
@@ -60,7 +58,6 @@ class DartIsolate : public UIDartState {
               fml::RefPtr<const DartSnapshot> isolate_snapshot,
               fml::RefPtr<const DartSnapshot> shared_snapshot,
               TaskRunners task_runners,
-              fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
               fml::WeakPtr<IOManager> io_manager,
               fml::WeakPtr<ImageDecoder> image_decoder,
               std::string advisory_script_uri,
