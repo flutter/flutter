@@ -215,7 +215,7 @@ class Material extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ThemeData.applyElevationOverlay] which controls the whether
+  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
   ///     an overlay color will be applied to indicate elevation.
   ///   * [color] which may have an elevation overlay applied.
   ///
@@ -228,7 +228,7 @@ class Material extends StatefulWidget {
   /// [MaterialType.transparency].
   ///
   /// To support dark themes, if the surrounding
-  /// [ThemeData.applyElevationOverlay] is [true] and
+  /// [ThemeData.applyElevationOverlayColor] is [true] and
   /// this color is [ThemeData.colorScheme.surface] then a semi-transparent
   /// white will be composited on top this color to indicate the elevation.
   ///
@@ -321,8 +321,8 @@ class Material extends StatefulWidget {
 Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
   final ThemeData theme = Theme.of(context);
   if (elevation > 0.0 &&
-    theme.applyElevationOverlay &&
-    background == theme.colorScheme.surface) {
+      theme.applyElevationOverlayColor &&
+      background == theme.colorScheme.surface) {
 
     // Compute the opacity for the given elevation
     // This formula matches the values in the spec:

@@ -37,7 +37,7 @@ Widget buildMaterial({
   );
 }
 
-RenderPhysicalShape getShadow(WidgetTester tester) {
+RenderPhysicalShape getModel(WidgetTester tester) {
   return tester.renderObject(find.byType(PhysicalShape));
 }
 
@@ -171,23 +171,23 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(elevation: 0.0));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.elevation, equals(0.0));
 
     await tester.pumpWidget(buildMaterial(elevation: 9.0));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.elevation, equals(0.0));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.elevation, closeTo(0.0, 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.elevation, equals(9.0));
   });
 
@@ -196,42 +196,42 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFFFF0000)));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 
   group('Elevation Overlay', () {
 
-    testWidgets('applyElevationOverlay set to false does not change surface color', (WidgetTester tester) async {
+    testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
       const Color surfaceColor = Color(0xFF121212);
       await tester.pumpWidget(Theme(
           data: ThemeData(
-            applyElevationOverlay: false,
+            applyElevationOverlayColor: false,
             colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
           ),
           child: buildMaterial(color: surfaceColor, elevation: 8.0))
       );
-      final RenderPhysicalShape model = getShadow(tester);
+      final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(surfaceColor));
     });
 
-    testWidgets('applyElevationOverlay set to true overlays a transparent white on surface color', (WidgetTester tester) async {
+    testWidgets('applyElevationOverlayColor set to true overlays a transparent white on surface color', (WidgetTester tester) async {
       // The colors we should get with a base surface color of 0xFF121212 for
       // a given elevation
       const List<ElevationColor> elevationColors = <ElevationColor>[
@@ -252,7 +252,7 @@ void main() {
         await tester.pumpWidget(
             Theme(
               data: ThemeData(
-                applyElevationOverlay: true,
+                applyElevationOverlayColor: true,
                 colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
               ),
               child: buildMaterial(
@@ -261,9 +261,8 @@ void main() {
               ),
             )
         );
-        await tester
-            .pumpAndSettle(); // wait for the elevation animation to finish
-        final RenderPhysicalShape model = getShadow(tester);
+        await tester.pumpAndSettle(); // wait for the elevation animation to finish
+        final RenderPhysicalShape model = getModel(tester);
         expect(model.color, equals(test.color));
       }
     });
@@ -272,7 +271,7 @@ void main() {
       await tester.pumpWidget(
           Theme(
             data: ThemeData(
-              applyElevationOverlay: true,
+              applyElevationOverlayColor: true,
               colorScheme: const ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
             ),
             child: buildMaterial(
@@ -281,7 +280,7 @@ void main() {
             ),
           )
       );
-      final RenderPhysicalShape model = getShadow(tester);
+      final RenderPhysicalShape model = getModel(tester);
       expect(model.color, equals(Colors.cyan));
     });
 

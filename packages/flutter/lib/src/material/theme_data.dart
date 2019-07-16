@@ -159,7 +159,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
-    bool applyElevationOverlay,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -229,7 +229,7 @@ class ThemeData extends Diagnosticable {
     final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
-    applyElevationOverlay ??= false;
+    applyElevationOverlayColor ??= false;
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
@@ -317,7 +317,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
-      applyElevationOverlay: applyElevationOverlay,
+      applyElevationOverlayColor: applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
@@ -387,7 +387,7 @@ class ThemeData extends Diagnosticable {
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
-    @required this.applyElevationOverlay,
+    @required this.applyElevationOverlayColor,
     @required this.pageTransitionsTheme,
     @required this.appBarTheme,
     @required this.bottomAppBarTheme,
@@ -688,8 +688,8 @@ class ThemeData extends Diagnosticable {
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
-  /// to the shadow. As the elevation of the component increases, the bright
-  /// overlay increases in opacity. [applyElevationOverlay] turns the
+  /// to the shadow. As the elevation of the component increases, the white
+  /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off.
   ///
   /// If [true] a semi-transparent white overlay will be applied to the color
@@ -703,17 +703,17 @@ class ThemeData extends Diagnosticable {
   ///
   /// Note: this setting is here to maintain backwards compatibility with
   /// apps that were built before the Material Dark theme specification
-  /// was published. New apps should set this to [true] for dark themes
-  /// (where [brightness] is [Brightness.dark].
+  /// was published. New apps should set this to [true] for any themes
+  /// where [brightness] is [Brightness.dark].
   ///
   /// See also:
   ///
-  ///  * [Material.elevation], which effects how transparent the overlay is.
-  ///  * [Material.color], which if it matches [colorScheme.surface] an overlay
-  ///    will be applied.
+  ///  * [Material.elevation], which effects how transparent the white overlay is.
+  ///  * [Material.color], the white color overlay will only be applied of the
+  ///    material's color is [colorScheme.surface].
   ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
   ///    the overlay should be applied.
-  final bool applyElevationOverlay;
+  final bool applyElevationOverlayColor;
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
@@ -815,7 +815,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
-    bool applyElevationOverlay,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -874,7 +874,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
-      applyElevationOverlay: applyElevationOverlay ?? this.applyElevationOverlay,
+      applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
@@ -1011,7 +1011,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
-      applyElevationOverlay: t < 0.5 ? a.applyElevationOverlay : b.applyElevationOverlay,
+      applyElevationOverlayColor: t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
@@ -1076,7 +1076,7 @@ class ThemeData extends Diagnosticable {
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
-           (otherData.applyElevationOverlay == applyElevationOverlay) &&
+           (otherData.applyElevationOverlayColor == applyElevationOverlayColor) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.appBarTheme == appBarTheme) &&
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
@@ -1140,7 +1140,7 @@ class ThemeData extends Diagnosticable {
       chipTheme,
       platform,
       materialTapTargetSize,
-      applyElevationOverlay,
+      applyElevationOverlayColor,
       pageTransitionsTheme,
       appBarTheme,
       bottomAppBarTheme,
@@ -1201,7 +1201,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
-    properties.add(DiagnosticsProperty<bool>('applyDarkThemeElevationOverlay', applyElevationOverlay));
+    properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
