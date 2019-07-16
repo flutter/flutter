@@ -1,4 +1,4 @@
-Signature: 100b8357730bae61fd46db9e14652402
+Signature: 93572b8069a882cb1f19267146b437fb
 
 UNUSED LICENSES:
 
@@ -5369,6 +5369,8 @@ FILE: ../../../third_party/skia/src/shaders/SkShader.cpp
 FILE: ../../../third_party/skia/src/shaders/gradients/SkGradientShader.cpp
 FILE: ../../../third_party/skia/src/utils/SkBase64.cpp
 FILE: ../../../third_party/skia/src/utils/SkCamera.cpp
+FILE: ../../../third_party/skia/src/utils/SkMetaData.cpp
+FILE: ../../../third_party/skia/src/utils/SkMetaData.h
 FILE: ../../../third_party/skia/src/utils/SkParse.cpp
 FILE: ../../../third_party/skia/src/utils/SkParseColor.cpp
 FILE: ../../../third_party/skia/src/xml/SkDOM.cpp
