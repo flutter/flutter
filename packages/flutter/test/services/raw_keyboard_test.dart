@@ -557,7 +557,7 @@ void main() {
         'modifiers': 0x0,
       });
       // The expected keyId is the combination of both unicode scalar values.
-      int expectedKeyId = ('a'.codeUnitAt(0) << 16) | 'q'.codeUnitAt(0);
+      final int expectedKeyId = ('a'.codeUnitAt(0) << 16) | 'q'.codeUnitAt(0);
       final RawKeyEventDataLinux data = keyAQEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey.keyId, equals(expectedKeyId));
