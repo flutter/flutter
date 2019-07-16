@@ -376,6 +376,32 @@ void main() {
     // If the above bug is present this test will never terminate.
   });
 
+    testWidgets('Really small deficit double precision error (redistributing deficit)', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/36256
+    const SizedBox cell = SizedBox(width: 1, height: 1);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          columnWidths: const <int, TableColumnWidth>{
+            0: FlexColumnWidth(1.0),
+            1: FlexColumnWidth(0.123),
+            2: FlexColumnWidth(0.123),
+            3: FlexColumnWidth(0.123),
+            4: FlexColumnWidth(0.123),
+            5: FlexColumnWidth(0.123),
+            6: FlexColumnWidth(0.123),
+          },
+          children: <TableRow>[
+            TableRow(children: List<Widget>.filled(7, cell)),
+            TableRow(children: List<Widget>.filled(7, cell)),
+          ],
+        ),
+      ),
+    );
+    // If the above bug is present this test will never terminate.
+  });
+
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

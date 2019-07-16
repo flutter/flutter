@@ -943,7 +943,7 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > 0.0) {
+      if (deficit > minimumDeficit) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
@@ -967,7 +967,7 @@ class RenderTable extends RenderBox {
             }
           }
           availableColumns = newAvailableColumns;
-        } while (deficit > 0.0 && availableColumns > 0);
+        } while (deficit > minimumDeficit && availableColumns > 0);
       }
     }
     return widths;
