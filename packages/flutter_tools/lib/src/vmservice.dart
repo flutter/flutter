@@ -140,10 +140,10 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('registerService', <String, String>{
+      _peer.sendRequest('registerService', <String, String>{
         'service': 'reloadSources',
         'alias': 'Flutter Tools',
-      });
+      }).catchError(printError);
     }
 
     if (restart != null) {
@@ -166,10 +166,10 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('registerService', <String, String>{
+      _peer.sendRequest('registerService', <String, String>{
         'service': 'hotRestart',
         'alias': 'Flutter Tools',
-      });
+      }).catchError(printError);
     }
 
     if (compileExpression != null) {
@@ -204,10 +204,10 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('registerService', <String, String>{
+      _peer.sendRequest('registerService', <String, String>{
         'service': 'compileExpression',
         'alias': 'Flutter Tools',
-      });
+      }).catchError(printError);
     }
   }
 
