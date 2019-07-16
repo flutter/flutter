@@ -75,6 +75,7 @@ class Usage {
           version,
           documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null,
         ) :
+        // Used for testing.
         LogToFileAnalytics(logFilePath);
 
     // Report a more detailed OS version string than package:usage does by default.
@@ -209,6 +210,9 @@ class Usage {
   }
 }
 
+// An Analytics mock that logs to file. Unimplemented methods goes to stdout.
+// But stdout can't be used for testing since wrapper scripts like
+// xcode_backend.sh etc manipulates them.
 class LogToFileAnalytics extends AnalyticsMock {
   LogToFileAnalytics(String logFilePath) :
     logFile = fs.file(logFilePath)..createSync(recursive: true),
