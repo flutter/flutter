@@ -409,7 +409,7 @@ class FlutterDriver {
 
     final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
     final WebSocket ws = await WebSocket.connect(webSocketUrl);
-    ws.done.then((dynamic _) => _checkCloseCode(ws));
+    ws.done.whenComplete(() => _checkCloseCode(ws));
     _peer = rpc.Peer(
         IOWebSocketChannel(ws).cast(),
         onUnhandledError: _unhandledJsonRpcError,
@@ -1138,8 +1138,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws1 = await WebSocket.connect(webSocketUrl);
       ws2 = await WebSocket.connect(webSocketUrl);
 
-      ws1.done.then((dynamic _) => _checkCloseCode(ws1));
-      ws2.done.then((dynamic _) => _checkCloseCode(ws2));
+      ws1.done.whenComplete(() => _checkCloseCode(ws1));
+      ws2.done.whenComplete(() => _checkCloseCode(ws2));
 
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
