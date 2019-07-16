@@ -31,7 +31,6 @@ TaskFunction createMicrobenchmarkTask() {
           final List<String> options = <String>[
             '-v',
             // --release doesn't work on iOS due to code signing issues
-            '--profile',
             '-d',
             device.deviceId,
           ];
@@ -55,6 +54,8 @@ TaskFunction createMicrobenchmarkTask() {
       ...await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await _runMicrobench('lib/gestures/gesture_detector_bench.dart'),
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
+      ...await _runMicrobench('lib/language/sync_star_bench.dart'),
+      ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
     };
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
