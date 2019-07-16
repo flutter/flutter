@@ -11,7 +11,8 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 
 class MutationCompositionPage extends Page {
   const MutationCompositionPage()
-      : super('Mutation composition', const ValueKey<String>('MutationPage'));
+      : super('Mutation Composition Tests',
+            const ValueKey<String>('MutationPage'));
 
   @override
   Widget build(BuildContext context) {
@@ -25,35 +26,70 @@ class MutationCompositionBody extends StatefulWidget {
 }
 
 class MutationCompositionBodyState extends State<MutationCompositionBody> {
-  static const int kEventsBufferSize = 1000;
-
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      clipper: RRectClipper(),
-      child: ClipRect(
-        clipper: RectClipper(),
-        child: Transform.scale(
-          scale: 0.5,
-          child: Opacity(
-            opacity: 0.2,
-            child: Opacity(
-                opacity: 0.5,
-                child: Transform.rotate(
-                  angle: 2.3,
-                  child: ClipPath(
-                    clipper: PathClipper(),
-                    child: Transform.translate(
-                      offset: const Offset(0, 30),
-                      child: const SimplePlatformView(
-                          key: ValueKey<String>('platform_view')),
-                    ),
-                  ),
-                )),
+    return Container(
+      child: Row(
+        children: [
+          Column(
+            children: <Widget>[
+              composition1(platformViewToMutate('0')),
+              composition2(platformViewToMutate('1')),
+              composition3(platformViewToMutate('2'))
+            ],
           ),
-        ),
+          Column(
+            children: <Widget>[
+              composition1(containerToMutate()),
+              composition2(containerToMutate()),
+              composition3(containerToMutate())
+            ],
+          )
+        ],
+      ),
+      padding: const EdgeInsets.all(40),
+    );
+  }
+
+  Widget composition1(Widget child) {
+    return Transform.scale(
+      scale: 0.5,
+      child: Opacity(
+        opacity: 0.2,
+        child: Opacity(
+            opacity: 0.5,
+            child: Transform.rotate(
+              angle: 1,
+              child: ClipRect(
+                clipper: RectClipper(),
+                child: Transform.translate(
+                  offset: const Offset(0, 30),
+                  child: child,
+                ),
+              ),
+            )),
       ),
     );
+  }
+
+  Widget composition2(Widget child) {
+    return ClipRRect(clipper: RRectClipper(), child: child);
+  }
+
+  Widget composition3(Widget child) {
+    return ClipPath(clipper: PathClipper(), child: child);
+  }
+
+  Widget containerToMutate() {
+    return Container(
+        width: 150, height: 150, child: Container(color: Color(0xFF0000FF)));
+  }
+
+  Widget platformViewToMutate(String id) {
+    return Container(
+        width: 150,
+        height: 150,
+        child: SimplePlatformView(key: ValueKey<String>('platform_view+$id')));
   }
 }
 
@@ -66,11 +102,11 @@ class PathClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final Path path = Path();
-    path.moveTo(20, 20);
-    path.lineTo(20, 50);
-    path.lineTo(40, 50);
-    path.quadraticBezierTo(50, 50, 60, 40);
-    path.cubicTo(60, 40, 70, 40, 60, 30);
+    path.moveTo(75, 0);
+    path.lineTo(0, 100);
+    path.quadraticBezierTo(37.5, 150, 75, 100);
+    path.lineTo(0, 100);
+    path.cubicTo(90, 150, 120, 130, 150, 100);
     path.close();
     return path;
   }
@@ -84,7 +120,7 @@ class RectClipper extends CustomClipper<Rect> {
 
   @override
   Rect getClip(Size size) {
-    return const Rect.fromLTRB(100, 20, 200, 200);
+    return const Rect.fromLTRB(10, 10, 100, 100);
   }
 }
 
@@ -96,7 +132,7 @@ class RRectClipper extends CustomClipper<RRect> {
 
   @override
   RRect getClip(Size size) {
-    return RRect.fromLTRBAndCorners(20, 100, 80, 200,
+    return RRect.fromLTRBAndCorners(10, 10, 100, 100,
         topLeft: const Radius.circular(10),
         bottomRight: const Radius.circular(10));
   }

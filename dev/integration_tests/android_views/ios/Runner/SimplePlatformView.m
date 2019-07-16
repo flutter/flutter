@@ -6,7 +6,7 @@
 
 @interface SimplePlatformView()
 
-@property (strong, nonatomic) UIView *view;
+@property (strong, nonatomic) UIView *platformView;
 @property (assign, nonatomic) int64_t viewId;
 @property (strong, nonatomic) FlutterMethodChannel* channel;
 
@@ -21,8 +21,8 @@
 {
   self = [super init];
   if (self) {
-    self.view = [[UIView alloc] initWithFrame:frame];
-    self.view.backgroundColor = [UIColor blueColor];
+    self.platformView = [[UIView alloc] initWithFrame:frame];
+    self.platformView.backgroundColor = [UIColor blueColor];
     NSString* channelName =
     [NSString stringWithFormat:@"simple_view/%lld", viewId];
     self.channel = [FlutterMethodChannel methodChannelWithName:channelName
@@ -38,7 +38,7 @@
 }
 
 - (UIView *)view {
-  return self.view;
+  return self.platformView;
 }
 
 - (void)onMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {

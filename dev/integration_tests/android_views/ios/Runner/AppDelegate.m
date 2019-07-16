@@ -4,12 +4,17 @@
 
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
+#import "SimplePlatformView.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [GeneratedPluginRegistrant registerWithRegistry:self];
+
+  NSObject<FlutterPluginRegistrar> *registrar = [self registrarForPlugin:@"io.flutter.integration.platformViews"];
+  SimplePlatformViewFactory *simplePlatformViewFactory = [[SimplePlatformViewFactory alloc] initWithRegistrar:registrar];
+  [registrar registerViewFactory:simplePlatformViewFactory withId:@"simple_view"];
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
