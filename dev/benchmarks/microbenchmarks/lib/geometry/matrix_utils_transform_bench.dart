@@ -25,15 +25,7 @@ void main() {
     );
   }
 
-  // The number of transforms (and perspective transforms) provided as data
-  // should be relatively prime to the number of rectangles or points provided
-  // so that the benchmark loops end up applying each transform to each point
-  // or rect. Benchmarks don't have asserts enabled, but essentially:
-  //  assert(_rects.length.gcd(_transforms.length) == 1);
-  //  assert(_rects.length.gcd(_perspectiveTransforms.length) == 1);
-  //  assert(_offsets.length.gcd(_perspectiveTransforms.length) == 1);
-  //  assert(_offsets.length.gcd(_transforms.length) == 1);
-  final List<Matrix4> _transforms = <Matrix4>[
+  final List<Matrix4> _affineTransforms = <Matrix4>[
     Matrix4.identity()..scale(1.2, 1.3, 1.0)..rotateZ(0.1),
     Matrix4.identity()..translate(12.0, 13.0, 10.0),
     Matrix4.identity()..scale(1.2, 1.3, 1.0)..translate(12.0, 13.0, 10.0),
@@ -43,7 +35,7 @@ void main() {
     _makePerspective( 8.0, math.pi / 8.0, 0.2),
     _makePerspective( 1.0, math.pi / 4.0, 0.1)..rotateX(0.1),
   ];
-  final List<Rect> _rects = <Rect>[
+  final List<Rect> _rectangles = <Rect>[
     const Rect.fromLTRB(1.1, 1.2, 1.5, 1.8),
     const Rect.fromLTRB(1.1, 1.2, 0.0, 1.0),
     const Rect.fromLTRB(1.1, 1.2, 1.3, 1.0),
@@ -57,14 +49,23 @@ void main() {
     const Offset(-1.1, -1.2),
     const Offset(-1.5, -1.8),
   ];
+  final int nAffine = _affineTransforms.length;
+  final int nPerspective = _perspectiveTransforms.length;
+  final int nRectangles = _rectangles.length;
+  final int nOffsets = _offsets.length;
 
   // Warm up lap
   for (int i = 0; i < _kNumWarmUp; i += 1) {
-    final Rect rect = _rects[i % _rects.length];
-    final Offset offset = _offsets[i % _offsets.length];
-    final Matrix4 transform = (i > _kNumWarmUp / 2)
-        ? _perspectiveTransforms[i % _perspectiveTransforms.length]
-        : _transforms[i % _transforms.length];
+    final Matrix4 transform = _perspectiveTransforms[i % nPerspective];
+    final Rect rect = _rectangles[(i ~/ nPerspective) % nRectangles];
+    final Offset offset = _offsets[(i ~/ nPerspective) % nOffsets];
+    MatrixUtils.transformRect(transform, rect);
+    MatrixUtils.transformPoint(transform, offset);
+  }
+  for (int i = 0; i < _kNumWarmUp; i += 1) {
+    final Matrix4 transform = _affineTransforms[i % nAffine];
+    final Rect rect = _rectangles[(i ~/ nAffine) % nRectangles];
+    final Offset offset = _offsets[(i ~/ nAffine) % nOffsets];
     MatrixUtils.transformRect(transform, rect);
     MatrixUtils.transformPoint(transform, offset);
   }
@@ -72,8 +73,8 @@ void main() {
   final Stopwatch watch = Stopwatch();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    final Rect rect = _rects[i % _rects.length];
-    final Matrix4 transform = _perspectiveTransforms[i % _perspectiveTransforms.length];
+    final Matrix4 transform = _perspectiveTransforms[i % nPerspective];
+    final Rect rect = _rectangles[(i ~/ nPerspective) % nRectangles];
     MatrixUtils.transformRect(transform, rect);
   }
   watch.stop();
@@ -82,8 +83,8 @@ void main() {
   watch.reset();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    final Rect rect = _rects[i % _rects.length];
-    final Matrix4 transform = _transforms[i % _transforms.length];
+    final Matrix4 transform = _affineTransforms[i % nAffine];
+    final Rect rect = _rectangles[(i ~/ nAffine) % nRectangles];
     MatrixUtils.transformRect(transform, rect);
   }
   watch.stop();
@@ -92,8 +93,8 @@ void main() {
   watch.reset();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    final Offset offset = _offsets[i % _offsets.length];
-    final Matrix4 transform = _perspectiveTransforms[i % _perspectiveTransforms.length];
+    final Matrix4 transform = _perspectiveTransforms[i % nPerspective];
+    final Offset offset = _offsets[(i ~/ nPerspective) % nOffsets];
     MatrixUtils.transformPoint(transform, offset);
   }
   watch.stop();
@@ -102,8 +103,8 @@ void main() {
   watch.reset();
   watch.start();
   for (int i = 0; i < _kNumIterations; i += 1) {
-    final Offset offset = _offsets[i % _offsets.length];
-    final Matrix4 transform = _transforms[i % _transforms.length];
+    final Matrix4 transform = _affineTransforms[i % nAffine];
+    final Offset offset = _offsets[(i ~/ nAffine) % nOffsets];
     MatrixUtils.transformPoint(transform, offset);
   }
   watch.stop();
