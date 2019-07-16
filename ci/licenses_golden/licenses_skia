@@ -1,4 +1,4 @@
-Signature: f84b8147876ecdf9eaf696d1e8ebd934
+Signature: 21cac08d0c2b4d16795b7801e2d248ee
 
 UNUSED LICENSES:
 
@@ -5795,9 +5795,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/infra/bots/gen_tasks.go + ../../../LICENSE
+ORIGIN: ../../../third_party/skia/infra/bots/gen_tasks_logic/gen_tasks_logic.go + ../../../LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/infra/bots/gen_tasks.go
+FILE: ../../../third_party/skia/infra/bots/gen_tasks_logic/gen_tasks_logic.go
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Chromium Authors. All rights reserved.
 
