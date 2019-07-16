@@ -10,7 +10,7 @@ void main() {
   test('light scheme matches the spec', () {
     // Colors should match the The Material Design baseline default theme:
     // https://material.io/design/color/dark-theme.html#ui-application
-    final ColorScheme scheme = ColorScheme.light();
+    const ColorScheme scheme = ColorScheme.light();
     expect(scheme.primary, const Color(0xff6200ee));
     expect(scheme.primaryVariant, const Color(0xff3700b3));
     expect(scheme.secondary, const Color(0xff03dac6));
@@ -29,7 +29,7 @@ void main() {
   test('dark scheme matches the spec', () {
     // Colors should match the The Material Design baseline dark theme:
     // https://material.io/design/color/dark-theme.html#ui-application
-    final ColorScheme scheme = ColorScheme.dark();
+    const ColorScheme scheme = ColorScheme.dark();
     expect(scheme.primary, const Color(0xffbb86fc));
     expect(scheme.primaryVariant, const Color(0xff3700b3));
     expect(scheme.secondary, const Color(0xff03dac6));
