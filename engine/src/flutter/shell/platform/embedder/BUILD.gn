@@ -153,13 +153,18 @@ if (is_mac && !embedder_for_target) {
     ]
   }
 
-  copy("copy_info_plist") {
+  action("copy_info_plist") {
+    script = "$flutter_root/build/copy_info_plist.py"
     visibility = [ ":*" ]
     sources = [
       "assets/EmbedderInfo.plist",
     ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist",
+    ]
+    args = [
+      rebase_path(sources[0]),
+      rebase_path(outputs[0]),
     ]
   }
 

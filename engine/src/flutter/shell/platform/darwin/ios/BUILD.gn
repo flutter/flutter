@@ -177,13 +177,18 @@ action("copy_dylib_and_update_framework_install_name") {
   ]
 }
 
-copy("copy_framework_info_plist") {
+action("copy_framework_info_plist") {
+  script = "$flutter_root/build/copy_info_plist.py"
   visibility = [ ":*" ]
   sources = [
     "framework/Info.plist",
   ]
   outputs = [
     "$_flutter_framework_dir/Info.plist",
+  ]
+  args = [
+    rebase_path(sources[0]),
+    rebase_path(outputs[0]),
   ]
 }
 
