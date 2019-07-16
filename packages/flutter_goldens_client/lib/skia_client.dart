@@ -73,7 +73,7 @@ class SkiaGoldClient extends GoldensClient {
       return;
 
     if (_serviceAccount.isEmpty) {
-      final StringBuffer buf = StringBuffer()..writeln('Gold service accout is unavailable.');
+      final StringBuffer buf = StringBuffer()..writeln('Gold service account is unavailable.');
       throw NonZeroExitCode(1, buf.toString());
     }
 
@@ -124,6 +124,8 @@ class SkiaGoldClient extends GoldensClient {
       '--failure-file', failures.path,
       '--passfail',
     ];
+
+    print('imgTestInitArgs: $imgtestInitArguments');
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer();
@@ -183,7 +185,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return 'e91822da24c013aa6f21d03ed3af3587923d9fd2';
+    return '1387e7fe3228d95ef240b8615140ab8a00969712';
 //    if (!flutterRoot.existsSync()) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter root could not be found: $flutterRoot');
