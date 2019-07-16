@@ -400,5 +400,70 @@ TEST_F(EmbedderTest, PlatformMessagesCanBeSentWithoutResponseHandles) {
   message.Wait();
 }
 
+//------------------------------------------------------------------------------
+/// Tests that a null platform message can be sent.
+///
+TEST_F(EmbedderTest, NullPlatformMessagesCanBeSent) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+
+  builder.SetDartEntrypoint("null_platform_messages");
+
+  fml::AutoResetWaitableEvent ready, message;
+  context.AddNativeCallback(
+      "SignalNativeTest",
+      CREATE_NATIVE_ENTRY(
+          [&ready](Dart_NativeArguments args) { ready.Signal(); }));
+  context.AddNativeCallback(
+      "SignalNativeMessage",
+      CREATE_NATIVE_ENTRY(([&message](Dart_NativeArguments args) {
+        auto received_message = tonic::DartConverter<std::string>::FromDart(
+            Dart_GetNativeArgument(args, 0));
+        ASSERT_EQ("true", received_message);
+        message.Signal();
+      })));
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+  ready.Wait();
+
+  FlutterPlatformMessage platform_message = {};
+  platform_message.struct_size = sizeof(FlutterPlatformMessage);
+  platform_message.channel = "test_channel";
+  platform_message.message = nullptr;
+  platform_message.message_size = 0;
+  platform_message.response_handle = nullptr;  // No response needed.
+
+  auto result =
+      FlutterEngineSendPlatformMessage(engine.get(), &platform_message);
+  ASSERT_EQ(result, kSuccess);
+  message.Wait();
+}
+
+//------------------------------------------------------------------------------
+/// Tests that a null platform message cannot be send if the message_size
+/// isn't equals to 0.
+///
+TEST_F(EmbedderTest, InvalidPlatformMessages) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterPlatformMessage platform_message = {};
+  platform_message.struct_size = sizeof(FlutterPlatformMessage);
+  platform_message.channel = "test_channel";
+  platform_message.message = nullptr;
+  platform_message.message_size = 1;
+  platform_message.response_handle = nullptr;  // No response needed.
+
+  auto result =
+      FlutterEngineSendPlatformMessage(engine.get(), &platform_message);
+  ASSERT_EQ(result, kInvalidArguments);
+}
+
 }  // namespace testing
 }  // namespace flutter
