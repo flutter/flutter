@@ -42,7 +42,6 @@ Engine::Engine(Delegate& delegate,
                TaskRunners task_runners,
                Settings settings,
                std::unique_ptr<Animator> animator,
-               fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                fml::WeakPtr<IOManager> io_manager)
     : delegate_(delegate),
       settings_(std::move(settings)),
@@ -62,7 +61,6 @@ Engine::Engine(Delegate& delegate,
       std::move(isolate_snapshot),           // isolate snapshot
       std::move(shared_snapshot),            // shared snapshot
       std::move(task_runners),               // task runners
-      std::move(snapshot_delegate),          // snapshot delegate
       std::move(io_manager),                 // io manager
       image_decoder_.GetWeakPtr(),           // image decoder
       settings_.advisory_script_uri,         // advisory script uri

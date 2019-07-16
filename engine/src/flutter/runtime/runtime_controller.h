@@ -33,7 +33,6 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<const DartSnapshot> isolate_snapshot,
                     fml::RefPtr<const DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
-                    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<IOManager> io_manager,
                     fml::WeakPtr<ImageDecoder> iamge_decoder,
                     std::string advisory_script_uri,
@@ -129,7 +128,6 @@ class RuntimeController final : public WindowClient {
   fml::RefPtr<const DartSnapshot> isolate_snapshot_;
   fml::RefPtr<const DartSnapshot> shared_snapshot_;
   TaskRunners task_runners_;
-  fml::WeakPtr<SnapshotDelegate> snapshot_delegate_;
   fml::WeakPtr<IOManager> io_manager_;
   fml::WeakPtr<ImageDecoder> image_decoder_;
   std::string advisory_script_uri_;
@@ -146,7 +144,6 @@ class RuntimeController final : public WindowClient {
                     fml::RefPtr<const DartSnapshot> isolate_snapshot,
                     fml::RefPtr<const DartSnapshot> shared_snapshot,
                     TaskRunners task_runners,
-                    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
                     fml::WeakPtr<IOManager> io_manager,
                     fml::WeakPtr<ImageDecoder> image_decoder,
                     std::string advisory_script_uri,

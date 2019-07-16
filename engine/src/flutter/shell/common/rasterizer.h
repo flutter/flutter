@@ -14,14 +14,13 @@
 #include "flutter/fml/closure.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/waitable_event.h"
-#include "flutter/lib/ui/snapshot_delegate.h"
 #include "flutter/shell/common/pipeline.h"
 #include "flutter/shell/common/surface.h"
 
 namespace flutter {
 
 /// Takes |LayerTree|s and draws its contents.
-class Rasterizer final : public SnapshotDelegate {
+class Rasterizer final {
  public:
   class Delegate {
    public:
@@ -52,8 +51,6 @@ class Rasterizer final : public SnapshotDelegate {
   void NotifyLowMemoryWarning() const;
 
   fml::WeakPtr<Rasterizer> GetWeakPtr() const;
-
-  fml::WeakPtr<SnapshotDelegate> GetSnapshotDelegate() const;
 
   flutter::LayerTree* GetLastLayerTree();
 
@@ -102,10 +99,6 @@ class Rasterizer final : public SnapshotDelegate {
   std::unique_ptr<flutter::LayerTree> last_layer_tree_;
   fml::closure next_frame_callback_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
-
-  // |SnapshotDelegate|
-  sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
-                                    SkISize picture_size) override;
 
   void DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
 

@@ -4,7 +4,10 @@
 
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:io';
+import 'package:image/image.dart' as dart_image;
 
+import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 typedef CanvasCallback = void Function(Canvas canvas);
@@ -15,7 +18,7 @@ void testCanvas(CanvasCallback callback) {
   } catch (error) { } // ignore: empty_catches
 }
 
-void main() {
+void testNoCrashes() {
   test('canvas APIs should not crash', () async {
     final Paint paint = Paint();
     const Rect rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
@@ -79,5 +82,73 @@ void main() {
     testCanvas((Canvas canvas) => canvas.skew(double.nan, double.nan));
     testCanvas((Canvas canvas) => canvas.transform(null));
     testCanvas((Canvas canvas) => canvas.translate(double.nan, double.nan));
+  });
+}
+
+/// @returns true When the images are resonably similar.
+/// @todo Make the search actually fuzzy to a certain degree.
+Future<bool> fuzzyCompareImages(Image golden, Image img) async {
+  if (golden.width != img.width || golden.height != img.height) {
+    return false;
+  }
+  int getPixel(ByteData data, int x, int y) => data.getUint32((x + y * golden.width) * 4);
+  final ByteData goldenData = await golden.toByteData();
+  final ByteData imgData = await img.toByteData();
+  for (int y = 0; y < golden.height; y++) {
+    for (int x = 0; x < golden.width; x++) {
+      if (getPixel(goldenData, x, y) != getPixel(imgData, x, y)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+/// @returns true When the images are resonably similar.
+Future<bool> fuzzyGoldenImageCompare(
+    Image image, String goldenImageName) async {
+  final String imagesPath = path.join('flutter', 'testing', 'resources');
+  final File file = File(path.join(imagesPath, goldenImageName));
+  final Uint8List goldenData = await file.readAsBytes();
+
+  final Codec codec = await instantiateImageCodec(goldenData);
+  final FrameInfo frame = await codec.getNextFrame();
+  expect(frame.image.height, equals(image.width));
+  expect(frame.image.width, equals(image.height));
+
+  final bool areEqual = await fuzzyCompareImages(frame.image, image);
+  if (!areEqual) {
+    final ByteData pngData = await image.toByteData();
+    final ByteBuffer buffer = pngData.buffer;
+    final dart_image.Image png = dart_image.Image.fromBytes(
+        image.width, image.height, buffer.asUint8List());
+    final String outPath = path.join(imagesPath, 'found_' + goldenImageName);
+    File(outPath)..writeAsBytesSync(dart_image.encodePng(png));
+    print('wrote: ' + outPath);
+  }
+  return areEqual;
+}
+
+void main() {
+  testNoCrashes();
+
+  test('Simple .toImage', () async {
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Path circlePath = Path()
+      ..addOval(
+          Rect.fromCircle(center: const Offset(40.0, 40.0), radius: 20.0));
+    final Paint paint = Paint()
+      ..isAntiAlias = false
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(circlePath, paint);
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(100, 100);
+    expect(image.width, equals(100));
+    expect(image.height, equals(100));
+
+    final bool areEqual =
+        await fuzzyGoldenImageCompare(image, 'canvas_test_toImage.png');
+    expect(areEqual, true);
   });
 }

@@ -2,6 +2,7 @@ name: engine_tests
 dependencies:
   test: 1.3.0
   path: 1.6.2
+  image: ^2.1.4
 
 dependency_overrides:
  sky_engine:

@@ -17,7 +17,6 @@ UIDartState::UIDartState(
     TaskRunners task_runners,
     TaskObserverAdd add_callback,
     TaskObserverRemove remove_callback,
-    fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
     fml::WeakPtr<IOManager> io_manager,
     fml::WeakPtr<ImageDecoder> image_decoder,
     std::string advisory_script_uri,
@@ -28,7 +27,6 @@ UIDartState::UIDartState(
     : task_runners_(std::move(task_runners)),
       add_callback_(std::move(add_callback)),
       remove_callback_(std::move(remove_callback)),
-      snapshot_delegate_(std::move(snapshot_delegate)),
       io_manager_(std::move(io_manager)),
       image_decoder_(std::move(image_decoder)),
       advisory_script_uri_(std::move(advisory_script_uri)),
@@ -113,10 +111,6 @@ void UIDartState::AddOrRemoveTaskObserver(bool add) {
   } else {
     remove_callback_(reinterpret_cast<intptr_t>(this));
   }
-}
-
-fml::WeakPtr<SnapshotDelegate> UIDartState::GetSnapshotDelegate() const {
-  return snapshot_delegate_;
 }
 
 fml::WeakPtr<GrContext> UIDartState::GetResourceContext() const {
