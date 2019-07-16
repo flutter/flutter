@@ -280,7 +280,6 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
-
   /// Returns the size of the Cupertino handle.
   @override
   Size getHandleSize(double textLineHeight) {

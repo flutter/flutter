@@ -4,27 +4,18 @@
 
 import 'dart:async';
 
-import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter/services.dart';
-import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
-
-final TextEditingController controller = TextEditingController();
-final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
-final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
-const TextStyle textStyle = TextStyle();
-const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
-
-enum HandlePositionInViewport {
-  leftEdge, rightEdge, within,
-}
 
 void main() {
   setUp(() {
@@ -1979,6 +1970,50 @@ void main() {
     expect(renderEditable.text.style.decoration, isNull);
   });
 
+  testWidgets('text selection handle color', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'XXXXX   XXXXX');
+    const Color handleColor = Color.fromARGB(255, 255, 155, 55);
+    await tester.pumpWidget(MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 100,
+            child: EditableText(
+              showSelectionHandles: true,
+              controller: controller,
+              focusNode: FocusNode(),
+              style: Typography(platform: TargetPlatform.android).black.subhead,
+              cursorColor: Colors.blue,
+              backgroundCursorColor: Colors.grey,
+              textSelectionHandleColor: handleColor,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
+
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pump();
+
+    final Iterable<RenderBox> renderBoxes = tester.renderObjectList<RenderBox>(
+      find.descendant(
+        of: find.byType(CompositedTransformFollower),
+        matching: find.byType(GestureDetector),
+      ),
+    );
+
+    expect(renderBoxes.length, 2);
+    for (RenderBox box in renderBoxes) {
+      expect(box, paints..rect(color: handleColor));
+    }
+  });
+
   testWidgets('text selection handle visibility', (WidgetTester tester) async {
     // Text with two separate words to select.
     const String testText = 'XXXXX          XXXXX';
@@ -2380,18 +2415,12 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   }, skip: isBrowser);
 }
+const Color cursorColor = Color.fromARGB(0xFF, 0xFF, 0x00, 0x00);
+const TextStyle textStyle = TextStyle();
+final TextEditingController controller = TextEditingController();
+final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 
-class MockTextSelectionControls extends Mock implements TextSelectionControls {
-  @override
-  Size getHandleSize(double textLineHeight) {
-    return Size.zero;
-  }
-
-  @override
-  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
-    return Offset.zero;
-  }
-}
+final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
@@ -2419,5 +2448,21 @@ class CustomStyleEditableTextState extends EditableTextState {
       style: const TextStyle(fontStyle: FontStyle.italic),
       text: widget.controller.value.text,
     );
+  }
+}
+
+enum HandlePositionInViewport {
+  leftEdge, rightEdge, within,
+}
+
+class MockTextSelectionControls extends Mock implements TextSelectionControls {
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
   }
 }
