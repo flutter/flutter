@@ -1,4 +1,4 @@
-name: android_views
+name: platform_views
 description: An integration test for embedded Android views
 version: 1.0.0+1
 

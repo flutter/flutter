@@ -6,7 +6,7 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="android_views">
+        android:label="platform_views">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
