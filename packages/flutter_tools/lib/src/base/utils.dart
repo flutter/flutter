@@ -27,7 +27,6 @@ class BotDetector {
 
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
         || platform.environment.containsKey('FLUTTER_HOST')
-        || platform.environment.containsKey('FLUTTER_PLATFORM_SCRIPT')
     ) {
       return false;
     }

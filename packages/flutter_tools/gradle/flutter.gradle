@@ -652,7 +652,6 @@ abstract class BaseFlutterTask extends DefaultTask {
         project.exec {
             executable flutterExecutable.absolutePath
             workingDir sourceDir
-            environment 'FLUTTER_PLATFORM_SCRIPT', 'true'
 
             if (localEngine != null) {
                 args "--local-engine", localEngine
