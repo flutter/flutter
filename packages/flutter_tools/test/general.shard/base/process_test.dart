@@ -2,17 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcess, MockProcessManager;
+import '../../src/mocks.dart' show FakeProcess, MockProcess, MockProcessManager;
 
 void main() {
   group('process exceptions', () {
@@ -89,6 +92,43 @@ void main() {
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
       Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
     });
+  });
+
+  group('runCommandAndStreamOutput', () {
+    ProcessManager mockProcessManager;
+    const Utf8Encoder utf8 = Utf8Encoder();
+
+    setUp(() {
+      mockProcessManager = PlainMockProcessManager();
+    });
+
+    testUsingContext('detach after detachFilter matches', () async {
+      // Create a fake process which outputs three lines ("foo", "bar" and "baz")
+      // to stdout, nothing to stderr, and doesn't exit.
+      final Process fake = FakeProcess(
+        exitCode: Completer<int>().future,
+        stdout: Stream<List<int>>.fromIterable(
+          <String>['foo\n', 'bar\n', 'baz\n'].map(utf8.convert)),
+        stderr: const Stream<List<int>>.empty());
+
+      when(mockProcessManager.start(<String>['test1'])).thenAnswer((_) => Future<Process>.value(fake));
+
+      // Detach when we see "bar", and check that:
+      //  - mapFunction still gets run on "baz",
+      //  - we don't wait for the process to terminate (it never will), and
+      //  - we get an exit-code of 0 back.
+      bool seenBaz = false;
+      String mapFunction(String line) {
+        seenBaz = seenBaz || line == 'baz';
+        return line;
+      }
+
+      final int exitCode = await runCommandAndStreamOutput(
+        <String>['test1'], mapFunction: mapFunction, detachFilter: RegExp('.*baz.*'));
+
+      expect(exitCode, 0);
+      expect(seenBaz, true);
+    }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
   });
 }
 

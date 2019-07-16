@@ -51,6 +51,7 @@ const String kCommandBuildBundleTargetPlatform = 'cd24';
 const String kCommandBuildBundleIsModule = 'cd25';
 
 const String kCommandResult = 'cd26';
+const String kCommandHasTerminal = 'cd31';
 
 const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
@@ -83,6 +84,8 @@ class Usage {
                  Config.instance.getValue(feature.configSetting) == true;
         })
         .map((Feature feature) => feature.configSetting)
+        .toList()
+        ..sort() // Keep flags in approximately the same order
         .join(',');
     _analytics.setSessionValue(kSessionHostOsDetails, enabledFeatures);
 
