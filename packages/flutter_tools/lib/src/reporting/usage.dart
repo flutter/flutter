@@ -7,15 +7,15 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
-import 'base/config.dart';
-import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/os.dart';
-import 'base/platform.dart';
-import 'base/utils.dart';
-import 'features.dart';
-import 'globals.dart';
-import 'version.dart';
+import '../base/config.dart';
+import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/utils.dart';
+import '../features.dart';
+import '../globals.dart';
+import '../version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
 
@@ -51,6 +51,7 @@ const String kCommandBuildBundleTargetPlatform = 'cd24';
 const String kCommandBuildBundleIsModule = 'cd25';
 
 const String kCommandResult = 'cd26';
+const String kCommandHasTerminal = 'cd31';
 
 const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
@@ -166,9 +167,9 @@ class Usage {
     }
   }
 
-  void sendException(dynamic exception, StackTrace trace) {
+  void sendException(dynamic exception) {
     if (!suppressAnalytics)
-      _analytics.sendException('${exception.runtimeType}\n${sanitizeStacktrace(trace)}');
+      _analytics.sendException(exception.runtimeType.toString());
   }
 
   /// Fires whenever analytics data is sent over the network.

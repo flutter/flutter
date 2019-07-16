@@ -599,4 +599,7 @@ class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent 
 
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
 
-class MockPeer extends Mock implements rpc.Peer { }
+class MockPeer extends Mock implements rpc.Peer {
+  @override
+  bool get isClosed => false;
+}

@@ -18,7 +18,7 @@ import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';

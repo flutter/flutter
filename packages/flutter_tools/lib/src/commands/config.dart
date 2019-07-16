@@ -9,8 +9,8 @@ import '../android/android_studio.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
