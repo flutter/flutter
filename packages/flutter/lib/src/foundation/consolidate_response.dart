@@ -27,7 +27,7 @@ import 'dart:typed_data';
 typedef BytesReceivedCallback = void Function(int cumulative, int total);
 
 /// Efficiently converts the response body of an [HttpClientResponse] into a
-/// [Uint8List].
+/// [TransferableTypedData].
 ///
 /// The future returned will forward any error emitted by `response`.
 ///
@@ -96,6 +96,24 @@ Future<TransferableTypedData> getHttpClientResponseBytes(
   return completer.future;
 }
 
+/// Efficiently converts the response body of an [HttpClientResponse] into a
+/// [Uint8List].
+///
+/// The future returned will forward any error emitted by `response`.
+///
+/// The `onBytesReceived` callback, if specified, will be invoked for every
+/// chunk of bytes that is received while consolidating the response bytes.
+/// If the callback throws an error, processing of the response will halt, and
+/// the returned future will complete with the error that was thrown by the
+/// callback. For more information on how to interpret the parameters to the
+/// callback, see the documentation on [BytesReceivedCallback].
+///
+/// If the `response` is gzipped and the `autoUncompress` parameter is true,
+/// this will automatically un-compress the bytes in the returned list if it
+/// hasn't already been done via [HttpClient.autoUncompress]. To get compressed
+/// bytes from this method (assuming the response is sending compressed bytes),
+/// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
+/// parameter to false.
 @Deprecated('Use getHttpClientReponseBytes instead')
 Future<Uint8List> consolidateHttpClientResponseBytes(
     HttpClientResponse response, {
