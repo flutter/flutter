@@ -5,26 +5,19 @@
 # found in the LICENSE file.
 
 """Get the Git HEAD revision of a specified Git repository."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import sys
 import subprocess
 import os
 import argparse
 
-def main():
-  parser = argparse.ArgumentParser();
-
-  parser.add_argument('--repository',
-                      action='store',
-                      help='Path to the Git repository.',
-                      required=True)
-
-  args = parser.parse_args()
-
-  repository = os.path.abspath(args.repository)
-
+def GetRepositoryVersion(repository):
+  "Returns the Git HEAD for the supplied repository path as a string."
   if not os.path.exists(repository):
-    exit -1
+    raise IOError("path doesn't exist")
 
   version = subprocess.check_output([
     'git',
@@ -34,7 +27,20 @@ def main():
     'HEAD',
   ])
 
-  print (version.strip())
+  return version.strip()
+
+def main():
+  parser = argparse.ArgumentParser()
+
+  parser.add_argument('--repository',
+                      action='store',
+                      help='Path to the Git repository.',
+                      required=True)
+
+  args = parser.parse_args()
+  repository = os.path.abspath(args.repository)
+  version = GetRepositoryVersion(repository)
+  print(version.strip())
 
   return 0
 
