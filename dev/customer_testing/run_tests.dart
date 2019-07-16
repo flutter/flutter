@@ -47,7 +47,23 @@ Future<bool> run(List<String> arguments) async {
       help: 'Print this help message.',
     );
 
-  final ArgResults parsedArguments = argParser.parse(arguments);
+  void printHelp() {
+    print('run_tests.dart [options...] path/to/file1.test path/to/file2.test...');
+    print('For details on the test registry format, see:');
+    print('  https://github.com/flutter/tests/blob/master/registry/template.test');
+    print('');
+    print(argParser.usage);
+    print('');
+  }
+
+  ArgResults parsedArguments;
+  try {
+    parsedArguments = argParser.parse(arguments);
+  } on ArgParserException catch (error) {
+    printHelp();
+    print('Error: ${error.message} Use --help for usage information.');
+    exit(1);
+  }
 
   final int repeat = int.tryParse(parsedArguments['repeat']);
   final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'];
@@ -62,12 +78,16 @@ Future<bool> run(List<String> arguments) async {
     .toList();
 
   if (help || repeat == null || files.isEmpty) {
-    print('run_tests.dart [options...] path/to/file1.test path/to/file2.test...');
-    print('For details on the test registry format, see:');
-    print('  https://github.com/flutter/tests/blob/master/registry/template.test');
-    print('');
-    print(argParser.usage);
-    print('');
+    printHelp();
+    if (verbose) {
+      if (repeat == null)
+        print('Error: Could not parse repeat count ("${parsedArguments['repeat']}")');
+      if (parsedArguments.rest.isEmpty) {
+        print('Error: No file arguments specified.');
+      } else if (files.isEmpty) {
+        print('Error: File arguments ("${parsedArguments.rest.join("\", \"")}") did not identify any real files.');
+      }
+    }
     return help;
   }
 
