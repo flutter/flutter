@@ -42,9 +42,8 @@ void main() {
   linuxPlatform.operatingSystem = 'linux';
   final FakePlatform windowsPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   windowsPlatform.operatingSystem = 'windows';
-  final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
 
-  group('Process calls', () {
+  group('IOSDevice', () {
     MockIOSApp mockApp;
     MockArtifacts mockArtifacts;
     MockCache mockCache;
@@ -139,6 +138,7 @@ void main() {
       Platform: () => macPlatform,
     });
 
+    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
@@ -177,6 +177,7 @@ void main() {
       Platform: () => macPlatform,
     });
 
+    final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
     for (Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
         when(iMobileDevice.isInstalled).thenReturn(false);
