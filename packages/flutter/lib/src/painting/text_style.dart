@@ -333,6 +333,9 @@ class TextStyle extends Diagnosticable {
     this.foreground,
     this.background,
     this.shadows,
+    this.strokeStyle,
+    this.strokeColor,
+    this.strokeWidth,
     this.fontFeatures,
     this.decoration,
     this.decorationColor,
@@ -590,6 +593,12 @@ class TextStyle extends Diagnosticable {
   /// [compareTo], and it does not affect [hashCode].
   final String debugLabel;
 
+  final ui.StrokeStyle strokeStyle;
+
+  final Color strokeColor;
+
+  final double strokeWidth;
+
   /// A list of [Shadow]s that will be painted underneath the text.
   ///
   /// Multiple shadows are supported to replicate lighting from multiple light
@@ -633,6 +642,9 @@ class TextStyle extends Diagnosticable {
     Locale locale,
     Paint foreground,
     Paint background,
+    ui.StrokeStyle strokeStyle,
+    Color strokeColor,
+    double strokeWidth,
     List<ui.Shadow> shadows,
     List<ui.FontFeature> fontFeatures,
     TextDecoration decoration,
@@ -665,6 +677,9 @@ class TextStyle extends Diagnosticable {
       locale: locale ?? this.locale,
       foreground: foreground ?? this.foreground,
       background: background ?? this.background,
+      strokeStyle: strokeStyle ?? this.strokeStyle,
+      strokeColor: strokeColor ?? this.strokeColor,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
       shadows: shadows ?? this.shadows,
       fontFeatures: fontFeatures ?? this.fontFeatures,
       decoration: decoration ?? this.decoration,
@@ -710,6 +725,10 @@ class TextStyle extends Diagnosticable {
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
+    ui.StrokeStyle strokeStyle,
+    Color strokeColor,
+    double strokeWidthFactor = 1.0,
+    double strokeWidthDelta = 0.0,
     double decorationThicknessFactor = 1.0,
     double decorationThicknessDelta = 0.0,
     String fontFamily,
@@ -765,6 +784,9 @@ class TextStyle extends Diagnosticable {
       locale: locale,
       foreground: foreground,
       background: background,
+      strokeStyle: strokeStyle ?? this.strokeStyle,
+      strokeColor: strokeColor ?? this.strokeColor,
+      strokeWidth: strokeWidth == null ? null : strokeWidth * strokeWidthFactor + strokeWidthDelta,
       shadows: shadows,
       fontFeatures: fontFeatures,
       decoration: decoration ?? this.decoration,
@@ -824,6 +846,9 @@ class TextStyle extends Diagnosticable {
       locale: other.locale,
       foreground: other.foreground,
       background: other.background,
+      strokeStyle: other.strokeStyle,
+      strokeColor: other.strokeColor,
+      strokeWidth: other.strokeWidth,
       shadows: other.shadows,
       fontFeatures: other.fontFeatures,
       decoration: other.decoration,
@@ -878,6 +903,9 @@ class TextStyle extends Diagnosticable {
         foreground: t < 0.5 ? null : b.foreground,
         background: t < 0.5 ? null : b.background,
         decoration: t < 0.5 ? null : b.decoration,
+        strokeStyle: t < 0.5 ? null : b.strokeStyle,
+        strokeColor: t < 0.5 ? null : b.strokeColor,
+        strokeWidth: t < 0.5 ? null : b.strokeWidth,
         shadows: t < 0.5 ? null : b.shadows,
         fontFeatures: t < 0.5 ? null : b.fontFeatures,
         decorationColor: Color.lerp(null, b.decorationColor, t),
@@ -904,6 +932,9 @@ class TextStyle extends Diagnosticable {
         locale: t < 0.5 ? a.locale : null,
         foreground: t < 0.5 ? a.foreground : null,
         background: t < 0.5 ? a.background : null,
+        strokeStyle: t < 0.5 ? a.strokeStyle : null,
+        strokeColor: t < 0.5 ? a.strokeColor : null,
+        strokeWidth: t < 0.5 ? a.strokeWidth : null,
         shadows: t < 0.5 ? a.shadows : null,
         fontFeatures: t < 0.5 ? a.fontFeatures : null,
         decoration: t < 0.5 ? a.decoration : null,
@@ -938,6 +969,9 @@ class TextStyle extends Diagnosticable {
           ? a.background ?? (Paint()..color = a.backgroundColor)
           : b.background ?? (Paint()..color = b.backgroundColor)
         : null,
+      strokeStyle: t < 0.5 ? a.strokeStyle : b.strokeStyle,
+      strokeColor: Color.lerp(a.strokeColor, b.strokeColor, t),
+      strokeWidth: ui.lerpDouble(a.strokeWidth ?? b.strokeWidth, b.strokeWidth ?? a.strokeWidth, t),
       shadows: t < 0.5 ? a.shadows : b.shadows,
       fontFeatures: t < 0.5 ? a.fontFeatures : b.fontFeatures,
       decoration: t < 0.5 ? a.decoration : b.decoration,
@@ -971,6 +1005,9 @@ class TextStyle extends Diagnosticable {
         ? (Paint()..color = backgroundColor)
         : null
       ),
+      strokeStyle: strokeStyle,
+      strokeColor: strokeColor,
+      strokeWidth: strokeWidth,
       shadows: shadows,
       fontFeatures: fontFeatures,
     );
@@ -1057,6 +1094,9 @@ class TextStyle extends Diagnosticable {
         decorationColor != other.decorationColor ||
         decorationStyle != other.decorationStyle ||
         decorationThickness != other.decorationThickness)
+        strokeStyle != other.strokeStyle)
+        strokeColor != other.strokeColor)
+        strokeWidth != other.strokeWidth)
       return RenderComparison.paint;
     return RenderComparison.identical;
   }
@@ -1086,6 +1126,9 @@ class TextStyle extends Diagnosticable {
            decorationColor == typedOther.decorationColor &&
            decorationStyle == typedOther.decorationStyle &&
            decorationThickness == typedOther.decorationThickness &&
+           strokeStyle == typedOther.strokeStyle &&
+           strokeColor == typedOther.strokeColor &&
+           strokeWidth == typedOther.strokeWidth &&
            listEquals(shadows, typedOther.shadows) &&
            listEquals(fontFeatures, typedOther.fontFeatures) &&
            listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
@@ -1112,6 +1155,9 @@ class TextStyle extends Diagnosticable {
       decoration,
       decorationColor,
       decorationStyle,
+      strokeStyle,
+      strokeColor,
+      strokeWidth,
       shadows,
       fontFeatures,
     );
@@ -1151,6 +1197,9 @@ class TextStyle extends Diagnosticable {
     styles.add(EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     styles.add(DiagnosticsProperty<Locale>('${prefix}locale', locale, defaultValue: null));
+    styles.add(EnumProperty<ui.StrokeStyle>('${prefix}strokeStyle', strokeStyle, defaultValue: null));
+    styles.add(ColorProperty('${prefix}strokeColor', strokeColor, defaultValue: null));
+    styles.add(DoubleProperty('${prefix}strokeWidth', strokeWidth, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}foreground', foreground, defaultValue: null));
     styles.add(DiagnosticsProperty<Paint>('${prefix}background', background, defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null || decorationThickness != null) {
