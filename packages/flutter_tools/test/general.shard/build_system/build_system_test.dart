@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -450,6 +451,8 @@ void main() {
       fizzSource.accept(visitor);
 
       expect(visitor.sources.single.resolveSymbolicLinksSync(), fs.path.absolute(path));
+    }, overrides: <Type, Generator>{
+      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     }));
 
     test('can substitute {PROJECT_DIR}/*.fizz', () => testbed.run(() {

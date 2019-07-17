@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -16,6 +17,7 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 import '../src/testbed.dart';
 
 void main() {
@@ -227,6 +229,8 @@ void main() {
 
         verifyNever(mockIsolate.flutterExit());
         verify(mockDevice.stopApp(any)).called(1);
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => MockOperatingSystemUtils(),
       }));
 
       test('Will exit an un-paused isolate', () => testbed.run(() async {
@@ -243,6 +247,8 @@ void main() {
         await flutterDevice.exitApps();
 
         verify(mockIsolate.flutterExit()).called(1);
+      }, overrides: <Type, Generator>{
+        OperatingSystemUtils: () => MockOperatingSystemUtils(),
       }));
     });
   });
