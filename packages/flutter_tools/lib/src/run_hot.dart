@@ -21,8 +21,8 @@ import 'convert.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'reporting/usage.dart';
 import 'resident_runner.dart';
-import 'usage.dart';
 import 'vmservice.dart';
 
 class HotRunnerConfig {

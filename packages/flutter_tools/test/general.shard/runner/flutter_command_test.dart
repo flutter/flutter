@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -62,11 +62,8 @@ void main() {
 
       expect(
         verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured,
-        <dynamic>[
-          'dummy',
-          const <String, String>{'cd26': 'success'}
-        ],
+                parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
+        equals('success'),
       );
     },
     overrides: <Type, Generator>{
@@ -87,11 +84,8 @@ void main() {
 
       expect(
         verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured,
-        <dynamic>[
-          'dummy',
-          const <String, String>{'cd26': 'warning'}
-        ],
+                parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
+        equals('warning'),
       );
     },
     overrides: <Type, Generator>{
@@ -114,11 +108,8 @@ void main() {
       } on ToolExit {
         expect(
           verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured,
-          <dynamic>[
-            'dummy',
-            const <String, String>{'cd26': 'fail'}
-          ],
+                  parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
+          equals('fail'),
         );
       }
     },
@@ -144,11 +135,8 @@ void main() {
       } on ToolExit {
         expect(
           verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured,
-          <dynamic>[
-            'dummy',
-            const <String, String>{'cd26': 'fail'}
-          ],
+                  parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
+          equals('fail'),
         );
       }
     },
