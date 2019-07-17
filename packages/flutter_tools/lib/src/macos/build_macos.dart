@@ -12,7 +12,8 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/usage.dart';
+
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcodebuild.

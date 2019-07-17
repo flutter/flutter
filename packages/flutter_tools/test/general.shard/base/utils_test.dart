@@ -42,11 +42,11 @@ void main() {
         Platform: () => fakePlatform,
       });
 
-      testUsingContext('returns true for non-interactive terminals', () async {
+      testUsingContext('returns false with and without a terminal attached', () async {
         mockStdio.stdout.hasTerminal = true;
         expect(botDetector.isRunningOnBot, isFalse);
         mockStdio.stdout.hasTerminal = false;
-        expect(botDetector.isRunningOnBot, isTrue);
+        expect(botDetector.isRunningOnBot, isFalse);
       }, overrides: <Type, Generator>{
         Stdio: () => mockStdio,
         Platform: () => fakePlatform,

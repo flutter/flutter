@@ -9,8 +9,8 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
-import '../usage.dart';
 import '../version.dart';
 import 'build.dart';
 
