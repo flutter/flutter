@@ -312,13 +312,29 @@ class MatrixUtils {
     if (storage[3] == 0.0 && storage[7] == 0.0 && storage[15] == 1.0) {
       double left  = rx;
       double right = rx;
-      if (wx < 0) { left += wx; } else { right += wx; }
-      if (hx < 0) { left += hx; } else { right += hx; }
+      if (wx < 0) {
+        left  += wx;
+      } else {
+        right += wx;
+      }
+      if (hx < 0) {
+        left  += hx;
+      } else {
+        right += hx;
+      }
 
       double top    = ry;
       double bottom = ry;
-      if (wy < 0) { top += wy; } else { bottom += wy; }
-      if (hy < 0) { top += hy; } else { bottom += hy; }
+      if (wy < 0) {
+        top    += wy;
+      } else {
+        bottom += wy;
+      }
+      if (hy < 0) {
+        top    += hy;
+      } else {
+        bottom += hy;
+      }
 
       return Rect.fromLTRB(left, top, right, bottom);
     } else {

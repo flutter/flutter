@@ -123,24 +123,23 @@ void main() {
   });
 
   test('transformRect with no perspective (w = 1)', () {
-    const Rect l10t20r30b40 = Rect.fromLTRB(10, 20, 30, 40);
-    const Rect l20t40r60b80 = Rect.fromLTRB(20, 40, 60, 80);
+    const Rect rectangle20x20 = Rect.fromLTRB(10, 20, 30, 40);
 
     // Identity
     expect(
-      MatrixUtils.transformRect(Matrix4.identity(), l10t20r30b40),
-      l10t20r30b40,
+      MatrixUtils.transformRect(Matrix4.identity(), rectangle20x20),
+      rectangle20x20,
     );
 
     // 2D Scaling
     expect(
-      MatrixUtils.transformRect(Matrix4.diagonal3Values(2, 2, 2), l10t20r30b40),
-      l20t40r60b80,
+      MatrixUtils.transformRect(Matrix4.diagonal3Values(2, 2, 2), rectangle20x20),
+      const Rect.fromLTRB(20, 40, 60, 80),
     );
 
     // Rotation
     expect(
-      MatrixUtils.transformRect(Matrix4.rotationZ(pi / 2.0), l10t20r30b40),
+      MatrixUtils.transformRect(Matrix4.rotationZ(pi / 2.0), rectangle20x20),
       within<Rect>(distance: 0.00001, from: const Rect.fromLTRB(-40.0, 10.0, -20.0, 30.0)),
     );
   });
