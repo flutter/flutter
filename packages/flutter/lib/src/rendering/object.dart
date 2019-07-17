@@ -407,7 +407,7 @@ class PaintingContext extends ClipContext {
   /// * `oldLayer` is the layer created in the previous frame. Specifying the
   ///   old layer gives the engine more information for performance
   ///   optimizations. Typically this is the value of [RenderObject.layer] that
-  ///   a render object creates once, then reuses for all subsequence frames
+  ///   a render object creates once, then reuses for all subsequent frames
   ///   until a layer is no longer needed (e.g. the render object no longer
   ///   needs compositing) or until the render object changes the type of the
   ///   layer (e.g. from opacity layer to a clip rect layer).

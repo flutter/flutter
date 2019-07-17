@@ -4754,14 +4754,14 @@ class RenderLeaderLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (layer == null) {
-      context.pushLayer(layer = LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+      layer = LeaderLayer(link: link, offset: offset);
     } else {
       final LeaderLayer leaderLayer = layer;
       leaderLayer
         ..link = link
         ..offset = offset;
-      context.pushLayer(leaderLayer, super.paint, Offset.zero);
     }
+    context.pushLayer(layer, super.paint, Offset.zero);
     assert(layer != null);
   }
 
