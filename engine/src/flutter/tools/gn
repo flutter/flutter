@@ -345,17 +345,10 @@ def parse_args(args):
 def main(argv):
   args = parse_args(argv)
 
-  if sys.platform.startswith(('cygwin', 'win')):
-    subdir = 'win'
-  elif sys.platform == 'darwin':
-    subdir = 'mac-x64'
-  elif sys.platform.startswith('linux'):
-     subdir = 'linux-x64'
-  else:
-    raise Error('Unknown platform: ' + sys.platform)
+  exe = '.exe' if sys.platform.startswith(('cygwin', 'win')) else ''
 
   command = [
-    '%s/buildtools/%s/gn' % (SRC_ROOT, subdir),
+    '%s/flutter/third_party/gn/gn%s' % (SRC_ROOT, exe),
     'gen',
     '--check',
   ]
