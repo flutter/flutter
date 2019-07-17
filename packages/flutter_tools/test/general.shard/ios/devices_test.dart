@@ -33,21 +33,27 @@ void main() {
   macPlatform.operatingSystem = 'macos';
   final FakePlatform linuxPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   linuxPlatform.operatingSystem = 'linux';
+  final FakePlatform windowsPlatform = FakePlatform.fromPlatform(const LocalPlatform());
+  windowsPlatform.operatingSystem = 'windows';
 
   group('IOSDevice', () {
     testUsingContext('successfully instantiates on Mac OS', () {
-      IOSDevice('iphone');
+      IOSDevice('device-123');
     }, overrides: <Type, Generator>{
       Platform: () => macPlatform,
     });
-    testUsingContext('throws UnsupportedError exception if instantiated on non Mac OS', () {
-      expect(
-        () { IOSDevice('iphone'); },
-        throwsA(isInstanceOf<UnsupportedError>())
-      );
-    }, overrides: <Type, Generator>{
-      Platform: () => linuxPlatform,
-    });
+
+    final List<Platform> unsupportedPlatforms = <Platform>[windowsPlatform, linuxPlatform];
+    for (Platform platform in unsupportedPlatforms) {
+      testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
+        expect(
+            () { IOSDevice('device-123'); },
+            throwsA(isInstanceOf<UnsupportedError>())
+        );
+      }, overrides: <Type, Generator>{
+        Platform: () => platform,
+      });
+    }
   });
 
   group('getAttachedDevices', () {
