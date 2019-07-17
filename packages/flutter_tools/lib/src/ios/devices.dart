@@ -191,20 +191,18 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
+    RunResult apps;
     try {
-      final RunResult apps = await runCheckedAsync(
+      apps = await runCheckedAsync(
         <String>[_installerPath, '--list-apps'],
         environment: Map<String, String>.fromEntries(
           <MapEntry<String, String>>[cache.dyLdLibEntry],
         ),
       );
-      if (RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
-        return true;
-      }
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
-    return false;
+    return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -227,7 +225,7 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
@@ -242,7 +240,7 @@ class IOSDevice extends Device {
         ),
       );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
