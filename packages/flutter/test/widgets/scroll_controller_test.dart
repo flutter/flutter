@@ -362,4 +362,45 @@ void main() {
     expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);
 
   });
+
+  testWidgets('IsBeingDragged', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) {
+            return Container(
+              height: 200.0,
+              child: Text(state),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+
+    expect(controller.isBeingDragged, equals(false));
+
+    /// Touch down and it is set to true.
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    expect(controller.isBeingDragged, equals(true));
+
+    /// Finger moves and it has no difference.
+    await gesture.moveBy(const Offset(-200.0, 0.0));
+    expect(controller.isBeingDragged, equals(true));
+
+    /// Finger up and it is set to false.
+    await gesture.up();
+    expect(controller.isBeingDragged, equals(false));
+
+    /// Touch again.
+    await gesture.down(const Offset(100.0, 100.0));
+    expect(controller.isBeingDragged, equals(true));
+
+    /// Gesture cancelled and it is set to false.
+    await gesture.cancel();
+    expect(controller.isBeingDragged, equals(false));
+  });
 }

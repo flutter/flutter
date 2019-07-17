@@ -327,7 +327,7 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
-  testWidgets('Page changes and scroll animation ends', (WidgetTester tester) async {
+  testWidgets('PageDidChange trigger at the end of scroll animation', (WidgetTester tester) async {
     final List<int> log = <int>[];
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -342,6 +342,32 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     // The page view is 800.0 wide, so this move is beyond halfway.
     await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    expect(log, isEmpty);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(log, equals(const <int>[1]));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+  });
+
+  testWidgets('PageDidChange does not trigger when user is dragging', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        pageDidChange: log.add,
+        children: kStates.map<Widget>((String state) => Text(state)).toList(),
+      ),
+    ));
+
+    expect(log, isEmpty);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    // The page view is 800.0 wide, so this move is beyond a whole page.
+    await gesture.moveBy(const Offset(-800.0, 0.0));
 
     expect(log, isEmpty);
 
@@ -506,9 +532,8 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
-    // PageDidChange should be fired.
-    expect(log, equals(const <String>['pageDidChange 2']));
-    log.clear();
+    // PageDidChange should not be fired.
+    expect(log, isEmpty);
 
     // Confirm that both pages are visible.
     expect(find.text('Alaska'), findsNothing);
@@ -520,8 +545,9 @@ void main() {
     await tester.pumpWidget(build(pageSnapping: true));
     await tester.pumpAndSettle();
 
-    // No one should trigger.
-    expect(log, isEmpty);
+    // PageDidChange should trigger.
+    expect(log, equals(const <String>['pageDidChange 2']));
+    log.clear();
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);

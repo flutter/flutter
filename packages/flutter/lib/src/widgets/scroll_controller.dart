@@ -117,6 +117,9 @@ class ScrollController extends ChangeNotifier {
   /// Requires the controller to be controlling exactly one scrollable widget.
   double get offset => position.pixels;
 
+  /// Whether the widget is being dragged by user.
+  bool isBeingDragged = false;
+
   /// Animates the position from its current value to the given value.
   ///
   /// Any active animation is canceled. If the user is currently scrolling, that

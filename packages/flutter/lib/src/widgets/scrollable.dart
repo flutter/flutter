@@ -479,6 +479,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
     assert(_hold == null);
+    widget.controller?.isBeingDragged = true;
     _hold = position.hold(_disposeHold);
   }
 
@@ -501,6 +502,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void _handleDragEnd(DragEndDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
+    widget.controller?.isBeingDragged = false;
     _drag?.end(details);
     assert(_drag == null);
   }
@@ -509,6 +511,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
     assert(_hold == null || _drag == null);
+    widget.controller?.isBeingDragged = false;
     _hold?.cancel();
     _drag?.cancel();
     assert(_hold == null);

@@ -641,6 +641,8 @@ class PageView extends StatefulWidget {
   /// Called whenever the page has changed and the scroll animation has stopped.
   ///
   /// It is called after [onPageChanged], at the end of the scroll animation.
+  ///
+  /// It won't be called if the value of [PageView.pageSnapping] if false.
   final ValueChanged<int> pageDidChange;
 
   /// A delegate that provides the children for the [PageView].
@@ -704,11 +706,15 @@ class _PageViewState extends State<PageView> {
             widget.onPageChanged(currentPage);
           }
         } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
+          final bool isBeingDragged = widget.controller.isBeingDragged;
+          if (!widget.pageSnapping || isBeingDragged) {
+            return false;
+          }
           final PageMetrics metrics = notification.metrics;
 
           /// Dart doubles are 64-bit floating-point numbers as specified in the
-          /// IEEE 754 standard.It has 52 bits of significand so the number "15"
-          /// is good to avoid the double number precision problem.
+          /// IEEE 754 standard.It has 52 bits of significand so its decimal
+          /// digits of precision is 15.
           final int currentPage = double.parse(metrics.page.toStringAsPrecision(15)).toInt();
 
           if (currentPage != _lastPageDidChangeIndex) {
