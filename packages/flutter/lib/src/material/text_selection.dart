@@ -112,7 +112,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
 /// Draws a single text selection handle which points up and to the left.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({ this.color });
+  const _TextSelectionHandlePainter({ @required this.color }) : assert(color != null);
 
   final Color color;
 

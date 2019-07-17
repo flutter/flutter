@@ -248,7 +248,8 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
-  const _TextSelectionHandlePainter(this.color);
+  const _TextSelectionHandlePainter({ @required this.color }) : assert(color != null);
+
   final Color color;
 
   @override
@@ -276,7 +277,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => color != oldPainter.color;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
@@ -381,7 +382,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
       child: CustomPaint(
-        painter: _TextSelectionHandlePainter(color),
+        painter: _TextSelectionHandlePainter(color: color),
       ),
     );
 
