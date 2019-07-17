@@ -35,6 +35,7 @@ void main() {
         .thenReturn(true);
     final Usage usage = Usage();
 
+    usage.suppressAnalytics = false;
     final Future<Map<String, dynamic>> data = usage.onSend.first;
     usage.sendCommand('test');
 
@@ -49,7 +50,8 @@ void main() {
     when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting))
         .thenReturn(true);
     final Usage usage = Usage();
-
+    
+    usage.suppressAnalytics = false;
     final Future<Map<String, dynamic>> data = usage.onSend.first;
     usage.sendCommand('test');
 
