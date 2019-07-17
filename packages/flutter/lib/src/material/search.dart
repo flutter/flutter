@@ -179,6 +179,9 @@ abstract class SearchDelegate<T> {
     _queryTextController.text = value;
   }
 
+  /// The hint text to be shown when the search field is empty.
+  String get searchFieldLabel => null;
+
   /// Transition from the suggestions returned by [buildSuggestions] to the
   /// [query] results returned by [buildResults].
   ///
@@ -417,7 +420,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
+        MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
