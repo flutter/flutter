@@ -368,7 +368,7 @@ class FakeHttpClientResponse implements HttpClientResponse {
   HttpConnectionInfo get connectionInfo => null;
 
   @override
-  int get contentLength => -1;
+  int get contentLength => 0;
 
   @override
   HttpClientResponseCompressionState get compressionState {
