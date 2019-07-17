@@ -409,8 +409,6 @@ void main() {
       osUtils = MockOperatingSystemUtils();
       fuchsiaDeviceTools = FakeFuchsiaDeviceTools();
       fuchsiaSdk = MockFuchsiaSdk();
-
-      when(osUtils.findFreePort()).thenAnswer((_) => Future<int>.value(12345));
     });
 
     Future<LaunchResult> setupAndStartApp({
@@ -639,8 +637,6 @@ class FuchsiaModulePackage extends ApplicationPackage {
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockProcessResult extends Mock implements ProcessResult {}
-
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
 
 class MockFile extends Mock implements File {}
 

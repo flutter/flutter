@@ -4,7 +4,6 @@
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -55,8 +54,6 @@ void main() {
 
       await runner.run(<String>['create',  '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
       expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'plugin'));
-    }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     }));
 
     test('set iOS host language type as usage value', () => testbed.run(() async {
@@ -76,8 +73,6 @@ void main() {
       ]);
       expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'swift'));
 
-    }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     }));
 
     test('set Android host language type as usage value', () => testbed.run(() async {
@@ -96,8 +91,6 @@ void main() {
         'testy',
       ]);
       expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'kotlin'));
-    }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     }));
   });
 }

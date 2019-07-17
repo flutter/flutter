@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -33,6 +34,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
       ? FileSystemStyle.windows
       : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
+  OperatingSystemUtils: () => MockOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
