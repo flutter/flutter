@@ -43,13 +43,19 @@ class IOSDeploy {
   /// Checks /tmp/<app id>.ios_deploy.pid for an `ios-deploy` processe already running
   /// the app and terminates it.
   Future<void> _killOther(ApplicationPackage package) async {
-    File x;
     final io.File temp = _tempFile(package);
     if (!temp.existsSync())
       return;
 
-    // No need to wait for the process to die, since the launch will block anyway.
     final String pid = await temp.readAsString();
+
+    // Sanity check that we're kill ios-deploy, and not some other process!
+    final RunResult check = await runAsync(<String>['ps', '-p', pid]);
+    if (!check.stdout.contains('ios-deploy'))
+      // Nothing to do.
+      return;
+
+    // No need to wait for the process to die, since the launch will block anyway.
     await runCommand(<String>['kill', pid]);
   }
 
