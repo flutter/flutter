@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/toolchain/clang.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/shell/platform/embedder/embedder.gni")
@@ -165,6 +166,7 @@ if (is_mac && !embedder_for_target) {
     args = [
       rebase_path(sources[0]),
       rebase_path(outputs[0]),
+      "--bitcode=$enable_bitcode",
     ]
   }
 

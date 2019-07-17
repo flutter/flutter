@@ -24,5 +24,7 @@
   <string>8.0</string>
   <key>FlutterEngine</key>
   <string>{0}</string>
+  <key>ClangVersion</key>
+  <string>{1}</string>
 </dict>
 </plist>
