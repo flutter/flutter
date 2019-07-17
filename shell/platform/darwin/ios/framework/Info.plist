@@ -22,7 +22,7 @@
   <string>1.0</string>
   <key>MinimumOSVersion</key>
   <string>8.0</string>
-  <key>FlutterEngine<key>
-  <string>{0}<string>
+  <key>FlutterEngine</key>
+  <string>{0}</string>
 </dict>
 </plist>
