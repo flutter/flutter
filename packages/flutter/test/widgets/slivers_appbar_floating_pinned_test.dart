@@ -10,7 +10,6 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(Localizations(
         locale: const Locale('en', 'us'),
         delegates: const <LocalizationsDelegate<dynamic>>[
@@ -23,11 +22,10 @@ void main() {
             data: const MediaQueryData(),
             child: CustomScrollView(
               slivers: <Widget>[
-                SliverAppBar(
-                  key: key,
+                const SliverAppBar(
                   bottom: PreferredSize(
                     preferredSize: Size.fromHeight(28),
-                    child: const Text('Bottom'),
+                    child: Text('Bottom'),
                   ),
                   backgroundColor: Colors.green,
                   floating: true,
@@ -43,7 +41,6 @@ void main() {
       ),
     );
 
-    expect(find.byKey(key), findsOneWidget);
     final RenderPhysicalModel renderObject = tester.renderObject<RenderPhysicalModel>(find.byType(PhysicalModel));
     expect(renderObject, isNotNull);
     expect(renderObject.elevation, 0.0);
