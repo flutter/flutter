@@ -58,7 +58,10 @@ void main() {
           .thenAnswer((Invocation invocation) => Future<String>.value(deviceName));
       when(mockIMobileDevice.getInfoForDevice(deviceId, 'ProductVersion'))
           .thenAnswer((Invocation invocation) => Future<String>.value(sdkVersion));
-      expect(() async { await IOSDevice.getAttachedDevices(); }, throwsA(isInstanceOf<AssertionError>()));
+      expect(
+        () async { await IOSDevice.getAttachedDevices(); },
+        throwsA(isInstanceOf<UnsupportedError>())
+      );
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
       Platform: () => linuxPlatform,

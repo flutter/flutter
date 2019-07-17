@@ -125,10 +125,7 @@ class IOSDevice extends Device {
           ephemeral: true,
       ) {
     if (!platform.isMacOS) {
-      assert(false, 'Cannot control iOS devices or simulators on your platform.');
-      _installerPath = null;
-      _iproxyPath = null;
-      return;
+      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
     }
     _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
