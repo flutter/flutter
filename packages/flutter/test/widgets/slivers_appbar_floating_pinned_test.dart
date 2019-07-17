@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+
 import 'semantics_tester.dart';
 
 void main() {
@@ -95,11 +96,11 @@ void main() {
             TestSemantics(
               children: <TestSemantics>[
                 TestSemantics(
-                  thickness: 4,
+                  thickness: 0,
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'Hello',
-                      elevation: 4,
+                      elevation: 0,
                       flags: <SemanticsFlag>[SemanticsFlag.isHeader, SemanticsFlag.namesRoute],
                       textDirection: TextDirection.ltr,
                     ),
