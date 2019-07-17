@@ -75,5 +75,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - test_driver/screenshots/
 
 # PUBSPEC CHECKSUM: 017d

@@ -7,6 +7,7 @@ import 'dart:io' show Platform;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
+
 Future<void> main() async {
   FlutterDriver driver;
 
@@ -37,6 +38,18 @@ Future<void> main() async {
         find.byValueKey('MutationPageListTile');
         await driver.tap(motionEventsListTile);
         await driver.waitFor(find.byValueKey('PlatformView0'));
+        _takeAndSaveScreenshot(driver, 'test_driver/screenshots/mutation_test.png');
+        Image currentImage = image.file('test_driver/screenshots/mutation_test.png');
+        assert(currentImage != null);
+        Image screenShot = Image.memory(await driver.screenshot());
+        expect(currentImage.toByteData == screenShot.toByteData);
      });
   });
+}
+
+
+_takeAndSaveScreenshot(FlutterDriver driver, String path) async {
+  final List<int> pixels = await driver.screenshot();
+  final File file = new File(path);
+  await file.writeAsBytes(pixels);
 }
