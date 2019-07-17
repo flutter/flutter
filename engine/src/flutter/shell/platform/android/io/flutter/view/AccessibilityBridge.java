@@ -1614,6 +1614,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         HAS_TOGGLED_STATE(1 << 16),
         IS_TOGGLED(1 << 17),
         HAS_IMPLICIT_SCROLLING(1 << 18),
+        // The Dart API defines the following flag but it isn't used in Android.
+        // IS_MULTILINE(1 << 19);
         IS_READ_ONLY(1 << 20);
 
         final int value;
