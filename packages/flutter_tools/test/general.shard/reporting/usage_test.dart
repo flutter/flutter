@@ -36,6 +36,7 @@ void main() {
     final Usage usage = Usage();
 
     usage.suppressAnalytics = false;
+    usage.enabled = true;
     final Future<Map<String, dynamic>> data = usage.onSend.first;
     usage.sendCommand('test');
 
@@ -52,6 +53,7 @@ void main() {
     final Usage usage = Usage();
     
     usage.suppressAnalytics = false;
+    usage.enabled = true;
     final Future<Map<String, dynamic>> data = usage.onSend.first;
     usage.sendCommand('test');
 
