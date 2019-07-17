@@ -24,7 +24,6 @@ def RunExecutable(command):
 
 def RunGN(variant_dir, flags):
   RunExecutable([
-      'python',
       os.path.join('flutter', 'tools', 'gn'),
   ] + flags)
 
