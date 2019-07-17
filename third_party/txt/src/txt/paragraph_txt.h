@@ -362,7 +362,9 @@ class ParagraphTxt : public Paragraph {
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
-  double GetLineXOffset(double line_total_advance);
+  double GetLineXOffset(double line_total_advance,
+                        size_t line_number,
+                        size_t line_limit);
 
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas,
