@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
@@ -303,7 +302,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   void _checkDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
-    double newValue = _dragOffset / (containerExtent * _kDragContainerExtentPercentage);
+    final double newValue = _dragOffset / (containerExtent * _kDragContainerExtentPercentage);
     _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
     if (_mode == _RefreshIndicatorMode.drag && _valueColor.value.alpha == 0xFF)
       _mode = _RefreshIndicatorMode.armed;
