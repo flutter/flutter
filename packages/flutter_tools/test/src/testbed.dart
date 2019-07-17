@@ -34,7 +34,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
       ? FileSystemStyle.windows
       : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
-  OperatingSystemUtils: () => MockOperatingSystemUtils(),
+  OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.

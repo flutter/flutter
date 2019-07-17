@@ -401,12 +401,12 @@ void main() {
 
   group('fuchsia app start and stop: ', () {
     MemoryFileSystem memoryFileSystem;
-    MockOperatingSystemUtils osUtils;
+    FakeOperatingSystemUtils osUtils;
     FakeFuchsiaDeviceTools fuchsiaDeviceTools;
     MockFuchsiaSdk fuchsiaSdk;
     setUp(() {
       memoryFileSystem = MemoryFileSystem();
-      osUtils = MockOperatingSystemUtils();
+      osUtils = FakeOperatingSystemUtils();
       fuchsiaDeviceTools = FakeFuchsiaDeviceTools();
       fuchsiaSdk = MockFuchsiaSdk();
     });
