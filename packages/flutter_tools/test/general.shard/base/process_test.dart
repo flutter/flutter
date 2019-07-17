@@ -115,19 +115,54 @@ void main() {
 
       // Detach when we see "bar", and check that:
       //  - mapFunction still gets run on "baz",
-      //  - we don't wait for the process to terminate (it never will), and
-      //  - we get an exit-code of 0 back.
+      //  - we don't wait for the process to terminate (it never will),
+      //  - we get an exit-code of 0 back, and
+      //  - onDetach is called with the correct Process.
       bool seenBaz = false;
       String mapFunction(String line) {
         seenBaz = seenBaz || line == 'baz';
         return line;
       }
 
+      bool onDetachCalled = false;
+      Future<void> onDetach(Process p) async {
+        onDetachCalled = true;
+        expect(p, fake);
+      }
+
       final int exitCode = await runCommandAndStreamOutput(
-        <String>['test1'], mapFunction: mapFunction, detachFilter: RegExp('.*baz.*'));
+        <String>['test1'], mapFunction: mapFunction,
+        detachFilter: RegExp('.*baz.*'),
+        onDetach: onDetach,
+      );
 
       expect(exitCode, 0);
       expect(seenBaz, true);
+      expect(onDetachCalled, true);
+    }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
+
+    testUsingContext('onExit called', () async {
+      // Create a fake process which exits immediately.
+      final Process fake = FakeProcess(
+        exitCode: Future<int>.value(0),
+        stdout: const Stream<List<int>>.empty(),
+        stderr: const Stream<List<int>>.empty());
+
+      when(mockProcessManager.start(<String>['test1'])).thenAnswer((_) => Future<Process>.value(fake));
+
+      bool onExitCalled = false;
+      Future<void> onExit(Process p) async {
+        onExitCalled = true;
+        expect(p, fake);
+      }
+
+      final int exitCode = await runCommandAndStreamOutput(
+        <String>['test1'],
+        onExit: onExit
+      );
+
+      expect(exitCode, 0);
+      expect(onExitCalled, true);
     }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
   });
 }

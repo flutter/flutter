@@ -133,7 +133,10 @@ Future<Process> runCommand(
 /// If [detachFilter] is non-null, the returned future will complete with exit code `0`
 /// when the process outputs something matching [detachFilter] to stderr. The process will
 /// continue in the background, and the final exit code will not be reported. [filter] is
-/// not considered on lines matching [detachFilter].
+/// not considered on lines matching [detachFilter]. [onDetach] is called (and awaited) with
+/// the PID of the process.
+///
+/// [onExit] is called when the process terminates, regardless of whether it was detached.
 Future<int> runCommandAndStreamOutput(
   List<String> cmd, {
   String workingDirectory,
@@ -144,6 +147,8 @@ Future<int> runCommandAndStreamOutput(
   StringConverter mapFunction,
   Map<String, String> environment,
   RegExp detachFilter,
+  Future<void> Function(Process) onDetach,
+  Future<void> Function(Process) onExit,
 }) async {
   final Completer<int> result = Completer<int>();
   final Process process = await runCommand(
@@ -160,7 +165,10 @@ Future<int> runCommandAndStreamOutput(
         // Detach from the process, assuming it will eventually complete successfully.
         // Output printed after detaching (incl. stdout and stderr) will still be
         // processed by [filter] and [mapFunction].
-        result.complete(0);
+        if (onDetach != null)
+          onDetach(process).then<void>((_) => result.complete(0));
+        else
+          result.complete(0);
       }
       return line;
     })
@@ -201,9 +209,14 @@ Future<int> runCommandAndStreamOutput(
       stderrSubscription.cancel(),
     ]);
 
+    final int exitCode = await process.exitCode;
+
+    if (onExit != null)
+      await onExit(process);
+
     // Complete the future if the we did not detach the process yet.
     if (!result.isCompleted) {
-      result.complete(process.exitCode);
+      result.complete(exitCode);
     }
   }
 

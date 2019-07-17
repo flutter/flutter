@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
@@ -24,16 +25,53 @@ import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
+/// [IOSDeploy] is responsible for spawning and managing `ios-deploy` processes.
+///
+/// When an app is launched via `ios-deploy`, we wait for the `ios-deploy` process
+/// until the app has been started via LLDB. Once it has started, `ios-deploy` puts LLDB
+/// into "autopilot" mode, and we continue.
+///
+/// If this (Flutter tools) process terminates before `ios-deploy` or the app, `ios-deploy`
+/// will be suspended. This is problematic because it will keep the app process on the phone
+/// alive via LLDB. Therefore we kill any previously created `ios-deploy` process which
+/// has launched an app before trying to run it again.
 class IOSDeploy {
   const IOSDeploy();
+
+  io.File _tempFile(ApplicationPackage package) => io.File('/tmp/${package.id}.ios_deploy.pid');
+
+  /// Checks /tmp/<app id>.ios_deploy.pid for an `ios-deploy` processe already running
+  /// the app and terminates it.
+  Future<void> _killOther(ApplicationPackage package) async {
+    File x;
+    final io.File temp = _tempFile(package);
+    if (!temp.existsSync())
+      return;
+
+    // No need to wait for the process to die, since the launch will block anyway.
+    final String pid = await temp.readAsString();
+    await runCommand(<String>['kill', pid]);
+  }
+
+  /// We have detached from `ios-deploy`: save its PID in case we need to kill it later.
+  Future<void> _detach(ApplicationPackage package, Process proc) {
+    return _tempFile(package).writeAsString(proc.pid.toString());
+  }
+
+  /// `ios-deploy` has terminated: delete its PID file so we don't accidentally kill another
+  /// process with the same PID later.
+  Future<void> _cleanup(ApplicationPackage package) => _tempFile(package).delete();
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
   /// the exit code.
   Future<int> runApp({
+    @required ApplicationPackage package,
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
   }) async {
+    await _killOther(package);
+
     final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
     // TODO(fujino): remove fallback once g3 updated
     const List<String> fallbackIosDeployPath = <String>[
@@ -67,13 +105,15 @@ class IOSDeploy {
     iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
     // Detach from the ios-deploy process once it' outputs 'autoexit', signaling that the
-    // App has been started and LLDB is in "autopilot" mode.
+    // App has been started and LLDB is running in "autopilot" mode.
     return await runCommandAndStreamOutput(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
       environment: iosDeployEnv,
-      detachFilter: RegExp('.*autoexit.*')
+      detachFilter: RegExp('.*\\(lldb\\) *autoexit.*'),
+      onDetach: (Process p) => _detach(package, p),
+      onExit: (Process p) => _cleanup(package)
     );
   }
 
@@ -350,6 +390,7 @@ class IOSDevice extends Device {
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
+        package: package,
       );
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
@@ -370,6 +411,7 @@ class IOSDevice extends Device {
         deviceId: id,
         bundlePath: bundle.path,
         launchArguments: launchArguments,
+        package: package,
       );
 
       localObservatoryUri = await launch.then<Uri>((int result) async {
