@@ -150,6 +150,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 
   _project = project ?: [[FLEDartProject alloc] init];
   _messageHandlers = [[NSMutableDictionary alloc] init];
+  _allowHeadlessExecution = allowHeadlessExecution;
 
   return self;
 }
