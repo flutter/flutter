@@ -13,8 +13,8 @@ NativeLibrary::NativeLibrary(const char* path) {
   ::dlerror();
   handle_ = ::dlopen(path, RTLD_NOW);
   if (handle_ == nullptr) {
-    FML_LOG(ERROR) << "Could not open library '" << path << "' due to error '"
-                   << ::dlerror() << "'.";
+    FML_DLOG(ERROR) << "Could not open library '" << path << "' due to error '"
+                    << ::dlerror() << "'.";
   }
 }
 
