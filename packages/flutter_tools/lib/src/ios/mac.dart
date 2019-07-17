@@ -24,8 +24,8 @@ import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../services.dart';
-import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 

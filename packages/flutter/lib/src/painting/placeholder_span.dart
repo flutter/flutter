@@ -60,6 +60,11 @@ abstract class PlaceholderSpan extends InlineSpan {
     }
   }
 
+  @override
+  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
+    collector.add(InlineSpanSemanticsInformation.placeholder);
+  }
+
   // TODO(garyq): Remove this after next stable release.
   /// The [visitTextSpan] method is invalid on [PlaceholderSpan]s
   @override

@@ -13,7 +13,8 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/usage.dart';
+
 import 'msbuild_utils.dart';
 import 'visual_studio.dart';
 

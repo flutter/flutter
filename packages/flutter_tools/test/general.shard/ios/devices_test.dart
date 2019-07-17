@@ -7,8 +7,10 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
@@ -22,6 +24,11 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
+class MockIOSApp extends Mock implements IOSApp {}
+class MockArtifacts extends Mock implements Artifacts {}
+class MockCache extends Mock implements Cache {}
+class MockDirectory extends Mock implements Directory {}
+class MockFileSystem extends Mock implements FileSystem {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
@@ -36,6 +43,94 @@ void main() {
   final FakePlatform windowsPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   windowsPlatform.operatingSystem = 'windows';
 
+  group('Process calls', () {
+    MockIOSApp mockApp;
+    MockArtifacts mockArtifacts;
+    MockCache mockCache;
+    MockFileSystem mockFileSystem;
+    MockProcessManager mockProcessManager;
+    const String installerPath = '/path/to/ideviceinstaller';
+    const String appId = '789';
+    const MapEntry<String, String> libraryEntry = MapEntry<String, String>(
+      'DYLD_LIBRARY_PATH',
+      '/path/to/libraries'
+    );
+    final Map<String, String> env = Map<String, String>.fromEntries(
+      <MapEntry<String, String>>[libraryEntry]
+    );
+
+    setUp(() {
+      mockApp = MockIOSApp();
+      mockArtifacts = MockArtifacts();
+      mockCache = MockCache();
+      when(mockCache.dyLdLibEntry).thenReturn(libraryEntry);
+      mockFileSystem = MockFileSystem();
+      mockProcessManager = MockProcessManager();
+      when(
+        mockArtifacts.getArtifactPath(
+          Artifact.ideviceinstaller,
+          platform: anyNamed('platform'),
+        )
+      ).thenReturn(installerPath);
+    });
+
+    testUsingContext('installApp() invokes process with correct environment', () async {
+      final IOSDevice device = IOSDevice('123');
+      const String bundlePath = '/path/to/bundle';
+      final List<String> args = <String>[installerPath, '-i', bundlePath];
+      when(mockApp.deviceBundlePath).thenReturn(bundlePath);
+      final MockDirectory directory = MockDirectory();
+      when(mockFileSystem.directory(bundlePath)).thenReturn(directory);
+      when(directory.existsSync()).thenReturn(true);
+      when(mockProcessManager.run(args, environment: env))
+        .thenAnswer(
+          (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
+        );
+      await device.installApp(mockApp);
+      verify(mockProcessManager.run(args, environment: env));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      Cache: () => mockCache,
+      FileSystem: () => mockFileSystem,
+      Platform: () => macPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('isAppInstalled() invokes process with correct environment', () async {
+      final IOSDevice device = IOSDevice('123');
+      final List<String> args = <String>[installerPath, '--list-apps'];
+      when(mockProcessManager.run(args, environment: env))
+        .thenAnswer(
+          (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
+        );
+      when(mockApp.id).thenReturn(appId);
+      await device.isAppInstalled(mockApp);
+      verify(mockProcessManager.run(args, environment: env));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      Cache: () => mockCache,
+      Platform: () => macPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('uninstallApp() invokes process with correct environment', () async {
+      final IOSDevice device = IOSDevice('123');
+      final List<String> args = <String>[installerPath, '-U', appId];
+      when(mockApp.id).thenReturn(appId);
+      when(mockProcessManager.run(args, environment: env))
+        .thenAnswer(
+          (_) => Future<ProcessResult>.value(ProcessResult(1, 0, '', ''))
+        );
+      await device.uninstallApp(mockApp);
+      verify(mockProcessManager.run(args, environment: env));
+    }, overrides: <Type, Generator>{
+      Artifacts: () => mockArtifacts,
+      Cache: () => mockCache,
+      Platform: () => macPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+  
   group('IOSDevice', () {
     testUsingContext('successfully instantiates on Mac OS', () {
       IOSDevice('device-123');
