@@ -33,6 +33,23 @@ void main() {
   macPlatform.operatingSystem = 'macos';
   final FakePlatform linuxPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   linuxPlatform.operatingSystem = 'linux';
+
+  group('IOSDevice', () {
+    testUsingContext('successfully instantiates on Mac OS', () {
+      IOSDevice('iphone');
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+    });
+    testUsingContext('throws UnsupportedError exception if instantiated on non Mac OS', () {
+      expect(
+        () { IOSDevice('iphone'); },
+        throwsA(isInstanceOf<UnsupportedError>())
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => linuxPlatform,
+    });
+  });
+
   group('getAttachedDevices', () {
     MockIMobileDevice mockIMobileDevice;
 
@@ -45,26 +62,6 @@ void main() {
       expect(await IOSDevice.getAttachedDevices(), isEmpty);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
-    });
-
-    testUsingContext('throws assertion error if platform is not mac os', () async {
-      when(mockIMobileDevice.isInstalled).thenReturn(true);
-      const String deviceId = '123';
-      const String deviceName = 'nexus7';
-      const String sdkVersion = '1.2.3';
-      when(mockIMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => Future<String>.value(deviceId));
-      when(mockIMobileDevice.getInfoForDevice(deviceId, 'DeviceName'))
-          .thenAnswer((Invocation invocation) => Future<String>.value(deviceName));
-      when(mockIMobileDevice.getInfoForDevice(deviceId, 'ProductVersion'))
-          .thenAnswer((Invocation invocation) => Future<String>.value(sdkVersion));
-      expect(
-        () async { await IOSDevice.getAttachedDevices(); },
-        throwsA(isInstanceOf<UnsupportedError>())
-      );
-    }, overrides: <Type, Generator>{
-      IMobileDevice: () => mockIMobileDevice,
-      Platform: () => linuxPlatform,
     });
 
     testUsingContext('returns no devices if none are attached', () async {
