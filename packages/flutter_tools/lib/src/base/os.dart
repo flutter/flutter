@@ -125,7 +125,14 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void chmod(FileSystemEntity entity, String mode) {
-    processManager.runSync(<String>['chmod', mode, entity.path]);
+    final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        'chmod',
+        <String>[mode, entity.path],
+        'exit code: ${result.exitCode}\nstdout: ${result.stdout}\nstderr: ${result.stderr}',
+      );
+    }
   }
 
   @override
