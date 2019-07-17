@@ -8,8 +8,8 @@ import '../base/common.dart';
 import '../base/os.dart';
 import '../dart/pub.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {

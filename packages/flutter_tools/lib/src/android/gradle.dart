@@ -23,8 +23,8 @@ import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
