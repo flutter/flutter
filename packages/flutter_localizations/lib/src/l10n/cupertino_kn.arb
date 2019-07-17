@@ -1,0 +1,22 @@
+{
+  "datePickerHourSemanticsLabelOne": "$hour ಗಂಟೆ",
+  "datePickerHourSemanticsLabelOther": "$hour ಗಂಟೆ",
+  "datePickerMinuteSemanticsLabelOne": "1 ನಿಮಿಷ",
+  "datePickerMinuteSemanticsLabelOther": "$minute ನಿಮಿಷಗಳು",
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "ಬೆಳಿಗ್ಗೆ",
+  "postMeridiemAbbreviation": "ಸಂಜೆ",
+  "todayLabel": "ಇಂದು",
+  "alertDialogLabel": "ಎಚ್ಚರಿಕೆ",
+  "timerPickerHourLabelOne": "ಗಂಟೆ",
+  "timerPickerHourLabelOther": "ಗಂಟೆಗಳು",
+  "timerPickerMinuteLabelOne": "ನಿಮಿ.",
+  "timerPickerMinuteLabelOther": "ನಿಮಿ.",
+  "timerPickerSecondLabelOne": "ಸೆ.",
+  "timerPickerSecondLabelOther": "ಸೆ.",
+  "cutButtonLabel": "ಕತ್ತರಿಸಿ",
+  "copyButtonLabel": "ನಕಲಿಸಿ",
+  "pasteButtonLabel": "ಅಂಟಿಸಿ",
+  "selectAllButtonLabel": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ"
+}
