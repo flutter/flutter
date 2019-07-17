@@ -16,7 +16,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import 'context.dart';
@@ -76,7 +76,7 @@ class Testbed {
       : _setup = setup,
         _overrides = overrides;
 
-  final Future<void> Function() _setup;
+  final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.
@@ -164,7 +164,7 @@ class NoOpUsage implements Usage {
   void sendEvent(String category, String parameter,{ Map<String, String> parameters }) {}
 
   @override
-  void sendException(dynamic exception, StackTrace trace) {}
+  void sendException(dynamic exception) {}
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) {}
