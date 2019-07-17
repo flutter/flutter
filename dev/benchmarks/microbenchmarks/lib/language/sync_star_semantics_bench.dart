@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
 
 import '../common.dart';
 
@@ -137,53 +134,4 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
     assert(workingLabel != null);
   }
   return result;
-}
-
-// TODO(jonahwilliams): use class from framework when landed.
-class InlineSpanSemanticsInformation {
-  const InlineSpanSemanticsInformation(
-    this.text, {
-    this.isPlaceholder = false,
-    this.semanticsLabel,
-    this.recognizer
-  }) : assert(text != null),
-       assert(isPlaceholder != null),
-       assert(isPlaceholder == false || (text == '\uFFFC' && semanticsLabel == null && recognizer == null)),
-       requiresOwnNode = isPlaceholder || recognizer != null;
-
-   /// The text info for a [PlaceholderSpan].
-  static const InlineSpanSemanticsInformation placeholder = InlineSpanSemanticsInformation('\uFFFC', isPlaceholder: true);
-
-   /// The text value, if any.  For [PlaceholderSpan]s, this will be the unicode
-  /// placeholder value.
-  final String text;
-
-   /// The semanticsLabel, if any.
-  final String semanticsLabel;
-
-   /// The gesture recognizer, if any, for this span.
-  final GestureRecognizer recognizer;
-
-   /// Whether this is for a placeholder span.
-  final bool isPlaceholder;
-
-   /// True if this configuration should get its own semantics node.
-  ///
-  /// This will be the case of the [recognizer] is not null, of if
-  /// [isPlaceholder] is true.
-  final bool requiresOwnNode;
-
-   @override
-  bool operator ==(dynamic other) {
-    if (other is! InlineSpanSemanticsInformation) {
-      return false;
-    }
-    return other.text == text &&
-           other.semanticsLabel == semanticsLabel &&
-           other.recognizer == recognizer &&
-           other.isPlaceholder == isPlaceholder;
-  }
-
-  @override
-  int get hashCode => ui.hashValues(text, semanticsLabel, recognizer, isPlaceholder);
 }
