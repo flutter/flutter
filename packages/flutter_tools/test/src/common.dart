@@ -5,8 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/desktop.dart';
-import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 
@@ -19,19 +17,6 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
-
-/// Disable both web and desktop to make testing easier. For example, prevent
-/// them from showing up in the devices list if the host happens to be setup
-/// properly.
-set debugDisableWebAndDesktop(bool value) {
-  if (value) {
-    debugDisableDesktop = true;
-    debugDisableWeb = true;
-  } else {
-    debugDisableDesktop = false;
-    debugDisableWeb = false;
-  }
-}
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed

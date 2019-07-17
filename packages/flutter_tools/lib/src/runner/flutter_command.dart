@@ -25,6 +25,7 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
@@ -649,17 +650,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (FlutterVersion.instance.isMaster) {
+      if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;

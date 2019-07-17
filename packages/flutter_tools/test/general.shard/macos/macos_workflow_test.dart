@@ -13,37 +13,33 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
-  group(MacOSWorkflow, () {
-    final MockPlatform mac = MockPlatform();
-    final MockPlatform macWithFde = MockPlatform()
-      ..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
-    final MockPlatform notMac = MockPlatform();
-    when(mac.isMacOS).thenReturn(true);
-    when(macWithFde.isMacOS).thenReturn(true);
-    when(notMac.isMacOS).thenReturn(false);
+  final MockPlatform mac = MockPlatform();
+  final MockPlatform notMac = MockPlatform();
+  when(mac.isMacOS).thenReturn(true);
+  when(macWithFde.isMacOS).thenReturn(true);
+  when(notMac.isMacOS).thenReturn(false);
 
-    final MockProcessManager mockProcessManager = MockProcessManager();
-    when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-      return ProcessResult(0, 1, '', '');
-    });
-    testUsingContext('Applies to mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, true);
-    }, overrides: <Type, Generator>{
-      Platform: () => mac,
-    });
-    testUsingContext('Does not apply to non-mac platform', () {
-      expect(macOSWorkflow.appliesToHostPlatform, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => notMac,
-    });
+  final MockProcessManager mockProcessManager = MockProcessManager();
+  when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+    return ProcessResult(0, 1, '', '');
+  });
+  testUsingContext('Applies to mac platform', () {
+    expect(macOSWorkflow.appliesToHostPlatform, true);
+  }, overrides: <Type, Generator>{
+    Platform: () => mac,
+  });
+  testUsingContext('Does not apply to non-mac platform', () {
+    expect(macOSWorkflow.appliesToHostPlatform, false);
+  }, overrides: <Type, Generator>{
+    Platform: () => notMac,
+  });
 
-    testUsingContext('defaults', () {
-      expect(macOSWorkflow.canListEmulators, false);
-      expect(macOSWorkflow.canLaunchDevices, true);
-      expect(macOSWorkflow.canListDevices, true);
-    }, overrides: <Type, Generator>{
-      Platform: () => macWithFde,
-    });
+  testUsingContext('defaults', () {
+    expect(macOSWorkflow.canListEmulators, false);
+    expect(macOSWorkflow.canLaunchDevices, true);
+    expect(macOSWorkflow.canListDevices, true);
+  }, overrides: <Type, Generator>{
+    Platform: () => macWithFde,
   });
 }
 

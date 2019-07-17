@@ -14,7 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'desktop.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
 
 import 'globals.dart';
@@ -25,7 +25,6 @@ import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
-import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
@@ -74,23 +73,15 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices + _conditionalWebDevices);
-
-  /// Only add desktop devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalDesktopDevices {
-    return flutterDesktopEnabled ? <DeviceDiscovery>[
+    if (featureFlags.isMacOSEnabled)
       MacOSDevices(),
+    if (featureFlags.isLinuxEnabled)
       LinuxDevices(),
+    if (featureFlags.isWindowsEnabled)
       WindowsDevices(),
-    ] : <DeviceDiscovery>[];
-  }
-
-  /// Only add web devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalWebDevices {
-    return flutterWebEnabled ? <DeviceDiscovery>[
+    if (featureFlags.isWebEnabled)
       WebDevices(),
-    ] : <DeviceDiscovery>[];
-  }
+  ]);
 
   String _specifiedDeviceId;
 
