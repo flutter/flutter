@@ -273,7 +273,7 @@ void main() {
       debugDefaultTargetPlatformOverride = null;
     });
 
-    testWidgets('extent is overidden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+    testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final GlobalKey key = GlobalKey();
       final ScrollController controller = ScrollController();
@@ -379,7 +379,7 @@ void main() {
       expect(tester.getCenter(button).dx, equals(400.0));
     });
 
-    testWidgets('extent is overidden by child size if precedingScrollExtent > viewportMainAxisExtent, fillOverscroll is ignored', (WidgetTester tester) async {
+    testWidgets('extent is overridden by child size if precedingScrollExtent > viewportMainAxisExtent, fillOverscroll is ignored', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       final ScrollController controller = ScrollController();
       final List<Widget> slivers = <Widget>[
