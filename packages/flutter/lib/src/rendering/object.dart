@@ -1862,7 +1862,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to repaint.
   ///
   /// If this getter returns true, the [paintBounds] are applied to this object
-  /// and all descendants.
+  /// and all descendants. The framework automatically creates an [OffsetLayer]
+  /// and assigns it to the [layer] field. Render objects that declare
+  /// themselves as repaint boundaries must not replace the layer created by
+  /// the framework.
   ///
   /// Warning: This getter must not change value over the lifetime of this object.
   bool get isRepaintBoundary => false;
