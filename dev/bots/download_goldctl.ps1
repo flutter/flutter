@@ -7,4 +7,8 @@ Write-Output "pwd:"
 Get-Location
 (New-Object System.Net.WebClient).DownloadFile($url, $path)
 Write-Output "File Downloaded"
+Write-Output "ls:"
+Get-ChildItem
+Write-Output "pwd:"
+Get-Location
 Expand-Archive -LiteralPath $path -DestinationPath "C:\Windows\Temp\goldctl_tool"
