@@ -125,20 +125,27 @@ class IOSDevice extends Device {
           ephemeral: true,
       ) {
     if (!platform.isMacOS) {
-      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
+      assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
     }
-    _installerPath = artifacts.getArtifactPath(
+  }
+
+  String get _installerPath {
+    _installerPathValue ??= artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
-    _iproxyPath = artifacts.getArtifactPath(
+    return _installerPathValue;
+  }
+  String _installerPathValue;
+
+  String get _iproxyPath {
+    _iproxyPathValue ??= artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios
     ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
+    return _iproxyPathValue;
   }
-
-  String _installerPath;
-  String _iproxyPath;
+  String _iproxyPathValue;
 
   final String _sdkVersion;
 
@@ -165,6 +172,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static Future<List<IOSDevice>> getAttachedDevices() async {
+    if (!platform.isMacOS) {
+      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
+    }
     if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
