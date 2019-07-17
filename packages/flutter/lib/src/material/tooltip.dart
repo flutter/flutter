@@ -424,14 +424,27 @@ class _TooltipOverlay extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
 
-    final TextStyle defaultTextStyle = theme.brightness == Brightness.dark
-      ? theme.typography.white.merge(theme.textTheme).body1
-      : theme.typography.white.merge(theme.primaryTextTheme).body1;
-
-    final BoxDecoration defaultDecoration = BoxDecoration(
-      color: Colors.grey[700].withOpacity(0.9),
-      borderRadius: const BorderRadius.all(Radius.circular(4)),
-    );
+    TextStyle defaultTextStyle;
+    BoxDecoration defaultDecoration;
+    if (theme.brightness == Brightness.dark) {
+      defaultTextStyle = theme.textTheme.body1.copyWith(
+        color: Colors.black,
+        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('white', 'black'),
+      );
+      defaultDecoration = BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      );
+    } else {
+      defaultTextStyle = theme.textTheme.body1.copyWith(
+        color: Colors.white,
+        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('black', 'white')
+      );
+      defaultDecoration = BoxDecoration(
+        color: Colors.grey[700].withOpacity(0.9),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      );
+    }
 
     return Positioned.fill(
       child: IgnorePointer(
