@@ -41,9 +41,9 @@ class SystemChannels {
   ///
   /// See also:
   ///
-  ///  * [Navigator] which manages between transitioning from one page to
-  ///    another. [Navigator.push], [Navigator.pushReplacement], [Navigator.pop]
-  ///    and [Navigator.replace], utilize this channel's methods to send route
+  ///  * [Navigator] which manages transitions from one page to another.
+  ///    [Navigator.push], [Navigator.pushReplacement], [Navigator.pop] and
+  ///    [Navigator.replace], utilize this channel's methods to send route
   ///    change information from framework to engine.
   static const MethodChannel navigation = MethodChannel(
       'flutter/navigation',
