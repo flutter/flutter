@@ -16,14 +16,15 @@ import '../device.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../resident_runner.dart';
 import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../usage.dart';
 import '../version.dart';
+
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {

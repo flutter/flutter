@@ -157,17 +157,6 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> handleTerminalCommand(String code) async {
-    if (code == 'R') {
-      // If hot restart is not supported for all devices, ignore the command.
-      if (!canHotRestart) {
-        return;
-      }
-      await restart(fullRestart: true);
-    }
-  }
-
-  @override
   void printHelp({bool details}) {
     if (details) {
       return printHelpDetails();
