@@ -20,6 +20,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -65,10 +66,6 @@ final RegExp androidXFailureRegex = RegExp(r'(AAPT|androidx|android\.support)');
 
 final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
   r"|WARNING: This version of (\w+) will break your Android build if it or its dependencies aren't compatible with AndroidX."
-  r'|To fix the issue, run:'
-  r'`export ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR=true` on Linux or MacOS.'
-  r'`set ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR=true` on Windows.'
-  r'Finally, run this command again.'
   r'|See https://goo.gl/CP92wY for more information on the problem and how to fix it.'
   r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
@@ -137,9 +134,9 @@ Future<void> checkGradleDependencies() async {
   progress.stop();
 }
 
-/// Tries to create [settings_aar.gradle] in an app project by removing the subprojects
-/// from the existing [settings.gradle] file. This operation will fail if the existing
-/// [settings.gradle] file has local edits.
+/// Tries to create `settings_aar.gradle` in an app project by removing the subprojects
+/// from the existing `settings.gradle` file. This operation will fail if the existing
+/// `settings.gradle` file has local edits.
 void createSettingsAarGradle(Directory androidDirectory) {
   final File newSettingsFile = androidDirectory.childFile('settings_aar.gradle');
   if (newSettingsFile.existsSync()) {
@@ -195,7 +192,8 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
 
   final FlutterManifest manifest = flutterProject.manifest;
   final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
-  if (_gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] == 'true' &&
+
+  if (featureFlags.isPluginAsAarEnabled &&
       !manifest.isPlugin && !manifest.isModule) {
     createSettingsAarGradle(hostAppGradleRoot);
   }
@@ -551,15 +549,12 @@ Future<void> buildGradleAar({
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
 
-  final Map<String, String> gradleEnv = Map<String, String>.from(_gradleEnv);
-  gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] = 'true';
-
   try {
     exitCode = await runCommandAndStreamOutput(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
-      environment: gradleEnv,
+      environment: _gradleEnv,
       mapFunction: (String line) {
         // Always print the full line in verbose mode.
         if (logger.isVerbose) {
@@ -700,8 +695,11 @@ Future<void> _buildGradleProjectV2(
         .map(getPlatformNameForAndroidArch).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
   }
-  if (_gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] == 'true') {
-    command.add('--settings-file=settings_aar.gradle');
+  if (featureFlags.isPluginAsAarEnabled) {
+    command.add('-Pbuild-plugins-as-aars=true');
+    if (!flutterProject.manifest.isModule) {
+      command.add('--settings-file=settings_aar.gradle');
+    }
   }
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;

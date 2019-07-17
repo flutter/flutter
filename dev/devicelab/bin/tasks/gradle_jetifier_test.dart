@@ -66,7 +66,6 @@ Future<void> main() async {
             '--target-platform', 'android-arm',
             '--verbose',
           ],
-          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
@@ -101,7 +100,6 @@ Future<void> main() async {
             '--target-platform', 'android-arm',
             '--debug', '--verbose',
           ],
-          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 

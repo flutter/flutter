@@ -9,8 +9,8 @@ import '../base/context.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
-import '../usage.dart';
 import 'build.dart';
 
 /// The AAR builder in the current context.

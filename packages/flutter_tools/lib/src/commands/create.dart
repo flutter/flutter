@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
@@ -478,6 +479,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         ? argResults['description']
         : 'A new flutter module project.';
     templateContext['description'] = description;
+    templateContext['isPluginAsAarEnabled'] = featureFlags.isPluginAsAarEnabled;
     generatedCount += _renderTemplate(fs.path.join('module', 'common'), directory, templateContext, overwrite: overwrite);
     if (argResults['pub']) {
       await pubGet(

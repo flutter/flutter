@@ -50,7 +50,6 @@ Future<void> main() async {
             '--flavor', 'does-not-exist',
           ],
           canFail: true, // The flavor doesn't exist.
-          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
@@ -104,7 +103,6 @@ plugins.each { name, path ->
             '--flavor', 'does-not-exist',
           ],
           canFail: true, // The flavor doesn't exist.
-          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 
@@ -152,7 +150,6 @@ plugins.each { name, path ->
           ],
           canFail: true, // The flavor doesn't exist.
           stderr: stderr,
-          environment: <String, String>{'ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR': 'true'},
         );
       });
 

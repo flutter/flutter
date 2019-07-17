@@ -371,6 +371,13 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
+    private static Boolean buildPluginAsAar(Project project) {
+        if (project.hasProperty('build-plugins-as-aars')) {
+            return project.property('build-plugins-as-aars').toBoolean()
+        }
+        return false
+    }
+
     /**
      * Returns the platform that is used to extract the `libflutter.so` and the .class files.
      *
@@ -628,7 +635,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android.libraryVariants.all addFlutterDeps
         }
 
-        if (System.getenv('ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR') == 'true') {
+        if (buildPluginAsAar(project)) {
             addPluginTasks(project)
 
             List<String> tasksToExecute = project.gradle.startParameter.taskNames
