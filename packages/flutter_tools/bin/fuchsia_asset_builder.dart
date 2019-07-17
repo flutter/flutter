@@ -13,10 +13,10 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/disabled_usage.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/disabled_usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';
