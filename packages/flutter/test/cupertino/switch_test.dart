@@ -513,4 +513,54 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
+  testWidgets('Switch renders correctly before and after being tapped', (WidgetTester tester) async {
+    final Key switchKey = UniqueKey();
+    bool value = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Center(
+              child: RepaintBoundary(
+                  child: CupertinoSwitch(
+                  key: switchKey,
+                  value: value,
+                  dragStartBehavior: DragStartBehavior.down,
+                  onChanged: (bool newValue) {
+                    setState(() {
+                      value = newValue;
+                    });
+                  },
+                  )
+              )
+            );
+          },
+        ),
+      ),
+    );
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.off.png',
+        version: 0,
+      ),
+      skip: !isLinux,
+    );
+
+    await tester.tap(find.byKey(switchKey));
+    expect(value, isTrue);
+    await tester.pumpAndSettle();
+
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.on.png',
+        version: 0,
+      ),
+      skip: !isLinux,
+    );
+  });
+
 }
