@@ -1,5 +1,5 @@
 name: platform_views
-description: An integration test for embedded Android views
+description: An integration test for embedded platform views
 version: 1.0.0+1
 
 dependencies:
