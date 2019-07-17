@@ -499,24 +499,29 @@ void main() {
     expect(log, equals(const <String>['onPageChanged 2']));
     log.clear();
 
-    // Release the gesture, confirm that both pages are visible.
+    // Now move beyond a whole page.
+    await gesture.moveBy(const Offset(-500.0, 0.0));
+
+    // Release the gesture and settle.
     await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(find.text('Alabama'), findsNothing);
-    expect(find.text('Alaska'), findsOneWidget);
-    expect(find.text('Arizona'), findsOneWidget);
-    expect(find.text('Arkansas'), findsNothing);
+    // PageDidChange should be fired.
+    expect(log, equals(const <String>['pageDidChange 2']));
+    log.clear();
 
-    // PageDidChange should not trigger before turning snapping back on.
-    expect(log, isEmpty);
+    // Confirm that both pages are visible.
+    expect(find.text('Alaska'), findsNothing);
+    expect(find.text('Arizona'), findsOneWidget);
+    expect(find.text('Arkansas'), findsOneWidget);
+    expect(find.text('California'), findsNothing);
 
     // Now re-enable snapping, confirm that we've settled on a page.
     await tester.pumpWidget(build(pageSnapping: true));
     await tester.pumpAndSettle();
 
-    // PageDidChange should be fired.
-    expect(log, equals(const <String>['pageDidChange 2']));
+    // No one should trigger.
+    expect(log, isEmpty);
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);

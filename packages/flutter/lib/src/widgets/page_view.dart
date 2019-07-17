@@ -704,11 +704,13 @@ class _PageViewState extends State<PageView> {
             widget.onPageChanged(currentPage);
           }
         } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
-          if (!widget.pageSnapping) {
-            return false;
-          }
           final PageMetrics metrics = notification.metrics;
-          final int currentPage = metrics.page.round();
+
+          /// Dart doubles are 64-bit floating-point numbers as specified in the
+          /// IEEE 754 standard.It has 52 bits of significand so the number "15"
+          /// is good to avoid the double number precision problem.
+          final int currentPage = double.parse(metrics.page.toStringAsFixed(15)).toInt();
+
           if (currentPage != _lastPageDidChangeIndex) {
             _lastPageDidChangeIndex = currentPage;
             widget.pageDidChange(currentPage);
