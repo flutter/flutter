@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 
@@ -34,16 +33,17 @@ import 'mac.dart';
 /// If this (Flutter tools) process terminates before `ios-deploy` or the app, `ios-deploy`
 /// will be suspended. This is problematic because it will keep the app process on the phone
 /// alive via LLDB. Therefore we kill any previously created `ios-deploy` process which
-/// has launched an app before trying to run it again.
+/// has launched an app before trying to run that app again.
 class IOSDeploy {
   const IOSDeploy();
 
-  io.File _tempFile(ApplicationPackage package) => io.File('/tmp/${package.id}.ios_deploy.pid');
+  File _tempFile(ApplicationPackage package) => fs.file('/tmp/${package.id}.ios_deploy.pid');
 
-  /// Checks /tmp/<app id>.ios_deploy.pid for an `ios-deploy` processe already running
+  /// Checks /tmp/<app id>.ios_deploy.pid for an `ios-deploy` process already running
   /// the app and terminates it.
   Future<void> _killOther(ApplicationPackage package) async {
-    final io.File temp = _tempFile(package);
+    final File temp = _tempFile(package);
+
     if (!temp.existsSync())
       return;
 
