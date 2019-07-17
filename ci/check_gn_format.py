@@ -43,7 +43,7 @@ def main():
     if subprocess.call(gn_command + [ gn_file ]) != 0:
       print "ERROR: '%s' is incorrectly formatted." % os.path.relpath(gn_file, args.root_directory)
       print "Format the same with 'gn format' using the 'gn' binary in //buildtools."
-      print "Or, run ./ci/check_gn_format.py with '--dry-run false'" 
+      print "Or, run ./ci/check_gn_format.py with '--dry-run false'"
       return -1
 
   return 0

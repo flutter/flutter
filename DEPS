@@ -107,8 +107,6 @@ vars = {
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
-  'buildtools_revision': 'bac220c15490dcf7b7d8136f75100bbc77e8d217',
-
   # Checkout Android dependencies only on platforms where we build for Android targets.
   'download_android_deps': 'host_os == "mac" or host_os == "linux"',
 
@@ -162,9 +160,6 @@ deps = {
    #
    # As part of integrating with Fuchsia, we should eventually remove all these
    # Chromium-style dependencies.
-
-  'src/buildtools':
-   Var('fuchsia_git') + '/buildtools' + '@' +  Var('buildtools_revision'),
 
   'src/ios_tools':
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
@@ -473,6 +468,27 @@ deps = {
      'dep_type': 'cipd',
    },
 
+  'src/flutter/third_party/gn': {
+    'packages': [
+      {
+        'package': 'gn/gn/${{platform}}',
+        'version': 'git_revision:bdb0fd02324b120cacde634a9235405061c8ea06'
+      },
+    ],
+    'dep_type': 'cipd',
+  },
+
+  'src/buildtools/{host_os}-x64/clang': {
+    'packages': [
+      {
+        'package': 'fuchsia/clang/${{platform}}',
+        'version': 'git_revision:de39621f0f03f20633bdfa50bde97a3908bf6e98'
+      }
+    ],
+    'condition': 'host_os == "mac" or host_os == "linux"',
+    'dep_type': 'cipd',
+  },
+
    # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
    # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
 
@@ -544,14 +560,6 @@ hooks = [
     'action': [
         'python',
         'src/flutter/tools/android_support/download_android_support.py',
-    ],
-  },
-  {
-    'name': 'buildtools',
-    'pattern': '.',
-    'action': [
-      'python',
-      'src/tools/buildtools/update.py',
     ],
   },
   {

@@ -23,3 +23,6 @@ pubspec.lock
 .vscode/
 docs/doxygen/
 xcuserdata
+
+third_party/gn/
+

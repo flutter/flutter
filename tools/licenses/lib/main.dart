@@ -926,17 +926,18 @@ class _RepositoryDirectory extends _RepositoryEntry implements LicenseSource {
   List<_RepositoryDirectory> get virtualSubdirectories => <_RepositoryDirectory>[];
 
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != '.cipd' &&
-           entry.name != '.git' &&
-           entry.name != '.github' &&
-           entry.name != '.gitignore' &&
-           entry.name != '.vscode' &&
-           entry.name != 'test' &&
-           entry.name != 'test.disabled' &&
-           entry.name != 'test_support' &&
-           entry.name != 'tests' &&
-           entry.name != 'javatests' &&
-           entry.name != 'testing';
+    return !entry.fullName.endsWith('third_party/gn') &&
+            entry.name != '.cipd' &&
+            entry.name != '.git' &&
+            entry.name != '.github' &&
+            entry.name != '.gitignore' &&
+            entry.name != '.vscode' &&
+            entry.name != 'test' &&
+            entry.name != 'test.disabled' &&
+            entry.name != 'test_support' &&
+            entry.name != 'tests' &&
+            entry.name != 'javatests' &&
+            entry.name != 'testing';
   }
 
   _RepositoryDirectory createSubdirectory(fs.Directory entry) {
