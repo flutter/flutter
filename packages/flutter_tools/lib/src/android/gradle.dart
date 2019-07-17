@@ -533,6 +533,7 @@ Future<void> buildGradleAar({
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${gradleProject.buildDirectory}',
     '-Pis-plugin=${manifest.isPlugin}',
+    '-Dbuild-plugins-as-aars=true',
   ];
 
   if (target != null && target.isNotEmpty) {
