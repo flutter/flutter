@@ -811,15 +811,23 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     _ensureInitialized(assetFolderPath);
 
+    final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
+
     if (_allowedAssetKeys.isNotEmpty) {
       defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
-        final String key = utf8.decode(message.buffer.asUint8List());
-        if (_allowedAssetKeys.contains(key)) {
-          final File asset = File(path.join(assetFolderPath, key));
-          final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-          return Future<ByteData>.value(encoded.buffer.asByteData());
+        String key = utf8.decode(message.buffer.asUint8List());
+        if (!_allowedAssetKeys.contains(key)) {
+          // For tests in package, it will load assets with its own package prefix.
+          // In this case, we do a best-effort look up.
+          if (!key.startsWith(prefix))
+            return null;
+          key = key.replaceFirst(prefix, '');
+          if (!_allowedAssetKeys.contains(key))
+            return null;
         }
-        return null;
+        final File asset = File(path.join(assetFolderPath, key));
+        final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+        return Future<ByteData>.value(encoded.buffer.asByteData());
       });
     }
   }
