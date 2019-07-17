@@ -191,15 +191,18 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
+    RunResult apps;
     try {
-      final RunResult apps = await runCheckedAsync(<String>[_installerPath, '--list-apps']);
-      if (RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
-        return true;
-      }
-    } catch (e) {
+      apps = await runCheckedAsync(
+        <String>[_installerPath, '--list-apps'],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
+    } on ProcessException {
       return false;
     }
-    return false;
+    return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -215,9 +218,14 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
@@ -225,9 +233,14 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(<String>[_installerPath, '-U', app.id]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-U', app.id],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
