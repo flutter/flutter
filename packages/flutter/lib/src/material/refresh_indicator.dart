@@ -427,7 +427,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(_isIndicatorAtTop != null);
 
     final bool showIndeterminateIndicator =
-        _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
+      _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
 
     return Stack(
       children: <Widget>[
@@ -445,8 +445,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 ? EdgeInsets.only(top: widget.displacement)
                 : EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
-                  ? Alignment.topCenter
-                  : Alignment.bottomCenter,
+                ? Alignment.topCenter
+                : Alignment.bottomCenter,
               child: ScaleTransition(
                 scale: _scaleFactor,
                 child: AnimatedBuilder(
