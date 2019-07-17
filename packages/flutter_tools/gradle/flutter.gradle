@@ -371,11 +371,8 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
-    private static Boolean buildPluginAsAar(Project project) {
-        if (project.hasProperty('build-plugins-as-aars')) {
-            return project.property('build-plugins-as-aars').toBoolean()
-        }
-        return false
+    private static Boolean buildPluginAsAar() {
+        return System.getProperty('build-plugins-as-aars') == 'true'
     }
 
     /**
@@ -635,7 +632,7 @@ class FlutterPlugin implements Plugin<Project> {
             project.android.libraryVariants.all addFlutterDeps
         }
 
-        if (buildPluginAsAar(project)) {
+        if (buildPluginAsAar()) {
             addPluginTasks(project)
 
             List<String> tasksToExecute = project.gradle.startParameter.taskNames

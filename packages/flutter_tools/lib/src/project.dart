@@ -15,7 +15,6 @@ import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
 import 'desktop.dart';
-import 'features.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -583,7 +582,6 @@ class AndroidProject {
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
         'androidX': usesAndroidX,
-        'isPluginAsAarEnabled': featureFlags.isPluginAsAarEnabled,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,

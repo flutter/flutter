@@ -696,7 +696,9 @@ Future<void> _buildGradleProjectV2(
     command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (featureFlags.isPluginAsAarEnabled) {
-    command.add('-Pbuild-plugins-as-aars=true');
+     // Pass a system flag instead of a project flag, so this flag can be
+     // read from include_flutter.groovy.
+    command.add('-Dbuild-plugins-as-aars=true');
     if (!flutterProject.manifest.isModule) {
       command.add('--settings-file=settings_aar.gradle');
     }
