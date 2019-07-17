@@ -502,12 +502,17 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
 
+    canvas.save();
+    canvas.clipRRect(trackRRect);
+    canvas.saveLayer(trackRect, Paint());
     _thumbPainter.paint(canvas, Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
       thumbCenterY + CupertinoThumbPainter.radius,
     ));
+    canvas.restore();
+    canvas.restore();
   }
 
   @override
