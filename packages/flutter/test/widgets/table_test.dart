@@ -376,8 +376,7 @@ void main() {
     // If the above bug is present this test will never terminate.
   });
 
-    testWidgets('Really small deficit double precision error (redistributing deficit)', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/36256
+  testWidgets('Really small deficit double precision error (redistributing deficit)', (WidgetTester tester) async {
     const SizedBox cell = SizedBox(width: 1, height: 1);
     await tester.pumpWidget(
       Directionality(
