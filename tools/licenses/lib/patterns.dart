@@ -519,7 +519,7 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     pattern: RegExp(
       kIndent +
       r'Copyright .+\. All rights reserved\. '
-      r'This is a GENERATED file, see //zircon/system/host/abigen\. '
+      r'This is a GENERATED file, see //zircon/.+/abigen\. '
       r'The license governing this file can be found in the (LICENSE) file\.'
       .replaceAll(' ', _linebreak),
       multiLine: true,
