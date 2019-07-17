@@ -120,7 +120,7 @@ void main() {
 
   test('PaintingContext.pushColorFilter reuses the layer', () {
     _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushColorFilter(offset, ColorFilter.mode(const Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer);
+      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer);
     });
   });
 
