@@ -51,7 +51,6 @@ class AarBuilderImpl extends AarBuilder {
     if (androidSdk == null) {
       throwToolExit('No Android SDK found. Try setting the `ANDROID_SDK_ROOT` environment variable.');
     }
-
     await buildGradleAar(
       project: project,
       androidBuildInfo: androidBuildInfo,

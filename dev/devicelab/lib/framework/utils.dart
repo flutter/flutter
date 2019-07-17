@@ -625,3 +625,10 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
     options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
   }
 }
+
+/// Checks that the file exists, otherwise throws a [FileSystemException].
+void checkFileExists(String file) {
+  if (!exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
+  }
+}

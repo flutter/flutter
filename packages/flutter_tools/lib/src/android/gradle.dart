@@ -140,7 +140,7 @@ Future<void> checkGradleDependencies() async {
 /// Tries to create [settings_aar.gradle] in an app project by removing the subprojects
 /// from the existing [settings.gradle] file. This operation will fail if the existing
 /// [settings.gradle] file has local edits.
-void _createSettingsAarGradle(Directory androidDirectory) {
+void createSettingsAarGradle(Directory androidDirectory) {
   final File newSettingsFile = androidDirectory.childFile('settings_aar.gradle');
   if (newSettingsFile.existsSync()) {
     return;
@@ -179,8 +179,9 @@ void _createSettingsAarGradle(Directory androidDirectory) {
     throwToolExit('Please create the file and run this command again.');
   }
   // Copy the new file.
-  fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-      'gradle', 'new_settings.gradle')).copySync(newSettingsFile.path);
+  final String settingsAarContent = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+      'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
+  newSettingsFile.writeAsStringSync(settingsAarContent);
   status.stop();
   printStatus('✅ `$newSettingsRelativeFile` created successfully.');
 }
@@ -196,7 +197,7 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   final Directory hostAppGradleRoot = flutterProject.android.hostAppGradleRoot;
   if (_gradleEnv['ENABLE_FLUTTER_BUILD_PLUGINS_AS_AAR'] == 'true' &&
       !manifest.isPlugin && !manifest.isModule) {
-    _createSettingsAarGradle(hostAppGradleRoot);
+    createSettingsAarGradle(hostAppGradleRoot);
   }
   if (manifest.isPlugin && isLibrary) {
     return GradleProject(
@@ -360,7 +361,11 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '3.3.0', max: '3.3.2')) {
     return '4.10.2';
   }
-  return '5.1.1';
+  if (_isWithinVersionRange(androidPluginVersion, min: '3.4.0', max: '3.5.0')) {
+    return '5.1.1';
+  }
+  throwToolExit('Unsuported Android Plugin version: $androidPluginVersion.');
+  return '';
 }
 
 final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
@@ -511,7 +516,7 @@ Future<void> buildGradleAar({
 
   final String aarTask = gradleProject.aarTaskFor(androidBuildInfo.buildInfo);
   if (aarTask == null) {
-    _printUndefinedTask(gradleProject, androidBuildInfo.buildInfo);
+    printUndefinedTask(gradleProject, androidBuildInfo.buildInfo);
     throwToolExit('Gradle build aborted.');
   }
   final Status status = logger.startProgress(
@@ -621,7 +626,7 @@ String _calculateSha(File file) {
   return sha;
 }
 
-void _printUndefinedTask(GradleProject project, BuildInfo buildInfo) {
+void printUndefinedTask(GradleProject project, BuildInfo buildInfo) {
   printError('');
   printError('The Gradle project does not define a task suitable for the requested build.');
   if (!project.buildTypes.contains(buildInfo.modeName)) {
@@ -655,7 +660,7 @@ Future<void> _buildGradleProjectV2(
     assembleTask = project.assembleTaskFor(buildInfo);
   }
   if (assembleTask == null) {
-    _printUndefinedTask(project, buildInfo);
+    printUndefinedTask(project, buildInfo);
     throwToolExit('Gradle build aborted.');
   }
   final Status status = logger.startProgress(

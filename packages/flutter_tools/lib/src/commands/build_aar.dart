@@ -6,7 +6,7 @@ import 'dart:async';
 
 import '../android/aar.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
+import '../base/os.dart';
 import '../build_info.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
@@ -18,7 +18,6 @@ AarBuilder get aarBuilder => context.get<AarBuilder>() ?? AarBuilderImpl();
 
 class BuildAarCommand extends BuildSubCommand {
   BuildAarCommand({bool verboseHelp = false}) {
-    usesTargetOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();
@@ -37,12 +36,6 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   final String name = 'aar';
-
-  /// Returns the [FlutterProject] depending on the target flag.
-  FlutterProject _getProject() {
-    final String projectDir = fs.file(targetFile).parent.parent.path;
-    return FlutterProject.fromPath(projectDir);
-  }
 
   @override
   Future<Map<String, String>> get usageValues async {
@@ -83,10 +76,19 @@ class BuildAarCommand extends BuildSubCommand {
 
     await aarBuilder.build(
       project: _getProject(),
-      target: targetFile,
+      target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
       outputDir: argResults['output-dir'],
     );
     return null;
+  }
+
+  /// Returns the [FlutterProject] which is determinated from the remaining command-line
+  /// argument if any or the current working directory.
+  FlutterProject _getProject() {
+    if (argResults.rest.isEmpty) {
+      return FlutterProject.current();
+    }
+    return FlutterProject.fromPath(findProjectRoot(argResults.rest.first));
   }
 }

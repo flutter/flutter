@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -40,8 +39,8 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>[
         'aar',
-        '--target', target,
         ...?arguments,
+        target,
       ]);
       return command;
     }
@@ -50,7 +49,7 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      final BuildAarCommand command = await runCommandIn(path.join(projectPath, 'lib', 'main.dart'));
+      final BuildAarCommand command = await runCommandIn(projectPath);
       expect(await command.usageValues,
           containsPair(kCommandBuildAarProjectType, 'module'));
 
@@ -62,7 +61,7 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=plugin', '--project-name=aar_test']);
 
-      final BuildAarCommand command = await runCommandIn(path.join(projectPath, 'lib', 'aar_test.dart'));
+      final BuildAarCommand command = await runCommandIn(projectPath);
       expect(await command.usageValues,
           containsPair(kCommandBuildAarProjectType, 'plugin'));
 
@@ -74,7 +73,7 @@ void main() {
       final String projectPath = await createProject(tempDir,
           arguments: <String>['--no-pub', '--template=module']);
 
-      final BuildAarCommand command = await runCommandIn(path.join(projectPath, 'lib', 'main.dart'),
+      final BuildAarCommand command = await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
       expect(await command.usageValues,
           containsPair(kCommandBuildAarTargetPlatform, 'android-arm'));

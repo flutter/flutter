@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/gradle.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -315,6 +317,106 @@ someOtherTask
     });
   });
 
+  group('Config files', () {
+    BufferLogger mockLogger;
+    Directory tempDir;
+
+    setUp(() {
+      mockLogger = BufferLogger();
+      tempDir = fs.systemTempDirectory.createTempSync('settings_aar_test.');
+
+    });
+
+    testUsingContext('create settings_aar.gradle', () {
+      const String deprecatedFile = '''
+include ':app'
+
+def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
+
+def plugins = new Properties()
+def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
+if (pluginsFile.exists()) {
+    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+}
+
+plugins.each { name, path ->
+    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
+    include ":\$name"
+    project(":\$name").projectDir = pluginDirectory
+}
+''';
+
+      const String settingsAarFile = '''
+include ':app'
+''';
+
+      tempDir.childFile('settings.gradle').writeAsStringSync(deprecatedFile);
+
+      final String toolGradlePath = fs.path.join(
+          fs.path.absolute(Cache.flutterRoot),
+          'packages',
+          'flutter_tools',
+          'gradle');
+      fs.directory(toolGradlePath).createSync(recursive: true);
+      fs.file(fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+          .writeAsStringSync(deprecatedFile);
+
+      fs.file(fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+          .writeAsStringSync(settingsAarFile);
+
+      createSettingsAarGradle(tempDir);
+
+      expect(mockLogger.statusText, contains('created successfully'));
+      expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Logger: () => mockLogger,
+    });
+  });
+
+  group('Undefined task', () {
+    BufferLogger mockLogger;
+
+    setUp(() {
+      mockLogger = BufferLogger();
+    });
+
+    testUsingContext('print undefined build type', () {
+      final GradleProject project = GradleProject(<String>['debug', 'release'],
+          const <String>['free', 'paid'], '/some/dir');
+
+      printUndefinedTask(project, const BuildInfo(BuildMode.profile, 'unknown'));
+      expect(mockLogger.errorText, contains('The Gradle project does not define a task suitable for the requested build'));
+      expect(mockLogger.errorText, contains('Review the android/app/build.gradle file and ensure it defines a profile build type'));
+    }, overrides: <Type, Generator>{
+      Logger: () => mockLogger,
+    });
+
+    testUsingContext('print no flavors', () {
+      final GradleProject project = GradleProject(<String>['debug', 'release'],
+          const <String>[], '/some/dir');
+
+      printUndefinedTask(project, const BuildInfo(BuildMode.debug, 'unknown'));
+      expect(mockLogger.errorText, contains('The Gradle project does not define a task suitable for the requested build'));
+      expect(mockLogger.errorText, contains('The android/app/build.gradle file does not define any custom product flavors'));
+      expect(mockLogger.errorText, contains('You cannot use the --flavor option'));
+    }, overrides: <Type, Generator>{
+      Logger: () => mockLogger,
+    });
+
+    testUsingContext('print flavors', () {
+      final GradleProject project = GradleProject(<String>['debug', 'release'],
+          const <String>['free', 'paid'], '/some/dir');
+
+      printUndefinedTask(project, const BuildInfo(BuildMode.debug, 'unknown'));
+      expect(mockLogger.errorText, contains('The Gradle project does not define a task suitable for the requested build'));
+      expect(mockLogger.errorText, contains('The android/app/build.gradle file defines product flavors: free, paid'));
+    }, overrides: <Type, Generator>{
+      Logger: () => mockLogger,
+    });
+  });
+
   group('Gradle local.properties', () {
     MockLocalEngineArtifacts mockArtifacts;
     MockProcessManager mockProcessManager;
@@ -578,6 +680,12 @@ flutter:
       expect(getGradleVersionFor('3.3.2'), '4.10.2');
 
       expect(getGradleVersionFor('3.4.0'), '5.1.1');
+      expect(getGradleVersionFor('3.5.0'), '5.1.1');
+    });
+
+    test('throws on unsupported versions', () {
+      expect(() => getGradleVersionFor('3.6.0'),
+          throwsA(predicate<Exception>((Exception e) => e is ToolExit)));
     });
   });
 }
