@@ -535,7 +535,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       observer.didHaveMemoryPressure();
   }
 
-  Future<dynamic> _handleSystemMessage(dynamic systemMessage) async {
+  Future<void> _handleSystemMessage(Object systemMessage) async {
     final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {

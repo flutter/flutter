@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:build_daemon/data/build_status.dart';
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
@@ -91,18 +90,4 @@ class WebCompilationProxy {
   Future<void> invalidate({@required List<Uri> inputs}) async {
     throw UnimplementedError();
   }
-
-  Future<DaemonHandle> daemon({
-    @required Directory projectDirectory,
-    @required List<String> targets,
-    String testOutputDir,
-    bool release = false,
-  }) {
-    throw UnimplementedError();
-  }
 }
-
-abstract class DaemonHandle implements Sink<List<String>> {
-  Stream<BuildResults> get buildResults;
-}
-

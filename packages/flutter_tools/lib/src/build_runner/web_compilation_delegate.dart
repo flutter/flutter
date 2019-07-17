@@ -7,7 +7,6 @@ import 'dart:async';
 import 'dart:io' as  io;
 
 import 'package:build/build.dart';
-import 'package:build_daemon/data/build_status.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
 import 'package:build_runner_core/src/asset_graph/graph.dart';
 import 'package:build_runner_core/src/asset_graph/node.dart';
@@ -37,16 +36,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   core.PackageGraph _packageGraph;
   BuildImpl _builder;
   PackageUriMapper _packageUriMapper;
-
-  @override
-  Future<DaemonHandle> daemon({
-    @required Directory projectDirectory,
-    @required List<String> targets,
-    String testOutputDir,
-    bool release = false,
-  }) async {
-    return BuildDaemonHandle();
-  }
 
   @override
   Future<bool> initialize({
@@ -216,18 +205,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }
 }
 
-class BuildDaemonHandle extends DaemonHandle {
-  @override
-  void add(List<String> data) {
-  }
-
-  @override
-  Stream<BuildResults> get buildResults => null;
-
-  @override
-  void close() {
-  }
-}
 /// Handles mapping a single root file scheme to a multiroot scheme.
 ///
 /// This allows one build_runner build to read the output from a previous
