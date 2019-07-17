@@ -103,9 +103,9 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
   }) : assert(child != null),
-        assert(onRefresh != null),
-        assert(notificationPredicate != null),
-        super(key: key);
+       assert(onRefresh != null),
+       assert(notificationPredicate != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -191,7 +191,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
         end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
-          curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
     );
     super.didChangeDependencies();
