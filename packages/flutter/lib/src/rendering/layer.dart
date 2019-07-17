@@ -52,6 +52,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   @visibleForTesting
   void markNeedsAddToScene() {
+    assert(
+      !alwaysNeedsAddToScene,
+      '$runtimeType called markNeedsAddToScene.\n'
+      'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
+    );
     _needsAddToScene = true;
   }
 
@@ -125,13 +130,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void dropChild(AbstractNode child) {
-    markNeedsAddToScene();
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
     super.dropChild(child);
   }
 
   @override
   void adoptChild(AbstractNode child) {
-    markNeedsAddToScene();
+    if (!alwaysNeedsAddToScene) {
+      markNeedsAddToScene();
+    }
     super.adoptChild(child);
   }
 
@@ -1039,7 +1048,7 @@ class ClipRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: engineLayer);
     } else {
       engineLayer = null;
     }
@@ -1121,7 +1130,7 @@ class ClipRRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: engineLayer);
     } else {
       engineLayer = null;
     }
@@ -1203,7 +1212,7 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+      engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: engineLayer);
     } else {
       engineLayer = null;
     }
@@ -1482,7 +1491,7 @@ class ShaderMaskLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
+    engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }

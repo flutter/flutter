@@ -41,7 +41,6 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
-// TODO(yjbanov): should this callback optionally return ContainerLayer?
 typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
 
 /// A place to paint.
@@ -130,17 +129,11 @@ class PaintingContext extends ClipContext {
     }());
     childContext ??= PaintingContext(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
+
+    // Double-check that the paint method did not replace the layer (the first
+    // check is done in the [layer] setter itself).
     assert(identical(childLayer, child._layer));
     childContext.stopRecordingIfNeeded();
-    assert(
-      child._layer is OffsetLayer,
-      '${child.runtimeType}\'s layer is not an OffsetLayer.\n'
-      'The layer was ${child._layer.runtimeType}.\n'
-      'The render object is a repaint boundary. Its RenderObject.layer field '
-      'must be an OffsetLayer created by the framework. Possibly the '
-      'implementation of the "paint" method created a different layer and '
-      'overwrote the "layer" field.',
-    );
   }
 
   /// In debug mode, repaint the given render object using a custom painting
@@ -396,18 +389,33 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a rectangle.
   ///
+  /// {@template flutter.rendering.object.needsCompositing}
   /// * `needsCompositing` is whether the child needs compositing. Typically
-  ///   matches the value of [RenderObject.needsCompositing] for the caller.
-  /// * `offset` is the offset from the origin of the canvas's coordinate system
+  ///   matches the value of [RenderObject.needsCompositing] for the caller. If
+  ///   false, this method returns null, indicating that a layer is no longer
+  ///   necessary. If a render object calling this method stores the `oldLayer`
+  ///   in its [RenderObject.layer] field, it should set that field to null.
+  /// {@end template}
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `clipRect` is rectangle (in the caller's coordinate system) to use to
   ///   clip the painting done by [painter].
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   /// * `clipBehavior` controls how the rectangle is clipped.
-  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer layer }) {
+  /// {@template flutter.rendering.object.oldLayer}
+  /// * `oldLayer` is the layer created in the previous frame. Specifying the
+  ///   old layer gives the engine more information for performance
+  ///   optimizations. Typically this is the value of [RenderObject.layer] that
+  ///   a render object creates once, then reuses for all subsequence frames
+  ///   until a layer is no longer needed (e.g. the render object no longer
+  ///   needs compositing) or until the render object changes the type of the
+  ///   layer (e.g. from opacity layer to a clip rect layer).
+  /// {@end template}
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer }) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
+      ClipRectLayer layer = oldLayer;
       if (layer == null) {
         layer = ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior);
       } else {
@@ -425,8 +433,7 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a rounded rectangle.
   ///
-  /// * `needsCompositing` is whether the child needs compositing. Typically
-  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// {@macro flutter.rendering.object.needsCompositing}
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `bounds` is the region of the canvas (in the caller's coordinate system)
@@ -436,11 +443,13 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the path is clipped.
-  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer layer }) {
+  /// {@macro flutter.rendering.object.oldLayer}
+  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer oldLayer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
+      ClipRRectLayer layer = oldLayer;
       if (layer == null) {
         layer = ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior);
       } else {
@@ -458,8 +467,7 @@ class PaintingContext extends ClipContext {
 
   /// Clip further painting using a path.
   ///
-  /// * `needsCompositing` is whether the child needs compositing. Typically
-  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// {@macro flutter.rendering.object.needsCompositing}
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `bounds` is the region of the canvas (in the caller's coordinate system)
@@ -469,11 +477,13 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the rounded rectangle is clipped.
-  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer layer }) {
+  /// {@macro flutter.rendering.object.oldLayer}
+  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer oldLayer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
+      ClipPathLayer layer = oldLayer;
       if (layer == null) {
         layer = ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior);
       } else {
@@ -497,29 +507,38 @@ class PaintingContext extends ClipContext {
   ///   painting done by `painter`.
   /// * `painter` is a callback that will paint with the `colorFilter` applied.
   ///   This function calls the `painter` synchronously.
+  /// {@macro flutter.rendering.object.oldLayer}
   ///
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
-  void pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter) {
+  ColorFilterLayer pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter, { ColorFilterLayer oldLayer }) {
     assert(colorFilter != null);
-    pushLayer(ColorFilterLayer(colorFilter: colorFilter), painter, offset);
+    ColorFilterLayer layer = oldLayer;
+    if (layer == null) {
+      layer = ColorFilterLayer(colorFilter: colorFilter);
+    } else {
+      layer.colorFilter = colorFilter;
+    }
+    pushLayer(layer, painter, offset);
+    return layer;
   }
 
   /// Transform further painting using a matrix.
   ///
-  /// * `needsCompositing` is whether the child needs compositing. Typically
-  ///   matches the value of [RenderObject.needsCompositing] for the caller.
+  /// {@macro flutter.rendering.object.needsCompositing}
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `transform` is the matrix to apply to the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `transform` applied. This
   ///   function calls the `painter` synchronously.
-  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter, { TransformLayer layer }) {
+  /// {@macro flutter.rendering.object.oldLayer}
+  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter, { TransformLayer oldLayer }) {
     final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
+      TransformLayer layer = oldLayer;
       if (layer == null) {
         layer = TransformLayer(transform: effectiveTransform);
       } else {
@@ -552,12 +571,14 @@ class PaintingContext extends ClipContext {
   ///   and an alpha value of 255 means the painting is fully opaque.
   /// * `painter` is a callback that will paint with the `alpha` applied. This
   ///   function calls the `painter` synchronously.
+  /// {@macro flutter.rendering.object.oldLayer}
   ///
   /// A [RenderObject] that uses this function is very likely to require its
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
-  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer layer }) {
+  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer oldLayer }) {
+    OpacityLayer layer = oldLayer;
     if (layer == null) {
       layer = OpacityLayer(alpha: alpha, offset: offset);
     } else {

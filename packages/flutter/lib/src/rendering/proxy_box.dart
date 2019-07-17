@@ -800,7 +800,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, layer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -920,7 +920,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, layer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
     }
   }
 
@@ -1337,7 +1337,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, layer: layer);
+      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
     } else {
       layer = null;
     }
@@ -1415,7 +1415,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, layer: layer);
+      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
     } else {
       layer = null;
     }
@@ -1485,7 +1485,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, layer: layer);
+      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
     } else {
       layer = null;
     }
@@ -1549,7 +1549,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, layer: layer);
+      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
     } else {
       layer = null;
     }
@@ -2235,7 +2235,7 @@ class RenderTransform extends RenderProxyBox {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
-        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, layer: layer);
+        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
       } else {
         super.paint(context, offset + childOffset);
         layer = null;
@@ -2383,7 +2383,7 @@ class RenderFittedBox extends RenderProxyBox {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
       return context.pushTransform(needsCompositing, offset, _transform, super.paint,
-          layer: layer is TransformLayer ? layer : null);
+          oldLayer: layer is TransformLayer ? layer : null);
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2397,7 +2397,7 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       if (_hasVisualOverflow)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            layer: layer is ClipRectLayer ? layer : null);
+            oldLayer: layer is ClipRectLayer ? layer : null);
       else
         layer = _paintChildWithTransform(context, offset);
     }
