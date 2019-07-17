@@ -163,6 +163,7 @@ void main() {
       expect(await IOSDevice.getAttachedDevices(), isEmpty);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
 
     testUsingContext('returns no devices if none are attached', () async {
@@ -173,6 +174,7 @@ void main() {
       expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
+      Platform: () => macPlatform,
     });
 
     testUsingContext('returns attached devices', () async {
