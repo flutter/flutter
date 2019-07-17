@@ -66,10 +66,12 @@ class FlutterWebServer {
       reloadConfiguration: ReloadConfiguration.none,
       serveDevTools: true,
       verbose: false,
-      handler: _assetHandler,
     );
+    Cascade cascade = Cascade();
+    cascade = cascade.add(_assetHandler);
+    cascade = cascade.add(dwds.handler);
     final HttpServer server = await HttpMultiServer.bind(_kHostName, port);
-    shelf_io.serveRequests(server, dwds.handler);
+    shelf_io.serveRequests(server, cascade.handler);
     final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
     return FlutterWebServer._(
       server,
@@ -78,23 +80,12 @@ class FlutterWebServer {
     );
   }
 
-  static final  FlutterProject _flutterProject = FlutterProject.current();
+  static final FlutterProject flutterProject = FlutterProject.current();
 
   static Future<Response> _assetHandler(Request request) async {
-    final String generated = fs.path.join(
-      _flutterProject.dartTool.path,
-      'build',
-      'flutter_web',
-      _flutterProject.manifest.appName,
-    );
-    if (request.url.path.contains('main.dart.js')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.dart.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
+    if (request.url.path.contains('index.html') || request.url.path == '/') {
+      return Response.ok(flutterProject.web.indexFile.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/html',
       });
     } else if (request.url.path.contains('stack_trace_mapper')) {
       final File file = fs.file(fs.path.join(
@@ -119,15 +110,6 @@ class FlutterWebServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
-    } else if (request.url.path.contains('.bootstrap.js')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.dart.bootstrap.js',
-      ));
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/javascript',
-      });
     } else if (request.url.path.contains('dart_sdk')) {
       final File file = fs.file(fs.path.join(
         artifacts.getArtifactPath(Artifact.flutterWebSdk),
@@ -138,13 +120,6 @@ class FlutterWebServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
-    } else if (request.url.path.contains('main_web_entrypoint.digests')) {
-      final File file = fs.file(fs.path.join(
-        generated,
-        'lib',
-        'main_web_entrypoint.digests',
-      ));
-      return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.contains('assets')) {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
       final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));

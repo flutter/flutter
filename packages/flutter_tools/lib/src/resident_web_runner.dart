@@ -240,11 +240,8 @@ class ResidentWebRunner extends ResidentRunner {
       daemonAssetPort: daemonAssetPort,
       buildResults: _client.buildResults,
     );
-    print('1');
     final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
-    print('2');
     appConnection.runMain();
-    print('3');
     _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
     appStartedCompleter?.complete();
     return attach(
