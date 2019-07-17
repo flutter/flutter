@@ -9,6 +9,46 @@ import 'package:flutter/material.dart';
 import 'semantics_tester.dart';
 
 void main() {
+  testWidgets('Sliver appBars - floating and pinned - correct elevation', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  key: key,
+                  bottom: PreferredSize(
+                    preferredSize: Size.fromHeight(28),
+                    child: const Text('Bottom'),
+                  ),
+                  backgroundColor: Colors.green,
+                  floating: true,
+                  primary: false,
+                  automaticallyImplyLeading: false,
+                ),
+                SliverToBoxAdapter(child: Container(color: Colors.yellow, height: 50.0)),
+                SliverToBoxAdapter(child: Container(color: Colors.red, height: 50.0)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byKey(key), findsOneWidget);
+    final RenderPhysicalModel renderObject = tester.renderObject<RenderPhysicalModel>(find.byType(PhysicalModel));
+    expect(renderObject, isNotNull);
+    expect(renderObject.elevation, 0.0);
+  });
+
   testWidgets('Sliver appbars - floating and pinned - correct semantics', (WidgetTester tester) async {
     await tester.pumpWidget(
       Localizations(
@@ -47,7 +87,6 @@ void main() {
         ),
       ),
     );
-
 
     final SemanticsTester semantics = SemanticsTester(tester);
 
