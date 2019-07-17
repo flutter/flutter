@@ -7,6 +7,7 @@ import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
@@ -41,10 +42,12 @@ class FlutterWebServer {
   }
 
   static Future<FlutterWebServer> start({
-    Stream<BuildResults> buildResults,
-    int daemonAssetPort,
+    @required Stream<BuildResults> buildResults,
+    @required int daemonAssetPort,
+    @required String target,
   }) async {
     // Only provide relevant build results
+    final FlutterProject flutterProject = FlutterProject.current();
     final Stream<BuildResult> filteredBuildResults = buildResults
         .asyncMap<BuildResult>((BuildResults results) {
           return results.results
@@ -67,9 +70,42 @@ class FlutterWebServer {
       serveDevTools: true,
       verbose: false,
     );
+    // Map the bootstrap files to the correct package directory.
+    final String targetBaseName = fs.path.withoutExtension(target).replaceFirst('lib/', '');
+    final Map<String, String> mappedUrls = <String, String>{
+      'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
+        '${targetBaseName}_web_entrypoint.dart.js',
+      '${targetBaseName}_web_entrypoint.dart.bootstrap.js': 'packages/${flutterProject.manifest.appName}/'
+        '${targetBaseName}_web_entrypoint.dart.bootstrap.js',
+      '${targetBaseName}_web_entrypoint.digests': 'packages/${flutterProject.manifest.appName}/'
+        '${targetBaseName}_web_entrypoint.digests',
+    };
+    final Handler handler = const Pipeline().addMiddleware((Handler innerHandler) {
+      return (Request request) async {
+        // Redirect the main.dart.js to the target file we decided to serve.
+        if (mappedUrls.containsKey(request.url.path)) {
+          final String newPath = mappedUrls[request.url.path];
+          print('mapping ${request.url.path} to $newPath');
+          return innerHandler(
+            Request(
+              request.method,
+              Uri.parse(request.requestedUri.toString()
+                  .replaceFirst(request.requestedUri.path, '/$newPath')),
+              headers: request.headers,
+              url: Uri.parse(request.url.toString()
+                  .replaceFirst(request.url.path, newPath)),
+            ),
+          );
+        } else {
+          print('skipping: ${request.url.path}');
+          return innerHandler(request);
+        }
+      };
+    })
+      .addHandler(dwds.handler);
     Cascade cascade = Cascade();
+    cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler);
-    cascade = cascade.add(dwds.handler);
     final HttpServer server = await HttpMultiServer.bind(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
     final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
@@ -80,14 +116,8 @@ class FlutterWebServer {
     );
   }
 
-  static final FlutterProject flutterProject = FlutterProject.current();
-
   static Future<Response> _assetHandler(Request request) async {
-    if (request.url.path.contains('index.html') || request.url.path == '/') {
-      return Response.ok(flutterProject.web.indexFile.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': 'text/html',
-      });
-    } else if (request.url.path.contains('stack_trace_mapper')) {
+    if (request.url.path.contains('stack_trace_mapper')) {
       final File file = fs.file(fs.path.join(
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
