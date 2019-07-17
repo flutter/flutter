@@ -479,6 +479,39 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
+  testWidgets('Showing custom search hint', (WidgetTester tester) async {
+    const String searchHint = 'custom search hint';
+    final String defaultSearchHint =
+        const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate =
+        _TestSearchDelegate(searchHint: searchHint);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+    expect(find.text(defaultSearchHint), findsNothing);
+  });
+
+  testWidgets('Showing default search label if no custom label is given', (WidgetTester tester) async {
+    final String searchHint =
+        const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+  });
+
   testWidgets('keyboard show search button', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
@@ -649,17 +682,18 @@ class TestHomePage extends StatelessWidget {
 }
 
 class _TestSearchDelegate extends SearchDelegate<String> {
-
   _TestSearchDelegate({
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
+    this.searchHint,
   });
 
   final String suggestions;
   final String result;
   final List<Widget> actions;
   final Color hintTextColor = Colors.green;
+  final String searchHint;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -704,4 +738,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   List<Widget> buildActions(BuildContext context) {
     return actions;
   }
+
+  @override
+  String get searchFieldLabel => searchHint;
 }
