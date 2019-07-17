@@ -287,11 +287,13 @@ class AsyncSnapshot<T> {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer()..write('$runtimeType')..write('(');
+    final StringBuffer buffer = StringBuffer()..write('$runtimeType')
+        ..write('(')
+        ..write('$connectionState');
     if (hasData)
-      buffer.write('data: $_data');
+      buffer.write(', data: $_data');
     else if (hasError)
-      buffer.write('error: $error');
+      buffer.write(', error: $error');
     buffer.write(')');
     return buffer.toString();
   }
