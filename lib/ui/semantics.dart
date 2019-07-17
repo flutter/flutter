@@ -288,6 +288,7 @@ class SemanticsFlag {
   static const int _kHasToggledStateIndex = 1 << 16;
   static const int _kIsToggledIndex = 1 << 17;
   static const int _kHasImplicitScrollingIndex = 1 << 18;
+  static const int _kIsMultilineIndex = 1 << 19;
   static const int _kIsReadOnlyIndex = 1 << 20;
 
   const SemanticsFlag._(this.index);
@@ -385,6 +386,13 @@ class SemanticsFlag {
   /// This is usually used for text fields to indicate that its content
   /// is a password or contains other sensitive information.
   static const SemanticsFlag isObscured = SemanticsFlag._(_kIsObscuredIndex);
+
+  /// Whether the value of the semantics node is coming from a multi-line text
+  /// field.
+  ///
+  /// This is used for text fields to distinguish single-line text fields from
+  /// multi-line ones.
+  static const SemanticsFlag isMultiline = SemanticsFlag._(_kIsMultilineIndex);
 
   /// Whether the semantics node is the root of a subtree for which a route name
   /// should be announced.
@@ -512,6 +520,10 @@ class SemanticsFlag {
     _kHasToggledStateIndex: hasToggledState,
     _kIsToggledIndex: isToggled,
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
+    // TODO(mdebbar): Uncomment after both these PRs are landed:
+    //                - https://github.com/flutter/engine/pull/9850
+    //                - https://github.com/flutter/flutter/pull/36297
+    // _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
   };
 
@@ -556,6 +568,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isToggled';
       case _kHasImplicitScrollingIndex:
         return 'SemanticsFlag.hasImplicitScrolling';
+      case _kIsMultilineIndex:
+        return 'SemanticsFlag.isMultiline';
       case _kIsReadOnlyIndex:
         return 'SemanticsFlag.isReadOnly';
     }

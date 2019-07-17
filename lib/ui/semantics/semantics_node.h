@@ -69,6 +69,8 @@ enum class SemanticsFlags : int32_t {
   kHasToggledState = 1 << 16,
   kIsToggled = 1 << 17,
   kHasImplicitScrolling = 1 << 18,
+  // The Dart API defines the following flag but it isn't used in iOS.
+  // kIsMultiline = 1 << 19,
   kIsReadOnly = 1 << 20,
 };
 
