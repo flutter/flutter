@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/base/platform.dart';
@@ -11,36 +11,48 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 void main() {
-  final MockPlatform mac = MockPlatform();
-  final MockPlatform notMac = MockPlatform();
-  when(mac.isMacOS).thenReturn(true);
-  when(macWithFde.isMacOS).thenReturn(true);
-  when(notMac.isMacOS).thenReturn(false);
+  MockPlatform mac;
+  MockPlatform notMac;
+  Testbed testbed;
 
-  final MockProcessManager mockProcessManager = MockProcessManager();
-  when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-    return ProcessResult(0, 1, '', '');
+  setUp(() {
+    mac = MockPlatform();
+    notMac = MockPlatform();
+    when(mac.isMacOS).thenReturn(true);
+    when(notMac.isMacOS).thenReturn(false);
+    testbed = Testbed(overrides: <Type, Generator>{
+      Platform: () => mac,
+      FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    });
   });
-  testUsingContext('Applies to mac platform', () {
+
+  test('Applies to macOS platform', () => testbed.run(() {
     expect(macOSWorkflow.appliesToHostPlatform, true);
-  }, overrides: <Type, Generator>{
-    Platform: () => mac,
-  });
-  testUsingContext('Does not apply to non-mac platform', () {
+    expect(macOSWorkflow.canListDevices, true);
+    expect(macOSWorkflow.canLaunchDevices, true);
+    expect(macOSWorkflow.canListEmulators, false);
+  }));
+
+  test('Does not apply to non-macOS platform', () => testbed.run(() {
     expect(macOSWorkflow.appliesToHostPlatform, false);
+    expect(macOSWorkflow.canListDevices, false);
+    expect(macOSWorkflow.canLaunchDevices, false);
+    expect(macOSWorkflow.canListEmulators, false);
   }, overrides: <Type, Generator>{
     Platform: () => notMac,
-  });
+  }));
 
-  testUsingContext('defaults', () {
+  test('Does not apply when feature is disabled', () => testbed.run(() {
+    expect(macOSWorkflow.appliesToHostPlatform, true);
+    expect(macOSWorkflow.canListDevices, false);
+    expect(macOSWorkflow.canLaunchDevices, false);
     expect(macOSWorkflow.canListEmulators, false);
-    expect(macOSWorkflow.canLaunchDevices, true);
-    expect(macOSWorkflow.canListDevices, true);
   }, overrides: <Type, Generator>{
-    Platform: () => macWithFde,
-  });
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
+  }));
 }
 
 class MockPlatform extends Mock implements Platform {
