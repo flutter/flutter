@@ -24,7 +24,7 @@
   <string>1</string>
   <key>NSHumanReadableCopyright</key>
   <string>Copyright 2013 The Flutter Authors. All rights reserved.</string>
-  <key>FlutterEngine<key>
-  <string>{0}<string>
+  <key>FlutterEngine</key>
+  <string>{0}</string>
 </dict>
 </plist>
