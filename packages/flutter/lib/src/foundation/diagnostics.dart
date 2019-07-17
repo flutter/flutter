@@ -2774,7 +2774,10 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   DiagnosticPropertiesBuilder _cachedBuilder;
 
-  DiagnosticPropertiesBuilder get _builder {
+  /// Retrieve the [DiagnosticPropertiesBuilder] of current node.
+  ///
+  /// It will cache the result to prevent duplicate operation.
+  DiagnosticPropertiesBuilder get builder {
     if (kReleaseMode)
       return null;
     if (_cachedBuilder == null) {
@@ -2786,14 +2789,14 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   DiagnosticsTreeStyle get style {
-    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? _builder.defaultDiagnosticsTreeStyle;
+    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? builder.defaultDiagnosticsTreeStyle;
   }
 
   @override
-  String get emptyBodyDescription => kReleaseMode ? '' : _builder.emptyBodyDescription;
+  String get emptyBodyDescription => kReleaseMode ? '' : builder.emptyBodyDescription;
 
   @override
-  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : _builder.properties;
+  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : builder.properties;
 
   @override
   List<DiagnosticsNode> getChildren() {
@@ -2875,6 +2878,13 @@ String describeEnum(Object enumEntry) {
 /// Builder to accumulate properties and configuration used to assemble a
 /// [DiagnosticsNode] from a [Diagnosticable] object.
 class DiagnosticPropertiesBuilder {
+  /// Creates a [DiagnosticPropertiesBuilder] with [properties] initialize to
+  /// an empty array.
+  DiagnosticPropertiesBuilder() : properties = <DiagnosticsNode>[];
+
+  /// Creates a [DiagnosticPropertiesBuilder] with a given [properties].
+  DiagnosticPropertiesBuilder.fromProperties(this.properties);
+
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
     if (!kReleaseMode) {
@@ -2883,7 +2893,7 @@ class DiagnosticPropertiesBuilder {
   }
 
   /// List of properties accumulated so far.
-  final List<DiagnosticsNode> properties = <DiagnosticsNode>[];
+  final List<DiagnosticsNode> properties;
 
   /// Default style to use for the [DiagnosticsNode] if no style is specified.
   DiagnosticsTreeStyle defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.sparse;
