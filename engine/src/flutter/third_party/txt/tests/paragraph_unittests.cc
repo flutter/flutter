@@ -1856,15 +1856,25 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyRTL)) {
     GetCanvas()->drawRect(boxes[i].rect, paint);
   }
   ASSERT_EQ(boxes.size(), 5ull);
+
+  paint.setColor(SK_ColorBLUE);
+  boxes = paragraph->GetRectsForRange(240, 250, rect_height_style,
+                                      rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  ASSERT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 588);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 130);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 640);
+  EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 156);
   ASSERT_TRUE(Snapshot());
 
-  // All lines except the last should be justified to the width of the
+  // All lines should be justified to the width of the
   // paragraph.
-  for (size_t i = 0; i < paragraph->glyph_lines_.size() - 1; ++i) {
+  for (size_t i = 0; i < paragraph->glyph_lines_.size(); ++i) {
     ASSERT_EQ(glyph_line_width(i), paragraph_width);
   }
-  ASSERT_NE(glyph_line_width(paragraph->glyph_lines_.size() - 1),
-            paragraph_width);
 }
 
 TEST_F(ParagraphTest, DecorationsParagraph) {

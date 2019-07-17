@@ -1047,14 +1047,14 @@ void ParagraphTxt::Layout(double width) {
       // advance subtracted, so we do add the advance here to reset the
       // run_x_offset. We do keep the record though so GetRectsForRange() can
       // find metrics for trailing spaces.
-      // if (!run.is_ghost() || run.is_rtl()) {
       if ((!run.is_ghost() || run.is_rtl()) && !run.is_placeholder_run()) {
         run_x_offset += layout.getAdvance();
       }
     }  // for each in line_runs
 
     // Adjust the glyph positions based on the alignment of the line.
-    double line_x_offset = GetLineXOffset(run_x_offset);
+    double line_x_offset =
+        GetLineXOffset(run_x_offset, line_number, line_limit);
     if (line_x_offset) {
       for (CodeUnitRun& code_unit_run : line_code_unit_runs) {
         code_unit_run.Shift(line_x_offset);
@@ -1174,13 +1174,18 @@ void ParagraphTxt::Layout(double width) {
   longest_line_ = max_right_ - min_left_;
 }
 
-double ParagraphTxt::GetLineXOffset(double line_total_advance) {
+double ParagraphTxt::GetLineXOffset(double line_total_advance,
+                                    size_t line_number,
+                                    size_t line_limit) {
   if (isinf(width_))
     return 0;
 
   TextAlign align = paragraph_style_.effective_align();
 
-  if (align == TextAlign::right) {
+  if (align == TextAlign::right ||
+      (align == TextAlign::justify &&
+       paragraph_style_.text_direction == TextDirection::rtl &&
+       line_number == line_limit - 1)) {
     return width_ - line_total_advance;
   } else if (align == TextAlign::center) {
     return (width_ - line_total_advance) / 2;
