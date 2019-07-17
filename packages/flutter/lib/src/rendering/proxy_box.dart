@@ -998,17 +998,37 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = context.pushShaderMask(
-        offset,
-        _shaderCallback(offset & size),
-        offset & size,
-        _blendMode,
-        super.paint,
-        layer: layer,
+      layer = _createOrUpdateShaderMaskLayer(
+        shader: _shaderCallback(offset & size),
+        maskRect: offset & size,
+        blendMode: _blendMode,
+        oldLayer: layer,
       );
+      context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
+  }
+}
+
+ShaderMaskLayer _createOrUpdateShaderMaskLayer({
+  @required Shader shader,
+  @required Rect maskRect,
+  @required BlendMode blendMode,
+  @required ShaderMaskLayer oldLayer,
+}) {
+  if (oldLayer == null) {
+    return ShaderMaskLayer(
+      shader: shader,
+      maskRect: maskRect,
+      blendMode: blendMode,
+    );
+  } else {
+    oldLayer
+      ..shader = shader
+      ..maskRect = maskRect
+      ..blendMode = blendMode;
+    return oldLayer;
   }
 }
 
@@ -1047,10 +1067,23 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = context.pushBackdropFilter(offset, _filter, super.paint, layer: layer);
+      layer = _createOrUpdateBackdropFilterLayer(filter: _filter, oldLayer: layer);
+      context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
+  }
+}
+
+BackdropFilterLayer _createOrUpdateBackdropFilterLayer({
+  @required ui.ImageFilter filter,
+  @required BackdropFilterLayer oldLayer,
+}) {
+  if (oldLayer == null) {
+    return BackdropFilterLayer(filter: filter);
+  } else {
+    oldLayer.filter = filter;
+    return oldLayer;
   }
 }
 
@@ -1730,8 +1763,16 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      layer = context.pushPhysicalModel(offset, offsetRRectAsPath, clipBehavior, paintShadows ? elevation : 0.0,
-          color, shadowColor, super.paint, childPaintBounds: offsetBounds, layer: layer);
+      layer = _createOrUpdatePhysicalModelLayer(
+        clipPath: offsetRRectAsPath,
+        clipBehavior: clipBehavior,
+        elevation: paintShadows ? elevation : 0.0,
+        color: color,
+        shadowColor: shadowColor,
+        childPaintBounds: offsetBounds,
+        oldLayer: layer,
+      );
+      context.pushLayer(layer, super.paint, offset);
       assert(() {
         layer?.debugCreator = debugCreator;
         return true;
@@ -1746,6 +1787,34 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<BoxShape>('shape', shape));
     description.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+  }
+}
+
+PhysicalModelLayer _createOrUpdatePhysicalModelLayer({
+  @required Path clipPath,
+  @required Clip clipBehavior,
+  @required double elevation,
+  @required Color color,
+  @required Color shadowColor,
+  @required Rect childPaintBounds,
+  @required PhysicalModelLayer oldLayer,
+}) {
+  if (oldLayer == null) {
+    return PhysicalModelLayer(
+      clipPath: clipPath,
+      clipBehavior: clipBehavior,
+      elevation: elevation,
+      color: color,
+      shadowColor: shadowColor,
+    );
+  } else {
+    oldLayer
+      ..clipPath = clipPath
+      ..clipBehavior = clipBehavior
+      ..elevation = elevation
+      ..color = color
+      ..shadowColor = shadowColor;
+    return oldLayer;
   }
 }
 
@@ -1820,8 +1889,16 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      layer = context.pushPhysicalModel(offset, offsetPath, clipBehavior, paintShadows ? elevation : 0.0,
-          color, shadowColor, super.paint, childPaintBounds: offsetBounds, layer: layer);
+      layer = _createOrUpdatePhysicalModelLayer(
+        clipPath: offsetPath,
+        clipBehavior: clipBehavior,
+        elevation: paintShadows ? elevation : 0.0,
+        color: color,
+        shadowColor: shadowColor,
+        childPaintBounds: offsetBounds,
+        oldLayer: layer,
+      );
+      context.pushLayer(layer, super.paint, offset);
       assert(() {
         layer?.debugCreator = debugCreator;
         return true;
@@ -2850,6 +2927,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
+    final OffsetLayer offsetLayer = layer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -4675,7 +4753,16 @@ class RenderLeaderLayer extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushLeader(offset, link, super.paint, layer: layer);
+    if (layer == null) {
+      context.pushLayer(layer = LeaderLayer(link: link, offset: offset), super.paint, Offset.zero);
+    } else {
+      final LeaderLayer leaderLayer = layer;
+      leaderLayer
+        ..link = link
+        ..offset = offset;
+      context.pushLayer(leaderLayer, super.paint, Offset.zero);
+    }
+    assert(layer != null);
   }
 
   @override
@@ -4805,13 +4892,24 @@ class RenderFollowerLayer extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(showWhenUnlinked != null);
-    layer = context.pushFollower(
-      this.offset,
-      offset,
-      link,
-      showWhenUnlinked,
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: this.offset,
+        unlinkedOffset: offset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = this.offset
+        ..unlinkedOffset = offset;
+    }
+    context.pushLayer(
+      layer,
       super.paint,
-      layer: layer,
+      Offset.zero,
       childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,

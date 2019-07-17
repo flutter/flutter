@@ -110,7 +110,7 @@ void main() {
         ],
       )
     );
-    ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
+    ContainerLayer layer = RendererBinding.instance.renderView.layer;
     while (layer != null && !(layer is OpacityLayer))
       layer = layer.firstChild;
     expect(layer, isInstanceOf<OpacityLayer>());

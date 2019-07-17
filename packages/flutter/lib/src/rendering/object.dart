@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder, ImageFilter;
+import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -113,20 +113,34 @@ class PaintingContext extends ClipContext {
       );
       return true;
     }());
-    if (child._layer == null) {
+    OffsetLayer childLayer = child._layer;
+    if (childLayer == null) {
       assert(debugAlsoPaintedParent);
-      child._layer = OffsetLayer();
+      child._layer = childLayer = OffsetLayer();
     } else {
-      assert(debugAlsoPaintedParent || child._layer.attached);
-      child._layer.removeAllChildren();
+      assert(childLayer is OffsetLayer);
+      assert(debugAlsoPaintedParent || childLayer.attached);
+      childLayer.removeAllChildren();
     }
+    assert(identical(childLayer, child._layer));
+    assert(child._layer is OffsetLayer);
     assert(() {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     }());
     childContext ??= PaintingContext(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
+    assert(identical(childLayer, child._layer));
     childContext.stopRecordingIfNeeded();
+    assert(
+      child._layer is OffsetLayer,
+      '${child.runtimeType}\'s layer is not an OffsetLayer.\n'
+      'The layer was ${child._layer.runtimeType}.\n'
+      'The render object is a repaint boundary. Its RenderObject.layer field '
+      'must be an OffsetLayer created by the framework. Possibly the '
+      'implementation of the "paint" method created a different layer and '
+      'overwrote the "layer" field.',
+    );
   }
 
   /// In debug mode, repaint the given render object using a custom painting
@@ -189,7 +203,6 @@ class PaintingContext extends ClipContext {
     if (child._needsPaint) {
       repaintCompositedChild(child, debugAlsoPaintedParent: true);
     } else {
-      assert(child._layer != null);
       assert(() {
         // register the call for RepaintBoundary metrics
         child.debugRegisterRepaintBoundaryPaint(
@@ -201,7 +214,8 @@ class PaintingContext extends ClipContext {
       }());
     }
     assert(child._layer is OffsetLayer);
-    child.offsetLayer.offset = offset;
+    final OffsetLayer childOffsetLayer = child._layer;
+    childOffsetLayer.offset = offset;
     appendLayer(child._layer);
   }
 
@@ -552,87 +566,6 @@ class PaintingContext extends ClipContext {
         ..offset = offset;
     }
     pushLayer(layer, painter, Offset.zero);
-    return layer;
-  }
-
-  ShaderMaskLayer pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter, { ShaderMaskLayer layer }) {
-    if (layer == null) {
-      layer = ShaderMaskLayer(
-        shader: shader,
-        maskRect: maskRect,
-        blendMode: blendMode,
-      );
-    } else {
-      layer
-        ..shader = shader
-        ..maskRect = maskRect
-        ..blendMode = blendMode;
-    }
-    pushLayer(layer, painter, offset);
-    return layer;
-  }
-
-  BackdropFilterLayer pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter, { BackdropFilterLayer layer }) {
-    if (layer == null) {
-      layer = BackdropFilterLayer(filter: filter);
-    } else {
-      layer.filter = filter;
-    }
-    pushLayer(layer, painter, offset);
-    return layer;
-  }
-
-  PhysicalModelLayer pushPhysicalModel(Offset offset, Path clipPath, Clip clipBehavior, double elevation, Color color,
-      Color shadowColor, PaintingContextCallback painter, { PhysicalModelLayer layer, Rect childPaintBounds }) {
-    if (layer == null) {
-      layer = PhysicalModelLayer(
-        clipPath: clipPath,
-        clipBehavior: clipBehavior,
-        elevation: elevation,
-        color: color,
-        shadowColor: shadowColor,
-      );
-    } else {
-      layer
-        ..clipPath = clipPath
-        ..clipBehavior = clipBehavior
-        ..elevation = elevation
-        ..color = color
-        ..shadowColor = shadowColor;
-    }
-    pushLayer(layer, painter, offset, childPaintBounds: childPaintBounds);
-    return layer;
-  }
-
-  LeaderLayer pushLeader(Offset offset, LayerLink link, PaintingContextCallback painter, { LeaderLayer layer }) {
-     if (layer == null) {
-       layer = LeaderLayer(link: link, offset: offset);
-     } else {
-       layer
-         ..link = link
-         ..offset = offset;
-     }
-     pushLayer(layer, painter, Offset.zero);
-     return layer;
-  }
-
-  FollowerLayer pushFollower(Offset linkedOffset, Offset unlinkedOffset, LayerLink link, bool showWhenUnlinked,
-      PaintingContextCallback painter, { FollowerLayer layer, Rect childPaintBounds }) {
-    if (layer == null) {
-      layer = FollowerLayer(
-        link: link,
-        showWhenUnlinked: showWhenUnlinked,
-        linkedOffset: linkedOffset,
-        unlinkedOffset: unlinkedOffset,
-      );
-    } else {
-      layer
-        ..link = link
-        ..showWhenUnlinked = showWhenUnlinked
-        ..linkedOffset = linkedOffset
-        ..unlinkedOffset = unlinkedOffset;
-    }
-    pushLayer(layer, painter, Offset.zero, childPaintBounds: childPaintBounds);
     return layer;
   }
 
@@ -1931,28 +1864,41 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   bool get alwaysNeedsCompositing => false;
 
-  ContainerLayer _layer;
   /// The compositing layer that this render object uses to repaint.
   ///
-  /// To access the layer in debug code, even when it might be inappropriate to
-  /// access it (e.g. because it is dirty), consider [debugLayer].
-  ContainerLayer get layer => _layer;
-  @protected
-  set layer(ContainerLayer newLayer) {
-    _layer = newLayer;
+  /// If this render object is not a repaint boundary, it is the responsibility
+  /// of the [paint] method to populate this field. If [needsCompositing] is
+  /// true, this field may be populated with the root-most layer used by the
+  /// render object implementation. When repainting, instead of creating a new
+  /// layer the render object may update the layer stored in this field for better
+  /// performance. It is also OK to leave this field as null and create a new
+  /// layer on every repaint, but without the performance benefit. If
+  /// [needsCompositing] is false, this field must be set to null either by
+  /// never populating this field, or by setting it to null when the value of
+  /// [needsCompositing] changes from true to false.
+  ///
+  /// If this render object is a repaint boundary, the framework automatically
+  /// creates an [OffsetLayer] and populates this field prior to calling the
+  /// [paint] method. The [paint] method must not replace the value of this
+  /// field.
+  ContainerLayer get layer {
+    assert(!isRepaintBoundary || (_layer == null || _layer is OffsetLayer));
+    return _layer;
   }
 
-  /// The offset layer that this render object uses to repaint.
-  ///
-  /// Call only when [isRepaintBoundary] is true and the render object has
-  /// already painted.
-  ///
-  /// To access the layer in debug code, even when it might be inappropriate to
-  /// access it (e.g. because it is dirty), consider [debugLayer].
-  OffsetLayer get offsetLayer {
-    assert(isRepaintBoundary, 'You can only access RenderObject.offsetLayer for render objects that are repaint boundaries.');
-    return layer;
+  // Protect the setter because it only makes sense for [RenderObject]
+  // implementations to set the layer.
+  @protected
+  set layer(ContainerLayer newLayer) {
+    assert(
+      !isRepaintBoundary,
+      'Attempted to set a layer to a repaint boundary render object.\n'
+      'The framework creates and assigns an OffsetLayer to a repaint '
+      'boundary automatically.',
+    );
+    _layer = newLayer;
   }
+  ContainerLayer _layer;
 
   /// In debug mode, the compositing layer that this render object uses to repaint.
   ///
@@ -1961,6 +1907,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// is dirty.
   ///
   /// For production code, consider [layer].
+  @Deprecated('use the "layer" getter instead.')
   ContainerLayer get debugLayer {
     ContainerLayer result;
     assert(() {
@@ -2104,10 +2051,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner.requestVisualUpdate();
       }
     } else if (parent is RenderObject) {
-      // We don't have our own layer; one of our ancestors will take
-      // care of updating the layer we're in and when they do that
-      // we'll get our paint() method called.
-      //assert(_layer == null);
       final RenderObject parent = this.parent;
       parent.markNeedsPaint();
       assert(parent == this.parent);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ImageFilter;
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/src/rendering/layer.dart';
@@ -142,52 +140,6 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
       { OpacityLayer layer }) {
     canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
-    canvas.restore();
-    return null;
-  }
-
-  @override
-  ShaderMaskLayer pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode,
-      PaintingContextCallback painter, { ShaderMaskLayer layer }) {
-    canvas.saveLayer(null, null);
-    painter(this, offset);
-    canvas.restore();
-    return null;
-  }
-
-  @override
-  BackdropFilterLayer pushBackdropFilter(Offset offset, ui.ImageFilter filter,
-      PaintingContextCallback painter, { BackdropFilterLayer layer }) {
-    canvas.saveLayer(null, null);
-    painter(this, offset);
-    canvas.restore();
-    return null;
-  }
-
-  @override
-  PhysicalModelLayer pushPhysicalModel(Offset offset, Path clipPath, Clip clipBehavior,
-      double elevation, Color color, Color shadowColor, PaintingContextCallback painter,
-      { PhysicalModelLayer layer, Rect childPaintBounds }) {
-    canvas.saveLayer(null, null);
-    painter(this, offset);
-    canvas.restore();
-    return null;
-  }
-
-  @override
-  LeaderLayer pushLeader(Offset offset, LayerLink link, PaintingContextCallback painter,
-      { LeaderLayer layer }) {
-    canvas.saveLayer(null, null);
-    painter(this, Offset.zero);
-    canvas.restore();
-    return null;
-  }
-
-  @override
-  FollowerLayer pushFollower(Offset linkedOffset, Offset unlinkedOffset, LayerLink link, bool showWhenUnlinked,
-      PaintingContextCallback painter, { FollowerLayer layer, Rect childPaintBounds }) {
-    canvas.saveLayer(null, null);
-    painter(this, Offset.zero);
     canvas.restore();
     return null;
   }

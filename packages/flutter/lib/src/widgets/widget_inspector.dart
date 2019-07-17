@@ -10,7 +10,6 @@ import 'dart:typed_data';
 import 'dart:ui' as ui
     show
         ClipOp,
-        EngineLayer,
         Image,
         ImageByteFormat,
         Paragraph,
@@ -546,7 +545,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
     final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
-      containerLayer: repaintBoundary.debugLayer,
+      containerLayer: repaintBoundary.layer,
       estimatedBounds: repaintBoundary.paintBounds,
       screenshotData: data,
     );
@@ -557,7 +556,8 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // want to capture debugPaint information as well.
       data.containerLayer.append(_ProxyLayer(repaintBoundary.layer));
       data.foundTarget = true;
-      data.screenshotOffset = repaintBoundary.offsetLayer.offset;
+      final OffsetLayer offsetLayer = repaintBoundary.layer;
+      data.screenshotOffset = offsetLayer.offset;
     } else {
       // Repaint everything under the repaint boundary.
       // We call debugInstrumentRepaintCompositedChild instead of paintChild as

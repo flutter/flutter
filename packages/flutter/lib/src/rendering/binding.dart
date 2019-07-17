@@ -388,7 +388,7 @@ void debugDumpRenderTree() {
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView?.layer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.
