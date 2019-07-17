@@ -96,19 +96,19 @@ class Tooltip extends StatefulWidget {
 
   /// Specifies the tooltip's shape and background color.
   ///
-  /// If not specified, defaults to a rounded rectangle with a border radius of
-  /// 4.0, and a color derived from the [ThemeData.textTheme] if the
-  /// [ThemeData.brightness] is dark, and [ThemeData.primaryTextTheme] if not.
+  /// The tooltip shape defaults to a rounded rectangle with a border radius of
+  /// 4.0. Tooltips will also default to an opacity of 90% and with the color
+  /// [Colors.grey[700]] if [ThemeData.brightness] is [Brightness.dark], and
+  /// [Colors.white] if it is [Brightness.light].
   final Decoration decoration;
 
   /// The style to use for the message of the tooltip.
   ///
   /// If null, the message's [TextStyle] will be determined based on
   /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [ThemeData.textTheme.body1] will be merged with
-  /// [ThemeData.typography.white]. Otherwise, if [ThemeData.brightness] is set
-  /// to [Brightness.light], [ThemeData.primaryTextTheme.body1] will be merged
-  /// with [ThemeData.typography.white].
+  /// [ThemeData.textTheme.body1] will be used with [Colors.white]. Otherwise,
+  /// if [ThemeData.brightness] is set to [Brightness.light],
+  /// [ThemeData.textTheme.body1] will be used with [Colors.black].
   final TextStyle textStyle;
 
   /// The amount of time that a pointer must hover over the widget before it
