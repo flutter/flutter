@@ -103,9 +103,9 @@ class RefreshIndicator extends StatefulWidget {
     this.semanticsLabel,
     this.semanticsValue,
   }) : assert(child != null),
-       assert(onRefresh != null),
-       assert(notificationPredicate != null),
-       super(key: key);
+        assert(onRefresh != null),
+        assert(notificationPredicate != null),
+        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -191,7 +191,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
         end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
-        curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
+          curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
     );
     super.didChangeDependencies();
@@ -250,6 +250,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
         _dragOffset -= notification.overscroll / 2.0;
         _checkDragOffset(notification.metrics.viewportDimension);
       }
+      if (_mode == _RefreshIndicatorMode.armed && notification.dragDetails.primaryDelta < 0 && _valueColor.value.alpha != 0xFF)
+        _mode = _RefreshIndicatorMode.drag;
     } else if (notification is ScrollEndNotification) {
       switch (_mode) {
         case _RefreshIndicatorMode.armed:
@@ -302,8 +304,6 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _checkDragOffset(double containerExtent) {
     assert(_mode == _RefreshIndicatorMode.drag || _mode == _RefreshIndicatorMode.armed);
     double newValue = _dragOffset / (containerExtent * _kDragContainerExtentPercentage);
-    if (_mode == _RefreshIndicatorMode.armed)
-      newValue = math.max(newValue, 1.0 / _kDragSizeFactorLimit);
     _positionController.value = newValue.clamp(0.0, 1.0); // this triggers various rebuilds
     if (_mode == _RefreshIndicatorMode.drag && _valueColor.value.alpha == 0xFF)
       _mode = _RefreshIndicatorMode.armed;
@@ -427,7 +427,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     assert(_isIndicatorAtTop != null);
 
     final bool showIndeterminateIndicator =
-      _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
+        _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
 
     return Stack(
       children: <Widget>[
@@ -445,8 +445,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                 ? EdgeInsets.only(top: widget.displacement)
                 : EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
-                ? Alignment.topCenter
-                : Alignment.bottomCenter,
+                  ? Alignment.topCenter
+                  : Alignment.bottomCenter,
               child: ScaleTransition(
                 scale: _scaleFactor,
                 child: AnimatedBuilder(
