@@ -391,7 +391,8 @@ Future<void> _runTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
-      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .map((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
 
     print('Running tests for: ${tests.join(';')}');

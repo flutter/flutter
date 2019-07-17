@@ -150,6 +150,8 @@
 				B11AF3E99D4F5D486C420DF0 /* Pods-Runner.release.xcconfig */,
 				7C09407F283942748BDF3120 /* Pods-Runner.profile.xcconfig */,
 			);
+
+			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -398,7 +400,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformViews;
+				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformviews;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -527,7 +529,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformViews;
+				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformviews;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -550,7 +552,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformViews;
+				PRODUCT_BUNDLE_IDENTIFIER = io.flutter.integration.platformviews;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				VERSIONING_SYSTEM = "apple-generic";
 			};

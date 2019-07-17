@@ -7,13 +7,15 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
-import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/os.dart';
-import 'base/platform.dart';
-import 'base/utils.dart';
-import 'globals.dart';
-import 'version.dart';
+import '../base/config.dart';
+import '../base/context.dart';
+import '../base/file_system.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../base/utils.dart';
+import '../features.dart';
+import '../globals.dart';
+import '../version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
 
@@ -49,12 +51,15 @@ const String kCommandBuildBundleTargetPlatform = 'cd24';
 const String kCommandBuildBundleIsModule = 'cd25';
 
 const String kCommandResult = 'cd26';
+const String kCommandHasTerminal = 'cd31';
 
 const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
 const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
-// Next ID: cd31
+
+const String enabledFlutterFeatures = 'cd32';
+// Next ID: cd33
 
 Usage get flutterUsage => Usage.instance;
 
@@ -64,13 +69,34 @@ class Usage {
   Usage({ String settingsName = 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
-        documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
+
+    final String logFilePath = platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+
+    _analytics = logFilePath == null || logFilePath.isEmpty ?
+        AnalyticsIO(
+          _kFlutterUA,
+          settingsName,
+          version,
+          documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null,
+        ) :
+        // Used for testing.
+        LogToFileAnalytics(logFilePath);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue(kSessionHostOsDetails, os.name);
     // Send the branch name as the "channel".
     _analytics.setSessionValue(kSessionChannelName, flutterVersion.getBranchName(redactUnknownBranches: true));
+    // For each flutter experimental feature, record a session value in a comma
+    // separated list.
+    final String enabledFeatures = allFeatures
+        .where((Feature feature) {
+          return feature.configSetting != null &&
+                 Config.instance.getValue(feature.configSetting) == true;
+        })
+        .map((Feature feature) => feature.configSetting)
+        .join(',');
+    _analytics.setSessionValue(enabledFlutterFeatures, enabledFeatures);
+
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
@@ -78,6 +104,7 @@ class Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    _analytics.sendScreenView('version is $version, is bot $isRunningOnBot, suppressed $suppressEnvFlag');
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.
@@ -151,9 +178,9 @@ class Usage {
     }
   }
 
-  void sendException(dynamic exception, StackTrace trace) {
+  void sendException(dynamic exception) {
     if (!suppressAnalytics)
-      _analytics.sendException('${exception.runtimeType}\n${sanitizeStacktrace(trace)}');
+      _analytics.sendException(exception.runtimeType.toString());
   }
 
   /// Fires whenever analytics data is sent over the network.
@@ -195,5 +222,24 @@ class Usage {
   ║ reporting.                                                                 ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
+  }
+}
+
+// An Analytics mock that logs to file. Unimplemented methods goes to stdout.
+// But stdout can't be used for testing since wrapper scripts like
+// xcode_backend.sh etc manipulates them.
+class LogToFileAnalytics extends AnalyticsMock {
+  LogToFileAnalytics(String logFilePath) :
+    logFile = fs.file(logFilePath)..createSync(recursive: true),
+    super(true);
+
+  final File logFile;
+
+  @override
+  Future<void> sendScreenView(String viewName, {Map<String, String> parameters}) {
+    parameters ??= <String, String>{};
+    parameters['viewName'] = viewName;
+    logFile.writeAsStringSync('screenView $parameters\n');
+    return Future<void>.value(null);
   }
 }
