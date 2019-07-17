@@ -33,9 +33,6 @@ class BotDetector {
 
     return platform.environment['BOT'] == 'true'
 
-        // Non-interactive terminals are assumed to be bots.
-        || !io.stdout.hasTerminal
-
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
         || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
@@ -48,7 +45,8 @@ class BotDetector {
         || platform.environment.containsKey('CIRRUS_CI')
 
         // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
+        || (platform.environment.containsKey('AWS_REGION') &&
+            platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
         // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
         || platform.environment.containsKey('JENKINS_URL')
