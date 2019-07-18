@@ -56,12 +56,10 @@ abstract class ShaderWarmUp {
 
   /// The size of the warm up image.
   ///
-  /// The exact size shouldn't matter much as long as it's not too far away from
-  /// the target device's screen. 1024x1024 is a good choice as it is within an
-  /// order of magnitude of most devices.
+  /// The exact size shouldn't matter much as long as all draws are onscreen.
   ///
   /// A custom shader warm up can override this based on targeted devices.
-  ui.Size get size => const ui.Size(1024.0, 1024.0);
+  ui.Size get size => const ui.Size(100.0, 100.0);
 
   /// Trigger draw operations on a given canvas to warm up GPU shader
   /// compilation cache.
@@ -157,22 +155,18 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       canvas.save();
       for (ui.Paint paint in paints) {
         canvas.drawPath(paths[i], paint);
-        canvas.translate(80.0, 0.0);
       }
       canvas.restore();
-      canvas.translate(0.0, 80.0);
     }
 
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
     canvas.save();
     canvas.drawShadow(rrectPath, black, 10.0, true);
-    canvas.translate(80.0, 0.0);
     canvas.drawShadow(rrectPath, black, 10.0, false);
     canvas.restore();
 
     // Warm up text shaders.
-    canvas.translate(0.0, 80.0);
     final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
     )..pushStyle(ui.TextStyle(color: black))..addText('_');
