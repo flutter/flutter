@@ -372,7 +372,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// tooltip.
   final double verticalOffset;
 
-  /// Whether the tooltip defaults to being displayed below the widget.
+  /// Whether the tooltip is displayed below its widget by default.
   ///
   /// If there is insufficient space to display the tooltip in the preferred
   /// direction, the tooltip will be displayed in the opposite direction.
