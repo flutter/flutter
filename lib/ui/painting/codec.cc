@@ -198,16 +198,22 @@ static void InstantiateImageCodec(Dart_NativeArguments args) {
   const int targetHeight =
       tonic::DartConverter<int>::FromDart(Dart_GetNativeArgument(args, 4));
 
-  auto codec = SkCodec::MakeFromData(buffer);
-
-  if (!codec) {
-    Dart_SetReturnValue(args, ToDart("Could not instantiate image codec."));
-    return;
+  std::unique_ptr<SkCodec> codec;
+  bool single_frame;
+  if (image_info) {
+    single_frame = true;
+  } else {
+    codec = SkCodec::MakeFromData(buffer);
+    if (!codec) {
+      Dart_SetReturnValue(args, ToDart("Could not instantiate image codec."));
+      return;
+    }
+    single_frame = codec->getFrameCount() == 1;
   }
 
   fml::RefPtr<Codec> ui_codec;
 
-  if (codec->getFrameCount() == 1) {
+  if (single_frame) {
     ImageDecoder::ImageDescriptor descriptor;
     descriptor.decompressed_image_info = image_info;
 
