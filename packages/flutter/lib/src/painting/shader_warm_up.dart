@@ -57,6 +57,8 @@ abstract class ShaderWarmUp {
   /// The size of the warm up image.
   ///
   /// The exact size shouldn't matter much as long as all draws are onscreen.
+  /// 100x100 is an arbitrary small size that's easy to fit significant draw 
+  /// calls onto.
   ///
   /// A custom shader warm up can override this based on targeted devices.
   ui.Size get size => const ui.Size(100.0, 100.0);
@@ -96,6 +98,11 @@ abstract class ShaderWarmUp {
 /// engineers' observation and experience based on the apps and the performance
 /// issues seen so far.
 class DefaultShaderWarmUp extends ShaderWarmUp {
+  // Constant that can be used to space out draw calls for visualizing the draws
+  // for debugging purposes (example: 80.0).  Be sure to also change your render
+  // size.
+  static final double _drawCallSpacing = 0.0;
+
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
   const DefaultShaderWarmUp();
 
@@ -155,18 +162,22 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       canvas.save();
       for (ui.Paint paint in paints) {
         canvas.drawPath(paths[i], paint);
+        canvas.translate(_drawCallSpacing, 0.0);
       }
       canvas.restore();
+      canvas.translate(0.0, _drawCallSpacing);
     }
 
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
     canvas.save();
     canvas.drawShadow(rrectPath, black, 10.0, true);
+    canvas.translate(_drawCallSpacing, 0.0);
     canvas.drawShadow(rrectPath, black, 10.0, false);
     canvas.restore();
 
     // Warm up text shaders.
+    canvas.translate(0.0, _drawCallSpacing);
     final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
     )..pushStyle(ui.TextStyle(color: black))..addText('_');
