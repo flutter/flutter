@@ -41,7 +41,7 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
   Widget build(BuildContext context) {
     return Container(
       child: Row(
-        children: [
+        children: <Column>[
           Column(
             children: <Widget>[
               _compositionComplex(_platformViewToMutate('0')),
@@ -90,7 +90,7 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
   Widget _compositionClipPath(Widget child) {
     return ClipPath(clipper: PathClipper(), child: child);
   }
-  
+
   // A `Container` widget that matches the testing platform view.
   Widget _containerToMutate() {
     return Container(

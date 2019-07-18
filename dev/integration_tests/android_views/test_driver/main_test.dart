@@ -8,6 +8,10 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:collection/collection.dart';
 
+
+const String kIOSScreenShotPath = 'test_driver/screenshots/mutation_test_ios.png';
+const String kAndroidScreenShotPath = 'test_driver/screenshots/mutation_test_android.png';
+
 Future<void> main() async {
   FlutterDriver driver;
 
@@ -38,8 +42,9 @@ Future<void> main() async {
         find.byValueKey('MutationPageListTile');
         await driver.tap(motionEventsListTile);
         await driver.waitFor(find.byValueKey('PlatformView0'));
-        List<int> screenShot = await driver.screenshot();
-        final File file = File('test_driver/screenshots/mutation_test.png');
+        final List<int> screenShot = await driver.screenshot();
+        final String path = _getScreenShotPath();
+        final File file = File(path);
         if (!file.existsSync()) {
           print('Platform view mutation test file not exist, creating a new one');
           file.writeAsBytesSync(screenShot);
@@ -50,4 +55,15 @@ Future<void> main() async {
         expect(listEquals(screenShot, matcher), true);
      });
   });
+}
+
+String _getScreenShotPath() {
+  if (Platform.isAndroid) {
+    return kAndroidScreenShotPath;
+  } else if (Platform.isIOS) {
+    return kIOSScreenShotPath;
+  } else {
+    assert(false, 'Platform not supported');
+  }
+  return '';
 }
