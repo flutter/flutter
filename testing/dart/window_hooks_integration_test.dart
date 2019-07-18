@@ -153,6 +153,8 @@ void main() {
       Zone innerZone;
       Zone runZone;
 
+      window._setNeedsReportTimings = (bool _) {};
+
       runZoned(() {
         innerZone = Zone.current;
         window.onReportTimings = (List<FrameTiming> timings) {

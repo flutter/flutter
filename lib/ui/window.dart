@@ -39,6 +39,9 @@ typedef PlatformMessageResponseCallback = void Function(ByteData data);
 /// Signature for [Window.onPlatformMessage].
 typedef PlatformMessageCallback = void Function(String name, ByteData data, PlatformMessageResponseCallback callback);
 
+// Signature for _setNeedsReportTimings.
+typedef _SetNeedsReportTimingsFunc = void Function(bool value);
+
 /// Various important time points in the lifetime of a frame.
 ///
 /// [FrameTiming] records a timestamp of each phase for performance analysis.
@@ -567,7 +570,9 @@ class Locale {
 /// [Window.viewPadding] anyway, so there is no need to account for that in the
 /// [Window.padding], which is always safe to use for such calculations.
 class Window {
-  Window._();
+  Window._() {
+    _setNeedsReportTimings = _nativeSetNeedsReportTimings;
+  }
 
   /// The number of device pixels for each logical pixel. This number might not
   /// be a power of two. Indeed, it might not even be an integer. For example,
@@ -922,7 +927,8 @@ class Window {
     _onReportTimingsZone = Zone.current;
   }
 
-  void _setNeedsReportTimings(bool value) native 'Window_setNeedsReportTimings';
+  _SetNeedsReportTimingsFunc _setNeedsReportTimings;
+  void _nativeSetNeedsReportTimings(bool value) native 'Window_setNeedsReportTimings';
 
   /// A callback that is invoked when pointer data is available.
   ///
