@@ -65,17 +65,23 @@ class Tooltip extends StatefulWidget {
   /// The text to display in the tooltip.
   final String message;
 
-  /// They height of the tooltip's [child].
+  /// The height of the tooltip's [child].
   ///
-  /// If the [child] is null, then this is the intrinsic height.
+  /// If the [child] is null, then this is the tooltip's intrinsic height.
   final double height;
 
-  /// The amount of space by which to inset the child.
+  /// The amount of space by which to inset the tooltip's [child].
   ///
   /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsetsGeometry padding;
 
   /// The vertical gap between the widget and the displayed tooltip.
+  ///
+  /// When [preferBelow] is set to true and tooltips have sufficient space to
+  /// display themselves, this property defines how much vertical space
+  /// tooltips will position themselves under their corresponding widgets.
+  /// Otherwise, tooltips will position themselves above their corresponding
+  /// widgets with the given offset.
   final double verticalOffset;
 
   /// Whether the tooltip defaults to being displayed below the widget.
@@ -87,6 +93,10 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip's [message] should be excluded from the semantics
   /// tree.
+  /// 
+  /// Defaults to false. A tooltip will add a [Semantics.label] that is set to
+  /// [Tooltip.message]. Set this property to true if a custom 
+  /// [Semantics.label] should be applied.
   final bool excludeFromSemantics;
 
   /// The widget below this widget in the tree.
@@ -111,13 +121,13 @@ class Tooltip extends StatefulWidget {
   /// [ThemeData.textTheme.body1] will be used with [Colors.black].
   final TextStyle textStyle;
 
-  /// The amount of time that a pointer must hover over the widget before it
-  /// will show a tooltip.
+  /// The length of time that a pointer must hover over a tooltip's widget
+  /// before the tooltip will be shown.
   ///
   /// Defaults to 0 milliseconds (tooltips show immediately upon hover).
   final Duration waitDuration;
 
-  /// The amount of time that the tooltip will be shown once it has appeared.
+  /// The length of time that the tooltip will be shown once it has appeared.
   ///
   /// Defaults to 1.5 seconds.
   final Duration showDuration;

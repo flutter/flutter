@@ -9,16 +9,19 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines the properties of [Tooltip] widgets.
+/// Defines the visual properties of [Tooltip] widgets.
 ///
-/// Used by [TooltipTheme] to control the properties of tooltips in a widget
-/// subtree.
+/// Used by [TooltipTheme] to control the visual properties of tooltips in a
+/// widget subtree.
 ///
-/// To obtain the current [TooltipTheme], use [TooltipTheme.of].
+/// To obtain this configuration, use [TooltipTheme.of] to access the closest
+/// ancestor [TooltipTheme] of the current [BuildContext].
 ///
 /// See also:
 ///
-///  * [TooltipTheme], which describes the actual configuration of a
+///  * [TooltipTheme], an [InheritedWidget] that propagates the theme down its
+///    subtree.
+///  * [TooltipThemeData], which describes the actual configuration of a
 ///    tooltip theme.
 class TooltipThemeData extends Diagnosticable {
   /// Creates the set of properties used to configure [Tooltip]s.
@@ -34,56 +37,46 @@ class TooltipThemeData extends Diagnosticable {
     this.showDuration,
   });
 
-  /// They height of the tooltip's [child].
-  ///
-  /// If the [child] is null, then this is the intrinsic height.
+  /// The height of [Tooltip.child].
   final double height;
 
-  /// The amount of space by which to inset the child.
-  ///
-  /// Defaults to 16.0 logical pixels in each direction.
+  /// If provided, the amount of space by which to inset [Tooltip.child].
   final EdgeInsetsGeometry padding;
 
   /// The vertical gap between the widget and the displayed tooltip.
+  ///
+  /// When [preferBelow] is set to true and tooltips have sufficient space to
+  /// display themselves, this property defines how much vertical space
+  /// tooltips will position themselves under their corresponding widgets.
+  /// Otherwise, tooltips will position themselves above their corresponding
+  /// widgets with the given offset.
   final double verticalOffset;
 
-  /// Whether the tooltip defaults to being displayed below the widget.
+  /// Whether the tooltip is displayed below its widget by default.
   ///
-  /// Defaults to true. If there is insufficient space to display the tooltip in
-  /// the preferred direction, the tooltip will be displayed in the opposite
-  /// direction.
+  /// If there is insufficient space to display the tooltip in the preferred
+  /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
   /// Whether the tooltip's [message] should be excluded from the semantics
   /// tree.
+  ///
+  /// By default, [Tooltip]s will add a [Semantics.label] that is set to
+  /// [Tooltip.message]. Set this property to true if a custom 
+  /// [Semantics.label] should be applied.
   final bool excludeFromSemantics;
 
-  /// Specifies the tooltip's shape and background color.
-  ///
-  /// If not specified, defaults to a rounded rectangle with a border radius of
-  /// 4.0, and a color derived from the [ThemeData.textTheme] if the
-  /// [ThemeData.brightness] is dark, and [ThemeData.primaryTextTheme] if not.
+  /// The [Tooltip]'s shape and background color.
   final Decoration decoration;
 
-  /// The style to use for the message of the tooltip.
-  ///
-  /// If null, the message's [TextStyle] will be determined based on
-  /// [ThemeData]. If [ThemeData.brightness] is set to [Brightness.dark],
-  /// [ThemeData.textTheme.body1] will be merged with
-  /// [ThemeData.typography.white]. Otherwise, if [ThemeData.brightness] is set
-  /// to [Brightness.light], [ThemeData.primaryTextTheme.body1] will be merged
-  /// with [ThemeData.typography.white].
+  /// The style to use for the message of [Tooltip]s.
   final TextStyle textStyle;
 
-  /// The amount of time that a pointer must hover over the widget before it
-  /// will show a tooltip.
-  ///
-  /// Defaults to 0 milliseconds (tooltips show immediately upon hover).
+  /// The length of time that a pointer must hover over a tooltip's widget
+  /// before the tooltip will be shown.
   final Duration waitDuration;
 
-  /// The amount of time that the tooltip will be shown once it has appeared.
-  ///
-  /// Defaults to 1.5 seconds.
+  /// The length of time that the tooltip will be shown once it has appeared.
   final Duration showDuration;
 
   /// Creates a copy of this object but with the given fields replaced with the
