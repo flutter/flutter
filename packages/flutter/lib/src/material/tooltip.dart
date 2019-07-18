@@ -124,7 +124,7 @@ class Tooltip extends StatefulWidget {
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
-  /// Defaults to 0 milliseconds (tooltips show immediately upon hover).
+  /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   final Duration waitDuration;
 
   /// The length of time that the tooltip will be shown once it has appeared.
