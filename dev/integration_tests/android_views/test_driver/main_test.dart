@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' show Platform, File;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
-
+import 'package:collection/collection.dart';
 
 Future<void> main() async {
   FlutterDriver driver;
@@ -38,18 +38,16 @@ Future<void> main() async {
         find.byValueKey('MutationPageListTile');
         await driver.tap(motionEventsListTile);
         await driver.waitFor(find.byValueKey('PlatformView0'));
-        _takeAndSaveScreenshot(driver, 'test_driver/screenshots/mutation_test.png');
-        Image currentImage = image.file('test_driver/screenshots/mutation_test.png');
-        assert(currentImage != null);
-        Image screenShot = Image.memory(await driver.screenshot());
-        expect(currentImage.toByteData == screenShot.toByteData);
+        List<int> screenShot = await driver.screenshot();
+        final File file = File('test_driver/screenshots/mutation_test.png');
+        if (!file.existsSync()) {
+          print('Platform view mutation test file not exist, creating a new one');
+          file.writeAsBytesSync(screenShot);
+        }
+        final List<int> matcher = file.readAsBytesSync();
+
+        final Function listEquals = const ListEquality<int>().equals;
+        expect(listEquals(screenShot, matcher), true);
      });
   });
-}
-
-
-_takeAndSaveScreenshot(FlutterDriver driver, String path) async {
-  final List<int> pixels = await driver.screenshot();
-  final File file = new File(path);
-  await file.writeAsBytes(pixels);
 }
