@@ -501,7 +501,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       visualPosition,
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
-    final thumbBounds = Rect.fromLTRB(
+    final Rect thumbBounds = Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
