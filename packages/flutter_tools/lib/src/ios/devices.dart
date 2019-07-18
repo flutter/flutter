@@ -50,17 +50,18 @@ class IOSDeploy {
 
     final String pid = await temp.readAsString();
 
-    // Sanity check that we're kill ios-deploy, and not some other process!
+    // Sanity check that we're killing ios-deploy, and not some other process!
     final RunResult check = await runAsync(<String>['ps', '-p', pid]);
     if (!check.stdout.contains('ios-deploy')) {
       // Nothing to do.
       return;
     }
 
-    try {
+    final int intPid = int.tryParse(pid);
+
+    // If we couldn't parse the file's contents, conservatively do nothing.
+    if (intPid != null) {
       processManager.killPid(int.parse(pid));
-    } catch (_) {
-      // If we couldn't parse the file's contents, conservatively do nothing.
     }
 
     // No need to wait for the process to die, since the launch will block anyway.
@@ -73,15 +74,22 @@ class IOSDeploy {
 
   /// `ios-deploy` has terminated: delete its PID file so we don't accidentally kill another
   /// process with the same PID later.
-  Future<void> _cleanup(ApplicationPackage package) => _tempFile(package).delete();
+  Future<void> _cleanup(ApplicationPackage package) async {
+    final File temp = _tempFile(package);
+    if (await temp.exists()) {
+      await _tempFile(package).delete();
+    }
+  }
 
   /// Installs and runs the specified app bundle using ios-deploy, then returns
-  /// the exit code.
+  /// the exit code. `ios-deploy` may continue running after `runApp` has returned.
+  /// In that case, `onExit` is invoked when `ios-deploy` quits.
   Future<int> runApp({
     @required ApplicationPackage package,
     @required String deviceId,
     @required String bundlePath,
     @required List<String> launchArguments,
+    void Function() onExit,
   }) async {
     await _killOther(package);
 
@@ -126,7 +134,7 @@ class IOSDeploy {
       environment: iosDeployEnv,
       detachFilter: RegExp('.*\\(lldb\\) *autoexit.*'),
       onDetach: (Process p) => _detach(package, p),
-      onExit: (Process p) => _cleanup(package)
+      onExit: (Process p) => _cleanup(package).then((_) => onExit != null ? onExit() : null),
     );
   }
 

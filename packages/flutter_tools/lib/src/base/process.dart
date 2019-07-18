@@ -112,12 +112,14 @@ Future<Process> runCommand(
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment,
+  ProcessStartMode mode,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
     cmd,
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
+    mode: mode
   );
 }
 
@@ -156,27 +158,34 @@ Future<int> runCommandAndStreamOutput(
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
+    mode: detachFilter != null ? ProcessStartMode.detachedWithStdio : ProcessStartMode.normal,
   );
   final StreamSubscription<String> stdoutSubscription = process.stdout
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .map((String line) {
-      if (detachFilter != null && detachFilter.hasMatch(line) && !result.isCompleted) {
-        // Detach from the process, assuming it will eventually complete successfully.
-        // Output printed after detaching (incl. stdout and stderr) will still be
-        // processed by [filter] and [mapFunction].
-        void finish(void _) => result.complete(0);
-        if (onDetach != null) {
-          final FutureOr<void> future = onDetach(process);
-          if (future is Future) {
-            future.then<void>(finish);
-          } else {
-            finish(null);
-          }
-        } else {
-          finish(null);
-        }
+    .asyncMap((String line) async {
+      if (detachFilter == null || !detachFilter.hasMatch(line) || result.isCompleted) {
+        return line;
       }
+
+      // Detach from the process, assuming it will eventually complete successfully.
+      // Output printed after detaching (incl. stdout and stderr) will still be
+      // processed by [filter] and [mapFunction].
+      //
+      // The result cannot be completed yet because we drain stdout before completing
+      // it below.
+      assert(!result.isCompleted);
+
+      final FutureOr<void> detachResult = onDetach != null ? onDetach(process) : null;
+      if (detachResult is Future) {
+        await detachResult;
+      }
+
+      // Result might have been completed while awaiting onExit.
+      if (!result.isCompleted) {
+        result.complete(0);
+      }
+
       return line;
     })
     .where((String line) => filter == null || filter.hasMatch(line))
@@ -219,9 +228,9 @@ Future<int> runCommandAndStreamOutput(
     final int exitCode = await process.exitCode;
 
     if (onExit != null) {
-      final FutureOr<void> exitResult = onExit(process);
-      if (exitResult is Future) {
-        await exitResult;
+      final FutureOr<void> result = onExit(process);
+      if (result is Future) {
+        await result;
       }
     }
 

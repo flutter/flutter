@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io' as io show ProcessSignal;
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -30,10 +33,10 @@ class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
+class MockApplicationPackage extends Mock implements ApplicationPackage {}
 
 void main() {
   final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform());
@@ -319,5 +322,179 @@ flutter:
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+  });
+
+  group('IOSDeploy.runApp', () {
+    MockProcessManager mockProcessManager;
+    MemoryFileSystem fileSystem;
+    const Utf8Encoder utf8 = Utf8Encoder();
+    const String packageName = 'com.example.test';
+
+    final MockApplicationPackage package = MockApplicationPackage();
+    when(package.id).thenReturn(packageName);
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      fileSystem = MemoryFileSystem();
+      fileSystem.directory('/tmp').createSync();
+    });
+
+    // Detached, completes before exit:
+    //   - start ios-deploy
+    //   - autoexit -> detach
+    //   - ios-deploy terminates
+    //
+    // Check:
+    //   - no temp files leftover
+    testUsingContext('Detached, completes before exit', () async {
+      final Process iosDeploy = FakeProcess(
+        exitCode: Future<int>.value(0),
+        stdout: Stream<List<int>>.fromIterable(
+          <String>['(lldb) autoexit\n'].map(utf8.convert)),
+        stderr: const Stream<List<int>>.empty());
+
+      mockProcessManager.processFactory = (_) => iosDeploy;
+      await fs.directory('/tmp').create();
+
+      final Completer<void> iosDeployTerminated = Completer<void>();
+      await const IOSDeploy().runApp(
+        package: package,
+        deviceId: 'test',
+        bundlePath: 'test',
+        launchArguments: <String>[],
+        onExit: () => iosDeployTerminated.complete()
+      );
+
+      await iosDeployTerminated.future;
+
+      expect(fs.directory('/tmp').listSync().length, 0);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    // Detached, suspended after exit:
+    //   - start ios-deploy
+    //   - autoexit -> detach
+    //
+    //   - start ios-fdeploy (again)
+    //   - once the old pid is killed, ios-deploy continues
+    //   - detaches
+    //
+    // Check:
+    //   - second launch doesn't hang
+    testUsingContext('Detached, suspended after exit', () async {
+      // Doesn't terminate.
+      final Process firstIosDeploy = FakeProcess(
+        exitCode: Completer<int>().future,
+        stdout: Stream<List<int>>.fromIterable(
+          <String>['(lldb) autoexit\n'].map(utf8.convert)),
+        stderr: const Stream<List<int>>.empty(),
+        pid: 101);
+
+      mockProcessManager.processFactory = (_) => firstIosDeploy;
+
+      await const IOSDeploy().runApp(
+        package: package,
+        deviceId: 'test',
+        bundlePath: 'test',
+        launchArguments: <String>[],
+      );
+
+      final Completer<void> oldIosKilled = Completer<void>();
+      mockProcessManager.killHandler = (int pid, io.ProcessSignal signal) {
+        if (!oldIosKilled.isCompleted && pid == 101 && signal == io.ProcessSignal.sigterm) {
+          oldIosKilled.complete();
+          return true;
+        }
+        return false;
+      };
+
+      // Also doesn't terminate, but doesn't even detach until the first one is killed.
+      final StreamController<String> secondIosStdout = StreamController<String>();
+      final Process secondIosDeploy = FakeProcess(
+        exitCode: Completer<int>().future,
+        stdout: secondIosStdout.stream.map((String line) => utf8.convert(line + '\n')),
+        stderr: const Stream<List<int>>.empty(),
+        pid: 102);
+
+      // The second `ios-deploy` can only continue once the first one has been killed.
+      unawaited(oldIosKilled.future.then((_) => secondIosStdout.add('(lldb) autoexit')));
+
+      mockProcessManager.processFactory = (_) => secondIosDeploy;
+      mockProcessManager.processRunHandler = (_) {
+        // Fake 'ps -p ...' results which show a running `ios-deploy` process.
+        return ProcessResult(0, 0, 'ios-deploy', '');
+      };
+
+      await const IOSDeploy().runApp(
+        package: package,
+        deviceId: 'test',
+        bundlePath: 'test',
+        launchArguments: <String>[],
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    // Detached, killed after exit:
+    //   - start ios-deploy
+    //   - autoexit -> detach
+    //   - (we exit)
+    //
+    //   - ios-deploy process is killed (system rebooted, most likely)
+    //
+    //   - start ios-deploy
+    //
+    // Check:
+    //   - no processes are killed
+    testUsingContext('Detached, killed after exit', () async {
+      // Doesn't terminate.
+      final Process firstIosDeploy = FakeProcess(
+        exitCode: Completer<int>().future,
+        stdout: Stream<List<int>>.fromIterable(
+          <String>['(lldb) autoexit\n'].map(utf8.convert)),
+        stderr: const Stream<List<int>>.empty(),
+        pid: 101);
+
+      mockProcessManager.processFactory = (_) => firstIosDeploy;
+
+      await const IOSDeploy().runApp(
+        package: package,
+        deviceId: 'test',
+        bundlePath: 'test',
+        launchArguments: <String>[],
+      );
+
+      // The first `ios-deploy` process was "killed" somehow. To push the circumstances,
+      // we supposed that Chrome is now running with the same PID. It should definitely *not* be killed!
+      mockProcessManager.processRunHandler = (_) {
+        return ProcessResult(0, 0, 'Google Chrome Helper', '');
+      };
+
+      mockProcessManager.killHandler = (int pid, io.ProcessSignal signal) {
+        assert(false);
+        return false;
+      };
+
+      final Process secondIosDeploy = FakeProcess(
+        exitCode: Future<int>.value(0),
+        stdout: Stream<List<int>>.fromIterable(<String>['(lldb) autoexit\n'].map(utf8.convert)),
+        stderr: const Stream<List<int>>.empty(),
+        pid: 102);
+
+      mockProcessManager.processFactory = (_) => secondIosDeploy;
+
+      await const IOSDeploy().runApp(
+        package: package,
+        deviceId: 'test',
+        bundlePath: 'test',
+        launchArguments: <String>[],
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fileSystem,
+      ProcessManager: () => mockProcessManager,
+    });
   });
 }

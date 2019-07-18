@@ -149,9 +149,17 @@ ro.build.version.codename=REL
 /// A strategy for creating Process objects from a list of commands.
 typedef ProcessFactory = Process Function(List<String> command);
 
+/// A way to respond to requests to kill a certain PID.
+typedef KillHandler = bool Function(int, io.ProcessSignal);
+
+/// Similar to 'ProcessFactory', but returns the results directly.
+typedef ProcessRunHandler = ProcessResult Function(List<String> commands);
+
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
+  ProcessRunHandler processRunHandler = (List<String> commands) => null;
+  KillHandler killHandler = (_, __) => true;
   bool succeed = true;
   List<String> commands;
 
@@ -178,7 +186,14 @@ class MockProcessManager implements ProcessManager {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => null;
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #run) {
+      return Future<ProcessResult>.value(processRunHandler(invocation.positionalArguments[0]));
+    }
+  }
+
+  @override
+  bool killPid(int pid, [io.ProcessSignal signal = io.ProcessSignal.sigterm]) => killHandler(pid, signal);
 }
 
 /// A process that exits successfully with no output and ignores all input.

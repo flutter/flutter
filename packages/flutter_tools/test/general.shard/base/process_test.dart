@@ -51,6 +51,7 @@ void main() {
         postProcessRecording = i++;
       }, ShutdownStage.POST_PROCESS_RECORDING);
 
+
       addShutdownHook(() async {
         serializeRecording2 = i++;
       }, ShutdownStage.SERIALIZE_RECORDING);
@@ -111,7 +112,7 @@ void main() {
           <String>['foo\n', 'bar\n', 'baz\n'].map(utf8.convert)),
         stderr: const Stream<List<int>>.empty());
 
-      when(mockProcessManager.start(<String>['test1'])).thenAnswer((_) => Future<Process>.value(fake));
+      when(mockProcessManager.start(<String>['test1'], mode: anyNamed('mode'))).thenAnswer((_) => Future<Process>.value(fake));
 
       // Detach when we see "bar", and check that:
       //  - mapFunction still gets run on "baz",
