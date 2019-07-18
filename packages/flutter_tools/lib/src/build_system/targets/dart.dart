@@ -77,7 +77,6 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   if (environment.defines[kTargetPlatform] == null) {
     throw MissingDefineException(kTargetPlatform, 'aot_elf');
   }
-  final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
 
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
   final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
@@ -87,7 +86,7 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
     mainPath: environment.buildDir.childFile('main.app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     outputPath: outputPath,
-    bitcode: bitcode,
+    bitcode: false,
   );
   if (snapshotExitCode != 0) {
     throw Exception('AOT snapshotter exited with code $snapshotExitCode');
