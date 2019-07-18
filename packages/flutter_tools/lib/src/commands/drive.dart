@@ -188,13 +188,6 @@ class DriveCommand extends RunCommandBase {
   }
 }
 
-/// Finds a device to test on. May launch a simulator, if necessary.
-// typedef TargetDeviceFinder = Future<Device> Function();
-// TargetDeviceFinder targetDeviceFinder = findTargetDevice;
-// void restoreTargetDeviceFinder() {
-//   targetDeviceFinder = findTargetDevice;
-// }
-
 Future<Device> findTargetDevice() async {
   final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
