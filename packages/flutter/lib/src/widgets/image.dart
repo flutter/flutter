@@ -216,7 +216,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```dart
 /// const Image(
 ///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
-/// );
+/// )
 /// ```
 /// {@end-tool}
 ///
@@ -228,7 +228,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
 ///
 /// ```dart
-/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg');
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg')
 /// ```
 /// {@end-tool}
 ///
