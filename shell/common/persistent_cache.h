@@ -19,7 +19,8 @@ namespace flutter {
 
 /// A cache of SkData that gets stored to disk.
 ///
-/// This is mainly used for Shaders but is also written to by Dart.
+/// This is mainly used for Shaders but is also written to by Dart.  It is
+/// thread-safe for reading and writing from multiple threads.
 class PersistentCache : public GrContextOptions::PersistentCache {
  public:
   // Mutable static switch that can be set before GetCacheForProcess. If true,
@@ -52,7 +53,7 @@ class PersistentCache : public GrContextOptions::PersistentCache {
   static std::string cache_base_path_;
 
   const bool is_read_only_;
-  std::shared_ptr<fml::UniqueFD> cache_directory_;
+  const std::shared_ptr<fml::UniqueFD> cache_directory_;
   mutable std::mutex worker_task_runners_mutex_;
   std::multiset<fml::RefPtr<fml::TaskRunner>> worker_task_runners_
       FML_GUARDED_BY(worker_task_runners_mutex_);

@@ -51,22 +51,33 @@ void PersistentCache::SetCacheDirectoryPath(std::string path) {
   cache_base_path_ = path;
 }
 
-PersistentCache::PersistentCache(bool read_only) : is_read_only_(read_only) {
+namespace {
+std::shared_ptr<fml::UniqueFD> MakeCacheDirectory(
+    const std::string& global_cache_base_path,
+    bool read_only) {
   fml::UniqueFD cache_base_dir;
-  if (cache_base_path_.length()) {
-    cache_base_dir = fml::OpenDirectory(cache_base_path_.c_str(), false,
+  if (global_cache_base_path.length()) {
+    cache_base_dir = fml::OpenDirectory(global_cache_base_path.c_str(), false,
                                         fml::FilePermission::kRead);
   } else {
     cache_base_dir = fml::paths::GetCachesDirectory();
   }
 
   if (cache_base_dir.is_valid()) {
-    cache_directory_ = std::make_shared<fml::UniqueFD>(CreateDirectory(
+    return std::make_shared<fml::UniqueFD>(CreateDirectory(
         cache_base_dir,
         {"flutter_engine", GetFlutterEngineVersion(), "skia", GetSkiaVersion()},
         read_only ? fml::FilePermission::kRead
                   : fml::FilePermission::kReadWrite));
+  } else {
+    return std::make_shared<fml::UniqueFD>();
   }
+}
+}  // namespace
+
+PersistentCache::PersistentCache(bool read_only)
+    : is_read_only_(read_only),
+      cache_directory_(MakeCacheDirectory(cache_base_path_, read_only)) {
   if (!IsValid()) {
     FML_LOG(WARNING) << "Could not acquire the persistent cache directory. "
                         "Caching of GPU resources on disk is disabled.";
