@@ -501,18 +501,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       visualPosition,
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
-
-    canvas.save();
-    canvas.clipRRect(trackRRect);
-    canvas.saveLayer(trackRect, Paint());
-    _thumbPainter.paint(canvas, Rect.fromLTRB(
+    final thumbBounds = Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
       thumbCenterY + CupertinoThumbPainter.radius,
-    ));
-    canvas.restore();
-    canvas.restore();
+    );
+
+    context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (innerContext, _) {
+      _thumbPainter.paint(innerContext.canvas, thumbBounds);
+    });
   }
 
   @override

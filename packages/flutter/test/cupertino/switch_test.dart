@@ -513,7 +513,7 @@ void main() {
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 1.0);
   });
 
-  testWidgets('Switch renders correctly before and after being tapped', (WidgetTester tester) async {
+  testWidgets('Switch renders correctly before, during, and after being tapped', (WidgetTester tester) async {
     final Key switchKey = UniqueKey();
     bool value = false;
     await tester.pumpWidget(
@@ -523,7 +523,7 @@ void main() {
           builder: (BuildContext context, StateSetter setState) {
             return Center(
               child: RepaintBoundary(
-                  child: CupertinoSwitch(
+                child: CupertinoSwitch(
                   key: switchKey,
                   value: value,
                   dragStartBehavior: DragStartBehavior.down,
@@ -532,7 +532,7 @@ void main() {
                       value = newValue;
                     });
                   },
-                  )
+                )
               )
             );
           },
@@ -551,8 +551,20 @@ void main() {
 
     await tester.tap(find.byKey(switchKey));
     expect(value, isTrue);
-    await tester.pumpAndSettle();
 
+    // Kick off animation, then advance to intermediate frame.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 60));
+    await expectLater(
+      find.byKey(switchKey),
+      matchesGoldenFile(
+        'switch.tap.turningOn.png',
+        version: 0,
+      ),
+      skip: !isLinux,
+    );  
+
+    await tester.pumpAndSettle();
     await expectLater(
       find.byKey(switchKey),
       matchesGoldenFile(
