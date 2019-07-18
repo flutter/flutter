@@ -163,14 +163,66 @@ void main() {
       ), isNot(0));
     }, overrides: contextOverrides);
 
+    testUsingContext('iOS debug AOT with bitcode uses right flags', () async {
+      fs.file('main.dill').writeAsStringSync('binary magic');
+
+      final String outputPath = fs.path.join('build', 'foo');
+      fs.directory(outputPath).createSync(recursive: true);
+
+      final String assembly = fs.path.join(outputPath, 'snapshot_assembly.S');
+      genSnapshot.outputs = <String, String>{
+        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
+      };
+
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+
+      final int genSnapshotExitCode = await snapshotter.build(
+        platform: TargetPlatform.ios,
+        buildMode: BuildMode.profile,
+        mainPath: 'main.dill',
+        packagesPath: '.packages',
+        outputPath: outputPath,
+        iosArch: IOSArch.armv7,
+        bitcode: true,
+      );
+
+      expect(genSnapshotExitCode, 0);
+      expect(genSnapshot.callCount, 1);
+      expect(genSnapshot.snapshotType.platform, TargetPlatform.ios);
+      expect(genSnapshot.snapshotType.mode, BuildMode.profile);
+      expect(genSnapshot.additionalArgs, <String>[
+        '--deterministic',
+        '--snapshot_kind=app-aot-assembly',
+        '--assembly=$assembly',
+        '--no-sim-use-hardfp',
+        '--no-use-integer-division',
+        'main.dill',
+      ]);
+
+      verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
+      verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
+      verify(xcode.dsymutil(any)).called(1);
+
+      final File assemblyFile = fs.file(assembly);
+      final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
+      expect(assemblyFile.existsSync(), true);
+      expect(assemblyBitcodeFile.existsSync(), true);
+      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
+      expect(assemblyBitcodeFile.readAsStringSync().contains('.section __DWARF'), false);
+    }, overrides: contextOverrides);
+
     testUsingContext('builds iOS armv7 profile AOT snapshot', () async {
       fs.file('main.dill').writeAsStringSync('binary magic');
 
       final String outputPath = fs.path.join('build', 'foo');
       fs.directory(outputPath).createSync(recursive: true);
 
+      final String assembly = fs.path.join(outputPath, 'snapshot_assembly.S');
       genSnapshot.outputs = <String, String>{
-        fs.path.join(outputPath, 'snapshot_assembly.S'): '',
+        assembly: 'blah blah\n.section __DWARF\nblah blah\n',
       };
 
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
@@ -194,11 +246,20 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-assembly',
-        '--assembly=${fs.path.join(outputPath, 'snapshot_assembly.S')}',
+        '--assembly=$assembly',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
       ]);
+      verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
+      verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
+      verifyNever(xcode.dsymutil(any));
+
+      final File assemblyFile = fs.file(assembly);
+      final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
+      expect(assemblyFile.existsSync(), true);
+      expect(assemblyBitcodeFile.existsSync(), false);
+      expect(assemblyFile.readAsStringSync().contains('.section __DWARF'), true);
     }, overrides: contextOverrides);
 
     testUsingContext('builds iOS arm64 profile AOT snapshot', () async {
