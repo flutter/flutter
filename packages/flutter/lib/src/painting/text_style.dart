@@ -176,7 +176,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ![Text border](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
 ///
 /// ```dart
-/// Paint borderPaint = Paint();
+/// final Paint borderPaint = Paint();
 /// borderPaint.style = PaintingStyle.stroke;
 /// borderPaint.strokeWidth = 6;
 /// borderPaint.color = Colors.blue[700];
@@ -200,7 +200,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///       ),
 ///     ),
 ///   ],
-/// ),
+/// )
 /// ```
 /// {@end-tool}
 ///
