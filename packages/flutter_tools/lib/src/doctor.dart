@@ -32,8 +32,8 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
+import 'reporting/usage.dart';
 import 'tester/flutter_tester.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -72,8 +72,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
         if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
           GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
-        if (iosWorkflow.appliesToHostPlatform)
-          iosValidator,
         if (webWorkflow.appliesToHostPlatform)
           const WebValidator(),
         // Add desktop doctors to workflow if the flag is enabled.
