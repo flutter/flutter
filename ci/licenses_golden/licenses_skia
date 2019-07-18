@@ -1,4 +1,4 @@
-Signature: f05c70f0a20aced6c42d0455c9b7f151
+Signature: 223f193d19e29b1068d5217c1b697d3c
 
 UNUSED LICENSES:
 
@@ -4816,6 +4816,7 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
+FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
