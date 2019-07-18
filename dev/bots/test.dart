@@ -272,12 +272,10 @@ Future<void> _runBuildTests() async {
       continue;
     }
     final String examplePath = fileEntity.path;
-    final String basename = path.basename(examplePath);
-    final bool expectIpaBuildFailure = basename == 'platform_channel_swift'; // Remove when https://github.com/flutter/flutter/issues/35773 is fixed.
 
     await _flutterBuildAot(examplePath);
     await _flutterBuildApk(examplePath);
-    await _flutterBuildIpa(examplePath, expectIpaBuildFailure: expectIpaBuildFailure);
+    await _flutterBuildIpa(examplePath);
   }
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
@@ -322,7 +320,7 @@ Future<void> _flutterBuildApk(String relativePathToApplication) async {
   print('Done.');
 }
 
-Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaBuildFailure = false}) async {
+Future<void> _flutterBuildIpa(String relativePathToApplication) async {
   if (!Platform.isMacOS) {
     return;
   }
@@ -341,7 +339,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication, {bool expectIpaB
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
-    expectNonZeroExit: expectIpaBuildFailure,
+    expectNonZeroExit: false,
     timeout: _kShortTimeout,
   );
   print('Done.');
@@ -393,7 +391,8 @@ Future<void> _runTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
-      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .map((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
 
     print('Running tests for: ${tests.join(';')}');
@@ -556,6 +555,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
@@ -593,7 +593,7 @@ Future<void> _pubRunTest(
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
     case 'create':
-      args.addAll(<String>[path.join('test', 'commands', 'create_test.dart')]);
+      args.addAll(<String>[path.join('test', 'general.shard', 'commands', 'create_test.dart')]);
       break;
   }
 
