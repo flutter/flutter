@@ -2429,6 +2429,22 @@ void main() {
     expect(const InputDecorationTheme().hashCode, const InputDecorationTheme().copyWith().hashCode);
   });
 
+  test('InputDecorationTheme copyWith correctly copies and replaces values', () {
+    final InputDecorationTheme original = InputDecorationTheme(
+      focusColor: Colors.orange,
+      fillColor: Colors.green,
+    );
+    final InputDecorationTheme copy = original.copyWith(
+      focusColor: Colors.yellow,
+      fillColor: Colors.blue,
+    );
+
+    expect(original.focusColor, Colors.orange);
+    expect(original.fillColor, Colors.green);
+    expect(copy.focusColor, Colors.yellow);
+    expect(copy.fillColor, Colors.blue);
+  });
+
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
