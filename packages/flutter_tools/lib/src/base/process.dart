@@ -147,8 +147,8 @@ Future<int> runCommandAndStreamOutput(
   StringConverter mapFunction,
   Map<String, String> environment,
   RegExp detachFilter,
-  Future<void> Function(Process) onDetach,
-  Future<void> Function(Process) onExit,
+  FutureOr<void> Function(Process) onDetach,
+  FutureOr<void> Function(Process) onExit,
 }) async {
   final Completer<int> result = Completer<int>();
   final Process process = await runCommand(
@@ -165,10 +165,17 @@ Future<int> runCommandAndStreamOutput(
         // Detach from the process, assuming it will eventually complete successfully.
         // Output printed after detaching (incl. stdout and stderr) will still be
         // processed by [filter] and [mapFunction].
-        if (onDetach != null)
-          onDetach(process).then<void>((_) => result.complete(0));
-        else
-          result.complete(0);
+        void finish(void _) => result.complete(0);
+        if (onDetach != null) {
+          final FutureOr<void> future = onDetach(process);
+          if (future is Future) {
+            future.then<void>(finish);
+          } else {
+            finish(null);
+          }
+        } else {
+          finish(null);
+        }
       }
       return line;
     })
@@ -211,8 +218,12 @@ Future<int> runCommandAndStreamOutput(
 
     final int exitCode = await process.exitCode;
 
-    if (onExit != null)
-      await onExit(process);
+    if (onExit != null) {
+      final FutureOr<void> exitResult = onExit(process);
+      if (exitResult is Future) {
+        await exitResult;
+      }
+    }
 
     // Complete the future if the we did not detach the process yet.
     if (!result.isCompleted) {

@@ -44,19 +44,26 @@ class IOSDeploy {
   Future<void> _killOther(ApplicationPackage package) async {
     final File temp = _tempFile(package);
 
-    if (!temp.existsSync())
+    if (!temp.existsSync()) {
       return;
+    }
 
     final String pid = await temp.readAsString();
 
     // Sanity check that we're kill ios-deploy, and not some other process!
     final RunResult check = await runAsync(<String>['ps', '-p', pid]);
-    if (!check.stdout.contains('ios-deploy'))
+    if (!check.stdout.contains('ios-deploy')) {
       // Nothing to do.
       return;
+    }
+
+    try {
+      processManager.killPid(int.parse(pid));
+    } catch (_) {
+      // If we couldn't parse the file's contents, conservatively do nothing.
+    }
 
     // No need to wait for the process to die, since the launch will block anyway.
-    await runCommand(<String>['kill', pid]);
   }
 
   /// We have detached from `ios-deploy`: save its PID in case we need to kill it later.
