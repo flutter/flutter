@@ -167,7 +167,6 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           childExtent = child.size.height;
           break;
       }
-
       if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
         extent = childExtent;
       if (maxExtent < extent)
