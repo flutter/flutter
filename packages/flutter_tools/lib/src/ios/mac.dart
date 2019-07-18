@@ -472,7 +472,6 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
-
     flutterUsage.sendEvent(
       'Xcode',
       'bitcode-failure',
