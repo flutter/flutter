@@ -382,7 +382,7 @@ Future<void> _runTests() async {
       options: <String>['--track-widget-creation'],
       tableData: bigqueryApi?.tabledata,
       tests: <String>[
-        'test/widgets/',
+        path.join('test', 'widgets') + path.separator,
       ],
     );
   }
