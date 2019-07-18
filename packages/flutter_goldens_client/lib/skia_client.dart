@@ -69,8 +69,8 @@ class SkiaGoldClient extends GoldensClient {
   Future<void> auth(Directory workDirectory) async {
     assert(workDirectory != null);
     _workDirectory = workDirectory;
-    if (_clientIsAuthorized())
-      return;
+//    if (_clientIsAuthorized())
+//      return;
 
     if (_serviceAccount.isEmpty) {
       final StringBuffer buf = StringBuffer()..writeln('Gold service account is unavailable.');
@@ -209,13 +209,13 @@ class SkiaGoldClient extends GoldensClient {
     );
   }
 
-  /// Returns a boolean value to prevent the client from re-authorizing itself
-  /// for multiple tests.
-  bool _clientIsAuthorized() {
-    final File authFile = _workDirectory?.childFile(super.fs.path.join(
-      'temp',
-      'auth_opt.json',
-    ));
-    return authFile.existsSync();
-  }
+//  /// Returns a boolean value to prevent the client from re-authorizing itself
+//  /// for multiple tests.
+//  bool _clientIsAuthorized() {
+//    final File authFile = _workDirectory?.childFile(super.fs.path.join(
+//      'temp',
+//      'auth_opt.json',
+//    ));
+//    return authFile.existsSync();
+//  }
 }
