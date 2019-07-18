@@ -105,6 +105,10 @@ class Xcode {
     return runCheckedAsync(<String>['xcrun', 'strip', ...args]);
   }
 
+  Future<RunResult> otool(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'otool', ...args]);
+  }
+
   String getSimulatorPath() {
     if (xcodeSelectPath == null)
       return null;

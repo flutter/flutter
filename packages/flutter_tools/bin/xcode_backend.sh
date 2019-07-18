@@ -174,6 +174,11 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
+
+    local bitcode_flag=""
+    if [[ $ENABLE_BITCODE == "YES" ]]; then
+      bitcode_flag="--bitcode"
+    fi
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -183,7 +188,8 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${flutter_engine_flag}                                                \
-      ${local_engine_flag}
+      ${local_engine_flag}                                                  \
+      ${bitcode_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."

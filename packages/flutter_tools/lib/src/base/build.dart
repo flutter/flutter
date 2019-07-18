@@ -96,7 +96,10 @@ class AOTSnapshotter {
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
   }) async {
-    assert(!bitcode || platform == TargetPlatform.ios, 'Bitcode is only supported for iOS.');
+    if (bitcode && platform != TargetPlatform.ios) {
+      printError('Bitcode is only supported for iOS.');
+      return 1;
+    }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
