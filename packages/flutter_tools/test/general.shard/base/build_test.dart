@@ -135,6 +135,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       ), isNot(equals(0)));
     }, overrides: contextOverrides);
 
@@ -146,6 +147,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -157,6 +159,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       ), isNot(0));
     }, overrides: contextOverrides);
 
@@ -181,6 +184,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         iosArch: IOSArch.armv7,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -218,6 +222,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         iosArch: IOSArch.arm64,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -253,6 +258,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         iosArch: IOSArch.armv7,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -290,6 +296,7 @@ void main() {
         packagesPath: '.packages',
         outputPath: outputPath,
         iosArch: IOSArch.arm64,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -316,6 +323,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -345,6 +353,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);
@@ -380,6 +389,7 @@ void main() {
         mainPath: 'main.dill',
         packagesPath: '.packages',
         outputPath: outputPath,
+        bitcode: false,
       );
 
       expect(genSnapshotExitCode, 0);

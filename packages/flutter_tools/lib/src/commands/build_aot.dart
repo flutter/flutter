@@ -52,6 +52,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
+      )
+      ..addFlag('bitcode',
+        defaultsTo: false,
+        hide: true,
       );
   }
 
@@ -67,6 +71,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
+
+    final bool bitcode = argResults['bitcode'];
 
     final BuildMode buildMode = getBuildMode();
 
@@ -118,6 +124,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+            bitcode: bitcode,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -157,6 +164,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+          bitcode: false,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();

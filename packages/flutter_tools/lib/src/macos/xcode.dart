@@ -98,11 +98,11 @@ class Xcode {
   }
 
   Future<RunResult> dsymutil(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'dsymutil']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'dsymutil', ...args]);
   }
 
   Future<RunResult> strip(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'strip']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'strip', ...args]);
   }
 
   String getSimulatorPath() {

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show LineSplitter, utf8;
 
 import 'package:meta/meta.dart';
 
@@ -95,7 +94,10 @@ class AOTSnapshotter {
     @required String outputPath,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
+    @required bool bitcode,
   }) async {
+    assert(!bitcode || platform == TargetPlatform.ios, 'Bitcode is only supported for iOS.');
+
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -132,7 +134,7 @@ class AOTSnapshotter {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
-      genSnapshotArgs.add('--assembly=$assembly.xyz');
+      genSnapshotArgs.add('--assembly=$assembly');
     } else {
       final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
@@ -173,11 +175,16 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
-
-    if (platform == TargetPlatform.ios) {
-      final sink = fs.file(assembly).openWrite();
-      await for (var line in fs.file('$assembly.xyz').openRead().cast<List<int>>().transform(utf8.decoder).transform(const LineSplitter())) {
-        if (line.startsWith('.section __DWARF')) break;
+    // TODO(dnfield): This should be removed when https://github.com/dart-lang/sdk/issues/37560
+    // is resolved.
+    // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
+    // gen_snapshot would provide an argument to do this automatically.
+    if (platform == TargetPlatform.ios && bitcode) {
+      final IOSink sink = fs.file('$assembly.bitcode').openWrite();
+      for (String line in await fs.file(assembly).readAsLines()) {
+        if (line.startsWith('.section __DWARF')) {
+          break;
+        }
         sink.writeln(line);
       }
       await sink.close();
@@ -191,7 +198,12 @@ class AOTSnapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      final RunResult result = await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
+      final RunResult result = await _buildIosFramework(
+        iosArch: iosArch,
+        assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
+        outputPath: outputDir.path,
+        bitcode: bitcode,
+      );
       if (result.exitCode != 0)
         return result.exitCode;
     }
@@ -204,13 +216,21 @@ class AOTSnapshotter {
     @required IOSArch iosArch,
     @required String assemblyPath,
     @required String outputPath,
+    @required bool bitcode,
   }) async {
     final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
     printStatus('Building App.framework for $targetArch...');
     final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
-    final RunResult compileResult = await xcode.cc(<String>[...commonBuildOptions, '-c', assemblyPath, '-o', assemblyO, '-fembed-bitcode']);
+    final RunResult compileResult = await xcode.cc(<String>[
+      ...commonBuildOptions,
+      '-c',
+      assemblyPath,
+      '-o',
+      assemblyO,
+      if (bitcode) '-fembed-bitcode',
+    ]);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
@@ -225,7 +245,7 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-fembed-bitcode',
+      if (bitcode) '-fembed-bitcode',
       '-o', appLib,
       assemblyO,
     ];
@@ -233,16 +253,17 @@ class AOTSnapshotter {
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
-    final RunResult dsymResult = await xcode.dsymutil([appLib, '-o', fs.path.join(outputPath, 'App.framework.dSYM')]);
+    if (!bitcode) {
+      return linkResult;
+    }
+    final RunResult dsymResult = await xcode.dsymutil(<String>[
+      appLib,
+      '-o', fs.path.join(outputPath, 'App.framework.dSYM'),
+    ]);
     if (dsymResult.exitCode != 0) {
       printError('Failed to extract dSYM out of dynamic lib');
-      return dsymResult;
     }
-    // final RunResult stripResult = await xcode.strip([appLib]);
-    // if (stripResult.exitCode != 0) {
-    //  printError('Failed to strip dynamic lib');
-    // }
-    return dsymResult;//stripResult;
+    return dsymResult;
   }
 
   /// Compiles a Dart file to kernel.
