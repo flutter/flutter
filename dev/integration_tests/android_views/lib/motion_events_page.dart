@@ -196,7 +196,10 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<String> handleDriverMessage(String message) async {
     switch (message) {
       case 'run test':
-        return playEventsFile();
+        final String result = await playEventsFile();
+        // popping back after the test is run.
+        Navigator.of(context).pop(true);
+        return result;
     }
     return 'unknown message: "$message"';
   }
