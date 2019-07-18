@@ -679,7 +679,14 @@ abstract class ResidentRunner {
     }
   }
 
+  /// Take a screenshot on the provided [device].
+  ///
+  /// If the device has a connected vmservice, this method will attempt to hide
+  /// and restore the debug banner before taking the screenshot.
+  ///
+  /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
+    assert(device.device.supportsScreenshot);
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
