@@ -419,8 +419,7 @@ void _defineTests() {
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
-            // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
-            //multiline: true,
+            multiline: true,
             scopesRoute: true,
             namesRoute: true,
             image: true,
@@ -433,10 +432,7 @@ void _defineTests() {
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags
-      // TODO(mdebbar): Remove this line after https://github.com/flutter/engine/pull/9894
-      ..remove(SemanticsFlag.isMultiline)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+    flags.remove(SemanticsFlag.hasImplicitScrolling);
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -471,8 +467,7 @@ void _defineTests() {
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
-            // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
-            //multiline: true,
+            multiline: true,
             scopesRoute: true,
             namesRoute: true,
             image: true,
@@ -484,10 +479,7 @@ void _defineTests() {
     flags = SemanticsFlag.values.values.toList();
     // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
     // therefore it has to be removed.
-    flags
-      // TODO(mdebbar): Remove this line after https://github.com/flutter/engine/pull/9894
-      ..remove(SemanticsFlag.isMultiline)
-      ..remove(SemanticsFlag.hasImplicitScrolling);
+    flags.remove(SemanticsFlag.hasImplicitScrolling);
 
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
