@@ -376,7 +376,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// [new StreamBuilder.withoutInitialData] constructor may be used. Doing so
 /// may cause the first frame to have a snapshot that contains no data.
 ///
-/// ## `StreamBuilder<void>`
+/// ## Void StreamBuilders
 ///
 /// The `StreamBuilder<void>` type will produce snapshots that contain no data.
 /// An example stream of snapshots would be the following:
@@ -585,7 +585,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 ///
-/// ## `Future<void>`
+/// ## Void futures
 ///
 /// The `FutureBuilder<void>` type will produce snapshots that contain no data:
 ///
@@ -628,18 +628,30 @@ class FutureBuilder<T> extends StatefulWidget {
   /// Creates a widget that builds itself based on the latest snapshot of
   /// interaction with a [Future].
   ///
+  /// The [future] argument must have been obtained earlier, e.g. during
+  /// [State.initState], [State.didUpdateConfig], or
+  /// [State.didChangeDependencies]. It must not be created during the
+  /// [State.build] or [StatelessWidget.build] method call when constructing
+  /// the [FutureBuilder]. If the [future] is created at the same time as the
+  /// [FutureBuilder], then every time the [FutureBuilder]'s parent is rebuilt,
+  /// the asynchronous task will be restarted.
+  ///
   // ignore: deprecated_member_use_from_same_package
   /// The [initialData] argument specifies the data that will be used to create
   /// the snapshots provided to [builder] until a non-null [future] has
-  /// completed.
+  /// completed. This argument is deprecated and will be removed in a future
+  /// stable release because snapshots that are provided to the [builder]
+  /// contain an [AsyncSnapshot.connectionState] property that indicates the
+  /// state of the [future]. The builder can use that connection state to
+  /// provide an "initial value" when the future has not yet completed.
   ///
   /// The [builder] argument must not be null.
   const FutureBuilder({
     Key key,
     this.future,
     @Deprecated(
-      "Don't provide initialData to FutureBuilder. Instead, check for "
-      'ConnectionState.none or ConnectionState.waiting in your build() '
+      'Instead of providing initialData to FutureBuilder, consider checking '
+      'for ConnectionState.none or ConnectionState.waiting in your build() '
       'method to know whether the future has completed or not.',
     )
     this.initialData,  // ignore: deprecated_member_use_from_same_package
@@ -665,28 +677,24 @@ class FutureBuilder<T> extends StatefulWidget {
   ///
   ///  * [ConnectionState.none]: [future] is null.
   ///
-  ///    If this widget was created with initial data via [new FutureBuilder],
-  ///    then the [AsyncSnapshot.data] will be set to [initialData], unless a
-  ///    future has previously completed, in which case the previous result
-  ///    persists.
+  ///    If this widget was created with initial data (deprecated), then the
+  ///    [AsyncSnapshot.data] will be set to [initialData], unless a future has
+  ///    previously completed, in which case the previous result persists.
   ///
-  ///    If this widget was created without initial data via
-  ///    [new FutureBuilder.withoutInitialData], then the [AsyncSnapshot.data]
-  ///    will be unset, and attempts to access the data will result in an
-  ///    exception.
+  ///    If this widget was created without initial data, then the
+  ///    [AsyncSnapshot.data] will be unset, and attempts to access the data
+  ///    will result in an exception.
   ///
   ///  * [ConnectionState.waiting]: [future] is not null but has not yet
   ///    completed.
   ///
-  ///    If this widget was created with initial data via [new FutureBuilder],
-  ///    then the [AsyncSnapshot.data] will be set to [initialData], unless a
-  ///    future has previously completed, in which case the previous result
-  ///    persists.
+  ///    If this widget was created with initial data (deprecated), then the
+  ///    [AsyncSnapshot.data] will be set to [initialData], unless a future has
+  ///    previously completed, in which case the previous result persists.
   ///
-  ///    If this widget was created without initial data via
-  ///    [new FutureBuilder.withoutInitialData], then the [AsyncSnapshot.data]
-  ///    will be unset, and attempts to access the data will result in an
-  ///    exception.
+  ///    If this widget was created without initial data, then the
+  ///    [AsyncSnapshot.data] will be unset, and attempts to access the data
+  ///    will result in an exception.
   ///
   ///  * [ConnectionState.done]: [future] is not null, and has completed. If the
   ///    future completed successfully, the [AsyncSnapshot.data] will be set to
@@ -705,8 +713,15 @@ class FutureBuilder<T> extends StatefulWidget {
   /// the [builder] will contain no data, regardless of [initialData]. (The
   /// error itself will be available in [AsyncSnapshot.error], and
   /// [AsyncSnapshot.hasError] will be true.)
+  ///
+  /// This field is deprecated and will be removed in a future stable release
+  /// because snapshots that are provided to the [builder] contain an
+  /// [AsyncSnapshot.connectionState] property that indicates the state of the
+  /// [future]. The builder can use that connection state to provide an
+  /// "initial value" when the future has not yet completed.
   @Deprecated(
-    "Don't use FutureBuilder.initialData. Instead, check for "
+    'Instead of using FutureBuilder.initialData, consider checking '
+    'for ConnectionState.none or ConnectionState.waiting in your build() '
     'ConnectionState.none or ConnectionState.waiting in your build() '
     'method to know whether the future has completed or not.',
   )
