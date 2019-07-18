@@ -33,8 +33,8 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>();
 
-MockDeviceManager get testDeviceManager => context.get<DeviceManager>();
-MockDoctor get testDoctor => context.get<Doctor>();
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>();
+FakeDoctor get testDoctor => context.get<Doctor>();
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -71,8 +71,8 @@ void testUsingContext(
         name: 'mocks',
         overrides: <Type, Generator>{
           Config: () => buildConfig(fs),
-          DeviceManager: () => MockDeviceManager(),
-          Doctor: () => MockDoctor(),
+          DeviceManager: () => FakeDeviceManager(),
+          Doctor: () => FakeDoctor(),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -135,7 +135,7 @@ void _printBufferedErrors(AppContext testContext) {
   }
 }
 
-class MockDeviceManager implements DeviceManager {
+class FakeDeviceManager extends DeviceManager {
   List<Device> devices = <Device>[];
 
   String _specifiedDeviceId;
@@ -188,22 +188,17 @@ class MockDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) {
-    return getDevices().toList();
-  }
-
-  @override
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
 }
 
-class MockAndroidLicenseValidator extends AndroidLicenseValidator {
+class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class MockDoctor extends Doctor {
+class FakeDoctor extends Doctor {
   // True for testing.
   @override
   bool get canListAnything => true;
@@ -220,7 +215,7 @@ class MockDoctor extends Doctor {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map<DoctorValidator>((DoctorValidator v) {
       if (v is AndroidLicenseValidator) {
-        return MockAndroidLicenseValidator();
+        return FakeAndroidLicenseValidator();
       }
       return v;
     }).toList();

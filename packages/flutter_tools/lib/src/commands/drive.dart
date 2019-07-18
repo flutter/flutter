@@ -13,6 +13,7 @@ import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
@@ -94,7 +95,7 @@ class DriveCommand extends RunCommandBase {
     if (testFile == null)
       throwToolExit(null);
 
-    _device = await targetDeviceFinder();
+    _device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);
 
@@ -188,14 +189,14 @@ class DriveCommand extends RunCommandBase {
 }
 
 /// Finds a device to test on. May launch a simulator, if necessary.
-typedef TargetDeviceFinder = Future<Device> Function();
-TargetDeviceFinder targetDeviceFinder = findTargetDevice;
-void restoreTargetDeviceFinder() {
-  targetDeviceFinder = findTargetDevice;
-}
+// typedef TargetDeviceFinder = Future<Device> Function();
+// TargetDeviceFinder targetDeviceFinder = findTargetDevice;
+// void restoreTargetDeviceFinder() {
+//   targetDeviceFinder = findTargetDevice;
+// }
 
 Future<Device> findTargetDevice() async {
-  final List<Device> devices = await deviceManager.getDevices().toList();
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
