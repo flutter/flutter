@@ -191,9 +191,10 @@ class TooltipThemeData extends Diagnosticable {
 ///     borderRadius: BorderRadius.zero,
 ///   ),
 ///   child: Tooltip(
-///     message: 'High quality',
+///     message: 'Example tooltip',
 ///     child: IconButton(
-///       icon: Icon(Icons.high_quality),
+///       iconSize: 36.0,
+///       icon: Icon(Icons.touch_app),
 ///       onPressed: () {},
 ///     ),
 ///   ),
