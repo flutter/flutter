@@ -520,10 +520,7 @@ class SemanticsFlag {
     _kHasToggledStateIndex: hasToggledState,
     _kIsToggledIndex: isToggled,
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
-    // TODO(mdebbar): Uncomment after both these PRs are landed:
-    //                - https://github.com/flutter/engine/pull/9850
-    //                - https://github.com/flutter/flutter/pull/36297
-    // _kIsMultilineIndex: isMultiline,
+    _kIsMultilineIndex: isMultiline,
     _kIsReadOnlyIndex: isReadOnly,
   };
 
