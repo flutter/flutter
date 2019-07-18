@@ -69,8 +69,8 @@ class SkiaGoldClient extends GoldensClient {
   Future<void> auth(Directory workDirectory) async {
     assert(workDirectory != null);
     _workDirectory = workDirectory;
-//    if (_clientIsAuthorized())
-//      return;
+    if (_clientIsAuthorized())
+      return;
 
     if (_serviceAccount.isEmpty) {
       final StringBuffer buf = StringBuffer()..writeln('Gold service account is unavailable.');
@@ -104,7 +104,8 @@ class SkiaGoldClient extends GoldensClient {
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the testing environment.
-  Future<void> imgtestInit() async {
+  Future<void> imgtestInit(Directory workDirectory) async {
+    await auth(workDirectory);
     final File keys = _workDirectory.childFile('keys.json');
     final File failures = _workDirectory.childFile('failures.json');
 
@@ -156,8 +157,6 @@ class SkiaGoldClient extends GoldensClient {
     assert(testName != null);
     assert(goldenFile != null);
 
-    await imgtestInit();
-
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', _workDirectory.childDirectory('temp').path,
@@ -182,7 +181,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return '42a9c031e51bbe5e94a517deb3922a5eebe80669';
+    return '9c9b71a0fb8a759abd395b85a719600f7ed3ef93';
 //    if (!flutterRoot.existsSync()) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter root could not be found: $flutterRoot');
@@ -209,13 +208,13 @@ class SkiaGoldClient extends GoldensClient {
     );
   }
 
-//  /// Returns a boolean value to prevent the client from re-authorizing itself
-//  /// for multiple tests.
-//  bool _clientIsAuthorized() {
-//    final File authFile = _workDirectory?.childFile(super.fs.path.join(
-//      'temp',
-//      'auth_opt.json',
-//    ));
-//    return authFile.existsSync();
-//  }
+  /// Returns a boolean value to prevent the client from re-authorizing itself
+  /// for multiple tests.
+  bool _clientIsAuthorized() {
+    final File authFile = _workDirectory?.childFile(super.fs.path.join(
+      'temp',
+      'auth_opt.json',
+    ));
+    return authFile.existsSync();
+  }
 }
