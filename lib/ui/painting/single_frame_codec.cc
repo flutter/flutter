@@ -83,13 +83,16 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
           std::move(canvas_image), 0 /* duration */);
     }
 
+    // The cached frame is now available and should be returned to any future
+    // callers.
+    codec->status_ = Status::kComplete;
+
+    // Invoke any callbacks that were provided before the frame was decoded.
     Dart_Handle frame = tonic::ToDart(codec->cached_frame_);
     for (const DartPersistentValue& callback : codec->pending_callbacks_) {
       tonic::DartInvoke(callback.value(), {frame});
     }
     codec->pending_callbacks_.clear();
-
-    codec->status_ = Status::kComplete;
   });
 
   // The encoded data is no longer needed now that it has been handed off
