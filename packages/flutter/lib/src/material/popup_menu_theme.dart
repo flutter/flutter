@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show lerpDouble;
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/material.dart';
+
+import 'dart:ui' show lerpDouble;
 
 /// Defines default property values for [PopupMenuEntry] widgets.
 ///
@@ -110,4 +109,48 @@ class PopupMenuThemeData extends Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('text style', textStyle, defaultValue: null));
   }
+}
+
+/// An inherited widget that defines the configuration for
+/// popup menus in this widget's subtree.
+///
+/// Values specified here are used for popup menu properties that are not
+/// given an explicit non-null value.
+class PopupMenuTheme extends InheritedWidget {
+  /// Creates a popup menu theme that controls the configurations for
+  /// popup menus.
+  PopupMenuTheme({
+    Key key,
+    Color color,
+    ShapeBorder shape,
+    double elevation,
+    TextStyle textStyle,
+    Widget child,
+  }) : data = PopupMenuThemeData(
+         color: color,
+         shape: shape,
+         elevation: elevation,
+         textStyle: textStyle,
+       ),
+       super(key: key, child: child);
+
+  /// The properties for descendant popup menu widgets.
+  final PopupMenuThemeData data;
+
+  /// The closest instance of this class' [data] value that encloses the given
+  /// context. If there is no ancestor, it returns [ThemeData.popupMenuTheme].
+  /// Applications can assume that the returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
+  /// ```
+  static PopupMenuThemeData of(BuildContext context) {
+    final PopupMenuTheme popupMenuTheme = context.inheritFromWidgetOfExactType(PopupMenuTheme);
+    return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
+  }
+
+  @override
+  bool updateShouldNotify(PopupMenuTheme oldWidget) => data != oldWidget.data;
 }
