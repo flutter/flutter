@@ -134,8 +134,8 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: kLightGalleryTheme,
-        darkTheme: kDarkGalleryTheme,
+        theme: kLightGalleryTheme.copyWith(platform: _options.platform),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform),
         themeMode: _options.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
