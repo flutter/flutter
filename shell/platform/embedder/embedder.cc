@@ -631,13 +631,6 @@ FlutterEngineResult FlutterEngineRun(size_t version,
     }
   }
 
-  run_configuration.AddAssetResolver(
-      std::make_unique<flutter::DirectoryAssetBundle>(
-          fml::Duplicate(settings.assets_dir)));
-
-  run_configuration.AddAssetResolver(
-      std::make_unique<flutter::DirectoryAssetBundle>(fml::OpenDirectory(
-          settings.assets_path.c_str(), false, fml::FilePermission::kRead)));
   if (!run_configuration.IsValid()) {
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
