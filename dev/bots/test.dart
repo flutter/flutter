@@ -370,7 +370,7 @@ Future<void> _runTests() async {
       path.join(flutterRoot, 'packages', 'flutter'),
       tableData: bigqueryApi?.tabledata,
       tests: <String>[
-        'test/widgets/',
+        path.join('test', 'widgets') + path.separator,
       ],
     );
     // Only packages/flutter/test/widgets/widget_inspector_test.dart really
