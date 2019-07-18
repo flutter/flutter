@@ -166,6 +166,44 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
+/// ### Borders and stroke
+///
+/// {@tool sample}
+/// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
+/// should be provided as a [foreground] paint. The following example uses a [Stack]
+/// to produce a stroke and fill effect.
+///
+/// ![Text border](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
+///
+/// ```dart
+/// Paint borderPaint = Paint();
+/// borderPaint.style = PaintingStyle.stroke;
+/// borderPaint.strokeWidth = 6;
+/// borderPaint.color = Colors.blue[700];
+/// String contents = 'Greetings, planet!';
+/// Stack(
+///   children: <Widget>[
+///     // Stroked text as border.
+///     Text(
+///       contents,
+///       style: TextStyle(
+///         fontSize: 40,
+///         foreground: borderPaint,
+///       ),
+///     ),
+///     // Solid text as fill.
+///     Text(
+///       contents,
+///       style: TextStyle(
+///         fontSize: 40,
+///         color: Colors.grey[300],
+///       ),
+///     ),
+///   ],
+/// ),
+/// ```
+/// {@end-tool}
+///
 /// ### Custom Fonts
 ///
 /// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
