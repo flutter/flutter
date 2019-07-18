@@ -195,6 +195,53 @@ TEST_F(ImageDecoderFixtureTest, ValidImageResultsInSuccess) {
   latch.Wait();
 }
 
+TEST_F(ImageDecoderFixtureTest, ExifDataIsRespectedOnDecode) {
+  auto loop = fml::ConcurrentMessageLoop::Create();
+  TaskRunners runners(GetCurrentTestName(),    // label
+                      GetThreadTaskRunner(),   // platform
+                      CreateNewThread("gpu"),  // gpu
+                      CreateNewThread("ui"),   // ui
+                      CreateNewThread("io")    // io
+  );
+
+  fml::AutoResetWaitableEvent latch;
+
+  std::unique_ptr<IOManager> io_manager;
+  std::unique_ptr<ImageDecoder> image_decoder;
+
+  SkISize decoded_size = SkISize::MakeEmpty();
+  auto decode_image = [&]() {
+    image_decoder = std::make_unique<ImageDecoder>(
+        runners, loop->GetTaskRunner(), io_manager->GetWeakIOManager());
+
+    ImageDecoder::ImageDescriptor image_descriptor;
+    image_descriptor.data = OpenFixtureAsSkData("Horizontal.jpg");
+
+    ASSERT_TRUE(image_descriptor.data);
+    ASSERT_GE(image_descriptor.data->size(), 0u);
+
+    ImageDecoder::ImageResult callback = [&](SkiaGPUObject<SkImage> image) {
+      ASSERT_TRUE(runners.GetUITaskRunner()->RunsTasksOnCurrentThread());
+      ASSERT_TRUE(image.get());
+      decoded_size = image.get()->dimensions();
+      latch.Signal();
+    };
+    image_decoder->Decode(std::move(image_descriptor), callback);
+  };
+
+  auto setup_io_manager_and_decode = [&]() {
+    io_manager = std::make_unique<TestIOManager>(runners.GetIOTaskRunner());
+    runners.GetUITaskRunner()->PostTask(decode_image);
+  };
+
+  runners.GetIOTaskRunner()->PostTask(setup_io_manager_and_decode);
+
+  latch.Wait();
+
+  ASSERT_EQ(decoded_size.width(), 600);
+  ASSERT_EQ(decoded_size.height(), 200);
+}
+
 TEST_F(ImageDecoderFixtureTest, CanDecodeWithoutAGPUContext) {
   auto loop = fml::ConcurrentMessageLoop::Create();
   TaskRunners runners(GetCurrentTestName(),    // label

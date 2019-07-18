@@ -133,62 +133,14 @@ static sk_sp<SkImage> ImageFromCompressedData(
   TRACE_EVENT0("flutter", __FUNCTION__);
   flow.Step(__FUNCTION__);
 
-  auto codec = SkCodec::MakeFromData(data);
+  auto decoded_image = SkImage::MakeFromEncoded(data);
 
-  if (!codec) {
+  if (!decoded_image) {
     return nullptr;
   }
 
-  const auto encoded_info = codec->getInfo();
-
-  if (encoded_info.dimensions().isEmpty()) {
-    return nullptr;
-  }
-
-  const double desired_width =
-      target_width.value_or(encoded_info.dimensions().width());
-  const double desired_height =
-      target_height.value_or(encoded_info.dimensions().height());
-
-  const auto scale_x = desired_width / encoded_info.dimensions().width();
-  const auto scale_y = desired_height / encoded_info.dimensions().height();
-
-  const double scale = std::min({scale_x, scale_y, 1.0});
-
-  if (scale <= 0.0) {
-    return nullptr;
-  }
-
-  // We ask the codec for one of the natively supported dimensions. This may not
-  // be exactly what we need, but it will also be smaller than 1:1. We will
-  // still have to perform a resize, but from a smaller intermediate buffer. In
-  // case no resize needs to be performed, ResizeRasterImage will just return
-  // the original image.
-  const auto scaled_dimensions = codec->getScaledDimensions(scale);
-
-  if (scaled_dimensions.isEmpty()) {
-    return nullptr;
-  }
-
-  const auto decoded_info = encoded_info.makeWH(scaled_dimensions.width(),
-                                                scaled_dimensions.height());
-
-  SkBitmap decoded_bitmap;
-  if (!decoded_bitmap.tryAllocPixels(decoded_info)) {
-    FML_LOG(ERROR) << "Could not perform allocation for image decoding.";
-    return nullptr;
-  }
-
-  const auto decompression_result = codec->getPixels(decoded_bitmap.pixmap());
-  if (decompression_result != SkCodec::Result::kSuccess) {
-    FML_LOG(ERROR) << "Could not perform image decompression. Error: "
-                   << SkCodec::ResultToString(decompression_result);
-    return nullptr;
-  }
-
-  decoded_bitmap.setImmutable();
-
-  auto decoded_image = SkImage::MakeFromBitmap(decoded_bitmap);
+  // Make sure to resolve all lazy images.
+  decoded_image = decoded_image->makeRasterImage();
 
   if (!decoded_image) {
     return nullptr;

@@ -151,7 +151,10 @@ source_set("ui") {
 if (current_toolchain == host_toolchain) {
   test_fixtures("ui_unittests_fixtures") {
     dart_main = "fixtures/ui_test.dart"
-    fixtures = [ "fixtures/DashInNooglerHat.jpg" ]
+    fixtures = [
+      "fixtures/DashInNooglerHat.jpg",
+      "fixtures/Horizontal.jpg",
+    ]
   }
 
   executable("ui_unittests") {
