@@ -74,6 +74,13 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
+TaskFunction createHelloWorldStartupTest() {
+  return StartupTest(
+    '${flutterDirectory.path}/examples/hello_world',
+    reportMetrics: false,
+  ).run;
+}
+
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
