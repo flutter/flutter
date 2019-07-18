@@ -4,7 +4,6 @@
 
 import 'package:build_daemon/data/build_status.dart';
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/project.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -12,15 +11,41 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 
 import '../artifacts.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'chrome.dart';
 
 /// The name of the built web project.
 const String kBuildTargetName = 'web';
+
+/// A factory for creating a [Dwds] instance.
+DwdsFactory get dwdsFactpory => context.get<DwdsFactory>() ?? Dwds.start;
+
+/// A factory for creating an [HttpMultiServer] instance.
+HttpMultiServerFactory get httpMultiServerFactory => context.get<HttpMultiServerFactory>() ?? HttpMultiServer.bind;
+
+/// A function with the same signature as [HttpMultiServier.bind].
+typedef HttpMultiServerFactory = Future<HttpServer> Function(dynamic address, int port);
+
+/// A function with the same signatire as [Dwds.start].
+typedef DwdsFactory = Future<Dwds> Function({
+   @required int applicationPort,
+  @required int assetServerPort,
+  @required String applicationTarget,
+  @required Stream<BuildResult> buildResults,
+  @required ConnectionProvider chromeConnection,
+  String hostname,
+  ReloadConfiguration reloadConfiguration,
+  bool serveDevTools,
+  LogWriter logWriter,
+  bool verbose,
+  bool enableDebugExtension,
+});
 
 /// The server responsible for handling flutter web applications.
 class FlutterWebServer {
@@ -45,16 +70,16 @@ class FlutterWebServer {
     @required Stream<BuildResults> buildResults,
     @required int daemonAssetPort,
     @required String target,
+    @required FlutterProject flutterProject,
   }) async {
     // Only provide relevant build results
-    final FlutterProject flutterProject = FlutterProject.current();
     final Stream<BuildResult> filteredBuildResults = buildResults
         .asyncMap<BuildResult>((BuildResults results) {
           return results.results
             .firstWhere((BuildResult result) => result.target == kBuildTargetName);
         });
     final int port = await os.findFreePort();
-    final Dwds dwds = await Dwds.start(
+    final Dwds dwds = await dwdsFactpory(
       hostname: _kHostName,
       applicationPort: port,
       applicationTarget: kBuildTargetName,
@@ -106,7 +131,7 @@ class FlutterWebServer {
     Cascade cascade = Cascade();
     cascade = cascade.add(handler);
     cascade = cascade.add(_assetHandler);
-    final HttpServer server = await HttpMultiServer.bind(_kHostName, port);
+    final HttpServer server = await httpMultiServerFactory(_kHostName, port);
     shelf_io.serveRequests(server, cascade.handler);
     final Chrome chrome = await chromeLauncher.launch('http://$_kHostName:$port/');
     return FlutterWebServer._(

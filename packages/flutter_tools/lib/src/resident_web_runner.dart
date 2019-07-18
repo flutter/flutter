@@ -229,6 +229,7 @@ class ResidentWebRunner extends ResidentRunner {
       daemonAssetPort: daemonAssetPort,
       buildResults: _client.buildResults,
       target: target,
+      flutterProject: flutterProject,
     );
     final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
     appConnection.runMain();
