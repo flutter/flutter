@@ -126,26 +126,20 @@ class IOSDevice extends Device {
       ) {
     if (!platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
+      return;
     }
-  }
-
-  String get _installerPath {
-    _installerPathValue ??= artifacts.getArtifactPath(
+    _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
       platform: TargetPlatform.ios,
     ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
-    return _installerPathValue;
-  }
-  String _installerPathValue;
-
-  String get _iproxyPath {
-    _iproxyPathValue ??= artifacts.getArtifactPath(
+    _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios
     ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
-    return _iproxyPathValue;
   }
-  String _iproxyPathValue;
+
+  String _installerPath;
+  String _iproxyPath;
 
   final String _sdkVersion;
 
