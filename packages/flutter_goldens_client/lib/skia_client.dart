@@ -105,16 +105,11 @@ class SkiaGoldClient extends GoldensClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
-    File keys;
-    File failures;
+    final File keys = _workDirectory.childFile('keys.json');
+    final File failures = _workDirectory.childFile('failures.json');
 
-    if (!_initFilesExist()) {
-      keys = _workDirectory.childFile('keys.json');
-      failures = _workDirectory.childFile('failures.json');
-
-      await keys.writeAsString(_getKeysJSON());
-      await failures.create();
-    }
+    await keys.writeAsString(_getKeysJSON());
+    await failures.create();
     final String commitHash = await _getCurrentCommit();
 
     final List<String> imgtestInitArguments = <String>[
@@ -126,8 +121,6 @@ class SkiaGoldClient extends GoldensClient {
       '--failure-file', failures.path,
       '--passfail',
     ];
-
-    print('imgTestInitArgs: $imgtestInitArguments');
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer();
@@ -189,7 +182,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return '63722509953ac14f79efafaeeee22aa242c7c469';
+    return '42a9c031e51bbe5e94a517deb3922a5eebe80669';
 //    if (!flutterRoot.existsSync()) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter root could not be found: $flutterRoot');
@@ -224,13 +217,5 @@ class SkiaGoldClient extends GoldensClient {
       'auth_opt.json',
     ));
     return authFile.existsSync();
-  }
-
-  /// Returns a boolean value to prevent the client from re-initializing itself
-  /// for multiple tests.
-  bool _initFilesExist() {
-    final File keysFile = _workDirectory?.childFile('keys.json');
-    final File failureFile = _workDirectory?.childFile('failures.json');
-    return keysFile.existsSync() && failureFile.existsSync();
   }
 }
