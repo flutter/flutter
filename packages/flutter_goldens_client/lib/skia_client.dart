@@ -105,15 +105,17 @@ class SkiaGoldClient extends GoldensClient {
   /// The `imgtest` command collects and uploads test results to the Skia Gold
   /// backend, the `init` argument initializes the testing environment.
   Future<void> imgtestInit() async {
-    if (_testIsInitialized())
-      return;
+    File keys;
+    File failures;
 
+    if (!_initFilesExist()) {
+      keys = _workDirectory.childFile('keys.json');
+      failures = _workDirectory.childFile('failures.json');
+
+      await keys.writeAsString(_getKeysJSON());
+      await failures.create();
+    }
     final String commitHash = await _getCurrentCommit();
-    final File keys = _workDirectory.childFile('keys.json');
-    final File failures = _workDirectory.childFile('failures.json');
-
-    await keys.writeAsString(_getKeysJSON());
-    await failures.create();
 
     final List<String> imgtestInitArguments = <String>[
       'imgtest', 'init',
@@ -187,7 +189,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return '4eb11c9f526c1948941dabe8e2f90c137dcd60c8';
+    return '63722509953ac14f79efafaeeee22aa242c7c469';
 //    if (!flutterRoot.existsSync()) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter root could not be found: $flutterRoot');
@@ -226,7 +228,7 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns a boolean value to prevent the client from re-initializing itself
   /// for multiple tests.
-  bool _testIsInitialized() {
+  bool _initFilesExist() {
     final File keysFile = _workDirectory?.childFile('keys.json');
     final File failureFile = _workDirectory?.childFile('failures.json');
     return keysFile.existsSync() && failureFile.existsSync();
