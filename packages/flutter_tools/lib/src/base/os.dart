@@ -128,10 +128,10 @@ class _PosixUtils extends OperatingSystemUtils {
     try {
       final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
       if (result.exitCode != 0) {
-        throw ProcessException(
-          'chmod',
-          <String>[mode, entity.path],
-          'exit code: ${result.exitCode}\nstdout: ${result.stdout}\nstderr: ${result.stderr}',
+        printTrace(
+          'Error trying to run chmod on ${entity.absolute.path}'
+          '\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}',
         );
       }
     } on ProcessException catch (error) {
