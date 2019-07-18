@@ -846,6 +846,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.obscured != null) {
       config.isObscured = properties.obscured;
     }
+    if (properties.multiline != null) {
+      config.isMultiline = properties.multiline;
+    }
     if (properties.hidden != null) {
       config.isHidden = properties.hidden;
     }
@@ -923,6 +926,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
+    }
+    if (properties.onMoveCursorForwardByWord != null) {
+      config.onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord;
+    }
+    if (properties.onMoveCursorBackwardByWord != null) {
+      config.onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord;
     }
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;

@@ -992,6 +992,7 @@ class RenderEditable extends RenderBox {
           ? obscuringCharacter * text.toPlainText().length
           : text.toPlainText()
       ..isObscured = obscureText
+      ..isMultiline = _isMultiline
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
