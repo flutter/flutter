@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 // All values eyeballed.
@@ -28,16 +27,6 @@ const double _kScrollbarThicknessDragging = 8.0;
 const double _kScrollbarMainAxisMargin = 3.0;
 const double _kScrollbarCrossAxisMargin = 3.0;
 
-// Callback for iOS13-style scrollbar drag events.
-//
-// primaryDelta is the amount that the gesture has moved along the primary axis
-// in the coordinate space of the scrollbar since the previous update.
-//
-// See also:
-//
-//   * [CupertinoScrollbar.onDragScrollbar]
-typedef GestureDragScrollbarCallback = void Function(double primaryDelta);
-
 /// An iOS style scrollbar.
 ///
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
@@ -59,8 +48,7 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   const CupertinoScrollbar({
     Key key,
-    this.onDragScrollbar,
-    this.onDragScrollbarUp,
+    this.controller,
     @required this.child,
   }) : super(key: key);
 
@@ -70,24 +58,16 @@ class CupertinoScrollbar extends StatefulWidget {
   /// typically a [Scrollable] widget.
   final Widget child;
 
-  /// Called when the user scrolls by dragging the scrollbar.
+  /// The [ScrollController] used to implement Scrollbar dragging.
   ///
   /// Starting in iOS13, a long press on the scroll bar or a drag in from the
   /// side enlarges the scrollbar thumb and makes it interactive. Dragging it
   /// then causes the view to scroll.
   ///
-  /// See also:
-  ///
-  ///   * [CupertinoPageScaffold], which uses the callback to implement the
-  ///     scrolling.
-  ///   * [CupertinoScrollbar.onDragScrollbarUp]
-  final GestureDragScrollbarCallback onDragScrollbar;
-
-  /// Called when the user releases after dragging the scrollbar.
-  ///
-  /// See also:
-  ///   * [CupertinoScrollbar.onDragScrollbar]
-  final VoidCallback onDragScrollbarUp;
+  /// Providing this controller parameter will enable this effect. When the
+  /// Scrollbar thumb is dragged, the controller will have its position updated
+  /// proportionally.
+  final ScrollController controller;
 
   @override
   _CupertinoScrollbarState createState() => _CupertinoScrollbarState();
@@ -103,8 +83,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   AnimationController _thicknessAnimationController;
   Animation<double> _thicknessAnimation;
   Timer _fadeoutTimer;
-  ScrollMetrics lastMetrics;
-  AxisDirection lastAxisDirection;
+  double _dragScrollbarStartY;
+  double _horizontalDragScrollbarStartY;
 
   double get _thickness {
     return _kScrollbarThickness + _thicknessAnimation.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
@@ -163,45 +143,22 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     );
   }
 
-  void _handleLongPressUp() {
-    _startFadeoutTimer();
-    _thicknessAnimationController.reverse();
-    if (widget.onDragScrollbarUp != null) {
-      widget.onDragScrollbarUp();
-    }
-  }
+  // Handle a gesture that drags the scrollbar by the given amount.
+  void _dragScrollbar(double primaryDelta) {
+    assert(widget.controller != null);
 
-  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (widget.onDragScrollbar != null) {
-      widget.onDragScrollbar(details.localOffsetFromOrigin.dy);
-    }
-  }
-
-  void _handleLongPress() {
-    _fadeoutTimer?.cancel();
-    _thicknessAnimationController.forward();
-  }
-
-  double _dragStartY;
-  void _handleHorizontalDragStart(DragStartDetails details) {
-    _dragStartY = details.localPosition.dy;
-    _fadeoutTimer?.cancel();
-    _thicknessAnimationController.forward();
-  }
-
-  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    if (widget.onDragScrollbar != null) {
-      widget.onDragScrollbar(details.localPosition.dy - _dragStartY);
-    }
-  }
-
-  void _handleHorizontalDragEnd(DragEndDetails details) {
-    _dragStartY = null;
-    _startFadeoutTimer();
-    _thicknessAnimationController.reverse();
-    if (widget.onDragScrollbarUp != null) {
-      widget.onDragScrollbarUp();
-    }
+    // Convert primaryDelta, the amount that the scrollbar moved, into the
+    // coordinate space of the scroll position, and scroll to that
+    // position.
+    final double viewHeight = widget.controller.position.viewportDimension;
+    final double scrollHeight = widget.controller.position.maxScrollExtent
+      + viewHeight - widget.controller.position.minScrollExtent;
+    _dragScrollbarStartY ??= widget.controller.position.pixels;
+    final double scrollDistance =
+      primaryDelta / viewHeight * scrollHeight;
+    widget.controller.position.jumpTo(
+      _dragScrollbarStartY + scrollDistance,
+    );
   }
 
   void _startFadeoutTimer() {
@@ -209,6 +166,43 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _fadeoutAnimationController.reverse();
       _fadeoutTimer = null;
     });
+  }
+
+  // Long press event callbacks handle the gesture where the user long presses
+  // on the scrollbar thumb and then drags the scrollbar without releasing.
+  void _handleLongPressUp() {
+    _startFadeoutTimer();
+    _thicknessAnimationController.reverse();
+    _dragScrollbarStartY = null;
+  }
+
+  void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    _dragScrollbar(details.localOffsetFromOrigin.dy);
+  }
+
+  void _handleLongPress() {
+    _fadeoutTimer?.cancel();
+    _thicknessAnimationController.forward();
+  }
+
+  // Horizontal drag event callbacks handle the gesture where the user swipes in
+  // from the right on top of the scrollbar thumb and then drags the scrollbar
+  // without releasing.
+  void _handleHorizontalDragStart(DragStartDetails details) {
+    _horizontalDragScrollbarStartY = details.localPosition.dy;
+    _fadeoutTimer?.cancel();
+    _thicknessAnimationController.forward();
+  }
+
+  void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+    _dragScrollbar(details.localPosition.dy - _horizontalDragScrollbarStartY);
+  }
+
+  void _handleHorizontalDragEnd(DragEndDetails details) {
+    _horizontalDragScrollbarStartY = null;
+    _dragScrollbarStartY = null;
+    _startFadeoutTimer();
+    _thicknessAnimationController.reverse();
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -226,29 +220,26 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
       _fadeoutTimer?.cancel();
       _painter.update(notification.metrics, notification.metrics.axisDirection);
-      lastMetrics = notification.metrics;
-      lastAxisDirection = notification.metrics.axisDirection;
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
 
       _fadeoutTimer?.cancel();
+      // TODO(justinmc): Drag the scrollbar then stop, but don't release. The
+      // thumb will fadeout. It shouldn't. Is this causing it?
       _startFadeoutTimer();
     }
     return false;
   }
 
-  @override
-  void dispose() {
-    _fadeoutAnimationController.dispose();
-    _fadeoutTimer?.cancel();
-    _painter.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
+  // thumb.
+  Map<Type, GestureRecognizerFactory> get _gestures {
     final Map<Type, GestureRecognizerFactory> gestures =
       <Type, GestureRecognizerFactory>{};
+    if (widget.controller == null) {
+      return gestures;
+    }
+
     gestures[_ThumbLongPressGestureRecognizer] =
       GestureRecognizerFactoryWithHandlers<_ThumbLongPressGestureRecognizer>(
         () => _ThumbLongPressGestureRecognizer(
@@ -277,11 +268,25 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
             ..onEnd = _handleHorizontalDragEnd;
         },
       );
+
+    return gestures;
+  }
+
+  @override
+  void dispose() {
+    _fadeoutAnimationController.dispose();
+    _fadeoutTimer?.cancel();
+    _painter.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: RepaintBoundary(
         child: RawGestureDetector(
-          gestures: gestures,
+          gestures: _gestures,
           child: CustomPaint(
             key: _customPaintKey,
             foregroundPainter: _painter,
