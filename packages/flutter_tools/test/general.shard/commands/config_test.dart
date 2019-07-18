@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
+import 'package:flutter_tools/src/desktop.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 
@@ -24,6 +25,8 @@ void main() {
   MockFlutterVersion mockFlutterVersion;
 
   setUpAll(() {
+    // TODO(jonahwilliams): remove once features are landed.
+    debugDisableDesktop = true;
     Cache.disableLocking();
   });
 
