@@ -43,7 +43,6 @@ void main() {
   final FakePlatform windowsPlatform = FakePlatform.fromPlatform(const LocalPlatform());
   windowsPlatform.operatingSystem = 'windows';
 
- 
   group('IOSDevice', () {
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
 
