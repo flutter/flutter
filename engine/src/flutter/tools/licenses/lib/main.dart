@@ -811,9 +811,8 @@ class _RepositoryCxxStlDualLicenseFile extends _RepositoryLicenseFile {
     : _licenses = _parseLicenses(io), super(parent, io);
 
   static final RegExp _pattern = RegExp(
-    r'^'
     r'==============================================================================\n'
-    r'.+ License\n'
+    r'.+ License.*\n'
     r'==============================================================================\n'
     r'\n'
     r'The .+ library is dual licensed under both the University of Illinois\n'

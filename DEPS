@@ -124,7 +124,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '3c8e427128687be69576d68886d7e555bbd89253',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'b9f3f7f78288b66cd80665be2378b5b9d6e36f35',
 
    # Fuchsia compatibility
    #
@@ -148,10 +148,10 @@ deps = {
    Var('fuchsia_git') + '/third_party/harfbuzz' + '@' + '2f8d51731d6502765aec2f93143c57bf13234358',
 
   'src/third_party/libcxx':
-   Var('fuchsia_git') + '/third_party/libcxx' + '@' + 'c5a5fa59789213c7dae68d2e51cb28ef681d8257',
+   Var('fuchsia_git') + '/third_party/libcxx' + '@' + '7524ef50093a376f334a62a7e5cebf5d238d4c99',
 
   'src/third_party/libcxxabi':
-   Var('fuchsia_git') + '/third_party/libcxxabi' + '@' + '1a9753522f1ae8d72848d365902f39e0d3d59a39',
+   Var('fuchsia_git') + '/third_party/libcxxabi' + '@' + '74d1e602c76350f0760bf6907910e4f3a4fccffe',
 
   'src/third_party/glfw':
    Var('fuchsia_git') + '/third_party/glfw' + '@' + '999f3556fdd80983b10051746264489f2cb1ef16',
