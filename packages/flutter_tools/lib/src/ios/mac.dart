@@ -471,6 +471,19 @@ String readGeneratedXcconfig(String appPath) {
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
+
+    flutterUsage.sendEvent(
+      'Xcode',
+      'bitcode-failure',
+      parameters: <String, String>{
+        'build-commands': result.xcodeBuildExecution.buildCommands.toString(),
+        'build-settings': result.xcodeBuildExecution.buildSettings.toString(),
+      });
+  }
+
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
       // May need updating if Xcode changes its outputs.
       result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
