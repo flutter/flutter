@@ -25,7 +25,8 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
+import '../../src/mocks.dart' hide MockProcessManager;
+import '../../src/mocks.dart' as mocks show MockProcessManager;
 
 class MockIOSApp extends Mock implements IOSApp {}
 class MockArtifacts extends Mock implements Artifacts {}
@@ -33,6 +34,7 @@ class MockCache extends Mock implements Cache {}
 class MockDirectory extends Mock implements Directory {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockIMobileDevice extends Mock implements IMobileDevice {}
+class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
@@ -325,7 +327,7 @@ flutter:
   });
 
   group('IOSDeploy.runApp', () {
-    MockProcessManager mockProcessManager;
+    mocks.MockProcessManager mockProcessManager;
     MemoryFileSystem fileSystem;
     const Utf8Encoder utf8 = Utf8Encoder();
     const String packageName = 'com.example.test';
@@ -334,7 +336,7 @@ flutter:
     when(package.id).thenReturn(packageName);
 
     setUp(() {
-      mockProcessManager = MockProcessManager();
+      mockProcessManager = mocks.MockProcessManager();
       fileSystem = MemoryFileSystem();
       fileSystem.directory('/tmp').createSync();
     });
