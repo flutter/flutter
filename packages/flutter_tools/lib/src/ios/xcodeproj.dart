@@ -174,15 +174,20 @@ class XcodeProjectInterpreter {
   }
 
   Map<String, String> getBuildSettings(String projectPath, String target) {
-    final String out = runCheckedSync(<String>[
-      _executable,
-      '-project',
-      fs.path.absolute(projectPath),
-      '-target',
-      target,
-      '-showBuildSettings',
-    ], workingDirectory: projectPath);
-    return parseXcodeBuildSettings(out);
+    try {
+      final String out = runCheckedSync(<String>[
+        _executable,
+        '-project',
+        fs.path.absolute(projectPath),
+        '-target',
+        target,
+        '-showBuildSettings',
+      ], workingDirectory: projectPath);
+      return parseXcodeBuildSettings(out);
+    } catch(error) {
+      printTrace('Unexpected failure to get the build settings: $error.');
+      return const <String, String>{};
+    }
   }
 
   Future<XcodeProjectInfo> getInfo(String projectPath) async {
