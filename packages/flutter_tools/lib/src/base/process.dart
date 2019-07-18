@@ -112,7 +112,7 @@ Future<Process> runCommand(
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment,
-  ProcessStartMode mode,
+  ProcessStartMode mode = ProcessStartMode.normal,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
@@ -181,11 +181,7 @@ Future<int> runCommandAndStreamOutput(
         await detachResult;
       }
 
-      // Result might have been completed while awaiting onExit.
-      if (!result.isCompleted) {
-        result.complete(0);
-      }
-
+      result.complete(0);
       return line;
     })
     .where((String line) => filter == null || filter.hasMatch(line))
