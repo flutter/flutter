@@ -93,9 +93,9 @@ class Tooltip extends StatefulWidget {
 
   /// Whether the tooltip's [message] should be excluded from the semantics
   /// tree.
-  /// 
+  ///
   /// Defaults to false. A tooltip will add a [Semantics.label] that is set to
-  /// [Tooltip.message]. Set this property to true if a custom 
+  /// [Tooltip.message]. Set this property to true if a custom
   /// [Semantics.label] should be applied.
   final bool excludeFromSemantics;
 

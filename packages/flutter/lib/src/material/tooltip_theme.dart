@@ -62,7 +62,7 @@ class TooltipThemeData extends Diagnosticable {
   /// tree.
   ///
   /// By default, [Tooltip]s will add a [Semantics.label] that is set to
-  /// [Tooltip.message]. Set this property to true if a custom 
+  /// [Tooltip.message]. Set this property to true if a custom
   /// [Semantics.label] should be applied.
   final bool excludeFromSemantics;
 
@@ -106,6 +106,10 @@ class TooltipThemeData extends Diagnosticable {
   }
 
   /// Linearly interpolate between two tooltip themes.
+  ///
+  /// If both arguments are null, then null is returned.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
   static TooltipThemeData lerp(TooltipThemeData a, TooltipThemeData b, double t) {
     if (a == null && b == null)
       return null;
