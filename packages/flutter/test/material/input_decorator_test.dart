@@ -2430,7 +2430,7 @@ void main() {
   });
 
   test('InputDecorationTheme copyWith correctly copies and replaces values', () {
-    final InputDecorationTheme original = InputDecorationTheme(
+    const InputDecorationTheme original = InputDecorationTheme(
       focusColor: Colors.orange,
       fillColor: Colors.green,
     );
