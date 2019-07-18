@@ -587,7 +587,7 @@ source_set("main") {
 
 shared_library("egl") {
   if (is_win) {
-    output_name = "libEGL"
+    output_name = "libEGL64_translator"
   } else {
     output_name = "EGL"
   }
@@ -645,7 +645,7 @@ shared_library("egl") {
 
 shared_library("gles") {
   if (is_win) {
-    output_name = "libGLESv2"
+    output_name = "lib64GLES_V2_translator"
   } else {
     output_name = "GLESv2"
   }

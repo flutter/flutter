@@ -1,0 +1,8 @@
+# Copyright 2019 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Set for ANGLE. This buildroot is close enough to Chromium's buildroot
+# (with the addition of some dummy files) to allow building in this mode; the
+# non-Chromium build mode for ANGLE is far too different.
+build_with_chromium = true
