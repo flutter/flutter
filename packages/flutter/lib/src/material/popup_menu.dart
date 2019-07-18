@@ -195,8 +195,8 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The text style of the entry.
   ///
-  /// If this is null, then [popupMenuTheme.textStyle] is used.
-  /// If that is also null, then [theme.textTheme.subhead] is used.
+  /// If this is null, then [PopupMenuThemeData.textStyle] is used.
+  /// If that is also null, then [ThemeData.textTheme.subhead] is used.
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -922,12 +922,12 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// If provided, the shape used for the menu.
   ///
-  /// If this is null, then popupMenuTheme.shape is used.
+  /// If this is null, then [PopupMenuThemeData.shape] is used.
   final ShapeBorder shape;
 
   /// If provided, the color used for the menu.
   ///
-  /// If this is null, then popupMenuTheme.color is used.
+  /// If this is null, then [PopupMenuThemeData.color] is used.
   final Color color;
 
   @override

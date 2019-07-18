@@ -16,7 +16,7 @@ import 'package:flutter/rendering.dart';
 /// [PopupMenuEntryThemeData.copyWith].
 ///
 /// Typically a [PopupMenuEntryThemeData] is specified as part of the
-/// overall [Theme] with [ThemeData.popupMenuThemeData].
+/// overall [Theme] with [ThemeData.popupMenuTheme].
 ///
 /// All [PopupMenuEntryThemeData] properties are `null` by default.
 /// When null, the [PopupMenuEntry] will provide its own defaults.
@@ -99,7 +99,6 @@ class PopupMenuThemeData extends Diagnosticable {
     return typedOther.elevation == elevation
         && typedOther.color == color
         && typedOther.shape == shape
-        && typedOther.elevation == elevation
         && typedOther.textStyle == textStyle;
   }
 

@@ -738,8 +738,8 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
-  /// A theme for customizing the color, shape, elevation, and text style of a
-  /// menu.
+  /// A theme for customizing the color, shape, elevation, and text style of
+  /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
