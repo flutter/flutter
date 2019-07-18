@@ -114,6 +114,7 @@ BuildApp() {
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
   fi
 
+  local bitcode_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
       EchoError "========================================================================"
@@ -130,6 +131,9 @@ BuildApp() {
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
+    if [[ $ENABLE_BITCODE == "YES" ]]; then
+      bitcode_flag="--bitcode"
+    fi
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -175,10 +179,6 @@ BuildApp() {
       exit -1
     fi
 
-    local bitcode_flag=""
-    if [[ $ENABLE_BITCODE == "YES" ]]; then
-      bitcode_flag="--bitcode"
-    fi
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \

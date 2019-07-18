@@ -16,7 +16,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
-import '../project_test.dart';
 
 void main() {
   MockXcode mockXcode;
@@ -137,3 +136,4 @@ void main() {
 }
 
 class MockXcode extends Mock implements Xcode {}
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
