@@ -178,6 +178,28 @@ class TooltipThemeData extends Diagnosticable {
 ///
 /// Values specified here are used for [Tooltip] properties that are not
 /// given an explicit non-null value.
+///
+/// {@tool sample}
+///
+/// Here is an example of a tooltip theme that applies a blue foreground
+/// with non-rounded corners.
+///
+/// ```dart
+/// TooltipTheme(
+///   decoration: BoxDecoration(
+///     color: Colors.blue.withOpacity(0.9),
+///     borderRadius: BorderRadius.zero,
+///   ),
+///   child: Tooltip(
+///     message: 'High quality',
+///     child: IconButton(
+///       icon: Icon(Icons.high_quality),
+///       onPressed: () {},
+///     ),
+///   ),
+/// ),
+/// ```
+/// {@end-tool}
 class TooltipTheme extends InheritedWidget {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].

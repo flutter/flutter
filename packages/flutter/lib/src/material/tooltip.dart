@@ -150,12 +150,23 @@ class Tooltip extends StatefulWidget {
 }
 
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
+  static const double _defaultTooltipHeight = 32.0;
+  static const double _defaultVerticalOffset = 24.0;
+  static const bool _defaultPreferBelow = true;
+  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
   static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
   static const bool _defaultExcludeFromSemantics = false;
 
+  double height;
+  EdgeInsetsGeometry padding;
+  Decoration decoration;
+  TextStyle textStyle;
+  double verticalOffset;
+  bool preferBelow;
+  bool excludeFromSemantics;
   AnimationController _controller;
   OverlayEntry _entry;
   Timer _hideTimer;
@@ -256,17 +267,17 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // rebuilds.
     final Widget overlay = _TooltipOverlay(
       message: widget.message,
-      height: widget.height,
-      padding: widget.padding,
-      decoration: widget.decoration,
-      textStyle: widget.textStyle,
+      height: height,
+      padding: padding,
+      decoration: decoration,
+      textStyle: textStyle,
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
       ),
       target: target,
-      verticalOffset: widget.verticalOffset,
-      preferBelow: widget.preferBelow,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
@@ -321,9 +332,37 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    final ThemeData theme = Theme.of(context);
     final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-    final bool excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
+    TextStyle defaultTextStyle;
+    BoxDecoration defaultDecoration;
+    if (theme.brightness == Brightness.dark) {
+      defaultTextStyle = theme.textTheme.body1.copyWith(
+        color: Colors.black,
+        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('white', 'black'),
+      );
+      defaultDecoration = BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      );
+    } else {
+      defaultTextStyle = theme.textTheme.body1.copyWith(
+        color: Colors.white,
+        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('black', 'white')
+      );
+      defaultDecoration = BoxDecoration(
+        color: Colors.grey[700].withOpacity(0.9),
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+      );
+    }
 
+    height = widget.height ?? tooltipTheme.height ?? _defaultTooltipHeight;
+    padding = widget.padding ?? tooltipTheme.padding ?? _defaultPadding;
+    verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
+    preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
+    excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
+    decoration = widget.decoration ?? tooltipTheme.decoration ?? defaultDecoration;
+    textStyle = widget.textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle;
     waitDuration = widget.waitDuration ?? tooltipTheme.waitDuration ?? _defaultWaitDuration;
     showDuration = widget.showDuration ?? tooltipTheme.showDuration ?? _defaultShowDuration;
 
@@ -414,11 +453,6 @@ class _TooltipOverlay extends StatelessWidget {
     this.preferBelow,
   }) : super(key: key);
 
-  static const double _defaultTooltipHeight = 32.0;
-  static const double _defaultVerticalOffset = 24.0;
-  static const bool _defaultPreferBelow = true;
-  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
-
   final String message;
   final double height;
   final EdgeInsetsGeometry padding;
@@ -431,52 +465,27 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TooltipThemeData tooltipTheme = TooltipTheme.of(context);
-
-    TextStyle defaultTextStyle;
-    BoxDecoration defaultDecoration;
-    if (theme.brightness == Brightness.dark) {
-      defaultTextStyle = theme.textTheme.body1.copyWith(
-        color: Colors.black,
-        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('white', 'black'),
-      );
-      defaultDecoration = BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    } else {
-      defaultTextStyle = theme.textTheme.body1.copyWith(
-        color: Colors.white,
-        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('black', 'white')
-      );
-      defaultDecoration = BoxDecoration(
-        color: Colors.grey[700].withOpacity(0.9),
-        borderRadius: const BorderRadius.all(Radius.circular(4)),
-      );
-    }
-
     return Positioned.fill(
       child: IgnorePointer(
         child: CustomSingleChildLayout(
           delegate: _TooltipPositionDelegate(
             target: target,
-            verticalOffset: verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset,
-            preferBelow: preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow,
+            verticalOffset: verticalOffset,
+            preferBelow: preferBelow,
           ),
           child: FadeTransition(
             opacity: animation,
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: height ?? tooltipTheme.height ?? _defaultTooltipHeight),
+              constraints: BoxConstraints(minHeight: height),
               child: Container(
-                decoration: decoration ?? tooltipTheme.decoration ?? defaultDecoration,
-                padding: padding ?? tooltipTheme.padding ?? _defaultPadding,
+                decoration: decoration,
+                padding: padding,
                 child: Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: Text(
                     message,
-                    style: textStyle ?? tooltipTheme.textStyle ?? defaultTextStyle,
+                    style: textStyle,
                   ),
                 ),
               ),
