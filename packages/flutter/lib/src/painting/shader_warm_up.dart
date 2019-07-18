@@ -101,7 +101,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
   // Constant that can be used to space out draw calls for visualizing the draws
   // for debugging purposes (example: 80.0).  Be sure to also change your render
   // size.
-  static final double _drawCallSpacing = 0.0;
+  static const double _drawCallSpacing = 0.0;
 
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
   const DefaultShaderWarmUp();
