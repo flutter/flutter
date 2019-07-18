@@ -2424,6 +2424,11 @@ void main() {
     expect(getOpacity(tester, 'label'), 0.0);
   }, skip: isBrowser);
 
+  test('InputDecorationTheme copyWith, ==, hashCode basics', () {
+    expect(const InputDecorationTheme(), const InputDecorationTheme().copyWith());
+    expect(const InputDecorationTheme().hashCode, const InputDecorationTheme().copyWith().hashCode);
+  });
+
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
