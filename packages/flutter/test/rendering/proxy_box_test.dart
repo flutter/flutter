@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image, ImageFilter;
-import 'dart:ui' as prefix0;
+import 'dart:ui' as ui show Gradient, Image, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +12,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/src/scheduler/ticker.dart';
 import '../flutter_test_alternative.dart';
 
-import '../widgets/clip_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
@@ -321,7 +319,7 @@ void main() {
   test('RenderShaderMask reuses its layer', () {
     _testLayerReuse<ShaderMaskLayer>(RenderShaderMask(
       shaderCallback: (Rect rect) {
-        return prefix0.Gradient.radial(
+        return ui.Gradient.radial(
           rect.center,
           rect.shortestSide / 2.0,
           const <Color>[Color.fromRGBO(0, 0, 0, 1.0), Color.fromRGBO(255, 255, 255, 1.0)],
@@ -373,7 +371,7 @@ void main() {
 
   test('RenderClipPath reuses its layer', () {
     _testLayerReuse<ClipPathLayer>(RenderClipPath(
-      clipper: PathClipper(),
+      clipper: _TestPathClipper(),
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
         opacity: 0.5,
@@ -395,7 +393,7 @@ void main() {
 
   test('RenderPhysicalShape reuses its layer', () {
     _testLayerReuse<PhysicalModelLayer>(RenderPhysicalShape(
-      clipper: PathClipper(),
+      clipper: _TestPathClipper(),
       color: const Color.fromRGBO(0, 0, 0, 1.0),
       // Inject opacity under the clip to force compositing.
       child: RenderOpacity(
@@ -552,4 +550,14 @@ void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
   pumpFrame(phase: EnginePhase.paint);
   expect(renderObject.debugNeedsPaint, false);
   expect(renderObject.layer, same(layer));
+}
+
+class _TestPathClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    return Path()
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+  }
+  @override
+  bool shouldReclip(_TestPathClipper oldClipper) => false;
 }
