@@ -176,24 +176,22 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ![Text border](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
 ///
 /// ```dart
-/// final Paint borderPaint = Paint();
-/// borderPaint.style = PaintingStyle.stroke;
-/// borderPaint.strokeWidth = 6;
-/// borderPaint.color = Colors.blue[700];
-/// String contents = 'Greetings, planet!';
 /// Stack(
 ///   children: <Widget>[
 ///     // Stroked text as border.
 ///     Text(
-///       contents,
+///       'Greetings, planet!',
 ///       style: TextStyle(
 ///         fontSize: 40,
-///         foreground: borderPaint,
+///         foreground: Paint()
+///           ..style = PaintingStyle.stroke
+///           ..strokeWidth = 6
+///           ..color = Colors.blue[700],
 ///       ),
 ///     ),
 ///     // Solid text as fill.
 ///     Text(
-///       contents,
+///       'Greetings, planet!',
 ///       style: TextStyle(
 ///         fontSize: 40,
 ///         color: Colors.grey[300],
