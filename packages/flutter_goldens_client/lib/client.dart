@@ -76,6 +76,8 @@ class GoldensClient {
       try {
         // Check the current commit again now that we have the lock.
         currentCommit = await _getCurrentCommit();
+        print('currentCommit: $currentCommit');
+        print('goldensCommit: $goldensCommit');
         if (currentCommit != goldensCommit) {
           if (currentCommit == null) {
             await _initRepository();
@@ -123,6 +125,7 @@ class GoldensClient {
       <String>['git', 'status', '--porcelain'],
       workingDirectory: repositoryRoot.path,
     );
+    print('checkCanSync result: ${result.stdout}');
     if (result.stdout.trim().isNotEmpty) {
       final StringBuffer buf = StringBuffer();
       buf
