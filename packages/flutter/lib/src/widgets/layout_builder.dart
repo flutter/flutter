@@ -48,7 +48,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   ConstrainedLayoutBuilder<ConstraintType> get widget => super.widget;
 
   @override
-  _GenericRenderLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject;
+  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject;
 
   Element _child;
 
@@ -130,15 +130,20 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    final _GenericRenderLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
+    final RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> renderObject = this.renderObject;
     assert(renderObject.child == child);
     renderObject.child = null;
     assert(renderObject == this.renderObject);
   }
 }
 
-mixin _GenericRenderLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
+/// Generic mixin for render objects created by [ConstrainedLayoutBuilder].
+///
+/// Provides a callback that should be called at layout time, typically in
+/// [RenderObject.performLayout].
+mixin RenderConstrainedLayoutBuilder<ConstraintType extends Constraints, ChildType extends RenderObject> on RenderObjectWithChildMixin<ChildType> {
   LayoutCallback<ConstraintType> _callback;
+  /// Change the layout callback.
   set callback(LayoutCallback<ConstraintType> value) {
     if (value == _callback)
       return;
@@ -146,6 +151,7 @@ mixin _GenericRenderLayoutBuilder<ConstraintType extends Constraints, ChildType 
     markNeedsLayout();
   }
 
+  /// Invoke the layout callback.
   void layoutAndBuildChild() {
     assert(_callback != null);
     invokeLayoutCallback(_callback);
@@ -188,7 +194,7 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 }
 
-class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, _GenericRenderLayoutBuilder<BoxConstraints, RenderBox> {
+class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
     assert(_debugThrowIfNotCheckingIntrinsics());
@@ -281,7 +287,7 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   _RenderSliverLayoutBuilder createRenderObject(BuildContext context) => _RenderSliverLayoutBuilder();
 }
 
-class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, _GenericRenderLayoutBuilder<SliverConstraints, RenderSliver> {
+class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChildMixin<RenderSliver>, RenderConstrainedLayoutBuilder<SliverConstraints, RenderSliver> {
   @override
   double childMainAxisPosition(RenderObject child) {
     assert(child != null);
