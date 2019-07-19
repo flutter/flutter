@@ -5484,8 +5484,10 @@ class Listener extends StatelessWidget {
     this.onPointerDown,
     this.onPointerMove,
     // We have to ignore the lint rule here in order to use deprecated
-    // parameters and keep backward compatibility. These parameters should be
-    // removed after v1.11 stable.
+    // parameters and keep backward compatibility.
+    // TODO(tongmu): After 2019Q3 stable, remove these 3 parameters from Listener
+    // and Listener should no longer need an intermediate class _PointerListener.
+    // https://github.com/flutter/flutter/issues/36085
     @Deprecated('Use Mouse.onEnter instead')
     this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
     @Deprecated('Use Mouse.onExit instead')
