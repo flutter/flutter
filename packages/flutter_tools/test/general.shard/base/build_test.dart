@@ -116,6 +116,13 @@ void main() {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
             platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
       }
+
+      when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(
+        RunResult(
+          ProcessResult(1, 0, '', ''),
+          <String>['command name', 'arguments...']),
+        ),
+      );
     });
 
     final Map<Type, Generator> contextOverrides = <Type, Generator>{
@@ -177,7 +184,6 @@ void main() {
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -228,7 +234,6 @@ void main() {
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
