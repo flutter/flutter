@@ -22,6 +22,12 @@ class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, Gest
   TestRenderingFlutterBinding({ this.onErrors });
 
   final List<FlutterErrorDetails> _errors = <FlutterErrorDetails>[];
+
+  /// A function called after drawing a frame if [FlutterError] caught any errors.
+  ///
+  /// This function is expected to inspect these errors and decide whether they
+  /// are expected or not. Use [takeFlutterErrorDetails] to take one error at a
+  /// time, or [takeAllFlutterErrorDetails] to iterate over all errors.
   VoidCallback onErrors;
 
   /// Returns the error least recently caught by [FlutterError] and removes it
@@ -38,7 +44,13 @@ class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, Gest
 
   /// Returns all error details caught by [FlutterError] from least recently caught to
   /// most recently caught, and removes them from the list of captured errors.
+  ///
+  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
+  /// errors, but there are 5 errors total, this binding will still fail the test.
+  /// Tests are expected to take and inspect all errors.
   Iterable<FlutterErrorDetails> takeAllFlutterErrorDetails() sync* {
+    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
+    // drained eagerly and allow a test pass with unexpected errors.
     while (_errors.isNotEmpty) {
       yield _errors.removeAt(0);
     }
@@ -46,7 +58,13 @@ class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, Gest
 
   /// Returns all exceptions caught by [FlutterError] from least recently caught to
   /// most recently caught, and removes them from the list of captured errors.
+  ///
+  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
+  /// errors, but there are 5 errors total, this binding will still fail the test.
+  /// Tests are expected to take and inspect all errors.
   Iterable<dynamic> takeAllFlutterExceptions() sync* {
+    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
+    // drained eagerly and allow a test pass with unexpected errors.
     while (_errors.isNotEmpty) {
       yield _errors.removeAt(0).exception;
     }
