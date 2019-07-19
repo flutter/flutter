@@ -4,18 +4,42 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:mockito/mockito.dart';
 
 import 'test_widgets.dart';
 
+class MockRemoveDependencies extends Mock {
+  void call(Element element);
+}
+
 class TestInherited extends InheritedWidget {
-  const TestInherited({ Key key, Widget child, this.shouldNotify = true })
-    : super(key: key, child: child);
+  const TestInherited({
+    Key key,
+    Widget child,
+    this.shouldNotify = true,
+    this.removeDependencies,
+  }) : super(key: key, child: child);
 
   final bool shouldNotify;
+  final void Function(Element) removeDependencies;
 
   @override
-  bool updateShouldNotify(InheritedWidget oldWidget) {
-    return shouldNotify;
+  bool updateShouldNotify(InheritedWidget oldWidget) => shouldNotify;
+
+  @override
+  TestInheritedElement createElement() => TestInheritedElement(this);
+}
+
+class TestInheritedElement extends InheritedElement {
+  TestInheritedElement(TestInherited widget): super(widget);
+
+  @override
+  TestInherited get widget => super.widget;
+
+  @override
+  void removeDependencies(Element dependent) {
+    super.removeDependencies(dependent);
+    widget.removeDependencies?.call(dependent);
   }
 }
 
@@ -84,21 +108,45 @@ void main() {
     expect(log, equals(<TestInherited>[first, third]));
   });
 
-  testWidgets('InheritedElement hasListeners', (WidgetTester tester) async {
-    final GlobalKey key = GlobalKey();
+  testWidgets('InheritedELement removeDependencies', (WidgetTester tester) async {
+    final MockRemoveDependencies removeDependencies = MockRemoveDependencies();
 
     await tester.pumpWidget(TestInherited(
-      key: key,
+      removeDependencies: removeDependencies,
+      child: Center(child: const SizedBox()),
+    ));
+
+    final Element nodeContext = tester.element(find.byType(Center));
+    final Element leafContext = tester.element(find.byType(SizedBox));
+
+    nodeContext.inheritFromWidgetOfExactType(TestInherited);
+    leafContext.inheritFromWidgetOfExactType(TestInherited);
+
+    verifyZeroInteractions(removeDependencies);
+
+    // unmount the previous TestInherited.child
+    await tester.pumpWidget(TestInherited(
+      removeDependencies: removeDependencies,
       child: Container(),
     ));
 
-    // ignore: avoid_as
-    final InheritedElement inheritedElement = key.currentContext as InheritedElement;
+    verifyInOrder(<void>[
+      removeDependencies(nodeContext),
+      removeDependencies(leafContext),
+    ]);
+    verifyNoMoreInteractions(removeDependencies);
+  });
+
+  testWidgets('InheritedElement hasListeners', (WidgetTester tester) async {
+    await tester.pumpWidget(TestInherited(
+      child: Container(),
+    ));
+
+    final InheritedElement inheritedElement = tester.element<InheritedElement>(find.byType(TestInherited));
 
     expect(inheritedElement.hasDependencies, isFalse);
 
     await tester.pumpWidget(TestInherited(
-      key: key,
       child: Builder(builder: (BuildContext context) {
         context.inheritFromWidgetOfExactType(TestInherited);
         return Container();
@@ -108,7 +156,6 @@ void main() {
     expect(inheritedElement.hasDependencies, isTrue);
 
     await tester.pumpWidget(TestInherited(
-      key: key,
       child: Container(),
     ));
 
