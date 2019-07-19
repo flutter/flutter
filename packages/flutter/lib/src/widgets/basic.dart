@@ -5418,15 +5418,21 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// ```
 ///
 /// ```dart
-/// int _enterCounter = 0;
-/// int _exitCounter = 0;
+/// int _downCounter = 0;
+/// int _upCounter = 0;
 /// double x = 0.0;
 /// double y = 0.0;
 ///
-/// void _incrementCounter(PointerEvent details) {
+/// void _incrementDown(PointerEvent details) {
 ///   _updateLocation(details);
 ///   setState(() {
-///     _enterCounter++;
+///     _downCounter++;
+///   });
+/// }
+/// void _incrementUp(PointerEvent details) {
+///   _updateLocation(details);
+///   setState(() {
+///     _upCounter++;
 ///   });
 /// }
 /// void _updateLocation(PointerEvent details) {
@@ -5444,17 +5450,17 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///       child: ConstrainedBox(
 ///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
 ///         child: Listener(
-///           onPointerDown: _incrementCounter,
+///           onPointerDown: _incrementDown,
 ///           onPointerMove: _updateLocation,
-///           onPointerUp: _incrementCounter,
+///           onPointerUp: _incrementUp,
 ///           child: Container(
 ///             color: Colors.lightBlueAccent,
 ///             child: Column(
 ///               mainAxisAlignment: MainAxisAlignment.center,
 ///               children: <Widget>[
-///                 Text('You have pressed or released this many times:'),
+///                 Text('You have pressed or released in this area this many times:'),
 ///                 Text(
-///                   '$_enterCounter Entries\n$_exitCounter Exits',
+///                   '$_downCounter presses\n$_upCounter releases',
 ///                   style: Theme.of(context).textTheme.display1,
 ///                 ),
 ///                 Text(
@@ -5670,13 +5676,17 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// double x = 0.0;
 /// double y = 0.0;
 ///
-/// void _incrementCounter(PointerEvent details) {
+/// void _incrementEnter(PointerEvent details) {
 ///   setState(() {
 ///     _enterCounter++;
 ///   });
 /// }
-///
-/// void _updateLocation(PointerHoverEvent details) {
+/// void _incrementExit(PointerEvent details) {
+///   setState(() {
+///     _exitCounter++;
+///   });
+/// }
+/// void _updateLocation(PointerEvent details) {
 ///   setState(() {
 ///     x = details.position.dx;
 ///     y = details.position.dy;
@@ -5685,27 +5695,30 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Center(
-///     child: ConstrainedBox(
-///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///       child: Mouse(
-///         onEnter: _incrementCounter,
-///         onHover: _updateLocation,
-///         onExit: _incrementCounter,
-///         child: Container(
-///           color: Colors.lightBlueAccent,
-///           child: Column(
-///             mainAxisAlignment: MainAxisAlignment.center,
-///             children: <Widget>[
-///               Text('You have entered or exited this box this many times:'),
-///               Text(
-///                 '$_enterCounter Entries\n$_exitCounter Exits',
-///                 style: Theme.of(context).textTheme.display1,
-///               ),
-///               Text(
-///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///               ),
-///             ],
+///   return Directionality(
+///     textDirection: TextDirection.ltr,
+///     child: Center(
+///       child: ConstrainedBox(
+///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///         child: MouseRegion(
+///           onEnter: _incrementEnter,
+///           onHover: _updateLocation,
+///           onExit: _incrementExit,
+///           child: Container(
+///             color: Colors.lightBlueAccent,
+///             child: Column(
+///               mainAxisAlignment: MainAxisAlignment.center,
+///               children: <Widget>[
+///                 Text('You have entered or exited this box this many times:'),
+///                 Text(
+///                   '$_enterCounter Entries\n$_exitCounter Exits',
+///                   style: Theme.of(context).textTheme.display1,
+///                 ),
+///                 Text(
+///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///                 ),
+///               ],
+///             ),
 ///           ),
 ///         ),
 ///       ),
