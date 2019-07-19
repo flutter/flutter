@@ -223,10 +223,6 @@ class PlatformAssetBundle extends CachingAssetBundle {
   }
 }
 
-AssetBundle _initRootBundle() {
-  return PlatformAssetBundle();
-}
-
 /// The [AssetBundle] from which this application was loaded.
 ///
 /// The [rootBundle] contains the resources that were packaged with the
@@ -256,4 +252,4 @@ AssetBundle _initRootBundle() {
 ///
 ///  * [DefaultAssetBundle]
 ///  * [NetworkAssetBundle]
-final AssetBundle rootBundle = _initRootBundle();
+AssetBundle rootBundle = PlatformAssetBundle();
