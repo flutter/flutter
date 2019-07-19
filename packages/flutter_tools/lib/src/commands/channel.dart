@@ -55,7 +55,7 @@ class ChannelCommand extends FlutterCommand {
     return channel == currentBranch ? '* $channel' : '  $channel';
   }
 
-  /// Sort the channels by stability.
+  // Sort the channels by stability.
   List<String> _sortOfficialChannelsByStability(List<String> officialChannels) {
     final List<String> result = List<String>(FlutterVersion.officialChannels.length);
     for (String channel in officialChannels) {
