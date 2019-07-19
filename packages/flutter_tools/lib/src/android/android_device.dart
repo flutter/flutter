@@ -219,7 +219,7 @@ class AndroidDevice extends Device {
   _AndroidDevicePortForwarder _portForwarder;
 
   List<String> adbCommandForDevice(List<String> args) {
-    return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
+    return <String>[getAdbPath(androidSdk), '-s', id, ...args];
   }
 
   String runAdbCheckedSync(
@@ -378,10 +378,14 @@ class AndroidDevice extends Device {
       printError('$installResult');
       return false;
     }
-
-    await runAdbCheckedAsync(<String>[
-      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
-    ]);
+    try {
+      await runAdbCheckedAsync(<String>[
+        'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
+      ]);
+    } on ProcessException catch (error) {
+      printError('adb shell failed to write the SHA hash: $error.');
+      return false;
+    }
     return true;
   }
 
@@ -390,7 +394,13 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final String uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
+    String uninstallOut;
+    try {
+      uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
+    } catch (error) {
+      printError('adb uninstall failed: $error');
+      return false;
+    }
     final RegExp failureExp = RegExp(r'^Failure.*$', multiLine: true);
     final String failure = failureExp.stringMatch(uninstallOut);
     if (failure != null) {
@@ -437,8 +447,8 @@ class AndroidDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
+    bool usesTerminalUi = true,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
@@ -520,40 +530,40 @@ class AndroidDevice extends Device {
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
+      if (traceStartup)
+        ...<String>['--ez', 'trace-startup', 'true'],
+      if (route != null)
+        ...<String>['--es', 'route', route],
+      if (debuggingOptions.enableSoftwareRendering)
+        ...<String>['--ez', 'enable-software-rendering', 'true'],
+      if (debuggingOptions.skiaDeterministicRendering)
+        ...<String>['--ez', 'skia-deterministic-rendering', 'true'],
+      if (debuggingOptions.traceSkia)
+        ...<String>['--ez', 'trace-skia', 'true'],
+      if (debuggingOptions.traceSystrace)
+        ...<String>['--ez', 'trace-systrace', 'true'],
+      if (debuggingOptions.dumpSkpOnShaderCompilation)
+        ...<String>['--ez', 'dump-skp-on-shader-compilation', 'true'],
+      if (debuggingOptions.debuggingEnabled)
+        ...<String>[
+          if (debuggingOptions.buildInfo.isDebug)
+            ...<String>[
+              ...<String>['--ez', 'enable-checked-mode', 'true'],
+              ...<String>['--ez', 'verify-entry-points', 'true'],
+            ],
+          if (debuggingOptions.startPaused)
+            ...<String>['--ez', 'start-paused', 'true'],
+          if (debuggingOptions.disableServiceAuthCodes)
+            ...<String>['--ez', 'disable-service-auth-codes', 'true'],
+          if (debuggingOptions.dartFlags.isNotEmpty)
+            ...<String>['--es', 'dart-flags', debuggingOptions.dartFlags],
+          if (debuggingOptions.useTestFonts)
+            ...<String>['--ez', 'use-test-fonts', 'true'],
+          if (debuggingOptions.verboseSystemLogs)
+            ...<String>['--ez', 'verbose-logging', 'true'],
+        ],
+      apk.launchActivity,
     ];
-
-    if (traceStartup)
-      cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
-    if (route != null)
-      cmd.addAll(<String>['--es', 'route', route]);
-    if (debuggingOptions.enableSoftwareRendering)
-      cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
-    if (debuggingOptions.skiaDeterministicRendering)
-      cmd.addAll(<String>['--ez', 'skia-deterministic-rendering', 'true']);
-    if (debuggingOptions.traceSkia)
-      cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
-    if (debuggingOptions.traceSystrace)
-      cmd.addAll(<String>['--ez', 'trace-systrace', 'true']);
-    if (debuggingOptions.dumpSkpOnShaderCompilation)
-      cmd.addAll(<String>['--ez', 'dump-skp-on-shader-compilation', 'true']);
-    if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildInfo.isDebug) {
-        cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
-        cmd.addAll(<String>['--ez', 'verify-entry-points', 'true']);
-      }
-      if (debuggingOptions.startPaused)
-        cmd.addAll(<String>['--ez', 'start-paused', 'true']);
-      if (debuggingOptions.disableServiceAuthCodes)
-        cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
-      if (debuggingOptions.dartFlags.isNotEmpty)
-        cmd.addAll(<String>['--es', 'dart-flags', debuggingOptions.dartFlags]);
-      if (debuggingOptions.useTestFonts)
-        cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
-      if (debuggingOptions.verboseSystemLogs) {
-        cmd.addAll(<String>['--ez', 'verbose-logging', 'true']);
-      }
-    }
-    cmd.add(apk.launchActivity);
     final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
@@ -615,13 +625,18 @@ class AndroidDevice extends Device {
 
   static final RegExp _timeRegExp = RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
-  /// Return the most recent timestamp in the Android log or null if there is
+  /// Return the most recent timestamp in the Android log or [null] if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
-    final String output = runAdbCheckedSync(<String>[
-      'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
-    ]);
-
+    String output;
+    try {
+      output = runAdbCheckedSync(<String>[
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+      ]);
+    } catch (error) {
+      printError('Failed to extract the most recent timestamp from the Android log: $error.');
+      return null;
+    }
     final Match timeMatch = _timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
   }
@@ -940,9 +955,15 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts {
     final List<ForwardedPort> ports = <ForwardedPort>[];
 
-    final String stdout = runCheckedSync(device.adbCommandForDevice(
-      <String>['forward', '--list']
-    ));
+    String stdout;
+    try {
+      stdout = runCheckedSync(device.adbCommandForDevice(
+        <String>['forward', '--list']
+      ));
+    } catch (error) {
+      printError('Failed to list forwarded ports: $error.');
+      return ports;
+    }
 
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {

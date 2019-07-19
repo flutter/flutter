@@ -55,16 +55,16 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 2,
+          id: 1,
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             TestSemantics(
-              id: 3,
+              id: 2,
               rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
               flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
-                  id: 4,
+                  id: 3,
                   label: 'Hello!',
                   textDirection: TextDirection.ltr,
                   rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),

@@ -100,8 +100,8 @@ class MaterialButton extends StatelessWidget {
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
   ///
-  /// If [textColor] is a [MaterialStateColor], [disabledTextColor] will be
-  /// ignored.
+  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// will be ignored.
   ///
   /// See also:
   ///
@@ -117,8 +117,8 @@ class MaterialButton extends StatelessWidget {
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
   ///
-  /// If [textColor] is a [MaterialStateColor], [disabledTextColor] will be
-  /// ignored.
+  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// will be ignored.
   ///
   /// See also:
   ///
@@ -257,7 +257,13 @@ class MaterialButton extends StatelessWidget {
 
   /// The theme brightness to use for this button.
   ///
-  /// Defaults to the theme's brightness, [ThemeData.brightness].
+  /// Defaults to the theme's brightness in [ThemeData.brightness]. Setting
+  /// this value determines the button text's colors based on
+  /// [ButtonThemeData.getTextColor].
+  ///
+  /// See also:
+  ///
+  ///  * [ButtonTextTheme], uses [Brightness] to determine text color.
   final Brightness colorBrightness;
 
   /// The button's label.

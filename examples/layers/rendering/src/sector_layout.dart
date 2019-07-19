@@ -520,6 +520,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   void performLayout() {
     if (child == null || (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight)) {
       size = constraints.constrain(Size.zero);
+      child?.layout(SectorConstraints(maxDeltaRadius: innerRadius), parentUsesSize: true);
       return;
     }
     assert(child is RenderSector);

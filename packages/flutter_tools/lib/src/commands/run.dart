@@ -16,14 +16,15 @@ import '../device.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../resident_runner.dart';
 import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../usage.dart';
 import '../version.dart';
+
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -352,7 +353,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
+    if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '
                            'channel.', null);
     }
@@ -411,7 +412,7 @@ class RunCommand extends RunCommandBase {
     }
     // Only support "web mode" on non-stable branches with a single web device
     // in a "hot mode".
-    final bool webMode = !FlutterVersion.instance.isStable
+    final bool webMode = FlutterVersion.instance.isMaster
       && devices.length == 1
       && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
@@ -450,8 +451,8 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        stayResident: stayResident,
         ipv6: ipv6,
+        stayResident: stayResident,
       );
     }
 
@@ -463,7 +464,14 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
-      (_) { appStartedTime = systemClock.now(); }
+      (_) {
+        appStartedTime = systemClock.now();
+        if (stayResident) {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }
+      }
     ));
 
     final int result = await runner.run(
@@ -471,8 +479,9 @@ class RunCommand extends RunCommandBase {
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null, exitCode: result);
+    }
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[

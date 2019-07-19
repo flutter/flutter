@@ -278,12 +278,15 @@ void main() {
     double progressValue;
     StateSetter setState;
     await tester.pumpWidget(
-      Center(
-        child: StatefulBuilder(
-          builder: (BuildContext context, StateSetter setter) {
-            setState = setter;
-            return CircularProgressIndicator(value: progressValue);
-          }
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return CircularProgressIndicator(value: progressValue);
+            }
+          ),
         ),
       )
     );

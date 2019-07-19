@@ -121,7 +121,7 @@ class VMPlatform extends PlatformPlugin {
   @override
   Future<void> close() async {
     try {
-      await Future.wait(_pending.values).timeout(const Duration(seconds: 10));
+      await Future.wait(_pending.values).timeout(const Duration(minutes: 1));
     } on TimeoutException {
       // TODO(jonahwilliams): resolve whether there are any specific tests that
       // get stuck or if it is a general infra issue with how we are collecting

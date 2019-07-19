@@ -103,7 +103,7 @@ void main() {
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
       final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
@@ -332,5 +332,82 @@ void main() {
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
     children = result['children'];
     expect(children.single['children'], isEmpty);
+  });
+
+  group('waitUntilFrameSync', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+
+    setUp(() {
+      extension = FlutterDriverExtension((String arg) async => '', true);
+      result = null;
+    });
+
+    testWidgets('returns immediately when frame is synced', (
+        WidgetTester tester) async {
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
   });
 }

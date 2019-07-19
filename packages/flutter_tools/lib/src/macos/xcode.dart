@@ -90,11 +90,23 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'cc', ...args]);
   }
 
   Future<RunResult> clang(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
+    return runCheckedAsync(<String>['xcrun', 'clang', ...args]);
+  }
+
+  Future<RunResult> dsymutil(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'dsymutil', ...args]);
+  }
+
+  Future<RunResult> strip(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'strip', ...args]);
+  }
+
+  Future<RunResult> otool(List<String> args) {
+    return runCheckedAsync(<String>['xcrun', 'otool', ...args]);
   }
 
   String getSimulatorPath() {

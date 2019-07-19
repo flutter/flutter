@@ -55,6 +55,7 @@ class SnackBarThemeData extends Diagnosticable {
     this.backgroundColor,
     this.actionTextColor,
     this.disabledActionTextColor,
+    this.contentTextStyle,
     this.elevation,
     this.shape,
     this.behavior,
@@ -76,6 +77,11 @@ class SnackBarThemeData extends Diagnosticable {
   /// opacity set to 0.30 if the [Theme]'s brightness is [Brightness.dark], 0.38
   /// otherwise.
   final Color disabledActionTextColor;
+
+  /// Used to configure the [DefaultTextStyle] for the [SnackBar.content] widget.
+  ///
+  /// If null, [SnackBar] defines its default.
+  final TextStyle contentTextStyle;
 
   /// Default value for [SnackBar.elevation].
   ///
@@ -102,6 +108,7 @@ class SnackBarThemeData extends Diagnosticable {
     Color backgroundColor,
     Color actionTextColor,
     Color disabledActionTextColor,
+    TextStyle contentTextStyle,
     double elevation,
     ShapeBorder shape,
     SnackBarBehavior behavior,
@@ -110,6 +117,7 @@ class SnackBarThemeData extends Diagnosticable {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       actionTextColor: actionTextColor ?? this.actionTextColor,
       disabledActionTextColor: disabledActionTextColor ?? this.disabledActionTextColor,
+      contentTextStyle: contentTextStyle ?? this.contentTextStyle,
       elevation: elevation ?? this.elevation,
       shape: shape ?? this.shape,
       behavior: behavior ?? this.behavior,
@@ -127,6 +135,7 @@ class SnackBarThemeData extends Diagnosticable {
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       actionTextColor: Color.lerp(a?.actionTextColor, b?.actionTextColor, t),
       disabledActionTextColor: Color.lerp(a?.disabledActionTextColor, b?.disabledActionTextColor, t),
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       behavior: t < 0.5 ? a.behavior : b.behavior,
@@ -139,6 +148,7 @@ class SnackBarThemeData extends Diagnosticable {
       backgroundColor,
       actionTextColor,
       disabledActionTextColor,
+      contentTextStyle,
       elevation,
       shape,
       behavior,
@@ -155,6 +165,7 @@ class SnackBarThemeData extends Diagnosticable {
     return typedOther.backgroundColor == backgroundColor
         && typedOther.actionTextColor == actionTextColor
         && typedOther.disabledActionTextColor == disabledActionTextColor
+        && typedOther.contentTextStyle == contentTextStyle
         && typedOther.elevation == elevation
         && typedOther.shape == shape
         && typedOther.behavior == behavior;
@@ -166,6 +177,7 @@ class SnackBarThemeData extends Diagnosticable {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('actionTextColor', actionTextColor, defaultValue: null));
     properties.add(ColorProperty('disabledActionTextColor', disabledActionTextColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));

@@ -32,8 +32,8 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
+import 'reporting/usage.dart';
 import 'tester/flutter_tester.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -60,45 +60,35 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<DoctorValidator> get validators {
     if (_validators == null) {
-      _validators = <DoctorValidator>[];
-      _validators.add(FlutterValidator());
+      final List<DoctorValidator> ideValidators = <DoctorValidator>[
+        ...AndroidStudioValidator.allValidators,
+        ...IntelliJValidator.installedValidators,
+        ...VsCodeValidator.installedValidators,
+      ];
 
-      if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
-
-      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
-
-      if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(iosValidator);
-
-      if (webWorkflow.appliesToHostPlatform)
-        _validators.add(const WebValidator());
-
-      // Add desktop doctors to workflow if the flag is enabled.
-      if (flutterDesktopEnabled) {
-        if (linuxWorkflow.appliesToHostPlatform) {
-          _validators.add(LinuxDoctorValidator());
-        }
-        if (windowsWorkflow.appliesToHostPlatform) {
-          _validators.add(visualStudioValidator);
-        }
-      }
-
-      final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-      ideValidators.addAll(AndroidStudioValidator.allValidators);
-      ideValidators.addAll(IntelliJValidator.installedValidators);
-      ideValidators.addAll(VsCodeValidator.installedValidators);
-      if (ideValidators.isNotEmpty)
-        _validators.addAll(ideValidators);
-      else
-        _validators.add(NoIdeValidator());
-
-      if (ProxyValidator.shouldShow)
-        _validators.add(ProxyValidator());
-
-      if (deviceManager.canListAnything)
-        _validators.add(DeviceValidator());
+      _validators = <DoctorValidator>[
+        FlutterValidator(),
+        if (androidWorkflow.appliesToHostPlatform)
+          GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]),
+        if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+          GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
+        if (webWorkflow.appliesToHostPlatform)
+          const WebValidator(),
+        // Add desktop doctors to workflow if the flag is enabled.
+        if (flutterDesktopEnabled)
+          ...<DoctorValidator>[
+            if (linuxWorkflow.appliesToHostPlatform) LinuxDoctorValidator(),
+            if (windowsWorkflow.appliesToHostPlatform) visualStudioValidator,
+          ],
+        if (ideValidators.isNotEmpty)
+          ...ideValidators
+        else
+          NoIdeValidator(),
+        if (ProxyValidator.shouldShow)
+          ProxyValidator(),
+        if (deviceManager.canListAnything)
+          DeviceValidator(),
+      ];
     }
     return _validators;
   }

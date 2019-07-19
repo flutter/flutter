@@ -220,7 +220,7 @@ Future<void> _runToolCoverage() async {
     final List<String> testGroup = tests[i];
     await runCommand(
       dart,
-      <String>[path.join('tool', 'tool_coverage.dart'), '--']..addAll(testGroup),
+      <String>[path.join('tool', 'tool_coverage.dart'), '--', ...testGroup],
       workingDirectory: toolRoot,
       environment: <String, String>{
         'FLUTTER_ROOT': flutterRoot,
@@ -240,7 +240,8 @@ Future<void> _runToolTests() async {
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.snapshot')).deleteSync();
     File(path.join(flutterRoot, 'bin', 'cache', 'flutter_tools.stamp')).deleteSync();
   }
-  if (noUseBuildRunner) {
+  // reduce overhead of build_runner in the create case.
+  if (noUseBuildRunner || Platform.environment['SUBSHARD'] == 'create') {
     await _pubRunTest(
       path.join(flutterRoot, 'packages', 'flutter_tools'),
       tableData: bigqueryApi?.tabledata,
@@ -258,22 +259,23 @@ Future<void> _runToolTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
-/// Verifies that AOT, APK, and IPA (if on macOS) builds of some
-/// examples apps finish without crashing. It does not actually
+/// Verifies that AOT, APK, and IPA (if on macOS) builds the
+/// examples apps without crashing. It does not actually
 /// launch the apps. That happens later in the devicelab. This is
 /// just a smoke-test. In particular, this will verify we can build
 /// when there are spaces in the path name for the Flutter SDK and
 /// target app.
 Future<void> _runBuildTests() async {
-  final List<String> paths = <String>[
-    path.join('examples', 'hello_world'),
-    path.join('examples', 'flutter_gallery'),
-    path.join('examples', 'flutter_view'),
-  ];
-  for (String path in paths) {
-    await _flutterBuildAot(path);
-    await _flutterBuildApk(path);
-    await _flutterBuildIpa(path);
+  final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
+  await for (FileSystemEntity fileEntity in exampleDirectories) {
+    if (fileEntity is! Directory) {
+      continue;
+    }
+    final String examplePath = fileEntity.path;
+
+    await _flutterBuildAot(examplePath);
+    await _flutterBuildApk(examplePath);
+    await _flutterBuildIpa(examplePath);
   }
   await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'));
 
@@ -389,7 +391,8 @@ Future<void> _runTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
       .listSync(followLinks: false, recursive: false)
       .whereType<Directory>()
-      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .where((Directory dir) => dir.path.endsWith('widgets') == false)
+      .map((Directory dir) => path.join('test', path.basename(dir.path)) + path.separator)
       .toList();
 
     print('Running tests for: ${tests.join(';')}');
@@ -552,6 +555,7 @@ Future<void> _buildRunnerTest(
       args,
       workingDirectory:workingDirectory,
       environment:pubEnvironment,
+      removeLine: (String line) => line.contains('[INFO]')
     );
   }
 }
@@ -588,6 +592,9 @@ Future<void> _pubRunTest(
     case 'tool':
       args.addAll(<String>['--exclude-tags', 'integration']);
       break;
+    case 'create':
+      args.addAll(<String>[path.join('test', 'general.shard', 'commands', 'create_test.dart')]);
+      break;
   }
 
   if (useFlutterTestFormatter) {
@@ -603,7 +610,7 @@ Future<void> _pubRunTest(
     await runCommand(
       pub,
       args,
-      workingDirectory:workingDirectory,
+      workingDirectory: workingDirectory,
     );
   }
 }
@@ -754,11 +761,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '-v', '--platform=chrome'];
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
-
-  args.addAll(tests);
+  final List<String> args = <String>[
+    'test',
+    '-v',
+    '--platform=chrome',
+    ...?flutterTestArgs,
+    ...tests,
+  ];
 
   // TODO(jonahwilliams): fix relative path issues to make this unecessary.
   final Directory oldCurrent = Directory.current;
@@ -791,9 +800,11 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
-  final List<String> args = <String>['test']..addAll(options);
-  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.addAll(flutterTestArgs);
+  final List<String> args = <String>[
+    'test',
+    ...options,
+    ...?flutterTestArgs,
+  ];
 
   final bool shouldProcessOutput = useFlutterTestFormatter && !expectFailure && !options.contains('--coverage');
   if (shouldProcessOutput) {

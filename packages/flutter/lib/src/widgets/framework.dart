@@ -83,8 +83,8 @@ class ObjectKey extends LocalKey {
 /// A key that is unique across the entire app.
 ///
 /// Global keys uniquely identify elements. Global keys provide access to other
-/// objects that are associated with elements, such as the a [BuildContext] and,
-/// for [StatefulWidget]s, a [State].
+/// objects that are associated with those elements, such as [BuildContext].
+/// For [StatefulWidget]s, global keys also provide access to [State].
 ///
 /// Widgets that have global keys reparent their subtrees when they are moved
 /// from one location in the tree to another location in the tree. In order to
@@ -2344,6 +2344,7 @@ class BuildOwner {
             e,
             stack,
             informationCollector: () sync* {
+              yield DiagnosticsDebugCreator(DebugCreator(_dirtyElements[index]));
               yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
             },
           );
@@ -2665,6 +2666,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// This function will only be called during development. In release builds,
   /// the `ext.flutter.reassemble` hook is not available, and so this code will
   /// never execute.
+  ///
+  /// Implementers should not rely on any ordering for hot reload source update,
+  /// reassemble, and build methods after a hot reload has been initiated. It is
+  /// possible that a [Timer] (e.g. an [Animation]) or a debugging session
+  /// attached to the isolate could trigger a build with reloaded code _before_
+  /// reassemble is called. Code that expects preconditions to be set by
+  /// reassemble after a hot reload must be resilient to being called out of
+  /// order, e.g. by fizzling instead of throwing. That said, once reassemble is
+  /// called, build will be called after it at least once.
   /// {@endtemplate}
   ///
   /// See also:
@@ -2761,7 +2771,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     // separators?
     return StringProperty(name, debugGetCreatorChain(10));
   }
-
 
   // This is used to verify that Element objects move through life in an
   // orderly fashion.
@@ -3924,7 +3933,16 @@ abstract class ComponentElement extends Element {
       built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $this'), e, stack));
+      built = ErrorWidget.builder(
+        _debugReportException(
+          ErrorDescription('building $this'),
+          e,
+          stack,
+          informationCollector: () sync* {
+            yield DiagnosticsDebugCreator(DebugCreator(this));
+          },
+        )
+      );
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -3935,7 +3953,16 @@ abstract class ComponentElement extends Element {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $this'), e, stack));
+      built = ErrorWidget.builder(
+        _debugReportException(
+          ErrorDescription('building $this'),
+          e,
+          stack,
+          informationCollector: () sync* {
+            yield DiagnosticsDebugCreator(DebugCreator(this));
+          },
+        )
+      );
       _child = updateChild(null, built, slot);
     }
 
@@ -4769,7 +4796,7 @@ abstract class RenderObjectElement extends Element {
 
   void _debugUpdateRenderObjectOwner() {
     assert(() {
-      _renderObject.debugCreator = _DebugCreator(this);
+      _renderObject.debugCreator = DebugCreator(this);
       return true;
     }());
   }
@@ -5250,9 +5277,17 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
   }
 }
 
-class _DebugCreator {
-  _DebugCreator(this.element);
-  final RenderObjectElement element;
+/// A wrapper class for the [Element] that is the creator of a [RenderObject].
+///
+/// Attaching a [DebugCreator] attach the [RenderObject] will lead to better error
+/// message.
+class DebugCreator {
+  /// Create a [DebugCreator] instance with input [Element].
+  DebugCreator(this.element);
+
+  /// The creator of the [RenderObject].
+  final Element element;
+
   @override
   String toString() => element.debugGetCreatorChain(12);
 }

@@ -6,10 +6,11 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
@@ -163,7 +164,8 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
+    Cache.releaseLockEarly();
+    await pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return null;
   }
 }
@@ -193,7 +195,8 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>[_commandName]..addAll(argResults.rest), context: PubContext.pubForward, retry: false);
+    Cache.releaseLockEarly();
+    await pub(<String>[_commandName, ...argResults.rest], context: PubContext.pubForward, retry: false);
     return null;
   }
 
@@ -220,6 +223,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     await pubInteractively(argResults.rest);
     return null;
   }

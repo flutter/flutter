@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -23,10 +24,6 @@ import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
-const String _kIdeviceinstallerInstructions =
-    'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
-    'brew install ideviceinstaller.';
-
 class IOSDeploy {
   const IOSDeploy();
 
@@ -37,9 +34,15 @@ class IOSDeploy {
     @required String bundlePath,
     @required List<String> launchArguments,
   }) async {
-    final List<String> launchCommand = <String>[
+    final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    // TODO(fujino): remove fallback once g3 updated
+    const List<String> fallbackIosDeployPath = <String>[
       '/usr/bin/env',
       'ios-deploy',
+    ];
+    final List<String> commandList = iosDeployPath != null ? <String>[iosDeployPath] : fallbackIosDeployPath;
+    final List<String> launchCommand = <String>[
+      ...commandList,
       '--id',
       deviceId,
       '--bundle',
@@ -61,6 +64,7 @@ class IOSDeploy {
     // it.
     final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
+    iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
 
     return await runCommandAndStreamOutput(
       launchCommand,
@@ -120,8 +124,20 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    _installerPath = _checkForCommand('ideviceinstaller');
-    _iproxyPath = _checkForCommand('iproxy');
+    if (!platform.isMacOS) {
+      printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
+      _installerPath = null;
+      _iproxyPath = null;
+      return;
+    }
+    _installerPath = artifacts.getArtifactPath(
+      Artifact.ideviceinstaller,
+      platform: TargetPlatform.ios
+    ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
+    _iproxyPath = artifacts.getArtifactPath(
+      Artifact.iproxy,
+      platform: TargetPlatform.ios
+    ) ?? 'iproxy'; // TODO(fujino): remove fallback once g3 updated
   }
 
   String _installerPath;
@@ -173,34 +189,20 @@ class IOSDevice extends Device {
     return devices;
   }
 
-  static String _checkForCommand(
-    String command, [
-    String macInstructions = _kIdeviceinstallerInstructions,
-  ]) {
-    try {
-      command = runCheckedSync(<String>['which', command]).trim();
-    } catch (e) {
-      if (platform.isMacOS) {
-        printError('$command not found. $macInstructions');
-      } else {
-        printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
-      }
-      return null;
-    }
-    return command;
-  }
-
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
+    RunResult apps;
     try {
-      final RunResult apps = await runCheckedAsync(<String>[_installerPath, '--list-apps']);
-      if (RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
-        return true;
-      }
-    } catch (e) {
+      apps = await runCheckedAsync(
+        <String>[_installerPath, '--list-apps'],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
+    } on ProcessException {
       return false;
     }
-    return false;
+    return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -216,9 +218,14 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
@@ -226,9 +233,14 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(<String>[_installerPath, '-U', app.id]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-U', app.id],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
@@ -589,12 +601,17 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       printTrace('attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await runCommand(<String>[
-        device._iproxyPath,
-        hostPort.toString(),
-        devicePort.toString(),
-        device.id,
-      ]);
+      process = await runCommand(
+        <String>[
+          device._iproxyPath,
+          hostPort.toString(),
+          devicePort.toString(),
+          device.id,
+        ],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
       connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {

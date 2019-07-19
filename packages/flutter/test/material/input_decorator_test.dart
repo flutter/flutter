@@ -2280,6 +2280,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 0.0);
@@ -2422,6 +2423,27 @@ void main() {
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
   }, skip: isBrowser);
+
+  test('InputDecorationTheme copyWith, ==, hashCode basics', () {
+    expect(const InputDecorationTheme(), const InputDecorationTheme().copyWith());
+    expect(const InputDecorationTheme().hashCode, const InputDecorationTheme().copyWith().hashCode);
+  });
+
+  test('InputDecorationTheme copyWith correctly copies and replaces values', () {
+    const InputDecorationTheme original = InputDecorationTheme(
+      focusColor: Colors.orange,
+      fillColor: Colors.green,
+    );
+    final InputDecorationTheme copy = original.copyWith(
+      focusColor: Colors.yellow,
+      fillColor: Colors.blue,
+    );
+
+    expect(original.focusColor, Colors.orange);
+    expect(original.fillColor, Colors.green);
+    expect(copy.focusColor, Colors.yellow);
+    expect(copy.fillColor, Colors.blue);
+  });
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(

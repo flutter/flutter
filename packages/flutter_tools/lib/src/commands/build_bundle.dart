@@ -9,8 +9,8 @@ import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
-import '../usage.dart';
 import '../version.dart';
 import 'build.dart';
 
@@ -103,7 +103,7 @@ class BuildBundleCommand extends BuildSubCommand {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
       case TargetPlatform.linux_x64:
-        if (FlutterVersion.instance.isStable) {
+        if (!FlutterVersion.instance.isMaster) {
           throwToolExit('$targetPlatform is not supported on stable Flutter.');
         }
         break;

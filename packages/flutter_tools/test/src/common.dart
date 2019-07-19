@@ -131,7 +131,7 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
+  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
@@ -141,3 +141,14 @@ const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
 /// Test case timeout for tests involving creating a Flutter project with
 /// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
 const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);
+
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}
