@@ -184,7 +184,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
     _dragScrollbarStartY = null;
-    ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
+    final ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
     scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
 
@@ -206,7 +206,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _dragScrollbarStartY = null;
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
+    final ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
     scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
 
