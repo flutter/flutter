@@ -40,31 +40,6 @@ FLUTTER_EXPORT
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
 
 /**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationDidBecomeActive:(UIApplication*)application;
-
-/**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillResignActive:(UIApplication*)application;
-
-/**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationDidEnterBackground:(UIApplication*)application;
-
-/**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillEnterForeground:(UIApplication*)application;
-
-/**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillTerminate:(UIApplication*)application;
-
-/**
  * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
  */
 - (void)application:(UIApplication*)application
