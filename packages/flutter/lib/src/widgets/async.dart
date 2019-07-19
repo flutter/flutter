@@ -369,12 +369,15 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
 ///
-/// The initial snapshot data can be controlled by specifying [initialData].
-/// This should be used to ensure that the first frame has the expected value,
-/// as the builder will always be called before the stream listener has a chance
-/// to be processed. In cases where callers wish to have no initial data, the
-/// [new StreamBuilder.withoutInitialData] constructor may be used. Doing so
-/// may cause the first frame to have a snapshot that contains no data.
+/// The initial snapshot data can be controlled by specifying [initialData] in
+/// the [new StreamBuilder.withInitialData] constructor. This can be used to
+/// ensure that the first frame has an expected value, as the builder will
+/// always be called before the stream listener has a chance to be processed.
+/// In cases where callers wish to have no initial data, the [new StreamBuilder]
+/// constructor may be used. Doing so will cause the first frame to have a
+/// snapshot that contains no data:
+///
+/// * `AsyncSnapshot<int>.withoutData(ConnectionState.waiting)`
 ///
 /// ## Void StreamBuilders
 ///
@@ -394,7 +397,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// set by a selector elsewhere in the UI.
 ///
 /// ```dart
-/// StreamBuilder<int>(
+/// StreamBuilder<int>.withInitialData(
 ///   stream: _lot?.bids, // a Stream<int> or null
 ///   initialData: 100, // initial seed value
 ///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
@@ -424,13 +427,39 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// snapshot of interaction with the specified `stream` and whose build
   /// strategy is given by [builder].
   ///
-  /// The [initialData] argument is used to create the initial snapshot. For
-  /// cases where there is no initial snapshot or the initial snapshot is not
-  /// yet available, callers may construct a [StreamBuilder] without an initial
-  /// snapshot using [new StreamBuilder.withoutInitialData].
+  // ignore: deprecated_member_use_from_same_package
+  /// The [initialData] argument is deprecated and will be removed in a future
+  /// release. To specify initial data to a [StreamBuilder], use the
+  /// [new StreamBuilder.withInitialData] constructor instead. While this
+  /// argument still exists, a null value will be interpreted as "no initial
+  /// data".
   ///
   /// The [builder] must not be null.
   const StreamBuilder({
+    Key key,
+    @Deprecated(
+      'If you wish to provide initialData to StreamBuilder, you should use '
+      'the [new StreamBuilder.withInitialData] constructor instead.',
+    )
+    T initialData,
+    Stream<T> stream,
+    @required this.builder,
+  }) : assert(builder != null),
+       hasInitialData = initialData != null,  // ignore: deprecated_member_use_from_same_package
+       _initialData = initialData,  // ignore: deprecated_member_use_from_same_package
+       super(key: key, stream: stream);
+
+  /// Creates a new [StreamBuilder] that builds itself based on the latest
+  /// snapshot of interaction with the specified `stream` and whose build
+  /// strategy is given by [builder].
+  ///
+  /// The [initialData] argument (possibly null) is used to create the initial
+  /// snapshot. For cases where there is no initial snapshot or the initial
+  /// snapshot is not yet available, callers may construct a [StreamBuilder]
+  /// without an initial snapshot using [new StreamBuilder].
+  ///
+  /// The [builder] must not be null.
+  const StreamBuilder.withInitialData({
     Key key,
     @required T initialData,
     Stream<T> stream,
@@ -438,22 +467,6 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   }) : assert(builder != null),
        hasInitialData = true,
        _initialData = initialData,
-       super(key: key, stream: stream);
-
-  /// Creates a new [StreamBuilder] that builds itself based on the latest
-  /// snapshot of interaction with the specified `stream` and whose build
-  /// strategy is given by [builder].
-  ///
-  /// The initial snapshot will contain no data.
-  ///
-  /// The [builder] must not be null.
-  const StreamBuilder.withoutInitialData({
-    Key key,
-    Stream<T> stream,
-    @required this.builder,
-  }) : assert(builder != null),
-       hasInitialData = false,
-       _initialData = null,
        super(key: key, stream: stream);
 
   /// The build strategy currently used by this builder.
@@ -479,9 +492,10 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// streams are asynchronous, no events from the stream can be obtained
   /// before the initial build.
   ///
-  /// Some builders intentionally have no data when first built. For those
-  /// cases, callers can use the [new StreamBuilder.withoutInitialData]
-  /// constructor. When a builder was constructed in this way, attempting to
+  /// This is set by callers using the [new StreamBuilder.withInitialData]
+  /// constructor. [StreamBuilder]s that intentionally have no data when first
+  /// built are constructed using the [new StreamBuilder] constructor. When a
+  /// [StreamBuilder] was constructed without initial data, attempting to
   /// access the [initialData] property will throw a [StateError].
   T get initialData {
     if (!hasInitialData) {
