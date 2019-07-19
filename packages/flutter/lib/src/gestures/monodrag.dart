@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
@@ -513,6 +514,54 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   String get debugDescription => 'horizontal drag';
+}
+
+// A horizontal drag gesture detector that only responds to events on the
+// scrollbar's thumb and ignores everything else.
+// TODO(justinmc): I wanted to put this in cuperinto/scrollbar.dart along with
+// the long press detector, but it seems I can't override _isFlingGesture
+// outside of this file because it's private. Any better way to organize this?
+class ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  ThumbHorizontalDragGestureRecognizer({
+    PointerDeviceKind kind,
+    Object debugOwner,
+    GlobalKey customPaintKey,
+  }) :  _customPaintKey = customPaintKey,
+        super(
+          kind: kind,
+          debugOwner: debugOwner,
+        );
+
+  final GlobalKey _customPaintKey;
+
+  // TODO(justinmc): Could I use some OOP magic to avoid duplicating this code
+  // with _ThumbLongPressGestureRecognizer.isPointerAllowed?
+  @override
+  bool isPointerAllowed(PointerEvent event) {
+    // foregroundPainter also hit tests its children by default, but the
+    // scrollbar should only respond to a gesture directly on its thumb, so
+    // manually check for a hit on the thumb here.
+    if (_customPaintKey.currentContext == null) {
+      return false;
+    }
+    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
+    final ScrollbarPainter painter = customPaint.foregroundPainter;
+    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
+    final Offset localOffset = renderBox.globalToLocal(event.position);
+    if (!painter.hitTestInteractive(localOffset)) {
+      return false;
+    }
+    return super.isPointerAllowed(event);
+  }
+
+  // Flings are actually in the vertical direction. Even though the event starts
+  // horizontal, the scrolling is tracked vertically.
+  @override
+  bool _isFlingGesture(VelocityEstimate estimate) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? kTouchSlop;
+    return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+  }
 }
 
 /// Recognizes movement both horizontally and vertically.

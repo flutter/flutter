@@ -206,11 +206,6 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _dragScrollbarStartY = null;
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    // TODO(justinmc): I get zero velocity about half of the time despite making
-    // a gesture that definitely feels like it should have velocity.
-    // The reason is that in monodrag.dart, it estimates whether the gesture is
-    // a fling or not, and thinks that many of my gestures are not flings. I
-    // don't know why it's so picky.
     ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
     scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
@@ -262,14 +257,14 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
             ..onLongPressEnd = _handleLongPressEnd;
         },
       );
-    gestures[_ThumbHorizontalDragGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<_ThumbHorizontalDragGestureRecognizer>(
-        () => _ThumbHorizontalDragGestureRecognizer(
+    gestures[ThumbHorizontalDragGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<ThumbHorizontalDragGestureRecognizer>(
+        () => ThumbHorizontalDragGestureRecognizer(
           debugOwner: this,
           kind: PointerDeviceKind.touch,
           customPaintKey: _customPaintKey,
         ),
-        (_ThumbHorizontalDragGestureRecognizer instance) {
+        (ThumbHorizontalDragGestureRecognizer instance) {
           instance
             ..onStart = _handleHorizontalDragStart
             ..onUpdate = _handleHorizontalDragUpdate
@@ -329,41 +324,6 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
   bool isPointerAllowed(PointerDownEvent event) {
     // foregroundPainter also hit tests its children by default, but the
     // scrollbar should only respond to a longpress directly on its thumb, so
-    // manually check for a hit on the thumb here.
-    if (_customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
-    final ScrollbarPainter painter = customPaint.foregroundPainter;
-    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
-    final Offset localOffset = renderBox.globalToLocal(event.position);
-    if (!painter.hitTestInteractive(localOffset)) {
-      return false;
-    }
-    return super.isPointerAllowed(event);
-  }
-}
-
-// A horizontal drag gesture detector that only responds to events on the
-// scrollbar's thumb and ignores everything else.
-class _ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
-  _ThumbHorizontalDragGestureRecognizer({
-    PointerDeviceKind kind,
-    Object debugOwner,
-    GlobalKey customPaintKey,
-  }) :  _customPaintKey = customPaintKey,
-        super(
-          kind: kind,
-          debugOwner: debugOwner,
-        );
-
-  final GlobalKey _customPaintKey;
-
-  // TODO(justinmc): Could I use some OOP magic to avoid duplicating this code?
-  @override
-  bool isPointerAllowed(PointerEvent event) {
-    // foregroundPainter also hit tests its children by default, but the
-    // scrollbar should only respond to a gesture directly on its thumb, so
     // manually check for a hit on the thumb here.
     if (_customPaintKey.currentContext == null) {
       return false;
