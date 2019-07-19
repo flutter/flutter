@@ -39,15 +39,14 @@ public class TextInputPlugin {
     private boolean mRestartInputPending;
     @Nullable
     private InputConnection lastInputConnection;
-
+    @NonNull
     private PlatformViewsController platformViewsController;
 
     // When true following calls to createInputConnection will return the cached lastInputConnection if the input
     // target is a platform view. See the comments on lockPlatformViewInputConnection for more details.
     private boolean isInputConnectionLocked;
 
-    // TODO(mattcarroll): change @Nullable to @NonNull once new embedding integrates PlatformViewsController (#34286).
-    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, @Nullable PlatformViewsController platformViewsController) {
+    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, @NonNull PlatformViewsController platformViewsController) {
         mView = view;
         mImm = (InputMethodManager) view.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -84,11 +83,9 @@ public class TextInputPlugin {
                 clearTextInputClient();
             }
         });
+
         this.platformViewsController = platformViewsController;
-        // TODO(mattcarroll): remove if-statement once new embedding integrates PlatformViewsController (#34286).
-        if (platformViewsController != null) {
-            platformViewsController.attachTextInputPlugin(this);
-        }
+        this.platformViewsController.attachTextInputPlugin(this);
     }
 
     @NonNull
@@ -127,10 +124,7 @@ public class TextInputPlugin {
      * The TextInputPlugin instance should not be used after calling this.
      */
     public void destroy() {
-        // TODO(mattcarroll): Remove if-statement once new embedding integrates PlatformViewsController (#34286).
-        if (platformViewsController != null) {
-            platformViewsController.detachTextInputPlugin();
-        }
+        platformViewsController.detachTextInputPlugin();
     }
 
     private static int inputTypeFromTextInputType(
