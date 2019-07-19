@@ -701,13 +701,13 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
 
   @override
   _SelectToggleButtonRenderObject createRenderObject(BuildContext context) => _SelectToggleButtonRenderObject(
-    leadingBorderSide: leadingBorderSide,
-    horizontalBorderSide: horizontalBorderSide,
-    trailingBorderSide: trailingBorderSide,
-    borderRadius: borderRadius,
-    isFirstButton: isFirstButton,
-    isLastButton: isLastButton,
-    textDirection: Directionality.of(context),
+    leadingBorderSide,
+    horizontalBorderSide,
+    trailingBorderSide,
+    borderRadius,
+    isFirstButton,
+    isLastButton,
+    Directionality.of(context),
   );
 
   @override
@@ -724,28 +724,57 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
 }
 
 class _SelectToggleButtonRenderObject extends RenderShiftedBox {
-  _SelectToggleButtonRenderObject({
-    this.leadingBorderSide,
-    this.horizontalBorderSide,
-    this.trailingBorderSide,
-    this.borderRadius,
+  _SelectToggleButtonRenderObject(
+    this._leadingBorderSide,
+    this._horizontalBorderSide,
+    this._trailingBorderSide,
+    this._borderRadius,
     this.isFirstButton,
     this.isLastButton,
     this.textDirection,
-    RenderBox child,
-  }) : super(child);
+    [RenderBox child]
+  ) : super(child);
 
   // The width and color of the button's leading side border.
-  BorderSide leadingBorderSide;
+  BorderSide get leadingBorderSide => _leadingBorderSide;
+  BorderSide _leadingBorderSide;
+  set leadingBorderSide(BorderSide value) {
+    print('new val $value');
+    if (_leadingBorderSide == value)
+      return;
+    _leadingBorderSide = value;
+    markNeedsLayout();
+  }
 
   // The width and color of the button's top and bottom side borders.
-  BorderSide horizontalBorderSide;
+  BorderSide get horizontalBorderSide => _horizontalBorderSide;
+  BorderSide _horizontalBorderSide;
+  set horizontalBorderSide(BorderSide value) {
+    if (_horizontalBorderSide == value)
+      return;
+    _horizontalBorderSide = value;
+    markNeedsLayout();
+  }
 
   // The width and color of the button's trailing side border.
-  BorderSide trailingBorderSide;
+  BorderSide get trailingBorderSide => _trailingBorderSide;
+  BorderSide _trailingBorderSide;
+  set trailingBorderSide(BorderSide value) {
+    if (_trailingBorderSide == value)
+      return;
+    _trailingBorderSide = value;
+    markNeedsLayout();
+  }
 
   // The border radii of each corner of the button.
-  BorderRadius borderRadius;
+  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius _borderRadius;
+  set borderRadius(BorderRadius value) {
+    if (_borderRadius == value)
+      return;
+    _borderRadius = value;
+    markNeedsLayout();
+  }
 
   // Whether or not this toggle button is the first button in the list.
   bool isFirstButton;
