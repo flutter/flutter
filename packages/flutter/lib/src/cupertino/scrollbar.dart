@@ -171,19 +171,21 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
-  void _handleLongPressUp() {
-    _startFadeoutTimer();
-    _thicknessAnimationController.reverse();
-    _dragScrollbarStartY = null;
+  void _handleLongPress() {
+    _fadeoutTimer?.cancel();
+    _thicknessAnimationController.forward();
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     _dragScrollbar(details.localOffsetFromOrigin.dy);
   }
 
-  void _handleLongPress() {
-    _fadeoutTimer?.cancel();
-    _thicknessAnimationController.forward();
+  void _handleLongPressEnd(LongPressEndDetails details) {
+    _startFadeoutTimer();
+    _thicknessAnimationController.reverse();
+    _dragScrollbarStartY = null;
+    // TODO(justinmc): There is no velocity given by LongPressEndDetails! I
+    // need it for a ballistic scroll.
   }
 
   // Horizontal drag event callbacks handle the gesture where the user swipes in
@@ -204,6 +206,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _dragScrollbarStartY = null;
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
+    // TODO(justinmc): I get zero velocity about half of the time despite making
+    // a gesture that definitely feels like it should have velocity.
+    ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
+    scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -250,7 +256,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
           instance
             ..onLongPress = _handleLongPress
             ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
-            ..onLongPressUp = _handleLongPressUp;
+            ..onLongPressEnd = _handleLongPressEnd;
         },
       );
     gestures[_ThumbHorizontalDragGestureRecognizer] =
