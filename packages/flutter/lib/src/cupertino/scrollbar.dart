@@ -184,8 +184,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
     _dragScrollbarStartY = null;
-    // TODO(justinmc): There is no velocity given by LongPressEndDetails! I
-    // need it for a ballistic scroll.
+    ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
+    scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
 
   // Horizontal drag event callbacks handle the gesture where the user swipes in
@@ -208,6 +208,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _thicknessAnimationController.reverse();
     // TODO(justinmc): I get zero velocity about half of the time despite making
     // a gesture that definitely feels like it should have velocity.
+    // The reason is that in monodrag.dart, it estimates whether the gesture is
+    // a fling or not, and thinks that many of my gestures are not flings. I
+    // don't know why it's so picky.
     ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
     scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
   }
