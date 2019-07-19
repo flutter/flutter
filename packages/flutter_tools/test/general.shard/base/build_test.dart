@@ -228,6 +228,7 @@ void main() {
       final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -253,7 +254,7 @@ void main() {
       ]);
       verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
       verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
-      verifyNever(xcode.dsymutil(any));
+      verify(xcode.dsymutil(any)).called(1);
 
       final File assemblyFile = fs.file(assembly);
       final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
