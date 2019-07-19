@@ -113,7 +113,7 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
-      'waitUntilFrameSync': _waitUntilFrameSync,
+      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -134,7 +134,7 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
-      'waitUntilFrameSync': (Map<String, String> params) => WaitUntilFrameSync.deserialize(params),
+      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -371,7 +371,7 @@ class FlutterDriverExtension {
     return null;
   }
 
-  /// Returns a future that waits until frame is synced.
+  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
   ///
   /// Specifically, it checks:
   /// * Whether the count of transient callbacks is zero.
@@ -388,7 +388,7 @@ class FlutterDriverExtension {
   /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
   /// details on how to do this. Note, disabling frame sync will require the
   /// test author to use some other method to avoid flakiness.
-  Future<Result> _waitUntilFrameSync(Command command) async {
+  Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0
           && !SchedulerBinding.instance.hasScheduledFrame;
