@@ -144,7 +144,7 @@ class Usage {
     if (suppressAnalytics)
       return;
 
-    parameters ??= const <String, String>{};
+    parameters ??= <String, String>{};
 
     _analytics.sendScreenView(command, parameters: parameters);
   }
@@ -234,12 +234,19 @@ class LogToFileAnalytics extends AnalyticsMock {
     super(true);
 
   final File logFile;
+  final Map<String, String> _sessionValues = <String, String>{};
 
   @override
   Future<void> sendScreenView(String viewName, {Map<String, String> parameters}) {
     parameters ??= <String, String>{};
     parameters['viewName'] = viewName;
+    parameters.addAll(_sessionValues);
     logFile.writeAsStringSync('screenView $parameters\n');
     return Future<void>.value(null);
+  }
+
+  @override
+  void setSessionValue(String param, dynamic value) {
+    _sessionValues[param] = value.toString();
   }
 }
