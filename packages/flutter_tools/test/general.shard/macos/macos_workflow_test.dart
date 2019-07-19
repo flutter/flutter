@@ -46,7 +46,7 @@ void main() {
   }));
 
   test('Does not apply when feature is disabled', () => testbed.run(() {
-    expect(macOSWorkflow.appliesToHostPlatform, true);
+    expect(macOSWorkflow.appliesToHostPlatform, false);
     expect(macOSWorkflow.canListDevices, false);
     expect(macOSWorkflow.canLaunchDevices, false);
     expect(macOSWorkflow.canListEmulators, false);

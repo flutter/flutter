@@ -98,7 +98,7 @@ class BuildBundleCommand extends BuildSubCommand {
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
-    // Check for target platforms that are only allowed on unstable Flutter.
+    // Check for target platforms that are only allowed via feature flags.
     switch (platform) {
       case TargetPlatform.darwin_x64:
         if (!featureFlags.isMacOSEnabled) {

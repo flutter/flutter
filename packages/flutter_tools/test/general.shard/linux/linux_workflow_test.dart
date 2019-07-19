@@ -46,7 +46,7 @@ void main() {
   }));
 
   test('Does not apply when feature is disabled', () => testbed.run(() {
-    expect(linuxWorkflow.appliesToHostPlatform, true);
+    expect(linuxWorkflow.appliesToHostPlatform, false);
     expect(linuxWorkflow.canLaunchDevices, false);
     expect(linuxWorkflow.canListDevices, false);
     expect(linuxWorkflow.canListEmulators, false);

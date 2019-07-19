@@ -47,7 +47,7 @@ void main() {
   }));
 
   test('Windows defaults on non-windows platform', () => testbed.run(() {
-    expect(windowsWorkflow.appliesToHostPlatform, true);
+    expect(windowsWorkflow.appliesToHostPlatform, false);
     expect(windowsWorkflow.canListDevices, false);
     expect(windowsWorkflow.canLaunchDevices, false);
     expect(windowsWorkflow.canListEmulators, false);

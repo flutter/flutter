@@ -53,7 +53,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = getBuildInfo();
     if (!featureFlags.isWindowsEnabled) {
-      throwToolExit('"build linux" is not currently supported.');
+      throwToolExit('"build windows" is not currently supported.');
     }
     if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
