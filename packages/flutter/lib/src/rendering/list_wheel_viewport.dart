@@ -42,7 +42,7 @@ abstract class ListWheelChildManager {
   /// nothing.
   ///
   /// It is possible to create children with negative indices.
-  void createChild(int index, {@required RenderBox after});
+  void createChild(int index, { @required RenderBox after });
 
   /// Removes the child element corresponding with the given RenderBox.
   void removeChild(RenderBox child);
@@ -102,7 +102,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// 3. The **transformed cylindrical space viewport painting coordinates**.
 ///    Children from system 2 get their positions transformed into a cylindrical
-///    projection matrix instead of its cartesian offset with respect to the
+///    projection matrix instead of its Cartesian offset with respect to the
 ///    scroll offset.
 ///
 ///    Children in this coordinate system are painted.
@@ -137,10 +137,11 @@ class RenderListWheelViewport
     @required ViewportOffset offset,
     double diameterRatio = defaultDiameterRatio,
     double perspective = defaultPerspective,
-    double offAxisFraction = 0.0,
+    double offAxisFraction = 0,
     bool useMagnifier = false,
-    double magnification = 1.0,
+    double magnification = 1,
     @required double itemExtent,
+    double squeeze = 1,
     bool clipToSize = true,
     bool renderChildrenOutsideViewport = false,
     List<RenderBox> children,
@@ -156,6 +157,8 @@ class RenderListWheelViewport
        assert(magnification != null),
        assert(magnification > 0),
        assert(itemExtent != null),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        assert(itemExtent > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
@@ -170,6 +173,7 @@ class RenderListWheelViewport
        _useMagnifier = useMagnifier,
        _magnification = magnification,
        _itemExtent = itemExtent,
+       _squeeze = squeeze,
        _clipToSize = clipToSize,
        _renderChildrenOutsideViewport = renderChildrenOutsideViewport {
     addAll(children);
@@ -381,6 +385,39 @@ class RenderListWheelViewport
     markNeedsLayout();
   }
 
+
+  /// {@template flutter.rendering.wheelList.squeeze}
+  /// The angular compactness of the children on the wheel.
+  ///
+  /// This denotes a ratio of the number of children on the wheel vs the number
+  /// of children that would fit on a flat list of equivalent size, assuming
+  /// [diameterRatio] of 1.
+  ///
+  /// For instance, if this RenderListWheelViewport has a height of 100px and
+  /// [itemExtent] is 20px, 5 items would fit on an equivalent flat list.
+  /// With a [squeeze] of 1, 5 items would also be shown in the
+  /// RenderListWheelViewport. With a [squeeze] of 2, 10 items would be shown
+  /// in the RenderListWheelViewport.
+  ///
+  /// Changing this value will change the number of children built and shown
+  /// inside the wheel.
+  ///
+  /// Must not be null and must be positive.
+  /// {@endtemplate}
+  ///
+  /// Defaults to 1.
+  double get squeeze => _squeeze;
+  double _squeeze;
+  set squeeze(double value) {
+    assert(value != null);
+    assert(value > 0);
+    if (value == _squeeze)
+      return;
+    _squeeze = value;
+    markNeedsLayout();
+    markNeedsSemanticsUpdate();
+  }
+
   /// {@template flutter.rendering.wheelList.clipToSize}
   /// Whether to clip painted children to the inside of this viewport.
   ///
@@ -572,7 +609,7 @@ class RenderListWheelViewport
   /// Returns the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  void _createChild(int index, {RenderBox after}) {
+  void _createChild(int index, { RenderBox after }) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.createChild(index, after: after);
@@ -614,7 +651,7 @@ class RenderListWheelViewport
 
     // The height, in pixel, that children will be visible and might be laid out
     // and painted.
-    double visibleHeight = size.height;
+    double visibleHeight = size.height * _squeeze;
     // If renderChildrenOutsideViewport is true, we spawn extra children by
     // doubling the visibility range, those that are in the backside of the
     // cylinder won't be painted anyway.
@@ -763,13 +800,13 @@ class RenderListWheelViewport
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
-            _getUntransformedPaintingCoordinateY(layoutOffset.dy)
+            _getUntransformedPaintingCoordinateY(layoutOffset.dy),
         );
 
     // Get child's center as a fraction of the viewport's height.
     final double fractionalY =
         (untransformedPaintingCoordinates.dy + _itemExtent / 2.0) / size.height;
-    final double angle = -(fractionalY - 0.5) * 2.0 * _maxVisibleRadian;
+    final double angle = -(fractionalY - 0.5) * 2.0 * _maxVisibleRadian / squeeze;
     // Don't paint the backside of the cylinder when
     // renderChildrenOutsideViewport is true. Otherwise, only children within
     // suitable angles (via _first/lastVisibleLayoutOffset) reach the paint
@@ -804,12 +841,12 @@ class RenderListWheelViewport
   /// Paint child with the magnifier active - the child will be rendered
   /// differently if it intersects with the magnifier.
   void _paintChildWithMagnifier(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
-      Offset untransformedPaintingCoordinates,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
+    Offset untransformedPaintingCoordinates,
   ) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
@@ -870,7 +907,7 @@ class RenderListWheelViewport
               child,
               cylindricalTransform,
               offsetToCenter);
-          }
+          },
       );
     } else {
       _paintChildCylindrically(
@@ -884,11 +921,11 @@ class RenderListWheelViewport
 
   // / Paint the child cylindrically at given offset.
   void _paintChildCylindrically(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
   ) {
     context.pushTransform(
       // Text with TransformLayers and no cullRects currently have an issue rendering
@@ -947,12 +984,10 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    return false;
-  }
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.

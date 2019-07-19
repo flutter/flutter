@@ -42,7 +42,7 @@ void main() {
         .transform<String>(const LineSplitter())
         .listen((String line) {
           print('run:stderr: $line');
-          stdout.add(line);
+          stderr.add(line);
         });
       run.exitCode.then<void>((int exitCode) { runExitCode = exitCode; });
       await Future.any<dynamic>(<Future<dynamic>>[ ready.future, run.exitCode ]);
@@ -54,7 +54,7 @@ void main() {
         throw 'flutter run --release had output on standard error.';
       if (stdout.first.startsWith('Building flutter tool...'))
         stdout.removeAt(0);
-      if (stdout.first.startsWith('Running "flutter packages get" in ui...'))
+      if (stdout.first.startsWith('Running "flutter pub get" in ui...'))
         stdout.removeAt(0);
       if (stdout.first.startsWith('Initializing gradle...'))
         stdout.removeAt(0);
@@ -63,7 +63,7 @@ void main() {
       if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...')))
         throw 'flutter run --release had unexpected first line: ${stdout.first}';
       stdout.removeAt(0);
-      if (!stdout.first.startsWith('Gradle task \'assembleRelease\'...'))
+      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...'))
         throw 'flutter run --release had unexpected second line: ${stdout.first}';
       stdout.removeAt(0);
       if (!(stdout.first.startsWith('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.endsWith('MB).')))

@@ -41,7 +41,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      body: const Text('Sheet')
+      body: const Text('Sheet'),
     );
   }
 }
@@ -140,9 +140,9 @@ void main() {
           color: const Color(0xff00ffff),
           child: const Hero(
             tag: kHeroTag,
-            child: Text('Home')
-          )
-        )
+            child: Text('Home'),
+          ),
+        ),
       ),
       '/settings': (_) => Scaffold(
         key: containerKey2,
@@ -151,9 +151,9 @@ void main() {
           color: const Color(0xffff00ff),
           child: const Hero(
             tag: kHeroTag,
-            child: Text('Settings')
-          )
-        )
+            child: Text('Settings'),
+          ),
+        ),
       ),
     };
 

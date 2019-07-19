@@ -8,9 +8,13 @@ import '../demo/all.dart';
 import 'icons.dart';
 
 class GalleryDemoCategory {
-  const GalleryDemoCategory._({ this.name, this.icon });
-  @required final String name;
-  @required final IconData icon;
+  const GalleryDemoCategory._({
+    @required this.name,
+    @required this.icon,
+  });
+
+  final String name;
+  final IconData icon;
 
   @override
   bool operator ==(dynamic other) {
@@ -93,7 +97,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.shrine,
       category: _kDemos,
       routeName: ShrineDemo.routeName,
-      buildRoute: (BuildContext context) => ShrineDemo(),
+      buildRoute: (BuildContext context) => const ShrineDemo(),
+    ),
+    GalleryDemo(
+      title: 'Fortnightly',
+      subtitle: 'Newspaper typography app',
+      icon: GalleryIcons.custom_typography,
+      category: _kDemos,
+      routeName: FortnightlyDemo.routeName,
+      buildRoute: (BuildContext context) => FortnightlyDemo(),
     ),
     GalleryDemo(
       title: 'Contact profile',
@@ -110,6 +122,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
+    ),
+    GalleryDemo(
+      title: '2D Transformations',
+      subtitle: 'Pan, Zoom, Rotate',
+      icon: GalleryIcons.grid_on,
+      category: _kDemos,
+      routeName: TransformationsDemo.routeName,
+      buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
 
     // Style
@@ -159,7 +179,7 @@ List<GalleryDemo> _buildGalleryDemos() {
     ),
     GalleryDemo(
       title: 'Bottom sheet: Modal',
-      subtitle: 'A dismissable bottom sheet',
+      subtitle: 'A dismissible bottom sheet',
       icon: GalleryIcons.bottom_sheets,
       category: _kMaterialComponents,
       routeName: ModalBottomSheetDemo.routeName,
@@ -243,9 +263,9 @@ List<GalleryDemo> _buildGalleryDemos() {
       subtitle: 'A list with one sub-list level',
       icon: GalleryIcons.expand_all,
       category: _kMaterialComponents,
-      routeName: TwoLevelListDemo.routeName,
+      routeName: ExpansionTileListDemo.routeName,
       documentationUrl: 'https://docs.flutter.io/flutter/material/ExpansionTile-class.html',
-      buildRoute: (BuildContext context) => TwoLevelListDemo(),
+      buildRoute: (BuildContext context) => ExpansionTileListDemo(),
     ),
     GalleryDemo(
       title: 'Expansion panels',

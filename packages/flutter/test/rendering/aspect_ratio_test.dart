@@ -53,7 +53,7 @@ void main() {
   test('RenderAspectRatio: Intrinsic sizing 2.0', () {
     final RenderAspectRatio box = RenderAspectRatio(
       aspectRatio: 2.0,
-      child: RenderSizedBox(const Size(90.0, 70.0))
+      child: RenderSizedBox(const Size(90.0, 70.0)),
     );
 
     expect(box.getMinIntrinsicWidth(200.0), 400.0);
@@ -77,7 +77,7 @@ void main() {
   test('RenderAspectRatio: Intrinsic sizing 0.5', () {
     final RenderAspectRatio box = RenderAspectRatio(
       aspectRatio: 0.5,
-      child: RenderSizedBox(const Size(90.0, 70.0))
+      child: RenderSizedBox(const Size(90.0, 70.0)),
     );
 
     expect(box.getMinIntrinsicWidth(200.0), 100.0);
@@ -109,7 +109,7 @@ void main() {
       maxHeight: double.infinity,
       child: RenderAspectRatio(
         aspectRatio: 0.5,
-        child: RenderSizedBox(const Size(90.0, 70.0))
+        child: RenderSizedBox(const Size(90.0, 70.0)),
       ),
     );
     expect(hadError, false);

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -89,7 +87,7 @@ void main() {
               key: middleBox,
               alignment: Alignment.center,
               widthFactor: 1.0,
-              child: const Text('Title')
+              child: const Text('Title'),
             ),
             trailing: const CupertinoButton(child: Text('Puma'), onPressed: null),
             padding: const EdgeInsetsDirectional.only(
@@ -148,15 +146,62 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
-  testWidgets('Verify styles of each slot', (WidgetTester tester) async {
+  testWidgets('Nav bar uses theme defaults', (WidgetTester tester) async {
     count = 0x000000;
     await tester.pumpWidget(
-      const CupertinoApp(
+      CupertinoApp(
         home: CupertinoNavigationBar(
-          leading: _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
-          middle: _ExpectStyles(color: Color(0xFF000000), letterSpacing: -0.08, index: 0x000100),
-          trailing: _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
-          actionsForegroundColor: Color(0xFF001122),
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: CupertinoColors.black, index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeBlue, index: 0x010000),
+          ),
+        ),
+      ),
+    );
+    expect(count, 0x010101);
+  });
+
+  testWidgets('Nav bar respects themes', (WidgetTester tester) async {
+    count = 0x000000;
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: CupertinoNavigationBar(
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: CupertinoColors.white, index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: CupertinoColors.activeOrange, index: 0x010000),
+          ),
+        ),
+      ),
+    );
+    expect(count, 0x010101);
+  });
+
+  testWidgets('Theme active color can be overriden', (WidgetTester tester) async {
+    count = 0x000000;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoNavigationBar(
+          leading: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: Color(0xFF001122), index: 0x000001),
+          ),
+          middle: const _ExpectStyles(color: Color(0xFF000000), index: 0x000100),
+          trailing: CupertinoButton(
+            onPressed: () { },
+            child: const _ExpectStyles(color: Color(0xFF001122), index: 0x010000),
+          ),
+          actionsForegroundColor: const Color(0xFF001122),
         ),
       ),
     );
@@ -400,7 +445,7 @@ void main() {
     // Large title initially visible.
     expect(
       largeTitleOpacity.opacity.value,
-      1.0
+      1.0,
     );
     // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
     expect(
@@ -419,7 +464,7 @@ void main() {
     // Large title no longer visible.
     expect(
       largeTitleOpacity.opacity.value,
-      0.0
+      0.0,
     );
 
     // The persistent toolbar doesn't move or change size.
@@ -598,9 +643,7 @@ void main() {
     expect(decoration.border, isNull);
   });
 
-  testWidgets(
-      'Border is displayed by default in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is displayed by default in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -628,9 +671,7 @@ void main() {
     expect(bottom, isNotNull);
   });
 
-  testWidgets(
-      'Border is not displayed when null in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border is not displayed when null in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -702,9 +743,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets(
-      'Border can be overridden in sliver nav bar',
-      (WidgetTester tester) async {
+  testWidgets('Border can be overridden in sliver nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoPageScaffold(
@@ -760,12 +799,15 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+        matchesGoldenFile(
+          'nav_bar_test.standard_title.png',
+          version: 1,
+        ),
       );
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -794,12 +836,15 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.large_title.1.png'),
+        matchesGoldenFile(
+          'nav_bar_test.large_title.png',
+          version: 1,
+        ),
       );
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !Platform.isLinux,
+    skip: !isLinux,
    );
 
 
@@ -842,21 +887,158 @@ void main() {
     );
     expect(SystemChrome.latestStyle, SystemUiOverlayStyle.dark);
   });
+
+  testWidgets('CupertinoNavigationBarBackButton shows an error when manually added outside a route', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoNavigationBarBackButton()
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
+  });
+
+  testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBarBackButton(),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
+  });
+
+  testWidgets('CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere', (WidgetTester tester) async {
+    bool backPressed = false;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoNavigationBarBackButton(
+          onPressed: () => backPressed = true,
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
+
+    await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+
+    expect(backPressed, true);
+  });
+
+  testWidgets(
+    'Manually inserted CupertinoNavigationBarBackButton still automatically '
+        'show previous page title when possible',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Placeholder(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'An iPod',
+          builder: (BuildContext context) {
+            return const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(),
+              child: Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'A Phone',
+          builder: (BuildContext context) {
+            return const CupertinoNavigationBarBackButton();
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
+    }
+  );
+
+  testWidgets(
+    'CupertinoNavigationBarBackButton onPressed overrides default pop behavior',
+    (WidgetTester tester) async {
+      bool backPressed = false;
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Placeholder(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'An iPod',
+          builder: (BuildContext context) {
+            return const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(),
+              child: Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'A Phone',
+          builder: (BuildContext context) {
+            return CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                leading: CupertinoNavigationBarBackButton(
+                  onPressed: () => backPressed = true,
+                ),
+              ),
+              child: const Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // The second page is still on top and didn't pop.
+      expect(find.text('A Phone'), findsOneWidget);
+      // Custom onPressed called.
+      expect(backPressed, true);
+    }
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({ this.color, this.letterSpacing, this.index });
+  const _ExpectStyles({ this.color, this.index });
 
   final Color color;
-  final double letterSpacing;
   final int index;
 
   @override
   Widget build(BuildContext context) {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, color);
+    expect(style.fontFamily, '.SF Pro Text');
     expect(style.fontSize, 17.0);
-    expect(style.letterSpacing, letterSpacing ?? -0.24);
+    expect(style.letterSpacing, -0.41);
     count += index;
     return Container();
   }

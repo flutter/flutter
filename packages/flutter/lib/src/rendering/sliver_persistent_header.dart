@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -169,10 +168,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   double childMainAxisPosition(covariant RenderObject child) => super.childMainAxisPosition(child);
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     assert(geometry.hitTestExtent > 0.0);
     if (child != null)
-      return hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+      return hitTestBoxChild(BoxHitTestResult.wrap(result), child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
     return false;
   }
 
@@ -356,7 +355,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
-  }) : _snapConfiguration = snapConfiguration, super(child: child);
+  }) : _snapConfiguration = snapConfiguration,
+       super(child: child);
 
   AnimationController _controller;
   Animation<double> _animation;
@@ -393,6 +393,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       return;
     if (value == null) {
       _controller?.dispose();
+      _controller = null;
     } else {
       if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
         _controller?.resync(value.vsync);
@@ -475,8 +476,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
+    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset;
     final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
-    excludeFromSemanticsScrolling = overlapsContent;
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
@@ -515,13 +516,16 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   @override
   double updateGeometry() {
     final double minExtent = this.minExtent;
+    final double minAllowedExtent = constraints.remainingPaintExtent > minExtent ? minExtent : constraints.remainingPaintExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double clampedPaintExtent = paintExtent.clamp(minAllowedExtent, constraints.remainingPaintExtent);
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
-      paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
-      layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
+      paintOrigin: math.min(constraints.overlap, 0.0),
+      paintExtent: clampedPaintExtent,
+      layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent,
       maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.

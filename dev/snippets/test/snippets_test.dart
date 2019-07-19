@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:io' hide Platform;
 import 'package:path/path.dart' as path;
 
@@ -18,7 +19,7 @@ void main() {
     File template;
 
     setUp(() {
-      tmpDir = Directory.systemTemp.createTempSync('snippets_test');
+      tmpDir = Directory.systemTemp.createTempSync('flutter_snippets_test.');
       configuration = Configuration(flutterRoot: Directory(path.join(
           tmpDir.absolute.path, 'flutter')));
       configuration.createOutputDirectory();
@@ -73,8 +74,14 @@ void main() {
 ```
 ''');
 
-      final String html =
-          generator.generate(inputFile, SnippetType.application, template: 'template', id: 'id');
+      final String html = generator.generate(
+        inputFile,
+        SnippetType.application,
+        template: 'template',
+        metadata: <String, Object>{
+          'id': 'id',
+        },
+      );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('print(&#39;The actual \$name.&#39;);'));
@@ -102,7 +109,7 @@ void main() {
 ```
 ''');
 
-      final String html = generator.generate(inputFile, SnippetType.sample);
+      final String html = generator.generate(inputFile, SnippetType.sample, metadata: <String, Object>{'id': 'id'});
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
@@ -110,6 +117,40 @@ void main() {
           '{@end-inject-html}A description of the snippet.\n\n'
           'On several lines.{@inject-html}</div>\n'));
       expect(html, contains('main() {'));
+    });
+
+    test('generates snippet application metadata', () async {
+      final File inputFile = File(path.join(tmpDir.absolute.path, 'snippet_in.txt'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+A description of the snippet.
+
+On several lines.
+
+```code
+void main() {
+  print('The actual \$name.');
+}
+```
+''');
+
+      final File outputFile = File(path.join(tmpDir.absolute.path, 'snippet_out.dart'));
+      final File expectedMetadataFile = File(path.join(tmpDir.absolute.path, 'snippet_out.json'));
+
+      generator.generate(
+        inputFile,
+        SnippetType.application,
+        template: 'template',
+        output: outputFile,
+        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
+      );
+      expect(expectedMetadataFile.existsSync(), isTrue);
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
+      expect(json['id'], equals('id'));
+      expect(json['file'], equals('snippet_out.dart'));
+      expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));
+      // Ensure any passed metadata is included in the output JSON too.
+      expect(json['sourcePath'], equals('some/path.dart'));
     });
   });
 }

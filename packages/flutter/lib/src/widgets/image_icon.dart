@@ -17,13 +17,14 @@ import 'image.dart';
 ///
 ///  * [IconButton], for interactive icons.
 ///  * [IconTheme], which provides ambient configuration for icons.
-///  * [Icon], for icons based on glyphs from fonts instead of images
+///  * [Icon], for icons based on glyphs from fonts instead of images.
 ///  * [Icons], a predefined font based set of icons from the material design library.
 class ImageIcon extends StatelessWidget {
   /// Creates an image icon.
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
-  const ImageIcon(this.image, {
+  const ImageIcon(
+    this.image, {
     Key key,
     this.size,
     this.color,
@@ -73,7 +74,7 @@ class ImageIcon extends StatelessWidget {
     if (image == null)
       return Semantics(
         label: semanticLabel,
-        child: SizedBox(width: iconSize, height: iconSize)
+        child: SizedBox(width: iconSize, height: iconSize),
       );
 
     final double iconOpacity = iconTheme.opacity;
@@ -101,6 +102,6 @@ class ImageIcon extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageProvider>('image', image, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

@@ -42,11 +42,11 @@ void main() {
                   id: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'foo',
-                )
+                ),
               ],
             ),
           ],
-        )
+        ),
       ],
     ), ignoreRect: true, ignoreTransform: true));
 
@@ -82,11 +82,11 @@ void main() {
                   id: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'bar',
-                )
+                ),
               ],
             ),
           ],
-        )
+        ),
       ],
     ), ignoreRect: true, ignoreTransform: true));
 

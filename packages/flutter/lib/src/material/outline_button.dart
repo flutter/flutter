@@ -8,36 +8,40 @@ import 'package:flutter/widgets.dart';
 import 'button_theme.dart';
 import 'colors.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 
 // The total time to make the button's fill color opaque and change
-// its elevation.
+// its elevation. Only applies when highlightElevation > 0.0.
 const Duration _kPressDuration = Duration(milliseconds: 150);
 
 // Half of _kPressDuration: just the time to change the button's
-// elevation.
+// elevation. Only applies when highlightElevation > 0.0.
 const Duration _kElevationDuration = Duration(milliseconds: 75);
 
-/// A cross between [RaisedButton] and [FlatButton]: a bordered button whose
-/// elevation increases and whose background becomes opaque when the button
-/// is pressed.
+/// Similar to a [FlatButton] with a thin grey rounded rectangle border.
 ///
-/// An outline button's elevation is initially 0.0 and its background [color]
-/// is transparent. When the button is pressed its background becomes opaque
-/// and then its elevation increases to [highlightElevation].
-///
-/// The outline button has a border whose shape is defined by [shape]
-/// and whose appearance is defined by [borderSide], [disabledBorderColor],
-/// and [highlightedBorderColor].
+/// The outline button's border shape is defined by [shape]
+/// and its appearance is defined by [borderSide], [disabledBorderColor],
+/// and [highlightedBorderColor]. By default the border is a one pixel
+/// wide grey rounded rectangle that does not change when the button is
+/// pressed or disabled. By default the button's background is transparent.
 ///
 /// If the [onPressed] callback is null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor].
 ///
+/// The button's [highlightElevation], which defines the size of the
+/// drop shadow when the button is pressed, is 0.0 (no shadow) by default.
+/// If [highlightElevation] is given a value greater than 0.0 then the button
+/// becomes a cross between [RaisedButton] and [FlatButton]: a bordered
+/// button whose elevation increases and whose background becomes opaque
+/// when the button is pressed.
+///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Outline buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Outline buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
 /// See also:
@@ -48,12 +52,12 @@ const Duration _kElevationDuration = Duration(milliseconds: 75);
 ///  * [FloatingActionButton], the round button in material applications.
 ///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
-///  * <https://material.google.com/components/buttons.html>
+///  * <https://material.io/design/components/buttons.html>
 class OutlineButton extends MaterialButton {
-  /// Create a filled button.
+  /// Create an outline button.
   ///
-  /// The [highlightElevation], [borderWidth], and [clipBehavior]
-  /// arguments must not be null.
+  /// The [highlightElevation] argument must be null or a positive value
+  /// and the [clipBehavior] argument must not be null.
   const OutlineButton({
     Key key,
     @required VoidCallback onPressed,
@@ -61,6 +65,8 @@ class OutlineButton extends MaterialButton {
     Color textColor,
     Color disabledTextColor,
     Color color,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     double highlightElevation,
@@ -69,7 +75,8 @@ class OutlineButton extends MaterialButton {
     this.highlightedBorderColor,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior,
+    FocusNode focusNode,
     Widget child,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
        super(
@@ -79,12 +86,15 @@ class OutlineButton extends MaterialButton {
          textColor: textColor,
          disabledTextColor: disabledTextColor,
          color: color,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          highlightElevation: highlightElevation,
          padding: padding,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          child: child,
        );
 
@@ -94,8 +104,8 @@ class OutlineButton extends MaterialButton {
   /// The icon and label are arranged in a row and padded by 12 logical pixels
   /// at the start, and 16 at the end, with an 8 pixel gap in between.
   ///
-  /// The [highlightElevation], [icon], [label], and [clipBehavior] must not be
-  /// null.
+  /// The [highlightElevation] argument must be null or a positive value. The
+  /// [icon], [label], and [clipBehavior] arguments must not be null.
   factory OutlineButton.icon({
     Key key,
     @required VoidCallback onPressed,
@@ -103,6 +113,8 @@ class OutlineButton extends MaterialButton {
     Color textColor,
     Color disabledTextColor,
     Color color,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     double highlightElevation,
@@ -112,21 +124,25 @@ class OutlineButton extends MaterialButton {
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     Clip clipBehavior,
+    FocusNode focusNode,
     @required Widget icon,
     @required Widget label,
   }) = _OutlineButtonWithIcon;
 
   /// The outline border's color when the button is [enabled] and pressed.
   ///
-  /// If null this value defaults to the theme's primary color,
-  /// [ThemeData.primaryColor].
+  /// By default the border's color does not change when the button
+  /// is pressed.
+  ///
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color highlightedBorderColor;
 
   /// The outline border's color when the button is not [enabled].
   ///
-  /// If null this value defaults to a very light shade of grey for light
-  /// themes (see [ThemeData.brightness]), and a very dark shade of grey for
-  /// dark themes.
+  /// By default the outline border's color does not change when the
+  /// button is disabled.
+  ///
+  /// This field is ignored if [borderSide.color] is a [MaterialStateProperty<Color>].
   final Color disabledBorderColor;
 
   /// Defines the color of the border when the button is enabled but not
@@ -136,7 +152,11 @@ class OutlineButton extends MaterialButton {
   /// an outline is not drawn.
   ///
   /// If null the default border's style is [BorderStyle.solid], its
-  /// [BorderSide.width] is 2.0, and its color is a light shade of grey.
+  /// [BorderSide.width] is 1.0, and its color is a light shade of grey.
+  ///
+  /// If [borderSide.color] is a [MaterialStateProperty<Color>], [MaterialStateProperty.resolve]
+  /// is used in all states and both [highlightedBorderColor] and [disabledBorderColor]
+  /// are ignored.
   final BorderSide borderSide;
 
   @override
@@ -149,6 +169,8 @@ class OutlineButton extends MaterialButton {
       textColor: buttonTheme.getTextColor(this),
       disabledTextColor: buttonTheme.getDisabledTextColor(this),
       color: color,
+      focusColor: buttonTheme.getFocusColor(this),
+      hoverColor: buttonTheme.getHoverColor(this),
       highlightColor: buttonTheme.getHighlightColor(this),
       splashColor: buttonTheme.getSplashColor(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
@@ -158,6 +180,7 @@ class OutlineButton extends MaterialButton {
       padding: buttonTheme.getPadding(this),
       shape: buttonTheme.getShape(this),
       clipBehavior: clipBehavior,
+      focusNode: focusNode,
       child: child,
     );
   }
@@ -165,26 +188,16 @@ class OutlineButton extends MaterialButton {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
+    properties.add(ColorProperty('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(ColorProperty('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
   }
 }
 
-// The type of of OutlineButtons created with [OutlineButton.icon].
+// The type of of OutlineButtons created with OutlineButton.icon.
 //
-// This class only exists to give RaisedButtons created with [RaisedButton.icon]
-// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
+// This class only exists to give OutlineButtons created with OutlineButton.icon
+// a distinct class for the sake of ButtonTheme. It can not be instantiated.
 class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMixin {
   _OutlineButtonWithIcon({
     Key key,
@@ -193,6 +206,8 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     Color textColor,
     Color disabledTextColor,
     Color color,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     double highlightElevation,
@@ -202,6 +217,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     Clip clipBehavior,
+    FocusNode focusNode,
     @required Widget icon,
     @required Widget label,
   }) : assert(highlightElevation == null || highlightElevation >= 0.0),
@@ -214,6 +230,8 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          textColor: textColor,
          disabledTextColor: disabledTextColor,
          color: color,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          highlightElevation: highlightElevation,
@@ -223,6 +241,7 @@ class _OutlineButtonWithIcon extends OutlineButton with MaterialButtonWithIconMi
          padding: padding,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          child: Row(
            mainAxisSize: MainAxisSize.min,
            children: <Widget>[
@@ -243,6 +262,8 @@ class _OutlineButton extends StatefulWidget {
     this.textColor,
     this.disabledTextColor,
     this.color,
+    this.focusColor,
+    this.hoverColor,
     this.highlightColor,
     this.splashColor,
     @required this.highlightElevation,
@@ -252,6 +273,7 @@ class _OutlineButton extends StatefulWidget {
     this.padding,
     this.shape,
     this.clipBehavior,
+    this.focusNode,
     this.child,
   }) : assert(highlightElevation != null && highlightElevation >= 0.0),
        assert(highlightedBorderColor != null),
@@ -264,6 +286,8 @@ class _OutlineButton extends StatefulWidget {
   final Color disabledTextColor;
   final Color color;
   final Color splashColor;
+  final Color focusColor;
+  final Color hoverColor;
   final Color highlightColor;
   final double highlightElevation;
   final BorderSide borderSide;
@@ -272,6 +296,7 @@ class _OutlineButton extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final FocusNode focusNode;
   final Widget child;
 
   bool get enabled => onPressed != null;
@@ -291,16 +316,17 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   void initState() {
     super.initState();
 
-    // The Material widget animates its shape (which includes the outline
-    // border) and elevation over _kElevationDuration. When pressed, the
-    // button makes its fill color opaque white first, and then sets
-    // its highlightElevation. We can't change the elevation while the
-    // button's fill is translucent, because the shadow fills the interior
-    // of the button.
+    // When highlightElevation > 0.0, the Material widget animates its
+    // shape (which includes the outline border) and elevation over
+    // _kElevationDuration. When pressed, the button makes its fill
+    // color opaque white first, and then sets its
+    // highlightElevation. We can't change the elevation while the
+    // button's fill is translucent, because the shadow fills the
+    // interior of the button.
 
     _controller = AnimationController(
       duration: _kPressDuration,
-      vsync: this
+      vsync: this,
     );
     _fillAnimation = CurvedAnimation(
       parent: _controller,
@@ -316,16 +342,36 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
   }
 
   @override
+  void didUpdateWidget(_OutlineButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_pressed && !widget.enabled) {
+      _pressed = false;
+      _controller.reverse();
+    }
+  }
+
+  void _handleHighlightChanged(bool value) {
+    if (_pressed == value)
+      return;
+    setState(() {
+      _pressed = value;
+      if (value)
+        _controller.forward();
+      else
+        _controller.reverse();
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
   Color _getFillColor() {
-    final bool themeIsDark = widget.brightness == Brightness.dark;
-    final Color color = widget.color ?? (themeIsDark
-      ? const Color(0x00000000)
-      : const Color(0x00FFFFFF));
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+      return Colors.transparent;
+    final Color color = widget.color ?? Theme.of(context).canvasColor;
     final Tween<Color> colorTween = ColorTween(
       begin: color.withAlpha(0x00),
       end: color.withAlpha(0xFF),
@@ -333,29 +379,36 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
     return colorTween.evaluate(_fillAnimation);
   }
 
+  Color get _outlineColor {
+    // If outline color is a `MaterialStateProperty`, it will be used in all
+    // states, otherwise we determine the outline color in the current state.
+    if (widget.borderSide?.color is MaterialStateProperty<Color>)
+      return widget.borderSide.color;
+    if (!widget.enabled)
+      return widget.disabledBorderColor;
+    if (_pressed)
+      return widget.highlightedBorderColor;
+    return widget.borderSide?.color;
+  }
+
   BorderSide _getOutline() {
-    final bool isDark = widget.brightness == Brightness.dark;
     if (widget.borderSide?.style == BorderStyle.none)
       return widget.borderSide;
 
-    final Color color = widget.enabled
-      ? (_pressed
-         ? widget.highlightedBorderColor
-         : (widget.borderSide?.color ??
-            (isDark ? Colors.grey[600] : Colors.grey[200])))
-      : (widget.disabledBorderColor ??
-         (isDark ? Colors.grey[800] : Colors.grey[100]));
+    final Color themeColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.12);
 
     return BorderSide(
-      color: color,
-      width: widget.borderSide?.width ?? 2.0,
+      color: _outlineColor ?? themeColor,
+      width: widget.borderSide?.width ?? 1.0,
     );
   }
 
   double _getHighlightElevation() {
+    if (widget.highlightElevation == null || widget.highlightElevation == 0.0)
+      return 0.0;
     return Tween<double>(
       begin: 0.0,
-      end: widget.highlightElevation ?? 2.0,
+      end: widget.highlightElevation,
     ).evaluate(_elevationAnimation);
   }
 
@@ -369,27 +422,24 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
           disabledTextColor: widget.disabledTextColor,
           color: _getFillColor(),
           splashColor: widget.splashColor,
+          focusColor: widget.focusColor,
+          hoverColor: widget.hoverColor,
           highlightColor: widget.highlightColor,
           disabledColor: Colors.transparent,
           onPressed: widget.onPressed,
           elevation: 0.0,
           disabledElevation: 0.0,
+          focusElevation: 0.0,
+          hoverElevation: 0.0,
           highlightElevation: _getHighlightElevation(),
-          onHighlightChanged: (bool value) {
-            setState(() {
-              _pressed = value;
-              if (value)
-                _controller.forward();
-              else
-                _controller.reverse();
-            });
-          },
+          onHighlightChanged: _handleHighlightChanged,
           padding: widget.padding,
           shape: _OutlineBorder(
             shape: widget.shape,
             side: _getOutline(),
           ),
           clipBehavior: widget.clipBehavior,
+          focusNode: widget.focusNode,
           animationDuration: _kElevationDuration,
           child: widget.child,
         );
@@ -400,7 +450,7 @@ class _OutlineButtonState extends State<_OutlineButton> with SingleTickerProvide
 
 // Render the button's outline border using using the OutlineButton's
 // border parameters and the button or buttonTheme's shape.
-class _OutlineBorder extends ShapeBorder {
+class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeBorder>{
   const _OutlineBorder({
     @required this.shape,
     @required this.side,
@@ -479,4 +529,12 @@ class _OutlineBorder extends ShapeBorder {
 
   @override
   int get hashCode => hashValues(side, shape);
+
+  @override
+  ShapeBorder resolve(Set<MaterialState> states) {
+    return _OutlineBorder(
+      shape: shape,
+      side: side.copyWith(color: MaterialStateProperty.resolveAs<Color>(side.color, states),
+    ));
+  }
 }

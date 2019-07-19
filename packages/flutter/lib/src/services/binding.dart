@@ -3,14 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
-import 'platform_messages.dart';
+import 'binary_messenger.dart';
 
-/// Listens for platform messages and directs them to [BinaryMessages].
+/// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
 /// the licenses found in the `LICENSE` file stored at the root of the asset
@@ -20,10 +19,15 @@ mixin ServicesBinding on BindingBase {
   @override
   void initInstances() {
     super.initInstances();
-    ui.window
-      ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
+    _instance = this;
+    window
+      ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
   }
+
+  /// The current [ServicesBinding], if one has been created.
+  static ServicesBinding get instance => _instance;
+  static ServicesBinding _instance;
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///
@@ -74,7 +78,7 @@ mixin ServicesBinding on BindingBase {
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
-          license.substring(split + 2)
+          license.substring(split + 2),
         ));
       } else {
         result.add(LicenseEntryWithLineBreaks(const <String>[], license));

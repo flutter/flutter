@@ -26,7 +26,7 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, stdout;
+import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -37,6 +37,7 @@ import 'process.dart';
 export 'dart:io'
     show
         BytesBuilder,
+        CompressionOptions,
         // Directory         NO! Use `file_system.dart`
         exitCode,
         // File              NO! Use `file_system.dart`
@@ -46,6 +47,8 @@ export 'dart:io'
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
+        HttpClientResponseCompressionState,
+        HttpException,
         HttpHeaders,
         HttpRequest,
         HttpServer,
@@ -69,6 +72,7 @@ export 'dart:io'
         Stdin,
         StdinException,
         // stdout,           NO! Use `io.dart`
+        Stdout,
         Socket,
         SocketException,
         systemEncoding,
@@ -95,7 +99,7 @@ ExitFunction get exit => _exitFunction;
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ExitFunction exitFunction]) {
+void setExitFunctionForTests([ ExitFunction exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
@@ -153,19 +157,16 @@ class Stdio {
   const Stdio();
 
   Stream<List<int>> get stdin => io.stdin;
-  io.IOSink get stdout => io.stdout;
+  io.Stdout get stdout => io.stdout;
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
   int get terminalColumns => hasTerminal ? io.stdout.terminalColumns : null;
   int get terminalLines => hasTerminal ? io.stdout.terminalLines : null;
-  bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
+  bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
 }
 
-io.IOSink get stderr => context[Stdio].stderr;
-
-Stream<List<int>> get stdin => context[Stdio].stdin;
-
-io.IOSink get stdout => context[Stdio].stdout;
-
-Stdio get stdio => context[Stdio];
+Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+io.Stdout get stdout => stdio.stdout;
+Stream<List<int>> get stdin => stdio.stdin;
+io.IOSink get stderr => stdio.stderr;

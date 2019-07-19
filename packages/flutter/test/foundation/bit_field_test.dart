@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
+
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-enum _TestEnum {
-  a, b, c, d, e, f, g, h,
-}
+enum _TestEnum { a, b, c, d, e, f, g, h, }
 
 void main() {
   test('BitField control test', () {

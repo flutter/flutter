@@ -23,7 +23,7 @@
   "continueButtonLabel": "LANJUTKAN",
   "copyButtonLabel": "SALIN",
   "cutButtonLabel": "POTONG",
-  "okButtonLabel": "Oke",
+  "okButtonLabel": "OKE",
   "pasteButtonLabel": "TEMPEL",
   "selectAllButtonLabel": "PILIH SEMUA",
   "viewLicensesButtonLabel": "LIHAT LISENSI",
@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Sisa 1 karakter",
   "remainingTextFieldCharacterCountOther": "Sisa $remainingCount karakter",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Memuat ulang"
 }

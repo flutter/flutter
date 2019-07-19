@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show VoidCallback;
-
 import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
@@ -108,8 +106,10 @@ mixin AnimationLocalListenersMixin {
   ///
   /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) {
-    _listeners.remove(listener);
-    didUnregisterListener();
+    final bool removed = _listeners.remove(listener);
+    if (removed) {
+      didUnregisterListener();
+    }
   }
 
   /// Calls all the listeners.
@@ -127,11 +127,14 @@ mixin AnimationLocalListenersMixin {
           exception: exception,
           stack: stack,
           library: 'animation library',
-          context: 'while notifying listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying listeners was:');
-            information.write('  $this');
-          }
+          context: ErrorDescription('while notifying listeners for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalListenersMixin>(
+              'The $runtimeType notifying listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
         ));
       }
     }
@@ -172,8 +175,10 @@ mixin AnimationLocalStatusListenersMixin {
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener) {
-    _statusListeners.remove(listener);
-    didUnregisterListener();
+    final bool removed = _statusListeners.remove(listener);
+    if (removed) {
+      didUnregisterListener();
+    }
   }
 
   /// Calls all the status listeners.
@@ -191,11 +196,14 @@ mixin AnimationLocalStatusListenersMixin {
           exception: exception,
           stack: stack,
           library: 'animation library',
-          context: 'while notifying status listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying status listeners was:');
-            information.write('  $this');
-          }
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
         ));
       }
     }

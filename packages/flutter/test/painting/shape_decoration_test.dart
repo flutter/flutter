@@ -81,7 +81,7 @@ void main() {
         );
       },
       paints
-        ..drawImageRect(source: Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
+        ..drawImageRect(source: const Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: const Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0)),
     );
     expect(
       (Canvas canvas) {
@@ -94,7 +94,7 @@ void main() {
           ),
         );
       },
-      isNot(paints..image()) // we always use drawImageRect
+      isNot(paints..image()), // we always use drawImageRect
     );
     expect(log, isEmpty);
   });
@@ -125,7 +125,7 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
     throw UnsupportedError('Cannot encode test image');
   }
 }

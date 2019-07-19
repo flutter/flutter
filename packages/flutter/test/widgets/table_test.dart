@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({ Key key }) : super(key: key);
@@ -16,6 +17,24 @@ class TestStatefulWidget extends StatefulWidget {
 class TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
   Widget build(BuildContext context) => Container();
+}
+
+class TestChildWidget extends StatefulWidget {
+  const TestChildWidget({ Key key }) : super(key: key);
+
+  @override
+  TestChildState createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChildWidget> {
+  bool toggle = true;
+
+  void toggleMe() {
+    setState(() { toggle = !toggle; });
+  }
+
+  @override
+  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
 }
 
 void main() {
@@ -67,13 +86,48 @@ void main() {
     await run(TextDirection.rtl);
   });
 
+  testWidgets('Table widget can be detached and re-attached', (WidgetTester tester) async {
+    final Widget table = Table(
+      key: GlobalKey(),
+      children: const <TableRow>[
+        TableRow(
+          decoration: BoxDecoration(
+              color: Colors.yellow
+          ),
+          children: <Widget>[Placeholder()],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: table,
+        ),
+      ),
+    );
+    // Move table to a different location to simulate detaching and re-attaching effect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Center(
+            child: table
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Table widget - column offset (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Table(
-            columnWidths: const <int, TableColumnWidth> {
+            columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(100.0),
               1: FixedColumnWidth(110.0),
               2: FixedColumnWidth(125.0),
@@ -143,7 +197,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: Center(
           child: Table(
-            columnWidths: const <int, TableColumnWidth> {
+            columnWidths: const <int, TableColumnWidth>{
               0: FixedColumnWidth(100.0),
               1: FixedColumnWidth(110.0),
               2: FixedColumnWidth(125.0),
@@ -295,6 +349,31 @@ void main() {
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
     expect(boxG1, isNot(equals(boxG2)));
+  });
+
+  testWidgets('Really small deficit double precision error', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27083
+    const SizedBox cell = SizedBox(width: 16, height: 16);
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Table(
+          children: const <TableRow>[
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+            TableRow(
+              children: <Widget>[
+                cell, cell, cell, cell, cell, cell,
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    // If the above bug is present this test will never terminate.
   });
 
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
@@ -499,7 +578,7 @@ void main() {
               ],
             ),
           ],
-        )
+        ),
       ),
     );
     final RenderBox boxA = tester.renderObject(find.text('AAA'));
@@ -771,28 +850,55 @@ void main() {
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'Table-[GlobalKey#00000](renderObject: RenderTable#00000)\n'
+        'Table-[GlobalKey#00000](dependencies: [Directionality], renderObject: RenderTable#00000)\n'
         '├Text("A")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "A", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("B")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "B", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("C")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "C", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("D")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "D", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("EEE")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "EEE", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("F")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "F", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("G")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "G", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '├Text("H")\n'
-        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        '│└RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "H", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
         '└Text("III")\n'
-        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
+        ' └RichText(softWrap: wrapping at box width, maxLines: unlimited, text: "III", dependencies: [Directionality], renderObject: RenderParagraph#00000 relayoutBoundary=up1)\n'
       ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/31473.
+  testWidgets(
+    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+      expect(find.text('CRASHHH'), findsNothing);
+
+      final TestChildState state = tester.state(find.byType(TestChildWidget));
+      state.toggleMe();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+
+      // Should not crash.
+      expect(find.text('CRASHHH'), findsOneWidget);
+    }
+  );
 
   // TODO(ianh): Test handling of TableCell object
 }

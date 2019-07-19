@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart' show visibleForTesting;
+
 /// Signature for callbacks passed to [LicenseRegistry.addLicense].
 typedef LicenseEntryCollector = Stream<LicenseEntry> Function();
 
@@ -54,7 +56,8 @@ abstract class LicenseEntry {
 }
 
 enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph, inParagraph,
+  beforeParagraph,
+  inParagraph,
 }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank
@@ -304,5 +307,12 @@ class LicenseRegistry {
       return;
     for (LicenseEntryCollector collector in _collectors)
       yield* collector();
+  }
+
+  /// Resets the internal state of [LicenseRegistry]. Intended for use in
+  /// testing.
+  @visibleForTesting
+  static void reset() {
+    _collectors = null;
   }
 }

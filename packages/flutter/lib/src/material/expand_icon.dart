@@ -13,7 +13,7 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
-/// 180 deg when pressed, then reverts the animation on a second press.
+/// 180 degrees when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
 ///
 /// The expand icon does not include a semantic label for accessibility. In
@@ -22,6 +22,10 @@ import 'theme.dart';
 ///
 /// See [IconButton] for a more general implementation of a pressable button
 /// with an icon.
+///
+/// See also:
+///
+///  * https://material.io/design/iconography/system-icons.html
 class ExpandIcon extends StatefulWidget {
   /// Creates an [ExpandIcon] with the given padding, and a callback that is
   /// triggered when the icon is pressed.
@@ -30,7 +34,10 @@ class ExpandIcon extends StatefulWidget {
     this.isExpanded = false,
     this.size = 24.0,
     @required this.onPressed,
-    this.padding = const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0),
+    this.color,
+    this.disabledColor,
+    this.expandedColor,
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -58,6 +65,35 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
+
+
+  /// The color of the icon.
+  ///
+  /// Defaults to [Colors.black54] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
+  final Color color;
+
+  /// The color of the icon when it is disabled,
+  /// i.e. if [onPressed] is null.
+  ///
+  /// Defaults to [Colors.black38] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white38] when it is [Brightness.dark]. This adheres to the
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
+  final Color disabledColor;
+
+  /// The color of the icon when the icon is expanded.
+  ///
+  /// Defaults to [Colors.black54] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white] when it is [Brightness.dark]. This adheres to the
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
+  final Color expandedColor;
 
   @override
   _ExpandIconState createState() => _ExpandIconState();
@@ -104,23 +140,48 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       widget.onPressed(widget.isExpanded);
   }
 
+  /// Default icon colors and opacities for when [Theme.brightness] is set to
+  /// [Brightness.light] are based on the
+  /// [Material Design system icon specifications](https://material.io/design/iconography/system-icons.html#color).
+  /// Icon colors and opacities for [Brightness.dark] are based on the
+  /// [Material Design dark theme specifications](https://material.io/design/color/dark-theme.html#ui-application)
+  Color get _iconColor {
+    if (widget.isExpanded && widget.expandedColor != null) {
+      return widget.expandedColor;
+    }
+
+    if (widget.color != null) {
+      return widget.color;
+    }
+
+    switch(Theme.of(context).brightness) {
+      case Brightness.light:
+        return Colors.black54;
+      case Brightness.dark:
+        return Colors.white60;
+    }
+
+    assert(false);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData theme = Theme.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
 
     return Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,
       child: IconButton(
         padding: widget.padding,
-        color: theme.brightness == Brightness.dark ? Colors.white54 : Colors.black54,
+        color: _iconColor,
+        disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more)
+          child: const Icon(Icons.expand_more),
         ),
       ),
     );

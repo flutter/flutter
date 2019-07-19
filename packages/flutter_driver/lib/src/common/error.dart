@@ -34,9 +34,9 @@ $originalStackTrace
 bool _noLogSubscribers = true;
 
 final StreamController<LogRecord> _logger =
-    StreamController<LogRecord>.broadcast(sync: true, onListen: () {
-      _noLogSubscribers = false;
-    });
+  StreamController<LogRecord>.broadcast(sync: true, onListen: () {
+    _noLogSubscribers = false;
+  });
 
 void _log(LogLevel level, String loggerName, Object message) {
   final LogRecord record = LogRecord._(level, loggerName, '$message');

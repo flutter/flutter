@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('SliverList reverse children (with keys)', (WidgetTester tester) async {
@@ -144,6 +145,52 @@ void main() {
     expect(find.text('Tile 18'), findsOneWidget);
     expect(find.text('Tile 19'), findsNothing);
   });
+
+  testWidgets('SliverList should layout first child in case of child reordering', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35904.
+    List<String> items = <String>['1', '2'];
+
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tile 1'), findsOneWidget);
+    expect(find.text('Tile 2'), findsOneWidget);
+
+    items = items.reversed.toList();
+    await tester.pumpWidget(_buildSliverListRenderWidgetChild(items));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tile 1'), findsOneWidget);
+    expect(find.text('Tile 2'), findsOneWidget);
+  });
+}
+
+Widget _buildSliverListRenderWidgetChild(List<String> items) {
+  return MaterialApp(
+    home: Directionality(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: Container(
+          height: 500,
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  items.map<Widget>((String item) {
+                    return Chip(
+                      key: Key(item),
+                      label: Text('Tile $item'),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 Widget _buildSliverList({
@@ -162,7 +209,7 @@ Widget _buildSliverList({
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int i) {
+                (BuildContext context, int i) {
                   return Container(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,

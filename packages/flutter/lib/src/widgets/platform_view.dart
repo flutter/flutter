@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'debug.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
@@ -117,6 +119,7 @@ class AndroidView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the Android
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails d) {},
@@ -125,8 +128,10 @@ class AndroidView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [AndroidView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -179,6 +184,7 @@ class AndroidView extends StatefulWidget {
 }
 
 // TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
 /// {@macro flutter.rendering.platformView.preview}
@@ -194,12 +200,14 @@ class AndroidView extends StatefulWidget {
 ///
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
+///
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
   /// {@macro flutter.widgets.platformViews.constructorParams}
-  UiKitView({ // ignore: prefer_const_constructors_in_immutables
-    // TODO(aam): Remove lint ignore above once https://dartbug.com/34297 is fixed
+  const UiKitView({
     Key key,
     @required this.viewType,
     this.onPlatformViewCreated,
@@ -209,11 +217,11 @@ class UiKitView extends StatefulWidget {
     this.creationParamsCodec,
     this.gestureRecognizers,
   }) : assert(viewType != null),
-        assert(hitTestBehavior != null),
-        assert(creationParams == null || creationParamsCodec != null),
-        super(key: key);
+       assert(hitTestBehavior != null),
+       assert(creationParams == null || creationParamsCodec != null),
+       super(key: key);
 
-  // TODO(amirh): reference the iOS API doc once avaliable.
+  // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
@@ -230,7 +238,7 @@ class UiKitView extends StatefulWidget {
 
   /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
   ///
-  /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
@@ -247,6 +255,7 @@ class UiKitView extends StatefulWidget {
   ///
   /// For example, with the following setup vertical drags will not be dispatched to the UIKit
   /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -255,8 +264,10 @@ class UiKitView extends StatefulWidget {
   ///   ),
   /// )
   /// ```
+  ///
   /// To get the [UiKitView] to claim the vertical drag gestures we can pass a vertical drag
   /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
   /// ```dart
   /// GestureDetector(
   ///   onVerticalDragStart: (DragStartDetails details) {},
@@ -290,16 +301,21 @@ class _AndroidViewState extends State<AndroidView> {
   AndroidViewController _controller;
   TextDirection _layoutDirection;
   bool _initialized = false;
+  FocusNode _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
-    return _AndroidPlatformView(
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _onFocusChange,
+      child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+      ),
     );
   }
 
@@ -309,6 +325,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     _initialized = true;
     _createNewAndroidView();
+    _focusNode = FocusNode(debugLabel: 'AndroidView(id: $_id)');
   }
 
   @override
@@ -362,10 +379,49 @@ class _AndroidViewState extends State<AndroidView> {
       id: _id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
-      onPlatformViewCreated: widget.onPlatformViewCreated,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        _focusNode.requestFocus();
+      }
     );
+    if (widget.onPlatformViewCreated != null) {
+      _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
+    }
+  }
+
+  void _onFocusChange(bool isFocused) {
+    if (!_controller.isCreated) {
+      return;
+    }
+    if (!isFocused) {
+      _controller.clearFocus().catchError((dynamic e) {
+       if (e is MissingPluginException) {
+         // We land the framework part of Android platform views keyboard
+         // support before the engine part. There will be a commit range where
+         // clearFocus isn't implemented in the engine. When that happens we
+         // just swallow the error here. Once the engine part is rolled to the
+         // framework I'll remove this.
+         // TODO(amirh): remove this once the engine's clearFocus is rolled.
+         return;
+       }
+      });
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      _id,
+    ).catchError((dynamic e) {
+      if (e is MissingPluginException) {
+        // We land the framework part of Android platform views keyboard
+        // support before the engine part. There will be a commit range where
+        // setPlatformViewClient isn't implemented in the engine. When that
+        // happens we just swallow the error here. Once the engine part is
+        // rolled to the framework I'll remove this.
+        // TODO(amirh): remove this once the engine's clearFocus is rolled.
+        return;
+      }
+    });
   }
 }
 
@@ -375,7 +431,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {

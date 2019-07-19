@@ -123,8 +123,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Called when the viewport's content extents are established.
   ///
   /// The arguments are the minimum and maximum scroll extents respectively. The
-  /// minimum will be equal to or less than zero, the maximum will be equal to
-  /// or greater than zero.
+  /// minimum will be equal to or less than the maximum. In the case of slivers,
+  /// the minimum will be equal to or less than zero, the maximum will be equal
+  /// to or greater than zero.
   ///
   /// The maximum scroll extent has the viewport dimension subtracted from it.
   /// For instance, if there is 100.0 pixels of scrollable content, and the
@@ -176,7 +177,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// The duration must not be zero. To jump to a particular value without an
   /// animation, use [jumpTo].
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   });
@@ -188,7 +190,8 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// [clamp] parameter is ignored by this stub implementation but subclasses
   /// like [ScrollPosition] handle it by adjusting [to] to prevent over or
   /// underscroll.
-  Future<void> moveTo(double to, {
+  Future<void> moveTo(
+    double to, {
     Duration duration,
     Curve curve,
     bool clamp,
@@ -273,7 +276,8 @@ class _FixedViewportOffset extends ViewportOffset {
   }
 
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) async { }

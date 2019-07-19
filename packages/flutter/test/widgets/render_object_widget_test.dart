@@ -96,7 +96,7 @@ void main() {
       decoration: kBoxDecorationA,
       child: DecoratedBox(
         decoration: kBoxDecorationB
-      )
+      ),
     ));
 
     checkFullTree();
@@ -106,8 +106,8 @@ void main() {
       child: TestWidget(
         child: DecoratedBox(
           decoration: kBoxDecorationB
-        )
-      )
+        ),
+      ),
     ));
 
     checkFullTree();
@@ -116,7 +116,7 @@ void main() {
       decoration: kBoxDecorationA,
       child: DecoratedBox(
         decoration: kBoxDecorationB
-      )
+      ),
     ));
 
     checkFullTree();
@@ -133,9 +133,9 @@ void main() {
         child: TestWidget(
           child: DecoratedBox(
             decoration: kBoxDecorationB
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ));
 
     checkFullTree();
@@ -155,8 +155,8 @@ void main() {
         decoration: kBoxDecorationB,
         child: DecoratedBox(
           decoration: kBoxDecorationC
-        )
-      )
+        ),
+      ),
     ));
 
     SingleChildRenderObjectElement element =
@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(400.0, 300.0)),
-      child: box
+      child: box,
     ));
 
     final RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
@@ -204,7 +204,7 @@ void main() {
 
     await tester.pumpWidget(MediaQuery(
       data: const MediaQueryData(size: Size(300.0, 400.0)),
-      child: box
+      child: box,
     ));
 
     decoration = renderBox.decoration;

@@ -26,7 +26,7 @@ void main() {
   // to have a specific size.
   final RenderBox square = RenderConstrainedBox(
     additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
-    child: green
+    child: green,
   );
   // Third, we wrap the sized green square in a render object that applies rotation
   // transform before painting its child. Each frame of the animation, we'll
@@ -35,12 +35,12 @@ void main() {
   final RenderTransform spin = RenderTransform(
     transform: Matrix4.identity(),
     alignment: Alignment.center,
-    child: square
+    child: square,
   );
   // Finally, we center the spinning green square...
   final RenderBox root = RenderPositionedBox(
     alignment: Alignment.center,
-    child: spin
+    child: spin,
   );
   // and attach it to the window.
   RenderingFlutterBinding(root: root);

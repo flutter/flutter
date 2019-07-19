@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:io' show Platform;
-import 'dart:ui' show TextAffinity, hashValues;
+import 'dart:ui' show TextAffinity, hashValues, Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -15,6 +15,9 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
+// Whether we're compiled to JavaScript in a web browser.
+const bool _kIsBrowser = identical(0, 0.0);
+
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -23,7 +26,9 @@ export 'dart:ui' show TextAffinity;
 /// for additional flags for some input types. For example, numeric input
 /// can specify whether it supports decimal numbers and/or signed numbers.
 class TextInputType {
-  const TextInputType._(this.index) : signed = null, decimal = null;
+  const TextInputType._(this.index)
+    : signed = null,
+      decimal = null;
 
   /// Optimize for numerical information.
   ///
@@ -387,7 +392,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -398,14 +403,14 @@ class TextInputConfiguration {
   /// What kind of action to request for the action button on the IME.
   final TextInputAction inputAction;
 
-  /// Specifies how platforms may automatically capitialize text entered by the
+  /// Specifies how platforms may automatically capitalize text entered by the
   /// user.
   ///
   /// Defaults to [TextCapitalization.none].
   ///
   /// See also:
   ///
-  ///   * [TextCapitalization], for a description of each capitalization behavior.
+  ///  * [TextCapitalization], for a description of each capitalization behavior.
   final TextCapitalization textCapitalization;
 
   /// The appearance of the keyboard.
@@ -439,6 +444,40 @@ TextAffinity _toTextAffinity(String affinity) {
   return null;
 }
 
+/// A floating cursor state the user has induced by force pressing an iOS
+/// keyboard.
+enum FloatingCursorDragState {
+  /// A user has just activated a floating cursor.
+  Start,
+
+  /// A user is dragging a floating cursor.
+  Update,
+
+  /// A user has lifted their finger off the screen after using a floating
+  /// cursor.
+  End,
+}
+
+/// The current state and position of the floating cursor.
+class RawFloatingCursorPoint {
+  /// Creates information for setting the position and state of a floating
+  /// cursor.
+  ///
+  /// [state] must not be null and [offset] must not be null if the state is
+  /// [FloatingCursorDragState.Update].
+  RawFloatingCursorPoint({
+    this.offset,
+    @required this.state,
+  }) : assert(state != null),
+       assert(state != FloatingCursorDragState.Update || offset != null);
+
+  /// The raw position of the floating cursor as determined by the iOS sdk.
+  final Offset offset;
+
+  /// The state of the floating cursor.
+  final FloatingCursorDragState state;
+}
+
 /// The current text, selection, and composing state for editing a run of text.
 @immutable
 class TextEditingValue {
@@ -451,7 +490,7 @@ class TextEditingValue {
   const TextEditingValue({
     this.text = '',
     this.selection = const TextSelection.collapsed(offset: -1),
-    this.composing = TextRange.empty
+    this.composing = TextRange.empty,
   }) : assert(text != null),
        assert(selection != null),
        assert(composing != null);
@@ -502,12 +541,12 @@ class TextEditingValue {
   TextEditingValue copyWith({
     String text,
     TextSelection selection,
-    TextRange composing
+    TextRange composing,
   }) {
     return TextEditingValue(
       text: text ?? this.text,
       selection: selection ?? this.selection,
-      composing: composing ?? this.composing
+      composing: composing ?? this.composing,
     );
   }
 
@@ -530,7 +569,7 @@ class TextEditingValue {
   int get hashCode => hashValues(
     text.hashCode,
     selection.hashCode,
-    composing.hashCode
+    composing.hashCode,
   );
 }
 
@@ -549,6 +588,18 @@ abstract class TextSelectionDelegate {
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
+
+  /// Whether cut is enabled, must not be null.
+  bool get cutEnabled => true;
+
+  /// Whether copy is enabled, must not be null.
+  bool get copyEnabled => true;
+
+  /// Whether paste is enabled, must not be null.
+  bool get pasteEnabled => true;
+
+  /// Whether select all is enabled, must not be null.
+  bool get selectAllEnabled => true;
 }
 
 /// An interface to receive information from [TextInput].
@@ -566,6 +617,9 @@ abstract class TextInputClient {
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
+
+  /// Updates the floating cursor position and state.
+  void updateFloatingCursor(RawFloatingCursorPoint point);
 }
 
 /// An interface for interacting with a text input control.
@@ -589,13 +643,13 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod('TextInput.show');
+    SystemChannels.textInput.invokeMethod<void>('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod(
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setEditingState',
       value.toJSON(),
     );
@@ -607,7 +661,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+      SystemChannels.textInput.invokeMethod<void>('TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
@@ -648,6 +702,26 @@ TextInputAction _toTextInputAction(String action) {
   throw FlutterError('Unknown text input action: $action');
 }
 
+FloatingCursorDragState _toTextCursorAction(String state) {
+  switch (state) {
+    case 'FloatingCursorDragState.start':
+      return FloatingCursorDragState.Start;
+    case 'FloatingCursorDragState.update':
+      return FloatingCursorDragState.Update;
+    case 'FloatingCursorDragState.end':
+      return FloatingCursorDragState.End;
+  }
+  throw FlutterError('Unknown text cursor action: $state');
+}
+
+RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, dynamic> encoded) {
+  assert(state != null, 'You must provide a state to set a new editing point.');
+  assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
+  assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
+  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  return RawFloatingCursorPoint(offset: offset, state: state);
+}
+
 class _TextInputClientHandler {
   _TextInputClientHandler() {
     SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
@@ -671,6 +745,9 @@ class _TextInputClientHandler {
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
+      case 'TextInputClient.updateFloatingCursor':
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        break;
       default:
         throw MissingPluginException();
     }
@@ -689,7 +766,7 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        SystemChannels.textInput.invokeMethod<void>('TextInput.hide');
     });
   }
 }
@@ -742,7 +819,7 @@ class TextInput {
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     final TextInputConnection connection = TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    SystemChannels.textInput.invokeMethod(
+    SystemChannels.textInput.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
@@ -751,6 +828,10 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
+      if (_kIsBrowser) {
+        // TODO(flutterweb): what makes sense here?
+        return true;
+      }
       if (Platform.isIOS) {
         assert(
           _iOSSupportedInputActions.contains(inputAction),

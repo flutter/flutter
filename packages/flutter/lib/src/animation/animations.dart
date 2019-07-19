@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -373,7 +372,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   CurvedAnimation({
     @required this.parent,
     @required this.curve,
-    this.reverseCurve
+    this.reverseCurve,
   }) : assert(parent != null),
        assert(curve != null) {
     _updateCurveDirection(parent.status);
@@ -493,7 +492,7 @@ class TrainHoppingAnimation extends Animation<double>
   /// can be null. If the next train is null, then this object will just proxy
   /// the first animation and never hop.
   TrainHoppingAnimation(this._currentTrain, this._nextTrain, { this.onSwitchedTrain })
-    : assert(_currentTrain != null) {
+      : assert(_currentTrain != null) {
     if (_nextTrain != null) {
       if (_currentTrain.value == _nextTrain.value) {
         _currentTrain = _nextTrain;
@@ -701,7 +700,7 @@ class AnimationMax<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMax] itself
   /// to combine multiple animations.
-  AnimationMax(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMax(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.max(first.value, next.value);
@@ -716,7 +715,7 @@ class AnimationMin<T extends num> extends CompoundAnimation<T> {
   ///
   /// Both arguments must be non-null. Either can be an [AnimationMin] itself
   /// to combine multiple animations.
-  AnimationMin(Animation<T> first, Animation<T> next): super(first: first, next: next);
+  AnimationMin(Animation<T> first, Animation<T> next) : super(first: first, next: next);
 
   @override
   T get value => math.min(first.value, next.value);

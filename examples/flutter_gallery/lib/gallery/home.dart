@@ -8,6 +8,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'backdrop.dart';
 import 'demos.dart';
@@ -59,6 +60,7 @@ class _CategoryItem extends StatelessWidget {
     return RepaintBoundary(
       child: RawMaterialButton(
         padding: EdgeInsets.zero,
+        hoverColor: theme.primaryColor.withOpacity(0.05),
         splashColor: theme.primaryColor.withOpacity(0.12),
         highlightColor: Colors.transparent,
         onPressed: onTap,
@@ -256,6 +258,7 @@ class _DemosPage extends StatelessWidget {
         label: category.name,
         explicitChildNodes: true,
         child: ListView(
+          dragStartBehavior: DragStartBehavior.down,
           key: PageStorageKey<String>(category.name),
           padding: EdgeInsets.only(top: 8.0, bottom: windowBottomPadding),
           children: kGalleryCategoryToDemos[category].map<Widget>((GalleryDemo demo) {
@@ -398,14 +401,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             child: const Banner(
               message: 'PREVIEW',
               location: BannerLocation.topEnd,
-            )
+            ),
           ),
-        ]
+        ],
       );
     }
     home = AnnotatedRegion<SystemUiOverlayStyle>(
       child: home,
-      value: SystemUiOverlayStyle.light
+      value: SystemUiOverlayStyle.light,
     );
 
     return home;

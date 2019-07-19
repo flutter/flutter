@@ -125,6 +125,7 @@ bool _isInAccessibilityMode(BuildContext context) {
 ///  * [CupertinoPopupSurface], which is a generic iOS-style popup surface that
 ///    holds arbitrary content to create custom popups.
 ///  * [CupertinoDialogAction], which is an iOS-style dialog button.
+///  * [AlertDialog], a Material Design alert dialog.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
@@ -137,8 +138,8 @@ class CupertinoAlertDialog extends StatelessWidget {
     this.actions = const <Widget>[],
     this.scrollController,
     this.actionScrollController,
-  })  : assert(actions != null),
-        super(key: key);
+  }) : assert(actions != null),
+       super(key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -305,6 +306,7 @@ class CupertinoDialog extends StatelessWidget {
 /// rectangle without any color (similar to iOS's volume control popup).
 ///
 /// See also:
+///
 ///  * [CupertinoAlertDialog], which is a dialog with a title, content, and
 ///    actions.
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
@@ -773,16 +775,25 @@ class _RenderCupertinoDialog extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    bool isHit = false;
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     final BoxParentData contentSectionParentData = contentSection.parentData;
     final BoxParentData actionsSectionParentData = actionsSection.parentData;
-    if (contentSection.hitTest(result, position: position - contentSectionParentData.offset)) {
-      isHit = true;
-    } else if (actionsSection.hitTest(result, position: position - actionsSectionParentData.offset)) {
-      isHit = true;
-    }
-    return isHit;
+    return result.addWithPaintOffset(
+             offset: contentSectionParentData.offset,
+             position: position,
+             hitTest: (BoxHitTestResult result, Offset transformed) {
+               assert(transformed == position - contentSectionParentData.offset);
+               return contentSection.hitTest(result, position: transformed);
+             },
+           )
+        || result.addWithPaintOffset(
+             offset: actionsSectionParentData.offset,
+             position: position,
+             hitTest: (BoxHitTestResult result, Offset transformed) {
+               assert(transformed == position - actionsSectionParentData.offset);
+               return actionsSection.hitTest(result, position: transformed);
+             },
+           );
   }
 }
 
@@ -892,8 +903,8 @@ class _CupertinoAlertActionSection extends StatefulWidget {
     Key key,
     @required this.children,
     this.scrollController,
-  })  : assert(children != null),
-        super(key: key);
+  }) : assert(children != null),
+       super(key: key);
 
   final List<Widget> children;
 
@@ -1023,7 +1034,7 @@ class _ActionButtonParentData extends MultiChildLayoutParentData {
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], a dialog that informs the user about situations
-///    that require acknowledgement
+///    that require acknowledgement.
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
@@ -1032,7 +1043,9 @@ class CupertinoDialogAction extends StatelessWidget {
     this.isDestructiveAction = false,
     this.textStyle,
     @required this.child,
-  }) : assert(child != null);
+  }) : assert(child != null),
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.
@@ -1042,12 +1055,19 @@ class CupertinoDialogAction extends StatelessWidget {
 
   /// Set to true if button is the default choice in the dialog.
   ///
-  /// Default buttons are bold.
+  /// Default buttons have bold text. Similar to
+  /// [UIAlertController.preferredAction](https://developer.apple.com/documentation/uikit/uialertcontroller/1620102-preferredaction),
+  /// but more than one action can have this attribute set to true in the same
+  /// [CupertinoAlertDialog].
+  ///
+  /// This parameters defaults to false and cannot be null.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
+  ///
+  /// Defaults to false and cannot be null.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.
@@ -1137,6 +1157,10 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle;
     style = style.merge(textStyle);
+
+    if (isDefaultAction) {
+      style = style.copyWith(fontWeight: FontWeight.w600);
+    }
 
     if (isDestructiveAction) {
       style = style.copyWith(color: CupertinoColors.destructiveRed);
@@ -1577,7 +1601,7 @@ class _RenderCupertinoDialogActions extends RenderBox
     // Create the button backgrounds path and paint it.
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest)
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height))
       ..addRect(verticalDivider);
 
     for (int i = 0; i < pressedButtonRects.length; i += 1) {
@@ -1615,7 +1639,7 @@ class _RenderCupertinoDialogActions extends RenderBox
 
     final Path backgroundFillPath = Path()
       ..fillType = PathFillType.evenOdd
-      ..addRect(Rect.largest);
+      ..addRect(Rect.fromLTWH(0.0, 0.0, size.width, size.height));
 
     final Path pressedBackgroundFillPath = Path();
 
@@ -1691,7 +1715,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

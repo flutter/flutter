@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vitool/vitool.dart';
 import 'package:path/path.dart' as path;
@@ -146,7 +147,7 @@ void main() {
               SvgPathCommand('M', <Point<double>>[Point<double>(19.0, 0.0)]),
               SvgPathCommand('Z', <Point<double>>[]),
             ]),
-            margin: 0.000000001
+            margin: precisionErrorTolerance,
         )
       ]);
     });

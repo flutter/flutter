@@ -54,8 +54,7 @@ void main() {
     expect(true, isTrue); // expect that we reach here without crashing
   });
 
-  testWidgets('SemanticsDebugger reparents subtree',
-      (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -140,8 +139,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SemanticsDebugger interaction test',
-      (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -179,8 +177,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('SemanticsDebugger interaction test - negative',
-      (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(

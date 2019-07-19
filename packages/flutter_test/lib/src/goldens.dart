@@ -124,7 +124,6 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
-    // [autoUpdateGoldenFiles] should never be set in a live widget binding.
     throw StateError('goldenFileComparator has not been initialized');
   }
 }
@@ -149,8 +148,8 @@ class LocalFileComparator implements GoldenFileComparator {
   ///
   /// The [testFile] URL must represent a file.
   LocalFileComparator(Uri testFile, {path.Style pathStyle})
-      : basedir = _getBasedir(testFile, pathStyle),
-        _path = _getPath(pathStyle);
+    : basedir = _getBasedir(testFile, pathStyle),
+      _path = _getPath(pathStyle);
 
   static path.Context _getPath(path.Style style) {
     return path.Context(style: style ?? path.Style.platform);

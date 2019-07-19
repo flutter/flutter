@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../doctor.dart';
+import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaWorkflow] instance.
-FuchsiaWorkflow get fuchsiaWorkflow => context[FuchsiaWorkflow];
+FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 
 /// The Fuchsia-specific implementation of a [Workflow].
 ///
@@ -21,12 +21,12 @@ class FuchsiaWorkflow implements Workflow {
 
   @override
   bool get canListDevices {
-    return os.which('fx') != null;
+    return fuchsiaArtifacts.devFinder != null;
   }
 
   @override
   bool get canLaunchDevices {
-    return os.which('fx') != null;
+    return fuchsiaArtifacts.devFinder != null && fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

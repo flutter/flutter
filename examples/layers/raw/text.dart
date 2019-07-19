@@ -19,7 +19,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
-  canvas.drawRect(ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+  canvas.drawRect(const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
   // The paint method of Paragraph draws the contents of the paragraph onto the
@@ -84,7 +84,7 @@ void main() {
     // Next, we supply a width that the text is permitted to occupy and we ask
     // the paragraph to the visual position of each its glyphs as well as its
     // overall size, subject to its sizing constraints.
-    ..layout(ui.ParagraphConstraints(width: 180.0));
+    ..layout(const ui.ParagraphConstraints(width: 180.0));
 
   // Finally, we register our beginFrame callback and kick off the first frame.
   ui.window.onBeginFrame = beginFrame;

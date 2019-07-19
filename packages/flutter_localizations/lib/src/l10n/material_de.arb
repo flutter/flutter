@@ -24,12 +24,12 @@
   "continueButtonLabel": "WEITER",
   "copyButtonLabel": "KOPIEREN",
   "cutButtonLabel": "AUSSCHNEIDEN",
-  "okButtonLabel": "OK",
+  "okButtonLabel": "Ok",
   "pasteButtonLabel": "EINFÜGEN",
   "selectAllButtonLabel": "ALLE AUSWÄHLEN",
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
-  "anteMeridiemAbbreviation": "VORM.",
-  "postMeridiemAbbreviation": "NACHM.",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Stunden auswählen",
   "timePickerMinuteModeAnnouncement": "Minuten auswählen",
   "signedInLabel": "Angemeldet",
@@ -52,5 +52,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Noch 1 Zeichen",
   "remainingTextFieldCharacterCountOther": "Noch $remainingCount Zeichen",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Aktualisieren"
 }

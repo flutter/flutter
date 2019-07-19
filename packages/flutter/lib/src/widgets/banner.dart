@@ -14,14 +14,14 @@ import 'framework.dart';
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
 const double _kHeight = 12.0; // height of banner
 const double _kBottomOffset = _kOffset + 0.707 * _kHeight; // offset plus sqrt(2)/2 * banner height
-final Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
+const Rect _kRect = Rect.fromLTWH(-_kOffset, _kOffset - _kHeight, _kOffset * 2.0, _kHeight);
 
 const Color _kColor = Color(0xA0B71C1C);
 const TextStyle _kTextStyle = TextStyle(
   color: Color(0xFFFFFFFF),
   fontSize: _kHeight * 0.85,
   fontWeight: FontWeight.w900,
-  height: 1.0
+  height: 1.0,
 );
 
 /// Where to show a [Banner].
@@ -322,7 +322,7 @@ class Banner extends StatelessWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<BannerLocation>('location', location));
     properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(ColorProperty('color', color, showName: false));
     textStyle?.debugFillProperties(properties, prefix: 'text ');
   }
 }
@@ -334,7 +334,7 @@ class CheckedModeBanner extends StatelessWidget {
   /// Creates a checked mode banner.
   const CheckedModeBanner({
     Key key,
-    @required this.child
+    @required this.child,
   }) : super(key: key);
 
   /// The widget to show behind the banner.

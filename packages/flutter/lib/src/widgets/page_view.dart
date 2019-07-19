@@ -7,6 +7,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -35,6 +37,87 @@ import 'viewport.dart';
 /// See also:
 ///
 ///  * [PageView], which is the widget this object controls.
+///
+/// {@tool sample}
+///
+/// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
+/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// to animate the [PageView] using a [PageController].
+///
+/// ```dart
+/// class MyPageView extends StatefulWidget {
+///   MyPageView({Key key}) : super(key: key);
+///
+///   _MyPageViewState createState() => _MyPageViewState();
+/// }
+///
+/// class _MyPageViewState extends State<MyPageView> {
+///   PageController _pageController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _pageController = PageController();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _pageController.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: PageView(
+///           controller: _pageController,
+///           children: [
+///             Container(
+///               color: Colors.red,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         1,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Next'),
+///                 ),
+///               ),
+///             ),
+///             Container(
+///               color: Colors.blue,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         0,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Previous'),
+///                 ),
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+/// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
@@ -111,7 +194,8 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> animateToPage(int page, {
+  Future<void> animateToPage(
+    int page, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -249,6 +333,29 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   final int initialPage;
   double _pageToUseOnStartup;
 
+  /// If [pixels] isn't set by [applyViewportDimension] before [dispose] is
+  /// called, this could throw an assert as [pixels] will be set to null.
+  ///
+  /// With [Tab]s, this happens when there are nested [TabBarView]s and there
+  /// is an attempt to warp over the nested tab to a tab adjacent to it.
+  ///
+  /// This flag will be set to true once the dimensions have been established
+  /// and [pixels] is set.
+  bool isInitialPixelsValueSet = false;
+
+  @override
+  void dispose() {
+    // TODO(shihaohong): remove workaround once these issues have been
+    // resolved, https://github.com/flutter/flutter/issues/32054,
+    // https://github.com/flutter/flutter/issues/32056
+    // Sets `pixels` to a non-null value before `ScrollPosition.dispose` is
+    // invoked if it was never set by `applyViewportDimension`.
+    if (pixels == null && !isInitialPixelsValueSet) {
+      correctPixels(0);
+    }
+    super.dispose();
+  }
+
   @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -262,7 +369,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    return math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double round = actual.roundToDouble();
+    if ((actual - round).abs() < precisionErrorTolerance) {
+      return round;
+    }
+    return actual;
   }
 
   double getPixelsFromPage(double page) {
@@ -270,7 +382,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  double get page {
+    assert(
+      pixels == null || (minScrollExtent != null && maxScrollExtent != null),
+      'Page value is only available after content dimensions are established.',
+    );
+    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  }
 
   @override
   void saveScrollOffset() {
@@ -293,8 +411,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     final double oldPixels = pixels;
     final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
     final double newPixels = getPixelsFromPage(page);
+
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
+      isInitialPixelsValueSet = true;
       return false;
     }
     return result;
@@ -398,6 +518,8 @@ const PageScrollPhysics _kPagePhysics = PageScrollPhysics();
 /// [PageView] is first constructed, and the [PageController.viewportFraction],
 /// which determines the size of the pages as a fraction of the viewport size.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=J1gE9xvph-A}
+///
 /// See also:
 ///
 ///  * [PageController], which controls which page is visible in the view.
@@ -423,6 +545,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
        super(key: key);
@@ -449,6 +572,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
        super(key: key);
@@ -464,6 +588,7 @@ class PageView extends StatefulWidget {
     this.pageSnapping = true,
     this.onPageChanged,
     @required this.childrenDelegate,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
        super(key: key);
@@ -516,6 +641,9 @@ class PageView extends StatefulWidget {
   /// respectively.
   final SliverChildDelegate childrenDelegate;
 
+  /// {@macro flutter.widgets.scrollable.dragStartBehavior}
+  final DragStartBehavior dragStartBehavior;
+
   @override
   _PageViewState createState() => _PageViewState();
 }
@@ -562,6 +690,7 @@ class _PageViewState extends State<PageView> {
         return false;
       },
       child: Scrollable(
+        dragStartBehavior: widget.dragStartBehavior,
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
@@ -573,7 +702,7 @@ class _PageViewState extends State<PageView> {
             slivers: <Widget>[
               SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,
-                delegate: widget.childrenDelegate
+                delegate: widget.childrenDelegate,
               ),
             ],
           );

@@ -2,17 +2,21 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show VoidCallback;
+import 'basic_types.dart';
+import 'constants.dart';
 
-/// Whether we've been built in release mode.
-const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
-
-/// When running in profile mode (or debug mode), invoke the given function.
+/// DEPRECATED. `function` cannot be treeshaken out of release builds.
 ///
-/// In release mode, the function is not invoked.
-// TODO(devoncarew): Going forward, we'll want the call to profile() to be tree-shaken out.
+/// Instead use:
+///
+/// ```dart
+/// if (!kReleaseMode) {
+///   function();
+/// }
+/// ```
+@Deprecated('Use `if (!kReleaseMode) { function(); }` instead')
 void profile(VoidCallback function) {
-  if (_kReleaseMode)
+  if (kReleaseMode)
     return;
   function();
 }

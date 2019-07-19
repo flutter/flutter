@@ -6,12 +6,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
-import 'package:vm_service_client/vm_service_client.dart';
-
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+import 'package:path/path.dart' as path;
+import 'package:vm_service_client/vm_service_client.dart';
 
 void main() {
   task(() async {
@@ -26,7 +25,7 @@ void main() {
       print('run: starting...');
       final Process run = await startProcess(
         path.join(flutterDirectory.path, 'bin', 'flutter'),
-        <String>['run', '--verbose', '-d', device.deviceId, 'lib/main.dart'],
+        <String>['run', '--verbose', '--disable-service-auth-codes', '-d', device.deviceId, 'lib/main.dart'],
       );
       run.stdout
           .transform<String>(utf8.decoder)
@@ -57,10 +56,19 @@ void main() {
       final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.first;
-      final Stream<VMExtensionEvent> frameEvents = isolate.onExtensionEvent.where(
-              (VMExtensionEvent e) => e.kind == 'Flutter.Frame');
-      final Stream<VMExtensionEvent> navigationEvents = isolate.onExtensionEvent.where(
-              (VMExtensionEvent e) => e.kind == 'Flutter.Navigation');
+
+      final StreamController<VMExtensionEvent> frameEventsController = StreamController<VMExtensionEvent>();
+      final StreamController<VMExtensionEvent> navigationEventsController = StreamController<VMExtensionEvent>();
+      isolate.onExtensionEvent.listen((VMExtensionEvent event) {
+        if (event.kind == 'Flutter.Frame') {
+          frameEventsController.add(event);
+        } else if (event.kind == 'Flutter.Navigation') {
+          navigationEventsController.add(event);
+        }
+      });
+
+      final Stream<VMExtensionEvent> frameEvents = frameEventsController.stream;
+      final Stream<VMExtensionEvent> navigationEvents = navigationEventsController.stream;
 
       print('reassembling app...');
       final Future<VMExtensionEvent> frameFuture = frameEvents.first;
@@ -71,20 +79,31 @@ void main() {
       print('${event.kind}: ${event.data}');
 
       // validate the fields
-      // {number: 8, startTime: 0, elapsed: 1437}
+      // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
       expect(event.data['number'] is int);
       expect(event.data['number'] >= 0);
       expect(event.data['startTime'] is int);
       expect(event.data['startTime'] >= 0);
       expect(event.data['elapsed'] is int);
       expect(event.data['elapsed'] >= 0);
+      expect(event.data['build'] is int);
+      expect(event.data['build'] >= 0);
+      expect(event.data['raster'] is int);
+      expect(event.data['raster'] >= 0);
 
       final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
-      device.tap(100, 100);
+      device.tap(100, 200);
+
       final VMExtensionEvent navigationEvent = await navigationFuture;
-      // Validate that there are not any fields.
-      expect(navigationEvent.data.isEmpty);
+      // validate the fields
+      expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.data['route'];
+      expect(route['description'] is String);
+      expect(route['settings'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> settings = route['settings'];
+      expect(settings.containsKey('name'));
+      expect(settings['isInitialRoute'] is bool);
 
       run.stdin.write('q');
       final int result = await run.exitCode;

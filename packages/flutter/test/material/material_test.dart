@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
   @override
@@ -17,13 +18,17 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(
-    {double elevation = 0.0, Color shadowColor = const Color(0xFF00FF00)}) {
+Widget buildMaterial({
+  double elevation = 0.0,
+  Color shadowColor = const Color(0xFF00FF00),
+  Color color = const Color(0xFF0000FF),
+}) {
   return Center(
     child: SizedBox(
       height: 100.0,
       width: 100.0,
       child: Material(
+        color: color,
         shadowColor: shadowColor,
         elevation: elevation,
         shape: const CircleBorder(),
@@ -32,7 +37,7 @@ Widget buildMaterial(
   );
 }
 
-RenderPhysicalShape getShadow(WidgetTester tester) {
+RenderPhysicalShape getModel(WidgetTester tester) {
   return tester.renderObject(find.byType(PhysicalShape));
 }
 
@@ -52,7 +57,48 @@ class PaintRecorder extends CustomPainter {
   bool shouldRepaint(PaintRecorder oldDelegate) => false;
 }
 
+class ElevationColor {
+  const ElevationColor(this.elevation, this.color);
+  final double elevation;
+  final Color color;
+}
+
 void main() {
+  testWidgets('default Material debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const Material().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>['type: canvas']);
+  });
+
+  testWidgets('Material implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const Material(
+      type: MaterialType.canvas,
+      color: Color(0xFFFFFFFF),
+      textStyle: TextStyle(color: Color(0xff00ff00)),
+      borderRadius: BorderRadiusDirectional.all(Radius.circular(10)),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
+
+    expect(description, <String>[
+      'type: canvas',
+      'color: Color(0xffffffff)',
+      'textStyle.inherit: true',
+      'textStyle.color: Color(0xff00ff00)',
+      'borderRadius: BorderRadiusDirectional.circular(10.0)',
+    ]);
+  });
+
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
@@ -125,23 +171,23 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(elevation: 0.0));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.elevation, equals(0.0));
 
     await tester.pumpWidget(buildMaterial(elevation: 9.0));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.elevation, equals(0.0));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.elevation, closeTo(0.0, 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.elevation, equals(9.0));
   });
 
@@ -150,24 +196,94 @@ void main() {
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
-    final RenderPhysicalShape modelA = getShadow(tester);
+    final RenderPhysicalShape modelA = getModel(tester);
     expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFFFF0000)));
-    final RenderPhysicalShape modelB = getShadow(tester);
+    final RenderPhysicalShape modelB = getModel(tester);
     expect(modelB.shadowColor, equals(const Color(0xFF00FF00)));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final RenderPhysicalShape modelC = getShadow(tester);
+    final RenderPhysicalShape modelC = getModel(tester);
     expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final RenderPhysicalShape modelD = getShadow(tester);
+    final RenderPhysicalShape modelD = getModel(tester);
     expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
 
     await tester.pump(kThemeChangeDuration);
-    final RenderPhysicalShape modelE = getShadow(tester);
+    final RenderPhysicalShape modelE = getModel(tester);
     expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
+  });
+
+  group('Elevation Overlay', () {
+
+    testWidgets('applyElevationOverlayColor set to false does not change surface color', (WidgetTester tester) async {
+      const Color surfaceColor = Color(0xFF121212);
+      await tester.pumpWidget(Theme(
+          data: ThemeData(
+            applyElevationOverlayColor: false,
+            colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
+          ),
+          child: buildMaterial(color: surfaceColor, elevation: 8.0))
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(surfaceColor));
+    });
+
+    testWidgets('applyElevationOverlayColor set to true overlays a transparent white on surface color', (WidgetTester tester) async {
+      // The colors we should get with a base surface color of 0xFF121212 for
+      // a given elevation
+      const List<ElevationColor> elevationColors = <ElevationColor>[
+        ElevationColor(0.0, Color(0xFF121212)),
+        ElevationColor(1.0, Color(0xFF1E1E1E)),
+        ElevationColor(2.0, Color(0xFF222222)),
+        ElevationColor(3.0, Color(0xFF252525)),
+        ElevationColor(4.0, Color(0xFF282828)),
+        ElevationColor(6.0, Color(0xFF2B2B2B)),
+        ElevationColor(8.0, Color(0xFF2D2D2D)),
+        ElevationColor(12.0, Color(0xFF323232)),
+        ElevationColor(16.0, Color(0xFF353535)),
+        ElevationColor(24.0, Color(0xFF393939)),
+      ];
+      const Color surfaceColor = Color(0xFF121212);
+
+      for (ElevationColor test in elevationColors) {
+        await tester.pumpWidget(
+            Theme(
+              data: ThemeData(
+                applyElevationOverlayColor: true,
+                colorScheme: const ColorScheme.dark().copyWith(surface: surfaceColor),
+              ),
+              child: buildMaterial(
+                color: surfaceColor,
+                elevation: test.elevation,
+              ),
+            )
+        );
+        await tester.pumpAndSettle(); // wait for the elevation animation to finish
+        final RenderPhysicalShape model = getModel(tester);
+        expect(model.color, equals(test.color));
+      }
+    });
+
+    testWidgets('overlay will only apply to materials using colorScheme.surface', (WidgetTester tester) async {
+      await tester.pumpWidget(
+          Theme(
+            data: ThemeData(
+              applyElevationOverlayColor: true,
+              colorScheme: const ColorScheme.dark().copyWith(surface: const Color(0xFF121212)),
+            ),
+            child: buildMaterial(
+                color: Colors.cyan,
+                elevation: 8.0
+            ),
+          )
+      );
+      final RenderPhysicalShape model = getModel(tester);
+      expect(model.color, equals(Colors.cyan));
+    });
+
   });
 
   group('Transparency clipping', () {
@@ -237,6 +353,69 @@ void main() {
         ),
       );
     });
+
+    testWidgets('supports directional clips', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      final ShapeBorder shape = TestBorder((String message) { logs.add(message); });
+      Widget buildMaterial() {
+        return Material(
+          type: MaterialType.transparency,
+          shape: shape,
+          child: const SizedBox(width: 100.0, height: 100.0),
+          clipBehavior: Clip.antiAlias,
+        );
+      }
+      final Widget material = buildMaterial();
+      // verify that a regular clip works as one would expect
+      logs.add('--0');
+      await tester.pumpWidget(material);
+      // verify that pumping again doesn't recompute the clip
+      // even though the widget itself is new (the shape doesn't change identity)
+      logs.add('--1');
+      await tester.pumpWidget(buildMaterial());
+      // verify that Material passes the TextDirection on to its shape when it's transparent
+      logs.add('--2');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      // verify that changing the text direction from LTR to RTL has an effect
+      // even though the widget itself is identical
+      logs.add('--3');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: material,
+      ));
+      // verify that pumping again with a text direction has no effect
+      logs.add('--4');
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.rtl,
+        child: buildMaterial(),
+      ));
+      logs.add('--5');
+      // verify that changing the text direction and the widget at the same time
+      // works as expected
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: material,
+      ));
+      expect(logs, <String>[
+        '--0',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) null',
+        '--1',
+        '--2',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        '--3',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.rtl',
+        '--4',
+        '--5',
+        'getOuterPath Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+        'paint Rect.fromLTRB(0.0, 0.0, 800.0, 600.0) TextDirection.ltr',
+      ]);
+    });
   });
 
   group('PhysicalModels', () {
@@ -246,7 +425,7 @@ void main() {
         Material(
           key: materialKey,
           type: MaterialType.canvas,
-          child: const SizedBox(width: 100.0, height: 100.0)
+          child: const SizedBox(width: 100.0, height: 100.0),
         )
       );
 
@@ -436,7 +615,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -456,7 +635,7 @@ void main() {
             side: BorderSide(
               width: 2.0,
               color: Color(0xFF0000FF),
-            )
+            ),
           ),
         )
       );
@@ -479,5 +658,92 @@ void main() {
       final RenderBox box = tester.renderObject(find.byKey(materialKey));
       expect(box, isNot(paints..circle()));
     });
+
+    testWidgets('border is painted above child by default', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile(
+          'material.border_paint_above.png',
+          version: null,
+        ),
+        skip: !isLinux,
+      );
+    }, skip: isBrowser);
+
+    testWidgets('border is painted below child when specified', (WidgetTester tester) async {
+      final Key painterKey = UniqueKey();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: RepaintBoundary(
+            key: painterKey,
+            child: Card(
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Material(
+                  clipBehavior: Clip.hardEdge,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    side: const BorderSide(color: Colors.grey, width: 6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  borderOnForeground: false,
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.green,
+                        height: 150,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ));
+
+      await expectLater(
+        find.byKey(painterKey),
+        matchesGoldenFile(
+          'material.border_paint_below.png',
+          version: null,
+        ),
+        skip: !isLinux,
+      );
+    }, skip: isBrowser);
   });
 }

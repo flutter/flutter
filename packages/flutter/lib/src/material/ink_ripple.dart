@@ -128,8 +128,7 @@ class InkRipple extends InteractiveInkFeature {
        _textDirection = textDirection,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
-       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved)
-  {
+       super(controller: controller, referenceBox: referenceBox, color: color, onRemoved: onRemoved) {
     assert(_borderRadius != null);
 
     // Immediately begin fading-in the initial splash.

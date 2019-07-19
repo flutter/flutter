@@ -36,6 +36,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 Future<void> main() async {
+  AutomatedTestWidgetsFlutterBinding();
   TestImageProvider.image = await decodeImageFromList(Uint8List.fromList(kTransparentImage));
 
   testWidgets('DecoratedBox handles loading images', (WidgetTester tester) async {
@@ -97,8 +98,8 @@ Future<void> main() async {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          color: Colors.teal[600]
-        )
+          color: Colors.teal[600],
+        ),
       )
     );
   });
@@ -112,9 +113,9 @@ Future<void> main() async {
           decoration: BoxDecoration(border: Border.all(width: 10.0)),
           child: Container(
             width: 25.0,
-            height: 25.0
-          )
-        )
+            height: 25.0,
+          ),
+        ),
       )
     );
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
@@ -243,7 +244,7 @@ Future<void> main() async {
       ..path()
       ..path()
       ..path()
-      ..rect(rect: Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
+      ..rect(rect: const Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
       ..drrect(
         outer: RRect.fromLTRBAndCorners(
           350.0, 200.0, 450.0, 300.0,
@@ -260,7 +261,7 @@ Future<void> main() async {
           bottomLeft: const Radius.circular(-10.0),
         ),
       )
-      ..circle(x: 400.0, y: 350.0, radius: 45.0)
+      ..circle(x: 400.0, y: 350.0, radius: 45.0),
     );
   });
 
@@ -283,7 +284,7 @@ Future<void> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 
@@ -320,7 +321,7 @@ Future<void> main() async {
           onTap: () {
             itemsTapped.add(1);
           },
-        )
+        ),
       );
     }
 

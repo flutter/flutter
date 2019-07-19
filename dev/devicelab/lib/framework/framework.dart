@@ -11,6 +11,7 @@ import 'dart:isolate';
 import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'running_processes.dart';
 import 'utils.dart';
 
 /// Maximum amount of time a single task is allowed to take to run.
@@ -82,7 +83,35 @@ class _TaskRunner {
     try {
       _taskStarted = true;
       print('Running task.');
-      final TaskResult result = await _performTask().timeout(taskTimeout);
+      final String exe = Platform.isWindows ? '.exe' : '';
+      section('Checking running Dart$exe processes');
+      final Set<RunningProcessInfo> beforeRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toSet();
+      beforeRunningDartInstances.forEach(print);
+
+      TaskResult result = await _performTask().timeout(taskTimeout);
+
+      section('Checking running Dart$exe processes after task...');
+      final List<RunningProcessInfo> afterRunningDartInstances = await getRunningProcesses(
+        processName: 'dart$exe',
+      ).toList();
+      for (final RunningProcessInfo info in afterRunningDartInstances) {
+        if (!beforeRunningDartInstances.contains(info)) {
+          print('$info was leaked by this test.');
+          // TODO(dnfield): remove this special casing after https://github.com/flutter/flutter/issues/29141 is resolved.
+          if (result is TaskResultCheckProcesses) {
+            result = TaskResult.failure('This test leaked dart processes');
+          }
+          final bool killed = await killProcess(info.pid);
+          if (!killed) {
+            print('Failed to kill process ${info.pid}.');
+          } else {
+            print('Killed process id ${info.pid}.');
+          }
+        }
+      }
+
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
@@ -230,4 +259,8 @@ class TaskResult {
 
     return json;
   }
+}
+
+class TaskResultCheckProcesses extends TaskResult {
+  TaskResultCheckProcesses() : super.success(null);
 }

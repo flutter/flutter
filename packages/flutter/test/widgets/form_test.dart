@@ -11,14 +11,19 @@ void main() {
     String fieldValue;
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              key: formKey,
-              child: TextFormField(
-                onSaved: (String value) { fieldValue = value; },
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    onSaved: (String value) { fieldValue = value; },
+                  ),
+                ),
               ),
             ),
           ),
@@ -33,7 +38,7 @@ void main() {
     Future<void> checkText(String testValue) async {
       await tester.enterText(find.byType(TextFormField), testValue);
       formKey.currentState.save();
-      // pump'ing is unnecessary because callback happens regardless of frames
+      // Pumping is unnecessary because callback happens regardless of frames.
       expect(fieldValue, equals(testValue));
     }
 
@@ -45,13 +50,18 @@ void main() {
     String fieldValue;
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              child: TextField(
-                onChanged: (String value) { fieldValue = value; },
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextField(
+                    onChanged: (String value) { fieldValue = value; },
+                  ),
+                ),
               ),
             ),
           ),
@@ -78,15 +88,20 @@ void main() {
     String errorText(String value) => value + '/error';
 
     Widget builder(bool autovalidate) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              key: formKey,
-              autovalidate: autovalidate,
-              child: TextFormField(
-                validator: errorText,
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  autovalidate: autovalidate,
+                  child: TextFormField(
+                    validator: errorText,
+                  ),
+                ),
               ),
             ),
           ),
@@ -129,22 +144,27 @@ void main() {
     String errorText(String input) => '${fieldKey.currentState.value}/error';
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              key: formKey,
-              autovalidate: true,
-              child: ListView(
-                children: <Widget>[
-                  TextFormField(
-                    key: fieldKey,
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  autovalidate: true,
+                  child: ListView(
+                    children: <Widget>[
+                      TextFormField(
+                        key: fieldKey,
+                      ),
+                      TextFormField(
+                        validator: errorText,
+                      ),
+                    ],
                   ),
-                  TextFormField(
-                    validator: errorText,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
@@ -172,14 +192,19 @@ void main() {
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              child: TextFormField(
-                key: inputKey,
-                initialValue: 'hello',
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    key: inputKey,
+                    initialValue: 'hello',
+                  ),
+                ),
               ),
             ),
           ),
@@ -212,14 +237,19 @@ void main() {
     final GlobalKey<FormFieldState<String>> inputKey = GlobalKey<FormFieldState<String>>();
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              child: TextFormField(
-                key: inputKey,
-                controller: controller,
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    key: inputKey,
+                    controller: controller,
+                  ),
+                ),
               ),
             ),
           ),
@@ -254,16 +284,21 @@ void main() {
     final TextEditingController controller = TextEditingController(text: 'Plover');
 
     Widget builder() {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              key: formKey,
-              child: TextFormField(
-                key: inputKey,
-                controller: controller,
-                // initialValue is 'Plover'
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: TextFormField(
+                    key: inputKey,
+                    controller: controller,
+                    // initialValue is 'Plover'
+                  ),
+                ),
               ),
             ),
           ),
@@ -301,14 +336,19 @@ void main() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Center(
-              child: Material(
-                child: Form(
-                  child: TextFormField(
-                    key: inputKey,
-                    controller: currentController,
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: Form(
+                      child: TextFormField(
+                        key: inputKey,
+                        controller: currentController,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -396,16 +436,21 @@ void main() {
     String fieldValue;
 
     Widget builder(bool remove) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(
-          child: Material(
-            child: Form(
-              key: formKey,
-              child: remove ? Container() : TextFormField(
-                autofocus: true,
-                onSaved: (String value) { fieldValue = value; },
-                validator: (String value) { return value.isEmpty ? null : 'yes'; }
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  key: formKey,
+                  child: remove ? Container() : TextFormField(
+                    autofocus: true,
+                    onSaved: (String value) { fieldValue = value; },
+                    validator: (String value) { return value.isEmpty ? null : 'yes'; },
+                  ),
+                ),
               ),
             ),
           ),

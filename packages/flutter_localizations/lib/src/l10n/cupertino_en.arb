@@ -1,0 +1,86 @@
+{
+  "datePickerHourSemanticsLabelOne": "$hour o'clock",
+  "datePickerHourSemanticsLabelOther": "$hour o'clock",
+  "@datePickerHourSemanticsLabel": {
+    "description": "Accessibility announcement for the selected hour on a time picker such as '5 o'clock' or '5点'",
+    "plural": "hour"
+  },
+
+  "datePickerMinuteSemanticsLabelOne": "1 minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "@datePickerMinuteSemanticsLabel": {
+    "description": "Accessibility announcement for the selected minute on a time picker such as '15 minutes' or '15分'",
+    "plural": "minute"
+  },
+
+  "datePickerDateOrder": "mdy",
+  "@datePickerDateOrder": {
+    "description": "Choose a standard order for the locale to arrange day, month and year in a date. Do not transliterate the abbreviations themselves. The only options are dmy, mdy, ymd and ydm. For instance, in French, use dmy (for day month year) but do not translate into jma (for jour mois année). "
+  },
+
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "@datePickerDateTimeOrder": {
+    "description": "Choose a standard order for the locale to arrange date, time and am/pm in a datetime. Do not transliterate the choices themselves. The only options are date_time_dayPeriod, date_dayPeriod_time, time_dayPeriod_date and dayPeriod_time_date where 'dayPeriod' is am/pm. You can ignore the position of dayPeriod if the locale uses 24h time only. For instance, in French, use date_time_dayPeriod, but do not translate into date_heure_périodeDuJour or some such."
+  },
+
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
+  },
+
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker when it's not using the 24h format. Reference the text iOS uses such as in the iOS clock app."
+  },
+
+  "todayLabel": "Today",
+  "@todayLabel": {
+    "description": "A label shown in the date picker when the date is today."
+  },
+
+  "alertDialogLabel": "Alert",
+  "@alertDialogLabel": {
+    "description": "The accessibility audio announcement made when an iOS style alert dialog is opened."
+  },
+
+  "timerPickerHourLabelOne": "hour",
+  "timerPickerHourLabelOther": "hours",
+  "@timerPickerHourLabel": {
+    "description": "The label adjacent to an hour integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "hour"
+  },
+
+  "timerPickerMinuteLabelOne": "min.",
+  "timerPickerMinuteLabelOther": "min.",
+  "@timerPickerMinuteLabel": {
+    "description": "The label adjacent to a minute integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "minute"
+  },
+
+  "timerPickerSecondLabelOne": "sec.",
+  "timerPickerSecondLabelOther": "sec.",
+  "@timerPickerSecondLabel": {
+    "description": "The label adjacent to a second integer number in a countdown timer. The reference abbreviation is what iOS does in the stock clock app's countdown timer.",
+    "plural": "second"
+  },
+
+  "cutButtonLabel": "Cut",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "copyButtonLabel": "Copy",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "pasteButtonLabel": "Paste",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  },
+
+  "selectAllButtonLabel": "Select All",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items. The reference abbreviation is what iOS shows on text selection toolbars."
+  }
+}

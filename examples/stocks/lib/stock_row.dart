@@ -14,7 +14,7 @@ class StockRow extends StatelessWidget {
     this.stock,
     this.onPressed,
     this.onDoubleTap,
-    this.onLongPressed
+    this.onLongPressed,
   }) : super(key: ObjectKey(stock));
 
   final Stock stock;
@@ -51,8 +51,8 @@ class StockRow extends StatelessWidget {
               margin: const EdgeInsets.only(right: 5.0),
               child: Hero(
                 tag: stock,
-                child: StockArrow(percentChange: stock.percentChange)
-              )
+                child: StockArrow(percentChange: stock.percentChange),
+              ),
             ),
             Expanded(
               child: Row(
@@ -61,28 +61,28 @@ class StockRow extends StatelessWidget {
                     flex: 2,
                     child: Text(
                       stock.symbol
-                    )
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       lastSale,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                   Expanded(
                     child: Text(
                       changeInPrice,
-                      textAlign: TextAlign.right
-                    )
+                      textAlign: TextAlign.right,
+                    ),
                   ),
                 ],
                 crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: DefaultTextStyle.of(context).style.textBaseline
-              )
+                textBaseline: DefaultTextStyle.of(context).style.textBaseline,
+              ),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }

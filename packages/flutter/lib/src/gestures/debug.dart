@@ -15,6 +15,15 @@ import 'package:flutter/foundation.dart';
 /// This has no effect in release builds.
 bool debugPrintHitTestResults = false;
 
+/// Whether to print the details of each mouse hover event to the console.
+///
+/// When this is set, in debug mode, any time a mouse hover event is triggered
+/// by the [GestureBinding], the results are dumped to the console.
+///
+/// This has no effect in release builds, and only applies to mouse hover
+/// events.
+bool debugPrintMouseHoverEvents = false;
+
 /// Prints information about gesture recognizers and gesture arenas.
 ///
 /// This flag only has an effect in debug mode.
@@ -45,8 +54,8 @@ bool debugPrintRecognizerCallbacksTrace = false;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/gestures/gestures-library.html] for
-/// a complete list.
+/// See [the gestures library](gestures/gestures-library.html) for a complete
+/// list.
 bool debugAssertAllGesturesVarsUnset(String reason) {
   assert(() {
     if (debugPrintHitTestResults ||

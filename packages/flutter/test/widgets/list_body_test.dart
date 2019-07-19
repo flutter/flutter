@@ -36,10 +36,10 @@ void main() {
     expectRects(
       tester,
       <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 150.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 300.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 450.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 150.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 300.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 450.0, 800.0, 150.0),
       ],
     );
   });
@@ -53,10 +53,10 @@ void main() {
     expectRects(
       tester,
       <Rect>[
-        Rect.fromLTWH(0.0, 450.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 300.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 150.0, 800.0, 150.0),
-        Rect.fromLTWH(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 450.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 300.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 150.0, 800.0, 150.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 150.0),
       ],
     );
   });
@@ -76,10 +76,10 @@ void main() {
     expectRects(
       tester,
       <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(200.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(400.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(600.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(0.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(200.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(400.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(600.0, 0.0, 200.0, 600.0),
       ],
     );
   });
@@ -99,10 +99,10 @@ void main() {
     expectRects(
       tester,
       <Rect>[
-        Rect.fromLTWH(600.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(400.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(200.0, 0.0, 200.0, 600.0),
-        Rect.fromLTWH(0.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(600.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(400.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(200.0, 0.0, 200.0, 600.0),
+        const Rect.fromLTWH(0.0, 0.0, 200.0, 600.0),
       ],
     );
   });

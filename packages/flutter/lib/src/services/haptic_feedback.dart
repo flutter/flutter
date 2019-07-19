@@ -21,7 +21,7 @@ class HapticFeedback {
   /// On Android, this uses the platform haptic feedback API to simulate a
   /// response to a long press (`HapticFeedbackConstants.LONG_PRESS`).
   static Future<void> vibrate() async {
-    await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
+    await SystemChannels.platform.invokeMethod<void>('HapticFeedback.vibrate');
   }
 
   /// Provides a haptic feedback corresponding a collision impact with a light mass.
@@ -32,7 +32,7 @@ class HapticFeedback {
   ///
   /// On Android, this uses `HapticFeedbackConstants.VIRTUAL_KEY`.
   static Future<void> lightImpact() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
       'HapticFeedbackType.lightImpact',
     );
@@ -46,7 +46,7 @@ class HapticFeedback {
   ///
   /// On Android, this uses `HapticFeedbackConstants.KEYBOARD_TAP`.
   static Future<void> mediumImpact() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
       'HapticFeedbackType.mediumImpact',
     );
@@ -61,7 +61,7 @@ class HapticFeedback {
   /// On Android, this uses `HapticFeedbackConstants.CONTEXT_CLICK` on API levels
   /// 23 and above. This call has no effects on Android API levels below 23.
   static Future<void> heavyImpact() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
       'HapticFeedbackType.heavyImpact',
     );
@@ -74,7 +74,7 @@ class HapticFeedback {
   ///
   /// On Android, this uses `HapticFeedbackConstants.CLOCK_TICK`.
   static Future<void> selectionClick() async {
-    await SystemChannels.platform.invokeMethod(
+    await SystemChannels.platform.invokeMethod<void>(
       'HapticFeedback.vibrate',
       'HapticFeedbackType.selectionClick',
     );

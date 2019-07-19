@@ -37,7 +37,7 @@ const double _kMinButtonSize = 48.0;
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
-/// {@tool snippet --template=stateful_widget}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// This sample shows an `IconButton` that uses the Material icon "volume_up" to
 /// increase the volume.
@@ -47,11 +47,67 @@ const double _kMinButtonSize = 48.0;
 /// ```
 ///
 /// ```dart
-/// Widget build(BuildContext) {
-///   return IconButton(
-///     icon: Icon(Icons.volume_up),
-///     tooltip: 'Increase volume by 10%',
-///     onPressed: () { setState(() { _volume *= 1.1; }); },
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: Column(
+///         mainAxisSize: MainAxisSize.min,
+///         children: <Widget>[
+///           IconButton(
+///             icon: Icon(Icons.volume_up),
+///             tooltip: 'Increase volume by 10',
+///             onPressed: () {
+///               setState(() {
+///                 _volume += 10;
+///               });
+///             },
+///           ),
+///           Text('Volume : $_volume')
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ### Adding a filled background
+///
+/// Icon buttons don't support specifying a background color or other
+/// background decoration because typically the icon is just displayed
+/// on top of the parent widget's background. Icon buttons that appear
+/// in [AppBar.actions] are an example of this.
+///
+/// It's easy enough to create an icon button with a filled background
+/// using the [Ink] widget. The [Ink] widget renders a decoration on
+/// the underlying [Material] along with the splash and highlight
+/// [InkResponse] contributed by descendant widgets.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// In this sample the icon button's background color is defined with an [Ink]
+/// widget whose child is an [IconButton]. The icon button's filled background
+/// is a light shade of blue, it's a filled circle, and it's as big as the
+/// button is.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Container(
+///       child: Ink(
+///         decoration: ShapeDecoration(
+///           color: Colors.lightBlue,
+///           shape: CircleBorder(),
+///         ),
+///         child: IconButton(
+///           icon: Icon(Icons.android),
+///           color: Colors.white,
+///           onPressed: () {
+///             print("filled background");
+///           },
+///         ),
+///       ),
+///     ),
 ///   );
 /// }
 /// ```
@@ -86,11 +142,14 @@ class IconButton extends StatelessWidget {
     this.alignment = Alignment.center,
     @required this.icon,
     this.color,
+    this.focusColor,
+    this.hoverColor,
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
     @required this.onPressed,
-    this.tooltip
+    this.focusNode,
+    this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -139,6 +198,16 @@ class IconButton extends StatelessWidget {
   /// See [Icon], [ImageIcon].
   final Widget icon;
 
+  /// The color for the button's icon when it has the input focus.
+  ///
+  /// Defaults to [ThemeData.focusColor] of the ambient theme.
+  final Color focusColor;
+
+  /// The color for the button's icon when a pointer is hovering over it.
+  ///
+  /// Defaults to [ThemeData.hoverColor] of the ambient theme.
+  final Color hoverColor;
+
   /// The color to use for the icon inside the button, if the icon is enabled.
   /// Defaults to leaving this up to the [icon] widget.
   ///
@@ -151,7 +220,7 @@ class IconButton extends StatelessWidget {
   ///   color: Colors.blue,
   ///   onPressed: _handleTap,
   ///   icon: Icons.widgets,
-  /// ),
+  /// )
   /// ```
   final Color color;
 
@@ -186,6 +255,14 @@ class IconButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
+  /// An optional focus node to use for requesting focus when pressed.
+  ///
+  /// If not supplied, the button will create and host its own [FocusNode].
+  ///
+  /// If supplied, the given focusNode will be _hosted_ by this widget. See
+  /// [FocusNode] for more information on what that implies.
+  final FocusNode focusNode;
+
   /// Text that describes the action that will occur when the button is pressed.
   ///
   /// This text is displayed when the user long-presses on the button and is
@@ -201,25 +278,21 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
-    Widget result = Semantics(
-      button: true,
-      enabled: onPressed != null,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
-        child: Padding(
-          padding: padding,
-          child: SizedBox(
-            height: iconSize,
-            width: iconSize,
-            child: Align(
-              alignment: alignment,
-              child: IconTheme.merge(
-                data: IconThemeData(
-                  size: iconSize,
-                  color: currentColor
-                ),
-                child: icon
+    Widget result = ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
+      child: Padding(
+        padding: padding,
+        child: SizedBox(
+          height: iconSize,
+          width: iconSize,
+          child: Align(
+            alignment: alignment,
+            child: IconTheme.merge(
+              data: IconThemeData(
+                size: iconSize,
+                color: currentColor,
               ),
+              child: icon,
             ),
           ),
         ),
@@ -229,18 +302,28 @@ class IconButton extends StatelessWidget {
     if (tooltip != null) {
       result = Tooltip(
         message: tooltip,
-        child: result
+        child: result,
       );
     }
-    return InkResponse(
-      onTap: onPressed,
-      child: result,
-      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-      splashColor: splashColor ?? Theme.of(context).splashColor,
-      radius: math.max(
-        Material.defaultSplashRadius,
-        (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-        // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: Focus(
+        focusNode: focusNode,
+        child: InkResponse(
+          onTap: onPressed,
+          child: result,
+          focusColor: focusColor ?? Theme.of(context).focusColor,
+          hoverColor: hoverColor ?? Theme.of(context).hoverColor,
+          highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+          splashColor: splashColor ?? Theme.of(context).splashColor,
+          radius: math.max(
+            Material.defaultSplashRadius,
+            (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+          ),
+        ),
       ),
     );
   }
@@ -249,7 +332,15 @@ class IconButton extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
+    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }
 }

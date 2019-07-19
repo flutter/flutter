@@ -14,7 +14,7 @@ class SyntaxHighlighterStyle {
     this.stringStyle,
     this.punctuationStyle,
     this.classStyle,
-    this.constantStyle
+    this.constantStyle,
   });
 
   static SyntaxHighlighterStyle lightThemeStyle() {
@@ -26,7 +26,7 @@ class SyntaxHighlighterStyle {
       stringStyle: const TextStyle(color: Color(0xFF43A047)),
       punctuationStyle: const TextStyle(color: Color(0xFF000000)),
       classStyle: const TextStyle(color: Color(0xFF512DA8)),
-      constantStyle: const TextStyle(color: Color(0xFF795548))
+      constantStyle: const TextStyle(color: Color(0xFF795548)),
     );
   }
 
@@ -39,7 +39,7 @@ class SyntaxHighlighterStyle {
       stringStyle: const TextStyle(color: Color(0xFF009688)),
       punctuationStyle: const TextStyle(color: Color(0xFFFFFFFF)),
       classStyle: const TextStyle(color: Color(0xFF009688)),
-      constantStyle: const TextStyle(color: Color(0xFF795548))
+      constantStyle: const TextStyle(color: Color(0xFF795548)),
     );
   }
 
@@ -53,7 +53,7 @@ class SyntaxHighlighterStyle {
   final TextStyle constantStyle;
 }
 
-abstract class SyntaxHighlighter { // ignore: one_member_abstracts
+abstract class SyntaxHighlighter {
   TextSpan format(String src);
 }
 
@@ -72,11 +72,11 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
     'finally', 'for', 'get', 'if', 'implements', 'import', 'in', 'is', 'library',
     'new', 'null', 'operator', 'part', 'rethrow', 'return', 'set', 'static',
     'super', 'switch', 'sync', 'this', 'throw', 'true', 'try', 'typedef', 'var',
-    'void', 'while', 'with', 'yield'
+    'void', 'while', 'with', 'yield',
   ];
 
   static const List<String> _builtInTypes = <String>[
-    'int', 'double', 'num', 'bool'
+    'int', 'double', 'num', 'bool',
   ];
 
   String _src;
@@ -125,7 +125,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.comment,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -146,7 +146,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.comment,
           startComment,
-          endComment
+          endComment,
         ));
 
         if (eof)
@@ -160,7 +160,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -170,7 +170,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -180,7 +180,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -190,7 +190,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -200,7 +200,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -210,7 +210,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.string,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -220,7 +220,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.number,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -240,7 +240,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.punctuation,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -250,7 +250,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans.add(_HighlightSpan(
           _HighlightType.keyword,
           _scanner.lastMatch.start,
-          _scanner.lastMatch.end
+          _scanner.lastMatch.end,
         ));
         continue;
       }
@@ -276,7 +276,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
           _spans.add(_HighlightSpan(
             type,
             _scanner.lastMatch.start,
-            _scanner.lastMatch.end
+            _scanner.lastMatch.end,
           ));
         }
       }
@@ -299,7 +299,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
         _spans[i] = _HighlightSpan(
           _spans[i].type,
           _spans[i].start,
-          _spans[i + 1].end
+          _spans[i + 1].end,
         );
         _spans.removeAt(i + 1);
       }

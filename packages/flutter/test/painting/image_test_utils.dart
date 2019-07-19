@@ -49,3 +49,8 @@ Future<ui.Image> createTestImage() {
   ui.decodeImageFromList(Uint8List.fromList(kTransparentImage), uiImage.complete);
   return uiImage.future;
 }
+
+class FakeImageConfiguration implements ImageConfiguration {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}

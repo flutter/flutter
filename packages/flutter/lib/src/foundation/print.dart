@@ -41,10 +41,11 @@ void debugPrintSynchronously(String message, { int wrapWidth }) {
 /// Implementation of [debugPrint] that throttles messages. This avoids dropping
 /// messages on platforms that rate-limit their logging (for example, Android).
 void debugPrintThrottled(String message, { int wrapWidth }) {
+  final List<String> messageLines = message?.split('\n') ?? <String>['null'];
   if (wrapWidth != null) {
-    _debugPrintBuffer.addAll(message.split('\n').expand<String>((String line) => debugWordWrap(line, wrapWidth)));
+    _debugPrintBuffer.addAll(messageLines.expand<String>((String line) => debugWordWrap(line, wrapWidth)));
   } else {
-    _debugPrintBuffer.addAll(message.split('\n'));
+    _debugPrintBuffer.addAll(messageLines);
   }
   if (!_debugPrintScheduled)
     _debugPrintTask();
@@ -87,6 +88,7 @@ Future<void> get debugPrintDone => _debugPrintCompleter?.future ?? Future<void>.
 
 final RegExp _indentPattern = RegExp('^ *(?:[-+*] |[0-9]+[.):] )?');
 enum _WordWrapParseMode { inSpace, inWord, atBreak }
+
 /// Wraps the given string at the given width.
 ///
 /// Wrapping occurs at space characters (U+0020). Lines that start with an

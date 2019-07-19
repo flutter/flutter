@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -19,6 +21,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   needs compositing\n'
         '   parentData: MISSING\n'
         '   constraints: MISSING\n'
         '   size: MISSING\n'
@@ -35,6 +38,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '   needs compositing\n'
         '   parentData: <none>\n'
         '   constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   size: Size(800.0, 600.0)\n'
@@ -71,7 +75,8 @@ void main() {
     expect(
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderViewport#00000 NEEDS-PAINT\n'
+        'RenderViewport#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
+        ' │ needs compositing\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -80,7 +85,7 @@ void main() {
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' │ anchor: 0.0\n'
         ' │\n'
-        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -96,7 +101,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 400.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -113,7 +118,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 800.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -130,7 +135,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 1200.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -146,7 +151,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         '   │ parentData: paintOffset=Offset(0.0, 1600.0) (can use size)\n'
         '   │ constraints: SliverConstraints(AxisDirection.down,\n'
         '   │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -199,7 +204,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -253,7 +258,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
@@ -342,7 +347,7 @@ void main() {
     expect(_getPaintOrigin(sliverD), const Offset(300.0, 0.0));
     expect(_getPaintOrigin(sliverE), const Offset(700.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
@@ -396,7 +401,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -470,7 +475,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -524,7 +529,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
@@ -578,7 +583,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(300.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
@@ -632,7 +637,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -749,4 +754,182 @@ void main() {
     expect(sliver.paintBounds, expectedRect);
     expect(sliver.semanticBounds, expectedRect);
   });
+
+  test('precedingScrollExtent is 0.0 for first Sliver in list', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver,
+      ],
+    );
+    layout(root);
+
+    expect(sliver.constraints.precedingScrollExtent, 0.0);
+  });
+
+  test('precedingScrollExtent accumulates over multiple Slivers', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
+  });
+
+  test('precedingScrollExtent is not impacted by scrollOffset', () {
+    const double viewportWidth = 800.0;
+    final RenderSliver sliver1 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver2 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderSliver sliver3 = RenderSliverToBoxAdapter(
+      child: RenderSizedBox(const Size(viewportWidth, 150.0)),
+    );
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.fixed(100.0),
+      children: <RenderSliver>[
+        sliver1,
+        sliver2,
+        sliver3,
+      ],
+    );
+    layout(root);
+
+    // The 3rd Sliver comes after 300.0px of preceding scroll extent by first 2 Slivers.
+    // In this test a ViewportOffset is applied to simulate a scrollOffset. That
+    // offset is not expected to impact the precedingScrollExtent.
+    expect(sliver3.constraints.precedingScrollExtent, 300.0);
+  });
+
+  group('hit testing', () {
+    test('SliverHitTestResult wrapping HitTestResult', () {
+      final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
+      final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
+      final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
+      final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
+
+      final HitTestResult wrapped = MyHitTestResult()
+        ..publicPushTransform(transform);
+      wrapped.add(entry1);
+      expect(wrapped.path, equals(<HitTestEntry>[entry1]));
+      expect(entry1.transform, transform);
+
+      final SliverHitTestResult wrapping = SliverHitTestResult.wrap(wrapped);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1]));
+      expect(wrapping.path, same(wrapped.path));
+
+      wrapping.add(entry2);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2]));
+      expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2]));
+      expect(entry2.transform, transform);
+
+      wrapped.add(entry3);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+      expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+      expect(entry3.transform, transform);
+    });
+
+    test('addWithAxisOffset', () {
+      final SliverHitTestResult result = SliverHitTestResult();
+      final List<double> mainAxisPositions = <double>[];
+      final List<double> crossAxisPositions = <double>[];
+      const Offset paintOffsetDummy = Offset.zero;
+
+      bool isHit = result.addWithAxisOffset(
+        paintOffset: paintOffsetDummy,
+        mainAxisOffset: 0.0,
+        crossAxisOffset: 0.0,
+        mainAxisPosition: 0.0,
+        crossAxisPosition: 0.0,
+        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
+          expect(result, isNotNull);
+          mainAxisPositions.add(mainAxisPosition);
+          crossAxisPositions.add(crossAxisPosition);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(mainAxisPositions.single, 0.0);
+      expect(crossAxisPositions.single, 0.0);
+      mainAxisPositions.clear();
+      crossAxisPositions.clear();
+
+      isHit = result.addWithAxisOffset(
+        paintOffset: paintOffsetDummy,
+        mainAxisOffset: 5.0,
+        crossAxisOffset: 6.0,
+        mainAxisPosition: 10.0,
+        crossAxisPosition: 20.0,
+        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
+          expect(result, isNotNull);
+          mainAxisPositions.add(mainAxisPosition);
+          crossAxisPositions.add(crossAxisPosition);
+          return false;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(mainAxisPositions.single, 10.0 - 5.0);
+      expect(crossAxisPositions.single, 20.0 - 6.0);
+      mainAxisPositions.clear();
+      crossAxisPositions.clear();
+
+      isHit = result.addWithAxisOffset(
+        paintOffset: paintOffsetDummy,
+        mainAxisOffset: -5.0,
+        crossAxisOffset: -6.0,
+        mainAxisPosition: 10.0,
+        crossAxisPosition: 20.0,
+        hitTest: (SliverHitTestResult result, { double mainAxisPosition, double crossAxisPosition }) {
+          expect(result, isNotNull);
+          mainAxisPositions.add(mainAxisPosition);
+          crossAxisPositions.add(crossAxisPosition);
+          return false;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(mainAxisPositions.single, 10.0 + 5.0);
+      expect(crossAxisPositions.single, 20.0 + 6.0);
+      mainAxisPositions.clear();
+      crossAxisPositions.clear();
+    });
+  });
+}
+
+class _DummyHitTestTarget implements HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
+}
+
+class MyHitTestResult extends HitTestResult {
+  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
 }

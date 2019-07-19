@@ -25,14 +25,19 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
     defaultConfig {
         minSdkVersion 16
+        {{#androidX}}
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        {{/androidX}}
+        {{^androidX}}
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        {{/androidX}}
     }
     lintOptions {
         disable 'InvalidPackage'

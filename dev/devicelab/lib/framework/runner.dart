@@ -23,7 +23,12 @@ const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) async {
+Future<Map<String, dynamic>> runTask(
+  String taskName, {
+  bool silent = false,
+  String localEngine,
+  String localEngineSrcPath,
+}) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
@@ -32,6 +37,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
+    if (localEngine != null) '-DlocalEngine=$localEngine',
+    if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
     taskExecutable,
   ]);
 
@@ -41,16 +48,16 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     runnerFinished = true;
   });
 
-  final Completer<int> port = Completer<int>();
+  final Completer<Uri> uri = Completer<Uri>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    if (!port.isCompleted) {
-      final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
-      if (portValue != null)
-        port.complete(portValue);
+    if (!uri.isCompleted) {
+      final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
+      if (serviceUri != null)
+        uri.complete(serviceUri);
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -66,7 +73,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 
   String waitingFor = 'connection';
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(await port.future);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
     waitingFor = 'task completion';
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
@@ -88,8 +95,15 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   }
 }
 
-Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
-  final String url = 'ws://localhost:$vmServicePort/ws';
+Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
+  final List<String> pathSegments = <String>[];
+  if (vmServiceUri.pathSegments.isNotEmpty) {
+    // Add authentication code.
+    pathSegments.add(vmServiceUri.pathSegments[0]);
+  }
+  pathSegments.add('ws');
+  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
+      pathSegments).toString();
   final DateTime started = DateTime.now();
 
   // TODO(yjbanov): due to lack of imagination at the moment the handshake with

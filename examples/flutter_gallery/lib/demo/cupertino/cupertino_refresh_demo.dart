@@ -32,26 +32,37 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
         return contacts[random.nextInt(contacts.length)]
             // Randomly adds a telephone icon next to the contact or not.
             ..add(random.nextBool().toString());
-      }
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTextStyle(
-      style: const TextStyle(
-        fontFamily: '.SF UI Text',
-        inherit: false,
-        fontSize: 17.0,
-        color: CupertinoColors.black,
-      ),
+      style: CupertinoTheme.of(context).textTheme.textStyle,
       child: CupertinoPageScaffold(
         child: DecoratedBox(
-          decoration: const BoxDecoration(color: Color(0xFFEFEFF4)),
+          decoration: BoxDecoration(
+            color: CupertinoTheme.of(context).brightness == Brightness.light
+                ? CupertinoColors.extraLightBackgroundGray
+                : CupertinoColors.darkBackgroundGray,
+          ),
           child: CustomScrollView(
+            // If left unspecified, the [CustomScrollView] appends an
+            // [AlwaysScrollableScrollPhysics]. Behind the scene, the ScrollableState
+            // will attach that [AlwaysScrollableScrollPhysics] to the output of
+            // [ScrollConfiguration.of] which will be a [ClampingScrollPhysics]
+            // on Android.
+            // To demonstrate the iOS behavior in this demo and to ensure that the list
+            // always scrolls, we specifically use a [BouncingScrollPhysics] combined
+            // with a [AlwaysScrollableScrollPhysics]
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
-                largeTitle: const Text('Cupertino Refresh'),
+                largeTitle: const Text('Refresh'),
+                // We're specifying a back label here because the previous page
+                // is a Material page. CupertinoPageRoutes could auto-populate
+                // these back labels.
                 previousPageTitle: 'Cupertino',
                 trailing: CupertinoDemoDocumentationButton(CupertinoRefreshControlDemo.routeName),
               ),
@@ -152,7 +163,7 @@ class _ListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CupertinoColors.white,
+      color: CupertinoTheme.of(context).scaffoldBackgroundColor,
       height: 60.0,
       padding: const EdgeInsets.only(top: 9.0),
       child: Row(
@@ -215,11 +226,11 @@ class _ListItem extends StatelessWidget {
                       letterSpacing: -0.41,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(left: 9.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 9.0),
                     child: Icon(
                       CupertinoIcons.info,
-                      color: CupertinoColors.activeBlue
+                      color: CupertinoTheme.of(context).primaryColor,
                     ),
                   ),
                 ],

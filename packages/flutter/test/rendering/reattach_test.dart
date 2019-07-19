@@ -29,7 +29,7 @@ class TestTree {
                 child: RenderPositionedBox(
                   child: child = RenderConstrainedBox(
                     additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
-                    child: RenderSemanticsAnnotations(label: 'Hello there foo', textDirection: TextDirection.ltr)
+                    child: RenderSemanticsAnnotations(label: 'Hello there foo', textDirection: TextDirection.ltr),
                   ),
                 ),
               ),

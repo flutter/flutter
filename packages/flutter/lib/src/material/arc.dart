@@ -224,7 +224,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///  * [MaterialRectCenterArcTween], which interpolates a rect along a circular
 ///    arc between the begin and end [Rect]'s centers.
 ///  * [Tween], for a discussion on how to use interpolation objects.
-///  * [MaterialPointArcTween], the analogue for [Offset] interpolation.
+///  * [MaterialPointArcTween], the analog for [Offset] interpolation.
 ///  * [RectTween], which does a linear rectangle interpolation.
 ///  * [Hero.createRectTween], which can be used to specify the tween that defines
 ///    a hero's path.
@@ -248,11 +248,11 @@ class MaterialRectArcTween extends RectTween {
     final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.beginId),
-      end: _cornerFor(end, diagonal.beginId)
+      end: _cornerFor(end, diagonal.beginId),
     );
     _endArc = MaterialPointArcTween(
       begin: _cornerFor(begin, diagonal.endId),
-      end: _cornerFor(end, diagonal.endId)
+      end: _cornerFor(end, diagonal.endId),
     );
     _dirty = false;
   }
@@ -340,7 +340,7 @@ class MaterialRectArcTween extends RectTween {
 ///  * [MaterialRectArcTween], A [Tween] that interpolates a [Rect] by having
 ///    its opposite corners follow circular arcs.
 ///  * [Tween], for a discussion on how to use interpolation objects.
-///  * [MaterialPointArcTween], the analogue for [Offset] interpolation.
+///  * [MaterialPointArcTween], the analog for [Offset] interpolation.
 ///  * [RectTween], which does a linear rectangle interpolation.
 ///  * [Hero.createRectTween], which can be used to specify the tween that defines
 ///    a hero's path.

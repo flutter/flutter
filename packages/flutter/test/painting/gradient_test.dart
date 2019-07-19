@@ -56,6 +56,7 @@ void main() {
         Color(0x3B3B3B3B),
         Color(0x77777777),
       ],
+      stops: <double>[0, 1],
     ));
   });
 
@@ -91,11 +92,84 @@ void main() {
       end: Alignment(-1.0, 0.0),
       colors: <Color>[
         Color(0x3B3B3B3B),
+        Color(0x55555555),
         Color(0x77777777),
       ],
       stops: <double>[
-        0.25,
-        0.75,
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('LinearGradient lerp test with unequal number of colors', () {
+    const LinearGradient testGradient1 = LinearGradient(
+      colors: <Color>[
+        Color(0x22222222),
+        Color(0x66666666),
+      ],
+    );
+    const LinearGradient testGradient2 = LinearGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x66666666),
+        Color(0x88888888),
+      ],
+    );
+
+    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const LinearGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x55555555),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('LinearGradient lerp test with stops and unequal number of colors', () {
+    const LinearGradient testGradient1 = LinearGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+      ],
+    );
+    const LinearGradient testGradient2 = LinearGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x48484848),
+        Color(0x88888888),
+      ],
+      stops: <double>[
+        0.5,
+        0.7,
+        1.0,
+      ],
+    );
+
+    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const LinearGradient(
+      colors: <Color>[
+        Color(0x3B3B3B3B),
+        Color(0x55555555),
+        Color(0x57575757),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        0.7,
+        1.0,
       ],
     ));
   });
@@ -121,8 +195,8 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       throwsAssertionError,
     );
@@ -130,8 +204,8 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
       returnsNormally,
     );
@@ -139,8 +213,8 @@ void main() {
       () {
         return const LinearGradient(
           begin: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
       returnsNormally,
     );
@@ -148,8 +222,8 @@ void main() {
       () {
         return const LinearGradient(
           begin: Alignment.topLeft,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       returnsNormally,
     );
@@ -160,8 +234,8 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       throwsAssertionError,
     );
@@ -170,8 +244,8 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
       returnsNormally,
     );
@@ -179,8 +253,8 @@ void main() {
       () {
         return const RadialGradient(
           center: AlignmentDirectional.topStart,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
       returnsNormally,
     );
@@ -188,8 +262,8 @@ void main() {
       () {
         return const RadialGradient(
           center: Alignment.topLeft,
-          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ]
-        ).createShader(Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
+          colors: <Color>[ Color(0xFFFFFFFF), Color(0xFFFFFFFF) ],
+        ).createShader(const Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
       returnsNormally,
     );
@@ -220,6 +294,10 @@ void main() {
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        1.0,
       ],
     ));
   });
@@ -259,11 +337,84 @@ void main() {
       radius: 15.0,
       colors: <Color>[
         Color(0x3B3B3B3B),
+        Color(0x55555555),
         Color(0x77777777),
       ],
       stops: <double>[
-        0.25,
-        0.75,
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('RadialGradient lerp test with unequal number of colors', () {
+    const RadialGradient testGradient1 = RadialGradient(
+      colors: <Color>[
+        Color(0x22222222),
+        Color(0x66666666),
+      ],
+    );
+    const RadialGradient testGradient2 = RadialGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x66666666),
+        Color(0x88888888),
+      ],
+    );
+
+    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const RadialGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x55555555),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('RadialGradient lerp test with stops and unequal number of colors', () {
+    const RadialGradient testGradient1 = RadialGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+      ],
+    );
+    const RadialGradient testGradient2 = RadialGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x48484848),
+        Color(0x88888888),
+      ],
+      stops: <double>[
+        0.5,
+        0.7,
+        1.0,
+      ],
+    );
+
+    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const RadialGradient(
+      colors: <Color>[
+        Color(0x3B3B3B3B),
+        Color(0x55555555),
+        Color(0x57575757),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        0.7,
+        1.0,
       ],
     ));
   });
@@ -308,6 +459,10 @@ void main() {
         Color(0x3B3B3B3B),
         Color(0x77777777),
       ],
+      stops: <double>[
+        0.0,
+        1.0,
+      ],
     ));
 
     final RadialGradient actual2 = RadialGradient.lerp(testGradient1, testGradient3, 0.5);
@@ -319,6 +474,10 @@ void main() {
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        1.0,
       ],
     ));
   });
@@ -351,6 +510,10 @@ void main() {
       colors: <Color>[
         Color(0x3B3B3B3B),
         Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        1.0,
       ],
     ));
   });
@@ -390,11 +553,84 @@ void main() {
       endAngle: math.pi * 3/4,
       colors: <Color>[
         Color(0x3B3B3B3B),
+        Color(0x55555555),
         Color(0x77777777),
       ],
       stops: <double>[
-        0.25,
-        0.75,
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('SweepGradient lerp test with unequal number of colors', () {
+    const SweepGradient testGradient1 = SweepGradient(
+      colors: <Color>[
+        Color(0x22222222),
+        Color(0x66666666),
+      ],
+    );
+    const SweepGradient testGradient2 = SweepGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x66666666),
+        Color(0x88888888),
+      ],
+    );
+
+    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const SweepGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x55555555),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        1.0,
+      ],
+    ));
+  });
+
+  test('SweepGradient lerp test with stops and unequal number of colors', () {
+    const SweepGradient testGradient1 = SweepGradient(
+      colors: <Color>[
+        Color(0x33333333),
+        Color(0x66666666),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+      ],
+    );
+    const SweepGradient testGradient2 = SweepGradient(
+      colors: <Color>[
+        Color(0x44444444),
+        Color(0x48484848),
+        Color(0x88888888),
+      ],
+      stops: <double>[
+        0.5,
+        0.7,
+        1.0,
+      ],
+    );
+
+    final SweepGradient actual = SweepGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const SweepGradient(
+      colors: <Color>[
+        Color(0x3B3B3B3B),
+        Color(0x55555555),
+        Color(0x57575757),
+        Color(0x77777777),
+      ],
+      stops: <double>[
+        0.0,
+        0.5,
+        0.7,
+        1.0,
       ],
     ));
   });
@@ -431,6 +667,10 @@ void main() {
         Color(0x33333333),
         Color(0x66666666),
       ],
+      stops: <double>[
+        0.0,
+        1.0,
+      ],
     );
     const RadialGradient testGradient2 = RadialGradient(
       center: Alignment(0.0, -1.0),
@@ -439,6 +679,10 @@ void main() {
         Color(0x3B3B3B3B),
         Color(0x77777777),
       ],
+      stops: <double>[
+        0.0,
+        1.0,
+      ],
     );
     const RadialGradient testGradient3 = RadialGradient(
       center: Alignment.topRight,
@@ -446,6 +690,10 @@ void main() {
       colors: <Color>[
         Color(0x44444444),
         Color(0x88888888),
+      ],
+      stops: <double>[
+        0.0,
+        1.0,
       ],
     );
 
@@ -511,7 +759,7 @@ void main() {
       ],
       stops: <double>[0.0, 1.0],
     );
-    final Rect rect = Rect.fromLTWH(1.0, 2.0, 3.0, 4.0);
+    const Rect rect = Rect.fromLTWH(1.0, 2.0, 3.0, 4.0);
     expect(test1a.createShader(rect), isNotNull);
     expect(test1b.createShader(rect), isNotNull);
     expect(() { test2a.createShader(rect); }, throwsArgumentError);

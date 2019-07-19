@@ -13,6 +13,12 @@ import 'finders.dart';
 import 'test_async_utils.dart';
 import 'test_pointer.dart';
 
+/// The default drag touch slop used to break up a large drag into multiple
+/// smaller moves.
+///
+/// This value must be greater than [kTouchSlop].
+const double kDragSlopDefault = 20.0;
+
 /// Class that programmatically interacts with widgets.
 ///
 /// For a variant of this class suited specifically for unit tests, see
@@ -38,15 +44,13 @@ abstract class WidgetController {
     return finder.evaluate().isNotEmpty;
   }
 
-
   /// All widgets currently in the widget tree (lazy pre-order traversal).
   ///
   /// Can contain duplicates, since widgets can be used in multiple
   /// places in the widget tree.
   Iterable<Widget> get allWidgets {
     TestAsyncUtils.guardSync();
-    return allElements
-           .map<Widget>((Element element) => element.widget);
+    return allElements.map<Widget>((Element element) => element.widget);
   }
 
   /// The matching widget in the widget tree.
@@ -83,7 +87,6 @@ abstract class WidgetController {
       return result;
     });
   }
-
 
   /// All elements currently in the widget tree (lazy pre-order traversal).
   ///
@@ -127,7 +130,6 @@ abstract class WidgetController {
     return finder.evaluate();
   }
 
-
   /// All states currently in the widget tree (lazy pre-order traversal).
   ///
   /// The returned iterable is lazy. It does not walk the entire widget tree
@@ -135,9 +137,7 @@ abstract class WidgetController {
   /// using [Iterator.moveNext].
   Iterable<State> get allStates {
     TestAsyncUtils.guardSync();
-    return allElements
-           .whereType<StatefulElement>()
-           .map<State>((StatefulElement element) => element.state);
+    return allElements.whereType<StatefulElement>().map<State>((StatefulElement element) => element.state);
   }
 
   /// The matching state in the widget tree.
@@ -183,7 +183,6 @@ abstract class WidgetController {
     throw StateError('Widget of type ${element.widget.runtimeType}, with ${finder.description}, is not a StatefulWidget.');
   }
 
-
   /// Render objects of all the widgets currently in the widget tree
   /// (lazy pre-order traversal).
   ///
@@ -193,8 +192,7 @@ abstract class WidgetController {
   /// their own render object.
   Iterable<RenderObject> get allRenderObjects {
     TestAsyncUtils.guardSync();
-    return allElements
-           .map<RenderObject>((Element element) => element.renderObject);
+    return allElements.map<RenderObject>((Element element) => element.renderObject);
   }
 
   /// The render object of the matching widget in the widget tree.
@@ -232,7 +230,6 @@ abstract class WidgetController {
     });
   }
 
-
   /// Returns a list of all the [Layer] objects in the rendering.
   List<Layer> get layers => _walkLayers(binding.renderView.layer).toList();
   Iterable<Layer> _walkLayers(Layer layer) sync* {
@@ -248,7 +245,6 @@ abstract class WidgetController {
     }
   }
 
-
   // INTERACTION
 
   /// Dispatch a pointer down / pointer up sequence at the center of
@@ -256,14 +252,14 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> tap(Finder finder, { int pointer }) {
-    return tapAt(getCenter(finder), pointer: pointer);
+  Future<void> tap(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+    return tapAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, { int pointer }) {
+  Future<void> tapAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await gesture.up();
     });
   }
@@ -273,9 +269,9 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<TestGesture> press(Finder finder, { int pointer }) {
+  Future<TestGesture> press(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<TestGesture>(() {
-      return startGesture(getCenter(finder), pointer: pointer);
+      return startGesture(getCenter(finder), pointer: pointer, buttons: buttons);
     });
   }
 
@@ -285,15 +281,15 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> longPress(Finder finder, { int pointer }) {
-    return longPressAt(getCenter(finder), pointer: pointer);
+  Future<void> longPress(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+    return longPressAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, { int pointer }) {
+  Future<void> longPressAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
     });
@@ -319,8 +315,12 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
-  Future<void> fling(Finder finder, Offset offset, double speed, {
+  Future<void> fling(
+    Finder finder,
+    Offset offset,
+    double speed, {
     int pointer,
+    int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
@@ -330,6 +330,7 @@ abstract class WidgetController {
       offset,
       speed,
       pointer: pointer,
+      buttons: buttons,
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
@@ -361,8 +362,12 @@ abstract class WidgetController {
   /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
   /// then fling to the left over 200 pixels, ending at the exact point that the
   /// drag started).
-  Future<void> flingFrom(Offset startLocation, Offset offset, double speed, {
+  Future<void> flingFrom(
+    Offset startLocation,
+    Offset offset,
+    double speed, {
     int pointer,
+    int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
@@ -370,7 +375,7 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer());
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
@@ -414,8 +419,41 @@ abstract class WidgetController {
   ///
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [fling] instead.
-  Future<void> drag(Finder finder, Offset offset, { int pointer }) {
-    return dragFrom(getCenter(finder), offset, pointer: pointer);
+  ///
+  /// {@template flutter.flutter_test.drag}
+  /// By default, if the x or y component of offset is greater than [kTouchSlop], the
+  /// gesture is broken up into two separate moves calls. Changing 'touchSlopX' or
+  /// `touchSlopY` will change the minimum amount of movement in the respective axis
+  /// before the drag will be broken into multiple calls. To always send the
+  /// drag with just a single call to [TestGesture.moveBy], `touchSlopX` and `touchSlopY`
+  /// should be set to 0.
+  ///
+  /// Breaking the drag into multiple moves is necessary for accurate execution
+  /// of drag update calls with a [DragStartBehavior] variable set to
+  /// [DragStartBehavior.start]. Without such a change, the dragUpdate callback
+  /// from a drag recognizer will never be invoked.
+  ///
+  /// To force this function to a send a single move event, the 'touchSlopX' and
+  /// 'touchSlopY' variables should be set to 0. However, generally, these values
+  /// should be left to their default values.
+  /// {@end template}
+  Future<void> drag(
+    Finder finder,
+    Offset offset, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double touchSlopX = kDragSlopDefault,
+    double touchSlopY = kDragSlopDefault,
+  }) {
+    assert(kDragSlopDefault > kTouchSlop);
+    return dragFrom(
+      getCenter(finder),
+      offset,
+      pointer: pointer,
+      buttons: buttons,
+      touchSlopX: touchSlopX,
+      touchSlopY: touchSlopY,
+    );
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
@@ -424,11 +462,85 @@ abstract class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
+  ///
+  /// {@macro flutter.flutter_test.drag}
+  Future<void> dragFrom(
+    Offset startLocation,
+    Offset offset, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double touchSlopX = kDragSlopDefault,
+    double touchSlopY = kDragSlopDefault,
+  }) {
+    assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
       assert(gesture != null);
-      await gesture.moveBy(offset);
+
+      final double xSign = offset.dx.sign;
+      final double ySign = offset.dy.sign;
+
+      final double offsetX = offset.dx;
+      final double offsetY = offset.dy;
+
+      final bool separateX = offset.dx.abs() > touchSlopX && touchSlopX > 0;
+      final bool separateY = offset.dy.abs() > touchSlopY && touchSlopY > 0;
+
+      if (separateY || separateX) {
+        final double offsetSlope = offsetY / offsetX;
+        final double inverseOffsetSlope = offsetX / offsetY;
+        final double slopSlope = touchSlopY / touchSlopX;
+        final double absoluteOffsetSlope = offsetSlope.abs();
+        final double signedSlopX = touchSlopX * xSign;
+        final double signedSlopY = touchSlopY * ySign;
+        if (absoluteOffsetSlope != slopSlope) {
+          // The drag goes through one or both of the extents of the edges of the box.
+          if (absoluteOffsetSlope < slopSlope) {
+            assert(offsetX.abs() > touchSlopX);
+            // The drag goes through the vertical edge of the box.
+            // It is guaranteed that the |offsetX| > touchSlopX.
+            final double diffY = offsetSlope.abs() * touchSlopX * ySign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(signedSlopX, diffY));
+            if (offsetY.abs() <= touchSlopY) {
+              // The drag ends on or before getting to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY));
+            } else {
+              final double diffY2 = signedSlopY - diffY;
+              final double diffX2 = inverseOffsetSlope * diffY2;
+
+              // The vector from the edge of the box to the horizontal extension of the horizontal edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - diffX2 - signedSlopX, offsetY - signedSlopY));
+            }
+          } else {
+            assert(offsetY.abs() > touchSlopY);
+            // The drag goes through the horizontal edge of the box.
+            // It is guaranteed that the |offsetY| > touchSlopY.
+            final double diffX = inverseOffsetSlope.abs() * touchSlopY * xSign;
+
+            // The vector from the origin to the vertical edge.
+            await gesture.moveBy(Offset(diffX, signedSlopY));
+            if (offsetX.abs() <= touchSlopX) {
+              // The drag ends on or before getting to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(offsetX - diffX, offsetY - signedSlopY));
+            } else {
+              final double diffX2 = signedSlopX - diffX;
+              final double diffY2 = offsetSlope * diffX2;
+
+              // The vector from the edge of the box to the vertical extension of the vertical edge.
+              await gesture.moveBy(Offset(diffX2, diffY2));
+              await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - diffY2 - signedSlopY));
+            }
+          }
+        } else { // The drag goes through the corner of the box.
+          await gesture.moveBy(Offset(signedSlopX, signedSlopY));
+          await gesture.moveBy(Offset(offsetX - signedSlopX, offsetY - signedSlopY));
+        }
+      } else { // The drag ends inside the box.
+        await gesture.moveBy(offset);
+      }
       await gesture.up();
     });
   }
@@ -445,15 +557,44 @@ abstract class WidgetController {
     return result;
   }
 
-  /// Begins a gesture at a particular point, and returns the
-  /// [TestGesture] object which you can use to continue the gesture.
-  Future<TestGesture> startGesture(Offset downLocation, { int pointer }) {
-    return TestGesture.down(
-      downLocation,
-      pointer: pointer ?? _getNextPointer(),
+  /// Creates gesture and returns the [TestGesture] object which you can use
+  /// to continue the gesture using calls on the [TestGesture] object.
+  ///
+  /// You can use [startGesture] instead if your gesture begins with a down
+  /// event.
+  Future<TestGesture> createGesture({
+    int pointer,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int buttons = kPrimaryButton,
+  }) async {
+    return TestGesture(
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
+      kind: kind,
+      pointer: pointer ?? _getNextPointer(),
+      buttons: buttons,
     );
+  }
+
+  /// Creates a gesture with an initial down gesture at a particular point, and
+  /// returns the [TestGesture] object which you can use to continue the
+  /// gesture.
+  ///
+  /// You can use [createGesture] if your gesture doesn't begin with an initial
+  /// down gesture.
+  Future<TestGesture> startGesture(
+    Offset downLocation, {
+    int pointer,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int buttons = kPrimaryButton,
+  }) async {
+    final TestGesture result = await createGesture(
+      pointer: pointer,
+      kind: kind,
+      buttons: buttons,
+    );
+    await result.down(downLocation);
+    return result;
   }
 
   /// Forwards the given location to the binding's hitTest logic.
@@ -469,7 +610,6 @@ abstract class WidgetController {
       binding.dispatchEvent(event, result);
     });
   }
-
 
   // GEOMETRY
 

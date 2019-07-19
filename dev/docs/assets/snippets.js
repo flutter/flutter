@@ -2,15 +2,10 @@
  * Scripting for handling custom code snippets
  */
 
-const shortSnippet = 'shortSnippet';
-const longSnippet = 'longSnippet';
-var visibleSnippet = shortSnippet;
-
 /**
- * Shows the requested snippet. Values for "name" can be "shortSnippet" or
- * "longSnippet".
+ * Shows the requested snippet, and stores the current state in visibleSnippet.
  */
-function showSnippet(name) {
+function showSnippet(name, visibleSnippet) {
   if (visibleSnippet == name) return;
   if (visibleSnippet != null) {
     var shown = document.getElementById(visibleSnippet);
@@ -39,6 +34,7 @@ function showSnippet(name) {
   if (button != null) {
     button.setAttributeNode(selectedAttribute);
   }
+  return visibleSnippet;
 }
 
 // Finds a sibling to given element with the given id.
@@ -61,11 +57,35 @@ function supportsCopying() {
       !!document.queryCommandSupported('copy');
 }
 
+// Copies the given string to the clipboard.
+function copyStringToClipboard(string) {
+  var textArea = document.createElement("textarea");
+  textArea.value = string;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  if (!supportsCopying()) {
+    alert('Unable to copy to clipboard (not supported by browser)');
+    return;
+  }
+
+  try {
+    document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textArea);
+  }
+}
+
+function fixHref(anchor, id) {
+  anchor.href = window.location.href.replace(/#.*$/, '') + '#' + id;
+}
+
 // Copies the text inside the currently visible snippet to the clipboard, or the
 // given element, if any.
 function copyTextToClipboard(element) {
-  if (element == null) {
-    var elementSelector = '#' + visibleSnippet + ' .language-dart';
+  if (typeof element === 'string') {
+    var elementSelector = '#' + element + ' .language-dart';
     element = document.querySelector(elementSelector);
     if (element == null) {
       console.log(

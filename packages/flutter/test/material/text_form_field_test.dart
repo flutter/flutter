@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Passes textAlign to underlying TextField', (WidgetTester tester) async {
@@ -50,7 +53,7 @@ void main() {
   });
 
   testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    final VoidCallback onEditingComplete = () { };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -69,6 +72,34 @@ void main() {
 
     final TextField textFieldWidget = tester.widget(textFieldFinder);
     expect(textFieldWidget.onEditingComplete, onEditingComplete);
+  });
+
+  testWidgets('Passes cursor attributes to underlying TextField', (WidgetTester tester) async {
+    const double cursorWidth = 3.14;
+    const Radius cursorRadius = Radius.circular(4);
+    const Color cursorColor = Colors.purple;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              cursorWidth: cursorWidth,
+              cursorRadius: cursorRadius,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.cursorWidth, cursorWidth);
+    expect(textFieldWidget.cursorRadius, cursorRadius);
+    expect(textFieldWidget.cursorColor, cursorColor);
   });
 
   testWidgets('onFieldSubmit callbacks are called', (WidgetTester tester) async {
@@ -90,6 +121,28 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pump();
     expect(_called, true);
+  });
+
+  testWidgets('onChanged callbacks are called', (WidgetTester tester) async {
+    String _value;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              onChanged: (String value) {
+                _value = value;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.enterText(find.byType(TextField), 'Soup');
+    await tester.pump();
+    expect(_value, 'Soup');
   });
 
   testWidgets('autovalidate is passed to super', (WidgetTester tester) async {
@@ -161,5 +214,70 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
+  });
+
+  testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Center(
+            child: TextFormField(
+              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
+                return Text('${currentLength.toString()} of ${maxLength.toString()}');
+              },
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0 of 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 of 10'), findsOneWidget);
+  });
+
+  testWidgets('readonly text form field will hide cursor by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              initialValue: 'readonly',
+              readOnly: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextFormField));
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.longPress(find.byType(TextFormField));
+    await tester.pump();
+
+    // Context menu should not have paste.
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    // Make sure it does not paint caret for a period of time.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 }

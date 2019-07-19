@@ -187,7 +187,7 @@ void main() {
     verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
 
     position.animateTo(bigHeight + delegate.maxExtent * 1.9, curve: Curves.linear, duration: const Duration(minutes: 1));
-    position.updateUserScrollDirection(ScrollDirection.forward); // ignore: invalid_use_of_protected_member
+    position.updateUserScrollDirection(ScrollDirection.forward);
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     verifyPaintPosition(key1, const Offset(0.0, 0.0), false);
     verifyPaintPosition(key2, const Offset(0.0, 0.0), true);
@@ -203,9 +203,9 @@ void main() {
           physics: const BouncingScrollPhysics(),
           slivers: <Widget>[
             SliverPersistentHeader(delegate: TestDelegate(), floating: true),
-            const SliverList(
+            SliverList(
               delegate: SliverChildListDelegate(<Widget>[
-                SizedBox(
+                const SizedBox(
                   height: 300.0,
                   child: Text('X'),
                 ),

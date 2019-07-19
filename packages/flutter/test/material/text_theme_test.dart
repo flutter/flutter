@@ -74,14 +74,14 @@ void main() {
     // The `displayColor` is applied to [display4], [display3], [display2],
     // [display1], and [caption]. The `bodyColor` is applied to the remaining
     // text styles.
-    const Color displayColor = Color(1);
-    const Color bodyColor = Color(2);
+    const Color displayColor = Color(0x00000001);
+    const Color bodyColor = Color(0x00000002);
     const String fontFamily = 'fontFamily';
-    const Color decorationColor = Color(3);
+    const Color decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
-      TextDecoration.lineThrough
+      TextDecoration.lineThrough,
     ]);
 
     final Typography typography = Typography(platform: TargetPlatform.android);
@@ -152,4 +152,58 @@ void main() {
     expect(sizeTheme.overline.fontSize, baseTheme.overline.fontSize * 2.0 + 5.0);
   });
 
+  test('TextTheme lerp with second parameter null', () {
+    final TextTheme theme = Typography().black;
+    final TextTheme lerped = TextTheme.lerp(theme, null, 0.25);
+
+    expect(lerped.display4, TextStyle.lerp(theme.display4, null, 0.25));
+    expect(lerped.display3, TextStyle.lerp(theme.display3, null, 0.25));
+    expect(lerped.display2, TextStyle.lerp(theme.display2, null, 0.25));
+    expect(lerped.display1, TextStyle.lerp(theme.display1, null, 0.25));
+    expect(lerped.caption, TextStyle.lerp(theme.caption, null, 0.25));
+    expect(lerped.headline, TextStyle.lerp(theme.headline, null, 0.25));
+    expect(lerped.title, TextStyle.lerp(theme.title, null, 0.25));
+    expect(lerped.subhead, TextStyle.lerp(theme.subhead, null, 0.25));
+    expect(lerped.body2, TextStyle.lerp(theme.body2, null, 0.25));
+    expect(lerped.body1, TextStyle.lerp(theme.body1, null, 0.25));
+    expect(lerped.button, TextStyle.lerp(theme.button, null, 0.25));
+    expect(lerped.subtitle, TextStyle.lerp(theme.subtitle, null, 0.25));
+    expect(lerped.overline, TextStyle.lerp(theme.overline, null, 0.25));
+  });
+
+  test('TextTheme lerp with first parameter null', () {
+    final TextTheme theme = Typography().black;
+    final TextTheme lerped = TextTheme.lerp(null, theme, 0.25);
+
+    expect(lerped.display4, TextStyle.lerp(null, theme.display4, 0.25));
+    expect(lerped.display3, TextStyle.lerp(null, theme.display3, 0.25));
+    expect(lerped.display2, TextStyle.lerp(null, theme.display2, 0.25));
+    expect(lerped.display1, TextStyle.lerp(null, theme.display1, 0.25));
+    expect(lerped.caption, TextStyle.lerp(null, theme.caption, 0.25));
+    expect(lerped.headline, TextStyle.lerp(null, theme.headline, 0.25));
+    expect(lerped.title, TextStyle.lerp(null, theme.title, 0.25));
+    expect(lerped.subhead, TextStyle.lerp(null, theme.subhead, 0.25));
+    expect(lerped.body2, TextStyle.lerp(null, theme.body2, 0.25));
+    expect(lerped.body1, TextStyle.lerp(null, theme.body1, 0.25));
+    expect(lerped.button, TextStyle.lerp(null, theme.button, 0.25));
+    expect(lerped.subtitle, TextStyle.lerp(null, theme.subtitle, 0.25));
+    expect(lerped.overline, TextStyle.lerp(null, theme.overline, 0.25));
+  });
+
+  test('TextTheme lerp with null parameters', () {
+    final TextTheme lerped = TextTheme.lerp(null, null, 0.25);
+    expect(lerped.display4, null);
+    expect(lerped.display3, null);
+    expect(lerped.display2, null);
+    expect(lerped.display1, null);
+    expect(lerped.caption, null);
+    expect(lerped.headline, null);
+    expect(lerped.title, null);
+    expect(lerped.subhead, null);
+    expect(lerped.body2, null);
+    expect(lerped.body1, null);
+    expect(lerped.button, null);
+    expect(lerped.subtitle, null);
+    expect(lerped.overline, null);
+  });
 }

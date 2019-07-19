@@ -25,10 +25,8 @@ import 'package:flutter/foundation.dart';
 ///
 ///  * [debugProfilePaintsEnabled], which does something similar for
 ///    painting but using the timeline view.
-///
 ///  * [debugPrintLayouts], which does something similar for layout but using
 ///    console output.
-///
 ///  * The discussions at [WidgetsBinding.drawFrame] and at
 ///    [SchedulerBinding.handleBeginFrame].
 bool debugPrintBeginFrameBanner = false;
@@ -55,8 +53,8 @@ bool debugPrintScheduleFrameStacks = false;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/scheduler/scheduler-library.html] for
-/// a complete list.
+/// See [the scheduler library](scheduler/scheduler-library.html) for a complete
+/// list.
 bool debugAssertAllSchedulerVarsUnset(String reason) {
   assert(() {
     if (debugPrintBeginFrameBanner ||

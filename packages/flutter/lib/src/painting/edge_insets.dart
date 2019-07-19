@@ -330,7 +330,10 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// ```
   /// {@end-tool}
   const EdgeInsets.all(double value)
-      : left = value, top = value, right = value, bottom = value;
+    : left = value,
+      top = value,
+      right = value,
+      bottom = value;
 
   /// Creates insets with only the given values non-zero.
   ///
@@ -346,7 +349,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     this.left = 0.0,
     this.top = 0.0,
     this.right = 0.0,
-    this.bottom = 0.0
+    this.bottom = 0.0,
   });
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
@@ -359,9 +362,13 @@ class EdgeInsets extends EdgeInsetsGeometry {
   /// const EdgeInsets.symmetric(vertical: 8.0)
   /// ```
   /// {@end-tool}
-  const EdgeInsets.symmetric({ double vertical = 0.0,
-                             double horizontal = 0.0 })
-    : left = horizontal, top = vertical, right = horizontal, bottom = vertical;
+  const EdgeInsets.symmetric({
+    double vertical = 0.0,
+    double horizontal = 0.0,
+  }) : left = horizontal,
+       top = vertical,
+       right = horizontal,
+       bottom = vertical;
 
   /// Creates insets that match the given window padding.
   ///
@@ -581,7 +588,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
     double top,
     double right,
     double bottom,
-}) {
+  }) {
     return EdgeInsets.only(
       left: left ?? this.left,
       top: top ?? this.top,
@@ -620,7 +627,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.start = 0.0,
     this.top = 0.0,
     this.end = 0.0,
-    this.bottom = 0.0
+    this.bottom = 0.0,
   });
 
   /// An [EdgeInsetsDirectional] with zero offsets in each direction.

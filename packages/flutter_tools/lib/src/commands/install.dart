@@ -11,7 +11,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-class InstallCommand extends FlutterCommand {
+class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
   }

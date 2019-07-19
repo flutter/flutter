@@ -25,8 +25,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -71,8 +71,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -115,8 +115,8 @@ void main() {
         children: <Widget>[
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -155,8 +155,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -201,8 +201,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -249,8 +249,8 @@ void main() {
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
           Container(key: child3Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -301,8 +301,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 20.0),
           Container(key: child1Key, width: 100.0, height: 20.0),
           Container(key: child2Key, width: 100.0, height: 20.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -340,9 +340,9 @@ void main() {
         key: flexKey,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
-        ]
-      )
+          Container(width: 100.0, height: 150.0),
+        ],
+      ),
     ));
     RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
     expect(renderBox.size.width, equals(100.0));
@@ -355,9 +355,9 @@ void main() {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
-        ]
-      )
+          Container(width: 100.0, height: 150.0),
+        ],
+      ),
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
     expect(renderBox.size.width, equals(100.0));
@@ -377,11 +377,11 @@ void main() {
             Container(
               key: childKey,
               width: 100.0,
-              height: 100.0
-            )
-          ]
-        )
-      )
+              height: 100.0,
+            ),
+          ],
+        ),
+      ),
     ));
 
     final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
@@ -409,8 +409,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Expanded(child: Container(key: child1Key, width: 100.0, height: 100.0)),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -456,8 +456,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -501,8 +501,8 @@ void main() {
         children: <Widget>[
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -542,8 +542,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -589,8 +589,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 100.0),
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -638,8 +638,8 @@ void main() {
           Container(key: child1Key, width: 100.0, height: 100.0),
           Container(key: child2Key, width: 100.0, height: 100.0),
           Container(key: child3Key, width: 100.0, height: 100.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -691,8 +691,8 @@ void main() {
           Container(key: child0Key, width: 100.0, height: 20.0),
           Container(key: child1Key, width: 100.0, height: 20.0),
           Container(key: child2Key, width: 100.0, height: 20.0),
-        ]
-      )
+        ],
+      ),
     ));
 
     RenderBox renderBox;
@@ -731,9 +731,9 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
-        ]
-      )
+          Container(width: 100.0, height: 150.0),
+        ],
+      ),
     ));
     RenderBox renderBox = tester.renderObject(find.byKey(flexKey));
     expect(renderBox.size.width, equals(100.0));
@@ -747,9 +747,9 @@ void main() {
         verticalDirection: VerticalDirection.up,
         children: <Widget>[
           Container(width: 100.0, height: 100.0),
-          Container(width: 100.0, height: 150.0)
-        ]
-      )
+          Container(width: 100.0, height: 150.0),
+        ],
+      ),
     ));
     renderBox = tester.renderObject(find.byKey(flexKey));
     expect(renderBox.size.width, equals(100.0));
@@ -770,11 +770,11 @@ void main() {
             Container(
               key: childKey,
               width: 100.0,
-              height: 100.0
-            )
-          ]
-        )
-      )
+              height: 100.0,
+            ),
+          ],
+        ),
+      ),
     ));
 
     final RenderBox renderBox = tester.renderObject(find.byKey(childKey));

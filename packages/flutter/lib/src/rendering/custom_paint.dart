@@ -39,6 +39,8 @@ typedef SemanticsBuilderCallback = List<CustomPainterSemantics> Function(Size si
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=vvI_NUXK00s}
+///
 /// The most efficient way to trigger a repaint is to either:
 ///
 /// * Extend this class and supply a `repaint` argument to the constructor of
@@ -155,8 +157,13 @@ abstract class CustomPainter extends Listenable {
   /// coordinate space configured such that the origin is at the top left of the
   /// box. The area of the box is the size of the [size] argument.
   ///
-  /// Paint operations should remain inside the given area. Graphical operations
-  /// outside the bounds may be silently ignored, clipped, or not clipped.
+  /// Paint operations should remain inside the given area. Graphical
+  /// operations outside the bounds may be silently ignored, clipped, or not
+  /// clipped. It may sometimes be difficult to guarantee that a certain
+  /// operation is inside the bounds (e.g., drawing a rectangle whose size is
+  /// determined by user inputs). In that case, consider calling
+  /// [Canvas.clipRect] at the beginning of [paint] so everything that follows
+  /// will be guaranteed to only draw within the clipped area.
   ///
   /// Implementations should be wary of correctly pairing any calls to
   /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
@@ -191,9 +198,9 @@ abstract class CustomPainter extends Listenable {
   ///
   /// See also:
   ///
-  /// * [SemanticsConfiguration.isSemanticBoundary], which causes new
-  ///   [SemanticsNode]s to be added to the semantics tree.
-  /// * [RenderCustomPaint], which uses this getter to build semantics.
+  ///  * [SemanticsConfiguration.isSemanticBoundary], which causes new
+  ///    [SemanticsNode]s to be added to the semantics tree.
+  ///  * [RenderCustomPaint], which uses this getter to build semantics.
   SemanticsBuilderCallback get semanticsBuilder => null;
 
   /// Called whenever a new instance of the custom painter delegate class is
@@ -276,8 +283,8 @@ abstract class CustomPainter extends Listenable {
 ///
 /// See also:
 ///
-/// * [SemanticsNode], which is created using the properties of this class.
-/// * [CustomPainter], which creates instances of this class.
+///  * [SemanticsNode], which is created using the properties of this class.
+///  * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
 
@@ -322,8 +329,8 @@ class CustomPainterSemantics {
   ///
   /// See also:
   ///
-  /// * [Semantics], which is a widget that also uses [SemanticsProperties] to
-  ///   annotate.
+  ///  * [Semantics], which is a widget that also uses [SemanticsProperties] to
+  ///    annotate.
   final SemanticsProperties properties;
 
   /// Tags used by the parent [SemanticsNode] to determine the layout of the
@@ -495,7 +502,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
@@ -621,12 +628,11 @@ class RenderCustomPaint extends RenderProxyBox {
 
     final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
     final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
-    final List<SemanticsNode> finalChildren = <SemanticsNode>[];
-    if (hasBackgroundSemantics)
-      finalChildren.addAll(_backgroundSemanticsNodes);
-    finalChildren.addAll(children);
-    if (hasForegroundSemantics)
-      finalChildren.addAll(_foregroundSemanticsNodes);
+    final List<SemanticsNode> finalChildren = <SemanticsNode>[
+      if (hasBackgroundSemantics) ..._backgroundSemanticsNodes,
+      ...children,
+      if (hasForegroundSemantics) ..._foregroundSemanticsNodes,
+    ];
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 
@@ -825,6 +831,9 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.textField != null) {
       config.isTextField = properties.textField;
     }
+    if (properties.readOnly != null) {
+      config.isReadOnly = properties.readOnly;
+    }
     if (properties.focused != null) {
       config.isFocused = properties.focused;
     }
@@ -836,6 +845,9 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.obscured != null) {
       config.isObscured = properties.obscured;
+    }
+    if (properties.multiline != null) {
+      config.isMultiline = properties.multiline;
     }
     if (properties.hidden != null) {
       config.isHidden = properties.hidden;
@@ -914,6 +926,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
       config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
+    }
+    if (properties.onMoveCursorForwardByWord != null) {
+      config.onMoveCursorForwardByWord = properties.onMoveCursorForwardByWord;
+    }
+    if (properties.onMoveCursorBackwardByWord != null) {
+      config.onMoveCursorBackwardByWord = properties.onMoveCursorBackwardByWord;
     }
     if (properties.onSetSelection != null) {
       config.onSetSelection = properties.onSetSelection;

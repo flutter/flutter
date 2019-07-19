@@ -64,6 +64,10 @@ class DriveCommand extends RunCommandBase {
               'extension, so e.g. if the target is "lib/main.dart", the driver will be '
               '"test_driver/main_test.dart".',
         valueHelp: 'path',
+      )
+      ..addFlag('build',
+        defaultsTo: true,
+        help: 'Build the app before running.',
       );
   }
 
@@ -78,6 +82,7 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
+  bool get shouldBuild => argResults['build'];
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
@@ -177,7 +182,7 @@ class DriveCommand extends RunCommandBase {
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
     final String pathWithNoExtension = fs.path.withoutExtension(fs.path.joinAll(
-      <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
+      <String>[packageDir, 'test_driver', ...parts.skip(1)]));
     return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
@@ -234,12 +239,15 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
-  printTrace('Installing application package.');
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
-  if (await command.device.isAppInstalled(package))
-    await command.device.uninstallApp(package);
-  await command.device.installApp(package);
+
+  if (command.shouldBuild) {
+    printTrace('Installing application package.');
+    if (await command.device.isAppInstalled(package))
+      await command.device.uninstallApp(package);
+    await command.device.installApp(package);
+  }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
   if (command.traceStartup)
@@ -264,6 +272,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       observatoryPort: command.observatoryPort,
     ),
     platformArgs: platformArgs,
+    prebuiltApplication: !command.shouldBuild,
     usesTerminalUi: false,
   );
 
@@ -288,14 +297,14 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]
-      ..addAll(dartVmFlags)
-      ..addAll(testArgs)
-      ..addAll(<String>[
-        '--packages=${PackageMap.globalPackagesPath}',
-        '-rexpanded',
-      ]),
-    environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
+    <String>[
+      dartVmPath,
+      ...dartVmFlags,
+      ...testArgs,
+      '--packages=${PackageMap.globalPackagesPath}',
+      '-rexpanded',
+    ],
+    environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
   );
   if (result != 0)
     throwToolExit('Driver tests failed: $result', exitCode: result);

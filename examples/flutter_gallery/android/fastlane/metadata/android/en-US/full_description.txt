@@ -6,4 +6,4 @@ Flutter is Google’s multi-platform mobile app SDK for crafting beautiful nativ
 
 This app is open source. Check out the code to see how this app is built: https://github.com/flutter/flutter/tree/master/examples/flutter_gallery
 
-Visit https://flutter.io to learn more.
+Visit https://flutter.dev to learn more.

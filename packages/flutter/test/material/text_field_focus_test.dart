@@ -6,6 +6,52 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  testWidgets('Dialog interaction', (WidgetTester tester) async {
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              focusNode: focusNode,
+              autofocus: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    final BuildContext context = tester.element(find.byType(TextField));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
+    );
+
+    await tester.pump();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    Navigator.of(tester.element(find.text('Dialog'))).pop();
+    await tester.pump();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byType(TextField));
+    await tester.idle();
+
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.pumpWidget(Container());
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -76,49 +122,6 @@ void main() {
     expect(tester.testTextInput.isVisible, isTrue);
 
     tester.testTextInput.hide();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.tap(find.byType(TextField));
-    await tester.idle();
-
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    await tester.pumpWidget(Container());
-
-    expect(tester.testTextInput.isVisible, isFalse);
-  });
-
-  testWidgets('Dialog interaction', (WidgetTester tester) async {
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              autofocus: true,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    final BuildContext context = tester.element(find.byType(TextField));
-
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
-    );
-
-    await tester.pump();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    Navigator.of(tester.element(find.text('Dialog'))).pop();
-    await tester.pump();
 
     expect(tester.testTextInput.isVisible, isFalse);
 
@@ -226,5 +229,146 @@ void main() {
     await tester.tap(find.byType(TextField));
     await tester.idle();
     expect(tester.testTextInput.isVisible, isTrue);
+  });
+
+  testWidgets('Sibling FocusScopes', (WidgetTester tester) async {
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    final FocusScopeNode focusScopeNode0 = FocusScopeNode();
+    final FocusScopeNode focusScopeNode1 = FocusScopeNode();
+    final Key textField0 = UniqueKey();
+    final Key textField1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                FocusScope(
+                  node: focusScopeNode0,
+                  child: Builder(
+                    builder: (BuildContext context) => TextField(key: textField0)
+                  ),
+                ),
+                FocusScope(
+                  node: focusScopeNode1,
+                  child: Builder(
+                    builder: (BuildContext context) => TextField(key: textField1),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    tester.testTextInput.hide();
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField1));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.tap(find.byKey(textField1));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    tester.testTextInput.hide();
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.pumpWidget(Container());
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
+  testWidgets('Sibling Navigators', (WidgetTester tester) async {
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    final Key textField0 = UniqueKey();
+    final Key textField1 = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Column(
+              children: <Widget>[
+                Expanded(
+                  child: Navigator(
+                    onGenerateRoute: (RouteSettings settings) {
+                      return MaterialPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return TextField(key: textField0);
+                        },
+                        settings: settings,
+                      );
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: Navigator(
+                    onGenerateRoute: (RouteSettings settings) {
+                      return MaterialPageRoute<void>(
+                        builder: (BuildContext context) {
+                          return TextField(key: textField1);
+                        },
+                        settings: settings,
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    tester.testTextInput.hide();
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField1));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.tap(find.byKey(textField1));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    tester.testTextInput.hide();
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byKey(textField0));
+    await tester.idle();
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.pumpWidget(Container());
+    expect(tester.testTextInput.isVisible, isFalse);
   });
 }

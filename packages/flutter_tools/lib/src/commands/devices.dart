@@ -34,7 +34,7 @@ class DevicesCommand extends FlutterCommand {
         'No devices detected.\n\n'
         "Run 'flutter emulators' to list and start any available device emulators.\n\n"
         'Or, if you expected your device to be detected, please run "flutter doctor" to diagnose '
-        'potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
+        'potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         printStatus('');

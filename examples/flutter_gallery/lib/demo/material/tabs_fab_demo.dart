@@ -76,8 +76,8 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         ),
         child: Padding(
           padding: const EdgeInsets.all(32.0),
-          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead)
-        )
+          child: Text(_explanatoryText, style: Theme.of(context).textTheme.subhead),
+        ),
       );
     });
   }
@@ -93,12 +93,12 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
               child: Text(page.label,
                 style: TextStyle(
                   color: page.labelColor,
-                  fontSize: 32.0
+                  fontSize: 32.0,
                 ),
-                textAlign: TextAlign.center
-              )
-            )
-          )
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
         );
       }
     );
@@ -115,7 +115,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
         backgroundColor: page.fabColor,
         icon: page.fabIcon,
         label: Text(page.label.toUpperCase()),
-        onPressed: _showExplanatoryText
+        onPressed: _showExplanatoryText,
       );
     }
 
@@ -124,7 +124,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       tooltip: 'Show explanation',
       backgroundColor: page.fabColor,
       child: page.fabIcon,
-      onPressed: _showExplanatoryText
+      onPressed: _showExplanatoryText,
     );
   }
 
@@ -153,7 +153,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
       floatingActionButton: buildFloatingActionButton(_selectedPage),
       body: TabBarView(
         controller: _controller,
-        children: _allPages.map<Widget>(buildTabView).toList()
+        children: _allPages.map<Widget>(buildTabView).toList(),
       ),
     );
   }

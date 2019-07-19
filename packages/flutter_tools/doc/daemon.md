@@ -42,6 +42,12 @@ Any params for that command should be passed in through a `params` field. Here's
 [{"id":2,"result":[{"id":"702ABC1F-5EA5-4F83-84AB-6380CA91D39A","name":"iPhone 6","platform":"ios_x64","available":true}]}]
 ```
 
+Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
+
+```
+[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true,"ephemeral":false,"platformType":"ios","category":"mobile"}}]
+```
+
 ## Domains and Commands
 
 ### daemon domain
@@ -54,6 +60,17 @@ The `version()` command responds with a String with the protocol version.
 
 The `shutdown()` command will terminate the flutter daemon. It is not necessary to call this before shutting down the daemon; it is perfectly acceptable to just kill the daemon process.
 
+### daemon.getSupportedPlatforms
+
+The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
+   - android
+   - ios
+   - linux #experimental
+   - macos #experimental
+   - windows #experimental
+   - fuchsia #experimental
+   - web #experimental
+
 #### Events
 
 #### daemon.connected
@@ -63,10 +80,9 @@ The `daemon.connected` event is sent when the daemon starts. The `params` field 
 - `version`: The protocol version. This is the same version returned by the `version()` command.
 - `pid`: The `pid` of the daemon process.
 
-#### daemon.logMessage
+#### daemon.log
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
-
+This is sent when user-facing output is received. The `params` field will be a map with the field `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
 #### daemon.showMessage
 
@@ -74,11 +90,17 @@ The `daemon.showMessage` event is sent by the daemon when some if would be usefu
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
 
+#### daemon.logMessage
+
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+
+Generally, clients won't display content from `daemon.logMessage` events unless they're set to a more verbose output mode.
+
 ### app domain
 
 #### app.restart
 
-The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
+The `restart()` restarts the given application. It returns a Map of `{ int code, String message }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure.
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
@@ -109,7 +131,7 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 #### app.start
 
-This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, and `deviceId`.
+This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, and `launchMode`.
 
 #### app.debugPort
 
@@ -135,7 +157,17 @@ This is sent when an app is stopped or detached from. The `params` field will be
 
 #### device.getDevices
 
-Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, and `emulator` (a boolean).
+Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, `emulator` (a boolean) and `emulatorId`.
+
+`category` is string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
+
+`platformType` is a string description of the platform sub-folder the device
+supports. The current catgetories are "android", "ios", "linux", "macos",
+"fuchsia", "windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
+
+`ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.
+
+`emulatorId` is an string ID that matches the ID from `getEmulators` to allow clients to match running devices to the emulators that started them (for example to hide emulators that are already running). This field is not guaranteed to be populated even if a device was spawned from an emulator as it may require a successful connection to the device to retrieve it. In the case of a failed connection or the device is not an emulator, this field will be null.
 
 #### device.enable
 
@@ -159,17 +191,17 @@ Removed a forwarded port. It takes `deviceId`, `devicePort`, and `hostPort` as r
 
 #### device.added
 
-This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 #### device.removed
 
-This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 ### emulator domain
 
 #### emulator.getEmulators
 
-Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id` and `name`.
+Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id`, `name`, `category` and `platformType`. `category` and `platformType` values match the values described in `device.getDevices`.
 
 #### emulator.launch
 
@@ -202,6 +234,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
+  - [`log`](#daemonlog)
   - [`logMessage`](#daemonlogmessage)
 
 ### app domain
@@ -227,6 +260,10 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.5.3: Added `emulatorId` field to device.
+- 0.5.2: Added `platformType` and `category` fields to emulator.
+- 0.5.1: Added `platformType`, `ephemeral`, and `category` fields to device.
+- 0.5.0: Added `daemon.getSupportedPlatforms` command
 - 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command

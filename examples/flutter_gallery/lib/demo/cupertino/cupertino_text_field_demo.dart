@@ -160,28 +160,33 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
       ),
       child: CupertinoPageScaffold(
         navigationBar: const CupertinoNavigationBar(
+          // We're specifying a back label here because the previous page is a
+          // Material page. CupertinoPageRoutes could auto-populate these back
+          // labels.
           previousPageTitle: 'Cupertino',
           middle: Text('Text Fields'),
         ),
-        child: ListView(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-              child: Column(
-                children: <Widget>[
-                  _buildNameField(),
-                  _buildEmailField(),
-                  _buildLocationField(),
-                  _buildPinField(),
-                  _buildTagsField(),
-                ],
+        child: CupertinoScrollbar(
+          child: ListView(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                child: Column(
+                  children: <Widget>[
+                    _buildNameField(),
+                    _buildEmailField(),
+                    _buildLocationField(),
+                    _buildPinField(),
+                    _buildTagsField(),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-              child: _buildChatTextField(),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                child: _buildChatTextField(),
+              ),
+            ],
+          ),
         ),
       ),
     );

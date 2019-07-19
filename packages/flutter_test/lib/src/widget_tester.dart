@@ -19,12 +19,22 @@ import 'controller.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
+import 'test_compat.dart';
 import 'test_text_input.dart';
 
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
+/// Hide these imports so that they do not conflict with our own implementations in
+/// test_compat.dart. This handles setting up a declarer when one is not defined, which
+/// can happen when a test is executed via flutter_run.
 export 'package:test_api/test_api.dart' hide
+  test,
+  group,
+  setUpAll,
+  tearDownAll,
+  setUp,
+  tearDown,
   expect, // we have our own wrapper below
   TypeMatcher, // matcher's TypeMatcher conflicts with the one in the Flutter framework
   isInstanceOf; // we have our own wrapper in matchers.dart
@@ -40,42 +50,82 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
 ///
+/// There are two kinds of timeouts that can be specified. The `timeout`
+/// argument specifies the backstop timeout implemented by the `test` package.
+/// If set, it should be relatively large (minutes). It defaults to ten minutes
+/// for tests run by `flutter test`, and is unlimited for tests run by `flutter
+/// run`; specifically, it defaults to
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// The `initialTimeout` argument specifies the timeout implemented by the
+/// `flutter_test` package itself. If set, it may be relatively small (seconds),
+/// as it is automatically increased for some expensive operations, and can also
+/// be manually increased by calling
+/// [AutomatedTestWidgetsFlutterBinding.addTime]. The effective maximum value of
+/// this timeout (even after calling `addTime`) is the one specified by the
+/// `timeout` argument.
+///
+/// In general, timeouts are race conditions and cause flakes, so best practice
+/// is to avoid the use of timeouts in tests.
+///
+/// If the `semanticsEnabled` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished. It defaults to true.
+///
 /// This function uses the [test] function in the test package to
 /// register the given callback as a test. The callback, when run,
 /// will be given a new instance of [WidgetTester]. The [find] object
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
+/// See also:
+///
+///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
+///    timeout and how to manually increase timeouts.
+///
 /// ## Sample code
 ///
 /// ```dart
-///     testWidgets('MyWidget', (WidgetTester tester) async {
-///       await tester.pumpWidget(new MyWidget());
-///       await tester.tap(find.text('Save'));
-///       expect(find.text('Success'), findsOneWidget);
-///     });
+/// testWidgets('MyWidget', (WidgetTester tester) async {
+///   await tester.pumpWidget(new MyWidget());
+///   await tester.tap(find.text('Save'));
+///   expect(find.text('Success'), findsOneWidget);
+/// });
 /// ```
 @isTest
-void testWidgets(String description, WidgetTesterCallback callback, {
+void testWidgets(
+  String description,
+  WidgetTesterCallback callback, {
   bool skip = false,
-  test_package.Timeout timeout
+  test_package.Timeout timeout,
+  Duration initialTimeout,
+  bool semanticsEnabled = true,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  timeout ??= binding.defaultTestTimeout;
-  test_package.test(
+  test(
     description,
     () {
+      SemanticsHandle semanticsHandle;
+      if (semanticsEnabled == true) {
+        semanticsHandle = tester.ensureSemantics();
+      }
       tester._recordNumberOfSemanticsHandles();
       test_package.addTearDown(binding.postTest);
       return binding.runTest(
-        () => callback(tester),
+        () async {
+          debugResetSemanticsIdCounter();
+          await callback(tester);
+          semanticsHandle?.dispose();
+        },
         tester._endOfTestVerifications,
         description: description ?? '',
+        timeout: initialTimeout,
       );
     },
     skip: skip,
-    timeout: timeout
+    timeout: timeout ?? binding.defaultTestTimeout,
   );
 }
 
@@ -95,8 +145,15 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
 ///
-/// Benchmarks must not be run in checked mode. To avoid this, this
-/// function will print a big message if it is run in checked mode.
+/// If the `semanticsEnabled` parameter is set to `true`,
+/// [WidgetTester.ensureSemantics] will have been called before the tester is
+/// passed to the `callback`, and that handle will automatically be disposed
+/// after the callback is finished.
+///
+/// Benchmarks must not be run in checked mode, because the performance is not
+/// representative. To avoid this, this function will print a big message if it
+/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
@@ -114,8 +171,15 @@ void testWidgets(String description, WidgetTesterCallback callback, {
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
+Future<void> benchmarkWidgets(
+  WidgetTesterCallback callback, {
+  bool mayRunWithAsserts = false,
+  bool semanticsEnabled = false,
+}) {
   assert(() {
+    if (mayRunWithAsserts)
+      return true;
+
     print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
     print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
     print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');
@@ -132,9 +196,16 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
+  SemanticsHandle semanticsHandle;
+  if (semanticsEnabled == true) {
+    semanticsHandle = tester.ensureSemantics();
+  }
   tester._recordNumberOfSemanticsHandles();
   return binding.runTest(
-    () => callback(tester),
+    () async {
+      await callback(tester);
+      semanticsHandle?.dispose();
+    },
     tester._endOfTestVerifications,
   ) ?? Future<void>.value();
 }
@@ -148,7 +219,9 @@ Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
 /// See also:
 ///
 ///  * [expectLater] for use with asynchronous matchers.
-void expect(dynamic actual, dynamic matcher, {
+void expect(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
   dynamic skip, // true or a String
 }) {
@@ -165,7 +238,9 @@ void expect(dynamic actual, dynamic matcher, {
 ///
 /// Generally, it is better to use [expect], which does include checks to ensure
 /// that asynchronous APIs are not being called.
-void expectSync(dynamic actual, dynamic matcher, {
+void expectSync(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
 }) {
   test_package.expect(actual, matcher, reason: reason);
@@ -179,7 +254,9 @@ void expectSync(dynamic actual, dynamic matcher, {
 /// If the matcher fails asynchronously, that failure is piped to the returned
 /// future where it can be handled by user code. If it is not handled by user
 /// code, the test will fail.
-Future<void> expectLater(dynamic actual, dynamic matcher, {
+Future<void> expectLater(
+  dynamic actual,
+  dynamic matcher, {
   String reason,
   dynamic skip, // true or a String
 }) {
@@ -215,9 +292,23 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// rebuild of the tree, even if [widget] is the same as the previous call.
   /// [pump] will only rebuild the widgets that have changed.
   ///
+  /// This method should not be used as the first parameter to an [expect] or
+  /// [expectLater] call to test that a widget throws an exception. Instead, use
+  /// [TestWidgetsFlutterBinding.takeException].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// testWidgets('MyWidget asserts invalid bounds', (WidgetTester tester) async {
+  ///   await tester.pumpWidget(MyWidget(-1));
+  ///   expect(tester.takeException(), isAssertionError); // or isNull, as appropriate.
+  /// });
+  /// ```
+  /// {@end-tool}
+  ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<void> pumpWidget(Widget widget, [
+  Future<void> pumpWidget(
+    Widget widget, [
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
@@ -247,6 +338,34 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     return TestAsyncUtils.guard<void>(() => binding.pump(duration, phase));
   }
 
+  /// Triggers a frame after `duration` amount of time, return as soon as the frame is drawn.
+  ///
+  /// This enables driving an artificially high CPU load by rendering frames in
+  /// a tight loop. It must be used with the frame policy set to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.benchmark].
+  ///
+  /// Similarly to [pump], this doesn't actually wait for `duration`, just
+  /// advances the clock.
+  Future<void> pumpBenchmark(Duration duration) async {
+    assert(() {
+      final TestWidgetsFlutterBinding widgetsBinding = binding;
+      return widgetsBinding is LiveTestWidgetsFlutterBinding &&
+              widgetsBinding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
+    }());
+
+    dynamic caughtException;
+    void handleError(dynamic error, StackTrace stackTrace) => caughtException ??= error;
+
+    await Future<void>.microtask(() { binding.handleBeginFrame(duration); }).catchError(handleError);
+    await idle();
+    await Future<void>.microtask(() { binding.handleDrawFrame(); }).catchError(handleError);
+    await idle();
+
+    if (caughtException != null) {
+      throw caughtException;
+    }
+  }
+
   /// Repeatedly calls [pump] with the given `duration` until there are no
   /// longer any frames scheduled. This will call [pump] at least once, even if
   /// no frames are scheduled when the function is called, to flush any pending
@@ -272,10 +391,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Alternatively, one can check that the return value from this function
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
-      Duration duration = const Duration(milliseconds: 100),
-      EnginePhase phase = EnginePhase.sendSemanticsUpdate,
-      Duration timeout = const Duration(minutes: 10),
-    ]) {
+    Duration duration = const Duration(milliseconds: 100),
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
+    Duration timeout = const Duration(minutes: 10),
+  ]) {
     assert(duration != null);
     assert(duration > Duration.zero);
     assert(timeout != null);
@@ -323,8 +442,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// are required to wait for the returned future to complete before calling
   /// this method again. Attempts to do otherwise will result in a
   /// [TestFailure] error being thrown.
-  Future<T> runAsync<T>(Future<T> callback(), {
-    Duration additionalTime = const Duration(milliseconds: 250),
+  Future<T> runAsync<T>(
+    Future<T> callback(), {
+    Duration additionalTime = const Duration(milliseconds: 1000),
   }) => binding.runAsync<T>(callback, additionalTime: additionalTime);
 
   /// Whether there are any any transient callbacks scheduled.
@@ -491,7 +611,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_TestTicker>();
+    _tickers ??= <_TestTicker>{};
     final _TestTicker result = _TestTicker(onTick, _removeTicker);
     _tickers.add(result);
     return result;
@@ -666,7 +786,7 @@ typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);
 
-  _TickerDisposeCallback _onDispose;
+  final _TickerDisposeCallback _onDispose;
 
   @override
   void dispose() {

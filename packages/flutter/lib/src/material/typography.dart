@@ -68,7 +68,8 @@ enum ScriptCategory {
 /// `Typography(platform: platform)` which uses [englishLike2014],
 /// [dense2014] and [tall2014]. To use the 2018 text theme
 /// geometries, specify a typography value:
-/// ```
+///
+/// ```dart
 /// Typography(
 ///   platorm: platform,
 ///   englishLike: Typography.englishLike2018,
@@ -87,20 +88,22 @@ enum ScriptCategory {
 class Typography extends Diagnosticable {
   /// Creates a typography instance.
   ///
-  /// If [platform] is specified, the default values for [black] and [white]
-  /// are [blackCupertino] and [whiteCupertino] respectively. Otherwise
-  /// they are [blackMountainView] and [whiteMoutainView].
+  /// If [platform] is [TargetPlatform.iOS], the default values for [black] and
+  /// [white] are [blackCupertino] and [whiteCupertino] respectively. Otherwise
+  /// they are [blackMountainView] and [whiteMoutainView]. If [platform] is
+  /// null then both [black] and [white] must be specified.
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
   factory Typography({
-    TargetPlatform platform,
+    TargetPlatform platform = TargetPlatform.android,
     TextTheme black,
     TextTheme white,
     TextTheme englishLike,
     TextTheme dense,
     TextTheme tall,
   }) {
+    assert(platform != null || (black != null && white != null));
     switch (platform) {
       case TargetPlatform.iOS:
         black ??= blackCupertino;
@@ -139,7 +142,7 @@ class Typography extends Diagnosticable {
   ///
   /// This [TextTheme] provides color but not geometry (font size, weight, etc).
   /// A text theme's geometry depends on the locale. To look up a localized
-  /// [TextTheme], use the the overall [Theme], for example:
+  /// [TextTheme], use the overall [Theme], for example:
   /// `Theme.of(context).textTheme`.
   ///
   /// The [englishLike], [dense], and [tall] text theme's provide locale-specific
@@ -153,7 +156,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.englishLike].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme englishLike;
 
@@ -164,7 +167,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.dense].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme dense;
 
@@ -174,7 +177,7 @@ class Typography extends Diagnosticable {
   /// on the overall [ThemeData.brightness], when the current locale's
   /// [MaterialLocalizations.scriptCategory] is [ScriptCategory.tall].
   ///
-  /// To look up a localized [TextTheme], use the the overall [Theme], for
+  /// To look up a localized [TextTheme], use the overall [Theme], for
   /// example: `Theme.of(context).textTheme`.
   final TextTheme tall;
 

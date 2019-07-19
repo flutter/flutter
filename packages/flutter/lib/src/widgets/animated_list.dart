@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart' show binarySearch;
-
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -26,7 +25,9 @@ const Duration _kDuration = Duration(milliseconds: 300);
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
-  _ActiveItem.index(this.itemIndex) : controller = null, removedItemBuilder = null;
+  _ActiveItem.index(this.itemIndex)
+    : controller = null,
+      removedItemBuilder = null;
 
   final AnimationController controller;
   final AnimatedListRemovedItemBuilder removedItemBuilder;
@@ -43,6 +44,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
   const AnimatedList({
@@ -171,7 +174,7 @@ class AnimatedList extends StatefulWidget {
       'This can happen when the context provided is from the same StatefulWidget that '
       'built the AnimatedList. Please see the AnimatedList documentation for examples '
       'of how to refer to an AnimatedListState object: '
-      '  https://docs.flutter.io/flutter/widgets/AnimatedListState-class.html \n'
+      '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
       'The context used was:\n'
       '  $context'
     );

@@ -3,25 +3,31 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
+import 'dart:io' show Platform;
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_goldens_client/client.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 Future<void> main() async {
+  FlutterDriver driver;
 
   setUpAll(() async {
-    print('Cloning goldens repository...');
-    final GoldensClient goldensClient = GoldensClient();
-    await goldensClient.prepare();
+    driver = await FlutterDriver.connect();
   });
 
-  test('MotionEvents recomposition', () async {
-    final FlutterDriver driver = await FlutterDriver.connect();
-    final String errorMessage = await driver.requestData('run test');
+  tearDownAll(() {
+    driver.close();
+  });
 
-    expect(errorMessage, '');
-    driver?.close();
+  group('MotionEvents tests ', () {
+    test('recomposition', () async {
+      if (Platform.isAndroid) {
+        final SerializableFinder motionEventsListTile =
+        find.byValueKey('MotionEventsListTile');
+        await driver.tap(motionEventsListTile);
+        await driver.waitFor(find.byValueKey('PlatformView'));
+        final String errorMessage = await driver.requestData('run test');
+        expect(errorMessage, '');
+      }
+    });
   });
 }
-

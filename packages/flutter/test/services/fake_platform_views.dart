@@ -20,14 +20,24 @@ class FakeAndroidPlatformViewsController {
 
   final Map<int, List<FakeAndroidMotionEvent>> motionEvents = <int, List<FakeAndroidMotionEvent>>{};
 
-  final Set<String> _registeredViewTypes = Set<String>();
+  final Set<String> _registeredViewTypes = <String>{};
 
   int _textureCounter = 0;
 
   Completer<void> resizeCompleter;
 
+  Completer<void> createCompleter;
+
+  int lastClearedFocusViewId;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
+  }
+
+  void invokeViewFocused(int viewId) {
+    final MethodCodec codec = SystemChannels.platform_views.codec;
+    final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
+    defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -42,11 +52,13 @@ class FakeAndroidPlatformViewsController {
         return _touch(call);
       case 'setDirection':
         return _setDirection(call);
+      case 'clearFocus':
+        return _clearFocus(call);
     }
     return Future<dynamic>.sync(() => null);
   }
 
-  Future<dynamic> _create(MethodCall call) {
+  Future<dynamic> _create(MethodCall call) async {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     final String viewType = args['viewType'];
@@ -66,6 +78,10 @@ class FakeAndroidPlatformViewsController {
         code: 'error',
         message: 'Trying to create a platform view of unregistered type: $viewType',
       );
+
+    if (createCompleter != null) {
+      await createCompleter.future;
+    }
 
     _views[id] = FakeAndroidPlatformView(id, viewType, Size(width, height), layoutDirection, creationParams);
     final int textureId = _textureCounter++;
@@ -142,6 +158,19 @@ class FakeAndroidPlatformViewsController {
 
     return Future<dynamic>.sync(() => null);
   }
+
+  Future<dynamic> _clearFocus(MethodCall call) {
+    final int id = call.arguments;
+
+    if (!_views.containsKey(id))
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to clear the focus on a platform view with unknown id: $id',
+      );
+
+    lastClearedFocusViewId = id;
+    return Future<dynamic>.sync(() => null);
+  }
 }
 
 class FakeIosPlatformViewsController {
@@ -153,14 +182,17 @@ class FakeIosPlatformViewsController {
   Iterable<FakeUiKitView> get views => _views.values;
   final Map<int, FakeUiKitView> _views = <int, FakeUiKitView>{};
 
-  final Set<String> _registeredViewTypes = Set<String>();
+  final Set<String> _registeredViewTypes = <String>{};
 
   // When this completer is non null, the 'create' method channel call will be
   // delayed until it completes.
   Completer<void> creationDelay;
 
-  // Maps a view id to the number of gestures it accepted so fat.
+  // Maps a view id to the number of gestures it accepted so far.
   final Map<int, int> gesturesAccepted = <int, int>{};
+
+  // Maps a view id to the number of gestures it rejected so far.
+  final Map<int, int> gesturesRejected = <int, int>{};
 
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
@@ -174,6 +206,8 @@ class FakeIosPlatformViewsController {
         return _dispose(call);
       case 'acceptGesture':
         return _acceptGesture(call);
+      case 'rejectGesture':
+        return _rejectGesture(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -202,6 +236,7 @@ class FakeIosPlatformViewsController {
 
     _views[id] = FakeUiKitView(id, viewType, creationParams);
     gesturesAccepted[id] = 0;
+    gesturesRejected[id] = 0;
     return Future<int>.sync(() => null);
   }
 
@@ -209,6 +244,13 @@ class FakeIosPlatformViewsController {
     final Map<dynamic, dynamic> args = call.arguments;
     final int id = args['id'];
     gesturesAccepted[id] += 1;
+    return Future<int>.sync(() => null);
+  }
+
+  Future<dynamic> _rejectGesture(MethodCall call) async {
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    gesturesRejected[id] += 1;
     return Future<int>.sync(() => null);
   }
 

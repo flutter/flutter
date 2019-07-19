@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+@TestOn('!chrome') // whole file needs triage.
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -36,12 +36,12 @@ void main() {
 
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -54,12 +54,12 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -75,10 +75,10 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
           ),
         ),
@@ -94,6 +94,41 @@ void main() {
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            tooltip: 'Add',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
+    await tester.longPress(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
+  testWidgets('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
@@ -105,9 +140,179 @@ void main() {
     );
 
     expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    try {
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add'), findsOneWidget);
+
+      await gesture.moveTo(Offset.zero);
+    } finally {
+      await gesture.removePointer();
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
+
     expect(find.text('Add'), findsOneWidget);
+  });
+
+  testWidgets('Floating Action Button elevation when highlighted - effect', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () { },
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    final TestGesture gesture = await tester.press(find.byType(PhysicalShape));
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 12.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () { },
+            highlightElevation: 20.0,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 12.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 20.0);
+    await gesture.up();
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 20.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+  });
+
+  testWidgets('Floating Action Button elevation when disabled - defaults', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    // Disabled elevation defaults to regular default elevation.
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+  });
+
+  testWidgets('Floating Action Button elevation when disabled - override', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            disabledElevation: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 0.0);
+  });
+
+  testWidgets('Floating Action Button elevation when disabled - effect', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            disabledElevation: 3.0,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 3.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () { },
+            disabledElevation: 3.0,
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 3.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+  });
+
+  testWidgets('Floating Action Button elevation when disabled while highlighted - effect', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () { },
+          ),
+        ),
+      ),
+    );
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.press(find.byType(PhysicalShape));
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 12.0);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 12.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () { },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<PhysicalShape>(find.byType(PhysicalShape)).elevation, 6.0);
   });
 
   testWidgets('FlatActionButton mini size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -163,8 +368,14 @@ void main() {
       return tester.widget<FloatingActionButton>(fabFinder);
     }
 
+    final Finder materialButtonFinder = find.byType(RawMaterialButton);
+
+    RawMaterialButton getRawMaterialButtonWidget() {
+      return tester.widget<RawMaterialButton>(materialButtonFinder);
+    }
+
     expect(getFabWidget().isExtended, false);
-    expect(getFabWidget().shape, const CircleBorder());
+    expect(getRawMaterialButtonWidget().shape, const CircleBorder());
 
     await tester.pumpWidget(
       MaterialApp(
@@ -182,7 +393,7 @@ void main() {
     );
 
     expect(getFabWidget().isExtended, true);
-    expect(getFabWidget().shape, const StadiumBorder());
+    expect(getRawMaterialButtonWidget().shape, const StadiumBorder());
     expect(find.text('label'), findsOneWidget);
     expect(find.byType(Icon), findsOneWidget);
 
@@ -205,6 +416,55 @@ void main() {
     expect(tester.getSize(find.byType(Icon)).width, 24.0);
     expect(tester.getSize(find.text('label')).width, 100.0);
     expect(tester.getSize(fabFinder).width, 168);
+  });
+
+  testWidgets('FloatingActionButton.isExtended (without icon)', (WidgetTester tester) async {
+    final Finder fabFinder = find.byType(FloatingActionButton);
+
+    FloatingActionButton getFabWidget() {
+      return tester.widget<FloatingActionButton>(fabFinder);
+    }
+
+    final Finder materialButtonFinder = find.byType(RawMaterialButton);
+
+    RawMaterialButton getRawMaterialButtonWidget() {
+      return tester.widget<RawMaterialButton>(materialButtonFinder);
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton.extended(
+            label: const SizedBox(
+              width: 100.0,
+              child: Text('label'),
+            ),
+            onPressed: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(getFabWidget().isExtended, true);
+    expect(getRawMaterialButtonWidget().shape, const StadiumBorder());
+    expect(find.text('label'), findsOneWidget);
+    expect(find.byType(Icon), findsNothing);
+
+    // Verify that the widget's height is 48 and that its internal
+    /// horizontal layout is: 20 label 20
+    expect(tester.getSize(fabFinder).height, 48.0);
+
+    final double fabLeft = tester.getTopLeft(fabFinder).dx;
+    final double fabRight = tester.getTopRight(fabFinder).dx;
+    final double labelLeft = tester.getTopLeft(find.text('label')).dx;
+    final double labelRight = tester.getTopRight(find.text('label')).dx;
+    expect(labelLeft - fabLeft, 20.0);
+    expect(fabRight - labelRight, 20.0);
+
+    // The overall width of the button is:
+    // 140 = 20 + 100(label) + 20
+    expect(tester.getSize(find.text('label')).width, 100.0);
+    expect(tester.getSize(fabFinder).width, 140);
   });
 
   testWidgets('Floating Action Button heroTag', (WidgetTester tester) async {
@@ -303,7 +563,7 @@ void main() {
             SemanticsFlag.isEnabled,
           ],
           actions: <SemanticsAction>[
-            SemanticsAction.tap
+            SemanticsAction.tap,
           ],
         ),
       ],
@@ -369,7 +629,7 @@ void main() {
                 TestSemantics(
                   label: 'Add Photo',
                   actions: <SemanticsAction>[
-                    SemanticsAction.tap
+                    SemanticsAction.tap,
                   ],
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isButton,
@@ -462,7 +722,7 @@ void main() {
             child: RepaintBoundary(
               key: key,
               child: FloatingActionButton(
-                onPressed: () {},
+                onPressed: () { },
                 child: const Icon(Icons.add),
               ),
             ),
@@ -476,28 +736,52 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('floating_action_button_test.clip.1.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'floating_action_button_test.clip.png',
+        version: 2,
+      ),
+      skip: !isLinux,
     );
   });
 
-  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async{
+  testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: FloatingActionButton(
-              onPressed: () { /* to make sure the button is enabled */ },
-            ),
-          )
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: FloatingActionButton(
+            focusNode: focusNode,
+            onPressed: () { /* to make sure the button is enabled */ },
+          ),
+        ),
       ),
     );
 
+    focusNode.unfocus();
+    await tester.pump();
+
     expect(
-        tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0)
+      tester.renderObject(find.byType(FloatingActionButton)),
+      paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+
+  testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(onPressed: () {}),
+    ));
+
+    expect(
+      tester.getSemantics(find.byType(FloatingActionButton)),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+      ),
+    );
+  }, semanticsEnabled: true);
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {

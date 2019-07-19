@@ -9,10 +9,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void sendFakeKeyEvent(Map<String, dynamic> data) {
-  BinaryMessages.handlePlatformMessage(
+  defaultBinaryMessenger.handlePlatformMessage(
     SystemChannels.keyEvent.name,
     SystemChannels.keyEvent.codec.encodeMessage(data),
-    (ByteData data) { },
+    (ByteData data) {},
   );
 }
 
@@ -29,13 +29,15 @@ void main() {
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(RawKeyboardListener(
-      focusNode: focusNode,
-      onKey: events.add,
-      child: Container(),
-    ));
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: events.add,
+        child: Container(),
+      ),
+    );
 
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+    focusNode.requestFocus();
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
@@ -43,7 +45,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -53,25 +55,27 @@ void main() {
     final RawKeyEventDataFuchsia typedData = events[0].data;
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
-    expect(typedData.modifiers, 0x08);
+    expect(typedData.modifiers, RawKeyEventDataFuchsia.modifierLeftMeta);
+    expect(typedData.isModifierPressed(ModifierKey.metaModifier, side: KeyboardSide.left), isTrue);
 
     await tester.pumpWidget(Container());
     focusNode.dispose();
   });
 
-  testWidgets('Defunct listeners do not receive events',
-      (WidgetTester tester) async {
+  testWidgets('Defunct listeners do not receive events', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
     final FocusNode focusNode = FocusNode();
 
-    await tester.pumpWidget(RawKeyboardListener(
-      focusNode: focusNode,
-      onKey: events.add,
-      child: Container(),
-    ));
+    await tester.pumpWidget(
+      RawKeyboardListener(
+        focusNode: focusNode,
+        onKey: events.add,
+        child: Container(),
+      ),
+    );
 
-    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+    focusNode.requestFocus();
     await tester.idle();
 
     sendFakeKeyEvent(<String, dynamic>{
@@ -79,7 +83,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
     await tester.idle();
 
@@ -93,7 +97,7 @@ void main() {
       'keymap': 'fuchsia',
       'hidUsage': 0x04,
       'codePoint': 0x64,
-      'modifiers': 0x08,
+      'modifiers': RawKeyEventDataFuchsia.modifierLeftMeta,
     });
 
     await tester.idle();

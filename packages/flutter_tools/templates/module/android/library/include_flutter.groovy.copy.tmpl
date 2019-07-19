@@ -1,6 +1,6 @@
 // Generated file. Do not edit.
 
-def scriptFile = getClass().protectionDomain.codeSource.location.path
+def scriptFile = getClass().protectionDomain.codeSource.location.toURI()
 def flutterProjectRoot = new File(scriptFile).parentFile.parentFile
 
 gradle.include ':flutter'
@@ -19,6 +19,12 @@ plugins.each { name, path ->
 }
 
 gradle.getGradle().projectsLoaded { g ->
+    g.rootProject.beforeEvaluate { p ->
+        _mainModuleName = binding.variables['mainModuleName']
+        if (_mainModuleName != null && !_mainModuleName.empty) {
+            p.ext.mainModuleName = _mainModuleName
+        }
+    }
     g.rootProject.afterEvaluate { p ->
         p.subprojects { sp ->
             if (sp.name != 'flutter') {

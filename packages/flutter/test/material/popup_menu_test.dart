@@ -14,7 +14,7 @@ void main() {
     final Key targetKey = UniqueKey();
     await tester.pumpWidget(
       MaterialApp(
-        routes: <String, WidgetBuilder> {
+        routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
             return const Text('Next');
           },
@@ -32,7 +32,7 @@ void main() {
                     return <PopupMenuItem<int>>[
                       const PopupMenuItem<int>(
                         value: 1,
-                        child: Text('One')
+                        child: Text('One'),
                       ),
                     ];
                   },
@@ -126,6 +126,55 @@ void main() {
     expect(cancels, equals(2));
   });
 
+  testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    bool itemBuilderCalled = false;
+    bool onSelectedCalled = false;
+    bool onCanceledCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: popupButtonKey,
+                enabled: false,
+                itemBuilder: (BuildContext context) {
+                  itemBuilderCalled = true;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                onSelected: (int selected) => onSelectedCalled = true,
+                onCanceled: () => onCanceledCalled = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Try to bring up the popup menu and select the first item from it
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onSelectedCalled, isFalse);
+
+    // Try to bring up the popup menu and tap outside it to cancel the menu
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onCanceledCalled, isFalse);
+  });
+
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
       return MaterialApp(
@@ -138,7 +187,7 @@ void main() {
                   return <PopupMenuItem<int>>[
                     const PopupMenuItem<int>(
                       value: 1,
-                      child: Text('One')
+                      child: Text('One'),
                     ),
                   ];
                 },
@@ -369,24 +418,24 @@ void main() {
       });
     }
 
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, const Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, const Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
@@ -420,7 +469,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     ));
 
     await tester.tap(find.text('XXX'));
@@ -457,7 +506,7 @@ void main() {
             child: Material(
               child: popupMenuButton,
             ),
-          )
+          ),
         ),
       ),
     );
@@ -551,6 +600,96 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('PopupMenuButton PopupMenuDivider', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27072
+
+    String selectedValue;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Container(
+            child: Center(
+              child: PopupMenuButton<String>(
+                onSelected: (String result) {
+                  selectedValue = result;
+                },
+                child: const Text('Menu Button'),
+                initialValue: '1',
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    child: Text('1'),
+                    value: '1',
+                  ),
+                  const PopupMenuDivider(),
+                  const PopupMenuItem<String>(
+                    child: Text('2'),
+                    value: '2',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Menu Button'));
+    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(PopupMenuDivider), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    expect(selectedValue, '1');
+
+    await tester.tap(find.text('Menu Button'));
+    await tester.pumpAndSettle();
+    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(PopupMenuDivider), findsOneWidget);
+    expect(find.text('2'), findsOneWidget);
+
+    await tester.tap(find.text('2'));
+    await tester.pumpAndSettle();
+    expect(selectedValue, '2');
+  });
+
+  testWidgets('showMenu position required', (WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/22256
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  onPressed: () {
+                    // Ensure showMenu throws an assertion without a position
+                    expect(() {
+                      // ignore: missing_required_param
+                      showMenu<int>(
+                        context: context,
+                        items: <PopupMenuItem<int>>[
+                          const PopupMenuItem<int>(
+                              value: 1, child: Text('1')
+                          ),
+                        ],
+                      );
+                    }, throwsAssertionError);
+                  },
+                  child: const Text('Menu Button'),
+                );
+              },
+            ),
+          ),
+        ),
+      )
+    );
+
+    await tester.tap(find.text('Menu Button'));
+  });
+
 }
 
 class TestApp extends StatefulWidget {
