@@ -12,6 +12,7 @@ const Color _kScrollbarColor = Color(0x99777777);
 // The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
 // to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
 const Offset _kGestureOffset = Offset(0, -25);
+const Radius _kScrollbarRadius = Radius.circular(1.5);
 
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
@@ -47,7 +48,7 @@ void main() {
           // Fraction in viewport * scrollbar height - top, bottom margin.
           600.0 / 4000.0 * (600.0 - 2 * 3),
         ),
-        const Radius.circular(1.25),
+        _kScrollbarRadius,
       ),
     ));
   });
@@ -92,7 +93,7 @@ void main() {
           // where Fraction visible = (viewport size - padding) / content size
           (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
         ),
-        const Radius.circular(1.25),
+        _kScrollbarRadius,
       ),
     ));
   });
