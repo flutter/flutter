@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -13,7 +15,7 @@ import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import '../src/common.dart';
@@ -22,6 +24,7 @@ import '../src/context.dart';
 void main() {
   group('analytics', () {
     Directory tempDir;
+    MockFlutterConfig mockFlutterConfig;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -30,6 +33,7 @@ void main() {
     setUp(() {
       Cache.flutterRoot = '../..';
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      mockFlutterConfig = MockFlutterConfig();
     });
 
     tearDown(() {
@@ -77,6 +81,44 @@ void main() {
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
+    });
+
+    testUsingContext('Usage records one feature in experiment setting', () async {
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+          .thenReturn(true);
+      final Usage usage = Usage();
+
+      usage.suppressAnalytics = false;
+      usage.enabled = true;
+      final Future<Map<String, dynamic>> data = usage.onSend.first;
+      usage.sendCommand('test');
+
+      expect(await data, containsPair(enabledFlutterFeatures, 'enable-web'));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      Usage: () => Usage(configDirOverride: tempDir.path),
+      Config: () => mockFlutterConfig,
+    });
+
+    testUsingContext('Usage records multiple features in experiment setting', () async {
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+          .thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting))
+          .thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting))
+          .thenReturn(true);
+      final Usage usage = Usage();
+
+      usage.suppressAnalytics = false;
+      usage.enabled = true;
+      final Future<Map<String, dynamic>> data = usage.onSend.first;
+      usage.sendCommand('test');
+
+      expect(await data, containsPair(enabledFlutterFeatures, 'enable-web,enable-linux-desktop,enable-macos-desktop'));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      Usage: () => Usage(configDirOverride: tempDir.path),
+      Config: () => mockFlutterConfig,
     });
   });
 
@@ -195,3 +237,5 @@ void main() {
 class MockUsage extends Mock implements Usage {}
 
 class MockDoctor extends Mock implements Doctor {}
+
+class MockFlutterConfig extends Mock implements Config {}

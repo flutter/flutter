@@ -8,10 +8,11 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'base/io.dart';
-import 'base/os.dart';
-import 'base/platform.dart';
-import 'globals.dart';
+import '../base/io.dart';
+import '../base/os.dart';
+import '../base/platform.dart';
+import '../globals.dart';
+
 import 'usage.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.

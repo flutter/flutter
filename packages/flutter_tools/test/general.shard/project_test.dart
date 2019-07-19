@@ -533,17 +533,6 @@ void transfer(FileSystemEntity entity, FileSystem target) {
   }
 }
 
-Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
-  try {
-    await future;
-    fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch(e) {
-    expect(e.message, messageMatcher);
-  } catch(e, trace) {
-    fail('ToolExit expected, got $e\n$trace');
-  }
-}
-
 void expectExists(FileSystemEntity entity) {
   expect(entity.existsSync(), isTrue);
 }

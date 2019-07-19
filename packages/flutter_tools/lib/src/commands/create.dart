@@ -22,9 +22,9 @@ import '../dart/pub.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
-import '../usage.dart';
 import '../version.dart';
 
 enum _ProjectType {

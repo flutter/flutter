@@ -24,8 +24,8 @@ import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../services.dart';
-import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
@@ -469,6 +469,18 @@ String readGeneratedXcconfig(String appPath) {
 }
 
 Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
+  if (result.xcodeBuildExecution != null &&
+      result.xcodeBuildExecution.buildForPhysicalDevice &&
+      result.stdout?.toUpperCase()?.contains('BITCODE') == true) {
+    flutterUsage.sendEvent(
+      'Xcode',
+      'bitcode-failure',
+      parameters: <String, String>{
+        'build-commands': result.xcodeBuildExecution.buildCommands.toString(),
+        'build-settings': result.xcodeBuildExecution.buildSettings.toString(),
+      });
+  }
+
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
