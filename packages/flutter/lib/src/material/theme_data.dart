@@ -662,7 +662,7 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the visual properties of [Tooltip]s.
   ///
-  /// This is the value returned from [Tooltip.of].
+  /// This is the value returned from [TooltipTheme.of].
   final TooltipThemeData tooltipTheme;
 
   /// The colors and styles used to render [Card].

@@ -62,8 +62,8 @@ class TooltipThemeData extends Diagnosticable {
   /// tree.
   ///
   /// By default, [Tooltip]s will add a [Semantics.label] that is set to
-  /// [Tooltip.message]. Set this property to true if a custom
-  /// [Semantics.label] should be applied.
+  /// [Tooltip.message]. Set this property to true if the app is going to
+  /// provide its own custom semantics label.
   final bool excludeFromSemantics;
 
   /// The [Tooltip]'s shape and background color.
@@ -232,9 +232,9 @@ class TooltipTheme extends InheritedWidget {
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;
 
-  /// The closest instance of this class' [data] value that encloses the given
-  /// context. If there is no ancestor, it returns [ThemeData.tooltipTheme].
-  /// Applications can assume that the returned value will not be null.
+  /// Returns the [data] from the closest [TooltipTheme] ancestor. If there is
+  /// no ancestor, it returns [ThemeData.tooltipTheme]. Applications can assume
+  /// that the returned value will not be null.
   ///
   /// Typical usage is as follows:
   ///

@@ -39,7 +39,7 @@ class Tooltip extends StatefulWidget {
   /// Creates a tooltip.
   ///
   /// By default, tooltips should adhere to the
-  /// [Material specifications](https://material.io/design/components/tooltips.html#spec).
+  /// [Material specification](https://material.io/design/components/tooltips.html#spec).
   /// If the optional constructor parameters are not defined, the values
   /// provided by [TooltipTheme.of] will be used if a [TooltipTheme] is present
   /// or specified in [ThemeData].
@@ -95,8 +95,8 @@ class Tooltip extends StatefulWidget {
   /// tree.
   ///
   /// Defaults to false. A tooltip will add a [Semantics.label] that is set to
-  /// [Tooltip.message]. Set this property to true if a custom
-  /// [Semantics.label] should be applied.
+  /// [Tooltip.message]. Set this property to true if the app is going to
+  /// provide its own custom semantics label.
   final bool excludeFromSemantics;
 
   /// The widget below this widget in the tree.
