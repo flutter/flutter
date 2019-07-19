@@ -5494,11 +5494,11 @@ class Listener extends StatelessWidget {
     // TODO(tongmu): After 2019Q3 stable, remove these 3 parameters from Listener
     // and Listener should no longer need an intermediate class _PointerListener.
     // https://github.com/flutter/flutter/issues/36085
-    @Deprecated('Use Mouse.onEnter instead')
+    @Deprecated('Use MouseRegion.onEnter instead')
     this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use Mouse.onExit instead')
+    @Deprecated('Use MouseRegion.onExit instead')
     this.onPointerExit, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use Mouse.onHover instead')
+    @Deprecated('Use MouseRegion.onHover instead')
     this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
