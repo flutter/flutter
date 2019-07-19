@@ -21,7 +21,7 @@ FLUTTER_EXPORT
  *
  * `delegate` will only referenced weakly.
  */
-- (void)addDelegate:(NSObject<FlutterPlugin>*)delegate;
+- (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.

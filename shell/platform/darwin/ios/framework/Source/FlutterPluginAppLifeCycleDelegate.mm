@@ -19,20 +19,20 @@ static const SEL selectorsHandledByPlugins[] = {
   UIBackgroundTaskIdentifier _debugBackgroundTask;
 
   // Weak references to registered plugins.
-  NSPointerArray* _pluginDelegates;
+  NSPointerArray* _delegates;
 }
 
 - (instancetype)init {
   if (self = [super init]) {
     std::string cachePath = fml::paths::JoinPaths({getenv("HOME"), kCallbackCacheSubDir});
     [FlutterCallbackCache setCachePath:[NSString stringWithUTF8String:cachePath.c_str()]];
-    _pluginDelegates = [[NSPointerArray weakObjectsPointerArray] retain];
+    _delegates = [[NSPointerArray weakObjectsPointerArray] retain];
   }
   return self;
 }
 
 - (void)dealloc {
-  [_pluginDelegates release];
+  [_delegates release];
   [super dealloc];
 }
 
@@ -50,32 +50,32 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 }
 
 - (BOOL)hasPluginThatRespondsToSelector:(SEL)selector {
-  for (id<FlutterPlugin> plugin in [_pluginDelegates allObjects]) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:selector]) {
+    if ([delegate respondsToSelector:selector]) {
       return YES;
     }
   }
   return NO;
 }
 
-- (void)addDelegate:(NSObject<FlutterPlugin>*)delegate {
-  [_pluginDelegates addPointer:(__bridge void*)delegate];
-  if (isPowerOfTwo([_pluginDelegates count])) {
-    [_pluginDelegates compact];
+- (void)addDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate {
+  [_delegates addPointer:(__bridge void*)delegate];
+  if (isPowerOfTwo([_delegates count])) {
+    [_delegates compact];
   }
 }
 
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-  for (id<FlutterPlugin> plugin in [_pluginDelegates allObjects]) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if (![plugin application:application didFinishLaunchingWithOptions:launchOptions]) {
+    if ([delegate respondsToSelector:_cmd]) {
+      if (![delegate application:application didFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
     }
@@ -86,12 +86,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     willFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   flutter::DartCallbackCache::LoadCacheFromDisk();
-  for (id<FlutterPlugin> plugin in [_pluginDelegates allObjects]) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in [_delegates allObjects]) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if (![plugin application:application willFinishLaunchingWithOptions:launchOptions]) {
+    if ([delegate respondsToSelector:_cmd]) {
+      if (![delegate application:application willFinishLaunchingWithOptions:launchOptions]) {
         return NO;
       }
     }
@@ -117,12 +117,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
                          "To reconnect, launch your application again via 'flutter run'";
                 }];
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin applicationDidEnterBackground:application];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate applicationDidEnterBackground:application];
     }
   }
 }
@@ -131,45 +131,45 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
   [application endBackgroundTask:_debugBackgroundTask];
 #endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin applicationWillEnterForeground:application];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate applicationWillEnterForeground:application];
     }
   }
 }
 
 - (void)applicationWillResignActive:(UIApplication*)application {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin applicationWillResignActive:application];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate applicationWillResignActive:application];
     }
   }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication*)application {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin applicationDidBecomeActive:application];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate applicationDidBecomeActive:application];
     }
   }
 }
 
 - (void)applicationWillTerminate:(UIApplication*)application {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin applicationWillTerminate:application];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate applicationWillTerminate:application];
     }
   }
 }
@@ -178,12 +178,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin application:application didRegisterUserNotificationSettings:notificationSettings];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate application:application didRegisterUserNotificationSettings:notificationSettings];
     }
   }
 }
@@ -191,12 +191,13 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 
 - (void)application:(UIApplication*)application
     didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin application:application didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate application:application
+          didRegisterForRemoteNotificationsWithDeviceToken:deviceToken];
     }
   }
 }
@@ -204,12 +205,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (void)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application
               didReceiveRemoteNotification:userInfo
                     fetchCompletionHandler:completionHandler]) {
         return;
@@ -222,12 +223,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
     didReceiveLocalNotification:(UILocalNotification*)notification {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      [plugin application:application didReceiveLocalNotification:notification];
+    if ([delegate respondsToSelector:_cmd]) {
+      [delegate application:application didReceiveLocalNotification:notification];
     }
   }
 }
@@ -238,14 +239,14 @@ static BOOL isPowerOfTwo(NSUInteger x) {
          withCompletionHandler:
              (void (^)(UNNotificationPresentationOptions options))completionHandler {
   if (@available(iOS 10.0, *)) {
-    for (id<FlutterPlugin> plugin in _pluginDelegates) {
-      if (!plugin) {
+    for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+      if (!delegate) {
         continue;
       }
-      if ([plugin respondsToSelector:_cmd]) {
-        [plugin userNotificationCenter:center
-               willPresentNotification:notification
-                 withCompletionHandler:completionHandler];
+      if ([delegate respondsToSelector:_cmd]) {
+        [delegate userNotificationCenter:center
+                 willPresentNotification:notification
+                   withCompletionHandler:completionHandler];
       }
     }
   }
@@ -254,12 +255,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
             openURL:(NSURL*)url
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application openURL:url options:options]) {
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application openURL:url options:options]) {
         return YES;
       }
     }
@@ -268,12 +269,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 }
 
 - (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application handleOpenURL:url]) {
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application handleOpenURL:url]) {
         return YES;
       }
     }
@@ -285,12 +286,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
               openURL:(NSURL*)url
     sourceApplication:(NSString*)sourceApplication
            annotation:(id)annotation {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application
                         openURL:url
               sourceApplication:sourceApplication
                      annotation:annotation]) {
@@ -304,12 +305,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (void)application:(UIApplication*)application
     performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
                completionHandler:(void (^)(BOOL succeeded))completionHandler NS_AVAILABLE_IOS(9_0) {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application
               performActionForShortcutItem:shortcutItem
                          completionHandler:completionHandler]) {
         return;
@@ -321,12 +322,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
                       completionHandler:(nonnull void (^)())completionHandler {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application
               handleEventsForBackgroundURLSession:identifier
                                 completionHandler:completionHandler]) {
         return YES;
@@ -338,12 +339,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 
 - (BOOL)application:(UIApplication*)application
     performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application performFetchWithCompletionHandler:completionHandler]) {
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application performFetchWithCompletionHandler:completionHandler]) {
         return YES;
       }
     }
@@ -354,12 +355,12 @@ static BOOL isPowerOfTwo(NSUInteger x) {
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
       restorationHandler:(void (^)(NSArray*))restorationHandler {
-  for (id<FlutterPlugin> plugin in _pluginDelegates) {
-    if (!plugin) {
+  for (NSObject<FlutterApplicationLifeCycleDelegate>* delegate in _delegates) {
+    if (!delegate) {
       continue;
     }
-    if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
+    if ([delegate respondsToSelector:_cmd]) {
+      if ([delegate application:application
               continueUserActivity:userActivity
                 restorationHandler:restorationHandler]) {
         return YES;

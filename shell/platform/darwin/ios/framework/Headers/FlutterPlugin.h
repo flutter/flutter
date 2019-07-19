@@ -18,7 +18,160 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;
 @protocol FlutterPluginRegistry;
 
+#pragma mark -
+/***************************************************************************************************
+ * Protocol for listener of events from the UIApplication, typically a FlutterPlugin.
+ */
+@protocol FlutterApplicationLifeCycleDelegate
+@optional
 /**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `NO` if this vetoes application launch.
+ */
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `NO` if this vetoes application launch.
+ */
+- (BOOL)application:(UIApplication*)application
+    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)applicationDidBecomeActive:(UIApplication*)application;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)applicationWillResignActive:(UIApplication*)application;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)applicationDidEnterBackground:(UIApplication*)application;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)applicationWillEnterForeground:(UIApplication*)application;
+
+/**
+ Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)applicationWillTerminate:(UIApplication*)application;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
+    API_DEPRECATED(
+        "See -[UIApplicationDelegate application:didRegisterUserNotificationSettings:] deprecation",
+        ios(8.0, 10.0));
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    didReceiveRemoteNotification:(NSDictionary*)userInfo
+          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+/**
+ * Calls all plugins registered for `UIApplicationDelegate` callbacks.
+ */
+- (void)application:(UIApplication*)application
+    didReceiveLocalNotification:(UILocalNotification*)notification
+    API_DEPRECATED(
+        "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
+        ios(4.0, 10.0));
+
+/**
+ * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
+ */
+- (void)userNotificationCenter:(UNUserNotificationCenter*)center
+       willPresentNotification:(UNNotification*)notification
+         withCompletionHandler:
+             (void (^)(UNNotificationPresentationOptions options))completionHandler
+    API_AVAILABLE(ios(10));
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+            openURL:(NSURL*)url
+            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+              openURL:(NSURL*)url
+    sourceApplication:(NSString*)sourceApplication
+           annotation:(id)annotation;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
+               completionHandler:(void (^)(BOOL succeeded))completionHandler
+    API_AVAILABLE(ios(9.0));
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
+                      completionHandler:(nonnull void (^)(void))completionHandler;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
+
+/**
+ * Called if this has been registered for `UIApplicationDelegate` callbacks.
+ *
+ * @return `YES` if this handles the request.
+ */
+- (BOOL)application:(UIApplication*)application
+    continueUserActivity:(NSUserActivity*)userActivity
+      restorationHandler:(void (^)(NSArray*))restorationHandler;
+@end
+
+#pragma mark -
+/***************************************************************************************************
  * A plugin registration callback.
  *
  * Used for registering plugins with additional instances of
@@ -28,13 +181,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>* registry);
 
-/**
+#pragma mark -
+/***************************************************************************************************
  * Implemented by the iOS part of a Flutter plugin.
  *
  * Defines a set of optional callback methods and a method to set up the plugin
  * and register it to be called by other application components.
  */
-@protocol FlutterPlugin <NSObject>
+@protocol FlutterPlugin <NSObject, FlutterApplicationLifeCycleDelegate>
 @required
 /**
  * Registers this plugin using the context information and callback registration
@@ -75,154 +229,10 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
  * @param result A callback for submitting the result of the call.
  */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `NO` if this plugin vetoes application launch.
- */
-- (BOOL)application:(UIApplication*)application
-    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `NO` if this plugin vetoes application launch.
- */
-- (BOOL)application:(UIApplication*)application
-    willFinishLaunchingWithOptions:(NSDictionary*)launchOptions;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationDidBecomeActive:(UIApplication*)application;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillResignActive:(UIApplication*)application;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationDidEnterBackground:(UIApplication*)application;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillEnterForeground:(UIApplication*)application;
-
-/**
- Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)applicationWillTerminate:(UIApplication*)application;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)application:(UIApplication*)application
-    didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
-    API_DEPRECATED(
-        "See -[UIApplicationDelegate application:didRegisterUserNotificationSettings:] deprecation",
-        ios(8.0, 10.0));
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- */
-- (void)application:(UIApplication*)application
-    didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)deviceToken;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-    didReceiveRemoteNotification:(NSDictionary*)userInfo
-          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
-
-/**
- * Calls all plugins registered for `UIApplicationDelegate` callbacks.
- */
-- (void)application:(UIApplication*)application
-    didReceiveLocalNotification:(UILocalNotification*)notification
-    API_DEPRECATED(
-        "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
-        ios(4.0, 10.0));
-
-/**
- * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
- */
-- (void)userNotificationCenter:(UNUserNotificationCenter*)center
-       willPresentNotification:(UNNotification*)notification
-         withCompletionHandler:
-             (void (^)(UNNotificationPresentationOptions options))completionHandler
-    API_AVAILABLE(ios(10));
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-            openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application handleOpenURL:(NSURL*)url;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-              openURL:(NSURL*)url
-    sourceApplication:(NSString*)sourceApplication
-           annotation:(id)annotation;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-    performActionForShortcutItem:(UIApplicationShortcutItem*)shortcutItem
-               completionHandler:(void (^)(BOOL succeeded))completionHandler
-    API_AVAILABLE(ios(9.0));
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-    handleEventsForBackgroundURLSession:(nonnull NSString*)identifier
-                      completionHandler:(nonnull void (^)(void))completionHandler;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
-
-/**
- * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
- *
- * @return `YES` if this plugin handles the request.
- */
-- (BOOL)application:(UIApplication*)application
-    continueUserActivity:(NSUserActivity*)userActivity
-      restorationHandler:(void (^)(NSArray*))restorationHandler;
 @end
 
-/**
+#pragma mark -
+/***************************************************************************************************
  *Registration context for a single `FlutterPlugin`, providing a one stop shop
  *for the plugin to access contextual information and register callbacks for
  *various application events.
@@ -312,7 +322,8 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
 - (NSString*)lookupKeyForAsset:(NSString*)asset fromPackage:(NSString*)package;
 @end
 
-/**
+#pragma mark -
+/***************************************************************************************************
  * A registry of Flutter iOS plugins.
  *
  * Plugins are identified by unique string keys, typically the name of the
@@ -357,12 +368,13 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey;
 @end
 
-/**
+#pragma mark -
+/***************************************************************************************************
  * Implement this in the `UIAppDelegate` of your app to enable Flutter plugins to register
  * themselves to the application life cycle events.
  */
 @protocol FlutterAppLifeCycleProvider
-- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate;
+- (void)addApplicationLifeCycleDelegate:(NSObject<FlutterApplicationLifeCycleDelegate>*)delegate;
 @end
 
 NS_ASSUME_NONNULL_END;
