@@ -71,12 +71,13 @@ class GoldensClient {
   Future<void> prepare() async {
     final String goldensCommit = await _getGoldensCommit();
     String currentCommit = await _getCurrentCommit();
+    print('currentCommit pre-lock : $currentCommit');
     if (currentCommit != goldensCommit) {
       await _obtainLock();
       try {
         // Check the current commit again now that we have the lock.
         currentCommit = await _getCurrentCommit();
-        print('currentCommit: $currentCommit');
+        print('currentCommit post-lock: $currentCommit');
         print('goldensCommit: $goldensCommit');
         if (currentCommit != goldensCommit) {
           if (currentCommit == null) {
@@ -130,6 +131,7 @@ class GoldensClient {
       final StringBuffer buf = StringBuffer();
       buf
         ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
+        ..writeln('local changes: ${result.stdout}')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
         ..writeln('cd ${repositoryRoot.path}')
         ..writeln('git reset --hard HEAD')
