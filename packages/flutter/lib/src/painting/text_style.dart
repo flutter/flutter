@@ -166,7 +166,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Borders and stroke
+/// ### Borders and stroke (custom paint)
 ///
 /// {@tool sample}
 /// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
@@ -198,6 +198,34 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///       ),
 ///     ),
 ///   ],
+/// )
+/// ```
+/// {@end-tool}
+/// 
+/// ### Gradients (custom paint)
+///
+/// {@tool sample}
+/// The [foreground] property also allows effects such as gradients to be
+/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// shader.
+///
+/// ![Text gradient](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
+///
+/// ```dart
+/// Text(
+///   'Greetings, planet!',
+///   style: TextStyle(
+///     fontSize: 40,
+///     foreground: Paint()
+///       ..shader = ui.Gradient.linear(
+///         const Offset(0, 20),
+///         const Offset(150, 20),
+///         <Color>[
+///           Colors.red,
+///           Colors.yellow,
+///         ],
+///       )
+///   ),
 /// )
 /// ```
 /// {@end-tool}
