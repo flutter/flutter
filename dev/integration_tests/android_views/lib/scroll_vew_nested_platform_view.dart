@@ -13,10 +13,9 @@ class ScrollViewNestedPlatformView extends Page {
 
   @override
   Widget build(BuildContext context) {
-    return ScrollViewNestedPlatformViewBody();
+    return const ScrollViewNestedPlatformViewBody();
   }
 }
-
 
 class ScrollViewNestedPlatformViewBody extends StatefulWidget {
 
