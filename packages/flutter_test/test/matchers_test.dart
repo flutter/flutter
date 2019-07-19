@@ -502,7 +502,9 @@ void main() {
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
-        flags |= index;
+        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+          flags |= index;
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
@@ -546,6 +548,8 @@ void main() {
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
+         //isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,

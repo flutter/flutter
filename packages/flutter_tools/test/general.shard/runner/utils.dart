@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 

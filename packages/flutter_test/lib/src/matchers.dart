@@ -419,6 +419,7 @@ Matcher matchesSemantics({
   bool isInMutuallyExclusiveGroup = false,
   bool isHeader = false,
   bool isObscured = false,
+  bool isMultiline = false,
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
@@ -479,6 +480,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isHeader);
   if (isObscured)
     flags.add(SemanticsFlag.isObscured);
+  if (isMultiline)
+    flags.add(SemanticsFlag.isMultiline);
   if (namesRoute)
     flags.add(SemanticsFlag.namesRoute);
   if (scopesRoute)
