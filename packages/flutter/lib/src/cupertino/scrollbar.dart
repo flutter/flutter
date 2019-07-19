@@ -162,6 +162,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   }
 
   void _startFadeoutTimer() {
+    _fadeoutTimer?.cancel();
     _fadeoutTimer = Timer(_kScrollbarTimeToFade, () {
       _fadeoutAnimationController.reverse();
       _fadeoutTimer = null;
@@ -222,11 +223,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _painter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
-
-      _fadeoutTimer?.cancel();
-      // TODO(justinmc): Drag the scrollbar then stop, but don't release. The
-      // thumb will fadeout. It shouldn't. Is this causing it?
-      _startFadeoutTimer();
+      if (_dragScrollbarStartY == null) {
+        _startFadeoutTimer();
+      }
     }
     return false;
   }
