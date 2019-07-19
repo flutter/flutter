@@ -96,9 +96,9 @@ Future<void> pubGet({
       'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
       timeout: timeoutConfiguration.slowOperation,
     );
+    final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'];
     final List<String> args = <String>[
-      '--verbosity=warning',
-      if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose']) '--verbose',
+      if (verbose) '--verbose' else '--verbosity=warning',
       ...<String>[command, '--no-precompile'],
       if (offline) '--offline',
     ];
