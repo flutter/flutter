@@ -255,8 +255,6 @@ class AOTSnapshotter {
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
-    }
-    if (!bitcode) {
       return linkResult;
     }
     final RunResult dsymResult = await xcode.dsymutil(<String>[
