@@ -56,6 +56,8 @@ void main() {
         return StatefulWrapper(key: key, child: Container(height: 100.0));
       }),
     );
+
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Moving global key inside a SliverLayoutBuilder', (WidgetTester tester) async {
@@ -95,5 +97,7 @@ void main() {
         ),
       ),
     );
+
+    expect(tester.takeException(), null);
   });
 }

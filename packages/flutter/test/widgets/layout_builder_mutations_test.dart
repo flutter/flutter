@@ -65,6 +65,8 @@ void main() {
         ),
       ],
     ));
+
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Moving a global key from another SliverLayoutBuilder at layout time', (WidgetTester tester) async {
@@ -121,5 +123,6 @@ void main() {
       ),
     );
 
+    expect(tester.takeException(), null);
   });
 }

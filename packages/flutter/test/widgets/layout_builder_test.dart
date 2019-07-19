@@ -436,7 +436,7 @@ void main() {
     final RenderBox renderChild1 = tester.renderObject(find.byKey(childKey1));
     final RenderBox renderChild2 = tester.renderObject(find.byKey(childKey2));
 
-    // scrollController.scrollOffset = 0:
+    // Test with scrollController.scrollOffset = 0.
     expect(
       renderChild1.localToGlobal(const Offset(100, 100)),
       const Offset(100, 300.0 + 100),
