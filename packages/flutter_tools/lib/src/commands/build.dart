@@ -21,7 +21,7 @@ class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildAotCommand());
+    addSubcommand(BuildAotCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildIOSCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());

@@ -91,7 +91,6 @@ void testUsingContext(
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-
           return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
@@ -105,7 +104,6 @@ void testUsingContext(
                     // tests can override this either in the test or during setup.
                     Cache.flutterRoot ??= flutterRoot;
                   }
-
                   return await testMethod();
                 },
               );

@@ -41,10 +41,6 @@ class BuildBundleCommand extends BuildSubCommand {
           'windows-x64',
         ],
       )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
@@ -59,6 +55,7 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
 
     bundleBuilder ??= BundleBuilder();
   }
