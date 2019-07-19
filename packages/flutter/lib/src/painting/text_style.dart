@@ -166,7 +166,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 ///
-/// ### Borders and stroke (custom paint)
+/// ### Borders and stroke (Foreground)
 ///
 /// {@tool sample}
 /// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
@@ -202,7 +202,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ```
 /// {@end-tool}
 /// 
-/// ### Gradients (custom paint)
+/// ### Gradients (Foreground)
 ///
 /// {@tool sample}
 /// The [foreground] property also allows effects such as gradients to be
