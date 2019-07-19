@@ -22,12 +22,26 @@ import android.support.annotation.UiThread;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.*;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.atomic.AtomicLong;
+
 import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.android.AndroidKeyProcessor;
 import io.flutter.embedding.android.AndroidTouchProcessor;
@@ -42,15 +56,11 @@ import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.PlatformChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
-import io.flutter.plugin.common.*;
+import io.flutter.plugin.common.ActivityLifecycleListener;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An Android view containing a Flutter app.
@@ -113,6 +123,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     private final AtomicLong nextTextureId = new AtomicLong(0L);
     private FlutterNativeView mNativeView;
     private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
+    private boolean didRenderFirstFrame = false;
 
     private final AccessibilityBridge.OnAccessibilityChangeListener onAccessibilityChangeListener = new AccessibilityBridge.OnAccessibilityChangeListener() {
         @Override
@@ -279,6 +290,14 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
     public void onMemoryPressure() {
         systemChannel.sendMemoryPressureWarning();
+    }
+
+    /**
+     * Returns true if the Flutter experience associated with this {@code FlutterView} has
+     * rendered its first frame, or false otherwise.
+     */
+    public boolean hasRenderedFirstFrame() {
+        return didRenderFirstFrame;
     }
 
     /**
@@ -643,8 +662,10 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         }
     }
 
-    // Called by native to notify first Flutter frame rendered.
+    // Called by FlutterNativeView to notify first Flutter frame rendered.
     public void onFirstFrame() {
+        didRenderFirstFrame = true;
+
         // Allow listeners to remove themselves when they are called.
         List<FirstFrameListener> listeners = new ArrayList<>(mFirstFrameListeners);
         for (FirstFrameListener listener : listeners) {
