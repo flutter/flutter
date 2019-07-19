@@ -15,8 +15,8 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, SliverConstraints constraints);
 
 // A widget that defers its building until layout.
-abstract class _GenericLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
-  const _GenericLayoutBuilder({
+abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
+  const ConstrainedLayoutBuilder._({
     Key key,
     @required this.builder,
   }) : assert(builder != null),
@@ -31,10 +31,10 @@ abstract class _GenericLayoutBuilder<ConstraintType extends Constraints> extends
 }
 
 class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderObjectElement {
-  _LayoutBuilderElement(_GenericLayoutBuilder<ConstraintType> widget) : super(widget);
+  _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> widget) : super(widget);
 
   @override
-  _GenericLayoutBuilder<ConstraintType> get widget => super.widget;
+  ConstrainedLayoutBuilder<ConstraintType> get widget => super.widget;
 
   @override
   _GenericRenderLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject;
@@ -60,7 +60,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 
   @override
-  void update(_GenericLayoutBuilder<ConstraintType> newWidget) {
+  void update(ConstrainedLayoutBuilder<ConstraintType> newWidget) {
     assert(widget != newWidget);
     super.update(newWidget);
     assert(widget == newWidget);
@@ -161,14 +161,14 @@ mixin _GenericRenderLayoutBuilder<ConstraintType extends Constraints, ChildType 
 ///  * [Builder], which calls a `builder` function at build time.
 ///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
 ///  * [CustomSingleChildLayout], which positions its child during layout.
-class LayoutBuilder extends _GenericLayoutBuilder<BoxConstraints> {
+class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
     LayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
+  }) : super._(key: key, builder: builder);
 
   /// Called at layout time to construct the widget tree. The builder must not
   /// return null.
@@ -254,14 +254,14 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 /// See also:
 ///
 ///  * [LayoutBuilder], the non-sliver version of this widget.
-class SliverLayoutBuilder extends _GenericLayoutBuilder<SliverConstraints> {
+class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   /// Creates a sliver widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
   const SliverLayoutBuilder({
     Key key,
     SliverLayoutWidgetBuilder builder,
-  }) : super(key: key, builder: builder);
+  }) : super._(key: key, builder: builder);
 
   /// Called at layout time to construct the widget tree. The builder must return
   /// a non-null sliver widget.
@@ -291,8 +291,7 @@ class _RenderSliverLayoutBuilder extends RenderSliver with RenderObjectWithChild
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
     assert(child == this.child);
-    // No-op because child's offset is always (0, 0),
-    // transform.translate(0, 0) doesn't do anything.
+    // child's offset is always (0, 0), transform.translate(0, 0) does not mutate the transform.
   }
 
   @override
