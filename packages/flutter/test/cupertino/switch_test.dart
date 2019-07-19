@@ -562,7 +562,7 @@ void main() {
         version: 0,
       ),
       skip: !isLinux,
-    );  
+    );
 
     await tester.pumpAndSettle();
     await expectLater(
