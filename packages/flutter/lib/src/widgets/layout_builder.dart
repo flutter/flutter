@@ -14,9 +14,18 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// The signature of the [SliverLayoutBuilder] builder function.
 typedef SliverLayoutWidgetBuilder = Widget Function(BuildContext context, SliverConstraints constraints);
 
-// A widget that defers its building until layout.
+/// An abstract superclass for widgets that defer their building until layout.
+///
+/// Similar to the [Builder] widget except that the framework calls the [builder]
+/// function at layout time and provides the constraints that this widget should
+/// adhere to. This is useful when the parent constrains the child's size and layout,
+/// and doesn't depend on the child's intrinsic size.
 abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> extends RenderObjectWidget {
-  const ConstrainedLayoutBuilder._({
+  /// Creates a widget that defers its building until layout.
+  ///
+  /// The [builder] argument must not be null, and the returned widget should not
+  /// be null.
+  const ConstrainedLayoutBuilder({
     Key key,
     @required this.builder,
   }) : assert(builder != null),
@@ -25,7 +34,9 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   @override
   _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
-  final Widget Function(BuildContext context, ConstraintType constraints) builder;
+  /// Called at layout time to construct the widget tree. The builder must not
+  /// return null.
+  final Widget Function(BuildContext, ConstraintType) builder;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -168,10 +179,8 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const LayoutBuilder({
     Key key,
     LayoutWidgetBuilder builder,
-  }) : super._(key: key, builder: builder);
+  }) : super(key: key, builder: builder);
 
-  /// Called at layout time to construct the widget tree. The builder must not
-  /// return null.
   @override
   LayoutWidgetBuilder get builder;
 
@@ -261,7 +270,7 @@ class SliverLayoutBuilder extends ConstrainedLayoutBuilder<SliverConstraints> {
   const SliverLayoutBuilder({
     Key key,
     SliverLayoutWidgetBuilder builder,
-  }) : super._(key: key, builder: builder);
+  }) : super(key: key, builder: builder);
 
   /// Called at layout time to construct the widget tree. The builder must return
   /// a non-null sliver widget.
