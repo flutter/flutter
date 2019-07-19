@@ -24,7 +24,7 @@ class MutationCompositionPage extends Page {
 
   @override
   Widget build(BuildContext context) {
-    return MutationCompositionBody();
+    return const MutationCompositionBody();
   }
 }
 
@@ -37,8 +37,13 @@ class MutationCompositionBody extends StatefulWidget {
 }
 
 class MutationCompositionBodyState extends State<MutationCompositionBody> {
+  // Keeps a track of how many platform views are created.
+  int _platformViewCompleteCount = 0;
+
   @override
   Widget build(BuildContext context) {
+    print(Theme.of(context).platform);
+    _platformViewCompleteCount = 0;
     return Container(
       child: Row(
         children: <Column>[
@@ -101,7 +106,24 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
     return Container(
         width: 150,
         height: 150,
-        child: SimplePlatformView(key: ValueKey<String>('PlatformView$id')));
+        child: SimplePlatformView(key: ValueKey<String>('PlatformView$id'), onPlatformViewCreated: _onPlatformViewCreated,));
+  }
+
+  void _onPlatformViewCreated(int id) {
+    assert(_platformViewCompleteCount <= 3);
+    _platformViewCompleteCount ++;
+    if (_platformViewCompleteCount == 3) {
+      driverDataHandler.handlerCompleter.complete(handleDriverMessage);
+    }
+  }
+
+  Future<String> handleDriverMessage(String message) async {
+    switch (message) {
+      case 'pop':
+        Navigator.of(context).pop(true);
+        return 'success';
+    }
+    return 'unknown message: "$message"';
   }
 }
 

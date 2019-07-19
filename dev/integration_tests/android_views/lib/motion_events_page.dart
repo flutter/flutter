@@ -8,7 +8,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_driver/driver_extension.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'motion_event_diff.dart';
@@ -27,22 +26,6 @@ class MotionEventsPage extends Page {
     return MotionEventsBody();
   }
 }
-
-/// Wraps a flutter driver [DataHandler] with one that waits until a delegate is set.
-///
-/// This allows the driver test to call [FlutterDriver.requestData] before the handler was
-/// set by the app in which case the requestData call will only complete once the app is ready
-/// for it.
-class FutureDataHandler {
-  final Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
-
-  Future<String> handleMessage(String message) async {
-    final DataHandler handler = await handlerCompleter.future;
-    return handler(message);
-  }
-}
-
-FutureDataHandler driverDataHandler = FutureDataHandler();
 
 class MotionEventsBody extends StatefulWidget {
   @override
@@ -200,6 +183,9 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
         // popping back after the test is run.
         Navigator.of(context).pop(true);
         return result;
+      case 'pop':
+        Navigator.of(context).pop(true);
+        return 'success';
     }
     return 'unknown message: "$message"';
   }

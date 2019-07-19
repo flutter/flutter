@@ -37,9 +37,22 @@ class ScrollViewNestedPlatformViewBodyState extends State<ScrollViewNestedPlatfo
           child: SingleChildScrollView(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 100.0),
-              child: const SimplePlatformView(),
+              child: SimplePlatformView(key: const ValueKey<String>('PlatformView'), onPlatformViewCreated: _onPlatformViewCreated,),
             ),
           ),
       );
+  }
+
+  void _onPlatformViewCreated(int id) {
+    driverDataHandler.handlerCompleter.complete(handleDriverMessage);
+  }
+
+  Future<String> handleDriverMessage(String message) async {
+    switch (message) {
+      case 'pop':
+        Navigator.of(context).pop(true);
+        return 'success';
+    }
+    return 'unknown message: "$message"';
   }
 }

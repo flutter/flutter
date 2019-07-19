@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform, File;
+import 'dart:io' show File;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 import 'package:collection/collection.dart';
 
-const String kAndroidScreenShotPath =
+const String kAndroidScreenShotPathStandard =
     'test_driver/screenshots/mutation_test_android.png';
+const String kAndroidScreenShotPathWithScrollView =
+    'test_driver/screenshots/mutation_test_android_scroll.png';
 
 Future<void> main() async {
   FlutterDriver driver;
@@ -29,6 +31,8 @@ Future<void> main() async {
       await driver.waitFor(find.byValueKey('PlatformView'));
       final String errorMessage = await driver.requestData('run test');
       expect(errorMessage, '');
+      final String popStatus = await driver.requestData('pop');
+      assert(popStatus == 'success');
     });
   });
 
@@ -40,16 +44,13 @@ Future<void> main() async {
     tearDownAll(() async {
       await driver.close();
     });
-    test('mutations', () async {
+    test('mutations standard', () async {
       final SerializableFinder motionEventsListTile =
           find.byValueKey('MutationPageListTile');
       await driver.tap(motionEventsListTile);
       await driver.waitFor(find.byValueKey('PlatformView0'));
       final List<int> screenShot = await driver.screenshot();
-      final String path = _getScreenShotPath();
-      print(Platform.operatingSystem);
-      print(path);
-      final File file = File(path);
+      final File file = File(kAndroidScreenShotPathStandard);
       if (!file.existsSync()) {
         print('Platform view mutation test file not exist, creating a new one');
         file.writeAsBytesSync(screenShot);
@@ -58,10 +59,28 @@ Future<void> main() async {
 
       final Function listEquals = const ListEquality<int>().equals;
       expect(listEquals(screenShot, matcher), true);
+      final String popStatus = await driver.requestData('pop');
+      assert(popStatus == 'success');
+    });
+
+    // Testing a failure case that was raised in https://github.com/flutter/flutter/issues/35840.
+    test('mutations: clipping with scrolling view', () async {
+            final SerializableFinder motionEventsListTile =
+          find.byValueKey('ScrollViewNestedPlatformViewListTile');
+      await driver.tap(motionEventsListTile);
+      await driver.waitFor(find.byValueKey('PlatformView'));
+      final List<int> screenShot = await driver.screenshot();
+      final File file = File(kAndroidScreenShotPathWithScrollView);
+      if (!file.existsSync()) {
+        print('Platform view mutation test file not exist, creating a new one');
+        file.writeAsBytesSync(screenShot);
+      }
+      final List<int> matcher = file.readAsBytesSync();
+
+      final Function listEquals = const ListEquality<int>().equals;
+      expect(listEquals(screenShot, matcher), true);
+      final String popStatus = await driver.requestData('pop');
+      assert(popStatus == 'success');
     });
   });
-}
-
-String _getScreenShotPath() {
-  return kAndroidScreenShotPath;
 }
