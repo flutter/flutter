@@ -137,7 +137,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   }
 }
 
-/// Generic mixin for render objects created by [ConstrainedLayoutBuilder].
+/// Generic mixin for [RenderObject]s created by [ConstrainedLayoutBuilder].
 ///
 /// Provides a callback that should be called at layout time, typically in
 /// [RenderObject.performLayout].
