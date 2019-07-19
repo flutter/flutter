@@ -103,9 +103,8 @@ class SkiaGoldClient extends GoldensClient {
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
-  /// backend, the `init` argument initializes the testing environment.
-  Future<void> imgtestInit(Directory workDirectory) async {
-    await auth(workDirectory);
+  /// backend, the `init` argument initializes the current test.
+  Future<void> imgtestInit() async {
     final File keys = _workDirectory.childFile('keys.json');
     final File failures = _workDirectory.childFile('failures.json');
 
@@ -157,6 +156,8 @@ class SkiaGoldClient extends GoldensClient {
     assert(testName != null);
     assert(goldenFile != null);
 
+    await imgtestInit();
+
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', _workDirectory.childDirectory('temp').path,
@@ -164,12 +165,22 @@ class SkiaGoldClient extends GoldensClient {
       '--png-file', goldenFile.path,
     ];
 
-    final io.ProcessResult result = await io.Process.run(
+    /* Temp for testing Cirrus */
+    final io.ProcessResult result =
+    /* */
+    await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
 
-    print(result.stdout);
+    /* Temp for testing Cirrus */
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('imgtestAdd failed.')..writeln(
+          'stdout: ${result.stdout}')..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(result.exitCode, buf.toString());
+    }
+    /* */
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // So as not to turn the tree red in this initial implementation, this will
@@ -181,7 +192,10 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    return '9c9b71a0fb8a759abd395b85a719600f7ed3ef93';
+    /* Temp for testing Cirrus */
+    return 'd1190b638f5cd234a4e3e9890313abd58393f6f3';
+    /* */
+
 //    if (!flutterRoot.existsSync()) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter root could not be found: $flutterRoot');
