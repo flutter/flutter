@@ -26,7 +26,7 @@ const String kTargetPlatform = 'TargetPlatform';
 const String kTargetFile = 'TargetFile';
 
 /// The define to control whether the AOT snapshot is built with bitcode.
-const String kBitcodeFlag = 'bitcode';
+const String kBitcodeFlag = 'EnableBitcode';
 
 /// The define to control what iOS architectures are built for.
 ///
