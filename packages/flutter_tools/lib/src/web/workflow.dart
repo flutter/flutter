@@ -2,17 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:meta/meta.dart';
-
 import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../doctor.dart';
 import '../features.dart';
 import 'chrome.dart';
-
-@visibleForTesting
-bool debugDisableWeb = false;
 
 /// The  web workflow instance.
 WebWorkflow get webWorkflow => context.get<WebWorkflow>();

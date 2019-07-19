@@ -18,7 +18,7 @@ class MacOSWorkflow implements Workflow {
   const MacOSWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isMacOS;
+  bool get appliesToHostPlatform => platform.isMacOS && featureFlags.isMacOSEnabled;
 
   @override
   bool get canLaunchDevices => platform.isMacOS && featureFlags.isMacOSEnabled;

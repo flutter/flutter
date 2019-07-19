@@ -20,7 +20,6 @@ import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
-import 'features.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
@@ -74,10 +73,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
         if (webWorkflow.appliesToHostPlatform)
           const WebValidator(),
-        // Add desktop doctors to workflow if the flag is enabled.
-        if (featureFlags.isLinuxEnabled && linuxWorkflow.appliesToHostPlatform)
+        if (linuxWorkflow.appliesToHostPlatform)
           LinuxDoctorValidator(),
-        if (featureFlags.isWindowsEnabled && windowsWorkflow.appliesToHostPlatform)
+        if (windowsWorkflow.appliesToHostPlatform)
           visualStudioValidator,
         if (ideValidators.isNotEmpty)
           ...ideValidators

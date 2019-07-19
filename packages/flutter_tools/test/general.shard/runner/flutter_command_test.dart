@@ -288,9 +288,6 @@ class FakeCommand extends FlutterCommand {
   String get name => 'fake';
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     return null;
   }

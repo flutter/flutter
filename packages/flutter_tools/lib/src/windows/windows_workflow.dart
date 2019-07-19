@@ -18,7 +18,7 @@ class WindowsWorkflow implements Workflow {
   const WindowsWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isWindows;
+  bool get appliesToHostPlatform => platform.isWindows && featureFlags.isWindowsEnabled;
 
   @override
   bool get canLaunchDevices => platform.isWindows && featureFlags.isWindowsEnabled;

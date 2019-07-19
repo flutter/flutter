@@ -101,17 +101,17 @@ class BuildBundleCommand extends BuildSubCommand {
     // Check for target platforms that are only allowed on unstable Flutter.
     switch (platform) {
       case TargetPlatform.darwin_x64:
-        if (featureFlags.isMacOSEnabled) {
+        if (!featureFlags.isMacOSEnabled) {
           throwToolExit('macOS is not a supported target platform.');
         }
         break;
       case TargetPlatform.windows_x64:
-        if (featureFlags.isWindowsEnabled) {
+        if (!featureFlags.isWindowsEnabled) {
           throwToolExit('Windows is not a supported target platform.');
         }
         break;
       case TargetPlatform.linux_x64:
-        if (featureFlags.isLinuxEnabled) {
+        if (!featureFlags.isLinuxEnabled) {
           throwToolExit('Linux is not a supported target platform.');
         }
         break;
