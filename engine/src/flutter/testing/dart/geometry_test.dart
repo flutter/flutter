@@ -11,36 +11,36 @@ import 'package:test/test.dart';
 void main() {
   group('Offset', () {
     test('OffsetBase.>=', () {
-      expect(const Offset(0, 0), greaterThanOrEqualTo(const Offset(0, -1)));
-      expect(const Offset(0, 0), greaterThanOrEqualTo(const Offset(-1, 0)));
-      expect(const Offset(0, 0), greaterThanOrEqualTo(const Offset(-1, -1)));
-      expect(const Offset(0, 0), greaterThanOrEqualTo(const Offset(0, 0)));
-      expect(const Offset(0, 0), isNot(greaterThanOrEqualTo(const Offset(0, double.nan))));
-      expect(const Offset(0, 0), isNot(greaterThanOrEqualTo(const Offset(double.nan, 0))));
-      expect(const Offset(0, 0), isNot(greaterThanOrEqualTo(const Offset(10, -10))));
+      expect(const Offset(0, 0) >= const Offset(0, -1), true);
+      expect(const Offset(0, 0) >= const Offset(-1, 0), true);
+      expect(const Offset(0, 0) >= const Offset(-1, -1), true);
+      expect(const Offset(0, 0) >= const Offset(0, 0), true);
+      expect(const Offset(0, 0) >= const Offset(0, double.nan), false);
+      expect(const Offset(0, 0) >= const Offset(double.nan, 0), false);
+      expect(const Offset(0, 0) >= const Offset(10, -10), false);
     });
 
     test('OffsetBase.<=', () {
-      expect(const Offset(0, 0), lessThanOrEqualTo(const Offset(0, 1)));
-      expect(const Offset(0, 0), lessThanOrEqualTo(const Offset(1, 0)));
-      expect(const Offset(0, 0), lessThanOrEqualTo(const Offset(0, 0)));
-      expect(const Offset(0, 0), isNot(lessThanOrEqualTo(const Offset(0, double.nan))));
-      expect(const Offset(0, 0), isNot(lessThanOrEqualTo(const Offset(double.nan, 0))));
-      expect(const Offset(0, 0), isNot(lessThanOrEqualTo(const Offset(10, -10))));
+      expect(const Offset(0, 0) <= const Offset(0, 1), true);
+      expect(const Offset(0, 0) <= const Offset(1, 0), true);
+      expect(const Offset(0, 0) <= const Offset(0, 0), true);
+      expect(const Offset(0, 0) <= const Offset(0, double.nan), false);
+      expect(const Offset(0, 0) <= const Offset(double.nan, 0), false);
+      expect(const Offset(0, 0) <= const Offset(10, -10), false);
     });
 
     test('OffsetBase.>', () {
-      expect(const Offset(0, 0), greaterThan(const Offset(-1, -1)));
-      expect(const Offset(0, 0), isNot(greaterThan(const Offset(0, -1))));
-      expect(const Offset(0, 0), isNot(greaterThan(const Offset(-1, 0))));
-      expect(const Offset(0, 0), isNot(greaterThan(const Offset(double.nan, -1))));
+      expect(const Offset(0, 0) > const Offset(-1, -1), true);
+      expect(const Offset(0, 0) > const Offset(0, -1), false);
+      expect(const Offset(0, 0) > const Offset(-1, 0), false);
+      expect(const Offset(0, 0) > const Offset(double.nan, -1), false);
     });
 
     test('OffsetBase.<', () {
-      expect(const Offset(0, 0), lessThan(const Offset(1, 1)));
-      expect(const Offset(0, 0), isNot(lessThan(const Offset(0, 1))));
-      expect(const Offset(0, 0), isNot(lessThan(const Offset(1, 0))));
-      expect(const Offset(0, 0), isNot(lessThan(const Offset(double.nan, 1))));
+      expect(const Offset(0, 0) < const Offset(1, 1), true);
+      expect(const Offset(0, 0) < const Offset(0, 1), false);
+      expect(const Offset(0, 0) < const Offset(1, 0), false);
+      expect(const Offset(0, 0) < const Offset(double.nan, 1), false);
     });
 
     test('OffsetBase.==', () {
