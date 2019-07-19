@@ -22,10 +22,10 @@ echo $GCLOUD_FIREBASE_TESTLAB_KEY > ${HOME}/gcloud-service-key.json
 gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
 gcloud --quiet config set project flutter-infra
 
-// Firebase Test Lab tests are currently known to be failing with
-// "Firebase Test Lab infrastructure failure: Error during preprocessing"
-// Remove "|| exit 0" once the failures are resolved
-// https://github.com/flutter/flutter/issues/36501
+# Firebase Test Lab tests are currently known to be failing with
+# "Firebase Test Lab infrastructure failure: Error during preprocessing"
+# Remove "|| exit 0" once the failures are resolved
+# https://github.com/flutter/flutter/issues/36501
 
 # Run the test.
 gcloud firebase test android run --type robo \
