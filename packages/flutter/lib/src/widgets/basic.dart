@@ -4713,13 +4713,14 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
+///
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+///
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with. The color of the button in the menu changes to
-/// indicate which one has been selected.
-///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+/// as it is interacted with, shown above. The color of the button in the menu
+/// changes to indicate which one has been selected.
 ///
 /// ```dart main
 /// import 'package:flutter/material.dart';
@@ -5925,6 +5926,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -5975,6 +5977,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
+      multiline: multiline,
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
@@ -6085,6 +6088,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
+      multiline: properties.multiline,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
@@ -6150,6 +6154,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..focused = properties.focused
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
+      ..multiline = properties.multiline
       ..hidden = properties.hidden
       ..image = properties.image
       ..liveRegion = properties.liveRegion

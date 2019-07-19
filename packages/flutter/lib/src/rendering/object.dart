@@ -444,6 +444,24 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Blend further painting with a color filter.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `colorFilter` is the [ColorFilter] value to use when blending the
+  ///   painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `colorFilter` applied.
+  ///   This function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which, for example, causes them to use composited clips.
+  void pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter) {
+    assert(colorFilter != null);
+    pushLayer(ColorFilterLayer(colorFilter: colorFilter), painter, offset);
+  }
+
   /// Transform further painting using a matrix.
   ///
   /// * `needsCompositing` is whether the child needs compositing. Typically
@@ -1189,6 +1207,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       context: ErrorDescription('during $method()'),
       renderObject: this,
       informationCollector: () sync* {
+        if (debugCreator != null)
+          yield DiagnosticsDebugCreator(debugCreator);
         yield describeForError('The following RenderObject was being processed when the exception was fired');
         // TODO(jacobr): this error message has a code smell. Consider whether
         // displaying the truncated children is really useful for command line
@@ -3017,11 +3037,11 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
     _childCount = 0;
   }
 
-  /// Move this child in the child list to be before the given child.
+  /// Move the given `child` in the child list to be after another child.
   ///
   /// More efficient than removing and re-adding the child. Requires the child
-  /// to already be in the child list at some position. Pass null for before to
-  /// move the child to the end of the child list.
+  /// to already be in the child list at some position. Pass null for `after` to
+  /// move the child to the start of the child list.
   void move(ChildType child, { ChildType after }) {
     assert(child != this);
     assert(after != this);
@@ -3674,4 +3694,21 @@ class _SemanticsGeometry {
   ///  * [SemanticsFlag.isHidden] for the purpose of marking a node as hidden.
   bool get markAsHidden => _markAsHidden;
   bool _markAsHidden = false;
+}
+
+/// A class that creates [DiagnosticsNode] by wrapping [RenderObject.debugCreator].
+///
+/// Attach a [DiagnosticsDebugCreator] into [FlutterErrorDetails.informationCollector]
+/// when a [RenderObject.debugCreator] is available. This will lead to improved
+/// error message.
+class DiagnosticsDebugCreator extends DiagnosticsProperty<Object> {
+  /// Create a [DiagnosticsProperty] with its [value] initialized to input
+  /// [RenderObject.debugCreator].
+  DiagnosticsDebugCreator(Object value):
+    assert(value != null),
+    super(
+      'debugCreator',
+      value,
+      level: DiagnosticLevel.hidden
+    );
 }
