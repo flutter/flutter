@@ -5410,8 +5410,8 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// it does not have a child, it grows to fit the parent instead.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
-/// This example makes a [Container] react to being clicked by a mouse
-/// pointer, showing a count of the number of pointer downs and ups.
+/// This example makes a [Container] react to being touched, showing a count of
+/// the number of pointer downs and ups.
 ///
 /// ```dart imports
 /// import 'package:flutter/widgets.dart';
@@ -5473,7 +5473,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Mouse], a similar widget that tracks mouse locations even when
+///  * [MouseRegion], a similar widget that tracks mouse locations even when
 ///    no button is pressed.
 class Listener extends StatelessWidget {
   /// Creates a widget that forwards point events to callbacks.
@@ -5563,7 +5563,7 @@ class Listener extends StatelessWidget {
     if (onPointerEnter != null ||
         onPointerExit != null ||
         onPointerHover != null) {
-      result = Mouse(
+      result = MouseRegion(
         onEnter: onPointerEnter,
         onExit: onPointerExit,
         onHover: onPointerHover,
@@ -5717,9 +5717,9 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when
 ///    the pointer have buttons pressed.
-class Mouse extends SingleChildRenderObjectWidget {
+class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards point events to callbacks.
-  const Mouse({
+  const MouseRegion({
     Key key,
     this.onEnter,
     this.onExit,

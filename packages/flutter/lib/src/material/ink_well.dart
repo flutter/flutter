@@ -702,7 +702,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    return Mouse(
+    return MouseRegion(
       onEnter: enabled ? _handleMouseEnter : null,
       onExit: enabled ? _handleMouseExit : null,
       child: GestureDetector(

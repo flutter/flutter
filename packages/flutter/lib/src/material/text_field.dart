@@ -1024,7 +1024,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: Mouse(
+      child: MouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
         child: IgnorePointer(

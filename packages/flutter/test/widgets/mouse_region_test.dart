@@ -38,7 +38,7 @@ class HoverClientState extends State<HoverClient> {
 
   @override
   Widget build(BuildContext context) {
-    return Mouse(
+    return MouseRegion(
       onEnter: _onEnter,
       onExit: _onExit,
       child: widget.child,
@@ -80,7 +80,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Mouse(
+        child: MouseRegion(
           child: Container(
             color: const Color.fromARGB(0xff, 0xff, 0x00, 0x00),
             width: 100.0,
@@ -107,7 +107,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Mouse(
+        child: MouseRegion(
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -136,7 +136,7 @@ void main() {
       PointerHoverEvent move;
       PointerExitEvent exit;
       await tester.pumpWidget(Center(
-        child: Mouse(
+        child: MouseRegion(
           child: Container(
             width: 100.0,
             height: 100.0,
@@ -146,7 +146,7 @@ void main() {
           onExit: (PointerExitEvent details) => exit = details,
         ),
       ));
-      final RenderMouseListener renderListener = tester.renderObject(find.byType(Mouse));
+      final RenderMouseListener renderListener = tester.renderObject(find.byType(MouseRegion));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
@@ -194,7 +194,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Mouse(
+            MouseRegion(
               onEnter: (PointerEnterEvent details) => enter1.add(details),
               onHover: (PointerHoverEvent details) => move1.add(details),
               onExit: (PointerExitEvent details) => exit1.add(details),
@@ -203,7 +203,7 @@ void main() {
                 width: 200,
                 height: 200,
                 padding: const EdgeInsets.all(50.0),
-                child: Mouse(
+                child: MouseRegion(
                   key: key2,
                   onEnter: (PointerEnterEvent details) => enter2.add(details),
                   onHover: (PointerHoverEvent details) => move2.add(details),
@@ -277,7 +277,7 @@ void main() {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Mouse(
+            MouseRegion(
               key: key1,
               child: Container(
                 width: 100.0,
@@ -287,7 +287,7 @@ void main() {
               onHover: (PointerHoverEvent details) => move1.add(details),
               onExit: (PointerExitEvent details) => exit1.add(details),
             ),
-            Mouse(
+            MouseRegion(
               key: key2,
               child: Container(
                 width: 100.0,
@@ -358,23 +358,23 @@ void main() {
 
     testWidgets('needsCompositing set when parent class needsCompositing is set', (WidgetTester tester) async {
       await tester.pumpWidget(
-        Mouse(
+        MouseRegion(
           onEnter: (PointerEnterEvent _) {},
           child: const Opacity(opacity: 0.5, child: Placeholder()),
         ),
       );
 
-      RenderMouseListener listener = tester.renderObject(find.byType(Mouse).first);
+      RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion).first);
       expect(listener.needsCompositing, isTrue);
 
       await tester.pumpWidget(
-        Mouse(
+        MouseRegion(
           onEnter: (PointerEnterEvent _) {},
           child: const Placeholder(),
         ),
       );
 
-      listener = tester.renderObject(find.byType(Mouse).first);
+      listener = tester.renderObject(find.byType(MouseRegion).first);
       expect(listener.needsCompositing, isFalse);
     });
 
@@ -391,7 +391,7 @@ void main() {
           home: Center(
             child: Transform.scale(
               scale: scaleFactor,
-              child: Mouse(
+              child: MouseRegion(
                 onEnter: (PointerEnterEvent event) {
                   events.add(event);
                 },
@@ -455,10 +455,10 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: const Mouse(),
+          child: const MouseRegion(),
         ),
       );
-      final RenderMouseListener listener = tester.renderObject(find.byType(Mouse));
+      final RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion));
       expect(listener.needsCompositing, isFalse);
       // No TransformLayer for `Transform.scale` is added because composting is
       // not required and therefore the transform is executed on the canvas
@@ -469,7 +469,7 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: Mouse(
+          child: MouseRegion(
             onHover: (PointerHoverEvent _) { },
           ),
         ),
@@ -482,7 +482,7 @@ void main() {
       await tester.pumpWidget(
         Transform.scale(
           scale: 2.0,
-          child: const Mouse(
+          child: const MouseRegion(
           ),
         ),
       );
@@ -563,7 +563,7 @@ void main() {
 
       await tester.pumpWidget(
         Center(
-          child: Mouse(
+          child: MouseRegion(
             onEnter: (PointerEnterEvent e) => enter.add(e),
             onHover: (PointerHoverEvent e) => hover.add(e),
             onExit: (PointerExitEvent e) => exit.add(e),
