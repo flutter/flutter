@@ -3920,8 +3920,6 @@ class Flex extends MultiChildRenderObjectWidget {
 ///
 /// #### Story time
 ///
-/// {@tool sample}
-///
 /// Suppose, for instance, that you had this code:
 ///
 /// ```dart
@@ -3937,8 +3935,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// You will see this issue when you run the app:
 ///
 /// ![A screenshot of the error using the Row widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
-///
-/// {@end-tool}
 ///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
