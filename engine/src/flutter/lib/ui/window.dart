@@ -489,22 +489,20 @@ class Locale {
   /// underscores as separator, however it is intended to be used for debugging
   /// purposes only. For parseable results, use [toLanguageTag] instead.
   @override
-  String toString() => _toLanguageTag('_');
+  String toString() {
+    if (!identical(cachedLocale, this)) {
+      cachedLocale = this;
+      cachedLocaleString = _rawToString('_');
+    }
+    return cachedLocaleString;
+  }
 
   /// Returns a syntactically valid Unicode BCP47 Locale Identifier.
   ///
   /// Some examples of such identifiers: "en", "es-419", "hi-Deva-IN" and
   /// "zh-Hans-CN". See http://www.unicode.org/reports/tr35/ for technical
   /// details.
-  String toLanguageTag() => _toLanguageTag();
-
-  String _toLanguageTag([String separator = '-']) {
-    if (!identical(cachedLocale, this)) {
-      cachedLocale = this;
-      cachedLocaleString = _rawToString(separator);
-    }
-    return cachedLocaleString;
-  }
+  String toLanguageTag() => _rawToString('-');
 
   String _rawToString(String separator) {
     final StringBuffer out = StringBuffer(languageCode);
