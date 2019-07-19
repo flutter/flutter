@@ -10,8 +10,8 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/usage.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
-
 
 void main() {
   group('usageValues', () {

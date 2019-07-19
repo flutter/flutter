@@ -82,10 +82,10 @@ void testUsingContext(
           },
           OutputPreferences: () => OutputPreferences(showColor: false),
           Logger: () => BufferLogger(),
-          OperatingSystemUtils: () => MockOperatingSystemUtils(),
+          OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
-          Usage: () => MockUsage(),
-          XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
+          Usage: () => FakeUsage(),
+          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
@@ -135,7 +135,7 @@ void _printBufferedErrors(AppContext testContext) {
   }
 }
 
-class FakeDeviceManager extends DeviceManager {
+class FakeDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
   String _specifiedDeviceId;
@@ -191,6 +191,11 @@ class FakeDeviceManager extends DeviceManager {
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
+
+  @override
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    return devices;
+  }
 }
 
 class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
@@ -228,9 +233,12 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils implements OperatingSystemUtils {
+class FakeOperatingSystemUtils implements OperatingSystemUtils {
   @override
   ProcessResult makeExecutable(File file) => null;
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) { }
 
   @override
   File which(String execName) => null;
@@ -268,7 +276,7 @@ class MockOperatingSystemUtils implements OperatingSystemUtils {
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
-class MockUsage implements Usage {
+class FakeUsage implements Usage {
   @override
   bool get isFirstRun => false;
 
@@ -309,7 +317,7 @@ class MockUsage implements Usage {
   void printWelcome() { }
 }
 
-class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   bool get isInstalled => true;
 

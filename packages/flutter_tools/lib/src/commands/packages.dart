@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/os.dart';
+import '../cache.dart';
 import '../dart/pub.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
@@ -163,6 +164,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     await pub(<String>['run', 'test', ...argResults.rest], context: PubContext.runTest, retry: false);
     return null;
   }
@@ -193,6 +195,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     await pub(<String>[_commandName, ...argResults.rest], context: PubContext.pubForward, retry: false);
     return null;
   }
@@ -220,6 +223,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    Cache.releaseLockEarly();
     await pubInteractively(argResults.rest);
     return null;
   }
