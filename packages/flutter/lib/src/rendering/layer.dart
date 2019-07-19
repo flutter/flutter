@@ -519,8 +519,7 @@ class ContainerLayer extends Layer {
     assert(() {
       // We should remove any layers that got added to highlight the incorrect
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
-      // or potentially leaving a physical model that is now correct highlighted
-      // in red.
+      // or continuing to render stale outlines.
       if (temporaryLayers != null) {
         for (PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
