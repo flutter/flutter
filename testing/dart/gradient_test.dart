@@ -68,6 +68,7 @@ void main() {
               ),
           throwsA(const TypeMatcher<AssertionError>()),
         );
+        return true;
       }());
   });
 }
