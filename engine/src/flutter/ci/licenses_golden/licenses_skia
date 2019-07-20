@@ -1,4 +1,4 @@
-Signature: 18ce8796ac20bb8a403d7cfd8b9d669b
+Signature: 17367123156ab295a080592a30b2459b
 
 UNUSED LICENSES:
 
@@ -4694,6 +4694,9 @@ FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrStencilAtlasOp.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpRedEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrComposeLerpEffect.cpp
@@ -4977,6 +4980,7 @@ FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrStencilAtlasOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnCaps.h
