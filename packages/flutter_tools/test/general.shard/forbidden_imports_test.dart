@@ -56,6 +56,9 @@ void main() {
   test('no unauthorized imports of dart:convert', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      // These will eventually live in a separate package.
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'doctor.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'extension', 'extension.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
