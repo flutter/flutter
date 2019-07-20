@@ -918,10 +918,7 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      // Handle double precision errors which causes this loop to become
-      // stuck in certain configurations.
-      const double minimumDeficit = precisionErrorTolerance;
-      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
+      while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -943,7 +940,7 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      while (deficit > minimumDeficit && availableColumns > 0) {
+      while (deficit > precisionErrorTolerance && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
