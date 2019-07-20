@@ -950,6 +950,7 @@ class RenderTable extends RenderBox {
         // each column, clamped to the minimum width, until we run out
         // of columns that aren't at their minWidth.        
         final double delta = deficit / availableColumns;
+        assert(delta != 0);
         int newAvailableColumns = 0;
         for (int x = 0; x < columns; x += 1) {
           final double availableDelta = widths[x] - minWidths[x];
