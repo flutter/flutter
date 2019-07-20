@@ -1,0 +1,1 @@
+The protoype flutter extension API lives in this subdirectory. The intention is to move it to a separate package that can be imported by third party tools. To simplify the initial development, it is placed under the flutter tools subdirectory.
