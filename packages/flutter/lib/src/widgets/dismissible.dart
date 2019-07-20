@@ -62,6 +62,8 @@ enum DismissDirection {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
 ///
+/// If [direction] is null, then the widget will not be dismissible.
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
@@ -130,6 +132,8 @@ class Dismissible extends StatefulWidget {
   final DismissDirectionCallback onDismissed;
 
   /// The direction in which the widget can be dismissed.
+  ///
+  /// If null, the widget will not be dismissible.
   final DismissDirection direction;
 
   /// The amount of time the widget will spend contracting before [onDismissed] is called.
@@ -373,7 +377,6 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   _FlingGestureKind _describeFlingGesture(Velocity velocity) {
-    assert(widget.direction != null);
     if (_dragExtent == 0.0) {
       // If it was a fling, then it was a fling that was let loose at the exact
       // middle of the range (i.e. when there's no displacement). In that case,
@@ -508,6 +511,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     super.build(context); // See AutomaticKeepAliveClientMixin.
+
+    if (widget.direction == null) {
+      return widget.child;
+    }
 
     assert(!_directionIsXAxis || debugCheckHasDirectionality(context));
 

@@ -732,4 +732,16 @@ void main() {
     expect(dismissedItems, isEmpty);
     expect(confirmDismissDirection, DismissDirection.endToStart);
   });
+
+  testWidgets('Dismissible with a null direction does not get dismissed', (WidgetTester tester) async {
+    dismissDirection = null;
+
+    await tester.pumpWidget(buildTest());
+    expect(dismissedItems, isEmpty);
+    expect(find.text('0'), findsOneWidget);
+
+    await dismissItem(tester, 0, gestureDirection: AxisDirection.right);
+    expect(dismissedItems, isEmpty);
+    expect(find.text('0'), findsOneWidget);
+  });
 }
