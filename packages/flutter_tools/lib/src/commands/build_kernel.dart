@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-
 import '../artifacts.dart';
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../compile.dart';
 import '../globals.dart';
 import '../project.dart';
