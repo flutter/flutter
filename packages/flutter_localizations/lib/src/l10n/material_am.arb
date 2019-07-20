@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "የዳሰሳ ምናሌን ክፈት",
   "backButtonTooltip": "ተመለስ",
   "closeButtonTooltip": "ዝጋ",

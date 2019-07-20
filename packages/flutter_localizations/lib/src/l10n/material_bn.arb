@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "নেভিগেশন মেনু খুলুন",
   "backButtonTooltip": "ফিরে যান",
   "closeButtonTooltip": "বন্ধ করুন",

@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "ເປີດເມນູການນຳທາງ",
   "backButtonTooltip": "ກັບຄືນ",
   "closeButtonTooltip": "ປິດ",

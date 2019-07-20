@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour ಗಂಟೆ",
   "datePickerMinuteSemanticsLabelOne": "1 ನಿಮಿಷ",
   "datePickerMinuteSemanticsLabelOther": "$minute ನಿಮಿಷಗಳು",
-  "datePickerDateOrder": "d/M/y",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "ಬೆಳಿಗ್ಗೆ",
   "postMeridiemAbbreviation": "ಸಂಜೆ",

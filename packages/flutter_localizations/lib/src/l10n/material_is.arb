@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Opna yfirlitsvalmynd",
   "backButtonTooltip": "Til baka",
   "closeButtonTooltip": "Loka",

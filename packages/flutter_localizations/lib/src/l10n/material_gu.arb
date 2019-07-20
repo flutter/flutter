@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "નૅવિગેશન મેનૂ ખોલો",
   "backButtonTooltip": "પાછળ",
   "closeButtonTooltip": "બંધ કરો",

@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "සංචාලන මෙනුව විවෘත කරන්න",
   "backButtonTooltip": "ආපසු",
   "closeButtonTooltip": "වසන්න",

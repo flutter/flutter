@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "remainingTextFieldCharacterCountFew": "Засталося $remainingCount сімвалы",
   "selectedRowCountTitleMany": "Выбрана $selectedRowCount элементаў",
   "selectedRowCountTitleFew": "Выбрана $selectedRowCount элементы",

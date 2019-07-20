@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour ሰዓት",
   "datePickerMinuteSemanticsLabelOne": "1 ደቂቃ",
   "datePickerMinuteSemanticsLabelOther": "$minute ደቂቃዎች",
-  "datePickerDateOrder": "ወ.ቀ.አ",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "ጥዋት",
   "postMeridiemAbbreviation": "ከሰዓት",

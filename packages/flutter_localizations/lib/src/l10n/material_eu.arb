@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Ireki nabigazio-menua",
   "backButtonTooltip": "Atzera",
   "closeButtonTooltip": "Itxi",

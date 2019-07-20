@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Отворете го менито за навигација",
   "backButtonTooltip": "Назад",
   "closeButtonTooltip": "Затвори",

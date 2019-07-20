@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "ನ್ಯಾವಿಗೇಶನ್‌ ಮೆನು ತೆರೆಯಿರಿ",
   "backButtonTooltip": "ಹಿಂತಿರುಗಿ",
   "closeButtonTooltip": "ಮುಚ್ಚಿರಿ",

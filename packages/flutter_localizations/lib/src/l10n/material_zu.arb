@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Vula imenyu yokuzulazula",
   "backButtonTooltip": "Emuva",
   "closeButtonTooltip": "Vala",

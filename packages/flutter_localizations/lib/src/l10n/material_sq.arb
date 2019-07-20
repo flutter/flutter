@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Hap menynë e navigimit",
   "backButtonTooltip": "Prapa",
   "closeButtonTooltip": "Mbyll",

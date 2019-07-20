@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Naviqasiya menyusunu açın",
   "backButtonTooltip": "Geri",
   "closeButtonTooltip": "Bağlayın",

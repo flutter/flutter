@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "নেভিগেশ্বন মেনু খোলক",
   "backButtonTooltip": "উভতি যাওক",
   "closeButtonTooltip": "বন্ধ কৰক",

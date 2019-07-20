@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Чабыттоо менюсун ачуу",
   "backButtonTooltip": "Артка",
   "closeButtonTooltip": "Жабуу",

@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "నావిగేషన్ మెనూను తెరువు",
   "backButtonTooltip": "వెనుకకు",
   "closeButtonTooltip": "మూసివేయి",

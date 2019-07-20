@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "လမ်းညွှန်မီနူးကို ဖွင့်ရန်",
   "backButtonTooltip": "နောက်သို့",
   "closeButtonTooltip": "ပိတ်ရန်",

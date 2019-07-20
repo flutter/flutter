@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Maak navigasiekieslys oop",
   "backButtonTooltip": "Terug",
   "closeButtonTooltip": "Maak toe",

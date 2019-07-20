@@ -457,7 +457,7 @@ void main() {
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     localizations = await GlobalMaterialLocalizations.delegate.load(locale);
     expect(localizations is MaterialLocalizationZhHantHk, true);
-    expect(localizations.alertDialogLabel, '快訊');
+    expect(localizations.alertDialogLabel, '通知');
     expect(localizations.anteMeridiemAbbreviation, '上午');
     expect(localizations.closeButtonLabel, '關閉');
     expect(localizations.okButtonLabel, '確定');

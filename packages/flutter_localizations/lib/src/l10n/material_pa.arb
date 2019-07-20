@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "ਨੈਵੀਗੇਸ਼ਨ ਮੀਨੂ ਖੋਲ੍ਹੋ",
   "backButtonTooltip": "ਪਿੱਛੇ",
   "closeButtonTooltip": "ਬੰਦ ਕਰੋ",

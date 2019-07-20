@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "tall",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "നാവിഗേഷൻ മെനു തുറക്കുക",
   "backButtonTooltip": "മടങ്ങുക",
   "closeButtonTooltip": "അടയ്‌ക്കുക",

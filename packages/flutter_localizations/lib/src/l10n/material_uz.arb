@@ -1,4 +1,6 @@
 {
+  "scriptCategory": "English-like",
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Navigatsiya menyusini ochish",
   "backButtonTooltip": "Orqaga",
   "closeButtonTooltip": "Yopish",
