@@ -16,25 +16,25 @@ const String kAndroidScreenShotPathWithScrollView =
 Future<void> main() async {
   FlutterDriver driver;
 
-  group('MotionEvents tests ', () {
-    setUpAll(() async {
-      driver = await FlutterDriver.connect();
-    });
+  // group('MotionEvents tests ', () {
+  //   setUpAll(() async {
+  //     driver = await FlutterDriver.connect();
+  //   });
 
-    tearDownAll(() async {
-      await driver.close();
-    });
-    test('recomposition', () async {
-      final SerializableFinder motionEventsListTile =
-          find.byValueKey('MotionEventsListTile');
-      await driver.tap(motionEventsListTile);
-      await driver.waitFor(find.byValueKey('PlatformView'));
-      final String errorMessage = await driver.requestData('run test');
-      expect(errorMessage, '');
-      final String popStatus = await driver.requestData('pop');
-      assert(popStatus == 'success');
-    });
-  });
+  //   tearDownAll(() async {
+  //     await driver.close();
+  //   });
+  //   test('recomposition', () async {
+  //     final SerializableFinder motionEventsListTile =
+  //         find.byValueKey('MotionEventsListTile');
+  //     await driver.tap(motionEventsListTile);
+  //     await driver.waitFor(find.byValueKey('PlatformView'));
+  //     final String errorMessage = await driver.requestData('run test');
+  //     expect(errorMessage, '');
+  //     final String popStatus = await driver.requestData('pop');
+  //     assert(popStatus == 'success');
+  //   });
+  // });
 
   group('Composition tests', () {
     setUpAll(() async {
@@ -59,8 +59,7 @@ Future<void> main() async {
 
       final Function listEquals = const ListEquality<int>().equals;
       expect(listEquals(screenShot, matcher), true);
-      final String popStatus = await driver.requestData('pop');
-      assert(popStatus == 'success');
+      await driver.tap(find.byValueKey('back'));
     });
 
     // Testing a failure case that was raised in https://github.com/flutter/flutter/issues/35840.
@@ -79,8 +78,7 @@ Future<void> main() async {
 
       final Function listEquals = const ListEquality<int>().equals;
       expect(listEquals(screenShot, matcher), true);
-      final String popStatus = await driver.requestData('pop');
-      assert(popStatus == 'success');
+      await driver.tap(find.byValueKey('back'));
     });
   });
 }

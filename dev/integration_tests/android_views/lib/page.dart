@@ -30,11 +30,16 @@ abstract class Page extends StatelessWidget {
 /// set by the app in which case the requestData call will only complete once the app is ready
 /// for it.
 class FutureDataHandler {
-  final Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
+  Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
 
   Future<String> handleMessage(String message) async {
     final DataHandler handler = await handlerCompleter.future;
     return handler(message);
+  }
+
+  void complete(FutureOr<DataHandler> value) {
+    handlerCompleter.complete(value);
+    handlerCompleter = Completer<DataHandler>();
   }
 }
 

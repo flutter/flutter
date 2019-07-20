@@ -27,32 +27,24 @@ class ScrollViewNestedPlatformViewBody extends StatefulWidget {
 }
 
 class ScrollViewNestedPlatformViewBodyState extends State<ScrollViewNestedPlatformViewBody> {
+
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(10.0),
-            topRight: Radius.circular(10.0),
-          ),
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 100.0),
-              child: SimplePlatformView(key: const ValueKey<String>('PlatformView'), onPlatformViewCreated: _onPlatformViewCreated,),
+    return Column(
+          children: [ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(10.0),
+              topRight: Radius.circular(10.0),
             ),
-          ),
-      );
-  }
-
-  void _onPlatformViewCreated(int id) {
-    driverDataHandler.handlerCompleter.complete(handleDriverMessage);
-  }
-
-  Future<String> handleDriverMessage(String message) async {
-    switch (message) {
-      case 'pop':
-        Navigator.of(context).pop(true);
-        return 'success';
-    }
-    return 'unknown message: "$message"';
+            child: SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 100.0),
+                child: const SimplePlatformView(key: ValueKey<String>('PlatformView')),
+              ),
+            ),
+        ),
+         Center(child:FlatButton(key: const ValueKey<String>('back'), child: const Text('back'), onPressed: (){
+            Navigator.of(context).pop();
+          },)) ]);
   }
 }

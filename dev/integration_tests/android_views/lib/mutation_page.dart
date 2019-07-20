@@ -42,29 +42,32 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
 
   @override
   Widget build(BuildContext context) {
-    print(Theme.of(context).platform);
     _platformViewCompleteCount = 0;
-    return Container(
-      child: Row(
-        children: <Column>[
-          Column(
-            children: <Widget>[
-              _compositionComplex(_platformViewToMutate('0')),
-              _compositionClipRect(_platformViewToMutate('1')),
-              _compositionClipPath(_platformViewToMutate('2'))
-            ],
-          ),
-          Column(
-            children: <Widget>[
-              _compositionComplex(_containerToMutate()),
-              _compositionClipRect(_containerToMutate()),
-              _compositionClipPath(_containerToMutate())
-            ],
-          )
-        ],
+    return Column(
+          children: [Container(
+        child: Row(
+          children: <Column>[
+            Column(
+              children: <Widget>[
+                _compositionComplex(_platformViewToMutate('0')),
+                _compositionClipRect(_platformViewToMutate('1')),
+                _compositionClipPath(_platformViewToMutate('2'))
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                _compositionComplex(_containerToMutate()),
+                _compositionClipRect(_containerToMutate()),
+                _compositionClipPath(_containerToMutate())
+              ],
+            )
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
       ),
-      padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
-    );
+          Center(child:FlatButton(key: const ValueKey<String>('back'), child: const Text('back'), onPressed: (){
+            Navigator.of(context).pop();
+          },))]);
   }
 
   Widget _compositionComplex(Widget child) {
@@ -106,24 +109,7 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
     return Container(
         width: 150,
         height: 150,
-        child: SimplePlatformView(key: ValueKey<String>('PlatformView$id'), onPlatformViewCreated: _onPlatformViewCreated,));
-  }
-
-  void _onPlatformViewCreated(int id) {
-    assert(_platformViewCompleteCount <= 3);
-    _platformViewCompleteCount ++;
-    if (_platformViewCompleteCount == 3) {
-      driverDataHandler.handlerCompleter.complete(handleDriverMessage);
-    }
-  }
-
-  Future<String> handleDriverMessage(String message) async {
-    switch (message) {
-      case 'pop':
-        Navigator.of(context).pop(true);
-        return 'success';
-    }
-    return 'unknown message: "$message"';
+        child: SimplePlatformView(key: ValueKey<String>('PlatformView$id')));
   }
 }
 

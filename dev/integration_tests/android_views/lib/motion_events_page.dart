@@ -180,8 +180,6 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
     switch (message) {
       case 'run test':
         final String result = await playEventsFile();
-        // popping back after the test is run.
-        Navigator.of(context).pop(true);
         return result;
       case 'pop':
         Navigator.of(context).pop(true);
