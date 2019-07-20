@@ -771,6 +771,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     window.onBeginFrame = null;
     window.onDrawFrame = null;
     _mockFlutterAssets();
+    _mockPlatformMessageChannel();
   }
 
   FakeAsync _currentFakeAsync; // set in runTest; cleared in postTest
@@ -828,6 +829,19 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
       final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
       return Future<ByteData>.value(encoded.buffer.asByteData());
+    });
+  }
+
+  /// Mocks out some trivial 'flutter/platform' message channel methods.
+  void _mockPlatformMessageChannel() {
+    const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+    defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData message) async {
+      final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+      // `SystemChrome.setApplicationSwitcherDescription` is called when the tests are initialized.
+      // In order to get [pendingChannelInvokeMethodCount] to zero, simply returns a mock response.
+      if (methodCall['method'] == 'SystemChrome.setApplicationSwitcherDescription') {
+           jsonMessage.encodeMessage(<dynamic>[null]);
+      }
     });
   }
 

@@ -13,7 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/services.dart' show ServicesBinding, pendingChannelInvokeMethodCount;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -114,6 +114,7 @@ class FlutterDriverExtension {
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
+      'waitUntilNoPendingChannelMessages': _waitUntilNoPendingChannelMessages,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -135,6 +136,7 @@ class FlutterDriverExtension {
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
+      'waitUntilNoPendingChannelMessages': (Map<String, String> params) => WaitUntilNoPendingChannelMessages.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -371,6 +373,15 @@ class FlutterDriverExtension {
     return null;
   }
 
+  /// Returns a future that waits until no channels are waiting for platform messages.
+  /// 
+  /// We track the number of [MethodChannel.invokeMethod] calls that are invoked but not finished,
+  /// and this method returns when this number is zero.
+  Future<Result> _waitUntilNoPendingChannelMessages(Command command) async {
+    await _waitUntilCondition(() => pendingChannelInvokeMethodCount == 0);
+    return null;
+  }
+
   /// Returns a future that waits until no pending frame is scheduled (frame is synced).
   ///
   /// Specifically, it checks:
@@ -548,5 +559,16 @@ class FlutterDriverExtension {
       _semantics = null;
     }
     return SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
+  }
+
+  Future<void> _waitUntilCondition(bool condition(), [ Completer<void> completer]) {
+    completer ??= Completer<void>();
+    Timer.periodic(const Duration(milliseconds: 2), (Timer timer) {
+      if (condition()) {
+        timer.cancel();
+        completer.complete();
+      }
+    });
+    return completer.future;
   }
 }

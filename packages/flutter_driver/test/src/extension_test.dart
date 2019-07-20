@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/diagnostics_tree.dart';
@@ -14,6 +17,7 @@ import 'package:flutter_driver/src/common/request_data.dart';
 import 'package:flutter_driver/src/common/text.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quiver/testing/async.dart';
 
 void main() {
   group('waitUntilNoTransientCallbacks', () {
@@ -408,6 +412,70 @@ void main() {
           'response': null,
         },
       );
+    });
+  });
+
+  group('waitUntilNoPendingChannelMessages', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+
+    setUp(() {
+      extension = FlutterDriverExtension((String arg) async => '', true);
+      result = null;
+    });
+
+    test('returns immediately when there is no pending channel message',
+        () async {
+      FakeAsync().run((async) {
+        extension
+            .call(const WaitUntilNoPendingChannelMessages().serialize())
+            .then<void>(expectAsync1((Map<String, dynamic> r) {
+          result = r;
+        }));
+
+        async.elapse(const Duration(milliseconds: 2));
+        expect(
+          result,
+          <String, dynamic>{
+            'isError': false,
+            'response': null,
+          },
+        );
+      });
+    });
+
+    test('waits until the invokeMethod is finished', () async {
+      FakeAsync().run((async) {
+        const MethodChannel channel =
+            MethodChannel('helloChannel', JSONMethodCodec());
+        const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
+        defaultBinaryMessenger.setMockMessageHandler('helloChannel',
+            (ByteData message) async {
+          return Future.delayed(const Duration(milliseconds: 3),
+              () => jsonMessage.encodeMessage(<dynamic>['hello world']));
+        });
+        channel.invokeMethod('sayHello', 'hello');
+
+        extension
+            .call(const WaitUntilNoPendingChannelMessages().serialize())
+            .then<void>(expectAsync1((Map<String, dynamic> r) {
+          result = r;
+        }));
+
+        // The channel message are delayed for 3 milliseconds, so nothing happens yet.
+        async.elapse(const Duration(milliseconds: 2));
+        expect(result, isNull);
+
+        // Now we receive the result.
+        async.elapse(const Duration(milliseconds: 2));
+        expect(
+          result,
+          <String, dynamic>{
+            'isError': false,
+            'response': null,
+          },
+        );
+      });
     });
   });
 }

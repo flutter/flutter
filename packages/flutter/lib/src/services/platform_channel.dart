@@ -11,6 +11,10 @@ import 'binary_messenger.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
+/// Returns the number of invoke methods waiting for return value.
+int get pendingChannelInvokeMethodCount => _pendingChannelInvokeMethodCount;
+int _pendingChannelInvokeMethodCount = 0;
+
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
 ///
@@ -306,15 +310,20 @@ class MethodChannel {
   @optionalTypeArgs
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     assert(method != null);
-    final ByteData result = await binaryMessenger.send(
-      name,
-      codec.encodeMethodCall(MethodCall(method, arguments)),
-    );
-    if (result == null) {
-      throw MissingPluginException('No implementation found for method $method on channel $name');
+    try {
+      _pendingChannelInvokeMethodCount += 1;
+      final ByteData result = await binaryMessenger.send(
+        name,
+        codec.encodeMethodCall(MethodCall(method, arguments)),
+      );
+      if (result == null) {
+        throw MissingPluginException('No implementation found for method $method on channel $name');
+      }
+      final T typedResult = codec.decodeEnvelope(result);
+      return typedResult;
+    } finally {
+      _pendingChannelInvokeMethodCount -= 1;
     }
-    final T typedResult = codec.decodeEnvelope(result);
-    return typedResult;
   }
 
   /// An implementation of [invokeMethod] that can return typed lists.
