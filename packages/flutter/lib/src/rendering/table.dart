@@ -943,31 +943,29 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > minimumDeficit) {
+      while (deficit > minimumDeficit && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
-        // of columns that aren't at their minWidth.
-        do {
-          final double delta = deficit / availableColumns;
-          int newAvailableColumns = 0;
-          for (int x = 0; x < columns; x += 1) {
-            final double availableDelta = widths[x] - minWidths[x];
-            if (availableDelta > 0.0) {
-              if (availableDelta <= delta) {
-                // shrank to minimum
-                deficit -= widths[x] - minWidths[x];
-                widths[x] = minWidths[x];
-              } else {
-                deficit -= delta;
-                widths[x] -= delta;
-                newAvailableColumns += 1;
-              }
+        // of columns that aren't at their minWidth.        
+        final double delta = deficit / availableColumns;
+        int newAvailableColumns = 0;
+        for (int x = 0; x < columns; x += 1) {
+          final double availableDelta = widths[x] - minWidths[x];
+          if (availableDelta > 0.0) {
+            if (availableDelta <= delta) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+            } else {
+              deficit -= delta;
+              widths[x] -= delta;
+              newAvailableColumns += 1;
             }
           }
-          availableColumns = newAvailableColumns;
-        } while (deficit > minimumDeficit && availableColumns > 0);
+        }
+        availableColumns = newAvailableColumns;
       }
     }
     return widths;
@@ -993,6 +991,8 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
+    debugPrint('performLayout() -- constraints: $constraints');
+
     final int rows = this.rows;
     final int columns = this.columns;
     assert(_children.length == rows * columns);
