@@ -948,7 +948,7 @@ class RenderTable extends RenderBox {
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
-        // of columns that aren't at their minWidth.        
+        // of columns that aren't at their minWidth.
         final double delta = deficit / availableColumns;
         assert(delta != 0);
         int newAvailableColumns = 0;
