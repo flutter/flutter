@@ -1,4 +1,4 @@
-Signature: 77af90e1b77b03f28bc27225cea28985
+Signature: 35654be73035602013e3bd6474c573f5
 
 UNUSED LICENSES:
 
@@ -1852,7 +1852,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/constants.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/advertising_data.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.le/peer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/address.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/appearance.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth/id.fidl
