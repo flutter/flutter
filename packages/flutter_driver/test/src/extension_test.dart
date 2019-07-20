@@ -426,7 +426,7 @@ void main() {
 
     test('returns immediately when there is no pending channel message',
         () async {
-      FakeAsync().run((async) {
+      FakeAsync().run((FakeAsync async) {
         extension
             .call(const WaitUntilNoPendingChannelMessages().serialize())
             .then<void>(expectAsync1((Map<String, dynamic> r) {
@@ -445,13 +445,13 @@ void main() {
     });
 
     test('waits until the invokeMethod is finished', () async {
-      FakeAsync().run((async) {
+      FakeAsync().run((FakeAsync async) {
         const MethodChannel channel =
             MethodChannel('helloChannel', JSONMethodCodec());
         const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
         defaultBinaryMessenger.setMockMessageHandler('helloChannel',
             (ByteData message) async {
-          return Future.delayed(const Duration(milliseconds: 3),
+          return Future<ByteData>.delayed(const Duration(milliseconds: 3),
               () => jsonMessage.encodeMessage(<dynamic>['hello world']));
         });
         channel.invokeMethod('sayHello', 'hello');
