@@ -18025,45 +18025,6 @@ class MaterialLocalizationZhHantHk extends MaterialLocalizationZhHant {
     decimalFormat: decimalFormat,
     twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
   );
-
-  @override
-  String get tabLabelRaw => r'第 $tabIndex 個標籤，總共 $tabCount 個';
-
-  @override
-  String get modalBarrierDismissLabel => r'拒絕';
-
-  @override
-  String get signedInLabel => r'已登入';
-
-  @override
-  String get aboutListTileTitleRaw => r'關於$applicationName';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'第 $firstRow 至 $lastRow 列，共 $rowCount 列';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'第 $firstRow 至 $lastRow 列，共約 $rowCount 列';
-
-  @override
-  String get timePickerHourModeAnnouncement => r'揀選小時';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'揀選分鐘';
-
-  @override
-  String get alertDialogLabel => r'通知';
-
-  @override
-  String get reorderItemToStart => r'移到開頭';
-
-  @override
-  String get reorderItemToEnd => r'移到最後';
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'尚餘 1 個字元';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'尚餘 $remainingCount 個字元';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
