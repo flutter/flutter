@@ -166,6 +166,7 @@ void test(
   dynamic tags,
   Map<String, dynamic> onPlatform,
   int retry,
+  @deprecated bool solo = false,
 }) {
   _declarer.test(
     description.toString(), body,
@@ -175,6 +176,7 @@ void test(
     onPlatform: onPlatform,
     tags: tags,
     retry: retry,
+    solo: solo
   );
 }
 
@@ -232,8 +234,11 @@ void test(
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
 @isTestGroup
-void group(Object description, Function body, { dynamic skip }) {
-  _declarer.group(description.toString(), body, skip: skip);
+void group(Object description, Function body, {
+  dynamic skip,
+  @deprecated bool solo = false,
+}) {
+  _declarer.group(description.toString(), body, skip: skip, solo: solo);
 }
 
 /// Registers a function to be run before tests.
