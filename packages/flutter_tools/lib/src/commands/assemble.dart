@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../convert.dart';
