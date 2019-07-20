@@ -51,6 +51,8 @@ class TargetModel {
         return flutter;
       case 'flutter_runner':
         return flutterRunner;
+      case 'vm':
+        return vm;
     }
     assert(false);
     return null;
@@ -63,6 +65,9 @@ class TargetModel {
 
   /// The fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
+
+  /// The Dart vm.
+  static const TargetModel vm = TargetModel._('vm');
 
   final String _value;
 
@@ -218,7 +223,6 @@ class KernelCompiler {
     bool aot = false,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
@@ -287,9 +291,6 @@ class KernelCompiler {
       command.add('-Ddart.vm.product=true');
     } else if (aot) {
       command.add('-Ddart.vm.profile=true');
-    }
-    if (incrementalCompilerByteStorePath != null) {
-      command.add('--incremental');
     }
     Uri mainUri;
     if (packagesPath != null) {

@@ -99,7 +99,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     bool aot = false,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     bool targetProductVm = false,
     // These arguments are currently unused.
     String sdkRoot,
@@ -135,7 +134,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       aot: aot,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
       targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,
