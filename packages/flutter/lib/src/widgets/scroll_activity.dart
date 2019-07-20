@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
 import 'scroll_metrics.dart';
@@ -241,6 +242,41 @@ class ScrollDragController implements Drag {
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
+  // If non-zero, this will be a pending drag delta for the next frame to
+  // consume. This is used to smooth out the irregular drag events delivery.
+  // See also [update] and scroll_events_test.dart.
+  double _pendingDragDelta = 0;
+
+  bool _isScrollFrameInProgress = false;
+
+  // To make sure that the callback is called only once per frame.
+  bool _pendingCallbackScheduled = false;
+
+  void _markScrollInProgress() {
+    _isScrollFrameInProgress = true;
+    if (!_pendingCallbackScheduled) {
+      WidgetsBinding.instance.addPostFrameCallback(_pendingDragCallback);
+      _pendingCallbackScheduled = true;
+    }
+  }
+
+  void _applyPendingDrag() {
+    assert(_pendingDragDelta != 0);
+    assert(_isScrollFrameInProgress);
+    delegate.applyUserOffset(_pendingDragDelta);
+    _pendingDragDelta = 0;
+    _markScrollInProgress();
+  }
+
+  void _pendingDragCallback(Duration _) {
+    _pendingCallbackScheduled = false;
+    if (_pendingDragDelta != 0) {
+      _applyPendingDrag();
+    } else {
+      _isScrollFrameInProgress = false;
+    }
+  }
+
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
   ScrollActivityDelegate _delegate;
@@ -369,11 +405,57 @@ class ScrollDragController implements Drag {
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
-    delegate.applyUserOffset(offset);
+
+    // If a scroll frame is still in progress, entering this function means that
+    // an input event is delivered to us too fast. That potentially means a
+    // later event will be too late which could cause the missing of a frame
+    // (https://github.com/flutter/flutter/issues/31086#issuecomment-513044440).
+    // Hence we'll cache it in `_pendingDragDelta` for the next frame to smooth
+    // it out.
+    //
+    // If the input event is sent to us regularly at the same rate of VSYNC (say
+    // at 60Hz, once per 16ms), this would be identical to the old behavior
+    // where `delegate.applyUserOffset(offset)` is always called right away.
+    // That's because `_isScrollFrameInProgress` will always be false at this
+    // point since it will be cleared by the end of a frame (VSYNC) through
+    // `_checkPendingDragCallback`. This is the case for all Android/iOS devices
+    // before iPhone X/XS.
+    //
+    // If the input event is irregular, but with a random latency of no more
+    // than one frame, this would guarantee that we'll miss at most 1 frame
+    // during a scroll. Without this, we could miss half of the frames.
+    //
+    // If the input event is delivered at a higher rate than that of VSYNC, this
+    // would at most add a latency of one event delivery. For example, if the
+    // input event is delivered at 120Hz (this is only true for iPad pro, not
+    // even iPhone X), this may delay the handling of an input event by 8ms.
+    //
+    // The assumption of this solution is that the sampling itself is still
+    // regular. Only the event delivery is allowed to be irregular. So far this
+    // assumption seems to hold on all devices. If it's changed in the future,
+    // we'll need a different solution.
+    //
+    // See also scroll_events_test.dart where we test all our claims above.
+    if (_isScrollFrameInProgress) {
+      // If there's already a pending drag, apply the old pending drag and make
+      // this drag the new pending drag. This would guarantee us to only have
+      // a latency of at most one event delivery.
+      if (_pendingDragDelta != 0) {
+        delegate.applyUserOffset(_pendingDragDelta);
+      }
+      _pendingDragDelta = offset;
+    } else {
+      assert(_pendingDragDelta == 0);
+      delegate.applyUserOffset(offset);
+    }
+    _markScrollInProgress();
   }
 
   @override
   void end(DragEndDetails details) {
+    if (_pendingDragDelta != 0) {
+      _applyPendingDrag();
+    }
     assert(details.primaryVelocity != null);
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
