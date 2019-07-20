@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// Core types used to communicate with the flutter tool.
+library extension;
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -11,9 +14,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'doctor.dart';
-
-/// Core types used to communicate with the flutter tool.
-library extension;
 
 /// A request sent to a tool extension from the host.
 class Request {

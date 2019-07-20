@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+/// An API for integration of doctor and workflow checks into the flutter tool.
+library doctor;
+
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
 import 'extension.dart';
 
-/// An API for integration of doctor and workflow checks into the flutter tool.
-library doctor;
 
 /// How does the environment match the validation requirements.
 class ValidationType implements Serializable {
