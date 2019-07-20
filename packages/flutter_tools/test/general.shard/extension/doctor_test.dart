@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/extension/doctor.dart';
 
-import '../src/common.dart';
+import '../../src/common.dart';
 
 void main() {
   test('serialization of ValidationType', () {
