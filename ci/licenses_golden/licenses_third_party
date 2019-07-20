@@ -1,4 +1,4 @@
-Signature: fb39c6bde58c7a49f5e33b13c9a97965
+Signature: 39f3f6e5d1561dc756a004e277638991
 
 UNUSED LICENSES:
 
@@ -4669,6 +4669,15 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/benchmarks/Example/dart/Example.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/benchmarks/Example/dart/Example.dart
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/FfiBoringssl.dart
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/digest.dart
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/dlopen_helper.dart
+FILE: ../../../third_party/dart/benchmarks/FfiBoringssl/dart/types.dart
+FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/FfiCall.dart
+FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/dlopen_helper.dart
+FILE: ../../../third_party/dart/benchmarks/FfiCall/dart/native/native_functions.c
+FILE: ../../../third_party/dart/benchmarks/FfiMemory/dart/FfiMemory.dart
+FILE: ../../../third_party/dart/benchmarks/FfiStruct/dart/FfiStruct.dart
 FILE: ../../../third_party/dart/runtime/bin/abi_version.h
 FILE: ../../../third_party/dart/runtime/bin/abi_version_in.cc
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension.cc
