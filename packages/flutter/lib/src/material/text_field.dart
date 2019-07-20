@@ -17,6 +17,7 @@ import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -932,14 +933,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorOpacityAnimates = true;
         cursorColor ??= CupertinoTheme.of(context).primaryColor;
         cursorRadius ??= const Radius.circular(2.0);
-        // An eyeballed value that moves the cursor slightly left of where it is
-        // rendered for text on Android so its positioning more accurately matches the
-        // native iOS text cursor positioning.
-        //
-        // This value is in device pixels, not logical pixels as is typically used
-        // throughout the codebase.
-        const int _iOSHorizontalOffset = -2;
-        cursorOffset = Offset(_iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
         break;
 
       case TargetPlatform.android:
