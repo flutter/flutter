@@ -992,8 +992,6 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
-    debugPrint('performLayout() -- constraints: $constraints');
-
     final int rows = this.rows;
     final int columns = this.columns;
     assert(_children.length == rows * columns);
