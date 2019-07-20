@@ -24,10 +24,13 @@ void main() {
       0, 0, 1, 0,
       0, 0, 0,
     ]);
-    expect(
-      () => builder.pushTransform(matrix4WrongLength),
-      throwsA(const TypeMatcher<AssertionError>()),
-    );
+    assert(() {
+      expect(
+        () => builder.pushTransform(matrix4WrongLength),
+        throwsA(const TypeMatcher<AssertionError>()),
+      );
+      return true;
+    }());
 
     final Float64List matrix4NaN = Float64List.fromList(<double>[
       1, 0, 0, 0,
@@ -35,10 +38,13 @@ void main() {
       0, 0, 1, 0,
       0, 0, 0, double.nan,
     ]);
-    expect(
-      () => builder.pushTransform(matrix4NaN),
-      throwsA(const TypeMatcher<AssertionError>()),
-    );
+    assert(() {
+      expect(
+        () => builder.pushTransform(matrix4NaN),
+        throwsA(const TypeMatcher<AssertionError>()),
+      );
+      return true;
+    }());
 
     final Float64List matrix4Infinity = Float64List.fromList(<double>[
       1, 0, 0, 0,
@@ -46,10 +52,13 @@ void main() {
       0, 0, 1, 0,
       0, 0, 0, double.infinity,
     ]);
-    expect(
-      () => builder.pushTransform(matrix4Infinity),
-      throwsA(const TypeMatcher<AssertionError>()),
-    );
+    assert(() {
+      expect(
+        () => builder.pushTransform(matrix4Infinity),
+        throwsA(const TypeMatcher<AssertionError>()),
+      );
+      return true;
+    }());
   });
 
   test('SceneBuilder accepts typed layers', () {
@@ -76,12 +85,15 @@ void main() {
     final SceneBuilder builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
-    try {
-      builder2.addRetained(layer);
-      fail('Expected addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('The layer is already being used'));
-    }
+    assert(() {
+      try {
+        builder2.addRetained(layer);
+        fail('Expected addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('The layer is already being used'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -94,12 +106,15 @@ void main() {
 
     final SceneBuilder builder2 = SceneBuilder();
     builder2.addRetained(layer);
-    try {
-      pushFunction(builder2, layer);
-      fail('Expected push to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('The layer is already being used'));
-    }
+    assert(() {
+      try {
+        pushFunction(builder2, layer);
+        fail('Expected push to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('The layer is already being used'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -112,12 +127,15 @@ void main() {
 
     final SceneBuilder builder2 = SceneBuilder();
     builder2.addRetained(layer);
-    try {
-      builder2.addRetained(layer);
-      fail('Expected second addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('The layer is already being used'));
-    }
+    assert(() {
+      try {
+        builder2.addRetained(layer);
+        fail('Expected second addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('The layer is already being used'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -130,12 +148,15 @@ void main() {
 
     final SceneBuilder builder2 = SceneBuilder();
     pushFunction(builder2, layer);
-    try {
-      pushFunction(builder2, layer);
-      fail('Expected push to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('was previously used as oldLayer'));
-    }
+    assert(() {
+      try {
+        pushFunction(builder2, layer);
+        fail('Expected push to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('was previously used as oldLayer'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -150,12 +171,15 @@ void main() {
 
     final SceneBuilder builder2 = SceneBuilder();
     builder2.addRetained(layer);
-    try {
-      builder2.pushOpacity(321, oldLayer: childLayer);
-      fail('Expected pushOpacity to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('The layer is already being used'));
-    }
+    assert(() {
+      try {
+        builder2.pushOpacity(321, oldLayer: childLayer);
+        fail('Expected pushOpacity to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('The layer is already being used'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -171,12 +195,15 @@ void main() {
     final SceneBuilder builder2 = SceneBuilder();
     builder2.pushOpacity(234, oldLayer: childLayer);
     builder2.pop();
-    try {
-      builder2.addRetained(layer);
-      fail('Expected addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('The layer is already being used'));
-    }
+    assert(() {
+      try {
+        builder2.addRetained(layer);
+        fail('Expected addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('The layer is already being used'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -190,13 +217,16 @@ void main() {
     final SceneBuilder builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
-    try {
-      final SceneBuilder builder3 = SceneBuilder();
-      builder3.addRetained(layer);
-      fail('Expected addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('was previously used as oldLayer'));
-    }
+    assert(() {
+      try {
+        final SceneBuilder builder3 = SceneBuilder();
+        builder3.addRetained(layer);
+        fail('Expected addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('was previously used as oldLayer'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -210,13 +240,16 @@ void main() {
     final SceneBuilder builder2 = SceneBuilder();
     pushFunction(builder2, layer);
     builder2.pop();
-    try {
-      final SceneBuilder builder3 = SceneBuilder();
-      pushFunction(builder3, layer);
-      fail('Expected addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('was previously used as oldLayer'));
-    }
+    assert(() {
+      try {
+        final SceneBuilder builder3 = SceneBuilder();
+        pushFunction(builder3, layer);
+        fail('Expected addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('was previously used as oldLayer'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
@@ -232,13 +265,16 @@ void main() {
     final SceneBuilder builder2 = SceneBuilder();
     builder2.pushOpacity(321, oldLayer: childLayer);
     builder2.pop();
-    try {
-      final SceneBuilder builder3 = SceneBuilder();
-      builder3.addRetained(parentLayer);
-      fail('Expected addRetained to throw AssertionError but it returned successully');
-    } on AssertionError catch (error) {
-      expect(error.toString(), contains('was previously used as oldLayer'));
-    }
+    assert(() {
+      try {
+        final SceneBuilder builder3 = SceneBuilder();
+        builder3.addRetained(parentLayer);
+        fail('Expected addRetained to throw AssertionError but it returned successully');
+      } on AssertionError catch (error) {
+        expect(error.toString(), contains('was previously used as oldLayer'));
+      }
+      return true;
+    }());
     builder2.build();
   }
 
