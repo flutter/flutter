@@ -240,6 +240,7 @@ void main() {
       },
     );
 
-    layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
+    // The bug will manifest itself by an assertion failure during layout.
+    layout(table, constraints: BoxConstraints.tight(const Size(600.0, 800.0)));
   });
 }
