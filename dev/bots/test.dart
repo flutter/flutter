@@ -255,11 +255,6 @@ Future<void> _runToolTests() async {
       enableFlutterToolAsserts: !Platform.isWindows,
     );
   }
-  await _pubRunTest(
-    path.join(flutterRoot, 'packages', 'flutter_extension_api'),
-    tableData: bigqueryApi?.tabledata,
-    enableFlutterToolAsserts: !Platform.isWindows,
-  );
 
   print('${bold}DONE: All tests successful.$reset');
 }
