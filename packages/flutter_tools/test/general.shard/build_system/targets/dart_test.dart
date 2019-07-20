@@ -291,6 +291,7 @@ class FakeKernelCompiler implements KernelCompiler {
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
+    String platformDill,
     String initializeFromDill}) async {
       fs.file(outputFilePath).createSync(recursive: true);
       return CompilerOutput(outputFilePath, 0, null);
