@@ -171,8 +171,8 @@ void main() {
       .toList();
 
     expect(description, <String>[
-      'backgroundColor: Color(0xcafecafe)',
       'foregroundColor: Color(0xfeedfeed)',
+      'backgroundColor: Color(0xcafecafe)',
       'elevation: 23.0',
       'disabledElevation: 11.0',
       'highlightElevation: 43.0',

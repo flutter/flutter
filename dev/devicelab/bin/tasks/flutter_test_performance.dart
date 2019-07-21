@@ -59,7 +59,7 @@ Future<int> runTest({bool coverage = false}) async {
       step = TestStep.buildingFlutterTool;
     } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
       // ignore this line
-    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter packages get" in automated_tests...') {
+    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index < TestStep.testWritesFirstCarriageReturn.index && entry == '') {
@@ -94,7 +94,7 @@ Future<int> runTest({bool coverage = false}) async {
   if (result != 0)
     throw Exception('flutter test failed with exit code $result');
   if (badLines > 0)
-    throw Exception('flutter test renderered unexpected output ($badLines bad lines)');
+    throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
   if (step != TestStep.testPassed)
     throw Exception('flutter test did not finish (only reached step $step)');
   print('elapsed time: ${clock.elapsedMilliseconds}ms');

@@ -102,43 +102,45 @@ class CategoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return ListView(
-      key: PageStorageKey<Category>(category),
-      padding: const EdgeInsets.symmetric(
-        vertical: 16.0,
-        horizontal: 64.0,
-      ),
-      children: category.assets.map<Widget>((String asset) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Card(
-              child: Container(
-                width: 144.0,
-                alignment: Alignment.center,
-                child: Column(
-                  children: <Widget>[
-                    Image.asset(
-                      asset,
-                      package: 'flutter_gallery_assets',
-                      fit: BoxFit.contain,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(bottom: 16.0),
-                      alignment: AlignmentDirectional.center,
-                      child: Text(
+    return Scrollbar(
+      child: ListView(
+        key: PageStorageKey<Category>(category),
+        padding: const EdgeInsets.symmetric(
+          vertical: 16.0,
+          horizontal: 64.0,
+        ),
+        children: category.assets.map<Widget>((String asset) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Card(
+                child: Container(
+                  width: 144.0,
+                  alignment: Alignment.center,
+                  child: Column(
+                    children: <Widget>[
+                      Image.asset(
                         asset,
-                        style: theme.textTheme.caption,
+                        package: 'flutter_gallery_assets',
+                        fit: BoxFit.contain,
                       ),
-                    ),
-                  ],
+                      Container(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        alignment: AlignmentDirectional.center,
+                        child: Text(
+                          asset,
+                          style: theme.textTheme.caption,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24.0),
-          ],
-        );
-      }).toList(),
+              const SizedBox(height: 24.0),
+            ],
+          );
+        }).toList(),
+      )
     );
   }
 }

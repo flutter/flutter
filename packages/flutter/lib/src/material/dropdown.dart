@@ -535,11 +535,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// This sample shows a `DropdownButton` whose value is one of
 /// "One", "Two", "Free", or "Four".
 ///
-/// ```dart preamble
-/// String dropdownValue = 'One';
-/// ```
-///
 /// ```dart
+/// String dropdownValue = 'One';
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
@@ -795,7 +794,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
+    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.subhead.fontSize;
+    return math.max(fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
   Color get _iconColor {

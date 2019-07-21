@@ -149,7 +149,11 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    _controller = AnimationController(duration: _fadeInDuration, vsync: this)
+    _controller = AnimationController(
+      duration: _fadeInDuration,
+      reverseDuration: _fadeOutDuration,
+      vsync: this,
+    )
       ..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
     RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
@@ -226,7 +230,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _createNewEntry() {
     final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
-    assert(_fadeOutDuration < _fadeInDuration);
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
@@ -239,14 +242,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       animation: CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn,
-        // Add an interval here to make the fade out use a different (shorter)
-        // duration than the fade in. If _kFadeOutDuration is made longer than
-        // _kFadeInDuration, then the equation below will need to change.
-        reverseCurve: Interval(
-          0.0,
-          _fadeOutDuration.inMilliseconds / _fadeInDuration.inMilliseconds,
-          curve: Curves.fastOutSlowIn,
-        ),
       ),
       target: target,
       verticalOffset: widget.verticalOffset,

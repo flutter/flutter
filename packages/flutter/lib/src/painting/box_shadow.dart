@@ -131,5 +131,5 @@ class BoxShadow extends ui.Shadow {
   int get hashCode => hashValues(color, offset, blurRadius, spreadRadius);
 
   @override
-  String toString() => 'BoxShadow($color, $offset, $blurRadius, $spreadRadius)';
+  String toString() => 'BoxShadow($color, $offset, ${debugFormatDouble(blurRadius)}, ${debugFormatDouble(spreadRadius)})';
 }

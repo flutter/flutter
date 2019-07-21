@@ -232,7 +232,7 @@ class GLFWKeyHelper with KeyHelper {
       case ModifierKey.shiftModifier:
       case ModifierKey.altModifier:
       case ModifierKey.metaModifier:
-       // Neither GLFW or X11 provide a distiction between left and right modifiers, so defaults to KeyboardSide.any.
+       // Neither GLFW or X11 provide a distinction between left and right modifiers, so defaults to KeyboardSide.any.
        // https://code.woboq.org/qt5/include/X11/X.h.html#_M/ShiftMask
        return KeyboardSide.any;
       case ModifierKey.capsLockModifier:

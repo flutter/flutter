@@ -173,7 +173,7 @@ void main() {
       },
     );
 
-    testWidgets('let the builder update as cancelled drag scrolls away', (WidgetTester tester) async {
+    testWidgets('let the builder update as canceled drag scrolls away', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
       await tester.pumpWidget(

@@ -47,6 +47,13 @@ TaskFunction createPlatformChannelSampleTest() {
   );
 }
 
+TaskFunction createPlatformChannelSwiftSampleTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/platform_channel_swift',
+    'test_driver/button_tap.dart',
+  );
+}
+
 TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_views',
@@ -124,8 +131,8 @@ class DriverTest {
         testTarget,
         '-d',
         deviceId,
+        ...extraOptions,
       ];
-      options.addAll(extraOptions);
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);

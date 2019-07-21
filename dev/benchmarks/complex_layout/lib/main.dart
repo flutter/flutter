@@ -438,8 +438,8 @@ class ItemImageBox extends StatelessWidget {
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                     padding: const EdgeInsets.all(4.0),
-                    child: const RichText(
-                      text: TextSpan(
+                    child: RichText(
+                      text: const TextSpan(
                         style: TextStyle(color: Colors.white),
                         children: <TextSpan>[
                           TextSpan(

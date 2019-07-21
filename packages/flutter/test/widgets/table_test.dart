@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 class TestStatefulWidget extends StatefulWidget {
   const TestStatefulWidget({ Key key }) : super(key: key);
@@ -16,6 +17,24 @@ class TestStatefulWidget extends StatefulWidget {
 class TestStatefulWidgetState extends State<TestStatefulWidget> {
   @override
   Widget build(BuildContext context) => Container();
+}
+
+class TestChildWidget extends StatefulWidget {
+  const TestChildWidget({ Key key }) : super(key: key);
+
+  @override
+  TestChildState createState() => TestChildState();
+}
+
+class TestChildState extends State<TestChildWidget> {
+  bool toggle = true;
+
+  void toggleMe() {
+    setState(() { toggle = !toggle; });
+  }
+
+  @override
+  Widget build(BuildContext context) => toggle ? const SizedBox() : const Text('CRASHHH');
 }
 
 void main() {
@@ -65,6 +84,41 @@ void main() {
     await run(TextDirection.ltr);
     await tester.pumpWidget(Container());
     await run(TextDirection.rtl);
+  });
+
+  testWidgets('Table widget can be detached and re-attached', (WidgetTester tester) async {
+    final Widget table = Table(
+      key: GlobalKey(),
+      children: const <TableRow>[
+        TableRow(
+          decoration: BoxDecoration(
+              color: Colors.yellow
+          ),
+          children: <Widget>[Placeholder()],
+        ),
+      ],
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: table,
+        ),
+      ),
+    );
+    // Move table to a different location to simulate detaching and re-attaching effect.
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Center(
+            child: table
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Table widget - column offset (LTR)', (WidgetTester tester) async {
@@ -818,6 +872,33 @@ void main() {
       ),
     );
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/31473.
+  testWidgets(
+    'Does not crash if a child RenderObject is replaced by another RenderObject of a different type',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+      expect(find.text('CRASHHH'), findsNothing);
+
+      final TestChildState state = tester.state(find.byType(TestChildWidget));
+      state.toggleMe();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(children: const <TableRow>[TableRow(children: <Widget>[TestChildWidget()])]),
+        ),
+      );
+
+      // Should not crash.
+      expect(find.text('CRASHHH'), findsOneWidget);
+    }
+  );
 
   // TODO(ianh): Test handling of TableCell object
 }

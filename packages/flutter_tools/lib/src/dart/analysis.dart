@@ -37,6 +37,8 @@ class AnalysisServer {
     final List<String> command = <String>[
       fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
+      '--disable-server-feature-completion',
+      '--disable-server-feature-search',
       '--sdk',
       sdkPath,
     ];

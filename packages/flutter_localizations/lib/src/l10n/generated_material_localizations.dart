@@ -1275,7 +1275,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get backButtonTooltip => r'Zurück';
@@ -1329,7 +1329,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'OK';
+  String get okButtonLabel => r'Ok';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -1347,7 +1347,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get popupMenuLabel => r'Pop-up-Menü';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get previousMonthTooltip => r'Vorheriger Monat';
@@ -5298,7 +5298,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get backButtonTooltip => r'Zurück';
@@ -5352,7 +5352,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Nächste Seite';
 
   @override
-  String get okButtonLabel => r'OK';
+  String get okButtonLabel => r'Ok';
 
   @override
   String get openAppDrawerTooltip => r'Navigationsmenü öffnen';
@@ -5370,7 +5370,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get popupMenuLabel => r'Pop-up-Menü';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get previousMonthTooltip => r'Vorheriger Monat';
@@ -7128,19 +7128,19 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   );
 
   @override
-  String get aboutListTileTitleRaw => r'$applicationName тұралы';
+  String get aboutListTileTitleRaw => r'$applicationName туралы';
 
   @override
-  String get alertDialogLabel => r'Ескерту';
+  String get alertDialogLabel => r'Дабыл';
 
   @override
-  String get anteMeridiemAbbreviation => r'AM';
+  String get anteMeridiemAbbreviation => r'түстен кейін';
 
   @override
   String get backButtonTooltip => r'Артқа';
 
   @override
-  String get cancelButtonLabel => r'ЖОЮ';
+  String get cancelButtonLabel => r'БАС ТАРТУ';
 
   @override
   String get closeButtonLabel => r'ЖАБУ';
@@ -7149,7 +7149,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get closeButtonTooltip => r'Жабу';
 
   @override
-  String get collapsedIconTapHint => r'Жазу';
+  String get collapsedIconTapHint => r'Жаю';
 
   @override
   String get continueButtonLabel => r'ЖАЛҒАСТЫРУ';
@@ -7158,28 +7158,28 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get copyButtonLabel => r'КӨШІРУ';
 
   @override
-  String get cutButtonLabel => r'ҚИЫП АЛУ';
+  String get cutButtonLabel => r'ҚИЮ';
 
   @override
-  String get deleteButtonTooltip => r'Өшіру';
+  String get deleteButtonTooltip => r'Жою';
 
   @override
-  String get dialogLabel => r'Диалогтік терезесі';
+  String get dialogLabel => r'Диалогтық терезе';
 
   @override
-  String get drawerLabel => r'Навигациялық мәзір';
+  String get drawerLabel => r'Навигация мәзірі';
 
   @override
-  String get expandedIconTapHint => r'Орау';
+  String get expandedIconTapHint => r'Жию';
 
   @override
-  String get hideAccountsLabel => r'Тіркеулік жасбасыны жасыру';
+  String get hideAccountsLabel => r'Есептік жазбаларды жасыру';
 
   @override
   String get licensesPageTitle => r'Лицензиялар';
 
   @override
-  String get modalBarrierDismissLabel => r'Болдырмау';
+  String get modalBarrierDismissLabel => r'Жабу';
 
   @override
   String get nextMonthTooltip => r'Келесі ай';
@@ -7188,31 +7188,31 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get nextPageTooltip => r'Келесі бет';
 
   @override
-  String get okButtonLabel => r'ЖАҚСЫ';
+  String get okButtonLabel => r'Иә';
 
   @override
-  String get openAppDrawerTooltip => r'Навигация мәзірді ашу';
+  String get openAppDrawerTooltip => r'Навигация мәзірін ашу';
 
   @override
-  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount ішінде';
+  String get pageRowsInfoTitleRaw => r'$rowCount ішінен $firstRow–$lastRow';
 
   @override
-  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow $rowCount шамасының ішінде';
+  String get pageRowsInfoTitleApproximateRaw => r'Шамамен $rowCount ішінен $firstRow–$lastRow';
 
   @override
-  String get pasteButtonLabel => r'ҚОНДЫРУ';
+  String get pasteButtonLabel => r'ҚОЮ';
 
   @override
-  String get popupMenuLabel => r'Ашылмалы мәзір';
+  String get popupMenuLabel => r'Қалқымалы терезе мәзірі';
 
   @override
-  String get postMeridiemAbbreviation => r'PM';
+  String get postMeridiemAbbreviation => r'түстен кейін';
 
   @override
   String get previousMonthTooltip => r'Өткен ай';
 
   @override
-  String get previousPageTooltip => r'Алдынғы бет';
+  String get previousPageTooltip => r'Алдыңғы бет';
 
   @override
   String get refreshIndicatorSemanticLabel => r'Жаңарту';
@@ -7224,10 +7224,10 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountMany => null;
 
   @override
-  String get remainingTextFieldCharacterCountOne => null;
+  String get remainingTextFieldCharacterCountOne => r'1 таңба қалды.';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount таңба қалды';
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount таңба қалды.';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
@@ -7236,25 +7236,25 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get remainingTextFieldCharacterCountZero => r'Таңбалар қалмады';
 
   @override
-  String get reorderItemDown => r'Төменге орналастыру';
+  String get reorderItemDown => r'Төменге жылжыту';
 
   @override
-  String get reorderItemLeft => r'Солға орналастыру';
+  String get reorderItemLeft => r'Солға жылжыту';
 
   @override
-  String get reorderItemRight => r'Оңға орналастыру';
+  String get reorderItemRight => r'Оңға жылжыту';
 
   @override
-  String get reorderItemToEnd => r'Аяққа орналастыру';
+  String get reorderItemToEnd => r'Соңына өту';
 
   @override
-  String get reorderItemToStart => r'Басына орналастыру';
+  String get reorderItemToStart => r'Басына өту';
 
   @override
-  String get reorderItemUp => r'Жоғарға орналастыру';
+  String get reorderItemUp => r'Жоғарыға жылжыту';
 
   @override
-  String get rowsPerPageTitle => r'Бір бетіне жазбалар:';
+  String get rowsPerPageTitle => r'Әр беттегі жолдар саны:';
 
   @override
   ScriptCategory get scriptCategory => ScriptCategory.englishLike;
@@ -7263,7 +7263,7 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get searchFieldLabel => r'Іздеу';
 
   @override
-  String get selectAllButtonLabel => r'БӘРІН ТАҢДАУ';
+  String get selectAllButtonLabel => r'БАРЛЫҒЫН ТАҢДАУ';
 
   @override
   String get selectedRowCountTitleFew => null;
@@ -7272,10 +7272,10 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleMany => null;
 
   @override
-  String get selectedRowCountTitleOne => null;
+  String get selectedRowCountTitleOne => r'1 элемент таңдалды.';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount тармақ таңдалған';
+  String get selectedRowCountTitleOther => r'$selectedRowCount элемент таңдалды.';
 
   @override
   String get selectedRowCountTitleTwo => null;
@@ -7284,25 +7284,25 @@ class MaterialLocalizationKk extends GlobalMaterialLocalizations {
   String get selectedRowCountTitleZero => r'Тармақ таңдалмаған';
 
   @override
-  String get showAccountsLabel => r'Тіркеулік жасбасыны көрсету';
+  String get showAccountsLabel => r'Есептік жазбаларды көрсету';
 
   @override
   String get showMenuTooltip => r'Мәзірді көрсету';
 
   @override
-  String get signedInLabel => r'Жүйеге кірді';
+  String get signedInLabel => r'Есептік жазбаға кірген';
 
   @override
-  String get tabLabelRaw => r'$tabCount қосымша парақтардың $tabIndex парақ';
+  String get tabLabelRaw => r'$tabCount/$tabIndex қойынды';
 
   @override
   TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
 
   @override
-  String get timePickerHourModeAnnouncement => r'Сағатты таңдау';
+  String get timePickerHourModeAnnouncement => r'Сағаттарды таңдаңыз';
 
   @override
-  String get timePickerMinuteModeAnnouncement => r'Минутты таңдау';
+  String get timePickerMinuteModeAnnouncement => r'Минуттарды таңдаңыз';
 
   @override
   String get viewLicensesButtonLabel => r'ЛИЦЕНЗИЯЛАРДЫ КӨРУ';
@@ -9243,7 +9243,7 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get pasteButtonLabel => r'WKLEJ';
 
   @override
-  String get popupMenuLabel => r'Wyskakujące menu';
+  String get popupMenuLabel => r'Menu kontekstowe';
 
   @override
   String get postMeridiemAbbreviation => r'PM';
@@ -9258,16 +9258,16 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get refreshIndicatorSemanticLabel => r'Odśwież';
 
   @override
-  String get remainingTextFieldCharacterCountFew => r'Jeszcze $remainingCount znaki';
+  String get remainingTextFieldCharacterCountFew => r'Pozostały $remainingCount znaki';
 
   @override
-  String get remainingTextFieldCharacterCountMany => r'Jeszcze $remainingCount znaków';
+  String get remainingTextFieldCharacterCountMany => r'Pozostało $remainingCount znaków';
 
   @override
-  String get remainingTextFieldCharacterCountOne => r'Jeszcze 1 znak';
+  String get remainingTextFieldCharacterCountOne => r'Jeszcze 1 znak';
 
   @override
-  String get remainingTextFieldCharacterCountOther => r'Jeszcze $remainingCount znaku';
+  String get remainingTextFieldCharacterCountOther => r'Pozostało $remainingCount znaków';
 
   @override
   String get remainingTextFieldCharacterCountTwo => null;
@@ -9306,16 +9306,16 @@ class MaterialLocalizationPl extends GlobalMaterialLocalizations {
   String get selectAllButtonLabel => r'ZAZNACZ WSZYSTKO';
 
   @override
-  String get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
+  String get selectedRowCountTitleFew => r'$selectedRowCount wybrane elementy';
 
   @override
-  String get selectedRowCountTitleMany => r'$selectedRowCount wybranych elementów';
+  String get selectedRowCountTitleMany => r'$selectedRowCount wybranych elementów';
 
   @override
-  String get selectedRowCountTitleOne => r'1 wybrany element';
+  String get selectedRowCountTitleOne => r'1 wybrany element';
 
   @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount wybranego elementu';
+  String get selectedRowCountTitleOther => r'$selectedRowCount wybranych elementów';
 
   @override
   String get selectedRowCountTitleTwo => null;
@@ -9582,7 +9582,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get alertDialogLabel => r'Alerta';
 
   @override
-  String get anteMeridiemAbbreviation => r'Manhã';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get backButtonTooltip => r'Voltar';
@@ -9654,7 +9654,7 @@ class MaterialLocalizationPt extends GlobalMaterialLocalizations {
   String get popupMenuLabel => r'Menu pop-up';
 
   @override
-  String get postMeridiemAbbreviation => r'Tarde/noite';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get previousMonthTooltip => r'Mês anterior';
@@ -9814,12 +9814,6 @@ class MaterialLocalizationPtPt extends MaterialLocalizationPt {
 
   @override
   String get okButtonLabel => r'OK';
-
-  @override
-  String get anteMeridiemAbbreviation => r'AM';
-
-  @override
-  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get modalBarrierDismissLabel => r'Ignorar';

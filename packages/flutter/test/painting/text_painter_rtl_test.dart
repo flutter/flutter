@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +43,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 28);
+    TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 28);
     painter.layout();
 
     // The skips here are because the old rendering code considers the bidi formatting characters
@@ -129,7 +128,8 @@ void main() {
     );
 
     final List<List<TextBox>> list = <List<TextBox>>[];
-    for (int index = 0; index < painter.text.text.length; index += 1)
+    textSpan = painter.text;
+    for (int index = 0; index < textSpan.text.length; index += 1)
       list.add(painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)));
     expect(list, const <List<TextBox>>[
       <TextBox>[], // U+202E, non-printing Unicode bidi formatting character
@@ -174,7 +174,8 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 28);
+    final TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 28);
     painter.layout();
 
     final TextRange hebrew1 = painter.getWordBoundary(const TextPosition(offset: 4, affinity: TextAffinity.downstream));
@@ -263,7 +264,8 @@ void main() {
       text: 'A\u05D0', // A, Alef
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    expect(painter.text.text.length, 2);
+    final TextSpan textSpan = painter.text;
+    expect(textSpan.text.length, 2);
     painter.layout(maxWidth: 10.0);
 
     for (int index = 0; index <= 2; index += 1) {
@@ -321,7 +323,7 @@ void main() {
     );
   },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  skip: !isLinux);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = TextPainter()

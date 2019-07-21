@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_driver/src/common/enum_util.dart';
-
+import 'enum_util.dart';
 import 'find.dart';
 import 'message.dart';
 
@@ -27,8 +26,11 @@ enum OffsetType {
 
 EnumIndex<OffsetType> _offsetTypeIndex = EnumIndex<OffsetType>(OffsetType.values);
 
-/// A Flutter Driver command that return the [offsetType] from the RenderObject
+/// A Flutter Driver command that returns the [offsetType] from the RenderObject
 /// identified by [finder].
+///
+/// The requested offset is returned in logical pixels, which can be translated
+/// to device pixels via [Window.devicePixelRatio].
 class GetOffset extends CommandWithTarget {
   /// The `finder` looks for an element to get its rect.
   GetOffset(SerializableFinder finder,  this.offsetType, { Duration timeout }) : super(finder, timeout: timeout);
@@ -51,14 +53,23 @@ class GetOffset extends CommandWithTarget {
 }
 
 /// The result of the [GetRect] command.
+///
+/// The offset is provided in logical pixels, which can be translated
+/// to device pixels via [Window.devicePixelRatio].
 class GetOffsetResult extends Result {
   /// Creates a result with the offset defined by [dx] and [dy].
   const GetOffsetResult({ this.dx = 0.0, this.dy = 0.0});
 
-  /// The x component of the offset.
+  /// The x component of the offset in logical pixels.
+  ///
+  /// The value can be translated to device pixels via
+  /// [Window.devicePixelRatio].
   final double dx;
 
-  /// The y component of the offset.
+  /// The y component of the offset in logical pixels.
+  ///
+  /// The value can be translated to device pixels via
+  /// [Window.devicePixelRatio].
   final double dy;
 
   /// Deserializes the result from JSON.

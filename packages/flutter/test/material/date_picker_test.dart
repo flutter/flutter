@@ -102,7 +102,7 @@ void _tests() {
     await tester.tap(find.text('17'));
     await tester.pumpAndSettle();
     expect(_selectedDate, equals(DateTime(2016, DateTime.august, 17)));
-  });
+  }, skip: isWindows); // TODO(dnfield): these are flaky on Windows https://github.com/flutter/flutter#19696
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -128,7 +128,7 @@ void _tests() {
       ),
     );
     await tester.pump(const Duration(seconds: 5));
-  });
+  }, skip: isWindows); // TODO(dnfield): these are flaky on Windows https://github.com/flutter/flutter#19696
 
   Future<void> preparePicker(WidgetTester tester, Future<void> callback(Future<DateTime> date)) async {
     BuildContext buttonContext;
@@ -445,6 +445,7 @@ void _tests() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 55,
                     actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -452,7 +453,22 @@ void _tests() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 11,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  // TODO(dnfield): These shouldn't be here. https://github.com/flutter/flutter/issues/34431
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
                                   TestSemantics(
                                     actions: <SemanticsAction>[SemanticsAction.tap],
                                     label: '1, Friday, January 1, 2016',

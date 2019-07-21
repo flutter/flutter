@@ -46,11 +46,40 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
 ///
-/// This service allows creating and controlling Android views.
+/// This service allows creating and controlling platform-specific views.
 ///
 /// See also: [PlatformView].
 class PlatformViewsService {
-  PlatformViewsService._();
+  PlatformViewsService._() {
+    SystemChannels.platform_views.setMethodCallHandler(_onMethodCall);
+  }
+
+  static PlatformViewsService _serviceInstance;
+
+  static PlatformViewsService get _instance {
+    _serviceInstance ??= PlatformViewsService._();
+    return _serviceInstance;
+  }
+
+  Future<void> _onMethodCall(MethodCall call) {
+    switch(call.method) {
+      case 'viewFocused':
+        final int id = call.arguments;
+        if (_focusCallbacks.containsKey(id)) {
+          _focusCallbacks[id]();
+        }
+        break;
+      default:
+        throw UnimplementedError('${call.method} was invoked but isn\'t implemented by PlatformViewsService');
+    }
+    return null;
+  }
+
+  /// Maps platform view IDs to focus callbacks.
+  ///
+  /// The callbacks are invoked when the platform view asks to be focused.
+  final Map<int, VoidCallback> _focusCallbacks = <int, VoidCallback>{};
+
 
   /// Creates a controller for a new Android view.
   ///
@@ -68,6 +97,9 @@ class PlatformViewsService {
   /// platform side. It should match the codec passed to the constructor of [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html#PlatformViewFactory-io.flutter.plugin.common.MessageCodec-).
   /// This is typically one of: [StandardMessageCodec], [JSONMessageCodec], [StringCodec], or [BinaryCodec].
   ///
+  /// `onFocus` is a callback that will be invoked when the Android View asks to get the
+  /// input focus.
+  ///
   /// The Android view will only be created after [AndroidViewController.setSize] is called for the
   /// first time.
   ///
@@ -79,18 +111,21 @@ class PlatformViewsService {
     @required TextDirection layoutDirection,
     dynamic creationParams,
     MessageCodec<dynamic> creationParamsCodec,
+    VoidCallback onFocus,
   }) {
     assert(id != null);
     assert(viewType != null);
     assert(layoutDirection != null);
     assert(creationParams == null || creationParamsCodec != null);
-    return AndroidViewController._(
+    final AndroidViewController controller = AndroidViewController._(
       id,
       viewType,
       creationParams,
       creationParamsCodec,
       layoutDirection,
     );
+    _instance._focusCallbacks[id] = onFocus ?? () {};
+    return controller;
   }
 
   // TODO(amirh): reference the iOS plugin API for registering a UIView factory once it lands.
@@ -431,7 +466,7 @@ class AndroidViewController {
   /// Android's [MotionEvent.ACTION_MOVE](https://developer.android.com/reference/android/view/MotionEvent#ACTION_MOVE)
   static const int kActionMove = 2;
 
-  /// Action code for when a motion event has been cancelled.
+  /// Action code for when a motion event has been canceled.
   ///
   /// Android's [MotionEvent.ACTION_CANCEL](https://developer.android.com/reference/android/view/MotionEvent#ACTION_CANCEL)
   static const int kActionCancel = 3;
@@ -470,9 +505,9 @@ class AndroidViewController {
 
   _AndroidViewState _state;
 
-  dynamic _creationParams;
+  final dynamic _creationParams;
 
-  MessageCodec<dynamic> _creationParamsCodec;
+  final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
@@ -546,6 +581,14 @@ class AndroidViewController {
       'id': id,
       'direction': _getAndroidDirection(layoutDirection),
     });
+  }
+
+  /// Clears the focus from the Android View if it is focused.
+  Future<void> clearFocus() {
+    if (_state != _AndroidViewState.created) {
+      return null;
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
   }
 
   static int _getAndroidDirection(TextDirection direction) {
@@ -623,9 +666,9 @@ class UiKitViewController {
 
   TextDirection _layoutDirection;
 
-  /// Sets the layout direction for the Android view.
+  /// Sets the layout direction for the iOS UIView.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(!_debugDisposed, 'trying to set a layout direction for a disposed Android View. View id: $id');
+    assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;

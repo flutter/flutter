@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -101,4 +102,53 @@ void main() {
     expect(depth0Values, equals(<int>[0, 0, 0, 0, 0]));
     expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
+
+  testWidgets('ScrollNotifications bubble past Scaffold Material', (WidgetTester tester) async {
+    final List<Type> notificationTypes = <Type>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: NotificationListener<ScrollNotification>(
+          onNotification: (ScrollNotification value) {
+            notificationTypes.add(value.runtimeType);
+            return false;
+          },
+          child: Scaffold(
+            body: SizedBox.expand(
+              child: SingleChildScrollView(
+                dragStartBehavior: DragStartBehavior.down,
+                child: SizedBox(
+                  height: 1200.0,
+                  child: Container(
+                    padding: const EdgeInsets.all(50.0),
+                    child: const SingleChildScrollView(
+                      child: SizedBox(height: 1200.0),
+                      dragStartBehavior: DragStartBehavior.down,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.moveBy(const Offset(-10.0, -40.0));
+    await tester.pump(const Duration(seconds: 1));
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    final List<Type> types = <Type>[
+      ScrollStartNotification,
+      UserScrollNotification,
+      ScrollUpdateNotification,
+      ScrollEndNotification,
+      UserScrollNotification,
+    ];
+    expect(notificationTypes, equals(types));
+  });
+
 }

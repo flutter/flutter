@@ -87,10 +87,10 @@ Information on how to get started can be found at our
 [widget catalog]: https://flutter.dev/widgets/
 [Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
 [Skia]: https://skia.org/
-[Dart platform]: https://www.dartlang.org/
+[Dart platform]: https://dart.dev/
 [Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
-[Flutter packages]: https://pub.dartlang.org/flutter
+[Flutter packages]: https://pub.dev/flutter
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel

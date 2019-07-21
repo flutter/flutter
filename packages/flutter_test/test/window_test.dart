@@ -164,7 +164,7 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) {
+  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) async {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
     final double originalTextScaleFactor = ui.window.textScaleFactor;
     final TestWindow testWindow = retrieveTestBinding(tester).window;

@@ -320,7 +320,7 @@ class PageTransitionsTheme extends Diagnosticable {
     return matchingBuilder.buildTransitions<T>(route, context, animation, secondaryAnimation, child);
   }
 
-  // Just used to the buidlers Map to a list with one PageTransitionsBuilder per platform
+  // Just used to the builders Map to a list with one PageTransitionsBuilder per platform
   // for the operator == overload.
   List<PageTransitionsBuilder> _all(Map<TargetPlatform, PageTransitionsBuilder> builders) {
     return TargetPlatform.values.map((TargetPlatform platform) => builders[platform]).toList();

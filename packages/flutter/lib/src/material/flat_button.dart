@@ -102,12 +102,15 @@ class FlatButton extends MaterialButton {
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget child,
   }) : super(
@@ -119,12 +122,15 @@ class FlatButton extends MaterialButton {
          disabledTextColor: disabledTextColor,
          color: color,
          disabledColor: disabledColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          colorBrightness: colorBrightness,
          padding: padding,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          materialTapTargetSize: materialTapTargetSize,
          child: child,
       );
@@ -145,12 +151,15 @@ class FlatButton extends MaterialButton {
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     Clip clipBehavior,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
@@ -163,38 +172,26 @@ class FlatButton extends MaterialButton {
     return RawMaterialButton(
       onPressed: onPressed,
       onHighlightChanged: onHighlightChanged,
-      clipBehavior: clipBehavior ?? Clip.none,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      focusColor: buttonTheme.getFocusColor(this),
+      hoverColor: buttonTheme.getHoverColor(this),
       highlightColor: buttonTheme.getHighlightColor(this),
       splashColor: buttonTheme.getSplashColor(this),
       elevation: buttonTheme.getElevation(this),
+      focusElevation: buttonTheme.getFocusElevation(this),
+      hoverElevation: buttonTheme.getHoverElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
-      animationDuration: buttonTheme.getAnimationDuration(this),
+      clipBehavior: clipBehavior ?? Clip.none,
+      focusNode: focusNode,
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
+      animationDuration: buttonTheme.getAnimationDuration(this),
       child: child,
     );
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));
   }
 }
 
@@ -212,12 +209,15 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
     Clip clipBehavior,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     @required Widget icon,
     @required Widget label,
@@ -232,12 +232,15 @@ class _FlatButtonWithIcon extends FlatButton with MaterialButtonWithIconMixin {
          disabledTextColor: disabledTextColor,
          color: color,
          disabledColor: disabledColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          colorBrightness: colorBrightness,
          padding: padding,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          materialTapTargetSize: materialTapTargetSize,
          child: Row(
            mainAxisSize: MainAxisSize.min,

@@ -355,7 +355,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   void initState() {
     super.initState();
-    queryTextController.addListener(_onQueryChanged);
+    widget.delegate._queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
     focusNode.addListener(_onFocusChanged);
@@ -365,7 +365,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   void dispose() {
     super.dispose();
-    queryTextController.removeListener(_onQueryChanged);
+    widget.delegate._queryTextController.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
     widget.delegate._focusNode = null;
@@ -379,6 +379,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate._currentBody == _SearchBody.suggestions) {
       focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_SearchPage<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.delegate != oldWidget.delegate) {
+      oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
+      widget.delegate._queryTextController.addListener(_onQueryChanged);
+      oldWidget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
+      widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
+      oldWidget.delegate._focusNode = null;
+      widget.delegate._focusNode = focusNode;
     }
   }
 
@@ -443,7 +456,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           brightness: theme.primaryColorBrightness,
           leading: widget.delegate.buildLeading(context),
           title: TextField(
-            controller: queryTextController,
+            controller: widget.delegate._queryTextController,
             focusNode: focusNode,
             style: theme.textTheme.title,
             textInputAction: TextInputAction.search,
@@ -453,6 +466,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: searchFieldLabel,
+              hintStyle: theme.inputDecorationTheme.hintStyle,
             ),
           ),
           actions: widget.delegate.buildActions(context),
@@ -464,6 +478,4 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       ),
     );
   }
-
-  TextEditingController get queryTextController => widget.delegate._queryTextController;
 }

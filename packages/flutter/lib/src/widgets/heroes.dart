@@ -11,6 +11,7 @@ import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
+import 'ticker_provider.dart' show TickerMode;
 import 'transitions.dart';
 
 /// Signature for a function that takes two [Rect] instances and returns a
@@ -20,6 +21,22 @@ import 'transitions.dart';
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
+
+/// Signature for a function that builds a [Hero] placeholder widget given a
+/// child and a [Size].
+///
+/// The child can optionally be part of the returned widget tree. The returned
+/// widget should typically be constrained to [heroSize], if it doesn't do so
+/// implicitly.
+///
+/// See also:
+///  * [TransitionBuilder], which is similar but only takes a [BuildContext]
+///    and a child widget.
+typedef HeroPlaceholderBuilder = Widget Function(
+  BuildContext context,
+  Size heroSize,
+  Widget child,
+);
 
 /// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
@@ -189,13 +206,30 @@ class Hero extends StatefulWidget {
   ///
   /// If none is provided, the destination route's Hero child is shown in-flight
   /// by default.
+  ///
+  /// ## Limitations
+  ///
+  /// If a widget built by [flightShuttleBuilder] takes part in a [Navigator]
+  /// push transition, that widget or its descendants must not have any
+  /// [GlobalKey] that is used in the source Hero's descendant widgets. That is
+  /// because both subtrees will be included in the widget tree during the Hero
+  /// flight animation, and [GlobalKey]s must be unique across the entire widget
+  /// tree.
+  ///
+  /// If the said [GlobalKey] is essential to your application, consider providing
+  /// a custom [placeholderBuilder] for the source Hero, to avoid the [GlobalKey]
+  /// collision, such as a builder that builds an empty [SizedBox], keeping the
+  /// Hero [child]'s original size.
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
-  /// Placeholder widget left in place as the Hero's child once the flight takes off.
+  /// Placeholder widget left in place as the Hero's [child] once the flight takes
+  /// off.
   ///
-  /// By default, an empty SizedBox keeping the Hero child's original size is
-  /// left in place once the Hero shuttle has taken flight.
-  final TransitionBuilder placeholderBuilder;
+  /// By default the placeholder widget is an empty [SizedBox] keeping the Hero
+  /// child's original size, unless this Hero is a source Hero of a [Navigator]
+  /// push transition, in which case [child] will be a descendant of the placeholder
+  /// and will be kept [Offstage] during the Hero's flight.
+  final HeroPlaceholderBuilder placeholderBuilder;
 
   /// Whether to perform the hero transition if the [PageRoute] transition was
   /// triggered by a user gesture, such as a back swipe on iOS.
@@ -285,8 +319,24 @@ class Hero extends StatefulWidget {
 class _HeroState extends State<Hero> {
   final GlobalKey _key = GlobalKey();
   Size _placeholderSize;
+  // Whether the placeholder widget should wrap the hero's child widget as its
+  // own child, when `_placeholderSize` is non-null (i.e. the hero is currently
+  // in its flight animation). See `startFlight`.
+  bool _shouldIncludeChild = true;
 
-  void startFlight() {
+  // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
+  // this hero should be included in the placeholder widget as a descendant.
+  //
+  // When a new hero flight animation takes place, a placeholder widget
+  // needs to be built to replace the original hero widget. When
+  // `shouldIncludeChildInPlaceholder` is set to true and `widget.placeholderBuilder`
+  // is null, the placeholder widget will include the original hero's child
+  // widget as a descendant, allowing the orignal element tree to be preserved.
+  //
+  // It is typically set to true for the *from* hero in a push transition,
+  // and false otherwise.
+  void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
+    _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
     final RenderBox box = context.findRenderObject();
     assert(box != null && box.hasSize);
@@ -310,19 +360,29 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
-    if (_placeholderSize != null) {
-      if (widget.placeholderBuilder == null) {
-        return SizedBox(
-          width: _placeholderSize.width,
-          height: _placeholderSize.height,
-        );
-      } else {
-        return widget.placeholderBuilder(context, widget.child);
-      }
+    final bool isHeroInFlight = _placeholderSize != null;
+
+    if (isHeroInFlight && widget.placeholderBuilder != null) {
+      return widget.placeholderBuilder(context, _placeholderSize, widget.child);
     }
-    return KeyedSubtree(
-      key: _key,
-      child: widget.child,
+
+    if (isHeroInFlight && !_shouldIncludeChild) {
+      return SizedBox(
+        width: _placeholderSize.width,
+        height: _placeholderSize.height,
+      );
+    }
+
+    return SizedBox(
+      width: _placeholderSize?.width,
+      height: _placeholderSize?.height,
+      child: Offstage(
+        offstage: isHeroInFlight,
+        child: TickerMode(
+          enabled: !isHeroInFlight,
+          child: KeyedSubtree(key: _key, child: widget.child),
+        )
+      ),
     );
   }
 }
@@ -496,7 +556,7 @@ class _HeroFlight {
     else
       _proxyAnimation.parent = manifest.animation;
 
-    manifest.fromHero.startFlight();
+    manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: manifest.type == HeroFlightDirection.push);
     manifest.toHero.startFlight();
 
     heroRectTween = _doCreateRectTween(
@@ -574,7 +634,7 @@ class _HeroFlight {
       manifest.toHero.endFlight();
 
       // Let the heroes in each of the routes rebuild with their placeholders.
-      newManifest.fromHero.startFlight();
+      newManifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: newManifest.type == HeroFlightDirection.push);
       newManifest.toHero.startFlight();
 
       // Let the transition overlay on top of the routes also rebuild since

@@ -374,6 +374,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  ///
   /// {@endtemplate}
   final String initialRoute;
 
@@ -874,11 +875,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.countryCode] only
+  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
   ///  3. [Locale.languageCode] and [Locale.countryCode] only
   ///  4. [Locale.languageCode] only (with caveats, see above)
-  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  5. returns [supportedLocales.first] as a fallback
+  ///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  6. returns [supportedLocales.first] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
