@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,6 +28,7 @@ class MutationCompositionPage extends Page {
   }
 }
 
+/// The widget to be tested containing several widgets that have different types of mutations.
 class MutationCompositionBody extends StatefulWidget {
 
   const MutationCompositionBody():super(key: const ValueKey<String>('MutationPage'));
@@ -37,14 +38,11 @@ class MutationCompositionBody extends StatefulWidget {
 }
 
 class MutationCompositionBodyState extends State<MutationCompositionBody> {
-  // Keeps a track of how many platform views are created.
-  int _platformViewCompleteCount = 0;
 
   @override
   Widget build(BuildContext context) {
-    _platformViewCompleteCount = 0;
     return Column(
-          children: [Container(
+          children: <Widget>[Container(
         child: Row(
           children: <Column>[
             Column(
@@ -159,27 +157,4 @@ class RRectClipper extends CustomClipper<RRect> {
         topLeft: const Radius.circular(10),
         bottomRight: const Radius.circular(10));
   }
-}
-
-
-Widget sample() {
-  return Transform.scale(
-      key:ValueKey<String>('sample'),
-      scale: 0.5,
-      child: Opacity(
-        opacity: 0.2,
-        child: Opacity(
-            opacity: 0.5,
-            child: Transform.rotate(
-              angle: 1,
-              child: ClipRect(
-                clipper: RectClipper(),
-                child: Transform.translate(
-                  offset: const Offset(0, 30),
-                  child: const SimplePlatformView(),
-                ),
-              ),
-            )),
-      ),
-    );
 }

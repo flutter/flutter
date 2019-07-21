@@ -8,8 +8,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_driver/driver_extension.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:platform_views/simple_platform_view.dart';
 import 'motion_event_diff.dart';
 import 'page.dart';
 
@@ -26,6 +27,27 @@ class MotionEventsPage extends Page {
     return MotionEventsBody();
   }
 }
+
+/// Wraps a flutter driver [DataHandler] with one that waits until a delegate is set.
+///
+/// This allows the driver test to call [FlutterDriver.requestData] before the handler was
+/// set by the app in which case the requestData call will only complete once the app is ready
+/// for it.
+class FutureDataHandler {
+  Completer<DataHandler> handlerCompleter = Completer<DataHandler>();
+
+  Future<String> handleMessage(String message) async {
+    final DataHandler handler = await handlerCompleter.future;
+    return handler(message);
+  }
+
+  void complete(FutureOr<DataHandler> value) {
+    handlerCompleter.complete(value);
+    handlerCompleter = Completer<DataHandler>();
+  }
+}
+
+FutureDataHandler driverDataHandler = FutureDataHandler();
 
 class MotionEventsBody extends StatefulWidget {
   @override
@@ -49,9 +71,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       children: <Widget>[
         SizedBox(
           height: 300.0,
-          child: AndroidView(
+          child: SimplePlatformView(
               key: const ValueKey<String>('PlatformView'),
-              viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated),
         ),
         Expanded(
@@ -179,8 +200,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<String> handleDriverMessage(String message) async {
     switch (message) {
       case 'run test':
-        final String result = await playEventsFile();
-        return result;
+        return await playEventsFile();
       case 'pop':
         Navigator.of(context).pop(true);
         return 'success';
