@@ -160,3 +160,26 @@ class RRectClipper extends CustomClipper<RRect> {
         bottomRight: const Radius.circular(10));
   }
 }
+
+
+Widget sample() {
+  return Transform.scale(
+      key:ValueKey<String>('sample'),
+      scale: 0.5,
+      child: Opacity(
+        opacity: 0.2,
+        child: Opacity(
+            opacity: 0.5,
+            child: Transform.rotate(
+              angle: 1,
+              child: ClipRect(
+                clipper: RectClipper(),
+                child: Transform.translate(
+                  offset: const Offset(0, 30),
+                  child: const SimplePlatformView(),
+                ),
+              ),
+            )),
+      ),
+    );
+}

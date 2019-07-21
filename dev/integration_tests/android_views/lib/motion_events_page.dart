@@ -184,6 +184,15 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       case 'pop':
         Navigator.of(context).pop(true);
         return 'success';
+      case 'target_platform':
+        switch (Theme.of(context).platform) {
+          case TargetPlatform.iOS:
+            return 'ios';
+          case TargetPlatform.android:
+            return 'android';
+          default:
+            return 'untested';
+        }
     }
     return 'unknown message: "$message"';
   }
