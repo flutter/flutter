@@ -12,12 +12,16 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../features.dart';
 import '../globals.dart';
 import '../version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+
+// Attached to all `Usage.sendCommand` and `Usage.sendEvent`.
+const String _kLocalTimeParameter = 'cd33';
 
 const String kSessionHostOsDetails = 'cd1';
 const String kSessionChannelName = 'cd2';
@@ -59,7 +63,7 @@ const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
 
 const String enabledFlutterFeatures = 'cd32';
-// Next ID: cd33
+// Next ID: cd34
 
 Usage get flutterUsage => Usage.instance;
 
@@ -69,8 +73,18 @@ class Usage {
   Usage({ String settingsName = 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
-    _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
-        documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
+
+    final String logFilePath = platform.environment['FLUTTER_ANALYTICS_LOG_FILE'];
+
+    _analytics = logFilePath == null || logFilePath.isEmpty ?
+        AnalyticsIO(
+          _kFlutterUA,
+          settingsName,
+          version,
+          documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null,
+        ) :
+        // Used for testing.
+        LogToFileAnalytics(logFilePath);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue(kSessionHostOsDetails, os.name);
@@ -94,6 +108,7 @@ class Usage {
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
+    _analytics.sendScreenView('version is $version, is bot $isRunningOnBot, suppressed $suppressEnvFlag');
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.
@@ -130,12 +145,16 @@ class Usage {
   String get clientId => _analytics.clientId;
 
   void sendCommand(String command, { Map<String, String> parameters }) {
-    if (suppressAnalytics)
+    if (suppressAnalytics) {
       return;
+    }
 
-    parameters ??= const <String, String>{};
+    final Map<String, String> paramsWithLocalTime = <String, String>{
+      ...?parameters,
+      _kLocalTimeParameter: systemClock.now().toString(),
+    };
 
-    _analytics.sendScreenView(command, parameters: parameters);
+    _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
 
   void sendEvent(
@@ -143,12 +162,16 @@ class Usage {
     String parameter, {
     Map<String, String> parameters,
   }) {
-    if (suppressAnalytics)
+    if (suppressAnalytics) {
       return;
+    }
 
-    parameters ??= const <String, String>{};
+    final Map<String, String> paramsWithLocalTime = <String, String>{
+      ...?parameters,
+      _kLocalTimeParameter: systemClock.now().toString(),
+    };
 
-    _analytics.sendEvent(category, parameter, parameters: parameters);
+    _analytics.sendEvent(category, parameter, parameters: paramsWithLocalTime);
   }
 
   void sendTiming(
@@ -157,19 +180,22 @@ class Usage {
     Duration duration, {
     String label,
   }) {
-    if (!suppressAnalytics) {
-      _analytics.sendTiming(
-        variableName,
-        duration.inMilliseconds,
-        category: category,
-        label: label,
-      );
+    if (suppressAnalytics) {
+      return;
     }
+    _analytics.sendTiming(
+      variableName,
+      duration.inMilliseconds,
+      category: category,
+      label: label,
+    );
   }
 
   void sendException(dynamic exception) {
-    if (!suppressAnalytics)
-      _analytics.sendException(exception.runtimeType.toString());
+    if (suppressAnalytics) {
+      return;
+    }
+    _analytics.sendException(exception.runtimeType.toString());
   }
 
   /// Fires whenever analytics data is sent over the network.
@@ -188,8 +214,9 @@ class Usage {
   void printWelcome() {
     // This gets called if it's the first run by the selected command, if any,
     // and on exit, in case there was no command.
-    if (_printedWelcome)
+    if (_printedWelcome) {
       return;
+    }
     _printedWelcome = true;
 
     printStatus('');
@@ -211,5 +238,34 @@ class Usage {
   ║ reporting.                                                                 ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
+  }
+}
+
+// An Analytics mock that logs to file. Unimplemented methods goes to stdout.
+// But stdout can't be used for testing since wrapper scripts like
+// xcode_backend.sh etc manipulates them.
+class LogToFileAnalytics extends AnalyticsMock {
+  LogToFileAnalytics(String logFilePath) :
+    logFile = fs.file(logFilePath)..createSync(recursive: true),
+    super(true);
+
+  final File logFile;
+
+  @override
+  Future<void> sendScreenView(String viewName, {Map<String, String> parameters}) {
+    parameters ??= <String, String>{};
+    parameters['viewName'] = viewName;
+    logFile.writeAsStringSync('screenView $parameters\n', mode: FileMode.append);
+    return Future<void>.value(null);
+  }
+
+  @override
+  Future<void> sendEvent(String category, String action,
+      {String label, int value, Map<String, String> parameters}) {
+    parameters ??= <String, String>{};
+    parameters['category'] = category;
+    parameters['action'] = action;
+    logFile.writeAsStringSync('event $parameters\n', mode: FileMode.append);
+    return Future<void>.value(null);
   }
 }

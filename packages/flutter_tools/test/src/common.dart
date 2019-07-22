@@ -126,3 +126,14 @@ const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
 /// Test case timeout for tests involving creating a Flutter project with
 /// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
 const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);
+
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}

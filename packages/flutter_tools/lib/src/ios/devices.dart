@@ -125,14 +125,12 @@ class IOSDevice extends Device {
           ephemeral: true,
       ) {
     if (!platform.isMacOS) {
-      printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
-      _installerPath = null;
-      _iproxyPath = null;
+      assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
     _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
@@ -168,6 +166,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static Future<List<IOSDevice>> getAttachedDevices() async {
+    if (!platform.isMacOS) {
+      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
+    }
     if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 
@@ -191,15 +192,18 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
+    RunResult apps;
     try {
-      final RunResult apps = await runCheckedAsync(<String>[_installerPath, '--list-apps']);
-      if (RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
-        return true;
-      }
-    } catch (e) {
+      apps = await runCheckedAsync(
+        <String>[_installerPath, '--list-apps'],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
+    } on ProcessException {
       return false;
     }
-    return false;
+    return RegExp(app.id, multiLine: true).hasMatch(apps.stdout);
   }
 
   @override
@@ -215,9 +219,14 @@ class IOSDevice extends Device {
     }
 
     try {
-      await runCheckedAsync(<String>[_installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-i', iosApp.deviceBundlePath],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
@@ -225,9 +234,14 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      await runCheckedAsync(<String>[_installerPath, '-U', app.id]);
+      await runCheckedAsync(
+        <String>[_installerPath, '-U', app.id],
+        environment: Map<String, String>.fromEntries(
+          <MapEntry<String, String>>[cache.dyLdLibEntry],
+        ),
+      );
       return true;
-    } catch (e) {
+    } on ProcessException {
       return false;
     }
   }
