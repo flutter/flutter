@@ -16,10 +16,11 @@ import 'toggle_buttons_theme.dart';
 
 /// A horizontal set of toggle buttons.
 ///
-/// It displays its widgets provided in a [List] of [children] horizontally.
-/// The state of each button is controlled by [isSelected], which is a list of
-/// bools that determine if a button is in an active, disabled, or selected
-/// state. They are both correlated by their index in the list.
+/// The list of [children] are laid out in a row. The state of each button
+/// is controlled by [isSelected], which is a list of bools that determine
+/// if a button is in an active, disabled, or selected state. They are both
+/// correlated by their index in the list. The length of [isSelected] has to
+/// match the length of the [children] list.
 ///
 /// ## Customizing toggle buttons
 /// The toggle buttons are designed to be configurable, meaning the actions
@@ -143,9 +144,11 @@ class ToggleButtons extends StatelessWidget {
   /// Creates a horizontal set of toggle buttons.
   ///
   /// It displays its widgets provided in a [List] of [children] horizontally.
-  /// The state of each button is controlled by [isSelected], which is a list of
-  /// bools that determine if a button is in an active, disabled, or selected
-  /// state. They are both correlated by their index in the list.
+  /// The state of each button is controlled by [isSelected], which is a list
+  /// of bools that determine if a button is in an active, disabled, or
+  /// selected state. They are both correlated by their index in the list.
+  /// The length of [isSelected] has to match the length of the [children]
+  /// list.
   ///
   /// Both [children] and [isSelected] properties arguments are required.
   const ToggleButtons({
@@ -502,8 +505,8 @@ class ToggleButtons extends StatelessWidget {
 class _ToggleButton extends StatelessWidget {
   /// Creates a toggle button based on [RawMaterialButton].
   ///
-  /// This class adds some logic to determine between enabled, active, and
-  /// disabled states to determine the appropriate colors to use.
+  /// This class adds some logic to distinguish between enabled, active, and
+  /// disabled states, to determine the appropriate colors to use.
   ///
   /// It takes in a [shape] property to modify the borders of the button,
   /// which is used by [ToggleButtons] to customize borders based on the
@@ -732,9 +735,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this._horizontalBorderSide,
     this._trailingBorderSide,
     this._borderRadius,
-    this.isFirstButton,
-    this.isLastButton,
-    this.textDirection,
+    this._isFirstButton,
+    this._isLastButton,
+    this._textDirection,
     [RenderBox child]
   ) : super(child);
 
@@ -779,13 +782,34 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   // Whether or not this toggle button is the first button in the list.
-  bool isFirstButton;
+  bool get isFirstButton => _isFirstButton;
+  bool _isFirstButton;
+  set isFirstButton(bool value) {
+    if (_isFirstButton == value)
+      return;
+    _isFirstButton = value;
+    markNeedsLayout();
+  }
 
   // Whether or not this toggle button is the last button in the list.
-  bool isLastButton;
+  bool get isLastButton => _isLastButton;
+  bool _isLastButton;
+  set isLastButton(bool value) {
+    if (_isLastButton == value)
+      return;
+    _isLastButton = value;
+    markNeedsLayout();
+  }
 
   // The direction in which text flows for this application.
-  TextDirection textDirection;
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsLayout();
+  }
 
   static double _maxHeight(RenderBox box, double width) {
     return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);

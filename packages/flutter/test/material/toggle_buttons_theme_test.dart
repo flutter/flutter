@@ -108,6 +108,8 @@ void main() {
                 isSelected: const <bool>[false],
                 onPressed: (int index) {},
                 children: <Widget>[
+                  // This Row is used like this to test for both TextStyle
+                  // and IconTheme for Text and Icon widgets respectively.
                   Row(children: const <Widget>[
                     Text('First child'),
                     Icon(Icons.check),
