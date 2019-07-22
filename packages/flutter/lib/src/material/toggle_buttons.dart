@@ -199,17 +199,22 @@ class ToggleButtons extends StatelessWidget {
   /// When set to null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
 
-  /// The color for [Text] and [Icon] widgets if the button is enabled.
+  /// The color for descendant [Text] and [Icon] widgets if the button is
+  /// enabled.
   ///
-  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  /// If [selected] is set to false and [onPressed] is not null, this color
+  /// will be used.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets if the button is selected.
+  /// The color for descendant [Text] and [Icon] widgets if the button is
+  /// selected.
   ///
-  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  /// If [selected] is set to true and [onPressed] is not null, this color
+  /// will be used.
   final Color selectedColor;
 
-  /// The color for [Text] and [Icon] widgets if the button is disabled.
+  /// The color for descendant [Text] and [Icon] widgets if the button is
+  /// disabled.
   ///
   /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
@@ -228,7 +233,8 @@ class ToggleButtons extends StatelessWidget {
   /// The splash color for the button's [InkWell].
   final Color splashColor;
 
-  /// The color to use for filling the button when the button has a pointer hovering over it.
+  /// The color to use for filling the button when the button has a pointer
+  /// hovering over it.
   ///
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
@@ -239,7 +245,8 @@ class ToggleButtons extends StatelessWidget {
   /// events. The focus tree keeps track of which widget is currently focused
   /// on by the user.
   ///
-  /// If not null, the length of focusNodes has to match the length of [children].
+  /// If not null, the length of focusNodes has to match the length of
+  /// [children].
   ///
   /// See [FocusNode] for more information about how focus nodes are used.
   final List<FocusNode> focusNodes;

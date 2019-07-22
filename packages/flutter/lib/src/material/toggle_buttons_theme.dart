@@ -17,6 +17,9 @@ import 'theme.dart';
 ///
 /// To obtain the current [ToggleButtonsTheme], use [ToggleButtonsTheme.of].
 ///
+/// Values specified here are used for [ToggleButtons] properties that are not
+/// given an explicit non-null value.
+///
 /// See also:
 ///
 ///  * [ToggleButtonsTheme], which describes the actual configuration of a
@@ -40,19 +43,16 @@ class ToggleButtonsThemeData extends Diagnosticable {
     this.borderWidth,
   });
 
-  /// The color for [Text] and [Icon] widgets if the button is enabled.
-  ///
-  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  /// The color for descendant [Text] and [Icon] widgets if the toggle button
+  /// is enabled.
   final Color color;
 
-  /// The color for [Text] and [Icon] widgets if the button is selected.
-  ///
-  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  /// The color for descendant [Text] and [Icon] widgets if the toggle button
+  /// is selected.
   final Color selectedColor;
 
-  /// The color for [Text] and [Icon] widgets if the button is disabled.
-  ///
-  /// If [onPressed] is null, this color will be used.
+  /// The color for descendant [Text] and [Icon] widgets if the toggle button
+  /// is disabled.
   final Color disabledColor;
 
   /// The fill color for selected toggle buttons.
@@ -61,13 +61,14 @@ class ToggleButtonsThemeData extends Diagnosticable {
   /// The color to use for filling the button when the button has input focus.
   final Color focusColor;
 
-  /// The highlight color for the button's [InkWell].
+  /// The highlight color for the toggle button's [InkWell].
   final Color highlightColor;
 
-  /// The splash color for the button's [InkWell].
+  /// The splash color for the toggle button's [InkWell].
   final Color splashColor;
 
-  /// The color to use for filling the button when the button has a pointer hovering over it.
+  /// The color to use for filling the toggle button when the button has a
+  /// pointer hovering over it.
   final Color hoverColor;
 
   /// The border color to display when the toggle button is enabled.
@@ -83,8 +84,6 @@ class ToggleButtonsThemeData extends Diagnosticable {
   ///
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
-  ///
-  /// To omit the border entirely, set [renderBorder] to false.
   ///
   /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
   /// See [BorderSide.width] for more details on hairline borders.
@@ -232,8 +231,8 @@ class ToggleButtonsTheme extends InheritedWidget {
     Color borderColor,
     Color selectedBorderColor,
     Color disabledBorderColor,
-    BorderRadius borderRadius = BorderRadius.zero,
-    double borderWidth = 1.0,
+    BorderRadius borderRadius,
+    double borderWidth,
     Widget child,
   }) :  data = ToggleButtonsThemeData(
           color: color,
