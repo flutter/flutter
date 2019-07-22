@@ -197,7 +197,8 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
       !manifest.isPlugin && !manifest.isModule) {
     createSettingsAarGradle(hostAppGradleRoot);
   }
-  if (manifest.isPlugin && isLibrary) {
+  if (manifest.isPlugin) {
+    assert(isLibrary);
     return GradleProject(
       <String>['debug', 'profile', 'release'],
       <String>[], // Plugins don't have flavors.
@@ -206,6 +207,8 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   }
   final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);
   GradleProject project;
+  // Get the properties and tasks from Gradle, so we can determinate the `buildDir`,
+  // flavors and build types defined in the project. If gradle fails, then check if the failure is due to t
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
       <String>[gradle, isLibrary ? 'properties' : 'app:properties'],
@@ -221,9 +224,8 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   } catch (exception) {
     if (getFlutterPluginVersion(flutterProject.android) == FlutterPluginVersion.managed) {
       status.cancel();
-      // Handle known exceptions. This will exit if handled.
-      handleKnownGradleExceptions(exception.toString());
-
+      // Handle known exceptions.
+      throwToolExitIfLicenseNotAccepted(exception);
       // Print a general Gradle error and exit.
       printError('* Error running Gradle:\n$exception\n');
       throwToolExit('Please review your Gradle project setup in the android/ folder.');
@@ -239,15 +241,15 @@ Future<GradleProject> _readGradleProject({bool isLibrary = false}) async {
   return project;
 }
 
-void handleKnownGradleExceptions(String exceptionString) {
-  // Handle Gradle error thrown when Gradle needs to download additional
-  // Android SDK components (e.g. Platform Tools), and the license
-  // for that component has not been accepted.
-  const String matcher =
+/// Handle Gradle error thrown when Gradle needs to download additional
+/// Android SDK components (e.g. Platform Tools), and the license
+/// for that component has not been accepted.
+void throwToolExitIfLicenseNotAccepted(Exception exception) {
+  const String licenseNotAcceptedMatcher =
     r'You have not accepted the license agreements of the following SDK components:'
     r'\s*\[(.+)\]';
-  final RegExp licenseFailure = RegExp(matcher, multiLine: true);
-  final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
+  final RegExp licenseFailure = RegExp(licenseNotAcceptedMatcher, multiLine: true);
+  final Match licenseMatch = licenseFailure.firstMatch(exception.toString());
   if (licenseMatch != null) {
     final String missingLicenses = licenseMatch.group(1);
     final String errorMessage =
@@ -627,14 +629,14 @@ void printUndefinedTask(GradleProject project, BuildInfo buildInfo) {
   printError('The Gradle project does not define a task suitable for the requested build.');
   if (!project.buildTypes.contains(buildInfo.modeName)) {
     printError('Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
+    return;
+  }
+  if (project.productFlavors.isEmpty) {
+    printError('The android/app/build.gradle file does not define any custom product flavors.');
+    printError('You cannot use the --flavor option.');
   } else {
-    if (project.productFlavors.isEmpty) {
-      printError('The android/app/build.gradle file does not define any custom product flavors.');
-      printError('You cannot use the --flavor option.');
-    } else {
-      printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
-      printError('You must specify a --flavor option to select one of them.');
-    }
+    printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
+    printError('You must specify a --flavor option to select one of them.');
   }
 }
 
