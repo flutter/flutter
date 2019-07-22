@@ -21,7 +21,6 @@ import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
-import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
@@ -81,7 +80,6 @@ class DeviceManager {
   static List<DeviceDiscovery> get _conditionalDesktopDevices {
     return flutterDesktopEnabled ? <DeviceDiscovery>[
       MacOSDevices(),
-      LinuxDevices(),
       WindowsDevices(),
     ] : <DeviceDiscovery>[];
   }

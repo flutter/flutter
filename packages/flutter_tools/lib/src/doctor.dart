@@ -21,12 +21,12 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'desktop.dart';
 import 'device.dart';
+import 'extension_host.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
-import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -64,6 +64,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         ...AndroidStudioValidator.allValidators,
         ...IntelliJValidator.installedValidators,
         ...VsCodeValidator.installedValidators,
+        ...extensionHost.getExtensionValidations(),
       ];
 
       _validators = <DoctorValidator>[
@@ -77,7 +78,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         // Add desktop doctors to workflow if the flag is enabled.
         if (flutterDesktopEnabled)
           ...<DoctorValidator>[
-            if (linuxWorkflow.appliesToHostPlatform) LinuxDoctorValidator(),
             if (windowsWorkflow.appliesToHostPlatform) visualStudioValidator,
           ],
         if (ideValidators.isNotEmpty)
@@ -447,7 +447,7 @@ class ValidationResult {
 }
 
 class ValidationMessage {
-  ValidationMessage(this.message) : type = ValidationMessageType.information;
+  ValidationMessage(this.message, [this.type = ValidationMessageType.information]);
   ValidationMessage.error(this.message) : type = ValidationMessageType.error;
   ValidationMessage.hint(this.message) : type = ValidationMessageType.hint;
 

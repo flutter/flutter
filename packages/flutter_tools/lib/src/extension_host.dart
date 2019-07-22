@@ -8,10 +8,13 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'device.dart';
+import 'doctor.dart';
 import 'extension/app.dart' as ext;
 import 'extension/build.dart' as ext;
 import 'extension/device.dart' as ext;
+import 'extension/doctor.dart' as ext;
 import 'extension/extension.dart';
+import 'globals.dart';
 import 'project.dart';
 
 /// The [ExtensionHost] instance.
@@ -35,6 +38,73 @@ class ExtensionHost {
       }
     }
   }
+
+  /// Return doctor validations provided by an extension host.
+  List<DoctorValidator> getExtensionValidations() {
+    return _toolExtensions.map((ToolExtension toolExtension) {
+      return DelegateDoctorValidator(toolExtension);
+    }).toList();
+  }
+}
+
+/// A doctor validator that delegates to a tool extension.
+class DelegateDoctorValidator implements DoctorValidator {
+  DelegateDoctorValidator(this.extension);
+
+  final ToolExtension extension;
+
+  @override
+  String get slowWarning => null;
+
+  @override
+  String get title => _lastResult.name;
+
+  ext.ValidationResult _lastResult;
+
+  @override
+  Future<ValidationResult> validate() async {
+    final ext.ValidationResult result = await extension.doctorDomain.diagnose();
+    _lastResult = result;
+
+    ValidationType type;
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+
+    switch (result.type) {
+      case ext.ValidationType.missing:
+        type = ValidationType.missing;
+        break;
+      case ext.ValidationType.partial:
+        type = ValidationType.partial;
+        break;
+      case ext.ValidationType.notAvailable:
+        type = ValidationType.notAvailable;
+        break;
+      case ext.ValidationType.installed:
+        type = ValidationType.installed;
+        break;
+    }
+    for (ext.ValidationMessage message in result.messages) {
+      ValidationMessageType messageType;
+      switch (message.type) {
+        case ext.ValidationMessageType.hint:
+          messageType = ValidationMessageType.hint;
+          break;
+        case ext.ValidationMessageType.error:
+          messageType = ValidationMessageType.error;
+          break;
+        case ext.ValidationMessageType.information:
+          messageType = ValidationMessageType.information;
+          break;
+      }
+      messages.add(ValidationMessage(message.message, messageType));
+    }
+
+    return ValidationResult(
+      type,
+      messages,
+    );
+  }
+
 }
 
 /// A device that delegates to an extension device.
@@ -119,21 +189,30 @@ class DeviceDelegate implements Device {
     bool ipv6 = false,
     bool usesTerminalUi = true,
   }) async {
-    final ext.DartBuildMode dartBuildMode = debuggingOptions.buildInfo.isDebug
+    final ext.DartBuildMode dartBuildMode = debuggingOptions?.buildInfo?.isDebug == true
         ? ext.DartBuildMode.debug
         : ext.DartBuildMode.release;
-    final ext.ApplicationBundle applicationBundle = await extension.buildDomain.build(ext.BuildInfo(
-      dartBuildMode: dartBuildMode,
-      projectRoot: fs.currentDirectory.uri,
-      targetFile: Uri.file(mainPath),
-    ));
+    ext.ApplicationBundle applicationBundle;
+    try {
+      applicationBundle = await extension.buildDomain.buildApp(ext.BuildInfo(
+        dartBuildMode: dartBuildMode,
+        projectRoot: fs.currentDirectory.uri,
+        targetFile: Uri.file(mainPath),
+      ));
+    } catch (err, stackTrace) {
+      printError(err.toString());
+      printError(stackTrace.toString());
+      return LaunchResult.failed();
+    }
     _applicationBundle = applicationBundle;
     try {
       final ext.ApplicationInstance applicationInstance = await extension.appDomain.startApp(applicationBundle, id);
       return LaunchResult.succeeded(
         observatoryUri: applicationInstance.vmserviceUri
       );
-    } catch (err) {
+    } catch (err, stackTrace) {
+      printError(err.toString());
+      printError(stackTrace.toString());
       return LaunchResult.failed();
     }
   }
@@ -150,10 +229,10 @@ class DeviceDelegate implements Device {
   }
 
   @override
-  bool get supportsFlutterExit => null;
+  bool get supportsFlutterExit => true;
 
   @override
-  Future<bool> get supportsHardwareRendering => null;
+  Future<bool> get supportsHardwareRendering async => true;
 
   @override
   bool get supportsHotReload => device.deviceCapabilities.supportsHotReload;
@@ -171,7 +250,23 @@ class DeviceDelegate implements Device {
   Future<void> takeScreenshot(File outputFile) => null;
 
   @override
-  Future<TargetPlatform> get targetPlatform => null;
+  Future<TargetPlatform> get targetPlatform async {
+    switch (device.targetPlatform) {
+      case ext.TargetPlatform.macOS:
+        return TargetPlatform.darwin_x64;
+      case ext.TargetPlatform.linux:
+        return TargetPlatform.linux_x64;
+      case ext.TargetPlatform.windows:
+        return TargetPlatform.windows_x64;
+      case ext.TargetPlatform.android:
+        switch (device.targetArchitecture) {
+          case ext.TargetArchitecture.x86:
+            return TargetPlatform.android_x86;
+        }
+        // TODO(jonahwilliams): remaining fields.
+    }
+    return null;
+  }
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;

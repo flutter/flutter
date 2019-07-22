@@ -145,20 +145,11 @@ class BuildOutputRequest implements Serializable {
 
 /// Functionality related to building applications.
 abstract class BuildDomain extends Domain {
-  /// Configure where the dart output of a build will be placed.
-  ///
-  /// This method is always called before [build].
-  Future<BuildOutputRequest> configureOutput(BuildInfo buildInfo);
-
   /// The tool has requested that an application be built.
-  ///
-  /// This method is always called after [configureOutput], and will contain
-  /// the described artifacts at the various locations in the filesystem
-  /// already.
   ///
   /// The correct configuration for the build is provided in [buildInfo].
   /// Deviation from this, such as producing a debug application when
   /// a release application is requested, may lead to build and run
   /// failures.
-  Future<ApplicationBundle> build(BuildInfo buildInfo);
+  Future<ApplicationBundle> buildApp(BuildInfo buildInfo);
 }

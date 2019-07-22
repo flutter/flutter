@@ -133,8 +133,7 @@ abstract class ToolExtension {
     }
     if (buildDomain != null) {
       buildDomain._parent = this;
-      registerMethod('app.configureOutput', (Map<String, Object> args) => buildDomain.configureOutput(BuildInfo.fromJson(args)));
-      registerMethod('app.build', (Map<String, Object> args) => buildDomain.build(BuildInfo.fromJson(args)));
+      registerMethod('app.build', (Map<String, Object> args) => buildDomain.buildApp(BuildInfo.fromJson(args)));
     }
    }
 
