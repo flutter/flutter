@@ -17,3 +17,7 @@ The files that are relevant to test execution are:
  
  - /android/app/src/main/java/io/flutter/splash_screen_kitchen_sink/FlutterZoomSplashScreen.java
  - /android/app/src/main/java/io/flutter/splash_screen_kitchen_sink/FlutterZoomSplashView.java
+ 
+ Communication takes place from Android to Flutter to Driver to communicate splash screen events.
+ This communication takes place over a channel called "testChannel", whose definition can be
+ found in `MainActivity.java` and `test_driver/main.dart`.
