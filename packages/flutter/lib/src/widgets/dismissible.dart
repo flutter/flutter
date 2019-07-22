@@ -99,7 +99,10 @@ class Dismissible extends StatefulWidget {
   }) : assert(key != null),
        assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
-       assert(child != null || direction != null),
+       assert(
+         child != null || direction != null,
+         'If direction is null, then child must not be null.',
+       ),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -135,6 +138,8 @@ class Dismissible extends StatefulWidget {
   /// The direction in which the widget can be dismissed.
   ///
   /// If null, the widget will not be dismissible.
+  ///
+  /// The widget's [child] should not be null if [direction] is null.
   final DismissDirection direction;
 
   /// The amount of time the widget will spend contracting before [onDismissed] is called.

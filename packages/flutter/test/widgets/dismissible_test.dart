@@ -744,4 +744,12 @@ void main() {
     expect(dismissedItems, isEmpty);
     expect(find.text('0'), findsOneWidget);
   });
+
+  testWidgets('Dismissible cannot have a null child and direction', (WidgetTester tester) async {
+    expect(() => Dismissible(
+      key: const ObjectKey(0),
+      child: null,
+      direction: null,
+    ), throwsAssertionError);
+  });
 }
