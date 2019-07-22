@@ -1,5 +1,6 @@
 gcp_credentials: ENCRYPTED[987a78af29b91ce8489594c9ab3fec21845bbe5ba68294b8f6def3cf0d380830f06687a89ea69c87344c5ade369700fe]
 
+# LINUX
 task:
   gke_container:
    image: gcr.io/flutter-cirrus/build-engine-image:latest
@@ -15,9 +16,8 @@ task:
     FLUTTER_ENGINE: "/tmp/clean_engine/src"
     FRAMEWORK_PATH: "/tmp/master_framework"
     PATH: "$FLUTTER_ENGINE/third_party/dart/tools/sdks/dart-sdk/bin:$DEPOT_TOOLS:$PATH"
-  depot_tools_script:
+  setup_script: |
     git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
-  gclient_sync_script: |
     mkdir -p $ENGINE_PATH/src
     echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
     cd $ENGINE_PATH/src
@@ -25,37 +25,42 @@ task:
     rm -rf out
     mv $CIRRUS_WORKING_DIR flutter
     gclient sync
-
   matrix:
-    - name: build_and_test_host
+    - name: build_and_test_linux_unopt_debug
       compile_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --unoptimized --full-dart-sdk
         ninja -C out/host_debug_unopt
-      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_debug_unopt
+      test_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/testing/run_tests.sh host_debug_unopt
       fetch_framework_script: |
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH
         git clone https://github.com/flutter/flutter.git
-      web_test_script: |
+      test_web_script: |
         cd $FRAMEWORK_PATH/flutter/dev/integration_tests/web
         ../../../bin/flutter --local-engine=host_debug_unopt build web -v
-      framework_test_script: |
+      test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
         ../../bin/flutter test --local-engine=host_debug_unopt
-    - name: build_and_test_host_profile
+    - name: build_and_test_linux_opt_profile
       compile_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --runtime-mode profile --no-lto
         ninja -C out/host_profile
-      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_profile
-    - name: build_and_test_host_release
+      test_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/testing/run_tests.sh host_profile
+    - name: build_and_test_linux_opt_release
       compile_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --runtime-mode release --no-lto
         ninja -C out/host_release
-      test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_release
-    - name: build_android
+      test_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/testing/run_tests.sh host_release
+    - name: build_android_unopt_debug
       get_android_sdk_script: |
         echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
         cd $ENGINE_PATH/src
@@ -71,9 +76,19 @@ task:
         mkdir javadoc_tmp
         ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
     - name: format_and_dart_test
-      format_script: cd $ENGINE_PATH/src/flutter && ./ci/format.sh
-      build_script: cd $ENGINE_PATH/src/flutter && ./ci/build.sh
+      format_script: |
+        cd $ENGINE_PATH/src/flutter
+        ./ci/format.sh
+      build_script: |
+        cd $ENGINE_PATH/src/flutter
+        ./ci/build.sh
+    - name: build_fuchsia_unopt_profile
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto --unopt
+        ninja -C out/fuchsia_profile_unopt
 
+# WINDOWS
 task:
   gce_instance:
     image_project: flutter-cirrus
@@ -83,64 +98,26 @@ task:
     cpu: 32
     memory: 32Gb
     disk: 50
-
   env:
     # Cirrus is somehow not picking up the environment variables set in the VM image.
     PATH: "c:/depot_tools;c:/MinGit/cmd;$PATH"
     DEPOT_TOOLS_WIN_TOOLCHAIN: 0
     GYP_MSVS_OVERRIDE_PATH: "c:/Program Files (x86)/Microsoft Visual Studio/2017/Community"
-
     ENGINE_PATH: "c:/flutter/engine"
-
-  # robocopy can return 1 for successful copy; suppress its error code.
-  # move somehow doesn't work as it complains that the file is being used by another process.
-  gclient_sync_script: |
-    robocopy %CIRRUS_WORKING_DIR% %ENGINE_PATH%/src/flutter /MIR || (cmd /s /c exit /b 0)
+  setup_script: |
+    REM robocopy can return 1 for successful copy; suppress its error code.
+    REM move somehow doesn't work as it complains that the file is being used by another process.
+    robocopy %CIRRUS_WORKING_DIR% %ENGINE_PATH%/src/flutter /MIR| (cmd /s /c exit /b 0)
     cd %ENGINE_PATH%/src
     gclient sync
-
   matrix:
-    - name: build_windows_debug
+    - name: build_windows_unopt_debug
       compile_host_script: |
         cd %ENGINE_PATH%/src
         python flutter/tools/gn --runtime-mode debug --unoptimized
         ninja -C out/host_debug_unopt
-
-    - name: build_windows_debug_unopt
+    - name: build_windows_opt_debug
       compile_host_script: |
         cd %ENGINE_PATH%/src
         python flutter/tools/gn --runtime-mode debug
         ninja -C out/host_debug
-
-task:
-  gke_container:
-   image: gcr.io/flutter-cirrus/build-engine-image:latest
-   cluster_name: build-32-cluster
-   zone: us-central1-a
-   namespace: default
-   cpu: 30 # can't use all 30-cores; system pods needs cores too
-   memory: 100Gb # similarly, can't use all 100Gb memory
-  env:
-    CIRRUS_WORKING_DIR: "/tmp/github_repo"
-    ENGINE_PATH: "/tmp/clean_engine"
-    DEPOT_TOOLS: "/tmp/depot_tools"
-    FLUTTER_ENGINE: "/tmp/clean_engine/src"
-    FRAMEWORK_PATH: "/tmp/master_framework"
-    PATH: "$FLUTTER_ENGINE/third_party/dart/tools/sdks/dart-sdk/bin:$DEPOT_TOOLS:$PATH"
-  depot_tools_script:
-    git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
-  gclient_sync_script: |
-    mkdir -p $ENGINE_PATH/src
-    echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_android_deps" : False, "download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
-    cd $ENGINE_PATH/src
-    rm -rf flutter
-    rm -rf out
-    mv $CIRRUS_WORKING_DIR flutter
-    gclient sync
-
-  matrix:
-    - name: build_fuchsia_profile
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto --unopt
-        ninja -C out/fuchsia_profile_unopt
