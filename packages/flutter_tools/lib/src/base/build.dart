@@ -46,6 +46,7 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
+    IOSArch iosArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
@@ -161,6 +162,7 @@ class AOTSnapshotter {
         () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
+      iosArch: iosArch,
     ));
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
