@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -11,7 +10,6 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -19,7 +17,6 @@ import 'package:process/process.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
-import '../../src/testbed.dart';
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -59,7 +56,6 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build fails on non-macOS platform', () async {
@@ -75,7 +71,6 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => memoryFilesystem,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('macOS build invokes build script', () async {
@@ -109,16 +104,6 @@ void main() {
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => macosPlatform,
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
-  });
-
-  testUsingContext('Refuses to build for macOS when feature is disabled', () {
-    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
-
-    expect(() => runner.run(<String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 }
 
