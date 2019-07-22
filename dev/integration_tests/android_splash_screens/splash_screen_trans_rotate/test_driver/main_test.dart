@@ -19,7 +19,7 @@ void main() {
     });
 
     test('Flutter experience eventually appears', () async {
-      final SerializableFinder fabFinder = find.byTooltip("Increment");
+      final SerializableFinder fabFinder = find.byTooltip('Increment');
 
       // Ensure that the Flutter experience eventually becomes visible.
       await driver.waitFor(fabFinder);
