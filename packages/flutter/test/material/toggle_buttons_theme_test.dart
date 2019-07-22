@@ -43,12 +43,12 @@ void main() {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const ToggleButtonsThemeData().debugFillProperties(builder);
 
-     final List<String> description = builder.properties
-        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())
-        .toList();
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString())
+      .toList();
 
-     expect(description, <String>[]);
+    expect(description, <String>[]);
   });
 
   testWidgets('ToggleButtonsThemeData implements debugFillProperties', (WidgetTester tester) async {
@@ -124,11 +124,11 @@ void main() {
 
       // custom theme enabled color
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
-      textStyle = tester.firstWidget(
+      textStyle = tester.firstWidget<DefaultTextStyle>(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, enabledColor);
-      iconTheme = tester.firstWidget(
+      iconTheme = tester.firstWidget<IconTheme>(
         find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, enabledColor);
@@ -156,11 +156,11 @@ void main() {
       await tester.pumpAndSettle();
       // custom theme selected color
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      textStyle = tester.firstWidget(
+      textStyle = tester.firstWidget<DefaultTextStyle>(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, selectedColor);
-      iconTheme = tester.firstWidget(
+      iconTheme = tester.firstWidget<IconTheme>(
         find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, selectedColor);
@@ -187,11 +187,11 @@ void main() {
       await tester.pumpAndSettle();
       // custom theme disabled color
       expect(theme.disabledColor, isNot(disabledColor));
-      textStyle = tester.firstWidget(
+      textStyle = tester.firstWidget<DefaultTextStyle>(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
       expect(textStyle.style.color, disabledColor);
-      iconTheme = tester.firstWidget(
+      iconTheme = tester.firstWidget<IconTheme>(
         find.widgetWithIcon(IconTheme, Icons.check),
       );
       expect(iconTheme.data.color, disabledColor);

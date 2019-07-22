@@ -626,28 +626,23 @@ class _ToggleButton extends StatelessWidget {
         ?? theme.disabledColor;
     }
 
-    final Widget result = IconTheme.merge(
-      data: IconThemeData(
-        color: currentColor,
-      ),
-      child: ClipRRect(
-        borderRadius: clipRadius,
-        child: RawMaterialButton(
-          textStyle: TextStyle(
-            color: currentColor,
-          ),
-          elevation: 0.0,
-          highlightElevation: 0.0,
-          fillColor: selected ? fillColor : null,
-          focusColor: selected ? focusColor : null,
-          highlightColor: highlightColor,
-          hoverColor: hoverColor,
-          splashColor: splashColor,
-          focusNode: focusNode,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          onPressed: onPressed,
-          child: child,
+    final Widget result = ClipRRect(
+      borderRadius: clipRadius,
+      child: RawMaterialButton(
+        textStyle: TextStyle(
+          color: currentColor,
         ),
+        elevation: 0.0,
+        highlightElevation: 0.0,
+        fillColor: selected ? fillColor : null,
+        focusColor: selected ? focusColor : null,
+        highlightColor: highlightColor,
+        hoverColor: hoverColor,
+        splashColor: splashColor,
+        focusNode: focusNode,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        onPressed: onPressed,
+        child: child,
       ),
     );
 
