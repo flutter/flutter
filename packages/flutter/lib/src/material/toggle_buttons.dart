@@ -815,6 +815,14 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
   }
 
+  static double _minWidth(RenderBox box, double height) {
+    return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
+  }
+
+  static double _maxWidth(RenderBox box, double height) {
+    return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
+  }
+
   @override
   double computeMaxIntrinsicHeight(double width) {
     return horizontalBorderSide.width +
@@ -824,6 +832,22 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
+    return leadingBorderSide.width +
+           _maxWidth(child, height) +
+           trailingWidth;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    final double trailingWidth = trailingBorderSide == null ? 0.0 : trailingBorderSide.width;
+    return leadingBorderSide.width +
+           _minWidth(child, height) +
+           trailingWidth;
+  }
 
   @override
   void performLayout() {
