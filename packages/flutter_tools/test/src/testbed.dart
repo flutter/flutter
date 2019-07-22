@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 
@@ -33,6 +35,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
       ? FileSystemStyle.windows
       : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
+  OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
   Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
   FlutterVersion: () => FakeFlutterVersion() // prevent requirement to mock git for test runner.
@@ -684,4 +687,27 @@ class FakeFlutterVersion implements FlutterVersion {
   Map<String, Object> toJson() {
     return null;
   }
+}
+
+// A test implementation of [FeatureFlags] that allows enabling without reading
+// config. If not otherwise specified, all values default to false.
+class TestFeatureFlags implements FeatureFlags {
+  TestFeatureFlags({
+    this.isLinuxEnabled = false,
+    this.isMacOSEnabled = false,
+    this.isWebEnabled = false,
+    this.isWindowsEnabled = false,
+});
+
+  @override
+  final bool isLinuxEnabled;
+
+  @override
+  final bool isMacOSEnabled;
+
+  @override
+  final bool isWebEnabled;
+
+  @override
+  final bool isWindowsEnabled;
 }

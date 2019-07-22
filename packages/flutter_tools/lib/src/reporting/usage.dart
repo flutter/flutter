@@ -12,12 +12,16 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/time.dart';
 import '../base/utils.dart';
 import '../features.dart';
 import '../globals.dart';
 import '../version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+
+// Attached to all `Usage.sendCommand` and `Usage.sendEvent`.
+const String _kLocalTimeParameter = 'cd33';
 
 const String kSessionHostOsDetails = 'cd1';
 const String kSessionChannelName = 'cd2';
@@ -53,16 +57,16 @@ const String kCommandBuildBundleIsModule = 'cd25';
 const String kCommandResult = 'cd26';
 const String kCommandHasTerminal = 'cd31';
 
+const String kCommandBuildAarTargetPlatform = 'cd34';
+const String kCommandBuildAarProjectType = 'cd35';
+
 const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
 const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
 
 const String enabledFlutterFeatures = 'cd32';
-
-const String kCommandBuildAarTargetPlatform = 'cd33';
-const String kCommandBuildAarProjectType = 'cd34';
-// Next ID: cd35
+// Next ID: cd36
 
 Usage get flutterUsage => Usage.instance;
 
@@ -144,12 +148,16 @@ class Usage {
   String get clientId => _analytics.clientId;
 
   void sendCommand(String command, { Map<String, String> parameters }) {
-    if (suppressAnalytics)
+    if (suppressAnalytics) {
       return;
+    }
 
-    parameters ??= const <String, String>{};
+    final Map<String, String> paramsWithLocalTime = <String, String>{
+      ...?parameters,
+      _kLocalTimeParameter: systemClock.now().toString(),
+    };
 
-    _analytics.sendScreenView(command, parameters: parameters);
+    _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
 
   void sendEvent(
@@ -157,12 +165,16 @@ class Usage {
     String parameter, {
     Map<String, String> parameters,
   }) {
-    if (suppressAnalytics)
+    if (suppressAnalytics) {
       return;
+    }
 
-    parameters ??= const <String, String>{};
+    final Map<String, String> paramsWithLocalTime = <String, String>{
+      ...?parameters,
+      _kLocalTimeParameter: systemClock.now().toString(),
+    };
 
-    _analytics.sendEvent(category, parameter, parameters: parameters);
+    _analytics.sendEvent(category, parameter, parameters: paramsWithLocalTime);
   }
 
   void sendTiming(
@@ -171,19 +183,22 @@ class Usage {
     Duration duration, {
     String label,
   }) {
-    if (!suppressAnalytics) {
-      _analytics.sendTiming(
-        variableName,
-        duration.inMilliseconds,
-        category: category,
-        label: label,
-      );
+    if (suppressAnalytics) {
+      return;
     }
+    _analytics.sendTiming(
+      variableName,
+      duration.inMilliseconds,
+      category: category,
+      label: label,
+    );
   }
 
   void sendException(dynamic exception) {
-    if (!suppressAnalytics)
-      _analytics.sendException(exception.runtimeType.toString());
+    if (suppressAnalytics) {
+      return;
+    }
+    _analytics.sendException(exception.runtimeType.toString());
   }
 
   /// Fires whenever analytics data is sent over the network.
@@ -202,8 +217,9 @@ class Usage {
   void printWelcome() {
     // This gets called if it's the first run by the selected command, if any,
     // and on exit, in case there was no command.
-    if (_printedWelcome)
+    if (_printedWelcome) {
       return;
+    }
     _printedWelcome = true;
 
     printStatus('');
@@ -242,7 +258,17 @@ class LogToFileAnalytics extends AnalyticsMock {
   Future<void> sendScreenView(String viewName, {Map<String, String> parameters}) {
     parameters ??= <String, String>{};
     parameters['viewName'] = viewName;
-    logFile.writeAsStringSync('screenView $parameters\n');
+    logFile.writeAsStringSync('screenView $parameters\n', mode: FileMode.append);
+    return Future<void>.value(null);
+  }
+
+  @override
+  Future<void> sendEvent(String category, String action,
+      {String label, int value, Map<String, String> parameters}) {
+    parameters ??= <String, String>{};
+    parameters['category'] = category;
+    parameters['action'] = action;
+    logFile.writeAsStringSync('event $parameters\n', mode: FileMode.append);
     return Future<void>.value(null);
   }
 }
