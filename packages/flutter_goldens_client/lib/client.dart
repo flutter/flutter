@@ -119,47 +119,20 @@ class GoldensClient {
   }
 
   Future<void> _checkCanSync() async {
-//    final bool isCirrus = (platform.environment['CIRRUS_CI'] ?? '').isNotEmpty;
     final io.ProcessResult result = await process.run(
       <String>['git', 'status', '--porcelain'],
       workingDirectory: repositoryRoot.path,
     );
-    print('Initial check: ${result.stdout}');
     if (result.stdout.trim().isNotEmpty) {
-      //if (isCirrus) {
-        //await _cleanCirrus();
-      //} else {
-        final StringBuffer buf = StringBuffer()
-          ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
-          ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
-          ..writeln('cd ${repositoryRoot.path}')
-          ..writeln('git reset --hard HEAD')
-          ..writeln('git clean -x -d -f -f');
-        throw NonZeroExitCode(1, buf.toString());
-      //}
+      final StringBuffer buf = StringBuffer()
+        ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
+        ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
+        ..writeln('cd ${repositoryRoot.path}')
+        ..writeln('git reset --hard HEAD')
+        ..writeln('git clean -x -d -f -f');
+      throw NonZeroExitCode(1, buf.toString());
     }
   }
-
-//  Future<void> _cleanCirrus() async {
-//    await process.run(
-//      <String>['git', 'reset', '--hard'],
-//      workingDirectory: repositoryRoot.path,
-//    );
-//    final io.ProcessResult result = await process.run(
-//      <String>['git', 'status', '--porcelain'],
-//      workingDirectory: repositoryRoot.path,
-//    );
-//    print('After clean: ${result.stdout}');
-//    if (result.stdout.trim().isNotEmpty) {
-//      final StringBuffer buf = StringBuffer()
-//        ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
-//        ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
-//        ..writeln('cd ${repositoryRoot.path}')
-//        ..writeln('git reset --hard HEAD')
-//        ..writeln('git clean -x -d -f -f');
-//      throw NonZeroExitCode(1, buf.toString());
-//    }
-//  }
 
   Future<void> _syncTo(String commit) async {
     await _runCommands(
