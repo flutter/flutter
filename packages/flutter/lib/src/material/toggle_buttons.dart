@@ -207,6 +207,10 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color
   /// will be used.
+  ///
+  /// If this property is set to null, then ToggleButtonTheme.of(context).color
+  /// is used. If [ToggleButtonThemeData.color] is also null, then
+  /// Theme.of(context).colorScheme.onSurface is used.
   final Color color;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
@@ -214,20 +218,38 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If [selected] is set to true and [onPressed] is not null, this color
   /// will be used.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).selectedColor is used. If
+  /// [ToggleButtonThemeData.selectedColor] is also null, then
+  /// Theme.of(context).colorScheme.primary is used.
   final Color selectedColor;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// disabled.
   ///
   /// If [onPressed] is null, this color will be used.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).disabledColor is used. If
+  /// [ToggleButtonThemeData.disabledColor] is also null, then
+  /// Theme.of(context).disabledColor is used.
   final Color disabledColor;
 
   /// The fill color for selected toggle buttons.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).fillColor is used. If
+  /// [ToggleButtonThemeData.fillColor] is also null, then
+  /// the fill color is set to null.
   final Color fillColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
-  /// Defaults to [ThemeData.focusColor] for the current theme.
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).focusColor is used. If
+  /// [ToggleButtonThemeData.focusColor] is also null, then
+  /// Theme.of(context).focusColor is used.
   final Color focusColor;
 
   /// The highlight color for the button's [InkWell].
