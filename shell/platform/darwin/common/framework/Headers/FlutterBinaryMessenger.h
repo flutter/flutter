@@ -61,10 +61,7 @@ FLUTTER_EXPORT
  */
 - (void)sendOnChannel:(NSString*)channel
               message:(NSData* _Nullable)message
-          binaryReply:(FlutterBinaryReply _Nullable)callback
-    // TODO: Add macOS support for replies once
-    // https://github.com/flutter/flutter/issues/18852 is fixed.
-    API_UNAVAILABLE(macos);
+          binaryReply:(FlutterBinaryReply _Nullable)callback;
 
 /**
  * Registers a message handler for incoming binary messages from the Flutter side
