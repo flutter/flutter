@@ -365,7 +365,7 @@ void main() {
         },
       );
     });
- 
+
    testWidgets(
         'waits until no transient callbacks', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrameCallback((_) {
