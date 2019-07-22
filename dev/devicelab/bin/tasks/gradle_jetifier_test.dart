@@ -88,6 +88,8 @@ Future<void> main() async {
         'io.flutter.plugins.firebaseauth.FirebaseAuthPlugin',
         // Used by `firebase_auth`.
         'com.google.firebase.FirebaseApp',
+        // Base class for activities that enables composition of higher level components.
+        'androidx.core.app.ComponentActivity',
       ]);
 
       section('Build debug APK');
@@ -122,6 +124,8 @@ Future<void> main() async {
         'io.flutter.plugins.firebaseauth.FirebaseAuthPlugin',
         // Used by `firebase_auth`.
         'com.google.firebase.FirebaseApp',
+        // Base class for activities that enables composition of higher level components.
+        'androidx.core.app.ComponentActivity',
       ]);
 
       return TaskResult.success(null);
