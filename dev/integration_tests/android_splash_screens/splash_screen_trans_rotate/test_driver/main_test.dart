@@ -4,7 +4,7 @@
 
 import 'package:flutter_driver/flutter_driver.dart';
 
-import 'package:test/test.dart' hide TypeMatcher, InstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('end-to-end test', () {
