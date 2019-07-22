@@ -164,14 +164,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     // Convert primaryDelta, the amount that the scrollbar moved, into the
     // coordinate space of the scroll position, and scroll to that
     // position.
-    final double viewHeight = widget.controller.position.viewportDimension;
-    final double scrollHeight = widget.controller.position.maxScrollExtent
-      + viewHeight - widget.controller.position.minScrollExtent;
+    final double scrollOffsetLocal = _painter.getTrackToScroll(primaryDelta);
     _dragScrollbarStartY ??= widget.controller.position.pixels;
-    final double scrollDistance =
-      primaryDelta / viewHeight * scrollHeight;
     widget.controller.position.jumpTo(
-      _dragScrollbarStartY + scrollDistance,
+      _dragScrollbarStartY + scrollOffsetLocal,
     );
   }
 
