@@ -12617,24 +12617,6 @@ class CupertinoLocalizationZhHantHk extends CupertinoLocalizationZhHant {
     singleDigitSecondFormat: singleDigitSecondFormat,
     decimalFormat: decimalFormat,
   );
-
-  @override
-  String get datePickerMinuteSemanticsLabelOne => r'1 分鐘';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute 分鐘';
-
-  @override
-  String get datePickerDateTimeOrderString => r'date_dayPeriod_time';
-
-  @override
-  String get alertDialogLabel => r'通知';
-
-  @override
-  String get timerPickerMinuteLabelOne => r'分鐘';
-
-  @override
-  String get timerPickerMinuteLabelOther => r'分鐘';
 }
 
 /// The translations for Chinese, as used in Taiwan, using the Han script (`zh_Hant_TW`).
