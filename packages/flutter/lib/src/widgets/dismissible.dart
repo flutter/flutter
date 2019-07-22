@@ -99,6 +99,7 @@ class Dismissible extends StatefulWidget {
   }) : assert(key != null),
        assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
+       assert(child != null || direction != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
