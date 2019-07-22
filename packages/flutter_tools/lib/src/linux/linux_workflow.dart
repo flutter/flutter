@@ -18,7 +18,7 @@ class LinuxWorkflow implements Workflow {
   const LinuxWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isLinux;
+  bool get appliesToHostPlatform => platform.isLinux && featureFlags.isLinuxEnabled;
 
   @override
   bool get canLaunchDevices => platform.isLinux && featureFlags.isLinuxEnabled;

@@ -33,7 +33,6 @@ class FlutterVersion {
   }
 
   /// Whether we are currently on the master branch.
-  @Deprecated('use Features instead.')
   bool get isMaster {
     final String branchName = getBranchName();
     return !<String>['dev', 'beta', 'stable'].contains(branchName);

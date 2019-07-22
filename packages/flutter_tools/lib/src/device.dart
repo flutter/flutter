@@ -14,9 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'features.dart';
 import 'fuchsia/fuchsia_device.dart';
-
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -73,14 +71,10 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-    if (featureFlags.isMacOSEnabled)
-      MacOSDevices(),
-    if (featureFlags.isLinuxEnabled)
-      LinuxDevices(),
-    if (featureFlags.isWindowsEnabled)
-      WindowsDevices(),
-    if (featureFlags.isWebEnabled)
-      WebDevices(),
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+    WebDevices(),
   ]);
 
   String _specifiedDeviceId;
