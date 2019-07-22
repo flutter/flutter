@@ -32,7 +32,7 @@ Future<void> main() async {
     tearDownAll(() async {
       await driver.close();
     });
-    
+
     // This test suite only tests Android.
     // Has to be run as the first test case.
     test('recomposition', () async {

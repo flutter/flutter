@@ -16,7 +16,7 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 ///   1. a complex mutation composition including clip rect
 ///   2. a clip rrect mutation
 ///   3. a clip path mutation.
-/// A set of `Container` widgets are shown next to the platform views with the same mutation composition for the manual sanity test purpose. 
+/// A set of `Container` widgets are shown next to the platform views with the same mutation composition for the manual sanity test purpose.
 class MutationCompositionPage extends Page {
   const MutationCompositionPage()
       : super('Mutation Composition Tests',
