@@ -3,7 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/extension/doctor.dart';
-import 'package:test/test.dart';
+
+import '../../src/common.dart';
 
 void main() {
   test('serialization of ValidationType', () {

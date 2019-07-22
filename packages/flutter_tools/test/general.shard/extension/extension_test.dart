@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/extension/extension.dart';
-import 'package:test/test.dart';
+import '../../src/common.dart';
 
 void main() {
   test('Request can serialize to json', () {
