@@ -201,7 +201,7 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// )
 /// ```
 /// {@end-tool}
-/// 
+///
 /// ### Gradients (Foreground)
 ///
 /// {@tool sample}
