@@ -659,6 +659,7 @@ void main() {
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await tester.pump();
+    await tester.pump();
     expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));

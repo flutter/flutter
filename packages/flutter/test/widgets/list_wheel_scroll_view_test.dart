@@ -863,17 +863,21 @@ void main() {
 
       // Now item 1 is closest to the center.
       await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      await tester.pump();
       expect(selectedItems, <int>[1]);
 
       // Now item 1 is still closest to the center for another full itemExtent (100px).
       await scrollGesture.moveBy(const Offset(0.0, -99.0));
+      await tester.pump();
       expect(selectedItems, <int>[1]);
 
       await scrollGesture.moveBy(const Offset(0.0, -1.0));
+      await tester.pump();
       expect(selectedItems, <int>[1, 2]);
 
       // Going back triggers previous item indices.
       await scrollGesture.moveBy(const Offset(0.0, 50.0));
+      await tester.pump();
       expect(selectedItems, <int>[1, 2, 1]);
     });
 

@@ -242,41 +242,6 @@ class ScrollDragController implements Drag {
        _lastNonStationaryTimestamp = details.sourceTimeStamp,
        _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
-  // If non-zero, this will be a pending drag delta for the next frame to
-  // consume. This is used to smooth out the irregular drag events delivery.
-  // See also [update] and scroll_events_test.dart.
-  double _pendingDragDelta = 0;
-
-  bool _isScrollFrameInProgress = false;
-
-  // To make sure that the callback is called only once per frame.
-  bool _pendingCallbackScheduled = false;
-
-  void _markScrollInProgress() {
-    _isScrollFrameInProgress = true;
-    if (!_pendingCallbackScheduled) {
-      WidgetsBinding.instance.addPostFrameCallback(_pendingDragCallback);
-      _pendingCallbackScheduled = true;
-    }
-  }
-
-  void _applyPendingDrag() {
-    assert(_pendingDragDelta != 0);
-    assert(_isScrollFrameInProgress);
-    delegate.applyUserOffset(_pendingDragDelta);
-    _pendingDragDelta = 0;
-    _markScrollInProgress();
-  }
-
-  void _pendingDragCallback(Duration _) {
-    _pendingCallbackScheduled = false;
-    if (_pendingDragDelta != 0) {
-      _applyPendingDrag();
-    } else {
-      _isScrollFrameInProgress = false;
-    }
-  }
-
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
   ScrollActivityDelegate _delegate;
@@ -384,6 +349,46 @@ class ScrollDragController implements Drag {
           return 0.0;
         }
       }
+    }
+  }
+
+  // If non-zero, this will be a pending drag delta for the next frame to
+  // consume. This is used to smooth out the irregular drag events delivery.
+  // See also [update] and scroll_events_test.dart.
+  double _pendingDragDelta = 0;
+
+  bool _isScrollFrameInProgress = false;
+
+  // To make sure that the callback is called only once per frame.
+  bool _pendingCallbackScheduled = false;
+
+  void _markScrollInProgress() {
+    _isScrollFrameInProgress = true;
+    if (!_pendingCallbackScheduled) {
+      WidgetsBinding.instance.addPostFrameCallback(_pendingDragCallback);
+      _pendingCallbackScheduled = true;
+    }
+  }
+
+  void _applyPendingDrag() {
+    if (_lastDetails == null) {
+      // This implies that [dispose] has been called.
+      // We can't apply any more drag after the disposing.
+      return;
+    }
+    assert(_pendingDragDelta != 0);
+    assert(_isScrollFrameInProgress);
+    delegate.applyUserOffset(_pendingDragDelta);
+    _pendingDragDelta = 0;
+    _markScrollInProgress();
+  }
+
+  void _pendingDragCallback(Duration _) {
+    _pendingCallbackScheduled = false;
+    if (_pendingDragDelta != 0) {
+      _applyPendingDrag();
+    } else {
+      _isScrollFrameInProgress = false;
     }
   }
 

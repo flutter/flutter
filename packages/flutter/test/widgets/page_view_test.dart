@@ -298,12 +298,14 @@ void main() {
 
     // We've crossed the halfway mark.
     await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
 
     expect(log, equals(const <int>[1]));
     log.clear();
 
     // Moving a bit more should not generate redundant notifications.
     await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
 
     expect(log, isEmpty);
 

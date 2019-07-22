@@ -39,8 +39,6 @@ void main() {
     scrollable.position.jumpTo(newScrollOffset);
   }
 
-
-
   Future<List<double>> _simulateScrollEvents(
       WidgetTester tester,
       int numEvents,
