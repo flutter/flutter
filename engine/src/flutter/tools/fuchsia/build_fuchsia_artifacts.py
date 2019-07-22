@@ -95,6 +95,16 @@ def BuildBucket():
   CopyToBucket('fuchsia_release/', 'flutter/release/')
 
 
+def CopyFiles(source, destination):
+  try:
+    shutil.copytree(source, destination)
+  except OSError as error:
+    if error.errno == errno.ENOTDIR:
+      shutil.copy(source, destination)
+    else:
+      raise
+
+
 def ProcessCIPDPakcage(upload, engine_version):
   # Copy the CIPD YAML template from the source directory to be next to the bucket
   # we are about to package.
