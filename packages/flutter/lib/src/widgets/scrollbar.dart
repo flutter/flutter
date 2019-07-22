@@ -11,8 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
-// TODO(justinmc): We already have this in text_selection.dart, is there
-// somewhere I can put it to reuse?
 const double _kMinInteractiveSize = 48.0;
 
 /// A [CustomPainter] for painting scrollbars.
