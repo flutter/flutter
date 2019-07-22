@@ -225,10 +225,10 @@ typedef ImageLoadingBuilder = Widget Function(
 /// types of images for convenience. In this example, use the [Image.network]
 /// constructor to display an image from the internet.
 ///
-/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
+/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
 ///
 /// ```dart
-/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg')
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
 /// ```
 /// {@end-tool}
 ///
