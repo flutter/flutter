@@ -315,7 +315,7 @@ void main() {
             imageAvailable.complete(error);
           },
         ));
-        dynamic err = await imageAvailable.future;
+        final dynamic err = await imageAvailable.future;
         expect(err, const TypeMatcher<NetworkImageLoadException>()
             .having((NetworkImageLoadException e) => e.toString(), 'e', startsWith('HTTP request failed'))
             .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', HttpStatus.badGateway)
