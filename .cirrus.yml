@@ -18,7 +18,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/*.version
