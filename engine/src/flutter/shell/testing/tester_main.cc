@@ -266,6 +266,15 @@ int main(int argc, char* argv[]) {
     fml::MessageLoop::GetCurrent().RemoveTaskObserver(key);
   };
 
+  settings.unhandled_exception_callback = [](const std::string& error,
+                                             const std::string& stack_trace) {
+    FML_LOG(ERROR) << "Unhandled exception" << std::endl
+                   << "Exception: " << error << std::endl
+                   << "Stack trace: " << stack_trace;
+    ::exit(1);
+    return true;
+  };
+
   return flutter::RunTester(
       settings, command_line.HasOption(
                     flutter::FlagForSwitch(flutter::Switch::RunForever)));
