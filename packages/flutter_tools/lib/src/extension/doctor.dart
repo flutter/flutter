@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// An API for integration of doctor and workflow checks into the flutter tool.
+/// Tool extensions for interfacing with flutter doctor.
 library doctor;
 
 import 'dart:convert';
@@ -16,7 +16,9 @@ import 'extension.dart';
 class ValidationType implements Serializable {
   const ValidationType._(this._value);
 
-  /// Create a [ValidationType] objecg from its json encoded equivalent.
+  /// Create a [ValidationType] object from its json encoded equivalent.
+  ///
+  /// Throws an [ArgumentError] if an invalid value is provided.
   factory ValidationType.fromJson(int value) {
     switch (value) {
       case 0:
@@ -148,6 +150,7 @@ class ValidationResult implements Serializable {
     this.messages = const <ValidationMessage>[],
     this.type = ValidationType.installed,
     this.statusText,
+    this.appliesToPlatform = true,
     @required this.name,
   }) : assert(name != null),
        assert(type != null),
@@ -201,6 +204,13 @@ class ValidationResult implements Serializable {
   /// negative.
   final String statusText;
 
+  /// Whether this check applies to the current platform or project.
+  ///
+  /// Defaults to true. If false, the remaining fields are ignored and this
+  /// message is discarded. For example, a validator for Xcode might set
+  /// `appliesToPlatform: false` on a Windows platform.
+  final bool appliesToPlatform;
+
   @override
   Map<String, Object> toJson() {
     return <String, Object>{
@@ -218,10 +228,9 @@ class ValidationResult implements Serializable {
   String toString() => json.encode(toJson());
 }
 
-/// Functionality related to diagnosing problems with a project or development
-/// environment.
+/// Functionality related to diagnosing problems with an environment.
 abstract class DoctorDomain extends Domain {
 
   /// Diagnose problems with the user's environment.
-  Future<ValidationResult> diagnose(Map<String, Object> arguments);
+  Future<ValidationResult> diagnose();
 }

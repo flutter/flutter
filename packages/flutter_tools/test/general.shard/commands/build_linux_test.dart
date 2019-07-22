@@ -111,7 +111,7 @@ BINARY_NAME=fizz_bar
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
-    expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
+    expect(makefileExecutableName(flutterProject.linux.makeFile), 'fizz_bar');
   }, overrides: <Type, Generator>{FileSystem: () => MemoryFileSystem()});
 }
 

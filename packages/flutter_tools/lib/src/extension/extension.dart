@@ -10,9 +10,13 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
+import 'app.dart';
+import 'build.dart';
+import 'device.dart';
 import 'doctor.dart';
 
 /// A request sent to a tool extension from the host.
@@ -104,32 +108,48 @@ abstract class Serializable {
 typedef DomainHandler = Future<Serializable> Function(Map<String, Object>);
 
 /// An extension is a pluggable piece of tool functionality.
+///
+/// New extension functionaliy should be implemented by extending this class
+/// and overriding [doctorDomain], [deviceDomain], and/or [appDomain] to inject
+/// the required functionality.
 abstract class ToolExtension {
-  /// WIP
   ToolExtension() {
     if (doctorDomain != null) {
       doctorDomain._parent = this;
-      registerMethod('doctor.diagnose', doctorDomain.diagnose);
+      registerMethod('doctor.diagnose', (Map<String, Object> args) => doctorDomain.diagnose());
     }
-  }
+    if (deviceDomain != null) {
+      deviceDomain._parent = this;
+      registerMethod('device.listDevices', (Map<String, Object> args) => deviceDomain.listDevices());
+    }
+    if (appDomain != null) {
+      appDomain._parent = this;
+      registerMethod('app.startApp', (Map<String, Object> args) {
+        final ApplicationBundle bundle = ApplicationBundle.fromJson(args['applicationBundle']);
+        final String deviceId = args['deviceId'];
+        return appDomain.startApp(bundle, deviceId);
+      });
+      registerMethod('app.stopApp', (Map<String, Object> args) => appDomain.stopApp(ApplicationBundle.fromJson(args)));
+    }
+    if (buildDomain != null) {
+      buildDomain._parent = this;
+      registerMethod('app.configureOutput', (Map<String, Object> args) => buildDomain.configureOutput(BuildInfo.fromJson(args)));
+      registerMethod('app.build', (Map<String, Object> args) => buildDomain.build(BuildInfo.fromJson(args)));
+    }
+   }
 
-  /// WIP
   FileSystem fileSystem = const LocalFileSystem();
-
-  /// WIP
   ProcessManager processManager = const LocalProcessManager();
-
-  /// WIP
   Platform platform = const LocalPlatform();
 
   final Map<String, DomainHandler> _domainHandlers = <String, DomainHandler>{};
 
-  /// WIP
+  @protected
   void registerMethod(String name, DomainHandler domainHandler) {
     _domainHandlers[name] = domainHandler;
   }
 
-  /// WIP
+  /// This method is temporarily public while the API is developed.
   Future<Response> handleMessage(Request request) async {
     Response response;
     final DomainHandler handler = _domainHandlers[request.method];
@@ -164,6 +184,15 @@ abstract class ToolExtension {
 
   /// The [DoctorDomain] for this extension, or null if not supported.
   DoctorDomain get doctorDomain => null;
+
+  /// The [DeviceDomain] for this extension, or null if not supported.
+  DeviceDomain get deviceDomain => null;
+
+  /// The [AppDomain] for this extension, or null if not supported.
+  AppDomain get appDomain => null;
+
+  /// The [BuildDomain] for this extension, or null if not supported.
+  BuildDomain get buildDomain => null;
 }
 
 /// A building-block of tool functionality.

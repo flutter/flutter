@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'desktop.dart';
+import 'extension_host.dart';
 import 'fuchsia/fuchsia_device.dart';
 
 import 'globals.dart';
@@ -152,6 +153,7 @@ class DeviceManager {
         yield device;
       }
     }
+    yield* extensionHost.getExtensionDevices();
   }
 
   /// Whether we're capable of listing any devices given the current environment configuration.

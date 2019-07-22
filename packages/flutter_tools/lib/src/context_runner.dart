@@ -28,6 +28,8 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'extension/extension.dart';
+import 'extension_host.dart';
 import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
@@ -54,6 +56,7 @@ import 'windows/windows_workflow.dart';
 Future<T> runInContext<T>(
   FutureOr<T> runner(), {
   Map<Type, Generator> overrides,
+  List<ToolExtension> toolExtensions,
 }) async {
   return await context.run<T>(
     name: 'global fallbacks',
@@ -110,6 +113,7 @@ Future<T> runInContext<T>(
       Xcode: () => Xcode(),
       XcodeValidator: () => const XcodeValidator(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
+      ExtensionHost: () => ExtensionHost(toolExtensions ?? const <ToolExtension>[]),
     },
   );
 }
