@@ -171,6 +171,11 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
+  void _handleLongPressStart(LongPressStartDetails details) {
+    _fadeoutTimer?.cancel();
+    _fadeoutAnimationController.forward();
+  }
+
   void _handleLongPress() {
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
@@ -252,6 +257,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
         ),
         (_ThumbLongPressGestureRecognizer instance) {
           instance
+            ..onLongPressStart = _handleLongPressStart
             ..onLongPress = _handleLongPress
             ..onLongPressMoveUpdate = _handleLongPressMoveUpdate
             ..onLongPressEnd = _handleLongPressEnd;
