@@ -113,7 +113,7 @@ Future<T> runInContext<T>(
       Xcode: () => Xcode(),
       XcodeValidator: () => const XcodeValidator(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
-      ExtensionHost: () => ExtensionHost(toolExtensions ?? const <ToolExtension>[]),
+      ExtensionHost: () => ExtensionHost(),
     },
   );
 }

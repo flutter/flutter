@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/linux/linux_extension.dart';
+
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'base/context.dart';
@@ -22,9 +25,13 @@ ExtensionHost get extensionHost => context.get<ExtensionHost>();
 
 /// A migration path for loading a [ToolExtension] hosted in the same isolate.
 class ExtensionHost {
-  ExtensionHost(this._toolExtensions);
+  ExtensionHost() {
+    if (featureFlags.isLinuxEnabled) {
+      _toolExtensions.add(LinuxToolExtension());
+    }
+  }
 
-  final List<ToolExtension> _toolExtensions;
+  final List<ToolExtension> _toolExtensions = <ToolExtension>[];
 
   /// Return devices provided by an extension host.
   Stream<Device> getExtensionDevices() async* {
