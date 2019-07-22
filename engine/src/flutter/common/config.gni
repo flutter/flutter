@@ -14,12 +14,21 @@ if (target_cpu == "arm" || target_cpu == "arm64") {
   import("//build/config/arm.gni")
 }
 
+if (is_ios || is_mac) {
+  import("//build/toolchain/clang.gni")
+}
+
 declare_args() {
   # The runtime mode ("debug", "profile", or "release")
   flutter_runtime_mode = "debug"
 
   # Whether to use the Skia text shaper module
   flutter_enable_skshaper = false
+
+  # A copy of the enable_bitcode flag from build/toolchain/clang.gni.
+  # This needs to be mirrored here because build/toolchain/clang.gni does
+  # not exist in the Fuchsia source tree.
+  flutter_enable_bitcode = false
 }
 
 # feature_defines_list ---------------------------------------------------------
@@ -42,4 +51,8 @@ if (flutter_runtime_mode == "debug") {
 
 if (is_fuchsia && using_fuchsia_sdk) {
   feature_defines_list += [ "FUCHSIA_SDK=1" ]
+}
+
+if (is_ios || is_mac) {
+  flutter_enable_bitcode = enable_bitcode
 }

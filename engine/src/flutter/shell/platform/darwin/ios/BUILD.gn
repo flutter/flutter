@@ -5,7 +5,6 @@
 assert(is_ios)
 
 import("//build/config/ios/ios_sdk.gni")
-import("//build/toolchain/clang.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/shell/platform/darwin/common/framework_shared.gni")
@@ -190,7 +189,7 @@ action("copy_framework_info_plist") {
   args = [
     rebase_path(sources[0]),
     rebase_path(outputs[0]),
-    "--bitcode=$enable_bitcode",
+    "--bitcode=$flutter_enable_bitcode",
   ]
 }
 
