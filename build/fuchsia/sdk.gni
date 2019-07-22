@@ -285,7 +285,7 @@ template("fuchsia_package") {
   gen_far_name = "$target_gen_dir/$package_name-$package_version.far"
 
   action(gen_far_target_name) {
-    script = "//build/fuchsia/gen_package.py"
+    script = "//flutter/tools/fuchsia/gen_package.py"
 
     pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
 
@@ -332,7 +332,7 @@ template("fuchsia_repo") {
   assert(defined(invoker.repo), "The location of the repo should be specified.")
 
   action(target_name) {
-    script = "//build/fuchsia/gen_repo.py"
+    script = "//flutter/tools/fuchsia/gen_repo.py"
 
     pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
     repo_directory = invoker.repo
