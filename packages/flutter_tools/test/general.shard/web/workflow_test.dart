@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:mockito/mockito.dart';
@@ -22,13 +22,9 @@ void main() {
     MockPlatform linux;
     MockPlatform macos;
     MockProcessManager mockProcessManager;
-    MockFlutterVersion unstable;
-    MockFlutterVersion stable;
     WebWorkflow workflow;
 
     setUpAll(() {
-      unstable = MockFlutterVersion(false);
-      stable = MockFlutterVersion(true);
       notSupported = MockPlatform(linux: false, windows: false, macos: false);
       windows = MockPlatform(windows: true);
       linux = MockPlatform(linux: true);
@@ -39,7 +35,7 @@ void main() {
         fs.file('chrome').createSync();
         when(mockProcessManager.canRun('chrome')).thenReturn(true);
       }, overrides: <Type, Generator>{
-        FlutterVersion: () => unstable,
+        FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
         ProcessManager: () => mockProcessManager,
       });
     });
@@ -81,25 +77,16 @@ void main() {
       Platform: () => notSupported,
     }));
 
-    test('does not apply on stable branch', () => testbed.run(() {
+    test('does not apply if feature flag is disabled', () => testbed.run(() {
       expect(workflow.appliesToHostPlatform, false);
       expect(workflow.canLaunchDevices, false);
       expect(workflow.canListDevices, false);
       expect(workflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       Platform: () => macos,
-      FlutterVersion: () => stable,
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
     }));
   });
-}
-
-class MockFlutterVersion extends Mock implements FlutterVersion {
-  MockFlutterVersion(this.isStable);
-
-  final bool isStable;
-
-  @override
-  bool get isMaster => !isStable;
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
