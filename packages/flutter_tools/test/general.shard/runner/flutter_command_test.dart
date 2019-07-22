@@ -60,11 +60,8 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
-        equals('success'),
-      );
+      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+      verify(usage.sendEvent(captureAny, 'success'));
     },
     overrides: <Type, Generator>{
       SystemClock: () => clock,
@@ -82,11 +79,8 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
-        equals('warning'),
-      );
+      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+      verify(usage.sendEvent(captureAny, 'warning'));
     },
     overrides: <Type, Generator>{
       SystemClock: () => clock,
@@ -106,11 +100,8 @@ void main() {
       try {
         await flutterCommand.run();
       } on ToolExit {
-        expect(
-          verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
-          equals('fail'),
-        );
+        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+        verify(usage.sendEvent(captureAny, 'fail'));
       }
     },
     overrides: <Type, Generator>{
@@ -133,11 +124,8 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        expect(
-          verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured[1]['cd26'],
-          equals('fail'),
-        );
+        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+        verify(usage.sendEvent(captureAny, 'fail'));
       }
     },
     overrides: <Type, Generator>{

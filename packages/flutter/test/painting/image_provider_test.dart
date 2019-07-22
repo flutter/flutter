@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test_api/test_api.dart' show TypeMatcher;
 
 import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
@@ -143,6 +144,28 @@ void main() {
     });
 
     group(NetworkImage, () {
+      test('Expect thrown exception with statusCode', () async {
+        final int errorStatusCode = HttpStatus.notFound;
+        const String requestUrl = 'foo-url';
+
+        debugNetworkImageHttpClientProvider = returnErrorStatusCode;
+
+        final Completer<dynamic> caughtError = Completer<dynamic>();
+
+        final ImageProvider imageProvider = NetworkImage(nonconst(requestUrl));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          caughtError.complete(error);
+        }));
+
+        final dynamic err = await caughtError.future;
+        expect(err, const TypeMatcher<NetworkImageLoadException>()
+            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', errorStatusCode)
+            .having((NetworkImageLoadException e) => e.uri, 'uri', Uri.base.resolve(requestUrl))
+        );
+      });
+
       test('Disallows null urls', () {
         expect(() {
           NetworkImage(nonconst(null));
@@ -170,11 +193,16 @@ void main() {
         }
 
         await loadNetworkImage();
-        expect(capturedErrors, <dynamic>['client1']);
+        expect(capturedErrors, isNotNull);
+        expect(capturedErrors.length, 1);
+        expect(capturedErrors[0], equals('client1'));
 
         debugNetworkImageHttpClientProvider = throwOnAnyClient2;
         await loadNetworkImage();
-        expect(capturedErrors, <dynamic>['client1', 'client2']);
+        expect(capturedErrors, isNotNull);
+        expect(capturedErrors.length, 2);
+        expect(capturedErrors[0], equals('client1'));
+        expect(capturedErrors[1], equals('client2'));
       }, skip: isBrowser);
 
       test('Propagates http client errors during resolve()', () async {
@@ -276,7 +304,7 @@ void main() {
       test('Handles http connection errors', () async {
         debugNetworkImageHttpClientProvider = respondErrorOnConnection;
 
-        final Completer<String> imageAvailable = Completer<String>();
+        final Completer<dynamic> imageAvailable = Completer<dynamic>();
         final ImageProvider imageProvider = NetworkImage(nonconst('baz'));
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
         result.addListener(ImageStreamListener(
@@ -287,8 +315,11 @@ void main() {
             imageAvailable.complete(error);
           },
         ));
-        expect(await imageAvailable.future,
-            matches(r'Exception: HTTP request failed, statusCode: 502, .*/baz'));
+        dynamic err = await imageAvailable.future;
+        expect(err, const TypeMatcher<NetworkImageLoadException>()
+            .having((NetworkImageLoadException e) => e.toString(), 'e', startsWith('HTTP request failed'))
+            .having((NetworkImageLoadException e) => e.statusCode, 'statusCode', HttpStatus.badGateway)
+            .having((NetworkImageLoadException e) => e.uri.toString(), 'uri', endsWith('/baz')));
       }, skip: isBrowser);
     });
   });
@@ -298,6 +329,21 @@ class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
 class MockHttpHeaders extends Mock implements HttpHeaders {}
+
+HttpClient returnErrorStatusCode() {
+  final int errorStatusCode = HttpStatus.notFound;
+
+  debugNetworkImageHttpClientProvider = returnErrorStatusCode;
+
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpClient httpClient = MockHttpClient();
+  when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+  when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+  when(response.statusCode).thenReturn(errorStatusCode);
+
+  return httpClient;
+}
 
 HttpClient throwOnAnyClient1() {
   final MockHttpClient httpClient = MockHttpClient();
@@ -313,7 +359,7 @@ HttpClient throwOnAnyClient2() {
 
 HttpClient throwErrorOnAny() {
   final MockHttpClient httpClient = MockHttpClient();
-  when(httpClient.getUrl(any)).thenThrow(Error());
+  when(httpClient.getUrl(any)).thenThrow(Exception());
   return httpClient;
 }
 

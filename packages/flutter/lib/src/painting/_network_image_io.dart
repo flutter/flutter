@@ -124,7 +124,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
         // Record download request so it can either send a request when isolate is ready or handle errors.
         _pendingLoadRequests.add(_PendingLoadRequest(
             (SendPort sendPort) { sendPort.send(downloadRequest); },
-            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error.toString())); },
+            (dynamic error) { downloadRequest.sendPort.send(_DownloadResponse.error(error)); },
         ));
       }
 
@@ -206,7 +206,7 @@ class _DownloadResponse {
 
   final TransferableTypedData bytes;
   final ImageChunkEvent chunkEvent;
-  final String error;
+  final dynamic error;
 }
 
 typedef _RequestHandler = void Function(SendPort sendPort);
@@ -256,10 +256,10 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
         request.headers.add(name, value);
       });
       final HttpClientResponse response = await request.close();
-      if (response.statusCode != HttpStatus.ok) {
-        throw Exception(
-            'HTTP request failed, statusCode: ${response?.statusCode}, ${downloadRequest.uri}');
-      }
+      if (response.statusCode != HttpStatus.ok)
+        throw image_provider.NetworkImageLoadException(
+            statusCode: response?.statusCode,
+            uri: downloadRequest.uri);
       final TransferableTypedData transferable = await getHttpClientResponseBytes(
           response,
           onBytesReceived: (int cumulative, int total) {
@@ -271,7 +271,7 @@ void _initializeWorkerIsolate(SendPort mainIsolateSendPort) {
           });
       downloadRequest.sendPort.send(_DownloadResponse.bytes(transferable));
     } catch (error) {
-      downloadRequest.sendPort.send(_DownloadResponse.error(error.toString()));
+      downloadRequest.sendPort.send(_DownloadResponse.error(error));
     }
     ongoingRequests--;
     if (ongoingRequests == 0) {
