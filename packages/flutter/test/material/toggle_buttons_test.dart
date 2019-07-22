@@ -8,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 
+const double _defaultBorderWidth = 1.0;
+
 Widget boilerplate({Widget child}) {
   return Directionality(
     textDirection: TextDirection.ltr,
@@ -860,7 +862,7 @@ void main() {
 
     for (int i = 0; i < toggleButtons.length; i++) {
       final Rect rect = tester.getRect(find.byWidget(toggleButtons[i]));
-      expect(rect.height, 400.0);
+      expect(rect.height, 400.0 + 2 * _defaultBorderWidth);
     }
   });
 
@@ -915,7 +917,6 @@ void main() {
   testWidgets(
     'Properly draws borders based on state',
     (WidgetTester tester) async {
-      const double defaultBorderWidth = 1.0;
       await tester.pumpWidget(
         Material(
           child: boilerplate(
@@ -944,7 +945,7 @@ void main() {
           ..path(
             style: PaintingStyle.stroke,
             color: const Color(0xff000000),
-            strokeWidth: defaultBorderWidth,
+            strokeWidth: _defaultBorderWidth,
           ),
       );
 
@@ -957,13 +958,13 @@ void main() {
           ..path(
             style: PaintingStyle.stroke,
             color: const Color(0xff2196f3),
-            strokeWidth: defaultBorderWidth,
+            strokeWidth: _defaultBorderWidth,
           )
           // top and bottom - selected
           ..path(
             style: PaintingStyle.stroke,
             color: const Color(0xff2196f3),
-            strokeWidth: defaultBorderWidth,
+            strokeWidth: _defaultBorderWidth,
           ),
       );
 
@@ -976,13 +977,13 @@ void main() {
           ..path(
             style: PaintingStyle.stroke,
             color: const Color(0xff2196f3),
-            strokeWidth: defaultBorderWidth,
+            strokeWidth: _defaultBorderWidth,
           )
           // trailing side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
             color: const Color(0xff000000),
-            strokeWidth: defaultBorderWidth,
+            strokeWidth: _defaultBorderWidth,
           ),
       );
     },

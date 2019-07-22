@@ -413,11 +413,12 @@ class ToggleButtons extends StatelessWidget {
       !isSelected.any((bool val) => val == null),
       'There is a null value in isSelected: $isSelected'
     );
-    assert(() {
-      if (focusNodes != null)
-        return focusNodes.length == children.length;
-      return true;
-    }(),
+    assert(
+      () {
+        if (focusNodes != null)
+          return focusNodes.length == children.length;
+        return true;
+      }(),
       'FocusNodes.length must match children.length'
     );
     final ThemeData theme = Theme.of(context);
@@ -739,7 +740,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   BorderSide get leadingBorderSide => _leadingBorderSide;
   BorderSide _leadingBorderSide;
   set leadingBorderSide(BorderSide value) {
-    print('new val $value');
     if (_leadingBorderSide == value)
       return;
     _leadingBorderSide = value;
@@ -784,6 +784,20 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
   // The direction in which text flows for this application.
   TextDirection textDirection;
+
+  static double _maxHeight(RenderBox box, double width) {
+    return box == null ? 0.0 : box.getMaxIntrinsicHeight(width);
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return horizontalBorderSide.width +
+           _maxHeight(child, width) +
+           horizontalBorderSide.width;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) => computeMaxIntrinsicHeight(width);
 
   @override
   void performLayout() {
