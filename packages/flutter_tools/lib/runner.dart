@@ -18,9 +18,7 @@ import 'src/base/process.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
-import 'src/extension/extension.dart';
 import 'src/globals.dart';
-import 'src/linux/linux_extension.dart';
 import 'src/reporting/crash_reporting.dart';
 import 'src/reporting/usage.dart';
 import 'src/runner/flutter_command.dart';
@@ -71,9 +69,7 @@ Future<int> run(
       await _handleToolError(
           error, stackTrace, verbose, args, reportCrashes, getVersion);
     });
-  }, overrides: overrides, toolExtensions: <ToolExtension>[
-    LinuxToolExtension()
-  ]);
+  }, overrides: overrides);
 }
 
 Future<int> _handleToolError(
