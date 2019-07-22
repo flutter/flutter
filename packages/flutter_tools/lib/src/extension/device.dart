@@ -239,7 +239,7 @@ class Device implements Serializable {
       'targetPlatform': targetPlatform.toJson(),
       'targetArchitecture': targetArchitecture.toJson(),
       'ephemeral': ephemeral,
-      'category': category,
+      'category': category.toJson(),
       'sdkNameAndVersion': sdkNameAndVersion,
     };
   }
