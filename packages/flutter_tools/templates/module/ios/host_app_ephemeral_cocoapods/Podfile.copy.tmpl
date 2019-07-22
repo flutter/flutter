@@ -3,6 +3,9 @@ platform :ios, '8.0'
 target 'Runner' do
   flutter_application_path = '../'
   eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  post_install do |installer|
+    flutter_post_install(installer)
+  end
 end
 
 # Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
