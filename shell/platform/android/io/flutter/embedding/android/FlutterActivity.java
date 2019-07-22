@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -16,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.util.TypedValue;
@@ -29,7 +29,6 @@ import android.widget.FrameLayout;
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
-import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
@@ -65,17 +64,70 @@ import io.flutter.view.FlutterMain;
  * {@link FlutterView}. Using a {@link FlutterView} requires forwarding some calls from an
  * {@code Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a
  * {@code Fragment}.
+ * <p>
+ * <strong>Launch Screen and Splash Screen</strong>
+ * <p>
+ * {@code FlutterActivity} supports the display of an Android "launch screen" as well as a
+ * Flutter-specific "splash screen". The launch screen is displayed while the Android application
+ * loads. It is only applicable if {@code FlutterActivity} is the first {@code Activity} displayed
+ * upon loading the app. After the launch screen passes, a splash screen is optionally displayed.
+ * The splash screen is displayed for as long as it takes Flutter to initialize and render its
+ * first frame.
+ * <p>
+ * Use Android themes to display a launch screen. Create two themes: a launch theme and a normal
+ * theme. In the launch theme, set {@code windowBackground} to the desired {@code Drawable} for
+ * the launch screen. In the normal theme, set {@code windowBackground} to any desired background
+ * color that should normally appear behind your Flutter content. In most cases this background
+ * color will never be seen, but for possible transition edge cases it is a good idea to explicitly
+ * replace the launch screen window background with a neutral color.
+ * <p>
+ * Do not change aspects of system chrome between a launch theme and normal theme. Either define
+ * both themes to be fullscreen or not, and define both themes to display the same status bar and
+ * navigation bar settings. To adjust system chrome once the Flutter app renders, use platform
+ * channels to instruct Android to do so at the appropriate time. This will avoid any jarring visual
+ * changes during app startup.
+ * <p>
+ * In the AndroidManifest.xml, set the theme of {@code FlutterActivity} to the defined launch theme.
+ * In the metadata section for {@code FlutterActivity}, defined the following reference to your
+ * normal theme:
+ *
+ * {@code
+ *   <meta-data
+ *     android:name="io.flutter.embedding.android.NormalTheme"
+ *     android:resource="@style/YourNormalTheme"
+ *     />
+ * }
+ *
+ * With themes defined, and AndroidManifest.xml updated, Flutter displays the specified launch
+ * screen until the Android application is initialized.
+ * <p>
+ * Flutter also requires initialization time. To specify a splash screen for Flutter initialization,
+ * subclass {@code FlutterActivity} and override {@link #provideSplashScreen()}. See
+ * {@link SplashScreen} for details on implementing a splash screen.
+ * <p>
+ * Flutter ships with a splash screen that automatically displays the exact same
+ * {@code windowBackground} as the launch theme discussed previously. To use that splash screen,
+ * include the following metadata in AndroidManifest.xml for this {@code FlutterActivity}:
+ *
+ * {@code
+ *   <meta-data
+ *     android:name="io.flutter.app.android.SplashScreenUntilFirstFrame"
+ *     android:value="true"
+ *     />
+ * }
  */
 // TODO(mattcarroll): explain each call forwarded to Fragment (first requires resolution of PluginRegistry API).
 public class FlutterActivity extends FragmentActivity
     implements FlutterFragment.FlutterEngineProvider,
     FlutterFragment.FlutterEngineConfigurator,
-    OnFirstFrameRenderedListener {
+    FlutterFragment.SplashScreenProvider {
   private static final String TAG = "FlutterActivity";
 
   // Meta-data arguments, processed from manifest XML.
   protected static final String DART_ENTRYPOINT_META_DATA_KEY = "io.flutter.Entrypoint";
   protected static final String INITIAL_ROUTE_META_DATA_KEY = "io.flutter.InitialRoute";
+  protected static final String SPLASH_SCREEN_META_DATA_KEY = "io.flutter.embedding.android.SplashScreenDrawable";
+  protected static final String NORMAL_THEME_META_DATA_KEY = "io.flutter.embedding.android.NormalTheme";
 
   // Intent extra arguments.
   protected static final String EXTRA_DART_ENTRYPOINT = "dart_entrypoint";
@@ -93,11 +145,6 @@ public class FlutterActivity extends FragmentActivity
   private static final int FRAGMENT_CONTAINER_ID = 609893468; // random number
   @Nullable
   private FlutterFragment flutterFragment;
-
-  // Used to cover the Activity until the 1st frame is rendered so as to
-  // avoid a brief black flicker from a SurfaceView version of FlutterView.
-  @Nullable
-  private View coverView;
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes
@@ -187,12 +234,117 @@ public class FlutterActivity extends FragmentActivity
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
+    switchLaunchThemeForNormalTheme();
+
     super.onCreate(savedInstanceState);
+
     configureWindowForTransparency();
     setContentView(createFragmentContainer());
-    showCoverView();
     configureStatusBarForFullscreenFlutterExperience();
     ensureFlutterFragmentCreated();
+  }
+
+  /**
+   * Switches themes for this {@code Activity} from the theme used to launch this
+   * {@code Activity} to a "normal theme" that is intended for regular {@code Activity}
+   * operation.
+   * <p>
+   * This behavior is offered so that a "launch screen" can be displayed while the
+   * application initially loads. To utilize this behavior in an app, do the following:
+   * <ol>
+   *   <li>Create 2 different themes in style.xml: one theme for the launch screen and
+   *   one theme for normal display.
+   *   <li>In the launch screen theme, set the "windowBackground" property to a {@code Drawable}
+   *   of your choice.
+   *   <li>In the normal theme, customize however you'd like.
+   *   <li>In the AndroidManifest.xml, set the theme of your {@code FlutterActivity} to
+   *   your launch theme.
+   *   <li>Add a {@code <meta-data>} property to your {@code FlutterActivity} with a name
+   *   of "io.flutter.embedding.android.NormalTheme" and set the resource to your normal
+   *   theme, e.g., {@code android:resource="@style/MyNormalTheme}.
+   * </ol>
+   * With the above settings, your launch theme will be used when loading the app, and
+   * then the theme will be switched to your normal theme once the app has initialized.
+   * <p>
+   * Do not change aspects of system chrome between a launch theme and normal theme. Either define
+   * both themes to be fullscreen or not, and define both themes to display the same status bar and
+   * navigation bar settings. If you wish to adjust system chrome once your Flutter app renders, use
+   * platform channels to instruct Android to do so at the appropriate time. This will avoid any
+   * jarring visual changes during app startup.
+   */
+  private void switchLaunchThemeForNormalTheme() {
+    try {
+      ActivityInfo activityInfo = getPackageManager().getActivityInfo(getComponentName(), PackageManager.GET_META_DATA);
+      if (activityInfo.metaData != null) {
+        int normalThemeRID = activityInfo.metaData.getInt(NORMAL_THEME_META_DATA_KEY, -1);
+        if (normalThemeRID != -1) {
+          setTheme(normalThemeRID);
+        }
+      } else {
+        Log.d(TAG, "Using the launch theme as normal theme.");
+      }
+    } catch (PackageManager.NameNotFoundException exception) {
+      Log.e(TAG, "Could not read meta-data for FlutterActivity. Using the launch theme as normal theme.");
+    }
+  }
+
+  /**
+   * Extracts a {@link Drawable} from the {@code Activity}'s {@code windowBackground}.
+   * <p>
+   * Returns null if no {@code windowBackground} is set for the activity.
+   */
+  private Drawable getLaunchScreenDrawableFromActivityTheme() {
+    TypedValue typedValue = new TypedValue();
+    if (!getTheme().resolveAttribute(
+        android.R.attr.windowBackground,
+        typedValue,
+        true)) {
+      return null;
+    }
+    if (typedValue.resourceId == 0) {
+      return null;
+    }
+    try {
+      return getResources().getDrawable(typedValue.resourceId, getTheme());
+    } catch (Resources.NotFoundException e) {
+      Log.e(TAG, "Splash screen requested in AndroidManifest.xml, but no windowBackground"
+          + " is available in the theme.");
+      return null;
+    }
+  }
+
+  @Nullable
+  @Override
+  public SplashScreen provideSplashScreen() {
+    Drawable manifestSplashDrawable = getSplashScreenFromManifest();
+    if (manifestSplashDrawable != null) {
+      return new DrawableSplashScreen(manifestSplashDrawable);
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Returns a {@link Drawable} to be used as a splash screen as requested by meta-data in the
+   * {@code AndroidManifest.xml} file, or null if no such splash screen is requested.
+   * <p>
+   * See {@link #SPLASH_SCREEN_META_DATA_KEY} for the meta-data key to be used in a
+   * manifest file.
+   */
+  @Nullable
+  private Drawable getSplashScreenFromManifest() {
+    try {
+      ActivityInfo activityInfo = getPackageManager().getActivityInfo(
+          getComponentName(),
+          PackageManager.GET_META_DATA|PackageManager.GET_ACTIVITIES
+      );
+      Bundle metadata = activityInfo.metaData;
+      Integer splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
+      return splashScreenId != null ? getResources().getDrawable(splashScreenId, getTheme()) : null;
+    } catch (PackageManager.NameNotFoundException e) {
+      // This is never expected to happen.
+      return null;
+    }
   }
 
   /**
@@ -210,68 +362,6 @@ public class FlutterActivity extends FragmentActivity
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
         WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
       );
-    }
-  }
-
-  /**
-   * Cover all visible {@code Activity} area with a {@code View} that paints everything the same
-   * color as the {@code Window}.
-   * <p>
-   * This cover {@code View} should be displayed at the very beginning of the {@code Activity}'s
-   * lifespan and then hidden once Flutter renders its first frame. The purpose of this cover is to
-   * cover {@link FlutterSurfaceView}, which briefly displays a black rectangle before it can make
-   * itself transparent.
-   */
-  private void showCoverView() {
-    if (getBackgroundMode() == BackgroundMode.transparent) {
-      // Don't display an opaque cover view if the Activity is intended to be transparent.
-      return;
-    }
-
-    Log.v(TAG, "Showing cover view until first frame is rendered.");
-
-    // Create the coverView.
-    if (coverView == null) {
-      coverView = new View(this);
-      addContentView(coverView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-    }
-
-    // Pain the coverView with the Window's background.
-    Drawable background = createCoverViewBackground();
-    if (background != null) {
-      coverView.setBackground(background);
-    } else {
-      // If we can't obtain a window background to replicate then we'd be guessing as to the least
-      // intrusive color. But there is no way to make an accurate guess. In this case we don't
-      // give the coverView any color, which means a brief black rectangle will be visible upon
-      // Activity launch.
-    }
-  }
-
-  @Nullable
-  private Drawable createCoverViewBackground() {
-    TypedValue typedValue = new TypedValue();
-    boolean hasBackgroundColor = getTheme().resolveAttribute(
-        android.R.attr.windowBackground,
-        typedValue,
-        true
-    );
-    if (hasBackgroundColor && typedValue.resourceId != 0) {
-      return getResources().getDrawable(typedValue.resourceId, getTheme());
-    } else {
-      return null;
-    }
-  }
-
-  /**
-   * Hides the cover {@code View}.
-   * <p>
-   * This method should be called when Flutter renders its first frame. See {@link #showCoverView()}
-   * for details.
-   */
-  private void hideCoverView() {
-    if (coverView != null) {
-      coverView.setVisibility(View.GONE);
     }
   }
 
@@ -548,12 +638,6 @@ public class FlutterActivity extends FragmentActivity
    */
   private boolean isDebuggable() {
     return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-  }
-
-  @Override
-  public void onFirstFrameRendered() {
-    Log.v(TAG, "First frame has been rendered. Hiding cover view.");
-    hideCoverView();
   }
 
   /**

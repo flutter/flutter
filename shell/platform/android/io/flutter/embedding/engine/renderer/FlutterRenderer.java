@@ -41,9 +41,18 @@ public class FlutterRenderer implements TextureRegistry {
   private final FlutterJNI flutterJNI;
   private final AtomicLong nextTextureId = new AtomicLong(0L);
   private RenderSurface renderSurface;
+  private boolean hasRenderedFirstFrame = false;
+
+  private final OnFirstFrameRenderedListener onFirstFrameRenderedListener = new OnFirstFrameRenderedListener() {
+    @Override
+    public void onFirstFrameRendered() {
+      hasRenderedFirstFrame = true;
+    }
+  };
 
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
+    this.flutterJNI.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
   }
 
   /**
@@ -78,8 +87,16 @@ public class FlutterRenderer implements TextureRegistry {
     }
   }
 
+  public boolean hasRenderedFirstFrame() {
+    return hasRenderedFirstFrame;
+  }
+
   public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
     flutterJNI.addOnFirstFrameRenderedListener(listener);
+
+    if (hasRenderedFirstFrame) {
+      listener.onFirstFrameRendered();
+    }
   }
 
   public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
@@ -283,6 +300,9 @@ public class FlutterRenderer implements TextureRegistry {
      */
     void detachFromRenderer();
 
+    // TODO(mattcarroll): convert old FlutterView to use FlutterEngine instead of individual
+    // components, then use FlutterEngine's FlutterRenderer to watch for the first frame and
+    // remove the following methods from this interface.
     /**
      * The {@link FlutterRenderer} corresponding to this {@code RenderSurface} has painted its
      * first frame since being initialized.

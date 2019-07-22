@@ -73,6 +73,7 @@ public class FlutterView extends FrameLayout {
   // Internal view hierarchy references.
   @Nullable
   private FlutterRenderer.RenderSurface renderSurface;
+  private final Set<OnFirstFrameRenderedListener> onFirstFrameRenderedListeners = new HashSet<>();
   private boolean didRenderFirstFrame;
 
   // Connections to a Flutter execution context.
@@ -109,6 +110,10 @@ public class FlutterView extends FrameLayout {
     @Override
     public void onFirstFrameRendered() {
       didRenderFirstFrame = true;
+
+      for (OnFirstFrameRenderedListener listener : onFirstFrameRenderedListeners) {
+        listener.onFirstFrameRendered();
+      }
     }
   };
 
@@ -199,9 +204,6 @@ public class FlutterView extends FrameLayout {
         break;
     }
 
-    // Register a listener for the first frame render event to set didRenderFirstFrame.
-    renderSurface.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
-
     // FlutterView needs to be focusable so that the InputMethodManager can interact with it.
     setFocusable(true);
     setFocusableInTouchMode(true);
@@ -232,7 +234,7 @@ public class FlutterView extends FrameLayout {
    * first rendered frame.
    */
   public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    renderSurface.addOnFirstFrameRenderedListener(listener);
+    onFirstFrameRenderedListeners.add(listener);
   }
 
   /**
@@ -240,7 +242,7 @@ public class FlutterView extends FrameLayout {
    * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
    */
   public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    renderSurface.removeOnFirstFrameRenderedListener(listener);
+    onFirstFrameRenderedListeners.remove(listener);
   }
 
   //------- Start: Process View configuration that Flutter cares about. ------
@@ -561,8 +563,10 @@ public class FlutterView extends FrameLayout {
     this.flutterEngine = flutterEngine;
 
     // Instruct our FlutterRenderer that we are now its designated RenderSurface.
-    didRenderFirstFrame = false;
-    this.flutterEngine.getRenderer().attachToRenderSurface(renderSurface);
+    FlutterRenderer flutterRenderer = this.flutterEngine.getRenderer();
+    didRenderFirstFrame = flutterRenderer.hasRenderedFirstFrame();
+    flutterRenderer.attachToRenderSurface(renderSurface);
+    flutterRenderer.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
 
     // Initialize various components that know how to process Android View I/O
     // in a way that Flutter understands.
@@ -607,6 +611,13 @@ public class FlutterView extends FrameLayout {
     for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
       listener.onFlutterEngineAttachedToFlutterView(flutterEngine);
     }
+
+    // If the first frame has already been rendered, notify all first frame listeners.
+    // Do this after all other initialization so that listeners don't inadvertently interact
+    // with a FlutterView that is only partially attached to a FlutterEngine.
+    if (didRenderFirstFrame) {
+      onFirstFrameRenderedListener.onFirstFrameRendered();
+    }
   }
 
   /**
@@ -646,16 +657,11 @@ public class FlutterView extends FrameLayout {
     textInputPlugin.destroy();
 
     // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.
+    FlutterRenderer flutterRenderer = flutterEngine.getRenderer();
     didRenderFirstFrame = false;
-    flutterEngine.getRenderer().detachFromRenderSurface();
+    flutterRenderer.removeOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
+    flutterRenderer.detachFromRenderSurface();
     flutterEngine = null;
-
-    // TODO(mattcarroll): clear the surface when JNI doesn't blow up
-//    if (isSurfaceAvailableForRendering) {
-//      Canvas canvas = surfaceHolder.lockCanvas();
-//      canvas.drawColor(Color.RED);
-//      surfaceHolder.unlockCanvasAndPost(canvas);
-//    }
   }
 
   /**
