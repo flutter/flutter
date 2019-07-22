@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -18,7 +17,6 @@ import 'package:xml/xml.dart' as xml;
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
-import '../../src/testbed.dart';
 
 void main() {
   MockProcessManager mockProcessManager;
@@ -67,7 +65,6 @@ void main() {
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
     VisualStudio: () => mockVisualStudio,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
@@ -81,7 +78,6 @@ void main() {
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
     VisualStudio: () => mockVisualStudio,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
@@ -100,7 +96,6 @@ void main() {
     Platform: () => notWindowsPlatform,
     FileSystem: () => memoryFilesystem,
     VisualStudio: () => mockVisualStudio,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
@@ -137,7 +132,6 @@ void main() {
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
-    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
 }
 

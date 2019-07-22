@@ -243,6 +243,27 @@ void main() {
       SystemClock: () => clock,
       Usage: () => usage,
     });
+
+  });
+
+  group('Experimental commands', () {
+    final MockVersion stableVersion = MockVersion();
+    final MockVersion betaVersion = MockVersion();
+    final FakeCommand fakeCommand = FakeCommand();
+    when(stableVersion.isMaster).thenReturn(false);
+    when(betaVersion.isMaster).thenReturn(true);
+
+    testUsingContext('Can be disabled on stable branch', () async {
+      expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => stableVersion,
+    });
+
+    testUsingContext('Works normally on regular branches', () async {
+      expect(fakeCommand.run(), completes);
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => betaVersion,
+    });
   });
 }
 
@@ -253,6 +274,9 @@ class FakeCommand extends FlutterCommand {
 
   @override
   String get name => 'fake';
+
+  @override
+  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

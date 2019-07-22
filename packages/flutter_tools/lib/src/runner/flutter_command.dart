@@ -25,10 +25,10 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
-import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
+import '../version.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -355,6 +355,11 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
+  /// Whether this feature should not be usable on stable branches.
+  ///
+  /// Defaults to false, meaning it is usable.
+  bool get isExperimental => false;
+
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
 
@@ -550,6 +555,12 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
+    // If we're on a stable branch, then don't allow the usage of
+    // "experimental" features.
+    if (isExperimental && !FlutterVersion.instance.isMaster) {
+      throwToolExit('Experimental feature $name is not supported on stable branches');
+    }
+
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
@@ -642,17 +653,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (featureFlags.isMacOSEnabled) {
+      if (FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (featureFlags.isWindowsEnabled) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (featureFlags.isLinuxEnabled) {
+      if (!FlutterVersion.instance.isMaster) {
         return DevelopmentArtifact.linux;
       }
       return null;

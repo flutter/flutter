@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../features.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import '../windows/build_windows.dart';
@@ -36,6 +35,9 @@ class BuildWindowsCommand extends BuildSubCommand {
   final String name = 'windows';
 
   @override
+  bool isExperimental = true;
+
+  @override
   bool hidden = true;
 
   @override
@@ -45,16 +47,13 @@ class BuildWindowsCommand extends BuildSubCommand {
   };
 
   @override
-  String get description => 'build the desktop Windows target.';
+  String get description => 'build the desktop Windows target (Experimental).';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = getBuildInfo();
-    if (!featureFlags.isWindowsEnabled) {
-      throwToolExit('"build windows" is not currently supported.');
-    }
     if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }

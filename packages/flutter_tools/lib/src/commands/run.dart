@@ -13,7 +13,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../features.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -411,11 +410,11 @@ class RunCommand extends RunCommandBase {
       );
       flutterDevices.add(flutterDevice);
     }
-    // Only support "web mode" with a single web device due to resident runner
-    // refactoring required otherwise.
-    final bool webMode = featureFlags.isWebEnabled &&
-                         devices.length == 1  &&
-                         await devices.single.targetPlatform == TargetPlatform.web_javascript;
+    // Only support "web mode" on non-stable branches with a single web device
+    // in a "hot mode".
+    final bool webMode = FlutterVersion.instance.isMaster
+      && devices.length == 1
+      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
