@@ -64,9 +64,30 @@ class CupertinoScrollbar extends StatefulWidget {
   /// side enlarges the scrollbar thumb and makes it interactive. Dragging it
   /// then causes the view to scroll.
   ///
-  /// Providing this controller parameter will enable this effect. When the
-  /// Scrollbar thumb is dragged, the controller will have its position updated
-  /// proportionally.
+  /// In order to enable this feature, pass an active ScrollController to this
+  /// parameter.  A stateful ancestor of this CupertinoScrollbar needs to
+  /// manage the ScrollController and either pass it to a scrollable descendant
+  /// or use a PrimaryScrollController to share it.
+  ///
+  /// Here is an example of using PrimaryScrollController to enable iOS13's
+  /// draggable scrollbar:
+  ///
+  /// {@tool sample}
+  ///
+  /// ```dart
+  /// final ScrollController controller = ScrollController();
+  /// return PrimaryScrollController(
+  ///   controller: controller,
+  ///   child: CupertinoScrollbar(
+  ///     controller: controller,
+  ///     child: ListView.builder(
+  ///       itemCount: 150,
+  ///       itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///     ),
+  ///   ),
+  /// );
+  /// ```
+  /// {@end-tool}
   final ScrollController controller;
 
   @override
