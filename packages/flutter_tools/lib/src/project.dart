@@ -14,7 +14,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
-import 'features.dart';
+import 'desktop.dart';
 import 'flutter_manifest.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -22,6 +22,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
+import 'web/workflow.dart';
 
 FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>() ?? const FlutterProjectFactory();
 
@@ -205,10 +206,10 @@ class FlutterProject {
     }
     // TODO(stuartmorgan): Add checkProjects logic once a create workflow exists
     // for macOS. For now, always treat checkProjects as true for macOS.
-    if (featureFlags.isMacOSEnabled && macos.existsSync()) {
+    if (flutterDesktopEnabled && macos.existsSync()) {
       await macos.ensureReadyForPlatformSpecificTooling();
     }
-    if (featureFlags.isWebEnabled && web.existsSync()) {
+    if (flutterWebEnabled && web.existsSync()) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);

@@ -8,10 +8,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../features.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -98,21 +98,13 @@ class BuildBundleCommand extends BuildSubCommand {
     if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
     }
-    // Check for target platforms that are only allowed via feature flags.
+    // Check for target platforms that are only allowed on unstable Flutter.
     switch (platform) {
       case TargetPlatform.darwin_x64:
-        if (!featureFlags.isMacOSEnabled) {
-          throwToolExit('macOS is not a supported target platform.');
-        }
-        break;
       case TargetPlatform.windows_x64:
-        if (!featureFlags.isWindowsEnabled) {
-          throwToolExit('Windows is not a supported target platform.');
-        }
-        break;
       case TargetPlatform.linux_x64:
-        if (!featureFlags.isLinuxEnabled) {
-          throwToolExit('Linux is not a supported target platform.');
+        if (!FlutterVersion.instance.isMaster) {
+          throwToolExit('$targetPlatform is not supported on stable Flutter.');
         }
         break;
       default:
