@@ -46,9 +46,6 @@ const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'add2app_test': _runAdd2AppTest,
 };
 
-const Duration _kLongTimeout = Duration(minutes: 45);
-const Duration _kShortTimeout = Duration(minutes: 5);
-
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -90,26 +87,22 @@ Future<void> _runSmokeTests() async {
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pass_test.dart'),
     printOutput: false,
-    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    timeout: _kShortTimeout,
   );
   // We run the timeout tests individually because they are timing-sensitive.
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'timeout_pass_test.dart'),
     expectFailure: false,
     printOutput: false,
-    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'timeout_fail_test.dart'),
     expectFailure: true,
     printOutput: false,
-    timeout: _kShortTimeout,
   );
   await _runFlutterTest(automatedTests,
     script: path.join('test_smoke_test', 'pending_timer_fail_test.dart'),
@@ -119,7 +112,6 @@ Future<void> _runSmokeTests() async {
       output.stdout.contains('failingPendingTimerTest')
       ? null
       : 'Failed to find the stack trace for the pending Timer.',
-    timeout: _kShortTimeout,
   );
   // We run the remaining smoketests in parallel, because they each take some
   // time to run (e.g. compiling), so we don't want to run them in series,
@@ -130,38 +122,32 @@ Future<void> _runSmokeTests() async {
         script: path.join('test_smoke_test', 'crash1_test.dart'),
         expectFailure: true,
         printOutput: false,
-        timeout: _kShortTimeout,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'crash2_test.dart'),
         expectFailure: true,
         printOutput: false,
-        timeout: _kShortTimeout,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
-        timeout: _kShortTimeout,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
         expectFailure: true,
         printOutput: false,
-        timeout: _kShortTimeout,
       ),
       _runFlutterTest(automatedTests,
         script: path.join('test_smoke_test', 'disallow_error_reporter_modification_test.dart'),
         expectFailure: true,
         printOutput: false,
-        timeout: _kShortTimeout,
       ),
       runCommand(flutter,
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
         expectNonZeroExit: true,
         outputMode: OutputMode.discard,
-        timeout: _kShortTimeout,
       ),
     ],
   );
@@ -306,7 +292,6 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
     <String>['build', 'web', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
-    timeout: _kShortTimeout,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     }
@@ -320,7 +305,6 @@ Future<void> _flutterBuildAot(String relativePathToApplication) async {
     <String>['build', 'aot', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
-    timeout: _kShortTimeout,
   );
   print('Done.');
 }
@@ -336,7 +320,6 @@ Future<void> _flutterBuildApk(String relativePathToApplication) async {
     <String>['build', 'apk', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
-    timeout: _kShortTimeout,
   );
   print('Done.');
 }
@@ -354,14 +337,12 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
       <String>['install'],
       workingDirectory: podfile.parent.path,
       expectNonZeroExit: false,
-      timeout: _kShortTimeout,
     );
   }
   await runCommand(flutter,
     <String>['build', 'ios', '--no-codesign', '--debug', '-v'],
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
-    timeout: _kShortTimeout,
   );
   print('Done.');
 }
@@ -376,7 +357,6 @@ Future<void> _runAdd2AppTest() async {
     <String>[],
     workingDirectory: add2AppDir,
     expectNonZeroExit: false,
-    timeout: _kShortTimeout,
   );
   print('Done.');
 }
@@ -783,7 +763,6 @@ class EvalResult {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, {
-  Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
   final List<String> args = <String>[
@@ -803,7 +782,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
       args,
       workingDirectory: workingDirectory,
       expectFlaky: true,
-      timeout: timeout,
       environment: <String, String>{
         'FLUTTER_WEB': 'true',
         'FLUTTER_LOW_RESOURCE_MODE': 'true',
@@ -821,7 +799,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
   OutputChecker outputChecker,
   List<String> options = const <String>[],
   bool skip = false,
-  Duration timeout = _kLongTimeout,
   bq.TabledataResourceApi tableData,
   Map<String, String> environment,
   List<String> tests = const <String>[],
@@ -876,7 +853,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
       outputMode: outputMode,
       output: output,
       skip: skip,
-      timeout: timeout,
       environment: environment,
     );
 
@@ -899,7 +875,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
       args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
-      timeout: timeout,
       beforeExit: formatter.finish,
       environment: environment,
     );
@@ -910,7 +885,6 @@ Future<void> _runFlutterTest(String workingDirectory, {
       args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
-      timeout: timeout,
     );
   }
 }
