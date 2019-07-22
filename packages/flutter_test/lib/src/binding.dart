@@ -840,8 +840,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       // `SystemChrome.setApplicationSwitcherDescription` is called when the tests are initialized.
       // In order to get [pendingChannelInvokeMethodCount] to zero, simply returns a mock response.
       if (methodCall['method'] == 'SystemChrome.setApplicationSwitcherDescription') {
-           jsonMessage.encodeMessage(<dynamic>[null]);
+           return Future<ByteData>.value(jsonMessage.encodeMessage(<dynamic>[null]));
       }
+      return null;
     });
   }
 

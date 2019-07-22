@@ -113,8 +113,7 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
-      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
-      'waitUntilNoPendingChannelMessages': _waitUntilNoPendingChannelMessages,
+      'waitUntilIdle': _waitUntilIdle,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -135,8 +134,7 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
-      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
-      'waitUntilNoPendingChannelMessages': (Map<String, String> params) => WaitUntilNoPendingChannelMessages.deserialize(params),
+      'waitUntilIdle': (Map<String, String> params) => WaitUntilIdle.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -373,36 +371,32 @@ class FlutterDriverExtension {
     return null;
   }
 
-  /// Returns a future that waits until no channels are waiting for platform messages.
-  /// 
-  /// We track the number of [MethodChannel.invokeMethod] calls that are invoked but not finished,
-  /// and this method returns when this number is zero.
-  Future<Result> _waitUntilNoPendingChannelMessages(Command command) async {
-    await _waitUntilCondition(() => pendingChannelInvokeMethodCount == 0);
-    return null;
-  }
-
-  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
+  /// Returns a future that waits until the app is idle.
   ///
   /// Specifically, it checks:
-  /// * Whether the count of transient callbacks is zero.
-  /// * Whether there's no pending request for scheduling a new frame.
+  /// * Whether there's no pending [MethodChannel.invokeMethod] calls.
+  /// * Whether the count of transient callbacks is zero, if "frame sync" is enabled.
+  /// * Whether there's no pending request for scheduling a new frame, if "frame sync" is enabled.
   ///
-  /// We consider the frame is synced when both conditions are met.
+  /// We consider the app idle when the conditions listed above are met.
   ///
   /// This method relies on a Flutter Driver mechanism called "frame sync",
   /// which waits for transient animations to finish. Persistent animations will
   /// cause this to wait forever.
   ///
   /// If a test needs to interact with the app while animations are running, it
-  /// should avoid this method and instead disable the frame sync using
-  /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
-  /// details on how to do this. Note, disabling frame sync will require the
-  /// test author to use some other method to avoid flakiness.
-  Future<Result> _waitUntilNoPendingFrame(Command command) async {
-    await _waitUntilFrame(() {
-      return SchedulerBinding.instance.transientCallbackCount == 0
-          && !SchedulerBinding.instance.hasScheduledFrame;
+  /// should instead disable the frame sync using the `set_frame_sync` method.
+  /// See [FlutterDriver.runUnsynchronized] for more details on how to do this.
+  /// Note, disabling frame sync will require the test author to use some other method to avoid flakiness.
+  Future<Result> _waitUntilIdle(Command command) async {
+    await _waitUntilCondition(() {
+      bool idleCondition = pendingChannelInvokeMethodCount == 0;
+      if (_frameSync) {
+        idleCondition = idleCondition &&
+            SchedulerBinding.instance.transientCallbackCount == 0 &&
+            !SchedulerBinding.instance.hasScheduledFrame;
+      }
+      return idleCondition;
     });
     return null;
   }
@@ -561,9 +555,10 @@ class FlutterDriverExtension {
     return SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
   }
 
-  Future<void> _waitUntilCondition(bool condition(), [ Completer<void> completer]) {
-    completer ??= Completer<void>();
-    Timer.periodic(const Duration(milliseconds: 2), (Timer timer) {
+  Future<void> _waitUntilCondition(bool condition(),
+      [Duration duration = const Duration(milliseconds: 10)]) {
+    final Completer<void> completer = Completer<void>();
+    Timer.periodic(duration, (Timer timer) {
       if (condition()) {
         timer.cancel();
         completer.complete();

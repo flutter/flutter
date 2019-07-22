@@ -338,7 +338,7 @@ void main() {
     expect(children.single['children'], isEmpty);
   });
 
-  group('waitUntilFrameSync', () {
+  group('waitUntilIdle', () {
     FlutterDriverExtension extension;
     Map<String, dynamic> result;
 
@@ -347,14 +347,16 @@ void main() {
       result = null;
     });
 
-    testWidgets('returns immediately when frame is synced', (
+    testWidgets('returns immediately when the app is idle', (
         WidgetTester tester) async {
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilIdle().serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
 
       await tester.idle();
+      // Advances time by 10 milliseconds.
+      await tester.pump(const Duration(milliseconds: 10));
       expect(
         result,
         <String, dynamic>{
@@ -363,14 +365,14 @@ void main() {
         },
       );
     });
-
-    testWidgets(
+ 
+   testWidgets(
         'waits until no transient callbacks', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrameCallback((_) {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilIdle().serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -381,6 +383,9 @@ void main() {
 
       // NOW we should receive the result.
       await tester.pump();
+      // Pumps again to advance time by 10 milliseconds, since the fakeAsync.elapse(duration)
+      // has to be called after frame is rendered.
+      await tester.pump(const Duration(milliseconds: 10));
       expect(
         result,
         <String, dynamic>{
@@ -394,7 +399,7 @@ void main() {
         'waits until no pending scheduled frame', (WidgetTester tester) async {
       SchedulerBinding.instance.scheduleFrame();
 
-      extension.call(const WaitUntilNoPendingFrame().serialize())
+      extension.call(const WaitUntilIdle().serialize())
           .then<void>(expectAsync1((Map<String, dynamic> r) {
         result = r;
       }));
@@ -405,6 +410,9 @@ void main() {
 
       // NOW we should receive the result.
       await tester.pump();
+      // Pumps again to advance time by 10 milliseconds, since the fakeAsync.elapse(duration)
+      // has to be called after frame is rendered.
+      await tester.pump(const Duration(milliseconds: 10));
       expect(
         result,
         <String, dynamic>{
@@ -413,61 +421,31 @@ void main() {
         },
       );
     });
-  });
-
-  group('waitUntilNoPendingChannelMessages', () {
-    FlutterDriverExtension extension;
-    Map<String, dynamic> result;
-
-    setUp(() {
-      extension = FlutterDriverExtension((String arg) async => '', true);
-      result = null;
-    });
-
-    test('returns immediately when there is no pending channel message',
-        () async {
-      FakeAsync().run((FakeAsync async) {
-        extension
-            .call(const WaitUntilNoPendingChannelMessages().serialize())
-            .then<void>(expectAsync1((Map<String, dynamic> r) {
-          result = r;
-        }));
-
-        async.elapse(const Duration(milliseconds: 2));
-        expect(
-          result,
-          <String, dynamic>{
-            'isError': false,
-            'response': null,
-          },
-        );
-      });
-    });
 
     test('waits until the invokeMethod is finished', () async {
-      FakeAsync().run((FakeAsync async) {
+      FakeAsync().run((FakeAsync fakeAsync) {
         const MethodChannel channel =
             MethodChannel('helloChannel', JSONMethodCodec());
         const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
         defaultBinaryMessenger.setMockMessageHandler('helloChannel',
             (ByteData message) async {
-          return Future<ByteData>.delayed(const Duration(milliseconds: 3),
+          return Future<ByteData>.delayed(const Duration(milliseconds: 15),
               () => jsonMessage.encodeMessage(<dynamic>['hello world']));
         });
-        channel.invokeMethod('sayHello', 'hello');
+        channel.invokeMethod<String>('sayHello', 'hello');
 
         extension
-            .call(const WaitUntilNoPendingChannelMessages().serialize())
+            .call(const WaitUntilIdle().serialize())
             .then<void>(expectAsync1((Map<String, dynamic> r) {
           result = r;
         }));
 
-        // The channel message are delayed for 3 milliseconds, so nothing happens yet.
-        async.elapse(const Duration(milliseconds: 2));
+        // The channel message are delayed for 15 milliseconds, so nothing happens yet.
+        fakeAsync.elapse(const Duration(milliseconds: 10));
         expect(result, isNull);
 
         // Now we receive the result.
-        async.elapse(const Duration(milliseconds: 2));
+        fakeAsync.elapse(const Duration(milliseconds: 10));
         expect(
           result,
           <String, dynamic>{

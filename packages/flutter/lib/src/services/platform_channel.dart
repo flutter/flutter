@@ -310,8 +310,8 @@ class MethodChannel {
   @optionalTypeArgs
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     assert(method != null);
+    _pendingChannelInvokeMethodCount += 1;
     try {
-      _pendingChannelInvokeMethodCount += 1;
       final ByteData result = await binaryMessenger.send(
         name,
         codec.encodeMethodCall(MethodCall(method, arguments)),
