@@ -423,8 +423,8 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   }, skip: isBrowser);
 
-  testWidgets('Default tooltip message textStyle', (WidgetTester tester) async {
-    GlobalKey key = GlobalKey();
+  testWidgets('Default tooltip message textStyle - light', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: Tooltip(
         key: key,
@@ -439,13 +439,15 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
     expect(textStyle.color, Colors.white);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
     expect(textStyle.debugLabel, '(englishLike body1 2014).merge(whiteMountainView body1)');
+  });
 
-    key = GlobalKey();
+  testWidgets('Default tooltip message textStyle - dark', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -463,7 +465,7 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    textStyle = tester.widget<Text>(find.text(tooltipText)).style;
+    final TextStyle textStyle = tester.widget<Text>(find.text(tooltipText)).style;
     expect(textStyle.color, Colors.black);
     expect(textStyle.fontFamily, 'Roboto');
     expect(textStyle.decoration, TextDecoration.none);
