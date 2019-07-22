@@ -26,7 +26,7 @@ class DevelopmentArtifact {
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should not be usable on stable branches.
+  /// Whether this artifact should be unavailable on stable branches.
   final bool unstable;
 
   /// Artifacts required for Android development.
@@ -35,7 +35,7 @@ class DevelopmentArtifact {
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
-  /// Artifacts required for web development,
+  /// Artifacts required for web development.
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
@@ -44,7 +44,7 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Windows.
   static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
-  /// Artifacts required for desktop linux.
+  /// Artifacts required for desktop Linux.
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
@@ -53,7 +53,7 @@ class DevelopmentArtifact {
   /// Artifacts required for the Flutter Runner.
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
 
-  /// Artifacts required by all developments.
+  /// Artifacts required for any development platform.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The values of DevelopmentArtifacts.
@@ -212,8 +212,10 @@ class Cache {
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
     final Directory dir = fs.directory(fs.path.join(getRoot().path, name));
-    if (!dir.existsSync())
+    if (!dir.existsSync()) {
       dir.createSync(recursive: true);
+      os.chmod(dir, '755');
+    }
     return dir;
   }
 
@@ -285,8 +287,10 @@ class Cache {
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
     final Directory serviceDir = fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
-    if (!serviceDir.existsSync())
+    if (!serviceDir.existsSync()) {
       serviceDir.createSync(recursive: true);
+      os.chmod(serviceDir, '755');
+    }
 
     final File cachedFile = fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
@@ -638,13 +642,16 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     return true;
   }
 
-
   void _makeFilesExecutable(Directory dir) {
-    for (FileSystemEntity entity in dir.listSync()) {
+    os.chmod(dir, 'a+r,a+x');
+    for (FileSystemEntity entity in dir.listSync(recursive: true)) {
       if (entity is File) {
-        final String name = fs.path.basename(entity.path);
-        if (name == 'flutter_tester')
-          os.makeExecutable(entity);
+        final FileStat stat = entity.statSync();
+        final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
+        if (entity.basename == 'flutter_tester' || isUserExecutable) {
+          // Make the file readable and executable by all users.
+          os.chmod(entity, 'a+r,a+x');
+        }
       }
     }
   }
@@ -891,24 +898,27 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
   }
 }
 
-/// The pre-built flutter runner.
+/// The pre-built flutter runner for Fuchsia development.
 class FlutterRunnerSDKArtifacts extends CachedArtifact {
   FlutterRunnerSDKArtifacts(Cache cache)
-      : super('flutter-runner', cache, const <DevelopmentArtifact>{
+      : super('flutter_runner', cache, const <DevelopmentArtifact>{
     DevelopmentArtifact.flutterRunner,
   });
 
   @override
-  Directory get location => cache.getArtifactDirectory('flutter-runner');
+  Directory get location => cache.getArtifactDirectory('flutter_runner');
 
   @override
-  Future<void> updateInner() {
-    if (!platform.isLinux || !platform.isMacOS) {
+  String get version => cache.getVersionFor('engine');
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
       return Future<void>.value();
     }
-    final String url = '$_cipdBaseUrl/flutter/fuchsia/+/$version';
-    return _downloadZipArchive('Downloading package flutter runner...',
-                               Uri.parse(url), location);
+    final String url = '$_cipdBaseUrl/flutter/fuchsia/+/git_revision:$version';
+    await _downloadZipArchive('Downloading package flutter runner...',
+        Uri.parse(url), location);
   }
 }
 

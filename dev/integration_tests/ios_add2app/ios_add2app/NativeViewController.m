@@ -34,6 +34,11 @@
 
     self.title = @"Native iOS View";
     self.view.backgroundColor = UIColor.lightGrayColor;
+    self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                                initWithTitle:@"Back"
+                                                        style:UIBarButtonItemStylePlain
+                                                       target:nil
+                                                       action:nil];
 
     _incrementLabel = [self addIncrementLabel];
     UIStackView* footer = [self addFooter];

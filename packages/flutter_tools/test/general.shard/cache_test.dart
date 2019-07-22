@@ -6,14 +6,20 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:file_testing/file_testing.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
+import 'package:flutter_tools/src/base/net.dart';
+import 'package:flutter_tools/src/base/os.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/testbed.dart';
 
 void main() {
   group('$Cache.checkLockAcquired', () {
@@ -51,8 +57,13 @@ void main() {
   });
 
   group('Cache', () {
-    final MockCache mockCache = MockCache();
-    final MemoryFileSystem fs = MemoryFileSystem();
+    MockCache mockCache;
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      mockCache = MockCache();
+      memoryFileSystem = MemoryFileSystem();
+    });
 
     testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
       final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
@@ -63,7 +74,7 @@ void main() {
       expect(gradleWrapper.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs,
+      FileSystem: () => memoryFileSystem,
     });
 
     testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
@@ -78,7 +89,7 @@ void main() {
       expect(gradleWrapper.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
       Cache: ()=> mockCache,
-      FileSystem: () => fs,
+      FileSystem: () => memoryFileSystem,
     });
 
     test('should not be up to date, if some cached artifact is not', () {
@@ -157,6 +168,83 @@ void main() {
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),
   });
+
+  test('Unstable artifacts', () {
+    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.linux.unstable, true);
+    expect(DevelopmentArtifact.macOS.unstable, true);
+    expect(DevelopmentArtifact.windows.unstable, true);
+    expect(DevelopmentArtifact.fuchsia.unstable, true);
+    expect(DevelopmentArtifact.flutterRunner.unstable, true);
+  });
+
+  group('EngineCachedArtifact', () {
+    FakeHttpClient fakeHttpClient;
+    FakePlatform fakePlatform;
+    MemoryFileSystem memoryFileSystem;
+    MockCache mockCache;
+    MockOperatingSystemUtils mockOperatingSystemUtils;
+
+    setUp(() {
+      fakeHttpClient = FakeHttpClient();
+      fakePlatform = FakePlatform()..environment = const <String, String>{};
+      memoryFileSystem = MemoryFileSystem();
+      mockCache = MockCache();
+      mockOperatingSystemUtils = MockOperatingSystemUtils();
+      when(mockOperatingSystemUtils.verifyZip(any)).thenReturn(true);
+    });
+
+    testUsingContext('makes binary dirs readable and executable by all', () async {
+      final Directory artifactDir = fs.systemTempDirectory.createTempSync('artifact.');
+      final Directory downloadDir = fs.systemTempDirectory.createTempSync('download.');
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      final FakeCachedArtifact artifact = FakeCachedArtifact(
+        cache: mockCache,
+        binaryDirs: <List<String>>[
+          <String>['bin_dir', 'unused_url_path'],
+        ],
+      );
+      await artifact.updateInner();
+      final Directory dir = memoryFileSystem.systemTempDirectory
+          .listSync(recursive: true)
+          .whereType<Directory>()
+          .singleWhere((Directory directory) => directory.basename == 'bin_dir', orElse: () => null);
+      expect(dir, isNotNull);
+      expect(dir.path, artifactDir.childDirectory('bin_dir').path);
+      verify(mockOperatingSystemUtils.chmod(argThat(hasPath(dir.path)), 'a+r,a+x'));
+    }, overrides: <Type, Generator>{
+      Cache: ()=> mockCache,
+      FileSystem: () => memoryFileSystem,
+      HttpClientFactory: () => () => fakeHttpClient,
+      OperatingSystemUtils: () => mockOperatingSystemUtils,
+      Platform: () => fakePlatform,
+    });
+  });
+}
+
+class FakeCachedArtifact extends EngineCachedArtifact {
+  FakeCachedArtifact({
+    String stampName = 'STAMP',
+    @required Cache cache,
+    Set<DevelopmentArtifact> requiredArtifacts = const <DevelopmentArtifact>{},
+    this.binaryDirs = const <List<String>>[],
+    this.licenseDirs = const <String>[],
+    this.packageDirs = const <String>[],
+  }) : super(stampName, cache, requiredArtifacts);
+
+  final List<List<String>> binaryDirs;
+  final List<String> licenseDirs;
+  final List<String> packageDirs;
+
+  @override
+  List<List<String>> getBinaryDirs() => binaryDirs;
+
+  @override
+  List<String> getLicenseDirs() => licenseDirs;
+
+  @override
+  List<String> getPackageDirs() => packageDirs;
 }
 
 class MockFileSystem extends ForwardingFileSystem {
@@ -179,3 +267,4 @@ class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
 class MockInternetAddress extends Mock implements InternetAddress {}
 class MockCache extends Mock implements Cache {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

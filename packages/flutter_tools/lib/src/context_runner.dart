@@ -28,6 +28,7 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
@@ -79,6 +80,7 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FeatureFlags: () => const FeatureFlags(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
