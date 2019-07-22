@@ -866,6 +866,109 @@ void main() {
     }
   });
 
+  testWidgets('Sizes of toggle buttons rebuilds with the correct dimensions', (WidgetTester tester) async {
+    final List<Widget> children = <Widget>[
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 100.0,
+          height: 100.0,
+        ),
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 100.0,
+          height: 100.0,
+        ),
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 100.0,
+          height: 100.0,
+        ),
+      ),
+    ];
+
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false, true, false],
+            children: children,
+          ),
+        ),
+      ),
+    );
+
+    List<Widget> toggleButtons;
+    toggleButtons = tester.allWidgets.where((Widget widget) {
+      return widget.runtimeType.toString() == '_SelectToggleButton';
+    }).toList();
+
+    for (int i = 0; i < toggleButtons.length; i++) {
+      final Rect rect = tester.getRect(find.byWidget(toggleButtons[i]));
+      expect(rect.height, 100.0 + 2 * _defaultBorderWidth);
+
+      // Only the last button paints both leading and trailing borders.
+      // Other buttons only paint the leading border.
+      if (i == toggleButtons.length - 1) {
+        expect(rect.width, 100.0 + 2 * _defaultBorderWidth);
+      } else {
+        expect(rect.width, 100.0 + 1 * _defaultBorderWidth);
+      }
+    }
+
+    final List<Widget> childrenRebuilt = <Widget>[
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 200.0,
+          height: 200.0,
+        ),
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 200.0,
+          height: 200.0,
+        ),
+      ),
+      Container(
+        constraints: const BoxConstraints.tightFor(
+          width: 200.0,
+          height: 200.0,
+        ),
+      ),
+    ];
+
+    // Update border width and widget sized to verify layout updates correctly
+    const double customBorderWidth = 5.0;
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            borderWidth: customBorderWidth,
+            isSelected: const <bool>[false, true, false],
+            children: childrenRebuilt,
+          ),
+        ),
+      ),
+    );
+
+    toggleButtons = tester.allWidgets.where((Widget widget) {
+      return widget.runtimeType.toString() == '_SelectToggleButton';
+    }).toList();
+
+    // Only the last button paints both leading and trailing borders.
+    // Other buttons only paint the leading border.
+    for (int i = 0; i < toggleButtons.length; i++) {
+      final Rect rect = tester.getRect(find.byWidget(toggleButtons[i]));
+      expect(rect.height, 200.0 + 2 * customBorderWidth);
+      if (i == toggleButtons.length - 1) {
+        expect(rect.width, 200.0 + 2 * customBorderWidth);
+      } else {
+        expect(rect.width, 200.0 + 1 * customBorderWidth);
+      }
+    }
+  });
+
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
