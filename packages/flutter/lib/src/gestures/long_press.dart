@@ -127,7 +127,7 @@ class LongPressEndDetails {
   /// The local position at which the pointer contacted the screen.
   final Offset localPosition;
 
-  /// The velocity the pointer was moving when it stopped contacting the screen.
+  /// The pointer's velocity when it stopped contacting the screen.
   ///
   /// Defaults to zero if not specified in the constructor.
   final Velocity velocity;
@@ -253,6 +253,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (!event.synthesized) {
       if (event is PointerDownEvent) {
+        assert(_velocityTracker == null);
         _velocityTracker = VelocityTracker();
         _velocityTracker.addPosition(event.timeStamp, event.localPosition);
       }
@@ -316,8 +317,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
     assert(_initialButtons == kPrimaryButton);
 
     final VelocityEstimate estimate = _velocityTracker.getVelocityEstimate();
-    final Velocity velocity = estimate == null ? Velocity.zero
-      : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
+    final Velocity velocity = estimate == null ? Velocity.zero : Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
     final LongPressEndDetails details = LongPressEndDetails(
       globalPosition: event.position,
       localPosition: event.localPosition,

@@ -102,17 +102,16 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   AnimationController _fadeoutAnimationController;
   Animation<double> _fadeoutOpacityAnimation;
   AnimationController _thicknessAnimationController;
-  Animation<double> _thicknessAnimation;
   Timer _fadeoutTimer;
   double _dragScrollbarStartY;
   double _horizontalDragScrollbarStartY;
 
   double get _thickness {
-    return _kScrollbarThickness + _thicknessAnimation.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
+    return _kScrollbarThickness + _thicknessAnimationController.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
   }
 
   Radius get _radius {
-    return Radius.lerp(_kScrollbarRadius, _kScrollbarRadiusDragging, _thicknessAnimation.value);
+    return Radius.lerp(_kScrollbarRadius, _kScrollbarRadiusDragging, _thicknessAnimationController.value);
   }
 
   @override
@@ -130,13 +129,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       vsync: this,
       duration: _kScrollbarResizeDuration,
     );
-    _thicknessAnimation = _thicknessAnimationController.drive(
-      Tween<double>(
-        begin: 0.0,
-        end: 1.0,
-      ),
-    );
-    _thicknessAnimation.addListener(() {
+    _thicknessAnimationController.addListener(() {
       _painter.updateThickness(_thickness, _radius);
     });
   }
@@ -263,8 +256,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // Get the GestureRecognizerFactories used to detect gestures on the scrollbar
   // thumb.
   Map<Type, GestureRecognizerFactory> get _gestures {
-    final Map<Type, GestureRecognizerFactory> gestures =
-      <Type, GestureRecognizerFactory>{};
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
     if (widget.controller == null) {
       return gestures;
     }
@@ -305,6 +297,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void dispose() {
     _fadeoutAnimationController.dispose();
+    _thicknessAnimationController.dispose();
     _fadeoutTimer?.cancel();
     _painter.dispose();
     super.dispose();
