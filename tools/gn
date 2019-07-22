@@ -367,7 +367,11 @@ def main(argv):
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
   print "Generating GN files in: %s" % out_dir
-  gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
+  try:
+    gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
+  except subprocess.CalledProcessError as exc:
+    print "Failed to generate gn files: ", exc.returncode, exc.output
+    sys.exit(1)
 
   if gn_call_result == 0:
     # Generate/Replace the compile commands database in out.

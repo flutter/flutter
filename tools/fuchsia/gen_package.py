@@ -3,7 +3,6 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """ Genrate a Fuchsia FAR Archive from an asset manifest and a signing key.
 """
 
@@ -14,13 +13,31 @@ import os
 import subprocess
 import sys
 
+
+def CreateFarPackage(pm_bin, package_dir, signing_key, dst_dir):
+  pm_command_base = [
+      pm_bin, '-m', package_dir, '-k', signing_key, '-o', dst_dir
+  ]
+
+  # Build the package
+  subprocess.check_call(pm_command_base + ['build'])
+
+  # Archive the package
+  subprocess.check_call(pm_command_base + ['archive'])
+
+  return 0
+
+
 def main():
-  parser = argparse.ArgumentParser();
+  parser = argparse.ArgumentParser()
 
   parser.add_argument('--pm-bin', dest='pm_bin', action='store', required=True)
-  parser.add_argument('--package-dir', dest='package_dir', action='store', required=True)
-  parser.add_argument('--signing-key', dest='signing_key', action='store', required=True)
-  parser.add_argument('--manifest-file', dest='manifest_file', action='store', required=True)
+  parser.add_argument(
+      '--package-dir', dest='package_dir', action='store', required=True)
+  parser.add_argument(
+      '--signing-key', dest='signing_key', action='store', required=True)
+  parser.add_argument(
+      '--manifest-file', dest='manifest_file', action='store', required=True)
 
   args = parser.parse_args()
 
@@ -30,22 +47,23 @@ def main():
   assert os.path.exists(args.manifest_file)
 
   pm_command_base = [
-    args.pm_bin,
-    '-o',
-    args.package_dir,
-    '-k',
-    args.signing_key,
-    '-m',
-    args.manifest_file,
+      args.pm_bin,
+      '-o',
+      args.package_dir,
+      '-k',
+      args.signing_key,
+      '-m',
+      args.manifest_file,
   ]
 
   # Build the package
-  subprocess.check_call(pm_command_base + [ 'build' ]);
+  subprocess.check_call(pm_command_base + ['build'])
 
   # Archive the package
-  subprocess.check_call(pm_command_base + [ 'archive' ]);
+  subprocess.check_call(pm_command_base + ['archive'])
 
   return 0
+
 
 if __name__ == '__main__':
   sys.exit(main())
