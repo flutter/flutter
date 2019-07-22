@@ -9579,210 +9579,6 @@ class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'មើលអាជ្ញាបណ្ណ';
 }
 
-/// The translations for Kannada (`kn`).
-class MaterialLocalizationKn extends GlobalMaterialLocalizations {
-  /// Create an instance of the translation bundle for Kannada.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
-  const MaterialLocalizationKn({
-    String localeName = 'kn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat longDateFormat,
-    @required intl.DateFormat yearMonthFormat,
-    @required intl.NumberFormat decimalFormat,
-    @required intl.NumberFormat twoDigitZeroPaddedFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    mediumDateFormat: mediumDateFormat,
-    longDateFormat: longDateFormat,
-    yearMonthFormat: yearMonthFormat,
-    decimalFormat: decimalFormat,
-    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
-  );
-
-  @override
-  String get aboutListTileTitleRaw => r'$applicationName ಬಗ್ಗೆ';
-
-  @override
-  String get alertDialogLabel => r'ಎಚ್ಚರಿಕೆ';
-
-  @override
-  String get anteMeridiemAbbreviation => r'ಬೆಳಿಗ್ಗೆ';
-
-  @override
-  String get backButtonTooltip => r'ಹಿಂತಿರುಗಿ';
-
-  @override
-  String get cancelButtonLabel => r'ರದ್ದುಮಾಡಿ';
-
-  @override
-  String get closeButtonLabel => r'ಮುಚ್ಚಿರಿ';
-
-  @override
-  String get closeButtonTooltip => r'ಮುಚ್ಚಿರಿ';
-
-  @override
-  String get collapsedIconTapHint => r'ವಿಸ್ತರಿಸಿ';
-
-  @override
-  String get continueButtonLabel => r'ಮುಂದುವರಿಸಿ';
-
-  @override
-  String get copyButtonLabel => r'ನಕಲಿಸಿ';
-
-  @override
-  String get cutButtonLabel => r'ಕತ್ತರಿಸಿ';
-
-  @override
-  String get deleteButtonTooltip => r'ಅಳಿಸಿ';
-
-  @override
-  String get dialogLabel => r'ಡೈಲಾಗ್';
-
-  @override
-  String get drawerLabel => r'ನ್ಯಾವಿಗೇಶನ್‌ ಮೆನು';
-
-  @override
-  String get expandedIconTapHint => r'ಕುಗ್ಗಿಸಿ';
-
-  @override
-  String get hideAccountsLabel => r'ಖಾತೆಗಳನ್ನು ಮರೆಮಾಡಿ';
-
-  @override
-  String get licensesPageTitle => r'ಪರವಾನಗಿಗಳು';
-
-  @override
-  String get modalBarrierDismissLabel => r'ವಜಾಗೊಳಿಸಿ';
-
-  @override
-  String get nextMonthTooltip => r'ಮುಂದಿನ ತಿಂಗಳು';
-
-  @override
-  String get nextPageTooltip => r'ಮುಂದಿನ ಪುಟ';
-
-  @override
-  String get okButtonLabel => r'ಸರಿ';
-
-  @override
-  String get openAppDrawerTooltip => r'ನ್ಯಾವಿಗೇಶನ್‌ ಮೆನು ತೆರೆಯಿರಿ';
-
-  @override
-  String get pageRowsInfoTitleRaw => r'$rowCount ರಲ್ಲಿ $firstRow–$lastRow';
-
-  @override
-  String get pageRowsInfoTitleApproximateRaw => r'$rowCount ರಲ್ಲಿ $firstRow–$lastRow';
-
-  @override
-  String get pasteButtonLabel => r'ಅಂಟಿಸಿ';
-
-  @override
-  String get popupMenuLabel => r'ಪಾಪ್ಅಪ್ ಮೆನು';
-
-  @override
-  String get postMeridiemAbbreviation => r'ಸಂಜೆ';
-
-  @override
-  String get previousMonthTooltip => r'ಹಿಂದಿನ ತಿಂಗಳು';
-
-  @override
-  String get previousPageTooltip => r'ಹಿಂದಿನ ಪುಟ';
-
-  @override
-  String get refreshIndicatorSemanticLabel => r'ರಿಫ್ರೆಶ್ ಮಾಡಿ';
-
-  @override
-  String get remainingTextFieldCharacterCountFew => null;
-
-  @override
-  String get remainingTextFieldCharacterCountMany => null;
-
-  @override
-  String get remainingTextFieldCharacterCountOne => r'1 ಅಕ್ಷರ ಉಳಿದಿದೆ';
-
-  @override
-  String get remainingTextFieldCharacterCountOther => r'$remainingCount ಅಕ್ಷರಗಳು ಉಳಿದಿವೆ';
-
-  @override
-  String get remainingTextFieldCharacterCountTwo => null;
-
-  @override
-  String get remainingTextFieldCharacterCountZero => null;
-
-  @override
-  String get reorderItemDown => r'ಕೆಳಗೆ ಸರಿಸಿ';
-
-  @override
-  String get reorderItemLeft => r'ಎಡಕ್ಕೆ ಸರಿಸಿ';
-
-  @override
-  String get reorderItemRight => r'ಬಲಕ್ಕೆ ಸರಿಸಿ';
-
-  @override
-  String get reorderItemToEnd => r'ಕೊನೆಗೆ ಸರಿಸಿ';
-
-  @override
-  String get reorderItemToStart => r'ಪ್ರಾರಂಭಕ್ಕೆ ಸರಿಸಿ';
-
-  @override
-  String get reorderItemUp => r'ಮೇಲೆ ಸರಿಸಿ';
-
-  @override
-  String get rowsPerPageTitle => r'ಪ್ರತಿ ಪುಟಕ್ಕೆ ಸಾಲುಗಳು:';
-
-  @override
-  ScriptCategory get scriptCategory => ScriptCategory.tall;
-
-  @override
-  String get searchFieldLabel => r'ಹುಡುಕಿ';
-
-  @override
-  String get selectAllButtonLabel => r'ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ';
-
-  @override
-  String get selectedRowCountTitleFew => null;
-
-  @override
-  String get selectedRowCountTitleMany => null;
-
-  @override
-  String get selectedRowCountTitleOne => r'1 ಐಟಂ ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ';
-
-  @override
-  String get selectedRowCountTitleOther => r'$selectedRowCount ಐಟಂಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಲಾಗಿದೆ';
-
-  @override
-  String get selectedRowCountTitleTwo => null;
-
-  @override
-  String get selectedRowCountTitleZero => null;
-
-  @override
-  String get showAccountsLabel => r'ಖಾತೆಗಳನ್ನು ತೋರಿಸಿ';
-
-  @override
-  String get showMenuTooltip => r'ಮೆನು ತೋರಿಸಿ';
-
-  @override
-  String get signedInLabel => r'ಸೈನ್ ಇನ್ ಮಾಡಲಾಗಿದೆ';
-
-  @override
-  String get tabLabelRaw => r'$tabCount ರಲ್ಲಿನ $tabIndex ಟ್ಯಾಬ್';
-
-  @override
-  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
-
-  @override
-  String get timePickerHourModeAnnouncement => r'ಗಂಟೆಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ';
-
-  @override
-  String get timePickerMinuteModeAnnouncement => r'ನಿಮಿಷಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ';
-
-  @override
-  String get viewLicensesButtonLabel => r'ಪರವಾನಗಿಗಳನ್ನು ವೀಕ್ಷಿಸಿ';
-}
-
 /// The translations for Korean (`ko`).
 class MaterialLocalizationKo extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Korean.
@@ -18304,7 +18100,6 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
   'ka', // Georgian
   'kk', // Kazakh
   'km', // Khmer Central Khmer
-  'kn', // Kannada
   'ko', // Korean
   'ky', // Kirghiz Kyrgyz
   'lo', // Lao
@@ -18393,7 +18188,6 @@ final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <Stri
 ///  * `ka` - Georgian
 ///  * `kk` - Kazakh
 ///  * `km` - Khmer Central Khmer
-///  * `kn` - Kannada
 ///  * `ko` - Korean
 ///  * `ky` - Kirghiz Kyrgyz
 ///  * `lo` - Lao
@@ -18591,8 +18385,6 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationKk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
       return MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
-    case 'kn':
-      return MaterialLocalizationKn(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
       return MaterialLocalizationKo(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ky':

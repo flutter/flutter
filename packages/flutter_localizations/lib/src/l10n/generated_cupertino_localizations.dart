@@ -6707,154 +6707,6 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get todayLabel => r'ថ្ងៃនេះ';
 }
 
-/// The translations for Kannada (`kn`).
-class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
-  /// Create an instance of the translation bundle for Kannada.
-  ///
-  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
-  const CupertinoLocalizationKn({
-    String localeName = 'kn',
-    @required intl.DateFormat fullYearFormat,
-    @required intl.DateFormat dayFormat,
-    @required intl.DateFormat mediumDateFormat,
-    @required intl.DateFormat singleDigitHourFormat,
-    @required intl.DateFormat singleDigitMinuteFormat,
-    @required intl.DateFormat doubleDigitMinuteFormat,
-    @required intl.DateFormat singleDigitSecondFormat,
-    @required intl.NumberFormat decimalFormat,
-  }) : super(
-    localeName: localeName,
-    fullYearFormat: fullYearFormat,
-    dayFormat: dayFormat,
-    mediumDateFormat: mediumDateFormat,
-    singleDigitHourFormat: singleDigitHourFormat,
-    singleDigitMinuteFormat: singleDigitMinuteFormat,
-    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
-    singleDigitSecondFormat: singleDigitSecondFormat,
-    decimalFormat: decimalFormat,
-  );
-
-  @override
-  String get alertDialogLabel => r'ಎಚ್ಚರಿಕೆ';
-
-  @override
-  String get anteMeridiemAbbreviation => r'ಬೆಳಿಗ್ಗೆ';
-
-  @override
-  String get copyButtonLabel => r'ನಕಲಿಸಿ';
-
-  @override
-  String get cutButtonLabel => r'ಕತ್ತರಿಸಿ';
-
-  @override
-  String get datePickerDateOrderString => r'dmy';
-
-  @override
-  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
-
-  @override
-  String get datePickerHourSemanticsLabelFew => null;
-
-  @override
-  String get datePickerHourSemanticsLabelMany => null;
-
-  @override
-  String get datePickerHourSemanticsLabelOne => r'$hour ಗಂಟೆ';
-
-  @override
-  String get datePickerHourSemanticsLabelOther => r'$hour ಗಂಟೆ';
-
-  @override
-  String get datePickerHourSemanticsLabelTwo => null;
-
-  @override
-  String get datePickerHourSemanticsLabelZero => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelFew => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelMany => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelOne => r'1 ನಿಮಿಷ';
-
-  @override
-  String get datePickerMinuteSemanticsLabelOther => r'$minute ನಿಮಿಷಗಳು';
-
-  @override
-  String get datePickerMinuteSemanticsLabelTwo => null;
-
-  @override
-  String get datePickerMinuteSemanticsLabelZero => null;
-
-  @override
-  String get pasteButtonLabel => r'ಅಂಟಿಸಿ';
-
-  @override
-  String get postMeridiemAbbreviation => r'ಸಂಜೆ';
-
-  @override
-  String get selectAllButtonLabel => r'ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆಮಾಡಿ';
-
-  @override
-  String get timerPickerHourLabelFew => null;
-
-  @override
-  String get timerPickerHourLabelMany => null;
-
-  @override
-  String get timerPickerHourLabelOne => r'ಗಂಟೆ';
-
-  @override
-  String get timerPickerHourLabelOther => r'ಗಂಟೆಗಳು';
-
-  @override
-  String get timerPickerHourLabelTwo => null;
-
-  @override
-  String get timerPickerHourLabelZero => null;
-
-  @override
-  String get timerPickerMinuteLabelFew => null;
-
-  @override
-  String get timerPickerMinuteLabelMany => null;
-
-  @override
-  String get timerPickerMinuteLabelOne => r'ನಿಮಿ.';
-
-  @override
-  String get timerPickerMinuteLabelOther => r'ನಿಮಿ.';
-
-  @override
-  String get timerPickerMinuteLabelTwo => null;
-
-  @override
-  String get timerPickerMinuteLabelZero => null;
-
-  @override
-  String get timerPickerSecondLabelFew => null;
-
-  @override
-  String get timerPickerSecondLabelMany => null;
-
-  @override
-  String get timerPickerSecondLabelOne => r'ಸೆ.';
-
-  @override
-  String get timerPickerSecondLabelOther => r'ಸೆ.';
-
-  @override
-  String get timerPickerSecondLabelTwo => null;
-
-  @override
-  String get timerPickerSecondLabelZero => null;
-
-  @override
-  String get todayLabel => r'ಇಂದು';
-}
-
 /// The translations for Korean (`ko`).
 class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Korean.
@@ -12844,7 +12696,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'ka', // Georgian
   'kk', // Kazakh
   'km', // Khmer Central Khmer
-  'kn', // Kannada
   'ko', // Korean
   'ky', // Kirghiz Kyrgyz
   'lo', // Lao
@@ -12932,7 +12783,6 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `ka` - Georgian
 ///  * `kk` - Kazakh
 ///  * `km` - Khmer Central Khmer
-///  * `kn` - Kannada
 ///  * `ko` - Korean
 ///  * `ky` - Kirghiz Kyrgyz
 ///  * `lo` - Lao
@@ -13126,8 +12976,6 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
       return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'km':
       return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
-    case 'kn':
-      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ko':
       return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ky':
