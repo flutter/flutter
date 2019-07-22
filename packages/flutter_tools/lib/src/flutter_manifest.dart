@@ -6,232 +6,88 @@ import 'package:meta/meta.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:yaml/yaml.dart';
 
+import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
-import 'cache.dart';
 import 'globals.dart';
 
-/// A wrapper around the `flutter` section in the `pubspec.yaml` file.
-class FlutterManifest {
-  FlutterManifest._();
-
-  /// Returns an empty manifest.
-  static FlutterManifest empty() {
-    final FlutterManifest manifest = FlutterManifest._();
-    manifest._descriptor = const <String, dynamic>{};
-    manifest._flutterDescriptor = const <String, dynamic>{};
-    return manifest;
-  }
-
-  /// Returns null on invalid manifest. Returns empty manifest on missing file.
-  static FlutterManifest createFromPath(String path) {
-    if (path == null || !fs.isFileSync(path))
-      return _createFromYaml(null);
-    final String manifest = fs.file(path).readAsStringSync();
-    return createFromString(manifest);
-  }
-
-  /// Returns null on missing or invalid manifest
-  @visibleForTesting
-  static FlutterManifest createFromString(String manifest) {
-    return _createFromYaml(loadYaml(manifest));
-  }
-
-  static FlutterManifest _createFromYaml(dynamic yamlDocument) {
-    final FlutterManifest pubspec = FlutterManifest._();
-    if (yamlDocument != null && !_validate(yamlDocument))
-      return null;
-
-    final Map<dynamic, dynamic> yamlMap = yamlDocument;
-    if (yamlMap != null) {
-      pubspec._descriptor = yamlMap.cast<String, dynamic>();
-    } else {
-      pubspec._descriptor = <String, dynamic>{};
-    }
-
-    final Map<dynamic, dynamic> flutterMap = pubspec._descriptor['flutter'];
-    if (flutterMap != null) {
-      pubspec._flutterDescriptor = flutterMap.cast<String, dynamic>();
-    } else {
-      pubspec._flutterDescriptor = <String, dynamic>{};
-    }
-
-    return pubspec;
-  }
-
-  /// A map representation of the entire `pubspec.yaml` file.
-  Map<String, dynamic> _descriptor;
-
-  /// A map representation of the `flutter` section in the `pubspec.yaml` file.
-  Map<String, dynamic> _flutterDescriptor;
-
-  /// True if the `pubspec.yaml` file does not exist.
-  bool get isEmpty => _descriptor.isEmpty;
-
-  /// The string value of the top-level `name` property in the `pubspec.yaml` file.
-  String get appName => _descriptor['name'] ?? '';
-
-  // Flag to avoid printing multiple invalid version messages.
-  bool _hasShowInvalidVersionMsg = false;
-
-  /// The version String from the `pubspec.yaml` file.
-  /// Can be null if it isn't set or has a wrong format.
-  String get appVersion {
-    final String verStr = _descriptor['version']?.toString();
-    if (verStr == null) {
-      return null;
-    }
-
-    Version version;
-    try {
-      version = Version.parse(verStr);
-    } on Exception {
-      if (!_hasShowInvalidVersionMsg) {
-        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
-        _hasShowInvalidVersionMsg = true;
-      }
-    }
-    return version?.toString();
-  }
-
-  /// The build version name from the `pubspec.yaml` file.
-  /// Can be null if version isn't set or has a wrong format.
-  String get buildName {
-    if (appVersion != null && appVersion.contains('+'))
-      return appVersion.split('+')?.elementAt(0);
-    else
-      return appVersion;
-  }
-
-  /// The build version number from the `pubspec.yaml` file.
-  /// Can be null if version isn't set or has a wrong format.
-  String get buildNumber {
-    if (appVersion != null && appVersion.contains('+')) {
-      final String value = appVersion.split('+')?.elementAt(1);
-      return value;
-    } else {
-      return null;
-    }
-  }
-
-  bool get usesMaterialDesign {
-    return _flutterDescriptor['uses-material-design'] ?? false;
-  }
-
-  /// True if this Flutter module should use AndroidX dependencies.
+/// The type of the Flutter project created using `flutter create -t <type>`
+enum ProjectType {
+  /// A Flutter project is considered an app when it doesn't a `module:`
+  /// or `plugin:` descriptor.
   ///
-  /// If false the deprecated Android Support library will be used.
-  bool get usesAndroidX {
-    return _flutterDescriptor['module']['androidX'] ?? false;
-  }
+  /// Such a project can be created using `flutter create -t app`.
+  app,
 
-  /// True if this manifest declares a Flutter module project.
-  ///
   /// A Flutter project is considered a module when it has a `module:`
   /// descriptor. A Flutter module project supports integration into an
   /// existing host app, and has managed platform host code.
   ///
   /// Such a project can be created using `flutter create -t module`.
-  bool get isModule => _flutterDescriptor.containsKey('module');
+  module,
 
-  /// True if this manifest declares a Flutter plugin project.
-  ///
   /// A Flutter project is considered a plugin when it has a `plugin:`
   /// descriptor. A Flutter plugin project wraps custom Android and/or
   /// iOS code in a Dart interface for consumption by other Flutter app
   /// projects.
   ///
   /// Such a project can be created using `flutter create -t plugin`.
-  bool get isPlugin => _flutterDescriptor.containsKey('plugin');
+  plugin,
+}
 
-  /// Returns the Android package declared by this manifest in its
-  /// module or plugin descriptor. Returns null, if there is no
-  /// such declaration.
-  String get androidPackage {
-    if (isModule)
-      return _flutterDescriptor['module']['androidPackage'];
-    if (isPlugin)
-      return _flutterDescriptor['plugin']['androidPackage'];
-    return null;
-  }
+/// A wrapper around the `flutter:` section in the `pubspec.yaml` file.
+class FlutterManifest {
+  FlutterManifest({
+    @required this.appName,
+    @required this.appVersion,
+    @required this.buildName,
+    @required this.buildNumber,
+    @required this.usesMaterialDesign,
+    @required this.projectType,
+    @required this.assets,
+    @required this.fonts,
+  })  : assert(appName != null),
+        assert(appVersion != null),
+        assert(buildName != null),
+        assert(buildNumber != null),
+        assert(usesMaterialDesign != null),
+        assert(projectType != null),
+        assert(assets != null),
+        assert(fonts != null);
 
-  /// Returns the iOS bundle identifier declared by this manifest in its
-  /// module descriptor. Returns null if there is no such declaration.
-  String get iosBundleIdentifier {
-    if (isModule)
-      return _flutterDescriptor['module']['iosBundleIdentifier'];
-    return null;
-  }
+  /// The string value of the top-level `name` property in the `pubspec.yaml` file.
+  final String appName;
 
-  List<Map<String, dynamic>> get fontsDescriptor {
-    return fonts.map((Font font) => font.descriptor).toList();
-  }
+  /// The version String from the `pubspec.yaml` file.
+  final String appVersion;
 
-  List<Map<String, dynamic>> get _rawFontsDescriptor {
-    final List<dynamic> fontList = _flutterDescriptor['fonts'];
-    return fontList == null
-        ? const <Map<String, dynamic>>[]
-        : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
-  }
+  /// The build version name from the `pubspec.yaml` file.
+  final String buildName;
 
-  List<Uri> get assets {
-    final List<dynamic> assets = _flutterDescriptor['assets'];
-    if (assets == null) {
-      return const <Uri>[];
-    }
-    return assets
-        .cast<String>()
-        .map<String>(Uri.encodeFull)
-        ?.map<Uri>(Uri.parse)
-        ?.toList();
-  }
+  /// The build version number from the `pubspec.yaml` file.
+  final String buildNumber;
 
-  List<Font> _fonts;
+  /// True if the project uses Material Design.
+  final bool usesMaterialDesign;
 
-  List<Font> get fonts {
-    _fonts ??= _extractFonts();
-    return _fonts;
-  }
+  /// The type of Flutter project.
+  final ProjectType projectType;
 
-  List<Font> _extractFonts() {
-    if (!_flutterDescriptor.containsKey('fonts'))
-      return <Font>[];
+  /// The list of assets.
+  final List<Uri> assets;
 
-    final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
-      final List<dynamic> fontFiles = fontFamily['fonts'];
-      final String familyName = fontFamily['family'];
-      if (familyName == null) {
-        printError('Warning: Missing family name for font.', emphasis: true);
-        continue;
-      }
-      if (fontFiles == null) {
-        printError('Warning: No fonts specified for font $familyName', emphasis: true);
-        continue;
-      }
+  /// The list of fonts.
+  final List<Font> fonts;
 
-      final List<FontAsset> fontAssets = <FontAsset>[];
-      for (Map<dynamic, dynamic> fontFile in fontFiles) {
-        final String asset = fontFile['asset'];
-        if (asset == null) {
-          printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
-          continue;
-        }
-
-        fontAssets.add(FontAsset(
-          Uri.parse(asset),
-          weight: fontFile['weight'],
-          style: fontFile['style'],
-        ));
-      }
-      if (fontAssets.isNotEmpty)
-        fonts.add(Font(fontFamily['family'], fontAssets));
-    }
-    return fonts;
+  @override
+  String toString() {
+    return '$runtimeType(appName: $appName, appVersion: $appVersion, buildName: $buildName, '
+        'buildNumber: $buildNumber, projectType: $projectType)';
   }
 }
 
+/// A wrapper around each of the sections under `fonts:` in `pubspec.yaml`.
 class Font {
   Font(this.familyName, this.fontAssets)
     : assert(familyName != null),
@@ -252,6 +108,7 @@ class Font {
   String toString() => '$runtimeType(family: $familyName, assets: $fontAssets)';
 }
 
+/// A wrapper around each of the nested `fonts:` in `pubspec.yaml`.
 class FontAsset {
   FontAsset(this.assetUri, {this.weight, this.style})
     : assert(assetUri != null);
@@ -262,12 +119,12 @@ class FontAsset {
 
   Map<String, dynamic> get descriptor {
     final Map<String, dynamic> descriptor = <String, dynamic>{};
-    if (weight != null)
+    if (weight != null) {
       descriptor['weight'] = weight;
-
-    if (style != null)
+    }
+    if (style != null) {
       descriptor['style'] = style;
-
+    }
     descriptor['asset'] = assetUri.path;
     return descriptor;
   }
@@ -276,25 +133,191 @@ class FontAsset {
   String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
-@visibleForTesting
-String buildSchemaDir(FileSystem fs) {
-  return fs.path.join(
-    fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
+/// A service class for creating [FlutterManifest].
+abstract class FlutterManifestService {
+  const FlutterManifestService();
+
+  /// Creates a [FlutterManifest] by parsing the `pubspec.yaml` file in [path].
+  /// Returns [null] if the manifest is invalid.
+  FlutterManifest createFromPath(String path);
+
+  /// Creates a [FlutterManifest] by parsing the [manifest].
+  /// Returns [null] if the manifest is invalid.
+  FlutterManifest createFromString(String manifest);
+}
+
+/// Default implementation of [FlutterManifestService].
+class FlutterManifestServiceImpl extends FlutterManifestService {
+  /// Creates a [FlutterManifest] by parsing the `pubspec.yaml` file in [path].
+  /// Returns [null] if the manifest is invalid.
+  @override
+  FlutterManifest createFromPath(String path) {
+    if (path == null || !fs.isFileSync(path)) {
+      return FlutterManifest();
+    }
+    final String manifest = fs.file(path).readAsStringSync();
+    return createFromString(manifest);
+  }
+
+  /// Creates a [FlutterManifest] by parsing the [manifest].
+  /// Returns [null] if the manifest is invalid.
+  @override
+  FlutterManifest createFromString(String manifest) {
+    return _createFromYaml(loadYaml(manifest));
+  }
+}
+
+/// If not injected, a default implementation is provided.
+FlutterManifestService get flutterManifestService =>
+    context.get<FlutterManifestService>() ?? FlutterManifestServiceImpl();
+
+/// Returns the [FlutterManifest] if [yamlDocument] is valid.
+/// Otherwise, it returns [null].
+FlutterManifest _createFromYaml(dynamic yamlDocument) {
+  if (!_validateManifest(yamlDocument)) {
+    return null;
+  }
+
+  final Map<String, dynamic> descriptor = yamlDocument.cast<String, dynamic>();
+  final Map<String, dynamic> flutterDescriptor = _getFlutterDescriptor(descriptor);
+
+  return FlutterManifest(
+    appName: descriptor['name'] ?? '',
+    appVersion: _getAppVersion(descriptor),
+    buildName: _getBuildName(descriptor),
+    buildNumber: _getBuildNumber(descriptor),
+    projectType: _getProjectType(flutterDescriptor),
+    usesMaterialDesign: _usesMaterialDesign(flutterDescriptor),
+    assets: _getAssets(flutterDescriptor),
+    fonts: _getFonts(flutterDescriptor),
   );
 }
 
-@visibleForTesting
-String buildSchemaPath(FileSystem fs) {
-  return fs.path.join(
-    buildSchemaDir(fs),
-    'pubspec_yaml.json',
-  );
+/// Gets the `flutter:` descriptor from `pubspec.yaml`.
+Map<String, dynamic> _getFlutterDescriptor(Map<String, dynamic> descriptor) {
+  final Map<dynamic, dynamic> flutterMap = descriptor['flutter'];
+  if (flutterMap == null) {
+    return const <String, dynamic>{};
+  }
+  return flutterMap.cast<String, dynamic>();
+}
+
+/// Gets the project type defined via `flutter create -t <type>`.
+ProjectType _getProjectType(Map<String, dynamic> futterDescriptor) {
+  if (futterDescriptor.containsKey('module')) {
+    return ProjectType.module;
+  }
+  if (futterDescriptor.containsKey('plugin')) {
+    return ProjectType.plugin;
+  }
+  return ProjectType.app;
+}
+
+/// True if the app uses Material Design.
+bool _usesMaterialDesign(Map<String, dynamic> futterDescriptor) {
+  return futterDescriptor['uses-material-design'] ?? false;
+}
+
+// Flag to avoid printing multiple invalid version messages.
+bool _hasShowInvalidVersionMsg = false;
+/// The version from the `pubspec.yaml` file.
+String _getAppVersion(Map<String, dynamic> descriptor) {
+  final String verStr = descriptor['version']?.toString();
+  if (verStr == null) {
+    return '';
+  }
+  Version version;
+  try {
+    version = Version.parse(verStr);
+  } on Exception {
+    if (!_hasShowInvalidVersionMsg) {
+      printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+      _hasShowInvalidVersionMsg = true;
+    }
+  }
+  return version?.toString() ?? '';
+}
+
+/// The build version name from the `pubspec.yaml` file.
+String _getBuildName(Map<String, dynamic> descriptor) {
+  final String appVersion = _getAppVersion(descriptor);
+
+  if (appVersion != null && appVersion.contains('+')) {
+    return appVersion.split('+')?.elementAt(0) ?? '';
+  }
+  return appVersion;
+}
+
+/// The build version number from the `pubspec.yaml` file.
+String _getBuildNumber(Map<String, dynamic> descriptor) {
+  final String appVersion = _getAppVersion(descriptor);
+
+  if (appVersion != null && appVersion.contains('+')) {
+    return appVersion.split('+')?.elementAt(1) ?? '';
+  }
+  return '';
+}
+
+/// Gets the list of assets URI's defined withtin the `assets:` descriptor in `pubspec.yaml`.
+List<Uri> _getAssets(Map<String, dynamic> flutterDescriptor) {
+  final List<dynamic> assets = flutterDescriptor['assets'];
+  if (assets == null) {
+    return const <Uri>[];
+  }
+  return assets
+      .cast<String>()
+      .map<String>(Uri.encodeFull)
+      ?.map<Uri>(Uri.parse)
+      ?.toList();
+}
+
+/// Gets the list of [Font] defined within the `fonts:` descriptor in `pubspec.yaml`.
+List<Font> _getFonts(Map<String, dynamic> flutterDescriptor) {
+  if (!flutterDescriptor.containsKey('fonts')) {
+    return const <Font>[];
+  }
+
+  final List<dynamic> fontList = flutterDescriptor['fonts'];
+  final List<Map<String, dynamic>> rawFontsDescriptor = fontList == null
+      ? const <Map<String, dynamic>>[]
+      : fontList.map<Map<String, dynamic>>(castStringKeyedMap).toList();
+
+  final List<Font> fonts = <Font>[];
+
+  for (Map<String, dynamic> fontFamily in rawFontsDescriptor) {
+    final List<dynamic> fontFiles = fontFamily['fonts'];
+    final String familyName = fontFamily['family'];
+    if (familyName == null) {
+      printError('Warning: Missing family name for font.', emphasis: true);
+      continue;
+    }
+    if (fontFiles == null) {
+      printError('Warning: No fonts specified for font $familyName', emphasis: true);
+      continue;
+    }
+    final List<FontAsset> fontAssets = <FontAsset>[];
+    for (Map<dynamic, dynamic> fontFile in fontFiles) {
+      final String asset = fontFile['asset'];
+      if (asset == null) {
+        printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
+        continue;
+      }
+      fontAssets.add(FontAsset(
+        Uri.parse(asset),
+        weight: fontFile['weight'],
+        style: fontFile['style'],
+      ));
+    }
+    if (fontAssets.isNotEmpty)
+      fonts.add(Font(fontFamily['family'], fontAssets));
+  }
+  return fonts;
 }
 
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
 /// but avoid introducing depdendencies on packages for simple validation.
-bool _validate(YamlMap manifest) {
+bool _validateManifest(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {
     if (kvp.key is! String) {
@@ -321,16 +344,15 @@ bool _validate(YamlMap manifest) {
         break;
     }
   }
-
   if (errors.isNotEmpty) {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
     printError(errors.join('\n'));
     return false;
   }
-
   return true;
 }
 
+/// Validates that the `flutter:` descriptor is correct. Produces [errors] otherwise.
 void _validateFlutter(YamlMap yaml, List<String> errors) {
   if (yaml == null || yaml.entries == null) {
     return;
@@ -397,13 +419,14 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
   }
 }
 
+const Set<int> _fontWeights = <int>{
+  100, 200, 300, 400, 500, 600, 700, 800, 900,
+};
+///  Validates that the fonts are correct. Produces [errors] otherwise.
 void _validateFonts(YamlList fonts, List<String> errors) {
   if (fonts == null) {
     return;
   }
-  const Set<int> fontWeights = <int>{
-    100, 200, 300, 400, 500, 600, 700, 800, 900,
-  };
   for (final YamlMap fontMap in fonts) {
     for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
@@ -429,7 +452,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
             }
             break;
           case 'weight':
-            if (!fontWeights.contains(kvp.value)) {
+            if (!_fontWeights.contains(kvp.value)) {
               errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
             }
             break;
