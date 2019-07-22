@@ -70,7 +70,25 @@ class UnpackCommand extends FlutterCommand {
   bool get hidden => true;
 
   @override
-  bool get isExperimental => true;
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    final TargetPlatform targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    switch (targetPlatform) {
+      case TargetPlatform.darwin_x64:
+        result.add(DevelopmentArtifact.macOS);
+        break;
+      case TargetPlatform.windows_x64:
+        result.add(DevelopmentArtifact.windows);
+        break;
+      case TargetPlatform.linux_x64:
+        result.add(DevelopmentArtifact.linux);
+        break;
+      default:
+    }
+    return result;
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {

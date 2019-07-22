@@ -16,7 +16,7 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows a [Form] with one [TextFormField] and a [RaisedButton]. A
 /// [GlobalKey] is used here to identify the [Form] and validate input.
 ///
@@ -35,6 +35,7 @@ import 'will_pop_scope.dart';
 ///             if (value.isEmpty) {
 ///               return 'Please enter some text';
 ///             }
+///             return null;
 ///           },
 ///         ),
 ///         Padding(

@@ -49,6 +49,11 @@ class _TextSelectionToolbar extends StatelessWidget {
     if (handleSelectAll != null)
       items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
+    // If there is no option available, build an empty widget.
+    if (items.isEmpty) {
+      return Container(width: 0.0, height: 0.0);
+    }
+
     return Material(
       elevation: 1.0,
       child: Container(
@@ -127,14 +132,16 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _MaterialTextSelectionControls extends TextSelectionControls {
+  /// Returns the size of the Material handle.
   @override
-  Size handleSize = const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
+    double textLineHeight,
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
@@ -179,15 +186,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textHeight) {
-    final Widget handle = Padding(
-      padding: const EdgeInsets.only(right: 26.0, bottom: 26.0),
-      child: SizedBox(
-        width: _kHandleSize,
-        height: _kHandleSize,
-        child: CustomPaint(
-          painter: _TextSelectionHandlePainter(
-            color: Theme.of(context).textSelectionHandleColor
-          ),
+    final Widget handle = SizedBox(
+      width: _kHandleSize,
+      height: _kHandleSize,
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(
+          color: Theme.of(context).textSelectionHandleColor
         ),
       ),
     );
@@ -197,20 +201,44 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // straight up or up-right depending on the handle type.
     switch (type) {
       case TextSelectionHandleType.left: // points up-right
-        return Transform(
-          transform: Matrix4.rotationZ(math.pi / 2.0),
+        return Transform.rotate(
+          angle: math.pi / 2.0,
           child: handle,
         );
       case TextSelectionHandleType.right: // points up-left
         return handle;
       case TextSelectionHandleType.collapsed: // points up
-        return Transform(
-          transform: Matrix4.rotationZ(math.pi / 4.0),
+        return Transform.rotate(
+          angle: math.pi / 4.0,
           child: handle,
         );
     }
     assert(type != null);
     return null;
+  }
+
+  /// Gets anchor for material-style text selection handles.
+  ///
+  /// See [TextSelectionControls.getHandleAnchor].
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    switch (type) {
+      case TextSelectionHandleType.left:
+        return const Offset(_kHandleSize, 0);
+      case TextSelectionHandleType.right:
+        return Offset.zero;
+      default:
+        return const Offset(_kHandleSize / 2, -4);
+    }
+  }
+
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    // Android allows SelectAll when selection is not collapsed, unless
+    // everything has already been selected.
+    final TextEditingValue value = delegate.textEditingValue;
+    return value.text.isNotEmpty &&
+      !(value.selection.start == 0 && value.selection.end == value.text.length);
   }
 }
 

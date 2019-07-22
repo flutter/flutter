@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -310,6 +311,15 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   bool _popPolicyDataIfNeeded(TraversalDirection direction, FocusScopeNode nearestScope, FocusNode focusedChild) {
     final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
+      if (policyData.history.last.node.parent == null) {
+        // If a node has been removed from the tree, then we should stop
+        // referencing it and reset the scope data so that we don't try and
+        // request focus on it. This can happen in slivers where the rendered node
+        // has been unmounted. This has the side effect that hysteresis might not
+        // be avoided when items that go off screen get unmounted.
+        invalidateScopeData(nearestScope);
+        return false;
+      }
       switch (direction) {
         case TraversalDirection.down:
         case TraversalDirection.up:
@@ -498,16 +508,19 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
 
   // Moves the focus to the next or previous node, depending on whether forward
   // is true or not.
-  bool _move(FocusNode node, {@required bool forward}) {
-    if (node == null) {
+  bool _move(FocusNode currentNode, {@required bool forward}) {
+    if (currentNode == null) {
       return false;
     }
-    final FocusScopeNode nearestScope = node.nearestScope;
+    final FocusScopeNode nearestScope = currentNode.nearestScope;
     invalidateScopeData(nearestScope);
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(node).requestFocus();
-      return true;
+      final FocusNode firstFocus = findFirstFocus(currentNode);
+      if (firstFocus != null) {
+        firstFocus.requestFocus();
+        return true;
+      }
     }
     FocusNode previousNode;
     FocusNode firstNode;
@@ -593,40 +606,22 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   @override
   FocusNode findFirstFocus(FocusNode currentNode) {
     assert(currentNode != null);
-    FocusScopeNode scope = currentNode.nearestScope;
-    // Start with the candidate focus as the focused child of this scope, if
-    // there is one. Otherwise start with this node itself. Keep going down
-    // through scopes until an ultimately focusable item is found, a scope
-    // doesn't have a focusedChild, or a non-scope is encountered.
+    final FocusScopeNode scope = currentNode.nearestScope;
     FocusNode candidate = scope.focusedChild;
-    while (candidate == null) {
-      if (candidate.nearestScope.traversalChildren.isNotEmpty) {
-        candidate = _sortByGeometry(scope).first;
-      }
-      if (candidate is FocusScopeNode) {
-        scope = candidate;
-        candidate = scope.focusedChild;
-        continue;
-      }
+    if (candidate == null && scope.traversalChildren.isNotEmpty) {
+      candidate = _sortByGeometry(scope).first;
     }
 
-    if (candidate == null) {
-      if (scope.traversalChildren.isNotEmpty) {
-        candidate = _sortByGeometry(scope).first;
-      } else {
-        candidate = currentNode;
-      }
-    }
-    while (candidate is FocusScopeNode && candidate.focusedChild != null) {
-      final FocusScopeNode candidateScope = candidate;
-      candidate = candidateScope.focusedChild;
-    }
+    // If we still didn't find any candidate, use the current node as a
+    // fallback.
+    candidate ??= currentNode;
+    candidate ??= WidgetsBinding.instance.focusManager.rootScope;
     return candidate;
   }
 
   // Sorts the list of nodes based on their geometry into the desired reading
   // order based on the directionality of the context for each node.
-  Iterable<FocusNode> _sortByGeometry(FocusNode scope) {
+  Iterable<FocusNode> _sortByGeometry(FocusScopeNode scope) {
     final Iterable<FocusNode> nodes = scope.traversalDescendants;
     if (nodes.length <= 1) {
       return nodes;
@@ -691,8 +686,11 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     invalidateScopeData(nearestScope);
     final FocusNode focusedChild = nearestScope.focusedChild;
     if (focusedChild == null) {
-      findFirstFocus(currentNode).requestFocus();
-      return true;
+      final FocusNode firstFocus = findFirstFocus(currentNode);
+      if (firstFocus != null) {
+        firstFocus.requestFocus();
+        return true;
+      }
     }
     final List<FocusNode> sortedNodes = _sortByGeometry(nearestScope).toList();
     if (forward && focusedChild == sortedNodes.last) {
@@ -723,7 +721,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   bool previous(FocusNode currentNode) => _move(currentNode, forward: false);
 }
 
-/// A widget that describes an inherited focus policy for focus traversal.
+/// A widget that describes the inherited focus policy for focus traversal.
 ///
 /// By default, traverses in widget order using
 /// [ReadingOrderFocusTraversalPolicy].
@@ -738,7 +736,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///     focus traversal in a direction.
 class DefaultFocusTraversal extends InheritedWidget {
-  /// Creates a FocusTraversal object.
+  /// Creates a [DefaultFocusTraversal] object.
   ///
   /// The [child] argument must not be null.
   const DefaultFocusTraversal({
@@ -763,7 +761,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///    bottom.
   final FocusTraversalPolicy policy;
 
-  /// Returns the [DefaultFocusTraversal] that most tightly encloses the given
+  /// Returns the [FocusTraversalPolicy] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.

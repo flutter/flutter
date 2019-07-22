@@ -1592,8 +1592,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', color));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', color));
   }
 }
 
@@ -2311,7 +2311,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2325,7 +2325,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2965,11 +2965,11 @@ class RenderIgnorePointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in
@@ -3171,7 +3171,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
@@ -3426,9 +3426,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool button,
     bool header,
     bool textField,
+    bool readOnly,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -3473,9 +3475,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _button = button,
        _header = header,
        _textField = textField,
+       _readOnly = readOnly,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _multiline = multiline,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
@@ -3629,6 +3633,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isReadOnly] semantic to the given value.
+  bool get readOnly => _readOnly;
+  bool _readOnly;
+  set readOnly(bool value) {
+    if (readOnly == value)
+      return;
+    _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
   bool get focused => _focused;
   bool _focused;
@@ -3658,6 +3672,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
+  /// value.
+  bool get multiline => _multiline;
+  bool _multiline;
+  set multiline(bool value) {
+    if (multiline == value)
+      return;
+    _multiline = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4252,12 +4277,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
+    if (readOnly != null)
+      config.isReadOnly = readOnly;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (multiline != null)
+      config.isMultiline = multiline;
     if (hidden != null)
       config.isHidden = hidden;
     if (image != null)

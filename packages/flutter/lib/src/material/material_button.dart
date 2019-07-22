@@ -100,6 +100,9 @@ class MaterialButton extends StatelessWidget {
   /// The default text color depends on the button theme's text theme,
   /// [ButtonThemeData.textTheme].
   ///
+  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// will be ignored.
+  ///
   /// See also:
   ///
   ///  * [disabledTextColor], the text color to use when the button has been
@@ -113,6 +116,9 @@ class MaterialButton extends StatelessWidget {
   ///
   /// The default value is the theme's disabled color,
   /// [ThemeData.disabledColor].
+  ///
+  /// If [textColor] is a [MaterialStateProperty<Color>], [disabledTextColor]
+  /// will be ignored.
   ///
   /// See also:
   ///
@@ -251,7 +257,13 @@ class MaterialButton extends StatelessWidget {
 
   /// The theme brightness to use for this button.
   ///
-  /// Defaults to the theme's brightness, [ThemeData.brightness].
+  /// Defaults to the theme's brightness in [ThemeData.brightness]. Setting
+  /// this value determines the button text's colors based on
+  /// [ButtonThemeData.getTextColor].
+  ///
+  /// See also:
+  ///
+  ///  * [ButtonTextTheme], uses [Brightness] to determine text color.
   final Brightness colorBrightness;
 
   /// The button's label.
@@ -353,14 +365,14 @@ class MaterialButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(DiagnosticsProperty<ButtonTextTheme>('textTheme', textTheme, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(ColorProperty('textColor', textColor, defaultValue: null));
+    properties.add(ColorProperty('disabledTextColor', disabledTextColor, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));

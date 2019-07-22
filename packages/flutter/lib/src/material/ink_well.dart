@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 /// Subclasses call [cancel] when an input gesture is aborted before it
 /// is recognized. For example a press event might trigger an ink feature
-/// that's cancelled when the pointer is dragged out of the reference
+/// that's canceled when the pointer is dragged out of the reference
 /// box.
 ///
 /// The [InkWell] and [InkResponse] widgets generate instances of this
@@ -467,6 +467,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   Set<InteractiveInkFeature> _splashes;
   InteractiveInkFeature _currentSplash;
   FocusNode _focusNode;
+  bool _hovering = false;
   final Map<_HighlightType, InkHighlight> _highlights = <_HighlightType, InkHighlight>{};
 
   bool get highlightsExist => _highlights.values.where((InkHighlight highlight) => highlight != null).isNotEmpty;
@@ -475,8 +476,17 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void didChangeDependencies() {
     super.didChangeDependencies();
     _focusNode?.removeListener(_handleFocusUpdate);
-    _focusNode = Focus.of(context);
+    _focusNode = Focus.of(context, nullOk: true);
     _focusNode?.addListener(_handleFocusUpdate);
+  }
+
+  @override
+  void didUpdateWidget(InkResponse oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
+      _handleHoverChange(_hovering);
+      _handleFocusUpdate();
+    }
   }
 
   @override
@@ -599,8 +609,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   }
 
   void _handleFocusUpdate() {
-    final bool hasFocus = Focus.of(context).hasPrimaryFocus;
-    updateHighlight(_HighlightType.focus, value: hasFocus);
+    final bool showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+    updateHighlight(_HighlightType.focus, value: showFocus);
   }
 
   void _handleTapDown(TapDownDetails details) {
@@ -669,10 +679,20 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     super.deactivate();
   }
 
-  bool get enabled => widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
+  bool _isWidgetEnabled(InkResponse widget) {
+    return widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
+  }
 
-  void _handlePointerEnter(PointerEnterEvent event) => updateHighlight(_HighlightType.hover, value: true);
-  void _handlePointerExit(PointerExitEvent event) => updateHighlight(_HighlightType.hover, value: false);
+  bool get enabled => _isWidgetEnabled(widget);
+
+  void _handlePointerEnter(PointerEnterEvent event) => _handleHoverChange(true);
+  void _handlePointerExit(PointerExitEvent event) => _handleHoverChange(false);
+  void _handleHoverChange(bool hovering) {
+    if (_hovering != hovering) {
+      _hovering = hovering;
+      updateHighlight(_HighlightType.hover, value: enabled && _hovering);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -683,8 +703,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
     return Listener(
-      onPointerEnter: _handlePointerEnter,
-      onPointerExit: _handlePointerExit,
+      onPointerEnter: enabled ? _handlePointerEnter : null,
+      onPointerExit: enabled ? _handlePointerExit : null,
       behavior: HitTestBehavior.translucent,
       child: GestureDetector(
         onTapDown: enabled ? _handleTapDown : null,

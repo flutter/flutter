@@ -43,7 +43,7 @@ AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._ro
 /// scope) is created.
 ///
 /// Child contexts are created and run using zones. To read more about how
-/// zones work, see https://api.dartlang.org/stable/dart-async/Zone-class.html.
+/// zones work, see https://api.dart.dev/stable/dart-async/Zone-class.html.
 class AppContext {
   AppContext._(
     this._parent,
@@ -142,6 +142,7 @@ class AppContext {
     String name,
     Map<Type, Generator> overrides,
     Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
   }) async {
     final AppContext child = AppContext._(
       this,
@@ -152,6 +153,7 @@ class AppContext {
     return await runZoned<Future<V>>(
       () async => await body(),
       zoneValues: <_Key, AppContext>{_Key.key: child},
+      zoneSpecification: zoneSpecification,
     );
   }
 

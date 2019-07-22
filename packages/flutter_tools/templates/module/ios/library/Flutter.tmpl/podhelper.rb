@@ -23,7 +23,7 @@ end
 def flutter_root(f)
     generated_xcode_build_settings = parse_KV_file(File.join(f, File.join('.ios', 'Flutter', 'Generated.xcconfig')))
     if generated_xcode_build_settings.empty?
-        puts "Generated.xcconfig must exist. Make sure `flutter packages get` is executed in #{f}."
+        puts "Generated.xcconfig must exist. Make sure `flutter pub get` is executed in #{f}."
         exit
     end
     generated_xcode_build_settings.map { |p|

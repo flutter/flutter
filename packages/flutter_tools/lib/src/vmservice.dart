@@ -140,7 +140,7 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'reloadSources',
         'alias': 'Flutter Tools',
       });
@@ -166,7 +166,7 @@ class VMService {
 
       // If the Flutter Engine doesn't support service registration this will
       // have no effect
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'hotRestart',
         'alias': 'Flutter Tools',
       });
@@ -204,7 +204,7 @@ class VMService {
         }
       });
 
-      _peer.sendNotification('_registerService', <String, String>{
+      _peer.sendNotification('registerService', <String, String>{
         'service': 'compileExpression',
         'alias': 'Flutter Tools',
       });
@@ -718,13 +718,11 @@ class VM extends ServiceObjectOwner {
 
   /// The number of bytes allocated (e.g. by malloc) in the native heap.
   int _heapAllocatedMemoryUsage;
-  int get heapAllocatedMemoryUsage {
-    return _heapAllocatedMemoryUsage == null ? 0 : _heapAllocatedMemoryUsage;
-  }
+  int get heapAllocatedMemoryUsage => _heapAllocatedMemoryUsage ?? 0;
 
   /// The peak resident set size for the process.
   int _maxRSS;
-  int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
+  int get maxRSS => _maxRSS ?? 0;
 
   // The embedder's name, Flutter or dart_runner.
   String _embedder;
@@ -845,12 +843,15 @@ class VM extends ServiceObjectOwner {
   Future<Map<String, dynamic>> invokeRpcRaw(
     String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
+    bool truncateLogs = true,
   }) async {
     printTrace('Sending to VM service: $method($params)');
     assert(params != null);
     try {
       final Map<String, dynamic> result = await _vmService._sendRequest(method, params);
-      printTrace('Result: ${_truncate(result.toString(), 250, '...')}');
+      final String resultString =
+          truncateLogs ? _truncate(result.toString(), 250, '...') : result.toString();
+      printTrace('Result: $resultString');
       return result;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
@@ -866,10 +867,12 @@ class VM extends ServiceObjectOwner {
   Future<T> invokeRpc<T extends ServiceObject>(
     String method, {
     Map<String, dynamic> params = const <String, dynamic>{},
+    bool truncateLogs = true,
   }) async {
     final Map<String, dynamic> response = await invokeRpcRaw(
       method,
       params: params,
+      truncateLogs: truncateLogs,
     );
     final ServiceObject serviceObject = ServiceObject._fromMap(this, response);
     if ((serviceObject != null) && (serviceObject._canCache)) {
@@ -945,13 +948,13 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> clearVMTimeline() {
-    return invokeRpcRaw('_clearVMTimeline');
+    return invokeRpcRaw('clearVMTimeline');
   }
 
   Future<Map<String, dynamic>> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return invokeRpcRaw(
-      '_setVMTimelineFlags',
+      'setVMTimelineFlags',
       params: <String, dynamic>{
         'recordedStreams': recordedStreams,
       },
@@ -959,7 +962,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> getVMTimeline() {
-    return invokeRpcRaw('_getVMTimeline');
+    return invokeRpcRaw('getVMTimeline');
   }
 
   Future<void> refreshViews({ bool waitForViews = false }) async {
@@ -973,7 +976,8 @@ class VM extends ServiceObjectOwner {
       // When the future returned by invokeRpc() below returns,
       // the _viewCache will have been updated.
       // This message updates all the views of every isolate.
-      await vmService.vm.invokeRpc<ServiceObject>('_flutter.listViews');
+      await vmService.vm.invokeRpc<ServiceObject>(
+          '_flutter.listViews', truncateLogs: false);
       if (_viewCache.values.isNotEmpty || !waitForViews)
         return;
       failCount += 1;
@@ -1464,6 +1468,16 @@ class FlutterView extends ServiceObject {
           'isolateId': _uiIsolate.id,
           'viewId': id,
           'assetDirectory': assetsDirectory.toFilePath(windows: false),
+        });
+  }
+
+  Future<void> setSemanticsEnabled(bool enabled) async {
+    assert(enabled != null);
+    await owner.vmService.vm.invokeRpc<ServiceObject>('_flutter.setSemanticsEnabled',
+        params: <String, dynamic>{
+          'isolateId': _uiIsolate.id,
+          'viewId': id,
+          'enabled': enabled,
         });
   }
 

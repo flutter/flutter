@@ -466,7 +466,7 @@ class AndroidViewController {
   /// Android's [MotionEvent.ACTION_MOVE](https://developer.android.com/reference/android/view/MotionEvent#ACTION_MOVE)
   static const int kActionMove = 2;
 
-  /// Action code for when a motion event has been cancelled.
+  /// Action code for when a motion event has been canceled.
   ///
   /// Android's [MotionEvent.ACTION_CANCEL](https://developer.android.com/reference/android/view/MotionEvent#ACTION_CANCEL)
   static const int kActionCancel = 3;
@@ -505,9 +505,9 @@ class AndroidViewController {
 
   _AndroidViewState _state;
 
-  dynamic _creationParams;
+  final dynamic _creationParams;
 
-  MessageCodec<dynamic> _creationParamsCodec;
+  final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
@@ -581,6 +581,14 @@ class AndroidViewController {
       'id': id,
       'direction': _getAndroidDirection(layoutDirection),
     });
+  }
+
+  /// Clears the focus from the Android View if it is focused.
+  Future<void> clearFocus() {
+    if (_state != _AndroidViewState.created) {
+      return null;
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
   }
 
   static int _getAndroidDirection(TextDirection direction) {

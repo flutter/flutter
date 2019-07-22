@@ -14,12 +14,12 @@ void main() {
   test('Describe transform control test', () {
     final Matrix4 identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
-    expect(description, equals(<String>[
+    expect(description, <String>[
       '[0] 1.0,0.0,0.0,0.0',
       '[1] 0.0,1.0,0.0,0.0',
       '[2] 0.0,0.0,1.0,0.0',
       '[3] 0.0,0.0,0.0,1.0',
-    ]));
+    ]);
   });
 
   test('transform property test', () {

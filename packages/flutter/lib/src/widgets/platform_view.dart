@@ -184,6 +184,7 @@ class AndroidView extends StatefulWidget {
 }
 
 // TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
 /// {@macro flutter.rendering.platformView.preview}
@@ -199,6 +200,9 @@ class AndroidView extends StatefulWidget {
 ///
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
+///
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -217,7 +221,7 @@ class UiKitView extends StatefulWidget {
        assert(creationParams == null || creationParamsCodec != null),
        super(key: key);
 
-  // TODO(amirh): reference the iOS API doc once avaliable.
+  // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
@@ -306,6 +310,7 @@ class _AndroidViewState extends State<AndroidView> {
   Widget build(BuildContext context) {
     return Focus(
       focusNode: _focusNode,
+      onFocusChange: _onFocusChange,
       child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
@@ -383,6 +388,40 @@ class _AndroidViewState extends State<AndroidView> {
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
     }
+  }
+
+  void _onFocusChange(bool isFocused) {
+    if (!_controller.isCreated) {
+      return;
+    }
+    if (!isFocused) {
+      _controller.clearFocus().catchError((dynamic e) {
+       if (e is MissingPluginException) {
+         // We land the framework part of Android platform views keyboard
+         // support before the engine part. There will be a commit range where
+         // clearFocus isn't implemented in the engine. When that happens we
+         // just swallow the error here. Once the engine part is rolled to the
+         // framework I'll remove this.
+         // TODO(amirh): remove this once the engine's clearFocus is rolled.
+         return;
+       }
+      });
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      _id,
+    ).catchError((dynamic e) {
+      if (e is MissingPluginException) {
+        // We land the framework part of Android platform views keyboard
+        // support before the engine part. There will be a commit range where
+        // setPlatformViewClient isn't implemented in the engine. When that
+        // happens we just swallow the error here. Once the engine part is
+        // rolled to the framework I'll remove this.
+        // TODO(amirh): remove this once the engine's clearFocus is rolled.
+        return;
+      }
+    });
   }
 }
 

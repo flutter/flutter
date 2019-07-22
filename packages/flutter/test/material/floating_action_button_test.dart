@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+@TestOn('!chrome') // whole file needs triage.
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -36,12 +36,12 @@ void main() {
 
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -54,12 +54,12 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -75,10 +75,10 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
           ),
         ),
@@ -94,10 +94,10 @@ void main() {
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
           ),
         ),
@@ -116,6 +116,44 @@ void main() {
 
     await gesture.moveTo(Offset.zero);
     await gesture.removePointer();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
+    await tester.longPress(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
+  testWidgets('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: null,
+            tooltip: 'Add',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    try {
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add'), findsOneWidget);
+
+      await gesture.moveTo(Offset.zero);
+    } finally {
+      await gesture.removePointer();
+    }
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -698,8 +736,11 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('floating_action_button_test.clip.2.png'), // .clip.1.png is obsolete and can be removed
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'floating_action_button_test.clip.png',
+        version: 2,
+      ),
+      skip: !isLinux,
     );
   });
 
@@ -725,6 +766,22 @@ void main() {
       paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+
+  testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(onPressed: () {}),
+    ));
+
+    expect(
+      tester.getSemantics(find.byType(FloatingActionButton)),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+      ),
+    );
+  }, semanticsEnabled: true);
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {

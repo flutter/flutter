@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // web does not have keyboard support yet.
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -39,6 +41,7 @@ void main() {
           'codePoint': 0x44,
           'scanCode': 0x20,
           'metaState': modifier,
+          'source': 0x101, // Keyboard source.
         });
         final RawKeyEventDataAndroid data = event.data;
         for (ModifierKey key in ModifierKey.values) {
@@ -73,6 +76,7 @@ void main() {
           'codePoint': 0x44,
           'scanCode': 0x20,
           'metaState': modifier | RawKeyEventDataAndroid.modifierFunction,
+          'source': 0x101, // Keyboard source.
         });
         final RawKeyEventDataAndroid data = event.data;
         for (ModifierKey key in ModifierKey.values) {
@@ -109,6 +113,7 @@ void main() {
         'character': 'A',
         'scanCode': 30,
         'metaState': 0x0,
+        'source': 0x101, // Keyboard source.
       });
       final RawKeyEventDataAndroid data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
@@ -124,6 +129,7 @@ void main() {
         'character': null,
         'scanCode': 1,
         'metaState': 0x0,
+        'source': 0x101, // Keyboard source.
       });
       final RawKeyEventDataAndroid data = escapeKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
@@ -140,10 +146,62 @@ void main() {
         'character': null,
         'scanCode': 42,
         'metaState': RawKeyEventDataAndroid.modifierLeftShift,
+        'source': 0x101, // Keyboard source.
       });
       final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
+    test('DPAD keys from a joystick give physical key mappings', () {
+      final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 20,
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 0,
+        'metaState': 0,
+        'source': 0x1000010, // Joystick source.
+      });
+      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
+      expect(data.keyLabel, isNull);
+    });
+    test('Arrow keys from a keyboard give correct physical key mappings', () {
+      final RawKeyEvent joystickDpadDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 20,
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 108,
+        'metaState': 0,
+        'source': 0x101, // Keyboard source.
+      });
+      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
+      expect(data.keyLabel, isNull);
+    });
+    test('DPAD center from a game pad gives physical key mappings', () {
+      final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 23,  // DPAD_CENTER code.
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 317,  // Left side thumb joystick center click button.
+        'metaState': 0,
+        'source': 0x501, // Gamepad and keyboard source.
+      });
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.gameButtonThumbLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isNull);
     });
   });

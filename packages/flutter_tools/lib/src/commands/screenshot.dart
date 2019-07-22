@@ -15,7 +15,7 @@ import '../vmservice.dart';
 
 const String _kOut = 'out';
 const String _kType = 'type';
-const String _kObservatoryPort = 'observatory-port';
+const String _kObservatoryUri = 'observatory-uri';
 const String _kDeviceType = 'device';
 const String _kSkiaType = 'skia';
 const String _kRasterizerType = 'rasterizer';
@@ -29,12 +29,12 @@ class ScreenshotCommand extends FlutterCommand {
       help: 'Location to write the screenshot.',
     );
     argParser.addOption(
-      _kObservatoryPort,
-      valueHelp: 'port',
-      help: 'The observatory port to connect to.\n'
+      _kObservatoryUri,
+      valueHelp: 'URI',
+      help: 'The observatory URI to connect to.\n'
           'This is required when --$_kType is "$_kSkiaType" or "$_kRasterizerType".\n'
-          'To find the observatory port number, use "flutter run --verbose" '
-          'and look for "Forwarded host port ... for Observatory" in the output.',
+          'To find the observatory URI, use "flutter run" and look for'
+          '"An Observatory ... is available at" in the output.',
     );
     argParser.addOption(
       _kType,
@@ -45,8 +45,8 @@ class ScreenshotCommand extends FlutterCommand {
         _kDeviceType: 'Delegate to the device\'s native screenshot capabilities. This '
             'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
-        _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryPort',
-        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryPort',
+        _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryUri',
+        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryUri',
       },
       defaultsTo: _kDeviceType,
     );
@@ -66,12 +66,15 @@ class ScreenshotCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
-    if (device == null)
+    if (device == null) {
       throwToolExit('Must have a connected device');
-    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot)
+    }
+    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot) {
       throwToolExit('Screenshot not supported for ${device.name}.');
-    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryPort] == null)
-      throwToolExit('Observatory port must be specified for screenshot type ${argResults[_kType]}');
+    }
+    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryUri] == null) {
+      throwToolExit('Observatory URI must be specified for screenshot type ${argResults[_kType]}');
+    }
     return super.verifyThenRunCommand(commandPath);
   }
 
@@ -127,8 +130,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
-    final Uri observatoryUri = Uri(scheme: 'http', host: '127.0.0.1',
-        port: int.parse(argResults[_kObservatoryPort]));
+    final Uri observatoryUri = Uri.parse(argResults[_kObservatoryUri]);
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);
   }

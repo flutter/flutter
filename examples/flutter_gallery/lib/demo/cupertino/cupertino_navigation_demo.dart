@@ -430,10 +430,13 @@ class CupertinoDemoTab2 extends StatelessWidget {
       navigationBar: CupertinoNavigationBar(
         trailing: trailingButtons,
       ),
-      child: ListView(
-        children: <Widget>[
-          Tab2Header(),
-        ]..addAll(buildTab2Conversation()),
+      child: CupertinoScrollbar(
+        child: ListView(
+          children: <Widget>[
+            Tab2Header(),
+            ...buildTab2Conversation(),
+          ],
+        ),
       ),
     );
   }

@@ -272,15 +272,15 @@ class NestedScrollView extends StatefulWidget {
   }
 
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
-    final List<Widget> slivers = <Widget>[];
-    slivers.addAll(headerSliverBuilder(context, bodyIsScrolled));
-    slivers.add(SliverFillRemaining(
-      child: PrimaryScrollController(
-        controller: innerController,
-        child: body,
+    return <Widget>[
+      ...headerSliverBuilder(context, bodyIsScrolled),
+      SliverFillRemaining(
+        child: PrimaryScrollController(
+          controller: innerController,
+          child: body,
+        ),
       ),
-    ));
-    return slivers;
+    ];
   }
 
   @override
@@ -498,8 +498,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (_NestedScrollPosition position in _innerPositions) {
-      if (position.pixels > position.minScrollExtent)
+      // TODO(chunhtai): Replace null check with assert once
+      // https://github.com/flutter/flutter/issues/31195 is fixed.
+      if (
+        position.minScrollExtent != null &&
+        position.pixels != null &&
+        position.pixels > position.minScrollExtent
+      ) {
         return true;
+      }
     }
     return false;
   }

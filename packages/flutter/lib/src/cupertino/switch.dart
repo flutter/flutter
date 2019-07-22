@@ -117,7 +117,9 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
+  ///    the different behaviors.
+  ///
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 

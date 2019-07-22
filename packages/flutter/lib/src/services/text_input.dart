@@ -15,6 +15,9 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
+// Whether we're compiled to JavaScript in a web browser.
+const bool _kIsBrowser = identical(0, 0.0);
+
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -466,7 +469,7 @@ class RawFloatingCursorPoint {
     this.offset,
     @required this.state,
   }) : assert(state != null),
-       assert(state == FloatingCursorDragState.Update ? offset != null : true);
+       assert(state != FloatingCursorDragState.Update || offset != null);
 
   /// The raw position of the floating cursor as determined by the iOS sdk.
   final Offset offset;
@@ -585,6 +588,18 @@ abstract class TextSelectionDelegate {
   /// Brings the provided [TextPosition] into the visible area of the text
   /// input.
   void bringIntoView(TextPosition position);
+
+  /// Whether cut is enabled, must not be null.
+  bool get cutEnabled => true;
+
+  /// Whether copy is enabled, must not be null.
+  bool get copyEnabled => true;
+
+  /// Whether paste is enabled, must not be null.
+  bool get pasteEnabled => true;
+
+  /// Whether select all is enabled, must not be null.
+  bool get selectAllEnabled => true;
 }
 
 /// An interface to receive information from [TextInput].
@@ -813,6 +828,10 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
+      if (_kIsBrowser) {
+        // TODO(flutterweb): what makes sense here?
+        return true;
+      }
       if (Platform.isIOS) {
         assert(
           _iOSSupportedInputActions.contains(inputAction),

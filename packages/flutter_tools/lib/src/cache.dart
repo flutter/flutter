@@ -26,7 +26,7 @@ class DevelopmentArtifact {
   /// This should match the flag name in precache.dart
   final String name;
 
-  /// Whether this artifact should not be usable on stable branches.
+  /// Whether this artifact should be unavailable on stable branches.
   final bool unstable;
 
   /// Artifacts required for Android development.
@@ -35,7 +35,7 @@ class DevelopmentArtifact {
   /// Artifacts required for iOS development.
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
-  /// Artifacts required for web development,
+  /// Artifacts required for web development.
   static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
@@ -44,16 +44,16 @@ class DevelopmentArtifact {
   /// Artifacts required for desktop Windows.
   static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
-  /// Artifacts required for desktop linux.
+  /// Artifacts required for desktop Linux.
   static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
   static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
-  /// Artifacts required by all developments.
+  /// Artifacts required for any development platform.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
-  /// The vaulues of DevelopmentArtifacts.
+  /// The values of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     android,
     iOS,
@@ -83,6 +83,9 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
+      for (String artifactName in IosUsbArtifacts.artifactNames) {
+        _artifacts.add(IosUsbArtifacts(artifactName, this));
+      }
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -204,8 +207,10 @@ class Cache {
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
     final Directory dir = fs.directory(fs.path.join(getRoot().path, name));
-    if (!dir.existsSync())
+    if (!dir.existsSync()) {
       dir.createSync(recursive: true);
+      os.chmod(dir, '755');
+    }
     return dir;
   }
 
@@ -220,6 +225,22 @@ class Cache {
   Directory getArtifactDirectory(String name) {
     return getCacheArtifacts().childDirectory(name);
   }
+
+  MapEntry<String, String> get dyLdLibEntry {
+    if (_dyLdLibEntry != null) {
+      return _dyLdLibEntry;
+    }
+    final List<String> paths = <String>[];
+    for (CachedArtifact artifact in _artifacts) {
+      final String currentPath = artifact.dyLdLibPath;
+      if (currentPath.isNotEmpty) {
+        paths.add(currentPath);
+      }
+    }
+    _dyLdLibEntry = MapEntry<String, String>('DYLD_LIBRARY_PATH', paths.join(':'));
+    return _dyLdLibEntry;
+  }
+  MapEntry<String, String> _dyLdLibEntry;
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
   /// code.
@@ -261,8 +282,10 @@ class Cache {
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
     final Directory serviceDir = fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
-    if (!serviceDir.existsSync())
+    if (!serviceDir.existsSync()) {
       serviceDir.createSync(recursive: true);
+      os.chmod(serviceDir, '755');
+    }
 
     final File cachedFile = fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
@@ -327,6 +350,9 @@ abstract class CachedArtifact {
   // The name of the stamp file. Defaults to the same as the
   // artifact name.
   String get stampName => name;
+
+  /// Returns a string to be set as environment DYLD_LIBARY_PATH variable
+  String get dyLdLibPath => '';
 
   /// All development artifacts this cache provides.
   final Set<DevelopmentArtifact> developmentArtifacts;
@@ -611,13 +637,16 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     return true;
   }
 
-
   void _makeFilesExecutable(Directory dir) {
-    for (FileSystemEntity entity in dir.listSync()) {
+    os.chmod(dir, 'a+r,a+x');
+    for (FileSystemEntity entity in dir.listSync(recursive: true)) {
       if (entity is File) {
-        final String name = fs.path.basename(entity.path);
-        if (name == 'flutter_tester')
-          os.makeExecutable(entity);
+        final FileStat stat = entity.statSync();
+        final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
+        if (entity.basename == 'flutter_tester' || isUserExecutable) {
+          // Make the file readable and executable by all users.
+          os.chmod(entity, 'a+r,a+x');
+        }
       }
     }
   }
@@ -637,30 +666,22 @@ class FlutterSdk extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[
+    return <List<String>>[
       <String>['common', 'flutter_patched_sdk.zip'],
       <String>['common', 'flutter_patched_sdk_product.zip'],
+      if (cache.includeAllPlatforms)
+        ...<List<String>>[
+          <String>['windows-x64', 'windows-x64/artifacts.zip'],
+          <String>['linux-x64', 'linux-x64/artifacts.zip'],
+          <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
+        ]
+      else if (platform.isWindows)
+        <String>['windows-x64', 'windows-x64/artifacts.zip']
+      else if (platform.isMacOS)
+        <String>['darwin-x64', 'darwin-x64/artifacts.zip']
+      else if (platform.isLinux)
+        <String>['linux-x64', 'linux-x64/artifacts.zip'],
     ];
-    if (cache.includeAllPlatforms) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isWindows) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['windows-x64', 'windows-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isMacOS) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['darwin-x64', 'darwin-x64/artifacts.zip'],
-      ]);
-    } else if (platform.isLinux) {
-      binaryDirs.addAll(<List<String>>[
-        <String>['linux-x64', 'linux-x64/artifacts.zip'],
-      ]);
-    }
-    return binaryDirs;
   }
 
   @override
@@ -745,28 +766,31 @@ class AndroidEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[];
-    if (cache.includeAllPlatforms) {
-      binaryDirs
-        ..addAll(_osxBinaryDirs)
-        ..addAll(_linuxBinaryDirs)
-        ..addAll(_windowsBinaryDirs)
-        ..addAll(_androidBinaryDirs)
-        ..addAll(_dartSdks);
-    } else if (platform.isWindows) {
-      binaryDirs
-        ..addAll(_windowsBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    } else if (platform.isMacOS) {
-      binaryDirs
-        ..addAll(_osxBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    } else if (platform.isLinux) {
-      binaryDirs
-        ..addAll(_linuxBinaryDirs)
-        ..addAll(_androidBinaryDirs);
-    }
-    return binaryDirs;
+    return <List<String>>[
+      if (cache.includeAllPlatforms)
+        ...<List<String>>[
+          ..._osxBinaryDirs,
+          ..._linuxBinaryDirs,
+          ..._windowsBinaryDirs,
+          ..._androidBinaryDirs,
+          ..._dartSdks,
+        ]
+      else if (platform.isWindows)
+        ...<List<String>>[
+          ..._windowsBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+      else if (platform.isMacOS)
+        ...<List<String>>[
+          ..._osxBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+      else if (platform.isLinux)
+        ...<List<String>>[
+          ..._linuxBinaryDirs,
+          ..._androidBinaryDirs,
+        ]
+    ];
   }
 
   @override
@@ -782,11 +806,10 @@ class IOSEngineArtifacts extends EngineCachedArtifact {
 
   @override
   List<List<String>> getBinaryDirs() {
-    final List<List<String>> binaryDirs = <List<String>>[];
-    if (platform.isMacOS || cache.includeAllPlatforms) {
-      binaryDirs.addAll(_iosBinaryDirs);
-    }
-    return binaryDirs;
+    return <List<String>>[
+      if (platform.isMacOS || cache.includeAllPlatforms)
+        ..._iosBinaryDirs,
+    ];
   }
 
   @override
@@ -896,6 +919,39 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   }
 }
 
+/// Cached iOS/USB binary artifacts.
+class IosUsbArtifacts extends CachedArtifact {
+  IosUsbArtifacts(String name, Cache cache) : super(
+    name,
+    cache,
+    // This is universal to ensure every command checks for them first
+    const <DevelopmentArtifact>{ DevelopmentArtifact.universal },
+  );
+
+  static const List<String> artifactNames = <String>[
+    'libimobiledevice',
+    'usbmuxd',
+    'libplist',
+    'openssl',
+    'ideviceinstaller',
+    'ios-deploy',
+  ];
+
+  @override
+  String get dyLdLibPath {
+    return cache.getArtifactDirectory(name).path;
+  }
+
+  @override
+  Future<void> updateInner() {
+    if (!platform.isMacOS) {
+      return Future<void>.value();
+    }
+    final Uri archiveUri = Uri.parse('$_storageBaseUrl/flutter_infra/ios-usb-dependencies/$name/$version/$name.zip');
+    return _downloadZipArchive('Downloading $name...', archiveUri, location);
+  }
+}
+
 // Many characters are problematic in filenames, especially on Windows.
 final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
   r'@'.codeUnitAt(0): '@@'.codeUnits,
@@ -914,16 +970,16 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
 /// Given a name containing slashes, colons, and backslashes, expand it into
 /// something that doesn't.
 String _flattenNameNoSubdirs(String fileName) {
-  final List<int> replacedCodeUnits = <int>[];
-  for (int codeUnit in fileName.codeUnits) {
-    replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
-  }
+  final List<int> replacedCodeUnits = <int>[
+    for (int codeUnit in fileName.codeUnits)
+      ..._flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit],
+  ];
   return String.fromCharCodes(replacedCodeUnits);
 }
 
 @visibleForTesting
 String flattenNameSubdirs(Uri url) {
-  final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
+  final List<String> pieces = <String>[url.host, ...url.pathSegments];
   final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fs.path.joinAll(convertedPieces);
 }

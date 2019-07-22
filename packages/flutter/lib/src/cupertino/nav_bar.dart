@@ -2174,8 +2174,9 @@ CreateRectTween _linearTranslateWithLargestRectSizeTween = (Rect begin, Rect end
   );
 };
 
-final TransitionBuilder _navBarHeroLaunchPadBuilder = (
+final HeroPlaceholderBuilder _navBarHeroLaunchPadBuilder = (
   BuildContext context,
+  Size heroSize,
   Widget child,
 ) {
   assert(child is _TransitionableNavigationBar);
@@ -2250,4 +2251,5 @@ final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
         topNavBar: fromNavBar,
       );
   }
+  return null;
 };

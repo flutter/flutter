@@ -381,7 +381,7 @@ class RenderUiKitView extends RenderBox {
       return;
     }
     _gestureRecognizer.addPointer(event);
-    _lastPointerDownEvent = event;
+    _lastPointerDownEvent = event.original ?? event;
   }
 
   // This is registered as a global PointerRoute while the render object is attached.
@@ -389,11 +389,10 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    final Offset localOffset = globalToLocal(event.position);
-    if (!(Offset.zero & size).contains(localOffset)) {
+    if (!(Offset.zero & size).contains(event.localPosition)) {
       return;
     }
-    if (event != _lastPointerDownEvent) {
+    if ((event.original ?? event) != _lastPointerDownEvent) {
       // The pointer event is in the bounds of this render box, but we didn't get it in handleEvent.
       // This means that the pointer event was absorbed by a different render object.
       // Since on the platform side the FlutterTouchIntercepting view is seeing all events that are
@@ -455,7 +454,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
@@ -528,7 +527,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }

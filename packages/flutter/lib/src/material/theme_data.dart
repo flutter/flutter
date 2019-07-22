@@ -159,6 +159,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -228,6 +229,7 @@ class ThemeData extends Diagnosticable {
     final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
+    applyElevationOverlayColor ??= false;
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
@@ -237,8 +239,8 @@ class ThemeData extends Diagnosticable {
     // Used as the default color (fill color) for RaisedButtons. Computing the
     // default for ButtonThemeData for the sake of backwards compatibility.
     buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
-    focusColor ??= buttonColor;
-    hoverColor ??= buttonColor;
+    focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
+    hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
     buttonTheme ??= ButtonThemeData(
       colorScheme: colorScheme,
       buttonColor: buttonColor,
@@ -249,7 +251,7 @@ class ThemeData extends Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
-    disabledColor ??= isDark ? Colors.white30 : Colors.black38;
+    disabledColor ??= isDark ? Colors.white38 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
@@ -315,6 +317,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
+      applyElevationOverlayColor: applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
@@ -384,6 +387,7 @@ class ThemeData extends Diagnosticable {
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
+    @required this.applyElevationOverlayColor,
     @required this.pageTransitionsTheme,
     @required this.appBarTheme,
     @required this.bottomAppBarTheme,
@@ -679,6 +683,38 @@ class ThemeData extends Diagnosticable {
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
+  /// Apply a semi-transparent white overlay on Material surfaces to indicate
+  /// elevation for dark themes.
+  ///
+  /// Material drop shadows can be difficult to see in a dark theme, so the
+  /// elevation of a surface should be portrayed with an "overlay" in addition
+  /// to the shadow. As the elevation of the component increases, the white
+  /// overlay increases in opacity. [applyElevationOverlayColor] turns the
+  /// application of this overlay on or off.
+  ///
+  /// If [true] a semi-transparent white overlay will be applied to the color
+  /// of [Material] widgets when their [Material.color] is [colorScheme.surface].
+  /// The level of transparency is based on [Material.elevation] as per the
+  /// Material Dark theme specification.
+  ///
+  /// If [false] the surface color will be used unmodified.
+  ///
+  /// Defaults to [false].
+  ///
+  /// Note: this setting is here to maintain backwards compatibility with
+  /// apps that were built before the Material Dark theme specification
+  /// was published. New apps should set this to [true] for any themes
+  /// where [brightness] is [Brightness.dark].
+  ///
+  /// See also:
+  ///
+  ///  * [Material.elevation], which effects how transparent the white overlay is.
+  ///  * [Material.color], the white color overlay will only be applied of the
+  ///    material's color is [colorScheme.surface].
+  ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
+  ///    the overlay should be applied.
+  final bool applyElevationOverlayColor;
+
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
   /// [MaterialPageRoute.buildTransitions] delegates to a [PageTransitionsBuilder]
@@ -779,6 +815,7 @@ class ThemeData extends Diagnosticable {
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -837,6 +874,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
@@ -973,6 +1011,7 @@ class ThemeData extends Diagnosticable {
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
+      applyElevationOverlayColor: t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
@@ -1037,6 +1076,7 @@ class ThemeData extends Diagnosticable {
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
+           (otherData.applyElevationOverlayColor == applyElevationOverlayColor) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.appBarTheme == appBarTheme) &&
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
@@ -1100,6 +1140,7 @@ class ThemeData extends Diagnosticable {
       chipTheme,
       platform,
       materialTapTargetSize,
+      applyElevationOverlayColor,
       pageTransitionsTheme,
       appBarTheme,
       bottomAppBarTheme,
@@ -1120,33 +1161,33 @@ class ThemeData extends Diagnosticable {
     final ThemeData defaultData = ThemeData.fallback();
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
-    properties.add(DiagnosticsProperty<Color>('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
-    properties.add(DiagnosticsProperty<Color>('accentColor', accentColor, defaultValue: defaultData.accentColor));
+    properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
-    properties.add(DiagnosticsProperty<Color>('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
-    properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
-    properties.add(DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
-    properties.add(DiagnosticsProperty<Color>('cardColor', cardColor, defaultValue: defaultData.cardColor));
-    properties.add(DiagnosticsProperty<Color>('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultData.focusColor));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: defaultData.splashColor));
-    properties.add(DiagnosticsProperty<Color>('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
-    properties.add(DiagnosticsProperty<Color>('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
-    properties.add(DiagnosticsProperty<Color>('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
-    properties.add(DiagnosticsProperty<Color>('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
-    properties.add(DiagnosticsProperty<Color>('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: defaultData.cursorColor));
-    properties.add(DiagnosticsProperty<Color>('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<Color>('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
-    properties.add(DiagnosticsProperty<Color>('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
-    properties.add(DiagnosticsProperty<Color>('hintColor', hintColor, defaultValue: defaultData.hintColor));
-    properties.add(DiagnosticsProperty<Color>('errorColor', errorColor, defaultValue: defaultData.errorColor));
-    properties.add(DiagnosticsProperty<Color>('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
+    properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
+    properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor));
+    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
+    properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
+    properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
+    properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: defaultData.cursorColor));
+    properties.add(ColorProperty('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
+    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor));
+    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor));
+    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
     properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme));
     properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
@@ -1160,6 +1201,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
+    properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));

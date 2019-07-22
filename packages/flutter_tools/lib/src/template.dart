@@ -85,6 +85,11 @@ class Template {
           return null;
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
+      // Only build a web project if explicitly asked.
+      final bool web = context['web'];
+      if (relativeDestinationPath.contains('web') && !web) {
+        return null;
+      }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
       final String pluginClass = context['pluginClass'];

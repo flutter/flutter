@@ -256,6 +256,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
+    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -735,6 +736,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
+
+  /// Whether the [renderViewElement] has been initialized.
+  ///
+  /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
+  /// is called in the context of a [TestWidgetsFlutterBinding]).
+  bool get isRootWidgetAttached => _renderViewElement != null;
 
   @override
   Future<void> performReassemble() {

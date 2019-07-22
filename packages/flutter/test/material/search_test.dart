@@ -72,7 +72,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <void>[null]);
@@ -89,6 +89,20 @@ void main() {
     expect(find.text('HomeBody'), findsNothing);
     expect(find.text('HomeTitle'), findsNothing);
     expect(find.text('Suggestions'), findsOneWidget);
+  });
+
+  testWidgets('Hint text color overridden', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final Color hintColor = textField.decoration.hintStyle.color;
+    expect(hintColor, delegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -516,7 +530,7 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -525,6 +539,7 @@ void main() {
                         ],
                         label: 'Search',
                         textDirection: TextDirection.ltr,
+                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
                   ),
@@ -644,6 +659,15 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String suggestions;
   final String result;
   final List<Widget> actions;
+  final Color hintTextColor = Colors.green;
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return theme.copyWith(
+      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
+    );
+  }
 
   @override
   Widget buildLeading(BuildContext context) {

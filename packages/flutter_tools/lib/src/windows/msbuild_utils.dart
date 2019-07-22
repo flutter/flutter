@@ -5,49 +5,6 @@
 import 'package:xml/xml.dart' as xml;
 
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
-
-/// The supported versions of Visual Studio.
-const List<String> _visualStudioVersions = <String>['2017', '2019'];
-
-/// The supported flavors of Visual Studio.
-const List<String> _visualStudioFlavors = <String>[
-  'Community',
-  'Professional',
-  'Enterprise',
-  'Preview'
-];
-
-/// Returns the path to an installed vcvars64.bat script if found, or null.
-Future<String> findVcvars() async {
-  final String programDir = platform.environment['PROGRAMFILES(X86)'];
-  final String pathPrefix = fs.path.join(programDir, 'Microsoft Visual Studio');
-  const String vcvarsScriptName = 'vcvars64.bat';
-  final String pathSuffix =
-      fs.path.join('VC', 'Auxiliary', 'Build', vcvarsScriptName);
-  for (final String version in _visualStudioVersions) {
-    for (final String flavor in _visualStudioFlavors) {
-      final String testPath =
-          fs.path.join(pathPrefix, version, flavor, pathSuffix);
-      if (fs.file(testPath).existsSync()) {
-        return testPath;
-      }
-    }
-  }
-
-  // If it can't be found manually, check the path.
-  final ProcessResult whereResult = await processManager.run(<String>[
-    'where.exe',
-    vcvarsScriptName,
-  ]);
-  if (whereResult.exitCode == 0) {
-    return whereResult.stdout.trim();
-  }
-
-  return null;
-}
 
 /// Writes a property sheet (.props) file to expose all of the key/value
 /// pairs in [variables] as enivornment variables.

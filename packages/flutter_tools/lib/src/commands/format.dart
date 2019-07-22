@@ -61,23 +61,14 @@ class FormatCommand extends FlutterCommand {
     }
 
     final String dartfmt = sdkBinaryName('dartfmt');
-    final List<String> command = <String>[dartfmt];
-
-    if (argResults['dry-run']) {
-      command.add('-n');
-    }
-    if (argResults['machine']) {
-      command.add('-m');
-    }
-    if (!argResults['dry-run'] && !argResults['machine']) {
-      command.add('-w');
-    }
-
-    if (argResults['set-exit-if-changed']) {
-      command.add('--set-exit-if-changed');
-    }
-
-    command..addAll(argResults.rest);
+    final List<String> command = <String>[
+      dartfmt,
+      if (argResults['dry-run']) '-n',
+      if (argResults['machine']) '-m',
+      if (!argResults['dry-run'] && !argResults['machine']) '-w',
+      if (argResults['set-exit-if-changed']) '--set-exit-if-changed',
+      ...argResults.rest,
+    ];
 
     final int result = await runCommandAndStreamOutput(command);
     if (result != 0)

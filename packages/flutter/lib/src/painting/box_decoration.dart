@@ -10,6 +10,7 @@ import 'basic_types.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
+import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -96,6 +97,30 @@ class BoxDecoration extends Decoration {
          'backgroundBlendMode applies to BoxDecoration\'s background color or '
          'gradient, but no color or gradient was provided.'
        );
+
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  BoxDecoration copyWith({
+    Color color,
+    DecorationImage image,
+    BoxBorder border,
+    BorderRadiusGeometry borderRadius,
+    List<BoxShadow> boxShadow,
+    Gradient gradient,
+    BlendMode backgroundBlendMode,
+    BoxShape shape,
+  }) {
+    return BoxDecoration(
+      color: color ?? this.color,
+      image: image ?? this.image,
+      border: border ?? this.border,
+      borderRadius: borderRadius ?? this.borderRadius,
+      boxShadow: boxShadow ?? this.boxShadow,
+      gradient: gradient ?? this.gradient,
+      backgroundBlendMode: backgroundBlendMode ?? this.backgroundBlendMode,
+      shape: shape ?? this.shape,
+    );
+  }
 
   @override
   bool debugAssertIsValid() {
@@ -295,7 +320,7 @@ class BoxDecoration extends Decoration {
       ..defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace
       ..emptyBodyDescription = '<no decorations specified>';
 
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));
