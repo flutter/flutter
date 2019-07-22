@@ -1,4 +1,4 @@
-Signature: ac2d2b8cc15f4b84f1838c6cde00ab4b
+Signature: 27276e7dd24df01e7c8495d7a8fff42d
 
 UNUSED LICENSES:
 
@@ -1369,6 +1369,7 @@ FILE: ../../../third_party/skia/infra/bots/calmbench.isolate
 FILE: ../../../third_party/skia/infra/bots/cfg.json
 FILE: ../../../third_party/skia/infra/bots/compile.isolate
 FILE: ../../../third_party/skia/infra/bots/compile_android_framework.isolate
+FILE: ../../../third_party/skia/infra/bots/compile_g3_framework.isolate
 FILE: ../../../third_party/skia/infra/bots/empty.isolate
 FILE: ../../../third_party/skia/infra/bots/infra_tests.isolate
 FILE: ../../../third_party/skia/infra/bots/infrabots.isolate
