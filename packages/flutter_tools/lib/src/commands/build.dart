@@ -15,7 +15,6 @@ import 'build_appbundle.dart';
 import 'build_bundle.dart';
 import 'build_fuchsia.dart';
 import 'build_ios.dart';
-import 'build_kernel.dart';
 import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
@@ -30,7 +29,6 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildLinuxCommand());
     addSubcommand(BuildWindowsCommand());
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));
-    addSubcommand(BuildKernelCommand(verboseHelp: verboseHelp));
   }
 
   @override
