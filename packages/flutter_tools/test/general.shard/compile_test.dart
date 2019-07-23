@@ -506,10 +506,10 @@ example:org-dartlang-app:/
     });
   });
 
-  test('StdoutHandler can handle null values', () {
+  testUsingContext('StdoutHandler can handle null values', () {
     final StdoutHandler handler = StdoutHandler();
 
-    expect(() => handler.handler(null), isNot(throwsA(isInstanceOf<NoSuchMethodError>())));
+    expect(() => handler.handler(null), returnsNormally);
   });
 }
 
