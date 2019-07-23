@@ -107,11 +107,13 @@ action("gen_android_build_config_java") {
   ]
 }
 
+flutter_jar_path = "$root_out_dir/flutter_java.jar"
+
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
 
-  jar_path = "$root_out_dir/flutter_java.jar"
+  jar_path = flutter_jar_path
 
   sources = [
     "io/flutter/Log.java",
@@ -309,5 +311,55 @@ action("android") {
   deps = [
     ":flutter_shell_java",
     ":flutter_shell_native",
+  ]
+}
+
+# To build and run:
+#   testing/run_tests.py [--type=java] [--filter=io.flutter.TestClassName]
+action("robolectric_tests") {
+  script = "//build/android/gyp/javac.py"
+  depfile = "$target_gen_dir/$target_name.d"
+
+  jar_path = "$root_out_dir/robolectric_tests.jar"
+
+  sources = [
+    "test/io/flutter/FlutterTestSuite.java",
+    "test/io/flutter/SmokeTest.java",
+    "test/io/flutter/util/PreconditionsTest.java",
+  ]
+
+  outputs = [
+    depfile,
+    jar_path,
+    jar_path + ".md5.stamp",
+  ]
+
+  _jar_dependencies = [
+    android_sdk_jar,
+    flutter_jar_path,
+    "//third_party/robolectric/lib/junit-3.8.jar",
+    "//third_party/robolectric/lib/junit-4.13-beta-3.jar",
+    "//third_party/robolectric/lib/robolectric-3.8.jar",
+    "//third_party/robolectric/lib/annotations-3.8.jar",
+  ]
+
+  inputs = _jar_dependencies
+
+  _rebased_jar_path = rebase_path(jar_path, root_build_dir)
+  _rebased_depfile = rebase_path(depfile, root_build_dir)
+  _rebased_classpath = rebase_path(_jar_dependencies, root_build_dir)
+  _rebased_srcjars = rebase_path(_jar_dependencies, root_build_dir)
+
+  args = [
+    "--depfile=$_rebased_depfile",
+    "--jar-path=$_rebased_jar_path",
+    "--classpath=$_rebased_classpath",
+    "--java-srcjars=$_rebased_srcjars",
+  ]
+
+  args += rebase_path(sources, root_build_dir)
+
+  deps = [
+    ":flutter_shell_java",
   ]
 }

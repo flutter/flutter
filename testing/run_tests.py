@@ -191,6 +191,58 @@ def EnsureDebugUnoptSkyPackagesAreBuilt():
   subprocess.check_call(gn_command, cwd=buildroot_dir)
   subprocess.check_call(ninja_command, cwd=buildroot_dir)
 
+def EnsureJavaTestsAreBuilt(android_out_dir):
+  ninja_command = [
+    'ninja',
+    '-C',
+    android_out_dir,
+    'flutter/shell/platform/android:robolectric_tests'
+  ]
+
+  # Attempt running Ninja if the out directory exists.
+  # We don't want to blow away any custom GN args the caller may have already set.
+  if os.path.exists(android_out_dir):
+    subprocess.check_call(ninja_command, cwd=buildroot_dir)
+    return
+
+  # Otherwise prepare the directory first, then build the test.
+  gn_command = [
+    os.path.join(buildroot_dir, 'flutter', 'tools', 'gn'),
+    '--android',
+    '--unoptimized',
+    '--runtime-mode=debug',
+    '--no-lto',
+  ]
+  subprocess.check_call(gn_command, cwd=buildroot_dir)
+  subprocess.check_call(ninja_command, cwd=buildroot_dir)
+
+def RunJavaTests(filter):
+  # There's no real reason why other Android build types couldn't be supported
+  # here. Could default to this but use any other variant of android_ if it
+  # exists, but it seems like overkill to add that logic in right now.
+  android_out_dir = os.path.join(out_dir, 'android_debug_unopt')
+  EnsureJavaTestsAreBuilt(android_out_dir)
+
+  robolectric_dir = os.path.join(buildroot_dir, 'third_party', 'robolectric', 'lib')
+  classpath = map(str, [
+    os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-28', 'android.jar'),
+    os.path.join(robolectric_dir, '*'), # Wildcard for all jars in the directory
+    os.path.join(android_out_dir, 'flutter_java.jar'),
+    os.path.join(android_out_dir, 'robolectric_tests.jar')
+  ])
+
+  test_class = filter if filter else 'io.flutter.FlutterTestSuite'
+  command = [
+    'java',
+    '-Drobolectric.offline=true',
+    '-Drobolectric.dependency.dir=' + robolectric_dir,
+    '-classpath', ':'.join(classpath),
+    'org.junit.runner.JUnitCore',
+    test_class
+  ]
+
+  return subprocess.call(command)
+
 def RunDartTests(build_dir, filter):
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
   # has dependencies that are hardcoded to point to the sky packages at host_debug_unopt/
@@ -219,25 +271,36 @@ def main():
       help='A list of engine test executables to run.')
   parser.add_argument('--dart-filter', type=str, default='',
       help='A list of Dart test scripts to run.')
+  parser.add_argument('--java-filter', type=str, default='',
+      help='A single Java test class to run.')
 
   args = parser.parse_args()
 
   if args.type == 'all':
-    types = ['engine', 'dart', 'benchmarks']
+    types = ['engine', 'dart', 'benchmarks', 'java']
   else:
     types = args.type.split(',')
 
   build_dir = os.path.join(out_dir, args.variant)
-  assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
+  if args.type != 'java':
+    assert os.path.exists(build_dir), 'Build variant directory %s does not exist!' % build_dir
 
   engine_filter = args.engine_filter.split(',') if args.engine_filter else None
   if 'engine' in types:
     RunCCTests(build_dir, engine_filter)
 
-  # https://github.com/flutter/flutter/issues/36301
-  if 'dart' in types and not IsWindows():
+  if 'dart' in types:
+    assert not IsWindows(), "Dart tests can't be run on windows. https://github.com/flutter/flutter/issues/36301."
     dart_filter = args.dart_filter.split(',') if args.dart_filter else None
     RunDartTests(build_dir, dart_filter)
+
+  if 'java' in types:
+    assert not IsWindows(), "Android engine files can't be compiled on Windows."
+    java_filter = args.java_filter
+    if ',' in java_filter or '*' in java_filter:
+      print('Can only filter JUnit4 tests by single entire class name, eg "io.flutter.SmokeTest". Ignoring filter=' + java_filter)
+      java_filter = None
+    RunJavaTests(java_filter)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not IsWindows():
