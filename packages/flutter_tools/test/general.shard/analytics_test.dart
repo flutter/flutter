@@ -4,22 +4,21 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
-import 'package:mockito/mockito.dart';
-
 import 'package:flutter_tools/src/base/config.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../src/common.dart';
@@ -94,7 +93,8 @@ void main() {
       final Usage usage = Usage();
       usage.sendCommand('test');
 
-      expect(fs.file('test').readAsStringSync(), contains('$enabledFlutterFeatures: enable-web'));
+      final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
+      expect(fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,
@@ -114,7 +114,8 @@ void main() {
       final Usage usage = Usage();
       usage.sendCommand('test');
 
-      expect(fs.file('test').readAsStringSync(), contains('$enabledFlutterFeatures: enable-web,enable-linux-desktop,enable-macos-desktop'));
+      final String featuresKey = cdKey(CustomDimensions.enabledFlutterFeatures);
+      expect(fs.file('test').readAsStringSync(), contains('$featuresKey: enable-web,enable-linux-desktop,enable-macos-desktop'));
     }, overrides: <Type, Generator>{
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Config: () => mockFlutterConfig,

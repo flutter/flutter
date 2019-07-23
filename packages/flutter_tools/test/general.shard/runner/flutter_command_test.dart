@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';

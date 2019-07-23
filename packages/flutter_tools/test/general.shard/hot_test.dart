@@ -129,6 +129,7 @@ void main() {
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
+      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,
@@ -190,6 +191,7 @@ void main() {
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
+      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug),
       ];
@@ -206,6 +208,7 @@ void main() {
       final MockDevice mockDevice = MockDevice();
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(true);
+      when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
       // Trigger hot restart.
       final List<FlutterDevice> devices = <FlutterDevice>[
         FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug)..devFS = mockDevFs,

@@ -14,7 +14,7 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 
 import 'context.dart';
 import 'file_system.dart';

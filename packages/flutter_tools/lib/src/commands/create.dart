@@ -23,7 +23,7 @@ import '../doctor.dart';
 import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 import '../version.dart';
@@ -165,11 +165,11 @@ class CreateCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
-  Future<Map<String, String>> get usageValues async {
-    return <String, String>{
-      kCommandCreateProjectType: argResults['template'],
-      kCommandCreateAndroidLanguage: argResults['android-language'],
-      kCommandCreateIosLanguage: argResults['ios-language'],
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    return <CustomDimensions, String>{
+      CustomDimensions.commandCreateProjectType: argResults['template'],
+      CustomDimensions.commandCreateAndroidLanguage: argResults['android-language'],
+      CustomDimensions.commandCreateIosLanguage: argResults['ios-language'],
     };
   }
 
