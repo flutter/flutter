@@ -23,6 +23,7 @@ export 'src/material/app_bar.dart';
 export 'src/material/app_bar_theme.dart';
 export 'src/material/arc.dart';
 export 'src/material/back_button.dart';
+export 'src/material/banner.dart';
 export 'src/material/bottom_app_bar.dart';
 export 'src/material/bottom_app_bar_theme.dart';
 export 'src/material/bottom_navigation_bar.dart';
