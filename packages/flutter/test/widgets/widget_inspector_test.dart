@@ -2338,55 +2338,55 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final FlutterExceptionHandler oldHandler = FlutterError.onError;
 
       try {
-        // enable
+        // Enable structured errors.
         expect(await service.testBoolExtension(
             'structuredErrors', <String, String>{'enabled': 'true'}),
             equals('true'));
 
-        // create an error
+        // Create an error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
         ));
 
-        // validate that we received an error
+        // Validate that we received an error.
         flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
         expect(flutterErrorEvents, hasLength(1));
 
-        // validate the error contents
+        // Validate the error contents.
         Map<Object, Object> error = flutterErrorEvents.first;
         expect(error['description'], 'Exception caught by rendering library');
         expect(error['children'], isEmpty);
 
-        // validate that we received an error count
+        // Validate that we received an error count.
         expect(error['errorsSinceReload'], 0);
 
-        // send a second error
+        // Send a second error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
           library: 'rendering library',
           context: ErrorDescription('also during layout'),
           exception: StackTrace.current,
         ));
 
-        // validate that the error count increased
+        // Validate that the error count increased.
         flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
         expect(flutterErrorEvents, hasLength(2));
         error = flutterErrorEvents.last;
         expect(error['errorsSinceReload'], 1);
 
-        // reload the app
+        // Reload the app.
         tester.binding.reassembleApplication();
         await tester.pump();
 
-        // send another error
+        // Send another error.
         FlutterError.reportError(FlutterErrorDetailsForRendering(
           library: 'rendering library',
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
         ));
 
-        // and validate that the error count has been reset
+        // And, validate that the error count has been reset.
         flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
         expect(flutterErrorEvents, hasLength(3));
         error = flutterErrorEvents.last;
