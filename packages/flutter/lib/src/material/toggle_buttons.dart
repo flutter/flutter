@@ -326,10 +326,10 @@ class ToggleButtons extends StatelessWidget {
   /// This applies to both the greater surrounding border, as well as the
   /// borders dividing each toggle button.
   ///
-  /// To omit the border entirely, set this value to null.
-  ///
   /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
   /// See [BorderSide.width] for more details on hairline borders.
+  ///
+  /// To omit the border entirely, set [renderBorder] to false.
   ///
   /// If this property is set to null, then
   /// ToggleButtonTheme.of(context).borderWidth is used. If
