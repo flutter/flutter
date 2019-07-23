@@ -65,7 +65,7 @@ shared_library("create_flutter_framework_dylib") {
 
   deps = [
     "$flutter_root/shell/platform/darwin/common:framework_shared",
-    "$flutter_root/shell/platform/embedder:embedder",
+    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
   ]
 
   public_configs = [ "$flutter_root:config" ]
