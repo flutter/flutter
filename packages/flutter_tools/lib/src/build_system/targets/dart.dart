@@ -25,6 +25,9 @@ const String kTargetPlatform = 'TargetPlatform';
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
 
+/// The define to control whether the AOT snapshot is built with bitcode.
+const String kBitcodeFlag = 'EnableBitcode';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not
@@ -74,6 +77,7 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
   if (environment.defines[kTargetPlatform] == null) {
     throw MissingDefineException(kTargetPlatform, 'aot_elf');
   }
+
   final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
   final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
   final int snapshotExitCode = await snapshotter.build(
@@ -82,6 +86,7 @@ Future<void> compileAotElf(Map<String, ChangeType> updates, Environment environm
     mainPath: environment.buildDir.childFile('main.app.dill').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
     outputPath: outputPath,
+    bitcode: false,
   );
   if (snapshotExitCode != 0) {
     throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -126,6 +131,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
   if (targetPlatform != TargetPlatform.ios) {
     throw Exception('aot_assembly is only supported for iOS applications');
   }
+  final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
 
   // If we're building for a single architecture (common), then skip the lipo.
   if (iosArchs.length == 1) {
@@ -136,6 +142,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       iosArch: iosArchs.single,
+      bitcode: bitcode,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -152,6 +159,7 @@ Future<void> compileAotAssembly(Map<String, ChangeType> updates, Environment env
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
         iosArch: iosArch,
+        bitcode: bitcode,
       ));
     }
     final List<int> results = await Future.wait(pending);
