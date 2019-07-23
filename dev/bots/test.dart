@@ -289,6 +289,9 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    }
   );
   print('Done.');
 }
