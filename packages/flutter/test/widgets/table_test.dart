@@ -378,6 +378,8 @@ void main() {
 
   testWidgets('Calculating flex columns with small width deficit', (WidgetTester tester) async {
     const SizedBox cell = SizedBox(width: 1, height: 1);
+    // If the error is present, pumpWidget() will fail due to an unsatisfied
+    // assertion during the layout phase.
     await tester.pumpWidget(
       ConstrainedBox(
         constraints: BoxConstraints.tight(const Size(600, 800)),
