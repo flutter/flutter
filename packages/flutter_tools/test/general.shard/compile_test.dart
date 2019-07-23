@@ -505,6 +505,12 @@ example:org-dartlang-app:/
       Platform: _kNoColorTerminalPlatform,
     });
   });
+
+  test('StdoutHandler can handle null values', () {
+    final StdoutHandler handler = StdoutHandler();
+
+    expect(() => handler.handler(null), isNot(throwsA(isInstanceOf<NoSuchMethodError>())));
+  });
 }
 
 Future<void> _recompile(

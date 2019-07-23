@@ -98,6 +98,10 @@ class StdoutHandler {
 
   void handler(String message) {
     printTrace('-> $message');
+    // See https://github.com/flutter/flutter/issues/35924.
+    if (message == null) {
+      return;
+    }
     const String kResultPrefix = 'result ';
     if (boundaryKey == null && message.startsWith(kResultPrefix)) {
       boundaryKey = message.substring(kResultPrefix.length);
