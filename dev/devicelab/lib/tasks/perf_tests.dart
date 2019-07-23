@@ -258,7 +258,9 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', '--web', sampleAppName]);
+      await flutter('create', options: <String>['--template=app', '--web', sampleAppName], environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+        });
       await inDirectory(sampleDir, () async {
         await flutter('packages', options: <String>['get']);
         await evalFlutter('build', options: <String>[
