@@ -1,0 +1,52 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# Creates a package dir that we will them use pm to package.
+#
+# This currently ignores the CMX files and does minimal validation.
+template("package_dir") {
+  assert(defined(invoker.binary), "package must define binary")
+
+  pkg_target_name = target_name
+  pkg = {
+    package_version = "0"  # placeholder
+    forward_variables_from(invoker,
+                           [
+                             "binary",
+                             "deps",
+                             "meta",
+                             "resources",
+                           ])
+    if (!defined(package_name)) {
+      package_name = pkg_target_name
+    }
+    if (!defined(meta)) {
+      meta = []
+    }
+    if (!defined(deps)) {
+      deps = []
+    }
+    if (!defined(resources)) {
+      resources = []
+    }
+  }
+
+  far_base_dir = "$root_out_dir/${pkg_target_name}_far"
+
+  copy_sources = [ "$root_out_dir/${invoker.binary}" ]
+  copy_outputs = [ "$far_base_dir/app/bin" ]
+
+  foreach(res, pkg.resources) {
+    copy_sources += [ res.path ]
+    copy_outputs += [ "$far_base_dir/data/${res.dest}" ]
+  }
+
+  action(target_name) {
+    script = "$flutter_root/tools/fuchsia/copy_path.py"
+    response_file_contents = rebase_path(copy_sources + copy_outputs)
+    deps = pkg.deps
+    args = [ "--file-list={{response_file_name}}" ]
+    outputs = copy_outputs
+  }
+}
