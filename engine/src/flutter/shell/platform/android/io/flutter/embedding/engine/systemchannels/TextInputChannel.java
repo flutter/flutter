@@ -371,7 +371,8 @@ public class TextInputChannel {
     PHONE("TextInputType.phone"),
     MULTILINE("TextInputType.multiline"),
     EMAIL_ADDRESS("TextInputType.emailAddress"),
-    URL("TextInputType.url");
+    URL("TextInputType.url"),
+    VISIBLE_PASSWORD("TextInputType.visiblePassword");
 
     static TextInputType fromValue(@NonNull String encodedName) throws NoSuchFieldException {
       for (TextInputType textInputType : TextInputType.values()) {
