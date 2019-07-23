@@ -14,11 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-<<<<<<< HEAD
-import 'desktop.dart';
 import 'extension_host.dart';
-=======
->>>>>>> e5ea996a1f731f6accc4e9bf5d2430a840c975f7
 import 'fuchsia/fuchsia_device.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
