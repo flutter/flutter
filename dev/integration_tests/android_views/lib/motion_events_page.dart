@@ -206,7 +206,7 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
           case TargetPlatform.android:
             return 'android';
           default:
-            return 'untested';
+            return 'unsupported';
         }
     }
     return 'unknown message: "$message"';

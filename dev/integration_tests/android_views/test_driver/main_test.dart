@@ -40,7 +40,8 @@ Future<void> main() async {
           find.byValueKey('MotionEventsListTile');
       await driver.tap(motionEventsListTile);
       await driver.waitFor(find.byValueKey('PlatformView'));
-      target = await driver.requestData('target platform');
+      target = await driver.requestData('target_platform');
+      print(target);
       if (target == 'android') {
         final String errorMessage = await driver.requestData('run test');
         expect(errorMessage, '');
@@ -67,10 +68,10 @@ Future<void> main() async {
       final List<int> screenShot = await driver.screenshot();
       final String path = target == 'ios'?kIOSScreenShotPathStandard:kAndroidScreenShotPathStandard;
       final File file = File(path);
-      if (!file.existsSync()) {
-        print('Platform view mutation test file not exist, creating a new one');
-        file.writeAsBytesSync(screenShot);
-      }
+      // if (!file.existsSync()) {
+      //   print('Platform view mutation test file not exist, creating a new one');
+      //   file.writeAsBytesSync(screenShot);
+      // }
       final List<int> matcher = file.readAsBytesSync();
 
       final Function listEquals = const ListEquality<int>().equals;
@@ -88,10 +89,10 @@ Future<void> main() async {
       final List<int> screenShot = await driver.screenshot();
       final String path = target == 'ios'?kIOSScreenShotPathWithScrollView:kAndroidScreenShotPathWithScrollView;
       final File file = File(path);
-      if (!file.existsSync()) {
-        print('Platform view mutation test file not exist, creating a new one');
-        file.writeAsBytesSync(screenShot);
-      }
+      // if (!file.existsSync()) {
+      //   print('Platform view mutation test file not exist, creating a new one');
+      //   file.writeAsBytesSync(screenShot);
+      // }
       final List<int> matcher = file.readAsBytesSync();
 
       final Function listEquals = const ListEquality<int>().equals;
