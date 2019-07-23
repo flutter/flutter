@@ -207,6 +207,31 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// {@tool sample}
+/// The default constructor can be used with any [ImageProvider], such as a
+/// [NetworkImage], to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
+///
+/// ```dart
+/// const Image(
+///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [Image] Widget also provides several constructors to display different
+/// types of images for convenience. In this example, use the [Image.network]
+/// constructor to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
+///
+/// ```dart
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.

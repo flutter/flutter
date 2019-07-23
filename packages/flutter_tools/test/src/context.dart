@@ -188,13 +188,13 @@ class FakeDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) {
-    return getDevices().toList();
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
   }
 
   @override
-  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
-    return device.isSupportedForProject(flutterProject);
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    return devices;
   }
 }
 
