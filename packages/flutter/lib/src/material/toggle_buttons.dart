@@ -151,6 +151,9 @@ class ToggleButtons extends StatelessWidget {
   /// list.
   ///
   /// Both [children] and [isSelected] properties arguments are required.
+  ///
+  /// [isSelected] values must be non-null. [focusNodes] must be null or a
+  /// list of non-null nodes. [renderBorder] must not be null.
   const ToggleButtons({
     Key key,
     @required this.children,
@@ -479,7 +482,15 @@ class ToggleButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(
       !isSelected.any((bool val) => val == null),
-      'There is a null value in isSelected: $isSelected'
+      'All elements of isSelected must be non-null.\n'
+      'The current list of isSelected values is as follows:\n'
+      '$isSelected'
+    );
+    assert(
+      !focusNodes.any((FocusNode val) => val == null),
+      'All elements of focusNodes must be non-null.\n'
+      'The current list of focus node values is as follows:\n'
+      '$focusNodes'
     );
     assert(
       () {
