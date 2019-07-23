@@ -2349,21 +2349,51 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           context: ErrorDescription('during layout'),
           exception: StackTrace.current,
         ));
+
+        // validate that we received an error
+        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        expect(flutterErrorEvents, hasLength(1));
+
+        // validate the error contents
+        Map<Object, Object> error = flutterErrorEvents.first;
+        expect(error['description'], 'Exception caught by rendering library');
+        expect(error['children'], isEmpty);
+
+        // validate that we received an error count
+        expect(error['errorsSinceReload'], 0);
+
+        // send a second error
+        FlutterError.reportError(FlutterErrorDetailsForRendering(
+          library: 'rendering library',
+          context: ErrorDescription('also during layout'),
+          exception: StackTrace.current,
+        ));
+
+        // validate that the error count increased
+        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        expect(flutterErrorEvents, hasLength(2));
+        error = flutterErrorEvents.last;
+        expect(error['errorsSinceReload'], 1);
+
+        // reload the app
+        tester.binding.reassembleApplication();
+        await tester.pump();
+
+        // send another error
+        FlutterError.reportError(FlutterErrorDetailsForRendering(
+          library: 'rendering library',
+          context: ErrorDescription('during layout'),
+          exception: StackTrace.current,
+        ));
+
+        // and validate that the error count has been reset
+        flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+        expect(flutterErrorEvents, hasLength(3));
+        error = flutterErrorEvents.last;
+        expect(error['errorsSinceReload'], 0);
       } finally {
         FlutterError.onError = oldHandler;
       }
-
-      // validate that we received an error
-      flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
-      expect(flutterErrorEvents, hasLength(1));
-
-      // validate the error contents
-      final Map<Object, Object> error = flutterErrorEvents.first;
-      expect(error['description'], 'Exception caught by rendering library');
-      expect(error['children'], isEmpty);
-
-      // validate that we received an error count
-      expect(error['errorsSinceReload'], 0);
     });
 
     testWidgets('Screenshot of composited transforms - only offsets', (WidgetTester tester) async {
