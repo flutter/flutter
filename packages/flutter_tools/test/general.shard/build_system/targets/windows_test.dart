@@ -90,7 +90,7 @@ void main() {
       await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
 
       expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, isNot(modified));
-    }));
+    }), skip: true); // TODO(jonahwilliams): track down flakiness.
   });
 }
 
