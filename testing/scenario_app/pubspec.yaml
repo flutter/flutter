@@ -1,0 +1,10 @@
+name: scenario_app
+publish_to: none
+
+# These are for convenience during local development. Changing them will not
+# impact the build.
+dependencies:
+ sky_engine:
+   path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_engine
+ sky_services:
+   path: ../../../out/host_debug_unopt/gen/dart-pkg/sky_services
