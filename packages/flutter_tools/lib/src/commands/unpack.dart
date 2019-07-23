@@ -70,9 +70,6 @@ class UnpackCommand extends FlutterCommand {
   bool get hidden => true;
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
