@@ -63,7 +63,8 @@ Future main(List<String> args) async {
     ..packagesFileUri = Uri.base.resolveUri(Uri.file(packagesPath))
     ..librariesSpecificationUri = Uri.base.resolveUri(Uri.file(librarySpecPath))
     ..target = target
-    ..onDiagnostic = onDiagnostic;
+    ..onDiagnostic = onDiagnostic
+    ..environmentDefines = {};
 
   var inputs = target.extraRequiredLibraries.map(Uri.parse).toList();
   var component = await kernelForComponent(inputs, options);
