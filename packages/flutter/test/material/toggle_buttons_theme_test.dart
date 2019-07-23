@@ -23,20 +23,35 @@ void main() {
   });
 
    test('ToggleButtonsThemeData defaults', () {
-    const ToggleButtonsThemeData theme = ToggleButtonsThemeData();
-    expect(theme.color, null);
-    expect(theme.selectedColor, null);
-    expect(theme.disabledColor, null);
-    expect(theme.fillColor, null);
-    expect(theme.focusColor, null);
-    expect(theme.highlightColor, null);
-    expect(theme.hoverColor, null);
-    expect(theme.splashColor, null);
-    expect(theme.borderColor, null);
-    expect(theme.selectedBorderColor, null);
-    expect(theme.disabledBorderColor, null);
-    expect(theme.borderRadius, null);
-    expect(theme.borderWidth, null);
+    const ToggleButtonsThemeData themeData = ToggleButtonsThemeData();
+    expect(themeData.color, null);
+    expect(themeData.selectedColor, null);
+    expect(themeData.disabledColor, null);
+    expect(themeData.fillColor, null);
+    expect(themeData.focusColor, null);
+    expect(themeData.highlightColor, null);
+    expect(themeData.hoverColor, null);
+    expect(themeData.splashColor, null);
+    expect(themeData.borderColor, null);
+    expect(themeData.selectedBorderColor, null);
+    expect(themeData.disabledBorderColor, null);
+    expect(themeData.borderRadius, null);
+    expect(themeData.borderWidth, null);
+
+    final ToggleButtonsTheme theme = ToggleButtonsTheme();
+    expect(theme.data.color, null);
+    expect(theme.data.selectedColor, null);
+    expect(theme.data.disabledColor, null);
+    expect(theme.data.fillColor, null);
+    expect(theme.data.focusColor, null);
+    expect(theme.data.highlightColor, null);
+    expect(theme.data.hoverColor, null);
+    expect(theme.data.splashColor, null);
+    expect(theme.data.borderColor, null);
+    expect(theme.data.selectedBorderColor, null);
+    expect(theme.data.disabledBorderColor, null);
+    expect(theme.data.borderRadius, null);
+    expect(theme.data.borderWidth, null);
   });
 
    testWidgets('Default ToggleButtonsThemeData debugFillProperties', (WidgetTester tester) async {

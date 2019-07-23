@@ -487,7 +487,7 @@ class ToggleButtons extends StatelessWidget {
       '$isSelected'
     );
     assert(
-      !focusNodes.any((FocusNode val) => val == null),
+      focusNodes == null || !focusNodes.any((FocusNode val) => val == null),
       'All elements of focusNodes must be non-null.\n'
       'The current list of focus node values is as follows:\n'
       '$focusNodes'
