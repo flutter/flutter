@@ -30,8 +30,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   String get name => 'assemble';
 
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -127,9 +125,6 @@ class AssembleRun extends AssembleBase {
   String get name => 'run';
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
@@ -156,9 +151,6 @@ class AssembleDescribe extends AssembleBase {
   String get name => 'describe';
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<FlutterCommandResult> runCommand() {
     try {
       printStatus(
@@ -179,9 +171,6 @@ class AssembleListInputs extends AssembleBase {
 
   @override
   String get name => 'inputs';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -208,9 +197,6 @@ class AssembleBuildDirectory extends AssembleBase {
 
   @override
   String get name => 'build-dir';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {

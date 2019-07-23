@@ -21,7 +21,7 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   artifacts_cache:
     folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
@@ -298,7 +298,7 @@ task:
     fingerprint_script: echo %OS% & type bin\internal\engine.version
   artifacts_cache:
     folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
     - flutter config --no-analytics
     - flutter doctor -v
@@ -498,12 +498,18 @@ task:
         - dart --enable-asserts dev/bots/test.dart
     - name: build_tests-macos
       env:
-        SHARD: build_tests # we should also enable integration_tests at some point, but it's too flaky right now
+        SHARD: build_tests
         COCOAPODS_DISABLE_STATS: true
         FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
       osx_instance:
         image: mojave-flutter
       remove_preinstalled_flutter_script: rm -rf $FLUTTER_HOME
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+    - name: integration_tests-macos
+      env:
+        SHARD: integration_tests
       test_all_script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart

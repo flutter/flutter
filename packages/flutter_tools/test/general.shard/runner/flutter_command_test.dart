@@ -4,7 +4,7 @@
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/time.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -60,14 +60,8 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured,
-        <dynamic>[
-          'dummy',
-          const <String, String>{'cd26': 'success'}
-        ],
-      );
+      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+      verify(usage.sendEvent(captureAny, 'success'));
     },
     overrides: <Type, Generator>{
       SystemClock: () => clock,
@@ -85,14 +79,8 @@ void main() {
       );
       await flutterCommand.run();
 
-      expect(
-        verify(usage.sendCommand(captureAny,
-                parameters: captureAnyNamed('parameters'))).captured,
-        <dynamic>[
-          'dummy',
-          const <String, String>{'cd26': 'warning'}
-        ],
-      );
+      verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+      verify(usage.sendEvent(captureAny, 'warning'));
     },
     overrides: <Type, Generator>{
       SystemClock: () => clock,
@@ -112,14 +100,8 @@ void main() {
       try {
         await flutterCommand.run();
       } on ToolExit {
-        expect(
-          verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured,
-          <dynamic>[
-            'dummy',
-            const <String, String>{'cd26': 'fail'}
-          ],
-        );
+        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+        verify(usage.sendEvent(captureAny, 'fail'));
       }
     },
     overrides: <Type, Generator>{
@@ -142,14 +124,8 @@ void main() {
         await flutterCommand.run();
         fail('Mock should make this fail');
       } on ToolExit {
-        expect(
-          verify(usage.sendCommand(captureAny,
-                  parameters: captureAnyNamed('parameters'))).captured,
-          <dynamic>[
-            'dummy',
-            const <String, String>{'cd26': 'fail'}
-          ],
-        );
+        verify(usage.sendCommand(captureAny, parameters: captureAnyNamed('parameters')));
+        verify(usage.sendEvent(captureAny, 'fail'));
       }
     },
     overrides: <Type, Generator>{
@@ -267,27 +243,6 @@ void main() {
       SystemClock: () => clock,
       Usage: () => usage,
     });
-
-  });
-
-  group('Experimental commands', () {
-    final MockVersion stableVersion = MockVersion();
-    final MockVersion betaVersion = MockVersion();
-    final FakeCommand fakeCommand = FakeCommand();
-    when(stableVersion.isMaster).thenReturn(false);
-    when(betaVersion.isMaster).thenReturn(true);
-
-    testUsingContext('Can be disabled on stable branch', () async {
-      expect(() => fakeCommand.run(), throwsA(isA<ToolExit>()));
-    }, overrides: <Type, Generator>{
-      FlutterVersion: () => stableVersion,
-    });
-
-    testUsingContext('Works normally on regular branches', () async {
-      expect(fakeCommand.run(), completes);
-    }, overrides: <Type, Generator>{
-      FlutterVersion: () => betaVersion,
-    });
   });
 }
 
@@ -298,9 +253,6 @@ class FakeCommand extends FlutterCommand {
 
   @override
   String get name => 'fake';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {

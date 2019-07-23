@@ -13,6 +13,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart' as io;
 import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/user_messages.dart';
@@ -24,10 +25,10 @@ import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../usage.dart';
-import '../version.dart';
+import '../reporting/usage.dart';
 import 'flutter_command_runner.dart';
 
 export '../cache.dart' show DevelopmentArtifact;
@@ -354,11 +355,6 @@ abstract class FlutterCommand extends Command<void> {
     }
   }
 
-  /// Whether this feature should not be usable on stable branches.
-  ///
-  /// Defaults to false, meaning it is usable.
-  bool get isExperimental => false;
-
   /// Additional usage values to be sent with the usage ping.
   Future<Map<String, String>> get usageValues async => const <String, String>{};
 
@@ -378,9 +374,10 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
+        final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand();
+          commandResult = await verifyThenRunCommand(commandPath);
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
           rethrow;
@@ -388,8 +385,7 @@ abstract class FlutterCommand extends Command<void> {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-
-          await _sendUsage(commandResult, startTime, endTime);
+          _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },
     );
@@ -399,32 +395,28 @@ abstract class FlutterCommand extends Command<void> {
   ///
   /// For example, the command path (e.g. `build/apk`) and the result,
   /// as well as the time spent running it.
-  Future<void> _sendUsage(FlutterCommandResult commandResult, DateTime startTime, DateTime endTime) async {
-    final String commandPath = await usagePath;
-
+  void _sendPostUsage(String commandPath, FlutterCommandResult commandResult,
+                      DateTime startTime, DateTime endTime) {
     if (commandPath == null) {
       return;
     }
 
-    // Send screen.
-    final Map<String, String> currentUsageValues = await usageValues;
-    final Map<String, String> additionalUsageValues = <String, String>{
-      ...?currentUsageValues,
-    };
+    // Send command result.
+    String result = 'unspecified';
     if (commandResult != null) {
       switch (commandResult.exitStatus) {
         case ExitStatus.success:
-          additionalUsageValues[kCommandResult] = 'success';
+          result = 'success';
           break;
         case ExitStatus.warning:
-          additionalUsageValues[kCommandResult] = 'warning';
+          result = 'warning';
           break;
         case ExitStatus.fail:
-          additionalUsageValues[kCommandResult] = 'fail';
+          result = 'fail';
           break;
       }
     }
-    flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+    flutterUsage.sendEvent(commandPath, result);
 
     // Send timing.
     final List<String> labels = <String>[
@@ -457,7 +449,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -473,6 +465,15 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     setupApplicationPackages();
+
+    if (commandPath != null) {
+      final Map<String, String> additionalUsageValues = <String,String>{
+        ...?await usageValues,
+      };
+      additionalUsageValues[kCommandHasTerminal] =
+          io.stdout.hasTerminal ? 'true' : 'false';
+      flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+    }
 
     return await runCommand();
   }
@@ -549,12 +550,6 @@ abstract class FlutterCommand extends Command<void> {
   @protected
   @mustCallSuper
   Future<void> validateCommand() async {
-    // If we're on a stable branch, then don't allow the usage of
-    // "experimental" features.
-    if (isExperimental && !FlutterVersion.instance.isMaster) {
-      throwToolExit('Experimental feature $name is not supported on stable branches');
-    }
-
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
@@ -647,17 +642,17 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
     case TargetPlatform.darwin_x64:
-      if (FlutterVersion.instance.isMaster) {
+      if (featureFlags.isMacOSEnabled) {
         return DevelopmentArtifact.macOS;
       }
       return null;
     case TargetPlatform.windows_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isWindowsEnabled) {
         return DevelopmentArtifact.windows;
       }
       return null;
     case TargetPlatform.linux_x64:
-      if (!FlutterVersion.instance.isMaster) {
+      if (featureFlags.isLinuxEnabled) {
         return DevelopmentArtifact.linux;
       }
       return null;
