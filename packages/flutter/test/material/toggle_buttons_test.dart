@@ -969,6 +969,51 @@ void main() {
     }
   });
 
+  testWidgets('ToggleButtons text baseline alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: <Widget>[
+              ToggleButtons(
+                borderWidth: 5.0,
+                isSelected: const <bool>[false, true],
+                children: const <Widget>[
+                  Text('First child', style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
+                  Text('Second child', style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
+                ],
+              ),
+              const MaterialButton(
+                onPressed: null,
+                child: Text('Material Button', style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0)),
+              ),
+              const Text('Text', style: TextStyle(fontFamily: 'Ahem', fontSize: 30.0)),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
+
+    final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
+    final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
+    final double materialButtonDy = tester.getBottomLeft(find.text('Material Button')).dy;
+    final double textDy = tester.getBottomLeft(find.text('Text')).dy;
+
+    expect(firstToggleButtonDy, secondToggleButtonDy);
+    expect(firstToggleButtonDy, closeTo(materialButtonDy - 2.0, 0.001));
+    expect(firstToggleButtonDy, closeTo(textDy - 4.0, 0.001));
+  });
+
   testWidgets('Directionality test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Material(
