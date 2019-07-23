@@ -1,0 +1,5 @@
+# Ensure File
+$ServiceURL https://chrome-infra-packages.appspot.com
+
+# Skia Gold Client goldctl
+skia/tools/goldctl/${platform} latest
