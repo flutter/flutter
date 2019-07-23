@@ -19,8 +19,6 @@ import 'material_localizations.dart';
 import 'popup_menu_theme.dart';
 import 'theme.dart';
 
-import 'package:flutter/foundation.dart';
-
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
@@ -756,9 +754,7 @@ Future<T> showMenu<T>({
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
-      label = semanticLabel ?? MaterialLocalizations
-          .of(context)
-          ?.popupMenuLabel;
+      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
   }
 
   return Navigator.push(context, _PopupMenuRoute<T>(
