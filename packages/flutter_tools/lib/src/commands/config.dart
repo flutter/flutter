@@ -24,6 +24,8 @@ class ConfigCommand extends FlutterCommand {
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
+        valueHelp: '/out');
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
@@ -127,6 +129,9 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
+    
+    if (argResults.wasParsed('build-dir'))
+      _updateConfig('build-dir', argResults['build-dir']);
 
     for (Feature feature in allFeatures) {
       if (feature.configSetting == null) {
