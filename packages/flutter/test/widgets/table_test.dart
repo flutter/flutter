@@ -403,6 +403,7 @@ void main() {
         ),
       ),
     );
+    expect(tester.takeException(), null);
   });
 
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
