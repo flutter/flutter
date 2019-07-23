@@ -345,19 +345,21 @@ class ToggleButtons extends StatelessWidget {
   /// the buttons default to non-rounded borders.
   final BorderRadius borderRadius;
 
+  bool _isFirstIndex(int index, int length, TextDirection textDirection) {
+    return index == 0 && textDirection == TextDirection.ltr
+        || index == length - 1 && textDirection == TextDirection.rtl;
+  }
+
   BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
     final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
 
-    if (
-      index == 0 && textDirection == TextDirection.ltr ||
-      index == children.length - 1 && textDirection == TextDirection.rtl
-    ) {
+    if (_isFirstIndex(index, length, textDirection)) {
       return BorderRadius.only(
         topLeft: resultingBorderRadius.topLeft,
         bottomLeft: resultingBorderRadius.bottomLeft,
       );
     } else if (
-      index == children.length - 1 && textDirection == TextDirection.ltr ||
+      index == length - 1 && textDirection == TextDirection.ltr ||
       index == 0 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
@@ -372,16 +374,13 @@ class ToggleButtons extends StatelessWidget {
     final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
     final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
 
-    if (
-      index == 0 && textDirection == TextDirection.ltr ||
-      index == children.length - 1 && textDirection == TextDirection.rtl
-    ) {
+    if (_isFirstIndex(index, length, textDirection)) {
       return BorderRadius.only(
         topLeft: resultingBorderRadius.topLeft - Radius.circular(resultingBorderWidth / 2.0),
         bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(resultingBorderWidth / 2.0),
       );
     } else if (
-      index == children.length - 1 && textDirection == TextDirection.ltr ||
+      index == length - 1 && textDirection == TextDirection.ltr ||
       index == 0 && textDirection == TextDirection.rtl
     ) {
       return BorderRadius.only(
