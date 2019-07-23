@@ -129,7 +129,7 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
-    
+
     if (argResults.wasParsed('build-dir'))
       _updateConfig('build-dir', argResults['build-dir']);
 
