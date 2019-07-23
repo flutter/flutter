@@ -56,6 +56,11 @@ class SkiaGoldClient extends GoldensClient {
   /// Uses the [platform] environment in this implementation.
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
 
+  /// The local [Directory] where the goldens files are located.
+  ///
+  /// Uses the [fs] file system.
+  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'skia_goldens'));
+
   /// Prepares the local work space for golden file testing and calls the
   /// goldctl `auth` command.
   ///
