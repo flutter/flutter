@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/resident_web_runner.dart';
@@ -24,6 +27,7 @@ void main() {
   MockPlatform mockPlatform;
 
   setUpAll(() {
+    Cache.flutterRoot = '';
     Cache.disableLocking();
   });
 
@@ -49,6 +53,7 @@ void main() {
       WebCompilationProxy: () => mockWebCompilationProxy,
       Platform: () => mockPlatform,
       FlutterVersion: () => MockFlutterVersion(),
+      FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
     });
   });
 
@@ -81,6 +86,15 @@ void main() {
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
     );
+  }));
+
+  test('Refuses to build for web when feature is disabled', () => testbed.run(() async {
+    final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
+
+    expect(() => runner.run(<String>['build', 'web']),
+        throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   }));
 }
 

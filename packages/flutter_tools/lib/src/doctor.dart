@@ -19,7 +19,6 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'desktop.dart';
 import 'device.dart';
 import 'extension_host.dart';
 import 'fuchsia/fuchsia_workflow.dart';
@@ -76,10 +75,8 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
         if (webWorkflow.appliesToHostPlatform)
           const WebValidator(),
         // Add desktop doctors to workflow if the flag is enabled.
-        if (flutterDesktopEnabled)
-          ...<DoctorValidator>[
-            if (windowsWorkflow.appliesToHostPlatform) visualStudioValidator,
-          ],
+        if (windowsWorkflow.appliesToHostPlatform)
+          visualStudioValidator,
         if (ideValidators.isNotEmpty)
           ...ideValidators
         else
