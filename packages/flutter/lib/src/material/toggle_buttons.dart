@@ -895,6 +895,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   }
 
   @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    // The baseline of this widget is the baseline of its child
+    return child.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
   double computeMaxIntrinsicHeight(double width) {
     return horizontalBorderSide.width +
            _maxHeight(child, width) +
