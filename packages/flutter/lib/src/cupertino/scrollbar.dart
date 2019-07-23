@@ -338,17 +338,7 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
-    // foregroundPainter also hit tests its children by default, but the
-    // scrollbar should only respond to a longpress directly on its thumb, so
-    // manually check for a hit on the thumb here.
-    if (_customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
-    final ScrollbarPainter painter = customPaint.foregroundPainter;
-    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
-    final Offset localOffset = renderBox.globalToLocal(event.position);
-    if (!painter.hitTestInteractive(localOffset)) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
       return false;
     }
     return super.isPointerAllowed(event);
@@ -357,9 +347,6 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
 
 // A horizontal drag gesture detector that only responds to events on the
 // scrollbar's thumb and ignores everything else.
-// TODO(justinmc): I wanted to put this in cuperinto/scrollbar.dart along with
-// the long press detector, but it seems I can't override _isFlingGesture
-// outside of this file because it's private. Any better way to organize this?
 class ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
   ThumbHorizontalDragGestureRecognizer({
     PointerDeviceKind kind,
@@ -373,21 +360,9 @@ class ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecogniz
 
   final GlobalKey _customPaintKey;
 
-  // TODO(justinmc): Could I use some OOP magic to avoid duplicating this code
-  // with _ThumbLongPressGestureRecognizer.isPointerAllowed?
   @override
   bool isPointerAllowed(PointerEvent event) {
-    // foregroundPainter also hit tests its children by default, but the
-    // scrollbar should only respond to a gesture directly on its thumb, so
-    // manually check for a hit on the thumb here.
-    if (_customPaintKey.currentContext == null) {
-      return false;
-    }
-    final CustomPaint customPaint = _customPaintKey.currentContext.widget;
-    final ScrollbarPainter painter = customPaint.foregroundPainter;
-    final RenderBox renderBox = _customPaintKey.currentContext.findRenderObject();
-    final Offset localOffset = renderBox.globalToLocal(event.position);
-    if (!painter.hitTestInteractive(localOffset)) {
+    if (!_hitTestInteractive(_customPaintKey, event.position)) {
       return false;
     }
     return super.isPointerAllowed(event);
@@ -401,4 +376,18 @@ class ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecogniz
     final double minDistance = minFlingDistance ?? kTouchSlop;
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
   }
+}
+
+// foregroundPainter also hit tests its children by default, but the
+// scrollbar should only respond to a gesture directly on its thumb, so
+// manually check for a hit on the thumb here.
+bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
+  if (customPaintKey.currentContext == null) {
+    return false;
+  }
+  final CustomPaint customPaint = customPaintKey.currentContext.widget;
+  final ScrollbarPainter painter = customPaint.foregroundPainter;
+  final RenderBox renderBox = customPaintKey.currentContext.findRenderObject();
+  final Offset localOffset = renderBox.globalToLocal(offset);
+  return painter.hitTestInteractive(localOffset);
 }
