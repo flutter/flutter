@@ -60,7 +60,7 @@ task:
       test_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/testing/run_tests.sh host_release
-    - name: build_android_unopt_debug
+    - name: build_and_test_android_unopt_debug
       get_android_sdk_script: |
         echo 'solutions = [{"managed": False,"name": "src/flutter","url": "git@github.com:flutter/engine.git","deps_file": "DEPS", "custom_vars": {"download_windows_deps" : False,},},]' > $ENGINE_PATH/.gclient
         cd $ENGINE_PATH/src
@@ -75,6 +75,7 @@ task:
         ninja -C out/android_debug_unopt
         mkdir javadoc_tmp
         ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
+      test_android_script: cd $ENGINE_PATH/src && python ./flutter/testing/run_tests.py --type=java
     - name: format_and_dart_test
       format_script: |
         cd $ENGINE_PATH/src/flutter
