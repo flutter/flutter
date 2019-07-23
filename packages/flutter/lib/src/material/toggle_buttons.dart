@@ -498,7 +498,9 @@ class ToggleButtons extends StatelessWidget {
           return focusNodes.length == children.length;
         return true;
       }(),
-      'FocusNodes.length must match children.length'
+      'focusNodes.length must match children.length.\n'
+      'There are ${focusNodes.length} focus nodes, while'
+      'there are ${children.length} children.'
     );
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
