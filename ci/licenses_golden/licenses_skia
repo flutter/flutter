@@ -1,4 +1,4 @@
-Signature: 27276e7dd24df01e7c8495d7a8fff42d
+Signature: 52adc2a1c4c65e7d34058459082d1915
 
 UNUSED LICENSES:
 
@@ -1724,6 +1724,7 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/FontResolver.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/Iterators.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.h
