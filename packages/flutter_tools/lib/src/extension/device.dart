@@ -165,22 +165,23 @@ class TargetArchitecture implements Serializable  {
 class Device implements Serializable {
   /// Create a new [Device].
   ///
-  /// All fields are required to be non-null.
+  /// All fields except for [ephemeral] and [category] are required to be
+  /// non-null.
   const Device({
     @required this.deviceName,
     @required this.deviceId,
     @required this.deviceCapabilities,
     @required this.targetPlatform,
     @required this.targetArchitecture,
-    @required this.ephemeral,
+    @required this.sdkNameAndVersion,
+    this.ephemeral,
     this.category,
-    this.sdkNameAndVersion,
   }) : assert(deviceName != null),
        assert(deviceId != null),
        assert(deviceCapabilities != null),
        assert(targetPlatform != null),
        assert(targetArchitecture != null),
-       assert(ephemeral != null);
+       assert(sdkNameAndVersion != null);
 
   /// The name of this device.
   ///
@@ -226,9 +227,6 @@ class Device implements Serializable {
   /// For example: 'Mac OS X 10.14.5 18F132'. If not provided, defaults to
   /// null.
   final String sdkNameAndVersion;
-
-  @override
-  String toString() => toJson().toString();
 
   @override
   Object toJson() {

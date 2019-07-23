@@ -5,8 +5,6 @@
 /// Tool extensions for interfacing with flutter doctor.
 library doctor;
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 
 import 'extension.dart';
@@ -50,9 +48,6 @@ class ValidationType implements Serializable {
 
   @override
   Object toJson() => _value;
-
-  @override
-  String toString() => json.encode(toJson());
 }
 
 /// The kind of validation message to be shown in the doctor UI.
@@ -85,9 +80,6 @@ class ValidationMessageType implements Serializable {
 
   @override
   Object toJson() => _value;
-
-  @override
-  String toString() => json.encode(toJson());
 }
 
 /// An individual validation message from a doctor diagnose.
@@ -134,9 +126,6 @@ class ValidationMessage implements Serializable {
       'type': type.toJson(),
     };
   }
-
-  @override
-  String toString() => json.encode(toJson());
 }
 
 /// An expected response from [DoctorDomain.diagnose].
@@ -223,9 +212,6 @@ class ValidationResult implements Serializable {
       'statusText': statusText,
     };
   }
-
-  @override
-  String toString() => json.encode(toJson());
 }
 
 /// Functionality related to diagnosing problems with an environment.

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -25,10 +26,14 @@ ExtensionHost get extensionHost => context.get<ExtensionHost>();
 
 /// A migration path for loading a [ToolExtension] hosted in the same isolate.
 class ExtensionHost {
-  ExtensionHost() {
+  ExtensionHost([List<ToolExtension> additionalExtensions = const <ToolExtension>[]]) {
     if (featureFlags.isLinuxEnabled) {
       final LinuxToolExtension toolExtension = LinuxToolExtension();
-      _toolExtensions.add(toolExtension);
+      toolExtensions.add(toolExtension);
+    }
+    toolExtensions.addAll(additionalExtensions);
+    // Initialize logging.
+    for (ToolExtension toolExtension in toolExtensions) {
       toolExtension.logs.listen((Log log) {
         if (log.trace == true) {
           printTrace(log.body);
@@ -41,11 +46,12 @@ class ExtensionHost {
     }
   }
 
-  final List<ToolExtension> _toolExtensions = <ToolExtension>[];
+  @visibleForTesting
+  final List<ToolExtension> toolExtensions = <ToolExtension>[];
 
   /// Return devices provided by an extension host.
   Stream<Device> getExtensionDevices() async* {
-    for (ToolExtension toolExtension in _toolExtensions) {
+    for (ToolExtension toolExtension in toolExtensions) {
       final ext.DeviceList toolDevices = await toolExtension.deviceDomain.listDevices();
       for (ext.Device device in toolDevices.devices) {
         yield DeviceDelegate(
@@ -58,7 +64,7 @@ class ExtensionHost {
 
   /// Return doctor validations provided by an extension host.
   List<DoctorValidator> getExtensionValidations() {
-    return _toolExtensions.map((ToolExtension toolExtension) {
+    return toolExtensions.map((ToolExtension toolExtension) {
       return DelegateDoctorValidator(toolExtension);
     }).toList();
   }
@@ -279,6 +285,12 @@ class DeviceDelegate implements Device {
         switch (device.targetArchitecture) {
           case ext.TargetArchitecture.x86:
             return TargetPlatform.android_x86;
+          case ext.TargetArchitecture.x86_64:
+            return TargetPlatform.android_x64;
+          case ext.TargetArchitecture.arm64_v8a:
+            return TargetPlatform.android_arm64;
+          case ext.TargetArchitecture.armeabi_v7a:
+            return TargetPlatform.android_arm;
         }
         // TODO(jonahwilliams): remaining fields.
     }
