@@ -25,9 +25,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   final String name = 'fuchsia';
 
   @override
-  bool isExperimental = true;
-
-  @override
   bool hidden = true;
 
   @override

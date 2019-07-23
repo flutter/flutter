@@ -18,7 +18,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/*.version
@@ -244,7 +244,7 @@ task:
       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   artifacts_cache:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\engine.version
@@ -295,7 +295,7 @@ task:
       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   artifacts_cache:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\*.version
@@ -406,7 +406,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
@@ -463,7 +463,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version

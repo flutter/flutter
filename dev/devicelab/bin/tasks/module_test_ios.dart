@@ -143,7 +143,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  battery:\n  package_info:\n',
+        '\ndependencies:\n  device_info:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
