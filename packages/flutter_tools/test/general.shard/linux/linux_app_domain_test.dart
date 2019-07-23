@@ -53,7 +53,7 @@ void main() {
     );
 
     await appDomain.stopApp(applicationBundle);
-    
+
     verify(processManager.killPid(123)).called(1);
   });
 

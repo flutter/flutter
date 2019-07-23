@@ -135,7 +135,7 @@ class DeviceDelegate implements Device {
   OverrideArtifacts get artifactOverrides => null;
 
   @override
-  Category get category { 
+  Category get category {
     switch (device.category) {
       case ext.Category.desktop:
         return Category.desktop;
