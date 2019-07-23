@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_driver/driver_extension.dart';
 import 'package:path_provider/path_provider.dart';
-
+import 'package:platform_views/simple_platform_view.dart';
 import 'motion_event_diff.dart';
 import 'page.dart';
 
@@ -66,9 +66,8 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
       children: <Widget>[
         SizedBox(
           height: 300.0,
-          child: AndroidView(
+          child: SimplePlatformView(
               key: const ValueKey<String>('PlatformView'),
-              viewType: 'simple_view',
               onPlatformViewCreated: onPlatformViewCreated),
         ),
         Expanded(
@@ -196,10 +195,19 @@ class MotionEventsBodyState extends State<MotionEventsBody> {
   Future<String> handleDriverMessage(String message) async {
     switch (message) {
       case 'run test':
-        final String result = await playEventsFile();
-        // popping back after the test is run.
+        return await playEventsFile();
+      case 'pop':
         Navigator.of(context).pop(true);
-        return result;
+        return 'success';
+      case 'target_platform':
+        switch (Theme.of(context).platform) {
+          case TargetPlatform.iOS:
+            return 'ios';
+          case TargetPlatform.android:
+            return 'android';
+          default:
+            return 'untested';
+        }
     }
     return 'unknown message: "$message"';
   }

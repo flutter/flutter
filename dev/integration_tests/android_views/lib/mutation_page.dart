@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@ MethodChannel channel = const MethodChannel('android_views_integration');
 ///   1. a complex mutation composition including clip rect
 ///   2. a clip rrect mutation
 ///   3. a clip path mutation.
-/// A set of `Container` widgets are shown next to the platform views with the same mutation composition for the manual sanity test purpose. 
+/// A set of `Container` widgets are shown next to the platform views with the same mutation composition for the manual sanity test purpose.
 class MutationCompositionPage extends Page {
   const MutationCompositionPage()
       : super('Mutation Composition Tests',
@@ -24,10 +24,11 @@ class MutationCompositionPage extends Page {
 
   @override
   Widget build(BuildContext context) {
-    return MutationCompositionBody();
+    return const MutationCompositionBody();
   }
 }
 
+/// The widget to be tested containing several widgets that have different types of mutations.
 class MutationCompositionBody extends StatefulWidget {
 
   const MutationCompositionBody():super(key: const ValueKey<String>('MutationPage'));
@@ -37,29 +38,34 @@ class MutationCompositionBody extends StatefulWidget {
 }
 
 class MutationCompositionBodyState extends State<MutationCompositionBody> {
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Row(
-        children: <Column>[
-          Column(
-            children: <Widget>[
-              _compositionComplex(_platformViewToMutate('0')),
-              _compositionClipRect(_platformViewToMutate('1')),
-              _compositionClipPath(_platformViewToMutate('2'))
-            ],
-          ),
-          Column(
-            children: <Widget>[
-              _compositionComplex(_containerToMutate()),
-              _compositionClipRect(_containerToMutate()),
-              _compositionClipPath(_containerToMutate())
-            ],
-          )
-        ],
+    return Column(
+          children: <Widget>[Container(
+        child: Row(
+          children: <Column>[
+            Column(
+              children: <Widget>[
+                _compositionComplex(_platformViewToMutate('0')),
+                _compositionClipRect(_platformViewToMutate('1')),
+                _compositionClipPath(_platformViewToMutate('2'))
+              ],
+            ),
+            Column(
+              children: <Widget>[
+                _compositionComplex(_containerToMutate()),
+                _compositionClipRect(_containerToMutate()),
+                _compositionClipPath(_containerToMutate())
+              ],
+            )
+          ],
+        ),
+        padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
       ),
-      padding: const EdgeInsets.fromLTRB(0, 50, 0, 0),
-    );
+          Center(child:FlatButton(key: const ValueKey<String>('back'), child: const Text('back'), onPressed: (){
+            Navigator.of(context).pop();
+          },))]);
   }
 
   Widget _compositionComplex(Widget child) {
