@@ -1665,4 +1665,73 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('platform view', (){
+    testWidgets('PlatformViewController Widget init', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      int createdPlatformViewId;
+      final PlatformViewControllerWidget platformViewControllerWidget = PlatformViewControllerWidget(createPlatformView: (PlatformViewCreationParams params){
+        params.onPlatformViewCreated(params.id);
+        return FakePlatformViewController();
+      }, builder: (BuildContext context, int id, PlatformViewController controller) {
+        return PlatformViewSurface(
+            context: context,
+            id: id,
+            gestureRecognizers: null,
+            controller: controller,
+        );
+      },onPlatformViewCreated: (int id) {
+        createdPlatformViewId = id;
+      },);
+
+      await tester.pumpWidget(platformViewControllerWidget);
+
+      expect(createdPlatformViewId, currentViewId+1);
+    });
+
+    testWidgets('PlatformViewController Widget dispose', (WidgetTester tester) async {
+      FakePlatformViewController controller = FakePlatformViewController();
+      final PlatformViewControllerWidget platformViewControllerWidget = PlatformViewControllerWidget(createPlatformView: (PlatformViewCreationParams params){
+        params.onPlatformViewCreated(params.id);
+        return controller;
+      }, builder: (BuildContext context, int id, PlatformViewController controller) {
+        return PlatformViewSurface(
+            context: context,
+            id: id,
+            gestureRecognizers: null,
+            controller: controller,
+        );
+      },onPlatformViewCreated: (int id) {
+      },);
+
+      await tester.pumpWidget(platformViewControllerWidget);
+
+      await tester.pumpWidget(Container());
+
+      expect(controller.disposed, true);
+    });
+  });
 }
+
+
+      // final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      // final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      // viewsController.registerViewType('webview');
+
+      // await tester.pumpWidget(
+      //   const Center(
+      //     child: SizedBox(
+      //       width: 200.0,
+      //       height: 100.0,
+      //       child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+      //     ),
+      //   ),
+      // );
+
+      // expect(
+      //   viewsController.views,
+      //   unorderedEquals(<FakeAndroidPlatformView>[
+      //     FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
+      //         AndroidViewController.kAndroidLayoutDirectionLtr),
+      //   ]),
+      // );

@@ -8,6 +8,28 @@ import 'package:collection/collection.dart';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+class FakePlatformViewController extends PlatformViewController {
+
+  bool disposed = false;
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+
+  @override
+  Future<void> clearFocus() {
+    // TODO: implement clearFocus
+    return null;
+  }
+
+  @override
+  void dispatchPointerEvent(PointerEvent event) {
+    // TODO: implement dispatchPointerEvent
+  }
+}
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {

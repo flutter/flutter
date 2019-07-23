@@ -13,6 +13,217 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
+/// The function to build a `PlatformViewSurface`.
+///
+/// See also:
+/// * `PlatformViewSurface`
+typedef PlatformViewSurfaceBuilder = PlatformViewSurface Function(BuildContext context, int id, PlatformViewController controller);
+
+/// The widget responsible for handling the life cycle and focus for implementing platform view widget.
+///
+/// To implement a new platform view widget, return this widget in the `build` method.
+/// e.g:
+/// ```dart
+/// class FooPlatformView extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return PlatformViewControllerWidget(
+///       createCallback: createFooWebView,
+///      builder: (BuildContext context, int id, PlatformViewController controller) {
+///        return PlatformViewSurface(
+///            context: context,
+///            id: id,
+///            gestureRecognizers: gestureRecognizers,
+///             controller: controller,
+///        );
+///       },
+///    );
+///   }
+/// }
+/// ```
+class PlatformViewControllerWidget extends StatefulWidget {
+
+  /// Construct a `PlatformViewControllerWidget` widget.
+  ///
+  /// The [builder] and the [createPlatformView] must not be null. In most cases, the [onPlatformViewCreated] should not be null and you should expose it
+  /// to your widget that is building the `PlatformViewControllerWidget`; it lets the developers who uses your widget be able to get notified when the underlying
+  /// platform view is created.
+  const PlatformViewControllerWidget({
+    @required this.builder,
+    @required this.createPlatformView,
+    this.onPlatformViewCreated}): assert(builder != null),
+                                  assert(createPlatformView != null);
+
+  /// The method that returns a `PlatformViewSurface` widget.
+  ///
+  /// See `PlatformViewSurface` for more details.
+  final PlatformViewSurfaceBuilder builder;
+
+  /// The method to create the platform view.
+  ///
+  /// The implementer of a new platform view is responsible to define this method and pass it
+  /// to the constructor of `PlatformViewControllerWidget`.
+  /// This method will get invoked when the state of `PlatformViewControllerWidget` is initialized.
+  final CreatePlatformView createPlatformView;
+
+  /// Invoked when the platform view is created.
+  ///
+  /// The `createPlatformView` is responsible to invoke the `onPlatformViewCreated` in one of its parameters at the appropriate time.
+  /// This should be propagated to the implementing platform view so the developer who uses the platform view have access to this callback.
+  final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  @override
+  State<StatefulWidget> createState() {
+    return _PlatformViewControllerWidgetState();
+  }
+}
+
+class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWidget> {
+
+  int _id;
+
+  PlatformViewController _controller;
+
+  bool _initialized = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller == null) {
+      return const SizedBox.expand();
+    }
+    return widget.builder(context, _id, _controller);
+  }
+
+  void _initializeOnce() {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    _id = platformViewsRegistry.getNextPlatformViewId();
+    _controller = widget.createPlatformView(PlatformViewCreationParams(id:_id, onPlatformViewCreated:_onPlatformViewCreated, onFocusChanged: _onFocusChanged));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initializeOnce();
+  }
+
+  void _onFocusChanged(bool isFocused) {
+    //TODO(cyanglaz): impl
+  }
+
+  void _onPlatformViewCreated(int id) {
+    widget.onPlatformViewCreated(id);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+}
+
+/// The widget responsible to handle painting, gestures and semantics of the `PlatformViewControllerWidget`.
+///
+/// This widget should be constructed and returned in the `PlatformViewControllerWidget.builder`.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`. Usually returned from `PlatformViewControllerWidget.builder`.
+  ///
+  /// The [context], the [id] and the [controller] must not be null.
+  const PlatformViewSurface({
+    @required this.context,
+    @required this.id,
+    @required this.controller,
+    this.gestureRecognizers}):assert(context != null),
+                                assert(id != null),
+                                assert(controller != null);
+
+  /// The context which the widget is built with.
+  final BuildContext context;
+
+  /// The id of the platform view that is associate with this `PlatformViewSurface`.
+  final int id;
+
+  /// Which gestures should be forwarded to the platform view.
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  ///
+  /// The below example uses a [FooPlatformView] which is a implementation of a platform view with the help of `PlatformViewControllerWidget`.
+  /// With the following setup vertical drags will not be dispatched to the platform
+  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: FooPlatformView(
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// To get the [FooPlatformView] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: FooPlatformView(
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  /// See also:
+  /// * `PlatformViewControllerWidget` for how to implement a platform view.
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  final PlatformViewController controller;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    // TODO: implement createRenderObject
+    return null;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) {
+    // TODO: implement updateRenderObject
+    super.updateRenderObject(context, renderObject);
+  }
+}
+
+abstract class PlatformViewController {
+  Future<void> clearFocus();
+  void dispatchPointerEvent(PointerEvent event);
+  void dispose();
+}
+
+class PlatformViewCreationParams {
+
+  const PlatformViewCreationParams({
+    @required this.id,
+    @required this.onPlatformViewCreated,
+    this.onFocusChanged}):assert(id != null),
+                          assert(onPlatformViewCreated != null);
+
+  final int id;
+  final PlatformViewCreatedCallback onPlatformViewCreated;
+  final ValueChanged<bool> onFocusChanged;
+}
+
+typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
+
 /// Embeds an Android view in the Widget hierarchy.
 ///
 /// Requires Android API level 20 or greater.
@@ -53,7 +264,7 @@ import 'framework.dart';
 /// released (some resources are immediately released and some by platform garbage collector).
 /// A stateful widget's state is disposed when the widget is removed from the tree or when it is
 /// moved within the tree. If the stateful widget has a key and it's only moved relative to its siblings,
-/// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.
+/// or it has a [GlobalKey] and it's moved within the tree, it will not be disposed.x
 /// {@endtemplate}
 class AndroidView extends StatefulWidget {
   /// Creates a widget that embeds an Android view.
