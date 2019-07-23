@@ -8,11 +8,11 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -2330,6 +2330,41 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         skip: !isLinux,
       );
     }, skip: isBrowser);
+
+    testWidgets('ext.flutter.inspector.structuredErrors', (WidgetTester tester) async {
+      List<Map<Object, Object>> flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+      expect(flutterErrorEvents, isEmpty);
+
+      final FlutterExceptionHandler oldHandler = FlutterError.onError;
+
+      try {
+        // enable
+        expect(await service.testBoolExtension(
+            'structuredErrors', <String, String>{'enabled': 'true'}),
+            equals('true'));
+
+        // create an error
+        FlutterError.reportError(FlutterErrorDetailsForRendering(
+          library: 'rendering library',
+          context: ErrorDescription('during layout'),
+          exception: StackTrace.current,
+        ));
+      } finally {
+        FlutterError.onError = oldHandler;
+      }
+
+      // validate that we received an error
+      flutterErrorEvents = service.getEventsDispatched('Flutter.Error');
+      expect(flutterErrorEvents, hasLength(1));
+
+      // validate the error contents
+      final Map<Object, Object> error = flutterErrorEvents.first;
+      expect(error['description'], 'Exception caught by rendering library');
+      expect(error['children'], isEmpty);
+
+      // validate that we received an error count
+      expect(error['errorsSinceReload'], 0);
+    });
 
     testWidgets('Screenshot of composited transforms - only offsets', (WidgetTester tester) async {
       // Composited transforms are challenging to take screenshots of as the
