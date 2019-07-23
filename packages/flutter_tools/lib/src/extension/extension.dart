@@ -98,6 +98,42 @@ class Response {
   }
 }
 
+/// A log message from an extension.
+class Log implements Serializable {
+  /// Create a new [Log] instance.
+  ///
+  /// The field [body] must not be null.
+  const Log({
+    @required this.body,
+    this.trace = false,
+    this.error = false,
+  })
+    : assert(body != null);
+
+  /// The body of the log message.
+  final String body;
+
+  /// Whether this message is a trace.
+  ///
+  /// Trace messages are only shown in verbose mode. Defaults to false.
+  final bool trace;
+
+  /// Whether this message is an error.
+  ///
+  /// Error messages are shown in scary red text. Defaults to false.
+  final bool error;
+
+  @override
+  Object toJson() {
+    return <String, Object>{
+      'id': null,
+      'body': body,
+      'trace': trace,
+      'error': error,
+    };
+  }
+}
+
 /// A type that can be converted into a JSON-safe object.
 abstract class Serializable {
   /// Convert this object to a JSON-safe object.
@@ -109,9 +145,9 @@ typedef DomainHandler = Future<Serializable> Function(Map<String, Object>);
 
 /// An extension is a pluggable piece of tool functionality.
 ///
-/// New extension functionaliy should be implemented by extending this class
-/// and overriding [doctorDomain], [deviceDomain], and/or [appDomain] to inject
-/// the required functionality.
+/// New extension functionality should be implemented by extending this class
+/// and overriding [doctorDomain], [deviceDomain], [appDomain], [buildDomain] to
+/// inject the required functionality.
 abstract class ToolExtension {
   ToolExtension() {
     if (doctorDomain != null) {
@@ -141,12 +177,15 @@ abstract class ToolExtension {
   ProcessManager processManager = const LocalProcessManager();
   Platform platform = const LocalPlatform();
 
+  final StreamController<Log> _logController = StreamController<Log>.broadcast();
   final Map<String, DomainHandler> _domainHandlers = <String, DomainHandler>{};
 
   @protected
   void registerMethod(String name, DomainHandler domainHandler) {
     _domainHandlers[name] = domainHandler;
   }
+
+  Stream<Log> get logs => _logController.stream;
 
   /// This method is temporarily public while the API is developed.
   Future<Response> handleMessage(Request request) async {
@@ -218,4 +257,31 @@ abstract class Domain {
   /// Extensions should use this instead of `dart:io` directly to improve
   /// testability.
   Platform get platform => _parent.platform;
+
+  /// Log a trace message to the tool.
+  ///
+  /// This is only shown to users when the tool is running in verbose mode.
+  void printTrace(String message) {
+    _parent._logController.add(Log(
+      body: message,
+      trace: true,
+    ));
+  }
+
+  /// Log a status update or other important information to the tool.
+  ///
+  /// This is shown regardless of the tool verbosity.
+  void printStatus(String message) {
+    _parent._logController.add(Log(
+      body: message,
+    ));
+  }
+
+  /// Log an error message to the tool.
+  void printError(String message) {
+    _parent._logController.add(Log(
+      body: message,
+      error: true,
+    ));
+  }
 }

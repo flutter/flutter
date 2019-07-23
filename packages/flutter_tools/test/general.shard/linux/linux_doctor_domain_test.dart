@@ -44,7 +44,7 @@ void main() {
 
     final ValidationResult result = await linuxDoctorDomain.diagnose();
     expect(result.type, ValidationType.installed);
-    expect(result.messages, <ValidationMessage>[
+    expect(result.messages, const <ValidationMessage>[
       ValidationMessage('clang++ 4.0.1'),
       ValidationMessage('GNU Make 4.1'),
     ]);
@@ -69,7 +69,7 @@ void main() {
 
     final ValidationResult result = await linuxDoctorDomain.diagnose();
     expect(result.type, ValidationType.partial);
-    expect(result.messages, <ValidationMessage>[
+    expect(result.messages, const <ValidationMessage>[
       ValidationMessage('clang++ 2.0.1 is below minimum version of 3.4.0', type: ValidationMessageType.error),
       ValidationMessage('GNU Make 4.1'),
     ]);
@@ -94,7 +94,7 @@ void main() {
 
     final ValidationResult result = await linuxDoctorDomain.diagnose();
     expect(result.type, ValidationType.missing);
-    expect(result.messages, <ValidationMessage>[
+    expect(result.messages, const <ValidationMessage>[
       ValidationMessage('clang++ 4.0.1'),
       ValidationMessage('make is not installed', type: ValidationMessageType.error)
     ]);
@@ -119,7 +119,7 @@ void main() {
 
     final ValidationResult result = await linuxDoctorDomain.diagnose();
     expect(result.type, ValidationType.missing);
-    expect(result.messages, <ValidationMessage>[
+    expect(result.messages, const <ValidationMessage>[
       ValidationMessage('clang++ is not installed', type: ValidationMessageType.error),
       ValidationMessage('GNU Make 4.1'),
     ]);

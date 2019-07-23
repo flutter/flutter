@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/linux/linux_extension.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -17,7 +15,9 @@ import 'extension/build.dart' as ext;
 import 'extension/device.dart' as ext;
 import 'extension/doctor.dart' as ext;
 import 'extension/extension.dart';
+import 'features.dart';
 import 'globals.dart';
+import 'linux/linux_extension.dart';
 import 'project.dart';
 
 /// The [ExtensionHost] instance.
@@ -27,7 +27,17 @@ ExtensionHost get extensionHost => context.get<ExtensionHost>();
 class ExtensionHost {
   ExtensionHost() {
     if (featureFlags.isLinuxEnabled) {
-      _toolExtensions.add(LinuxToolExtension());
+      final LinuxToolExtension toolExtension = LinuxToolExtension();
+      _toolExtensions.add(toolExtension);
+      toolExtension.logs.listen((Log log) {
+        if (log.trace == true) {
+          printTrace(log.body);
+        }
+        if (log.error == true) {
+          printError(log.body);
+        }
+        printStatus(log.body);
+      });
     }
   }
 
