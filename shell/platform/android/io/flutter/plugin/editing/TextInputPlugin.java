@@ -155,6 +155,8 @@ public class TextInputPlugin {
             textType |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
         } else if (type.type == TextInputChannel.TextInputType.URL) {
             textType |= InputType.TYPE_TEXT_VARIATION_URI;
+        } else if (type.type == TextInputChannel.TextInputType.VISIBLE_PASSWORD) {
+            textType |= InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD;
         }
 
         if (obscureText) {
