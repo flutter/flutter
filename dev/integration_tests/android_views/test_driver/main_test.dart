@@ -68,10 +68,6 @@ Future<void> main() async {
       final List<int> screenShot = await driver.screenshot();
       final String path = target == 'ios'?kIOSScreenShotPathStandard:kAndroidScreenShotPathStandard;
       final File file = File(path);
-      // if (!file.existsSync()) {
-      //   print('Platform view mutation test file not exist, creating a new one');
-      //   file.writeAsBytesSync(screenShot);
-      // }
       final List<int> matcher = file.readAsBytesSync();
 
       final Function listEquals = const ListEquality<int>().equals;
@@ -89,10 +85,6 @@ Future<void> main() async {
       final List<int> screenShot = await driver.screenshot();
       final String path = target == 'ios'?kIOSScreenShotPathWithScrollView:kAndroidScreenShotPathWithScrollView;
       final File file = File(path);
-      // if (!file.existsSync()) {
-      //   print('Platform view mutation test file not exist, creating a new one');
-      //   file.writeAsBytesSync(screenShot);
-      // }
       final List<int> matcher = file.readAsBytesSync();
 
       final Function listEquals = const ListEquality<int>().equals;

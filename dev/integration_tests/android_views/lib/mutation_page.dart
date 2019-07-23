@@ -138,14 +138,6 @@ class MutationCompositionBodyState extends State<MutationCompositionBody> {
     return Opacity(opacity: 0.5, child: child);
   }
 
-  // A `Container` widget that matches the testing platform view.
-  Widget _containerToMutate() {
-    return Container(
-        width: 75,
-        height: 75,
-        child: Container(color: const Color(0xFF0000FF)));
-  }
-
   Widget _platformViewToMutate(String id) {
     return Container(
         width: 75,
