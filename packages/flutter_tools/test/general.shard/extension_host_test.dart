@@ -66,7 +66,7 @@ void main() {
       );
     });
     final ExtensionHost extensionHost = ExtensionHost(<ext.ToolExtension>[mockToolExtension]);
-    final Device device = await extensionHost.getExtensionDevices().single;   
+    final Device device = await extensionHost.getExtensionDevices().single;
 
     expect(device.name, 'testy');
     expect(device.id, '1234');
