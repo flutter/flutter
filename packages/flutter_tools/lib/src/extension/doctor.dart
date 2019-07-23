@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 
 import 'extension.dart';
 
-
 /// How does the environment match the validation requirements.
 class ValidationType implements Serializable {
   const ValidationType._(this._value);

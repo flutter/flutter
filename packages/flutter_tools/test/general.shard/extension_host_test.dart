@@ -43,7 +43,7 @@ void main() {
     when(mockToolExtension.deviceDomain).thenReturn(mockDeviceDomain);
     when(mockToolExtension.logs).thenAnswer((Invocation invocation) {
       return const Stream<ext.Log>.empty();
-    }); 
+    });
     when(mockDeviceDomain.listDevices()).thenAnswer((Invocation invocation) async {
       return const ext.DeviceList(
         devices: <ext.Device>[

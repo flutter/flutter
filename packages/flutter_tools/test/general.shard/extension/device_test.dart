@@ -106,7 +106,7 @@ void main() {
       targetPlatform: TargetPlatform.iOS,
     ), throwsA(isInstanceOf<AssertionError>()));
   });
-  
+
   test('Category can be serialized to json', () {
     expect(Category.web.toJson(), 0);
     expect(Category.desktop.toJson(), 1);
