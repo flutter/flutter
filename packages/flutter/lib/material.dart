@@ -93,6 +93,7 @@ export 'src/material/reorderable_list.dart';
 export 'src/material/scaffold.dart';
 export 'src/material/scrollbar.dart';
 export 'src/material/search.dart';
+export 'src/material/selectable_text.dart';
 export 'src/material/shadows.dart';
 export 'src/material/slider.dart';
 export 'src/material/slider_theme.dart';

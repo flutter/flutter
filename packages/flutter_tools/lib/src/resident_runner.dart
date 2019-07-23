@@ -175,8 +175,20 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty)
       return;
     final List<Future<void>> futures = <Future<void>>[];
+    // If any of the flutter views are paused, we might not be able to
+    // cleanly exit since the service extension may not have been registered.
+    if (flutterViews.any((FlutterView view) {
+      return view != null &&
+             view.uiIsolate != null &&
+             view.uiIsolate.pauseEvent.isPauseEvent;
+      }
+    )) {
+      await device.stopApp(package);
+      return;
+    }
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
+        assert(!view.uiIsolate.pauseEvent.isPauseEvent);
         futures.add(view.uiIsolate.flutterExit());
       }
     }
@@ -667,7 +679,14 @@ abstract class ResidentRunner {
     }
   }
 
+  /// Take a screenshot on the provided [device].
+  ///
+  /// If the device has a connected vmservice, this method will attempt to hide
+  /// and restore the debug banner before taking the screenshot.
+  ///
+  /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
+    assert(device.device.supportsScreenshot);
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {

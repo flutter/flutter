@@ -65,6 +65,11 @@ void main() {
       return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
+    testUsingContext('can load assets within its own package', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    }, skip: io.Platform.isWindows);
+
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,

@@ -4,8 +4,8 @@
 
 import '../base/context.dart';
 import '../base/platform.dart';
-import '../desktop.dart';
 import '../doctor.dart';
+import '../features.dart';
 
 /// The [MacOSWorkflow] instance.
 MacOSWorkflow get macOSWorkflow => context.get<MacOSWorkflow>();
@@ -18,13 +18,13 @@ class MacOSWorkflow implements Workflow {
   const MacOSWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isMacOS;
+  bool get appliesToHostPlatform => platform.isMacOS && featureFlags.isMacOSEnabled;
 
   @override
-  bool get canLaunchDevices => platform.isMacOS && flutterDesktopEnabled;
+  bool get canLaunchDevices => platform.isMacOS && featureFlags.isMacOSEnabled;
 
   @override
-  bool get canListDevices => platform.isMacOS && flutterDesktopEnabled;
+  bool get canListDevices => platform.isMacOS && featureFlags.isMacOSEnabled;
 
   @override
   bool get canListEmulators => false;
