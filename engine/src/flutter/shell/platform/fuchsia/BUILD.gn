@@ -8,7 +8,7 @@ if (using_fuchsia_sdk) {
   group("fuchsia") {
     deps = [
       "dart",
-      "flutter",
+      "flutter:flutter_jit_runner",
     ]
   }
 }

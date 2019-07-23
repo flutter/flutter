@@ -5,10 +5,45 @@
 assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/tools/fuchsia/package_dir.gni")
 
-if (using_fuchsia_sdk) {
-  executable("flutter") {
-    output_name = "flutter_runner"
+shell_gpu_configuration("fuchsia_gpu_configuration") {
+  enable_software = false
+  enable_gl = false
+  enable_vulkan = true
+  enable_metal = false
+}
+
+# Builds a flutter_runner
+#
+# Parameters:
+#
+#  output_name (required):
+#    The name of the resulting binary.
+#
+#  extra_deps (required):
+#    Any additional dependencies.
+#  extra_defines (optional):
+#    Any additional preprocessor defines.
+template("flutter_runner") {
+  assert(defined(invoker.output_name), "flutter_runner must define output_name")
+  assert(defined(invoker.extra_deps), "flutter_runner must define extra_deps")
+
+  invoker_output_name = invoker.output_name
+  extra_deps = invoker.extra_deps
+
+  extra_defines = []
+  if (defined(invoker.extra_defines)) {
+    extra_defines += invoker.extra_defines
+  }
+
+  executable(target_name) {
+    output_name = invoker_output_name
+
+    defines = extra_defines
+
+    libs = []
 
     sources = [
       "component.cc",
@@ -57,35 +92,109 @@ if (using_fuchsia_sdk) {
     ]
 
     deps = [
-      "$flutter_root/common",
-      "$flutter_root/flow",
-      "$flutter_root/fml",
-      "$flutter_root/lib/ui",
-      "$flutter_root/runtime",
-      "$flutter_root/runtime:libdart",
-      "$flutter_root/shell/common",
-      "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
-      "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
-      "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
-      "$flutter_root/vulkan",
-      "$fuchsia_sdk_root/fidl:fuchsia.fonts",
-      "$fuchsia_sdk_root/fidl:fuchsia.images",
-      "$fuchsia_sdk_root/fidl:fuchsia.io",
-      "$fuchsia_sdk_root/fidl:fuchsia.modular",
-      "$fuchsia_sdk_root/fidl:fuchsia.sys",
-      "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
-      "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
-      "$fuchsia_sdk_root/pkg:async-cpp",
-      "$fuchsia_sdk_root/pkg:async-loop",
-      "$fuchsia_sdk_root/pkg:async-loop-cpp",
-      "$fuchsia_sdk_root/pkg:fdio",
-      "$fuchsia_sdk_root/pkg:fidl_cpp",
-      "$fuchsia_sdk_root/pkg:scenic_cpp",
-      "$fuchsia_sdk_root/pkg:syslog",
-      "$fuchsia_sdk_root/pkg:zx",
-      "$fuchsia_sdk_root/pkg/lib/sys/cpp",
-      "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
-      "//third_party/tonic",
+             ":fuchsia_gpu_configuration",
+             "$flutter_root/common",
+             "$flutter_root/flow",
+             "$flutter_root/fml",
+             "$flutter_root/lib/ui",
+             "$flutter_root/runtime",
+             "$flutter_root/runtime:libdart",
+             "$flutter_root/shell/common",
+             "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
+             "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
+             "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
+             "$flutter_root/vulkan",
+             "$fuchsia_sdk_root/fidl:fuchsia.fonts",
+             "$fuchsia_sdk_root/fidl:fuchsia.images",
+             "$fuchsia_sdk_root/fidl:fuchsia.io",
+             "$fuchsia_sdk_root/fidl:fuchsia.modular",
+             "$fuchsia_sdk_root/fidl:fuchsia.sys",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.app",
+             "$fuchsia_sdk_root/fidl:fuchsia.ui.scenic",
+             "$fuchsia_sdk_root/pkg:async-cpp",
+             "$fuchsia_sdk_root/pkg:async-loop",
+             "$fuchsia_sdk_root/pkg:async-loop-cpp",
+             "$fuchsia_sdk_root/pkg:fdio",
+             "$fuchsia_sdk_root/pkg:fidl_cpp",
+             "$fuchsia_sdk_root/pkg:scenic_cpp",
+             "$fuchsia_sdk_root/pkg:syslog",
+             "$fuchsia_sdk_root/pkg:zx",
+             "$fuchsia_sdk_root/pkg/lib/sys/cpp",
+             "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+             "//third_party/tonic",
+           ] + extra_deps
+
+    # The flags below are needed so that Dart's CPU profiler can walk the
+    # C++ stack.
+    cflags = [ "-fno-omit-frame-pointer" ]
+  }
+}
+
+# Things that explicitly being excluded:
+# 1. flutter_profile flag.
+# 2. Injecting flutter tool specific stuff.
+# 3. Product mode is going to be false for now.
+# 4. Kernel snapshot: framework and product.
+# 5. Observatoory stuff.
+# 6. Profiler symbols.
+# 7. framework and product!! (_framework snapshots and dilp files.)
+# 8. CMX files are also ignored.
+
+flutter_runner("jit") {
+  output_name = "flutter_jit_runner"
+
+  extra_deps = [ "$flutter_root/runtime:libdart" ]
+}
+
+template("jit_runner") {
+  product_suffix = ""
+
+  if (defined(invoker.product) && invoker.product) {
+    product_suffix = "product"
+  }
+
+  package_dir(target_name) {
+    snapshot_gen_dir = "$root_build_dir/gen/flutter/lib/snapshot"
+
+    deps = [
+      ":jit${product_suffix}",
+      "$flutter_root/lib/snapshot:generate_snapshot_bin",
+    ]
+
+    binary = "flutter_jit${product_suffix}_runner"
+
+    resources = [
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
+        dest = "vm_snapshot_data.bin"
+      },
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/vm_snapshot_instructions${product_suffix}.bin")
+        dest = "vm_snapshot_instructions.bin"
+      },
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/isolate_snapshot${product_suffix}.bin")
+        dest = "isolate_core_snapshot_data.bin"
+      },
+      {
+        path = rebase_path(
+                "$snapshot_gen_dir/isolate_snapshot_instructions${product_suffix}.bin")
+        dest = "isolate_core_snapshot_instructions.bin"
+      },
+    ]
+
+    meta = [
+      {
+        path = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")
+        dest = "flutter_jit${product_suffix}_runner.cmx"
+      },
     ]
   }
+}
+
+jit_runner("flutter_jit_runner") {
+  product = false
 }
