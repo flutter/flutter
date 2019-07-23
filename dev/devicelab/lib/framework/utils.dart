@@ -303,7 +303,7 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// For logging purposes, the command's output is also printed out by default.
+/// For logging purposes, the command's output is also printed out.
 Future<String> eval(
   String executable,
   List<String> arguments, {
@@ -311,8 +311,6 @@ Future<String> eval(
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
   StringBuffer stderr, // if not null, the stderr will be written here
-  bool printStdout = true,
-  bool printStderr = true,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
@@ -323,18 +321,14 @@ Future<String> eval(
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        if (printStdout) {
-          print('stdout: $line');
-        }
+        print('stdout: $line');
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        if (printStderr) {
-          print('stderr: $line');
-        }
+        print('stderr: $line');
         stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
@@ -623,12 +617,5 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
     };
 
     options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
-  }
-}
-
-/// Checks that the file exists, otherwise throws a [FileSystemException].
-void checkFileExists(String file) {
-  if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
   }
 }

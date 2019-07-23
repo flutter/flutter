@@ -36,9 +36,6 @@ class FeatureFlags {
   /// Whether flutter desktop for Windows is enabled.
   bool get isWindowsEnabled => _isEnabled(flutterWindowsDesktopFeature);
 
-  /// Whether plugins are built as AARs in app projects.
-  bool get isPluginAsAarEnabled => _isEnabled(flutterBuildPluginAsAarFeature);
-
   // Calculate whether a particular feature is enabled for the current channel.
   static bool _isEnabled(Feature feature) {
     final String currentChannel = FlutterVersion.instance.channel;
@@ -68,7 +65,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  flutterBuildPluginAsAarFeature,
 ];
 
 /// The [Feature] for flutter web.
@@ -114,20 +110,6 @@ const Feature flutterWindowsDesktopFeature = Feature(
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-);
-
-/// The [Feature] for building plugins as AARs in an app project.
-const Feature flutterBuildPluginAsAarFeature = Feature(
-  name: 'Build plugins independently as AARs in app projects',
-  configSetting: 'enable-build-plugin-as-aar',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: true,
-  ),
-  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
