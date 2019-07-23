@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/android/android_studio.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -64,6 +65,16 @@ void main() {
       ]);
 
       expect(getBuildDirectory(), 'foo');
+    });
+
+    testUsingContext('throws error on absolute path to build-dir', () async {
+      final ConfigCommand configCommand = ConfigCommand();
+      final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
+
+      expect(() => commandRunner.run(<String>[
+        'config',
+        '--build-dir=/foo'
+      ]), throwsA(isInstanceOf<ToolExit>()));
     });
 
     testUsingContext('allows setting and removing feature flags', () async {
