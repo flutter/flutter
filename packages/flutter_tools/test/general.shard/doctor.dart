@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/linux/linux_doctor.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
 import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
 
@@ -20,8 +19,6 @@ void main() {
 
   test('doctor validators includes desktop when features are enabled', () => testbed.run(() {
     expect(DoctorValidatorsProvider.defaultInstance.validators,
-        contains(isInstanceOf<LinuxDoctorValidator>()));
-    expect(DoctorValidatorsProvider.defaultInstance.validators,
         contains(isInstanceOf<VisualStudioValidator>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(
@@ -31,8 +28,6 @@ void main() {
   }));
 
   test('doctor validators does not include desktop when features are enabled', () => testbed.run(() {
-    expect(DoctorValidatorsProvider.defaultInstance.validators,
-        isNot(contains(isInstanceOf<LinuxDoctorValidator>())));
     expect(DoctorValidatorsProvider.defaultInstance.validators,
         isNot(contains(isInstanceOf<VisualStudioValidator>())));
   }, overrides: <Type, Generator>{
