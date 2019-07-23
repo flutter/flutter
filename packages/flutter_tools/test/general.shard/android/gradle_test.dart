@@ -327,8 +327,8 @@ someOtherTask
 
     });
 
-    testUsingContext('create settings_aar.gradle', () {
-      const String deprecatedFile = '''
+    testUsingContext('create settings_aar.gradle when current settings.gradle loads plugins', () {
+      const String currentSettingsGradle = '''
 include ':app'
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
@@ -350,7 +350,7 @@ plugins.each { name, path ->
 include ':app'
 ''';
 
-      tempDir.childFile('settings.gradle').writeAsStringSync(deprecatedFile);
+      tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
 
       final String toolGradlePath = fs.path.join(
           fs.path.absolute(Cache.flutterRoot),
@@ -359,7 +359,40 @@ include ':app'
           'gradle');
       fs.directory(toolGradlePath).createSync(recursive: true);
       fs.file(fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
-          .writeAsStringSync(deprecatedFile);
+          .writeAsStringSync(currentSettingsGradle);
+
+      fs.file(fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+          .writeAsStringSync(settingsAarFile);
+
+      createSettingsAarGradle(tempDir);
+
+      expect(mockLogger.statusText, contains('created successfully'));
+      expect(tempDir.childFile('settings_aar.gradle').existsSync(), isTrue);
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Logger: () => mockLogger,
+    });
+
+    testUsingContext('create settings_aar.gradle when current settings.gradle doesn\'t load plugins', () {
+      const String currentSettingsGradle = '''
+include ':app'
+''';
+
+      const String settingsAarFile = '''
+include ':app'
+''';
+
+      tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
+
+      final String toolGradlePath = fs.path.join(
+          fs.path.absolute(Cache.flutterRoot),
+          'packages',
+          'flutter_tools',
+          'gradle');
+      fs.directory(toolGradlePath).createSync(recursive: true);
+      fs.file(fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+          .writeAsStringSync(currentSettingsGradle);
 
       fs.file(fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);

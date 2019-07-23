@@ -156,11 +156,16 @@ void createSettingsAarGradle(Directory androidDirectory) {
   final File deprecatedFile = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
       'gradle', 'deprecated_settings.gradle'));
   assert(deprecatedFile.existsSync());
+  final String settingsAarContent = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
+      'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
+
   // Get the `settings.gradle` content variants that should be patched.
-  final List<String> deprecatedFilesContent = deprecatedFile.readAsStringSync().split(';EOF');
+  final List<String> existingVariants = deprecatedFile.readAsStringSync().split(';EOF');
+  existingVariants.add(settingsAarContent);
+
   bool exactMatch = false;
-  for (String deprecatedFileContent in deprecatedFilesContent) {
-    if (currentFileContent.trim() == deprecatedFileContent.trim()) {
+  for (String fileContentVariant in existingVariants) {
+    if (currentFileContent.trim() == fileContentVariant.trim()) {
       exactMatch = true;
       break;
     }
@@ -176,8 +181,6 @@ void createSettingsAarGradle(Directory androidDirectory) {
     throwToolExit('Please create the file and run this command again.');
   }
   // Copy the new file.
-  final String settingsAarContent = fs.file(fs.path.join(flutterRoot, 'packages','flutter_tools',
-      'gradle', 'settings_aar.gradle.tmpl')).readAsStringSync();
   newSettingsFile.writeAsStringSync(settingsAarContent);
   status.stop();
   printStatus('✅ `$newSettingsRelativeFile` created successfully.');
