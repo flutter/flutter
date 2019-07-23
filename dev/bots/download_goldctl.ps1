@@ -1,10 +1,11 @@
 $url= "https://storage.googleapis.com/chrome-infra/depot_tools.zip"
-$path = "C:\Windows\Temp\depot_tools.zip"
+$zipPath = "C:\Windows\Temp\flutter^ sdk\depot_tools.zip"
+$path = "C:\Windows\Temp\flutter^ sdk\depot_tools"
 
-(New-Object System.Net.WebClient).DownloadFile($url, $path)
-Expand-Archive -LiteralPath $path -DestinationPath "C:\Windows\Temp\depot_tools"
+(New-Object System.Net.WebClient).DownloadFile($url, $zipPath)
+Expand-Archive -LiteralPath $zipPath -DestinationPath $path
 Get-ChildItem
-cd C:\Windows\Temp\depot_tools
+cd $path
 Get-ChildItem
-cmd.exe /C "C:\Windows\Temp\depot_tools\cipd.bat ensure -ensure-file C:\Windows\Temp\dev\bots\ensure_goldctl.txt -root ."
+cmd.exe /C "C:\Windows\Temp\flutter ^ sdk\depot_tools\cipd.bat ensure -ensure-file C:\Windows\Temp\flutter^ sdk\dev\bots\ensure_goldctl.txt -root $path"
 Get-ChildItem

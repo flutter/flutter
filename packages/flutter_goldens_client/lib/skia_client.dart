@@ -196,7 +196,7 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     /* Temp for testing Cirrus */
-    return 'd1190b638f5cd234a4e3e9890313abd58393f6f3';
+    return 'e5ea996a1f731f6accc4e9bf5d2430a840c975f7';
     /* */
 
 //    if (!flutterRoot.existsSync()) {
