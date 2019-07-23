@@ -164,7 +164,7 @@ class LinuxDoctorDomain extends DoctorDomain {
     }
     if (clangResult == null || clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage('clang++ is not installed', type: ValidationMessageType.error));
+      messages.add(const ValidationMessage('clang++ is not installed', type: ValidationMessageType.error));
     } else {
       final String firstLine = clangResult.stdout.split('\n').first.trim();
       final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
@@ -191,7 +191,7 @@ class LinuxDoctorDomain extends DoctorDomain {
     }
     if (makeResult == null || makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage('make is not installed', type: ValidationMessageType.error));
+      messages.add(const ValidationMessage('make is not installed', type: ValidationMessageType.error));
     } else {
       final String firstLine = makeResult.stdout.split('\n').first.trim();
       messages.add(ValidationMessage(firstLine));
