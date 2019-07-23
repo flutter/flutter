@@ -14,49 +14,67 @@ shell_gpu_configuration("embedder_gpu_configuration") {
   enable_metal = false
 }
 
-source_set("embedder") {
-  sources = [
-    "embedder.cc",
-    "embedder.h",
-    "embedder_engine.cc",
-    "embedder_engine.h",
-    "embedder_external_texture_gl.cc",
-    "embedder_external_texture_gl.h",
-    "embedder_include.c",
-    "embedder_platform_message_response.cc",
-    "embedder_platform_message_response.h",
-    "embedder_safe_access.h",
-    "embedder_surface.cc",
-    "embedder_surface.h",
-    "embedder_surface_gl.cc",
-    "embedder_surface_gl.h",
-    "embedder_surface_software.cc",
-    "embedder_surface_software.h",
-    "embedder_task_runner.cc",
-    "embedder_task_runner.h",
-    "embedder_thread_host.cc",
-    "embedder_thread_host.h",
-    "platform_view_embedder.cc",
-    "platform_view_embedder.h",
-    "vsync_waiter_embedder.cc",
-    "vsync_waiter_embedder.h",
-  ]
+# Template for the embedder build. Used to allow building it multiple times with
+# different flags.
+template("embedder_source_set") {
+  forward_variables_from(invoker, "*")
 
-  deps = [
-    ":embedder_gpu_configuration",
-    "$flutter_root/assets",
-    "$flutter_root/common",
-    "$flutter_root/flow",
-    "$flutter_root/fml",
-    "$flutter_root/lib/ui",
-    "$flutter_root/runtime:libdart",
-    "$flutter_root/shell/common",
-    "//third_party/dart/runtime/bin:dart_io_api",
-    "//third_party/skia",
-    "//third_party/tonic",
-  ]
+  source_set(target_name) {
+    sources = [
+      "embedder.cc",
+      "embedder.h",
+      "embedder_engine.cc",
+      "embedder_engine.h",
+      "embedder_external_texture_gl.cc",
+      "embedder_external_texture_gl.h",
+      "embedder_include.c",
+      "embedder_platform_message_response.cc",
+      "embedder_platform_message_response.h",
+      "embedder_safe_access.h",
+      "embedder_surface.cc",
+      "embedder_surface.h",
+      "embedder_surface_gl.cc",
+      "embedder_surface_gl.h",
+      "embedder_surface_software.cc",
+      "embedder_surface_software.h",
+      "embedder_task_runner.cc",
+      "embedder_task_runner.h",
+      "embedder_thread_host.cc",
+      "embedder_thread_host.h",
+      "platform_view_embedder.cc",
+      "platform_view_embedder.h",
+      "vsync_waiter_embedder.cc",
+      "vsync_waiter_embedder.h",
+    ]
 
-  public_configs = [ "$flutter_root:config" ]
+    deps = [
+      ":embedder_gpu_configuration",
+      "$flutter_root/assets",
+      "$flutter_root/common",
+      "$flutter_root/flow",
+      "$flutter_root/fml",
+      "$flutter_root/lib/ui",
+      "$flutter_root/runtime:libdart",
+      "$flutter_root/shell/common",
+      "//third_party/dart/runtime/bin:dart_io_api",
+      "//third_party/skia",
+      "//third_party/tonic",
+    ]
+
+    public_configs += [ "$flutter_root:config" ]
+  }
+}
+
+embedder_source_set("embedder") {
+  public_configs = []
+}
+
+embedder_source_set("embedder_with_symbol_prefix") {
+  public_configs = [ ":embedder_prefix_config" ]
+}
+
+config("embedder_prefix_config") {
+  defines = [ "FLUTTER_API_SYMBOL_PREFIX=Embedder" ]
 }
 
 test_fixtures("fixtures") {

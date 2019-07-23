@@ -4,13 +4,13 @@
 
 #include "flutter/shell/platform/glfw/public/flutter_glfw.h"
 
+#include <GLFW/glfw3.h>
 #include <assert.h>
+
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <iostream>
-
-#include <GLFW/glfw3.h>
 
 #include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/cpp/incoming_message_dispatcher.h"
@@ -59,7 +59,7 @@ struct FlutterDesktopWindowControllerState {
       UniqueGLFWwindowPtr(nullptr, glfwDestroyWindow);
 
   // The handle to the Flutter engine instance.
-  FlutterEngine engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) engine;
 
   // The window handle given to API clients.
   std::unique_ptr<FlutterDesktopWindow> window_wrapper;
@@ -113,7 +113,7 @@ struct FlutterDesktopWindow {
 // Struct for storing state of a Flutter engine instance.
 struct FlutterDesktopEngineState {
   // The handle to the Flutter engine instance.
-  FlutterEngine engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) engine;
 };
 
 // State associated with the plugin registrar.
@@ -128,7 +128,7 @@ struct FlutterDesktopPluginRegistrar {
 // State associated with the messenger used to communicate with the engine.
 struct FlutterDesktopMessenger {
   // The Flutter engine this messenger sends outgoing messages to.
-  FlutterEngine engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) engine;
 
   // The message dispatcher for handling incoming messages.
   flutter::IncomingMessageDispatcher* dispatcher;
@@ -493,13 +493,13 @@ static void GLFWErrorCallback(int error_code, const char* description) {
 // provided).
 //
 // Returns a caller-owned pointer to the engine.
-static FlutterEngine RunFlutterEngine(
-    GLFWwindow* window,
-    const char* assets_path,
-    const char* icu_data_path,
-    const char** arguments,
-    size_t arguments_count,
-    const FlutterCustomTaskRunners* custom_task_runners) {
+static FLUTTER_API_SYMBOL(FlutterEngine)
+    RunFlutterEngine(GLFWwindow* window,
+                     const char* assets_path,
+                     const char* icu_data_path,
+                     const char** arguments,
+                     size_t arguments_count,
+                     const FlutterCustomTaskRunners* custom_task_runners) {
   // FlutterProjectArgs is expecting a full argv, so when processing it for
   // flags the first item is treated as the executable and ignored. Add a dummy
   // value so that all provided arguments are used.
@@ -535,7 +535,7 @@ static FlutterEngine RunFlutterEngine(
   args.command_line_argv = &argv[0];
   args.platform_message_callback = GLFWOnFlutterPlatformMessage;
   args.custom_task_runners = custom_task_runners;
-  FlutterEngine engine = nullptr;
+  FLUTTER_API_SYMBOL(FlutterEngine) engine = nullptr;
   auto result =
       FlutterEngineRun(FLUTTER_ENGINE_VERSION, &config, &args, window, &engine);
   if (result != kSuccess || engine == nullptr) {

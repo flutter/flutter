@@ -46,7 +46,7 @@ source_set("common_cpp") {
   deps = [
     ":common_cpp_library_headers",
     "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "$flutter_root/shell/platform/embedder:embedder",
+    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
   ]
 
   # TODO: Remove once text input model refactor lands, at which point this code

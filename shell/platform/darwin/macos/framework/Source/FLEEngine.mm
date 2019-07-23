@@ -123,7 +123,7 @@ static void OnPlatformMessage(const FlutterPlatformMessage* message, FLEEngine* 
 
 @implementation FLEEngine {
   // The embedding-API-level engine object.
-  FlutterEngine _engine;
+  FLUTTER_API_SYMBOL(FlutterEngine) _engine;
 
   // The project being run by this engine.
   FLEDartProject* _project;

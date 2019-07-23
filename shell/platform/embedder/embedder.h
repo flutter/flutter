@@ -17,6 +17,16 @@ extern "C" {
 #define FLUTTER_EXPORT
 #endif  // FLUTTER_EXPORT
 
+#ifdef FLUTTER_API_SYMBOL_PREFIX
+#define FLUTTER_EMBEDDING_CONCAT(a, b) a##b
+#define FLUTTER_EMBEDDING_ADD_PREFIX(symbol, prefix) \
+  FLUTTER_EMBEDDING_CONCAT(prefix, symbol)
+#define FLUTTER_API_SYMBOL(symbol) \
+  FLUTTER_EMBEDDING_ADD_PREFIX(symbol, FLUTTER_API_SYMBOL_PREFIX)
+#else
+#define FLUTTER_API_SYMBOL(symbol) symbol
+#endif
+
 #define FLUTTER_ENGINE_VERSION 1
 
 typedef enum {
@@ -168,7 +178,7 @@ typedef enum {
   kFlutterTextDirectionLTR = 2,
 } FlutterTextDirection;
 
-typedef struct _FlutterEngine* FlutterEngine;
+typedef struct _FlutterEngine* FLUTTER_API_SYMBOL(FlutterEngine);
 
 typedef struct {
   //   horizontal scale factor
@@ -692,25 +702,27 @@ FlutterEngineResult FlutterEngineRun(size_t version,
                                      const FlutterRendererConfig* config,
                                      const FlutterProjectArgs* args,
                                      void* user_data,
-                                     FlutterEngine* engine_out);
+                                     FLUTTER_API_SYMBOL(FlutterEngine) *
+                                         engine_out);
 
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineShutdown(FlutterEngine engine);
+FlutterEngineResult FlutterEngineShutdown(FLUTTER_API_SYMBOL(FlutterEngine)
+                                              engine);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendWindowMetricsEvent(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterWindowMetricsEvent* event);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendPointerEvent(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPointerEvent* events,
     size_t events_count);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendPlatformMessage(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessage* message);
 
 // Creates a platform message response handle that allows the embedder to set a
@@ -728,7 +740,7 @@ FlutterEngineResult FlutterEngineSendPlatformMessage(
 // call as the third argument.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterDataCallback data_callback,
     void* user_data,
     FlutterPlatformMessageResponseHandle** response_out);
@@ -737,12 +749,12 @@ FlutterEngineResult FlutterPlatformMessageCreateResponseHandle(
 // |FlutterPlatformMessageCreateResponseHandle|.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterPlatformMessageReleaseResponseHandle(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterPlatformMessageResponseHandle* response);
 
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     const FlutterPlatformMessageResponseHandle* handle,
     const uint8_t* data,
     size_t data_length);
@@ -760,19 +772,19 @@ FlutterEngineResult __FlutterEngineFlushPendingTasksNow();
 // |FlutterEngineMarkExternalTextureFrameAvailable|.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineRegisterExternalTexture(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
 
 // Unregister a previous texture registration.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineUnregisterExternalTexture(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
 
 // Mark that a new texture frame is available for a given texture identifier.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     int64_t texture_identifier);
 
 // Enable or disable accessibility semantics.
@@ -781,19 +793,20 @@ FlutterEngineResult FlutterEngineMarkExternalTextureFrameAvailable(
 // the |FlutterUpdateSemanticsNodeCallback| registered to
 // |update_semantics_node_callback| in |FlutterProjectArgs|;
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(FlutterEngine engine,
-                                                        bool enabled);
+FlutterEngineResult FlutterEngineUpdateSemanticsEnabled(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    bool enabled);
 
 // Sets additional accessibility features.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineUpdateAccessibilityFeatures(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterAccessibilityFeature features);
 
 // Dispatch a semantics action to the specified semantics node.
 FLUTTER_EXPORT
 FlutterEngineResult FlutterEngineDispatchSemanticsAction(
-    FlutterEngine engine,
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
     uint64_t id,
     FlutterSemanticsAction action,
     const uint8_t* data,
@@ -816,7 +829,8 @@ FlutterEngineResult FlutterEngineDispatchSemanticsAction(
 //
 // That frame timepoints are in nanoseconds.
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineOnVsync(FlutterEngine engine,
+FlutterEngineResult FlutterEngineOnVsync(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
                                          intptr_t baton,
                                          uint64_t frame_start_time_nanos,
                                          uint64_t frame_target_time_nanos);
@@ -851,9 +865,10 @@ void FlutterEngineTraceEventInstant(const char* name);
 // from any thread as long as a |FlutterEngineShutdown| on the specific engine
 // has not already been initiated.
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEnginePostRenderThreadTask(FlutterEngine engine,
-                                                      VoidCallback callback,
-                                                      void* callback_data);
+FlutterEngineResult FlutterEnginePostRenderThreadTask(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    VoidCallback callback,
+    void* callback_data);
 
 // Get the current time in nanoseconds from the clock used by the flutter
 // engine. This is the system monotonic clock.
@@ -865,7 +880,8 @@ uint64_t FlutterEngineGetCurrentTime();
 // call must only be made at the target time specified in that callback. Running
 // the task before that time is undefined behavior.
 FLUTTER_EXPORT
-FlutterEngineResult FlutterEngineRunTask(FlutterEngine engine,
+FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
+                                             engine,
                                          const FlutterTask* task);
 
 #if defined(__cplusplus)
