@@ -28,8 +28,13 @@ enum TextOverflow {
   /// Fade the overflowing text to transparent.
   fade,
 
-  /// Use an ellipsis to indicate that the text has overflowed.
+  /// Use an ellipsis to indicate that the text has overflowed, text is
+  /// truncated based on word boundary.
   ellipsis,
+
+  /// Use an ellipsis to indicate that the text has overflowed, text is
+  /// truncated based on character boundary.
+  ellipsisCharacter,
 
   /// Render overflowing text outside of its container.
   visible,
@@ -93,7 +98,11 @@ class RenderParagraph extends RenderBox
          textDirection: textDirection,
          textScaleFactor: textScaleFactor,
          maxLines: maxLines,
-         ellipsis: overflow == TextOverflow.ellipsis ? _kEllipsis : null,
+         ellipsis:
+           overflow == TextOverflow.ellipsis ||
+           overflow == TextOverflow.ellipsisCharacter ?
+            _kEllipsis : null,
+         ellipsizeByCharacter: overflow == TextOverflow.ellipsisCharacter,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -202,7 +211,11 @@ class RenderParagraph extends RenderBox
     if (_overflow == value)
       return;
     _overflow = value;
-    _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
+    _textPainter.ellipsis =
+      value == TextOverflow.ellipsis ||
+      value == TextOverflow.ellipsisCharacter ?
+        _kEllipsis : null;
+    _textPainter.ellipsizeByCharacter = value == TextOverflow.ellipsisCharacter;
     markNeedsLayout();
   }
 

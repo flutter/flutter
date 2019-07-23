@@ -140,6 +140,7 @@ class TextPainter {
     double textScaleFactor = 1.0,
     int maxLines,
     String ellipsis,
+    bool ellipsizeByCharacter = false,
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
@@ -154,6 +155,7 @@ class TextPainter {
        _textScaleFactor = textScaleFactor,
        _maxLines = maxLines,
        _ellipsis = ellipsis,
+       _ellipsizeByCharacter = ellipsizeByCharacter,
        _locale = locale,
        _strutStyle = strutStyle,
        _textWidthBasis = textWidthBasis;
@@ -267,6 +269,18 @@ class TextPainter {
     if (_ellipsis == value)
       return;
     _ellipsis = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
+  /// Whether to ellipsize text by character boundary.
+  bool get ellipsizeByCharacter => _ellipsizeByCharacter;
+  bool _ellipsizeByCharacter;
+  set ellipsizeByCharacter(bool value) {
+    assert(value == null);
+    if (_ellipsizeByCharacter == value)
+      return;
+    _ellipsizeByCharacter = value;
     _paragraph = null;
     _needsLayout = true;
   }
@@ -396,6 +410,7 @@ class TextPainter {
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
       ellipsis: _ellipsis,
+      ellipsizeByCharacter: _ellipsizeByCharacter,
       locale: _locale,
       strutStyle: _strutStyle,
     ) ?? ui.ParagraphStyle(
@@ -403,6 +418,7 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
       ellipsis: ellipsis,
+      ellipsizeByCharacter: ellipsizeByCharacter,
       locale: locale,
     );
   }

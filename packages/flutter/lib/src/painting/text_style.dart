@@ -1053,6 +1053,7 @@ class TextStyle extends Diagnosticable {
     TextDirection textDirection,
     double textScaleFactor = 1.0,
     String ellipsis,
+    bool ellipsizeByCharacter = false,
     int maxLines,
     Locale locale,
     String fontFamily,
@@ -1085,6 +1086,7 @@ class TextStyle extends Diagnosticable {
         forceStrutHeight: strutStyle.forceStrutHeight,
       ),
       maxLines: maxLines,
+      ellipsizeByCharacter: ellipsizeByCharacter,
       ellipsis: ellipsis,
       locale: locale,
     );
