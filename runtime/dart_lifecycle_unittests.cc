@@ -105,7 +105,9 @@ static std::shared_ptr<DartIsolate> CreateAndRunRootIsolate(
   return isolate;
 }
 
-TEST_F(DartLifecycleTest, ShuttingDownTheVMShutsDownAllIsolates) {
+// TODO(chinmaygarde): This unit-test is flaky and indicates thread un-safety
+// during shutdown. https://github.com/flutter/flutter/issues/36782
+TEST_F(DartLifecycleTest, DISABLED_ShuttingDownTheVMShutsDownAllIsolates) {
   auto settings = CreateSettingsForFixture();
   settings.leak_vm = false;
   // Make sure the service protocol launches
