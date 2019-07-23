@@ -5,10 +5,9 @@
 /// Tool extensions for interfacing with the flutter build process.
 library build;
 
-import 'dart:convert';
-
 import 'package:meta/meta.dart';
 
+import '../convert.dart';
 import 'app.dart';
 import 'extension.dart';
 
