@@ -41,6 +41,7 @@ const Target unpackWindows = Target(
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_export.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_messenger.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_plugin_registrar.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_texture_registrar.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),

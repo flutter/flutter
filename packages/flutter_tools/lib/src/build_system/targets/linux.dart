@@ -37,6 +37,7 @@ const Target unpackLinux = Target(
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_export.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_messenger.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_plugin_registrar.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_texture_registrar.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/icudtl.dat'),
     Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper/*'),

@@ -40,6 +40,7 @@ void main() {
         fs.file('bin/cache/artifacts/engine/linux-x64/flutter_export.h').createSync();
         fs.file('bin/cache/artifacts/engine/linux-x64/flutter_messenger.h').createSync();
         fs.file('bin/cache/artifacts/engine/linux-x64/flutter_plugin_registrar.h').createSync();
+        fs.file('bin/cache/artifacts/engine/linux-x64/flutter_texture_registrar.h').createSync();
         fs.file('bin/cache/artifacts/engine/linux-x64/flutter_glfw.h').createSync();
         fs.file('bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
         fs.file('bin/cache/artifacts/engine/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
@@ -57,6 +58,7 @@ void main() {
       expect(fs.file('linux/flutter/flutter_export.h').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_messenger.h').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_plugin_registrar.h').existsSync(), true);
+      expect(fs.file('linux/flutter/flutter_texture_registrar.h').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_glfw.h').existsSync(), true);
       expect(fs.file('linux/flutter/icudtl.dat').existsSync(), true);
       expect(fs.file('linux/flutter/cpp_client_wrapper/foo').existsSync(), true);
