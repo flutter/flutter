@@ -786,7 +786,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
-    TooltipTheme tooltipTheme,
+    TooltipThemeData tooltipTheme,
     CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
