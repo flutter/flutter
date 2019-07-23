@@ -193,9 +193,11 @@ static const float kDoubleDecorationSpacing = 3.0f;
 ParagraphTxt::GlyphPosition::GlyphPosition(double x_start,
                                            double x_advance,
                                            size_t code_unit_index,
-                                           size_t code_unit_width)
+                                           size_t code_unit_width,
+                                           size_t cluster)
     : code_units(code_unit_index, code_unit_index + code_unit_width),
-      x_pos(x_start, x_start + x_advance) {}
+      x_pos(x_start, x_start + x_advance),
+      cluster(cluster) {}
 
 void ParagraphTxt::GlyphPosition::Shift(double delta) {
   x_pos.Shift(delta);
@@ -881,13 +883,11 @@ void ParagraphTxt::Layout(double width) {
             builder.allocRunPos(font, glyph_blob.end - glyph_blob.start);
 
         double justify_x_offset_delta = 0;
-
         for (size_t glyph_index = glyph_blob.start;
              glyph_index < glyph_blob.end;) {
           size_t cluster_start_glyph_index = glyph_index;
           uint32_t cluster = layout.getGlyphCluster(cluster_start_glyph_index);
           double glyph_x_offset;
-
           // Add all the glyphs in this cluster to the text blob.
           do {
             size_t blob_index = glyph_index - glyph_blob.start;
@@ -946,7 +946,7 @@ void ParagraphTxt::Layout(double width) {
           glyph_positions.emplace_back(run_x_offset + glyph_x_offset,
                                        grapheme_advance,
                                        run.start() + glyph_code_units.start,
-                                       grapheme_code_unit_counts[0]);
+                                       grapheme_code_unit_counts[0], cluster);
 
           // Compute positions for the additional graphemes in the ligature.
           for (size_t i = 1; i < grapheme_code_unit_counts.size(); ++i) {
@@ -954,7 +954,7 @@ void ParagraphTxt::Layout(double width) {
                 glyph_positions.back().x_pos.end, grapheme_advance,
                 glyph_positions.back().code_units.start +
                     grapheme_code_unit_counts[i - 1],
-                grapheme_code_unit_counts[i]);
+                grapheme_code_unit_counts[i], cluster);
           }
 
           bool at_word_start = false;
@@ -1772,12 +1772,28 @@ Paragraph::PositionWithAffinity ParagraphTxt::GetGlyphPositionAtCoordinate(
 
   size_t x_index;
   const GlyphPosition* gp = nullptr;
+  const GlyphPosition* gp_cluster = nullptr;
+  bool is_cluster_corection = false;
   for (x_index = 0; x_index < line_glyph_position.size(); ++x_index) {
     double glyph_end = (x_index < line_glyph_position.size() - 1)
                            ? line_glyph_position[x_index + 1].x_pos.start
                            : line_glyph_position[x_index].x_pos.end;
+    if (gp_cluster == nullptr ||
+        gp_cluster->cluster != line_glyph_position[x_index].cluster) {
+      gp_cluster = &line_glyph_position[x_index];
+    }
     if (dx < glyph_end) {
-      gp = &line_glyph_position[x_index];
+      // Check if the glyph position is part of a cluster. If it is,
+      // we assign the cluster's root GlyphPosition to represent it.
+      if (gp_cluster->cluster == line_glyph_position[x_index].cluster) {
+        gp = gp_cluster;
+        // Detect if the matching GlyphPosition was non-root for the cluster.
+        if (gp_cluster != &line_glyph_position[x_index]) {
+          is_cluster_corection = true;
+        }
+      } else {
+        gp = &line_glyph_position[x_index];
+      }
       break;
     }
   }
@@ -1798,8 +1814,13 @@ Paragraph::PositionWithAffinity ParagraphTxt::GetGlyphPositionAtCoordinate(
   }
 
   double glyph_center = (gp->x_pos.start + gp->x_pos.end) / 2;
+  // We want to use the root cluster's start when the cluster
+  // was corrected.
+  // TODO(garyq): Detect if the position is in the middle of the cluster
+  // and properly assign the start/end positions.
   if ((direction == TextDirection::ltr && dx < glyph_center) ||
-      (direction == TextDirection::rtl && dx >= glyph_center)) {
+      (direction == TextDirection::rtl && dx >= glyph_center) ||
+      is_cluster_corection) {
     return PositionWithAffinity(gp->code_units.start, DOWNSTREAM);
   } else {
     return PositionWithAffinity(gp->code_units.end, UPSTREAM);

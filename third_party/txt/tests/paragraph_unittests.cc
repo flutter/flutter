@@ -4042,6 +4042,123 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiParagraph)) {
   EXPECT_EQ(paragraph->records_[7].line(), 7ull);
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiMultiLineRectsParagraph)) {
+  // clang-format off
+  const char* text =
+      "👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧i🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸"
+      "👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸"
+      "👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸"
+      "👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸👩‍👩‍👦👩‍👩‍👧‍👧🇺🇸"
+      "❄🍕🍔🍟🥝🍱🕶🎩🏈⚽🚴‍♀️🎻🎼🎹🚨🚎🚐⚓🛳🚀🚁🏪🏢🖱⏰📱💾💉📉🛏🔑🔓"
+      "📁🗓📊❤💯🚫🔻♠♣🕓❗🏳🏁🏳️‍🌈🇮🇹🇱🇷🇺🇸🇬🇧🇨🇳🇧🇴";
+  // clang-format on
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+
+  txt::ParagraphBuilderTxt builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.color = SK_ColorBLACK;
+  text_style.font_families = std::vector<std::string>(1, "Noto Color Emoji");
+  text_style.font_size = 50;
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = BuildParagraph(builder);
+  paragraph->Layout(GetTestCanvasWidth() - 300);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  for (size_t i = 0; i < u16_text.length(); i++) {
+    ASSERT_EQ(paragraph->text_[i], u16_text[i]);
+  }
+
+  ASSERT_EQ(paragraph->records_.size(), 10ull);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  // Tests for GetRectsForRange()
+  Paragraph::RectHeightStyle rect_height_style =
+      Paragraph::RectHeightStyle::kTight;
+  Paragraph::RectWidthStyle rect_width_style =
+      Paragraph::RectWidthStyle::kTight;
+  paint.setColor(SK_ColorRED);
+  std::vector<txt::Paragraph::TextBox> boxes =
+      paragraph->GetRectsForRange(0, 0, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 0ull);
+
+  // Ligature style indexing.
+  boxes =
+      paragraph->GetRectsForRange(0, 119, rect_height_style, rect_width_style);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 2ull);
+  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 0);
+  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 334.61475);
+
+  boxes = paragraph->GetRectsForRange(122, 132, rect_height_style,
+                                      rect_width_style);
+  paint.setColor(SK_ColorBLUE);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 1ull);
+  EXPECT_FLOAT_EQ(boxes[0].rect.left(), 357.95996);
+  EXPECT_FLOAT_EQ(boxes[0].rect.right(), 418.79901);
+
+  // GetPositionForCoordinates should not return inter-emoji positions.
+  boxes = paragraph->GetRectsForRange(
+      0, paragraph->GetGlyphPositionAtCoordinate(610, 100).position,
+      rect_height_style, rect_width_style);
+  paint.setColor(SK_ColorGREEN);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 2ull);
+  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 0);
+  // The following is expected to change to a higher value when
+  // rounding up is added to getGlyphPositionForCoordinate.
+  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 560.28516);
+
+  boxes = paragraph->GetRectsForRange(
+      0, paragraph->GetGlyphPositionAtCoordinate(580, 100).position,
+      rect_height_style, rect_width_style);
+  paint.setColor(SK_ColorGREEN);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 2ull);
+  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 0);
+  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 560.28516);
+
+  boxes = paragraph->GetRectsForRange(
+      0, paragraph->GetGlyphPositionAtCoordinate(560, 100).position,
+      rect_height_style, rect_width_style);
+  paint.setColor(SK_ColorGREEN);
+  for (size_t i = 0; i < boxes.size(); ++i) {
+    GetCanvas()->drawRect(boxes[i].rect, paint);
+  }
+  EXPECT_EQ(boxes.size(), 2ull);
+  EXPECT_FLOAT_EQ(boxes[1].rect.left(), 0);
+  // The following is expected to change to the 560.28516 value when
+  // rounding up is added to getGlyphPositionForCoordinate.
+  EXPECT_FLOAT_EQ(boxes[1].rect.right(), 498.03125);
+
+  ASSERT_TRUE(Snapshot());
+}
+
 TEST_F(ParagraphTest, HyphenBreakParagraph) {
   const char* text =
       "A "
