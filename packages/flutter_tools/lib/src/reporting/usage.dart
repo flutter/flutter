@@ -57,13 +57,16 @@ const String kCommandBuildBundleIsModule = 'cd25';
 const String kCommandResult = 'cd26';
 const String kCommandHasTerminal = 'cd31';
 
+const String kCommandBuildAarTargetPlatform = 'cd34';
+const String kCommandBuildAarProjectType = 'cd35';
+
 const String reloadExceptionTargetPlatform = 'cd27';
 const String reloadExceptionSdkName = 'cd28';
 const String reloadExceptionEmulator = 'cd29';
 const String reloadExceptionFullRestart = 'cd30';
 
 const String enabledFlutterFeatures = 'cd32';
-// Next ID: cd34
+// Next ID: cd36
 
 Usage get flutterUsage => Usage.instance;
 
