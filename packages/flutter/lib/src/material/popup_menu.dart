@@ -19,6 +19,8 @@ import 'material_localizations.dart';
 import 'popup_menu_theme.dart';
 import 'theme.dart';
 
+import 'package:flutter/foundation.dart';
+
 // Examples can assume:
 // enum Commands { heroAndScholar, hurricaneCame }
 // dynamic _heroAndScholar;
@@ -193,10 +195,10 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   @override
   final double height;
 
-  /// The text style of the entry.
+  /// The text style of the popup menu entry.
   ///
-  /// If this is null, then [PopupMenuThemeData.textStyle] is used.
-  /// If that is also null, then [ThemeData.textTheme.subhead] is used.
+  /// If this property is null, then [PopupMenuThemeData.textStyle] is used.
+  /// If [PopupMenuThemeData.textStyle] is also null, then [ThemeData.textTheme.subhead] is used.
   final TextStyle textStyle;
 
   /// The widget below this widget in the tree.
@@ -253,8 +255,9 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final PopupMenuThemeData popupMenuTheme = theme.popupMenuTheme;
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     TextStyle style = widget.textStyle ?? popupMenuTheme.textStyle ?? theme.textTheme.subhead;
+
     if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
@@ -442,7 +445,7 @@ class _PopupMenu<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
     final List<Widget> children = <Widget>[];
-    final PopupMenuThemeData popupMenuTheme = Theme.of(context).popupMenuTheme;
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
@@ -605,6 +608,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.semanticLabel,
     this.shape,
     this.color,
+    this.popupMenuTheme,
   });
 
   final RelativeRect position;
@@ -615,6 +619,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final String semanticLabel;
   final ShapeBorder shape;
   final Color color;
+  final PopupMenuThemeData popupMenuTheme;
 
   @override
   Animation<double> createAnimation() {
@@ -652,6 +657,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
+    if(popupMenuTheme != null)
+      menu = PopupMenuTheme(textStyle: popupMenuTheme.textStyle, child: menu);
     if (theme != null)
       menu = Theme(data: theme, child: menu);
 
@@ -749,7 +756,9 @@ Future<T> showMenu<T>({
       break;
     case TargetPlatform.android:
     case TargetPlatform.fuchsia:
-      label = semanticLabel ?? MaterialLocalizations.of(context)?.popupMenuLabel;
+      label = semanticLabel ?? MaterialLocalizations
+          .of(context)
+          ?.popupMenuLabel;
   }
 
   return Navigator.push(context, _PopupMenuRoute<T>(
@@ -762,6 +771,7 @@ Future<T> showMenu<T>({
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
+    popupMenuTheme: PopupMenuTheme.of(context),
   ));
 }
 
@@ -922,12 +932,12 @@ class PopupMenuButton<T> extends StatefulWidget {
 
   /// If provided, the shape used for the menu.
   ///
-  /// If this is null, then [PopupMenuThemeData.shape] is used.
+  /// If this property is null, then [PopupMenuThemeData.shape] is used.
   final ShapeBorder shape;
 
   /// If provided, the color used for the menu.
   ///
-  /// If this is null, then [PopupMenuThemeData.color] is used.
+  /// If this property is null, then [PopupMenuThemeData.color] is used.
   final Color color;
 
   @override
@@ -936,6 +946,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
+    final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
     final RenderBox button = context.findRenderObject();
     final RenderBox overlay = Overlay.of(context).context.findRenderObject();
     final RelativeRect position = RelativeRect.fromRect(
@@ -950,12 +961,12 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     if (items.isNotEmpty) {
       showMenu<T>(
         context: context,
-        elevation: widget.elevation,
+        elevation: widget.elevation ?? popupMenuTheme.elevation,
         items: items,
         initialValue: widget.initialValue,
         position: position,
-        shape: widget.shape,
-        color: widget.color,
+        shape: widget.shape ?? popupMenuTheme.shape,
+        color: widget.color ?? popupMenuTheme.color,
       )
       .then<void>((T newValue) {
         if (!mounted)

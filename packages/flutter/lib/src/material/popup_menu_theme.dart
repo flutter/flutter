@@ -2,30 +2,38 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-
 import 'dart:ui' show lerpDouble;
 
-/// Defines default property values for [PopupMenuEntry] widgets.
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+
+import 'theme.dart';
+
+/// Defines the visual properties of [PopupMenuEntry] widgets.
 ///
 /// Descendant widgets obtain the current [PopupMenuEntryThemeData] object
 /// using `Theme.of(context).popupMenuTheme`. Instances of
 /// [PopupMenuEntryThemeData] can be customized with
 /// [PopupMenuEntryThemeData.copyWith].
 ///
-/// Typically a [PopupMenuEntryThemeData] is specified as part of the
-/// overall [Theme] with [ThemeData.popupMenuTheme].
+/// Typically, a [PopupMenuEntryThemeData] is specified as part of the
+/// overall [Theme] with [ThemeData.popupMenuTheme]. Otherwise,
+/// [PopupMenuTheme] can be used to configure its own widget subtree.
 ///
 /// All [PopupMenuEntryThemeData] properties are `null` by default.
-/// When null, the [PopupMenuEntry] will provide its own defaults.
+/// If any of these properties are null, [PopupMenuEntry] will provide its
+/// own defaults.
 ///
 /// See also:
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
+///  * [PopupMenuTheme], an [InheritedWidget] that propagates the theme down its
+///    subtree.
+///  * [PopupMenuThemeData], which describes the actual configuration of a
+///    popup menu theme.
 class PopupMenuThemeData extends Diagnosticable {
-  /// Creates a theme that can be used for [ThemeData.popupMenuTheme].
+  /// Creates the set of properties used to configure [PopupMenuTheme].
   const PopupMenuThemeData({
     this.color,
     this.shape,
@@ -61,9 +69,9 @@ class PopupMenuThemeData extends Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two popup menu entry themes.
+  /// Linearly interpolate between two popup menu themes.
   ///
-  /// If both arguments are null then null is returned.
+  /// If both arguments are null, then null is returned.
   ///
   /// {@macro dart.ui.shadow.lerp}
   static PopupMenuThemeData lerp(PopupMenuThemeData a, PopupMenuThemeData b, double t) {
@@ -118,7 +126,7 @@ class PopupMenuThemeData extends Diagnosticable {
 /// given an explicit non-null value.
 class PopupMenuTheme extends InheritedWidget {
   /// Creates a popup menu theme that controls the configurations for
-  /// popup menus.
+  /// popup menus in its widget subtree.
   PopupMenuTheme({
     Key key,
     Color color,
