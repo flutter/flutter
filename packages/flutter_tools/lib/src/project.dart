@@ -510,6 +510,10 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
+  Directory get gradleAppBundleOutV1Directory {
+    return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
+  }
+
   /// Whether the current flutter project has an Android sub-project.
   bool existsSync() {
     return parent.isModule || _editableHostAppDirectory.existsSync();
