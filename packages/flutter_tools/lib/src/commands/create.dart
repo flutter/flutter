@@ -20,6 +20,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../reporting/usage.dart';
@@ -613,7 +614,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': FlutterVersion.instance.frameworkRevision,
       'flutterChannel': FlutterVersion.instance.channel,
-      'web': web && FlutterVersion.instance.isMaster
+      'web': web && featureFlags.isWebEnabled,
     };
   }
 
