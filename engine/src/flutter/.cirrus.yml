@@ -40,6 +40,7 @@ task:
         git clone https://github.com/flutter/flutter.git
       test_web_script: |
         cd $FRAMEWORK_PATH/flutter/dev/integration_tests/web
+        ../../../bin/flutter config --local-engine=host_debug_unopt --no-analytics --enable-web
         ../../../bin/flutter --local-engine=host_debug_unopt build web -v
       test_framework_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
