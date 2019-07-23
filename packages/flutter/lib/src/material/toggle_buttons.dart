@@ -203,13 +203,13 @@ class ToggleButtons extends StatelessWidget {
   final void Function(int index) onPressed;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
-  /// enabled.
+  /// enabled and not selected.
   ///
   /// If [selected] is set to false and [onPressed] is not null, this color
   /// will be used.
   ///
   /// If this property is set to null, then ToggleButtonTheme.of(context).color
-  /// is used. If [ToggleButtonThemeData.color] is also null, then
+  /// is used. If [ToggleButtonsThemeData.color] is also null, then
   /// Theme.of(context).colorScheme.onSurface is used.
   final Color color;
 
@@ -221,7 +221,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If this property is set to null, then
   /// ToggleButtonTheme.of(context).selectedColor is used. If
-  /// [ToggleButtonThemeData.selectedColor] is also null, then
+  /// [ToggleButtonsThemeData.selectedColor] is also null, then
   /// Theme.of(context).colorScheme.primary is used.
   final Color selectedColor;
 
@@ -232,7 +232,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If this property is set to null, then
   /// ToggleButtonTheme.of(context).disabledColor is used. If
-  /// [ToggleButtonThemeData.disabledColor] is also null, then
+  /// [ToggleButtonsThemeData.disabledColor] is also null, then
   /// Theme.of(context).disabledColor is used.
   final Color disabledColor;
 
@@ -240,7 +240,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If this property is set to null, then
   /// ToggleButtonTheme.of(context).fillColor is used. If
-  /// [ToggleButtonThemeData.fillColor] is also null, then
+  /// [ToggleButtonsThemeData.fillColor] is also null, then
   /// the fill color is set to null.
   final Color fillColor;
 
@@ -248,20 +248,33 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If this property is set to null, then
   /// ToggleButtonTheme.of(context).focusColor is used. If
-  /// [ToggleButtonThemeData.focusColor] is also null, then
+  /// [ToggleButtonsThemeData.focusColor] is also null, then
   /// Theme.of(context).focusColor is used.
   final Color focusColor;
 
   /// The highlight color for the button's [InkWell].
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).highlightColor is used. If
+  /// [ToggleButtonsThemeData.highlightColor] is also null, then
+  /// Theme.of(context).highlightColor is used.
   final Color highlightColor;
 
   /// The splash color for the button's [InkWell].
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).splashColor is used. If
+  /// [ToggleButtonsThemeData.splashColor] is also null, then
+  /// Theme.of(context).splashColor is used.
   final Color splashColor;
 
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
   ///
-  /// Defaults to [ThemeData.hoverColor] for the current theme.
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).hoverColor is used. If
+  /// [ToggleButtonsThemeData.hoverColor] is also null, then
+  /// Theme.of(context).hoverColor is used.
   final Color hoverColor;
 
   /// The list of [FocusNode]s, corresponding to each toggle button.
@@ -279,17 +292,33 @@ class ToggleButtons extends StatelessWidget {
   /// Whether or not to render a border around each toggle button.
   ///
   /// When set to true, a border with [borderWidth], [borderRadius] and the
-  /// corresponsing border colors will render. Otherwise, no border will be
+  /// appropriate border color will render. Otherwise, no border will be
   /// rendered.
   final bool renderBorder;
 
-  /// The border color to display when the toggle button is enabled.
+  /// The border color to display when the toggle button is enabled and not
+  /// selected.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).borderColor is used. If
+  /// [ToggleButtonsThemeData.borderColor] is also null, then
+  /// Theme.of(context).colorScheme.onSurface is used.
   final Color borderColor;
 
   /// The border color to display when the toggle button is selected.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).selectedBorderColor is used. If
+  /// [ToggleButtonsThemeData.selectedBorderColor] is also null, then
+  /// Theme.of(context).colorScheme.primary is used.
   final Color selectedBorderColor;
 
   /// The border color to display when the toggle button is disabled.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).disabledBorderColor is used. If
+  /// [ToggleButtonsThemeData.disabledBorderColor] is also null, then
+  /// Theme.of(context).disabledBorderColor is used.
   final Color disabledBorderColor;
 
   /// The width of the border surrounding each toggle button.
@@ -301,11 +330,19 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
   /// See [BorderSide.width] for more details on hairline borders.
+  ///
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).borderWidth is used. If
+  /// [ToggleButtonsThemeData.borderWidth] is also null, then
+  /// a width of 1.0 is used.
   final double borderWidth;
 
   /// The radii of the border's corners.
   ///
-  /// By default, the border's corners are not rounded.
+  /// If this property is set to null, then
+  /// ToggleButtonTheme.of(context).borderRadius is used. If
+  /// [ToggleButtonsThemeData.borderRadius] is also null, then
+  /// the buttons default to non-rounded borders.
   final BorderRadius borderRadius;
 
   BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
