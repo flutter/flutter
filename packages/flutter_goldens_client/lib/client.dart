@@ -51,6 +51,11 @@ abstract class GoldensClient {
   /// Uses the [fs] file system.
   Directory get flutterRoot => fs.directory(platform.environment[_kFlutterRootKey]);
 
+  /// The local [Directory] where the goldens files are located.
+  ///
+  /// Uses the [fs] file system.
+  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
+
 }
 
 /// A class that represents a clone of the https://github.com/flutter/goldens
@@ -68,11 +73,6 @@ class GoldensRepositoryClient extends GoldensClient {
   );
 
   RandomAccessFile _lock;
-
-  /// The local [Directory] where the goldens files are located.
-  ///
-  /// Uses the [fs] file system.
-  Directory get comparisonRoot => flutterRoot.childDirectory(fs.path.join('bin', 'cache', 'pkg', 'goldens'));
 
   /// Prepares the local clone of the `flutter/goldens` repository for golden
   /// file testing.
