@@ -799,7 +799,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
-    PopupMenuTheme popupMenuTheme,
+    PopupMenuThemeData popupMenuTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
