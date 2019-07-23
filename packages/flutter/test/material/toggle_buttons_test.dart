@@ -999,10 +999,10 @@ void main() {
     // The Ahem font extends 0.2 * fontSize below the baseline.
     // So the three row elements line up like this:
     //
-    //  A  abc  B
-    //  ---------   baseline
-    //  2  4    6   space below the baseline = 0.2 * fontSize
-    //  ---------   rowBottomY
+    //  ToggleButton  MaterialButton  Text
+    //  ------------------------------------   baseline
+    //  2             4               6        space below the baseline = 0.2 * fontSize
+    //  ------------------------------------   widget text dy values
 
     final double firstToggleButtonDy = tester.getBottomLeft(find.text('First child')).dy;
     final double secondToggleButtonDy = tester.getBottomLeft(find.text('Second child')).dy;
