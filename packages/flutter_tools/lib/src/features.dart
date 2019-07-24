@@ -88,7 +88,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter for macOS desktop',
+  name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -99,7 +99,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter for Linux desktop',
+  name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -110,7 +110,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter for Windows desktop',
+  name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(

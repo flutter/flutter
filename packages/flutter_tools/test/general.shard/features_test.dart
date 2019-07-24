@@ -82,15 +82,15 @@ void main() {
     });
 
     test('flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for macOS desktop. This setting will take effect on the master channel.');
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on macOS. This setting will take effect on the master channel.');
     });
 
     test('flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for Linux desktop. This setting will take effect on the master channel.');
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Linux. This setting will take effect on the master channel.');
     });
 
     test('flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for Windows desktop. This setting will take effect on the master channel.');
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Windows. This setting will take effect on the master channel.');
     });
 
     test('help string on multiple channels', () {
