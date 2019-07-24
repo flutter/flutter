@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'banner_theme.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'divider.dart';
@@ -75,6 +76,7 @@ class MaterialBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     // TODO: Is this the right condition? Should it be able to be forced into single row?
     final bool isSingleRow = actions.length == 1;
@@ -90,7 +92,7 @@ class MaterialBanner extends StatelessWidget {
     );
 
     return Container(
-      color: backgroundColor ?? theme.canvasColor,
+      color: backgroundColor ?? bannerTheme.backgroundColor ?? theme.canvasColor,
       child: Column(
         children: <Widget>[
           Padding(
@@ -106,7 +108,7 @@ class MaterialBanner extends StatelessWidget {
                   child: DefaultTextStyle(
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
-                    style: contentTextStyle ?? theme.textTheme.body1,
+                    style: contentTextStyle ?? bannerTheme.contentTextStyle ?? theme.textTheme.body1,
                     child: content,
                   ),
                 ),

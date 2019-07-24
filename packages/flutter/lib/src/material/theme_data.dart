@@ -1098,7 +1098,7 @@ class ThemeData extends Diagnosticable {
            (otherData.typography == typography) &&
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
-           (otherData.bottomSheetTheme == bottomSheetTheme),
+           (otherData.bottomSheetTheme == bottomSheetTheme) &&
            (otherData.bannerTheme == bannerTheme);
   }
 
