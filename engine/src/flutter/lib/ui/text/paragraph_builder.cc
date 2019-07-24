@@ -438,8 +438,10 @@ void ParagraphBuilder::pushStyle(tonic::Int32List& encoded,
   }
 
   if (mask & tsFontFamilyMask) {
-    style.font_families.insert(style.font_families.end(), fontFamilies.begin(),
-                               fontFamilies.end());
+    // The child style's font families override the parent's font families.
+    // If the child's fonts are not available, then the font collection will
+    // use the system fallback fonts (not the parent's fonts).
+    style.font_families = fontFamilies;
   }
 
   if (mask & tsFontFeaturesMask) {
