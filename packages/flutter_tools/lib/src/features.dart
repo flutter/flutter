@@ -73,7 +73,7 @@ const List<Feature> allFeatures = <Feature>[
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
-  name: 'Flutter for Web',
+  name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
@@ -88,7 +88,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter for macOS Desktop',
+  name: 'Flutter for macOS desktop',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -99,7 +99,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter for Linux Desktop',
+  name: 'Flutter for Linux desktop',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -110,7 +110,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter for Windows Desktop',
+  name: 'Flutter for Windows desktop',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -139,7 +139,7 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
 /// a "safe" value, such as being off.
 ///
 /// The top level feature settings can be provided to apply to all channels.
-/// Otherwise, more specific settings take precidence over higher level
+/// Otherwise, more specific settings take precedence over higher level
 /// settings.
 class Feature {
   /// Creates a [Feature].
@@ -197,8 +197,12 @@ class Feature {
     ];
     if (channels.length == 1) {
       buffer.write('the ${channels.single} channel.');
+    } else if (channels.length == 2) {
+      buffer.write('the ${channels.join(' and ')} channels.');
     } else {
-      buffer.write('${channels.join(', ')} channels.');
+      final String prefix = (channels.toList()
+        ..removeLast()).join(', ');
+      buffer.write('the $prefix, and ${channels.last} channels.');
     }
     return buffer.toString();
   }
