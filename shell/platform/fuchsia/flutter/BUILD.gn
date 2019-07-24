@@ -193,6 +193,35 @@ template("jit_runner") {
       },
     ]
 
+    fuchsia_sdk_lib = "//fuchsia/sdk/$host_os/arch/$host_cpu/lib"
+
+    libraries = [
+      {
+        name = "libasync-default.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libtrace-engine.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libfdio.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libmemfs.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libsyslog.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libvulkan.so"
+        path = rebase_path("$fuchsia_sdk_lib")
+      },
+    ]
+
     meta = [
       {
         path = rebase_path("meta/flutter_jit${product_suffix}_runner.cmx")

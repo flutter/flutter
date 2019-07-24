@@ -17,6 +17,7 @@ template("package_dir") {
                              "deps",
                              "meta",
                              "resources",
+                             "libraries",
                            ])
     if (!defined(package_name)) {
       package_name = pkg_target_name
@@ -30,6 +31,9 @@ template("package_dir") {
     if (!defined(resources)) {
       resources = []
     }
+    if (!defined(libraries)) {
+      libraries = []
+    }
   }
 
   far_base_dir = "$root_out_dir/${pkg_target_name}_far"
@@ -40,6 +44,11 @@ template("package_dir") {
   foreach(res, pkg.resources) {
     copy_sources += [ res.path ]
     copy_outputs += [ "$far_base_dir/data/${res.dest}" ]
+  }
+
+  foreach(lib, pkg.libraries) {
+    copy_sources += [ "${lib.path}/${lib.name}" ]
+    copy_outputs += [ "$far_base_dir/lib/${lib.name}" ]
   }
 
   action(target_name) {
