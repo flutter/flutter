@@ -512,7 +512,68 @@ void main() {
     expect(material.type, MaterialType.button);
   });
 
-  testWidgets('Default InkWell colors', (WidgetTester tester) async {
+  testWidgets('Default InkWell colors - unselected', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    final FocusNode focusNode = FocusNode();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            focusNodes: <FocusNode>[focusNode],
+            children: const <Widget>[
+              Text('First child'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset center = tester.getCenter(find.text('First child'));
+
+    // splashColor
+    final TestGesture touchGesture = await tester.createGesture();
+    await touchGesture.down(center);
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures;
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(
+      inkFeatures,
+      paints
+        ..circle(color: theme.colorScheme.onSurface.withOpacity(0.16)),
+    );
+
+    await touchGesture.up();
+    await tester.pumpAndSettle();
+
+    // hoverColor
+    final TestGesture hoverGesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await hoverGesture.addPointer();
+    await hoverGesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    await hoverGesture.removePointer();
+
+    // focusColor
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
+      return object.runtimeType.toString() == '_RenderInkFeatures';
+    });
+    expect(inkFeatures, paints..rect(color: theme.focusColor));
+  });
+
+  testWidgets('Default InkWell colors - selected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
@@ -533,7 +594,6 @@ void main() {
     final Offset center = tester.getCenter(find.text('First child'));
 
     // splashColor
-    // highlightColor
     final TestGesture touchGesture = await tester.createGesture();
     await touchGesture.down(center);
     await tester.pumpAndSettle();
@@ -545,8 +605,7 @@ void main() {
     expect(
       inkFeatures,
       paints
-        ..circle(color: theme.splashColor)
-        ..rect(color: theme.highlightColor),
+        ..circle(color: theme.colorScheme.primary.withOpacity(0.16)),
     );
 
     await touchGesture.up();
@@ -604,7 +663,6 @@ void main() {
     final Offset center = tester.getCenter(find.text('First child'));
 
     // splashColor
-    // highlightColor
     final TestGesture touchGesture = await tester.createGesture();
     await touchGesture.down(center);
     await tester.pumpAndSettle();
@@ -617,7 +675,6 @@ void main() {
       inkFeatures,
       paints
         ..circle(color: splashColor)
-        ..rect(color: highlightColor),
     );
 
     await touchGesture.up();
