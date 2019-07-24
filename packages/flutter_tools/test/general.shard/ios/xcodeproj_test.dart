@@ -143,6 +143,12 @@ void main() {
           .thenReturn(ProcessResult(1, 0, 'Xcode 8.3.3\nBuild version 8E3004b', ''));
       expect(xcodeProjectInterpreter.isInstalled, isTrue);
     });
+
+    testUsingOsxContext('build settings is empty when xcodebuild failed to get the build settings', () {
+      when(mockProcessManager.runSync(argThat(contains(xcodebuild))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+      expect(xcodeProjectInterpreter.getBuildSettings('', ''), const <String, String>{});
+    });
   });
   group('Xcode project properties', () {
     test('properties from default project can be parsed', () {

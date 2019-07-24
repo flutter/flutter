@@ -4,7 +4,6 @@
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../convert.dart';
@@ -30,8 +29,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   String get name => 'assemble';
 
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -96,7 +93,9 @@ abstract class AssembleBase extends FlutterCommand {
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
     final Environment result = Environment(
-      buildDir: fs.directory(getBuildDirectory()),
+      buildDir: flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(argResults['define']),
     );
@@ -127,9 +126,6 @@ class AssembleRun extends AssembleBase {
   String get name => 'run';
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
@@ -156,9 +152,6 @@ class AssembleDescribe extends AssembleBase {
   String get name => 'describe';
 
   @override
-  bool get isExperimental => true;
-
-  @override
   Future<FlutterCommandResult> runCommand() {
     try {
       printStatus(
@@ -179,9 +172,6 @@ class AssembleListInputs extends AssembleBase {
 
   @override
   String get name => 'inputs';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -208,9 +198,6 @@ class AssembleBuildDirectory extends AssembleBase {
 
   @override
   String get name => 'build-dir';
-
-  @override
-  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {

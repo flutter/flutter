@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -478,11 +477,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         break;
     }
 
-    final Color trackColor = _value ? activeColor : _kTrackColor;
-    final double borderThickness = 1.5 + (_kTrackRadius - 1.5) * math.max(currentReactionValue, currentValue);
-
     final Paint paint = Paint()
-      ..color = trackColor;
+      ..color = Color.lerp(_kTrackColor, activeColor, currentValue);
 
     final Rect trackRect = Rect.fromLTWH(
         offset.dx + (size.width - _kTrackWidth) / 2.0,
@@ -490,9 +486,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         _kTrackWidth,
         _kTrackHeight,
     );
-    final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
-    canvas.drawDRRect(outerRRect, innerRRect, paint);
+    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
+    canvas.drawRRect(trackRRect, paint);
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(
@@ -506,13 +501,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       visualPosition,
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
-
-    _thumbPainter.paint(canvas, Rect.fromLTRB(
+    final Rect thumbBounds = Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
       thumbCenterY + CupertinoThumbPainter.radius,
-    ));
+    );
+
+    context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+      _thumbPainter.paint(innerContext.canvas, thumbBounds);
+    });
   }
 
   @override
