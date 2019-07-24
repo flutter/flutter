@@ -183,6 +183,8 @@ class SkiaGoldClient extends GoldensClient {
           'stdout: ${result.stdout}')..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(result.exitCode, buf.toString());
     }
+
+    print(result.stdout);
     /* */
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
@@ -196,7 +198,7 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     /* Temp for testing Cirrus */
-    return '15fa2f22261ef8dea5fd78b43bc8805df7686a79';
+    return '22dc6b0195d72feb937a31bac10d4e957515879c';
     /* */
 
 //    if (!flutterRoot.existsSync()) {
