@@ -99,12 +99,19 @@ abstract class ShaderWarmUp {
 /// issues seen so far.
 class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
-  const DefaultShaderWarmUp();
+  const DefaultShaderWarmUp(
+      {double this.drawCallSpacing = 0.0,
+      ui.Size this.canvasSize = const ui.Size(100.0, 100.0)});
 
   // Constant that can be used to space out draw calls for visualizing the draws
-  // for debugging purposes (example: 80.0).  Be sure to also change your render
+  // for debugging purposes (example: 80.0).  Be sure to also change your canvas
   // size.
-  static const double _drawCallSpacing = 0.0;
+  final double drawCallSpacing;
+
+  final ui.Size canvasSize;
+
+  @override
+  ui.Size get size => canvasSize;
 
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
@@ -162,22 +169,22 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       canvas.save();
       for (ui.Paint paint in paints) {
         canvas.drawPath(paths[i], paint);
-        canvas.translate(_drawCallSpacing, 0.0);
+        canvas.translate(drawCallSpacing, 0.0);
       }
       canvas.restore();
-      canvas.translate(0.0, _drawCallSpacing);
+      canvas.translate(0.0, drawCallSpacing);
     }
 
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
     canvas.save();
     canvas.drawShadow(rrectPath, black, 10.0, true);
-    canvas.translate(_drawCallSpacing, 0.0);
+    canvas.translate(drawCallSpacing, 0.0);
     canvas.drawShadow(rrectPath, black, 10.0, false);
     canvas.restore();
 
     // Warm up text shaders.
-    canvas.translate(0.0, _drawCallSpacing);
+    canvas.translate(0.0, drawCallSpacing);
     final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
     )..pushStyle(ui.TextStyle(color: black))..addText('_');
