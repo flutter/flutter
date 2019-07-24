@@ -632,3 +632,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
     flaky: true
+
+  android_splash_screen_integration_test:
+    description: >
+      Runs end-to-end test of Flutter's Android splash behavior.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]

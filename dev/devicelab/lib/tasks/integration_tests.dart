@@ -101,6 +101,13 @@ TaskFunction createFlutterCreateOfflineTest() {
   };
 }
 
+TaskFunction createAndroidSplashScreenKitchenSinkTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
+    'test_driver/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(
