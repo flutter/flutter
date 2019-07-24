@@ -81,7 +81,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     status.cancel();
   }
   if (result != 0) {
-    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`. If this does not help you resolve your build failure, please file an issue at https://github.com/flutter/flutter/issues/new/choose');
+    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`.');
   }
   flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
