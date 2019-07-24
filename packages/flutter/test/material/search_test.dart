@@ -523,7 +523,7 @@ void main() {
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
   });
 
-  testWidgets('keyboard shows corresponding button when text input action is set', (WidgetTester tester) async {
+  testWidgets('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
 
     await tester.pumpWidget(TestHomePage(
@@ -699,7 +699,7 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.actions = const <Widget>[],
     String searchHint,
     TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel : searchHint, textInputAction : textInputAction);
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
 
   final String suggestions;
   final String result;

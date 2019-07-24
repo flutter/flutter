@@ -99,7 +99,11 @@ abstract class SearchDelegate<T> {
   ///   CustomSearchHintDelegate({
   ///     String hintText,
   ///
-  ///   }) : super(searchFieldLabel: hintText, keyboardType: TextInputType.text, textInputAction: TextInputAction.search,);
+  ///   }) : super(
+  ///     searchFieldLabel: hintText,
+  ///     keyboardType: TextInputType.text,
+  ///     textInputAction: TextInputAction.search,
+  ///   );
   ///
   ///   @override
   ///   Widget buildLeading(BuildContext context) => Text("leading");
@@ -467,7 +471,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
     final String searchFieldLabel = widget.delegate.searchFieldLabel
-        ?? MaterialLocalizations.of(context).searchFieldLabel;
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
