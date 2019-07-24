@@ -156,7 +156,6 @@ class Usage {
       ...?parameters,
       _kLocalTimeParameter: systemClock.now().toString(),
     };
-
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
 
@@ -253,11 +252,13 @@ class LogToFileAnalytics extends AnalyticsMock {
     super(true);
 
   final File logFile;
+  final Map<String, String> _sessionValues = <String, String>{};
 
   @override
   Future<void> sendScreenView(String viewName, {Map<String, String> parameters}) {
     parameters ??= <String, String>{};
     parameters['viewName'] = viewName;
+    parameters.addAll(_sessionValues);
     logFile.writeAsStringSync('screenView $parameters\n', mode: FileMode.append);
     return Future<void>.value(null);
   }
@@ -270,5 +271,10 @@ class LogToFileAnalytics extends AnalyticsMock {
     parameters['action'] = action;
     logFile.writeAsStringSync('event $parameters\n', mode: FileMode.append);
     return Future<void>.value(null);
+  }
+
+  @override
+  void setSessionValue(String param, dynamic value) {
+    _sessionValues[param] = value.toString();
   }
 }
