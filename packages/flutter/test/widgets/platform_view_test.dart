@@ -1666,7 +1666,7 @@ void main() {
     });
   });
 
-  group('platform view', (){
+  group('platform view', () {
     testWidgets('PlatformViewController Widget init', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       int createdPlatformViewId;

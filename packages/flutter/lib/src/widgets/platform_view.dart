@@ -47,39 +47,6 @@ typedef PlatformViewSurfaceBuilder = PlatformViewSurface Function(BuildContext c
 ///```
 typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
 
-/// The implementer of a new platform view need to implement this.
-///
-/// An instance of the implemented subclass should be returned in [PlatformViewControllerWidget.createPlatformView].
-abstract class PlatformViewController {
-
-  /// Implement this if the new platform view needs to handle focus(Android for example).
-  /// e.g.
-  /// ```dart
-  /// Future<void> dispose() async {
-  ///   await SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
-  /// }
-  /// ```
-  /// See `SystemChannels.platform_views` for more details.
-  // TODO(cyanglaz): Invoke this method after figuring out how to handle focus, https://github.com/flutter/flutter/issues/36779
-  Future<void> clearFocus();
-
-  /// Implement this if the new platform view cannot receive gesture directly and
-  /// needs the framework to dispatch pointer events to the platform(Android for example).
-  // TODO(cyanglaz): Invoke this method after implementing `PlatformViewSurface`, https://github.com/flutter/flutter/issues/36779
-  void dispatchPointerEvent(PointerEvent event);
-
-  /// Invoked when the state of `PlatformViewControllerWidget` is disposed. Implement this to properly dispose resources of the new platform view from the platform.
-  ///
-  /// e.g.
-  /// ```dart
-  /// Future<void> dispose() async {
-  ///   await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
-  /// }
-  /// ```
-  /// See `SystemChannels.platform_views` for more details.
-  void dispose();
-}
-
 /// The widget responsible for handling the life cycle and focus for implementing platform view widget.
 ///
 /// To implement a new platform view widget, return this widget in the `build` method.
@@ -264,7 +231,7 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   @override
   RenderObject createRenderObject(BuildContext context) {
     // TODO(cyanglaz): implement createRenderObject, https://github.com/flutter/flutter/issues/36779
-    return null;
+    return PlatformViewRenderBox();
   }
 
   @override
