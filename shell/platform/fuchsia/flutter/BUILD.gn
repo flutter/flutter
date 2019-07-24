@@ -165,6 +165,13 @@ template("jit_runner") {
 
     resources = [
       {
+        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        dest = "icudtl.dat"
+      },
+    ]
+
+    resources += [
+      {
         path = rebase_path(
                 "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
         dest = "vm_snapshot_data.bin"

@@ -16,7 +16,7 @@ import subprocess
 import sys
 
 _ARTIFACT_PATH_TO_DST = {
-    'flutter_runner': 'flutter_runner',
+    'flutter_jit_runner': 'flutter_jit_runner',
     'icudtl.dat': 'data/icudtl.dat',
     'dart_runner': 'dart_runner',
     'flutter_patched_sdk': 'flutter_patched_sdk'
