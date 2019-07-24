@@ -18,11 +18,11 @@ import 'framework.dart';
 /// It is used when constructing a `PlatformViewControllerWidget`.
 /// A sample implementation could be:
 /// ```dart
-/// (int id, PlatformViewController controller) {
+/// surfaceFactory: (BuildContext context, PlatformViewController controller, int id) {
 ///        return PlatformViewSurface(
 ///            id: id,
 ///            gestureRecognizers: gestureRecognizers,
-///             controller: controller,
+///            controller: controller,
 ///        );
 ///       }
 /// ```
@@ -56,7 +56,7 @@ typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreatio
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewControllerWidget(
 ///       createCallback: createFooWebView,
-///       surfaceFactory: (int id, PlatformViewController controller) {
+///       surfaceFactory: (BuildContext context, PlatformViewController controller, int id) {
 ///        return PlatformViewSurface(
 ///            id: id,
 ///            gestureRecognizers: gestureRecognizers,
@@ -146,17 +146,17 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
 
 /// The widget responsible to handle painting, gestures and semantics of the `PlatformViewControllerWidget`.
 ///
-/// This widget should be constructed and returned in the `PlatformViewControllerWidget.builder`.
+/// This widget should be constructed and returned in the `PlatformViewControllerWidget.surfaceFactory`.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
-  /// Construct a `PlatformViewSurface`. Usually returned from `PlatformViewControllerWidget.builder`.
+  /// Construct a `PlatformViewSurface`. Usually returned from `PlatformViewControllerWidget.surfaceFactory`.
   ///
   /// The [context], the [id] and the [controller] must not be null.
-  /// The `PlatformViewControllerWidget.builder` should provide [context], [id] and [controller];
+  /// The `PlatformViewControllerWidget.surfaceFactory` should provide [context], [id] and [controller];
   /// normally, you would use those directly when constructing the `PlatformViewSurface`.
   ///
   /// See also
-  /// * `PlatformViewControllerWidget.builder` for how to construct a `PlatformViewSurface` inside the builder.
+  /// * `PlatformViewControllerWidget.surfaceFactory` for how to construct a `PlatformViewSurface` inside `PlatformViewControllerWidget.surfaceFactory`.
   const PlatformViewSurface({
     @required this.id,
     @required this.controller,
@@ -267,7 +267,7 @@ class PlatformViewCreationParams {
   ///       onFocusChange: onFocusChanged,
   ///       child: PlatformViewControllerWidget(
   ///         createCallback: createFooWebView,
-  ///       builder: (BuildContext context, int id, PlatformViewController controller) {
+  ///         surfaceFactory: (BuildContext context, PlatformViewController controller, int id) {
   ///         return PlatformViewSurface(
   ///             context: context,
   ///             id: id,
