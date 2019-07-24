@@ -84,6 +84,7 @@ class CrashReportSender {
     @required dynamic error,
     @required StackTrace stackTrace,
     @required String getFlutterVersion(),
+    @required String command,
   }) async {
     try {
       final String flutterVersion = getFlutterVersion();
@@ -111,6 +112,7 @@ class CrashReportSender {
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
+      req.fields['comments'] = command;
 
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
