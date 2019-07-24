@@ -238,7 +238,7 @@ class ToggleButtons extends StatelessWidget {
   /// If this property is null, then
   /// ToggleButtonTheme.of(context).disabledColor is used. If
   /// [ToggleButtonsThemeData.disabledColor] is also null, then
-  /// Theme.of(context).disabledColor is used.
+  /// Theme.of(context).colorScheme.onSurface.withOpacity(0.32) is used.
   final Color disabledColor;
 
   /// The fill color for selected toggle buttons.
@@ -360,8 +360,15 @@ class ToggleButtons extends StatelessWidget {
         || index == 0 && textDirection == TextDirection.rtl;
   }
 
-  BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
-    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
+  BorderRadius _getEdgeBorderRadius(
+    int index,
+    int length,
+    TextDirection textDirection,
+    ToggleButtonsThemeData toggleButtonsTheme,
+  ) {
+    final BorderRadius resultingBorderRadius = borderRadius
+      ?? toggleButtonsTheme.borderRadius
+      ?? BorderRadius.zero;
 
     if (_isFirstIndex(index, length, textDirection)) {
       return BorderRadius.only(
@@ -377,9 +384,18 @@ class ToggleButtons extends StatelessWidget {
     return BorderRadius.zero;
   }
 
-  BorderRadius _getClipBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
-    final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
-    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
+  BorderRadius _getClipBorderRadius(
+    int index,
+    int length,
+    TextDirection textDirection,
+    ToggleButtonsThemeData toggleButtonsTheme,
+  ) {
+    final BorderRadius resultingBorderRadius = borderRadius
+      ?? toggleButtonsTheme.borderRadius
+      ?? BorderRadius.zero;
+    final double resultingBorderWidth = borderWidth
+      ?? toggleButtonsTheme.borderWidth
+      ?? _defaultBorderWidth;
 
     if (_isFirstIndex(index, length, textDirection)) {
       return BorderRadius.only(
@@ -403,20 +419,28 @@ class ToggleButtons extends StatelessWidget {
     if (!renderBorder)
       return BorderSide.none;
 
-    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
+    final double resultingBorderWidth = borderWidth
+      ?? toggleButtonsTheme.borderWidth
+      ?? _defaultBorderWidth;
     if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
       return BorderSide(
-        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor
+          ?? toggleButtonsTheme.selectedBorderColor
+          ?? theme.colorScheme.primary,
         width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
+        color: borderColor
+          ?? toggleButtonsTheme.borderColor
+          ?? theme.colorScheme.onSurface,
         width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        color: disabledBorderColor
+          ?? toggleButtonsTheme.disabledBorderColor
+          ?? theme.colorScheme.onSurface.withOpacity(0.32),
         width: resultingBorderWidth,
       );
     }
@@ -430,20 +454,28 @@ class ToggleButtons extends StatelessWidget {
     if (!renderBorder)
       return BorderSide.none;
 
-    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
+    final double resultingBorderWidth = borderWidth
+      ?? toggleButtonsTheme.borderWidth
+      ?? _defaultBorderWidth;
     if (onPressed != null && isSelected[index]) {
       return BorderSide(
-        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor
+          ?? toggleButtonsTheme.selectedBorderColor
+          ?? theme.colorScheme.primary,
         width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
+        color: borderColor
+          ?? toggleButtonsTheme.borderColor
+          ?? theme.colorScheme.onSurface,
         width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        color: disabledBorderColor
+          ?? toggleButtonsTheme.disabledBorderColor
+          ?? theme.colorScheme.onSurface.withOpacity(0.32),
         width: resultingBorderWidth,
       );
     }
@@ -460,20 +492,28 @@ class ToggleButtons extends StatelessWidget {
     if (index != children.length - 1)
       return null;
 
-    final double resultingBorderWidth = borderWidth ?? toggleButtonsTheme.borderWidth ?? _defaultBorderWidth;
+    final double resultingBorderWidth = borderWidth
+      ?? toggleButtonsTheme.borderWidth
+      ?? _defaultBorderWidth;
     if (onPressed != null && (isSelected[index])) {
       return BorderSide(
-        color: selectedBorderColor ?? toggleButtonsTheme.selectedBorderColor ?? theme.colorScheme.primary,
+        color: selectedBorderColor
+          ?? toggleButtonsTheme.selectedBorderColor
+          ?? theme.colorScheme.primary,
         width: resultingBorderWidth,
       );
     } else if (onPressed != null && !isSelected[index]) {
       return BorderSide(
-        color: borderColor ?? toggleButtonsTheme.borderColor ?? theme.colorScheme.onSurface,
+        color: borderColor
+          ?? toggleButtonsTheme.borderColor
+          ?? theme.colorScheme.onSurface,
         width: resultingBorderWidth,
       );
     } else {
       return BorderSide(
-        color: disabledBorderColor ?? toggleButtonsTheme.disabledBorderColor ?? theme.disabledColor,
+        color: disabledBorderColor
+          ?? toggleButtonsTheme.disabledBorderColor
+          ?? theme.colorScheme.onSurface.withOpacity(0.32),
         width: resultingBorderWidth,
       );
     }
@@ -698,7 +738,7 @@ class _ToggleButton extends StatelessWidget {
     } else {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
-        ?? theme.disabledColor;
+        ?? theme.colorScheme.onSurface.withOpacity(0.32);
     }
 
     final Widget result = ClipRRect(
