@@ -15,9 +15,61 @@ import 'framework.dart';
 
 /// The function to build a `PlatformViewSurface`.
 ///
+/// It is used when constructing a `PlatformViewControllerWidget`.
+/// A sample implementation could be:
+/// ```dart
+/// (BuildContext context, int id, PlatformViewController controller) {
+///        return PlatformViewSurface(
+///            context: context,
+///            id: id,
+///            gestureRecognizers: gestureRecognizers,
+///             controller: controller,
+///        );
+///       }
+/// ```
+///
 /// See also:
-/// * `PlatformViewSurface`
+/// * `PlatformViewSurface` for more details.
 typedef PlatformViewSurfaceBuilder = PlatformViewSurface Function(BuildContext context, int id, PlatformViewController controller);
+
+/// The function to create a `PlatformViewController`.
+///
+/// The implementer of a new platform view is responsible to implement this method when constructing a `PlatformViewControllerWidget`.
+/// See `PlatformViewControllerWidget.createPlatformView` for a sample implementation.
+typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
+
+/// The implementer of a new platform view need to implement this.
+///
+/// An instance of the implemented subclass should be returned in [PlatformViewControllerWidget.createPlatformView].
+abstract class PlatformViewController {
+
+  /// Implement this if the new platform view needs to handle focus(Android for example).
+  /// e.g.
+  /// ```dart
+  /// Future<void> dispose() async {
+  ///   await SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
+  /// }
+  /// ```
+  /// See `SystemChannels.platform_views` for more details.
+  // TODO(cyanglaz): Invoke this method after figuring out how to handle focus.
+  Future<void> clearFocus();
+
+  /// Implement this if the new platform view cannot receive gesture directly and
+  /// needs the framework to dispatch pointer events to the platform(Android for example).
+  // TODO(cyanglaz): Invoke this method after implementing `PlatformViewSurface`
+  void dispatchPointerEvent(PointerEvent event);
+
+  /// Invoked when the state of `PlatformViewControllerWidget` is disposed. Implement this to properly dispose resources of the new platform view from the platform.
+  ///
+  /// e.g.
+  /// ```dart
+  /// Future<void> dispose() async {
+  ///   await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+  /// }
+  /// ```
+  /// See `SystemChannels.platform_views` for more details.
+  void dispose();
+}
 
 /// The widget responsible for handling the life cycle and focus for implementing platform view widget.
 ///
@@ -56,7 +108,20 @@ class PlatformViewControllerWidget extends StatefulWidget {
 
   /// The method that returns a `PlatformViewSurface` widget.
   ///
-  /// See `PlatformViewSurface` for more details.
+  /// The implementer of a new platform view is responsible to implement this method,
+  /// A simple example would be:
+  /// ```dart
+  /// builder: (BuildContext context, int id, PlatformViewController controller) {
+  ///   return PlatformViewSurface(
+  ///        context: context,
+  ///        id: id,
+  ///        gestureRecognizers: gestureRecognizers,
+  ///        controller: controller,
+  ///    );
+  /// },
+  /// ```
+  /// See also:
+  /// * `PlatformViewSurface` for more details.
   final PlatformViewSurfaceBuilder builder;
 
   /// The method to create the platform view.
@@ -64,12 +129,23 @@ class PlatformViewControllerWidget extends StatefulWidget {
   /// The implementer of a new platform view is responsible to define this method and pass it
   /// to the constructor of `PlatformViewControllerWidget`.
   /// This method will get invoked when the state of `PlatformViewControllerWidget` is initialized.
+  ///
+  /// A simple example of implementing this function for foo platform can be:
+  /// ```dart
+  /// FooPlatformViewController createPlatformView(PlatformViewCreationParams params) {
+  ///   final FooPlatformViewController controller = FooPlatformViewController(id: params.id);
+  ///   params.onPlatformViewCreated(id);
+  ///   return controller;
+  /// }
+  ///```
   final CreatePlatformView createPlatformView;
 
   /// Invoked when the platform view is created.
   ///
   /// The `createPlatformView` is responsible to invoke the `onPlatformViewCreated` in one of its parameters at the appropriate time.
   /// This should be propagated to the implementing platform view so the developer who uses the platform view have access to this callback.
+  /// See also
+  /// * `createPlatformView` for a sample of implementing `createPlatformView`, which also provides a sample on how to call `onPlatformViewCreated`.
   final PlatformViewCreatedCallback onPlatformViewCreated;
 
   @override
@@ -100,7 +176,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
     }
     _initialized = true;
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget.createPlatformView(PlatformViewCreationParams(id:_id, onPlatformViewCreated:_onPlatformViewCreated, onFocusChanged: _onFocusChanged));
+    _controller = widget.createPlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated, onFocusChanged: _onFocusChanged));
   }
 
   @override
@@ -132,6 +208,11 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// Construct a `PlatformViewSurface`. Usually returned from `PlatformViewControllerWidget.builder`.
   ///
   /// The [context], the [id] and the [controller] must not be null.
+  /// The `PlatformViewControllerWidget.builder` should provide [context], [id] and [controller];
+  /// normally, you would use those directly when constructing the `PlatformViewSurface`.
+  ///
+  /// See also
+  /// * `PlatformViewControllerWidget.builder` for how to construct a `PlatformViewSurface` inside the builder.
   const PlatformViewSurface({
     @required this.context,
     @required this.id,
@@ -183,11 +264,22 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// ```
   ///
   /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  ///
   /// See also:
   /// * `PlatformViewControllerWidget` for how to implement a platform view.
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
+  /// The controller that is implemented by the platform view implementer.
+  ///
+  /// The controller is responsible for:
+  /// * handling clearing focus
+  /// * dispatching pointer events
+  /// * dispose
+  /// Some of these are not applicable to certain platforms. For example, iOS does not require
+  /// dispatching the pointer events.
+  ///
+  /// See `PlatformViewController` for how to implement a new PlatformViewController.
   final PlatformViewController controller;
 
   @override
@@ -203,26 +295,56 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   }
 }
 
-abstract class PlatformViewController {
-  Future<void> clearFocus();
-  void dispatchPointerEvent(PointerEvent event);
-  void dispose();
-}
-
+/// The parameters used for creating a [FooPlatformViewController] that is a subclass of `PlatformViewController`.
 class PlatformViewCreationParams {
 
-  const PlatformViewCreationParams({
+  const PlatformViewCreationParams._({
     @required this.id,
     @required this.onPlatformViewCreated,
     this.onFocusChanged}):assert(id != null),
                           assert(onPlatformViewCreated != null);
 
+  /// The auto generated id for the newly created platform view.
+  ///
+  /// Use the auto generated id lets the framework handles things like semantics for you.
+  /// The implementer of a new platform view should almost never manually create an id for a new platform view.
   final int id;
+
+  /// The implementer of a new platform view must call this when the platform view is created and ready from the platform.
+  ///
+  /// For example, on iOS, this has to be called when we know the UIView is initialized.
   final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// The implementer is responsible to invoke this method when the focus is changed.
+  ///
+  /// For example, if the `PlatformViewControllerWidget` is wrapped around a `FocusNode` widget inside the [build] method of the implemented
+  /// [FooPlatformView] widget, this can be passed to the `FocusNode`'s constructor.
+  /// e.g.
+  /// e.g:
+  /// ```dart
+  /// class FooPlatformView extends StatelessWidget {
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return FocusNode(
+  ///       onFocusChange: onFocusChanged,
+  ///       child: PlatformViewControllerWidget(
+  ///         createCallback: createFooWebView,
+  ///       builder: (BuildContext context, int id, PlatformViewController controller) {
+  ///         return PlatformViewSurface(
+  ///             context: context,
+  ///             id: id,
+  ///             gestureRecognizers: gestureRecognizers,
+  ///             controller: controller,
+  ///        );
+  ///       },
+  ///    );
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// If your platform view doesn't need to handle focus, you can ignore this.
   final ValueChanged<bool> onFocusChanged;
 }
-
-typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Embeds an Android view in the Widget hierarchy.
 ///

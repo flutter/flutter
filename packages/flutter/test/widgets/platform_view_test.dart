@@ -1690,7 +1690,7 @@ void main() {
     });
 
     testWidgets('PlatformViewController Widget dispose', (WidgetTester tester) async {
-      FakePlatformViewController controller = FakePlatformViewController();
+       FakePlatformViewController controller = FakePlatformViewController();
       final PlatformViewControllerWidget platformViewControllerWidget = PlatformViewControllerWidget(createPlatformView: (PlatformViewCreationParams params){
         params.onPlatformViewCreated(params.id);
         return controller;
