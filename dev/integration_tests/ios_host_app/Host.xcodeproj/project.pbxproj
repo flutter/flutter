@@ -13,23 +13,8 @@
 		74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786D215AB9E9005A0F04 /* Assets.xcassets */; };
 		74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */; };
 		74F97874215AB9E9005A0F04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97873215AB9E9005A0F04 /* main.m */; };
-		74F978AF215AD6F9005A0F04 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 74F978AC215AD6E8005A0F04 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DAEA7B95412864C7F3A4AE98 /* libPods-Host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2499C53F0BD30E24745E2F6B /* libPods-Host.a */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		74F978A2215ACF9B005A0F04 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				74F978AF215AD6F9005A0F04 /* App.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		2499C53F0BD30E24745E2F6B /* libPods-Host.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Host.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -138,12 +123,10 @@
 			buildConfigurationList = 74F97877215AB9E9005A0F04 /* Build configuration list for PBXNativeTarget "Host" */;
 			buildPhases = (
 				EDACAC7378E52BD5BBDB34D5 /* [CP] Check Pods Manifest.lock */,
-				74F9787E215ABB1B005A0F04 /* Run Script */,
 				74F9785D215AB9E8005A0F04 /* Sources */,
 				74F9785E215AB9E8005A0F04 /* Frameworks */,
 				74F9785F215AB9E8005A0F04 /* Resources */,
 				53642CAE5328D86A50FDAD59 /* [CP] Embed Pods Frameworks */,
-				74F978A2215ACF9B005A0F04 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -214,20 +197,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Host/Pods-Host-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		74F9787E215ABB1B005A0F04 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n";
 		};
 		EDACAC7378E52BD5BBDB34D5 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
