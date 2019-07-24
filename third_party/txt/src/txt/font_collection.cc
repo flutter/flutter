@@ -159,6 +159,7 @@ FontCollection::GetMinikinFontCollectionForFamilies(
   }
   // Default font family also not found. We fail to get a FontCollection.
   if (minikin_families.empty()) {
+    font_collections_cache_[family_key] = nullptr;
     return nullptr;
   }
   if (enable_font_fallback_) {
