@@ -51,12 +51,12 @@ abstract class PlatformViewController {
   /// }
   /// ```
   /// See `SystemChannels.platform_views` for more details.
-  // TODO(cyanglaz): Invoke this method after figuring out how to handle focus.
+  // TODO(cyanglaz): Invoke this method after figuring out how to handle focus, https://github.com/flutter/flutter/issues/36779
   Future<void> clearFocus();
 
   /// Implement this if the new platform view cannot receive gesture directly and
   /// needs the framework to dispatch pointer events to the platform(Android for example).
-  // TODO(cyanglaz): Invoke this method after implementing `PlatformViewSurface`
+  // TODO(cyanglaz): Invoke this method after implementing `PlatformViewSurface`, https://github.com/flutter/flutter/issues/36779
   void dispatchPointerEvent(PointerEvent event);
 
   /// Invoked when the state of `PlatformViewControllerWidget` is disposed. Implement this to properly dispose resources of the new platform view from the platform.
@@ -186,7 +186,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
   }
 
   void _onFocusChanged(bool isFocused) {
-    //TODO(cyanglaz): impl
+    //TODO(cyanglaz): impl, https://github.com/flutter/flutter/issues/36779
   }
 
   void _onPlatformViewCreated(int id) {
@@ -284,14 +284,13 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    // TODO: implement createRenderObject
+    // TODO(cyanglaz): implement createRenderObject, https://github.com/flutter/flutter/issues/36779
     return null;
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderObject renderObject) {
-    // TODO: implement updateRenderObject
-    super.updateRenderObject(context, renderObject);
+    // TODO(cyanglaz): implement updateRenderObject, https://github.com/flutter/flutter/issues/36779
   }
 }
 

@@ -21,13 +21,13 @@ class FakePlatformViewController extends PlatformViewController {
 
   @override
   Future<void> clearFocus() {
-    // TODO: implement clearFocus
+    // TODO(cyanglaz): implement clearFocus, https://github.com/flutter/flutter/issues/36779.
     return null;
   }
 
   @override
   void dispatchPointerEvent(PointerEvent event) {
-    // TODO: implement dispatchPointerEvent
+    // TODO(cyanglaz): implement dispatchPointerEvent, https://github.com/flutter/flutter/issues/36779
   }
 }
 
