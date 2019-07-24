@@ -23,89 +23,89 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
-    testUsingContext('not have extraneous error messages', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
-    }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
+    // testUsingContext('not have extraneous error messages', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    // }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
 
-    testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report a nice error when a guarded function was called without await', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report a nice error when a guarded function was called without await', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report a nice error when an async function was called without await', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report a nice error when an async function was called without await', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report a nice error when a Ticker is left running', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report a nice error when a Ticker is left running', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
-      final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
-      Cache.flutterRoot = '../..';
-      return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
+    //   final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('trivial', missingDependencyTests, missingDependencyTests);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report which user created widget caused the error', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
-          extraArguments: const <String>['--track-widget-creation']);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report which user created widget caused the error', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
+    //       extraArguments: const <String>['--track-widget-creation']);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('report which user created widget caused the error - no flag', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
+    // testUsingContext('report which user created widget caused the error - no flag', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory);
+    // }, skip: io.Platform.isWindows); // TODO(chunhtai): Dart on Windows has trouble with unicode characters in output (#35425).
 
-    testUsingContext('can load assets within its own package', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
-    }, skip: io.Platform.isWindows);
+    // testUsingContext('can load assets within its own package', () async {
+    //   Cache.flutterRoot = '../..';
+    //   return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    // }, skip: io.Platform.isWindows);
 
-    testUsingContext('run a test when its name matches a regexp', () async {
-      Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
-        extraArguments: const <String>['--name', 'inc.*de']);
-      if (!result.stdout.contains('+1: All tests passed'))
-        fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
-      expect(result.exitCode, 0);
-    });
+    // testUsingContext('run a test when its name matches a regexp', () async {
+    //   Cache.flutterRoot = '../..';
+    //   final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+    //     extraArguments: const <String>['--name', 'inc.*de']);
+    //   if (!result.stdout.contains('+1: All tests passed'))
+    //     fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    //   expect(result.exitCode, 0);
+    // });
 
-    testUsingContext('run a test when its name contains a string', () async {
-      Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
-        extraArguments: const <String>['--plain-name', 'include']);
-      if (!result.stdout.contains('+1: All tests passed'))
-        fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
-      expect(result.exitCode, 0);
-    });
+    // testUsingContext('run a test when its name contains a string', () async {
+    //   Cache.flutterRoot = '../..';
+    //   final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
+    //     extraArguments: const <String>['--plain-name', 'include']);
+    //   if (!result.stdout.contains('+1: All tests passed'))
+    //     fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    //   expect(result.exitCode, 0);
+    // });
 
-    testUsingContext('test runs to completion', () async {
-      Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
-        extraArguments: const <String>['--verbose']);
-      if ((!result.stdout.contains('+1: All tests passed')) ||
-          (!result.stdout.contains('test 0: starting shell process')) ||
-          (!result.stdout.contains('test 0: deleting temporary directory')) ||
-          (!result.stdout.contains('test 0: finished')) ||
-          (!result.stdout.contains('test package returned with exit code 0')))
-        fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
-      if (result.stderr.isNotEmpty)
-        fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
-      expect(result.exitCode, 0);
-    });
+    // testUsingContext('test runs to completion', () async {
+    //   Cache.flutterRoot = '../..';
+    //   final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
+    //     extraArguments: const <String>['--verbose']);
+    //   if ((!result.stdout.contains('+1: All tests passed')) ||
+    //       (!result.stdout.contains('test 0: starting shell process')) ||
+    //       (!result.stdout.contains('test 0: deleting temporary directory')) ||
+    //       (!result.stdout.contains('test 0: finished')) ||
+    //       (!result.stdout.contains('test package returned with exit code 0')))
+    //     fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    //   if (result.stderr.isNotEmpty)
+    //     fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+    //   expect(result.exitCode, 0);
+    // });
 
     testUsingContext('run all tests inside of a directory with no trailing slash', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest('tests inside a directory with no trailing slash', automatedTestsDirectory, '../../dev/automated_tests/flutter_test',
+      final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
         extraArguments: const <String>['--verbose']);
       if ((!result.stdout.contains('+1: All tests passed')) ||
           (!result.stdout.contains('test 0: starting shell process')) ||
@@ -115,6 +115,7 @@ void main() {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       if (result.stderr.isNotEmpty)
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       expect(result.exitCode, 0);
     });
 
@@ -209,10 +210,20 @@ Future<ProcessResult> _runFlutterTest(
   List<String> extraArguments = const <String>[],
 }) async {
 
-  final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
-  final File testFile = fs.file(testFilePath);
-  if (!testFile.existsSync())
-    fail('missing test file: $testFile');
+  String testPath;
+  if (testName == null) {
+    // Test everything in the directory.
+    testPath = testDirectory;
+    final Directory directoryToTest = fs.directory(testPath);
+    if (!directoryToTest.existsSync())
+      fail('missing test directory: $directoryToTest');
+  } else {
+    // Test just a specific test file.
+     testPath = fs.path.join(testDirectory, '${testName}_test.dart');
+    final File testFile = fs.file(testPath);
+    if (!testFile.existsSync())
+      fail('missing test file: $testFile');
+  }
 
   final List<String> args = <String>[
     ...dartVmFlags,
@@ -220,7 +231,7 @@ Future<ProcessResult> _runFlutterTest(
     'test',
     '--no-color',
     ...extraArguments,
-    testFilePath
+    testPath
   ];
 
   while (_testExclusionLock != null)
