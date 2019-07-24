@@ -27,6 +27,8 @@ class BotDetector {
 
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
         || platform.environment.containsKey('FLUTTER_HOST')
+        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
+        || platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
       return false;
     }

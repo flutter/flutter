@@ -798,9 +798,6 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   int get microtaskCount => _currentFakeAsync.microtaskCount;
 
-  /// A whitelist [Set] that is used in mocking the asset message channel.
-  static Set<String> _allowedAssetKeys;
-
   void _mockFlutterAssets() {
     if (isBrowser) {
       return;
@@ -809,46 +806,29 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       return;
     }
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
-    _ensureInitialized(assetFolderPath);
-
     final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
-    if (_allowedAssetKeys.isNotEmpty) {
-      defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
-        String key = utf8.decode(message.buffer.asUint8List());
-        if (!_allowedAssetKeys.contains(key)) {
-          // For tests in package, it will load assets with its own package prefix.
-          // In this case, we do a best-effort look up.
-          if (!key.startsWith(prefix))
-            return null;
-          key = key.replaceFirst(prefix, '');
-          if (!_allowedAssetKeys.contains(key))
-            return null;
-        }
-        final File asset = File(path.join(assetFolderPath, key));
-        final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-        return Future<ByteData>.value(encoded.buffer.asByteData());
-      });
-    }
-  }
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
+      String key = utf8.decode(message.buffer.asUint8List());
+      File asset = File(path.join(assetFolderPath, key));
 
-  void _ensureInitialized(String assetFolderPath) {
-    if (_allowedAssetKeys != null) {
-      return;
-    }
-    final File manifestFile = File(
-        path.join(assetFolderPath, 'AssetManifest.json'));
-    // If the file does not exist, it means there is no asset declared in
-    // the project.
-    if (!manifestFile.existsSync()) {
-      _allowedAssetKeys = <String>{};
-      return;
-    }
-    final Map<String, dynamic> manifest = json.decode(manifestFile.readAsStringSync());
-    _allowedAssetKeys = <String>{
-      'AssetManifest.json',
-      ...manifest.values.cast<List<dynamic>>().expand<dynamic>((List<dynamic> e) => e).cast<String>(),
-    };
+      if (!asset.existsSync()) {
+        // For tests in package, it will load assets with its own package prefix.
+        // In this case, we do a best-effort look up.
+        if (!key.startsWith(prefix)) {
+          return null;
+        }
+
+        key = key.replaceFirst(prefix, '');
+        asset = File(path.join(assetFolderPath, key));
+        if (!asset.existsSync()) {
+          return null;
+        }
+      }
+
+      final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+      return Future<ByteData>.value(encoded.buffer.asByteData());
+    });
   }
 
   @override

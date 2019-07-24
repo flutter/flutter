@@ -653,10 +653,11 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }
 
   Future<Map<String, dynamic>> _waitForJson({
-    Duration timeout,
+    Duration timeout = defaultTimeout,
   }) async {
     return _timeoutWithMessages<Map<String, dynamic>>(
-      () => _stdout.stream.map<Map<String, dynamic>>(_parseJsonResponse).first,
+      () => _stdout.stream.map<Map<String, dynamic>>(_parseJsonResponse)
+          .firstWhere((Map<String, dynamic> output) => output != null),
       timeout: timeout,
       task: 'Waiting for JSON',
     );

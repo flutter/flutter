@@ -143,7 +143,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  battery:\n  package_info:\n',
+        '\ndependencies:\n  device_info:\n  package_info:\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -219,6 +219,8 @@ Future<void> main() async {
         hostApp,
       );
 
+      final File analyticsOutputFile = File(path.join(tempDir.path, 'analytics.log'));
+
       await inDirectory(hostApp, () async {
         await exec('pod', <String>['install']);
         await exec(
@@ -236,6 +238,9 @@ Future<void> main() async {
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
           ],
+          environment: <String, String> {
+            'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
+          }
         );
       });
 
@@ -244,9 +249,18 @@ Future<void> main() async {
         'Host.app',
         'Host',
       )));
-
       if (!existingAppBuilt) {
         return TaskResult.failure('Failed to build existing app .app');
+      }
+
+      final String analyticsOutput = analyticsOutputFile.readAsStringSync();
+      if (!analyticsOutput.contains('cd24: ios')
+          || !analyticsOutput.contains('cd25: true')
+          || !analyticsOutput.contains('viewName: build/bundle')) {
+        return TaskResult.failure(
+          'Building outer app produced the following analytics: "$analyticsOutput"'
+          'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
+        );
       }
 
       return TaskResult.success(null);

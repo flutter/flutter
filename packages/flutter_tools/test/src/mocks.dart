@@ -606,4 +606,7 @@ class FakeProcessResult implements ProcessResult {
 
   @override
   final dynamic stdout;
+
+  @override
+  String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
 }

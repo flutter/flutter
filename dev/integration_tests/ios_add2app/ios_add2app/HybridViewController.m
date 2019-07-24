@@ -36,6 +36,11 @@ static NSString *_kPing = @"ping";
   stackView.layoutMargins = UIEdgeInsetsMake(0, 0, 50, 0);
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
+  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                              initWithTitle:@"Back"
+                                                      style:UIBarButtonItemStylePlain
+                                                     target:nil
+                                                     action:nil];
 
   NativeViewController *nativeViewController =
       [[NativeViewController alloc] initWithDelegate:self];

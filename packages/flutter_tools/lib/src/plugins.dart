@@ -9,7 +9,7 @@ import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
-import 'desktop.dart';
+import 'features.dart';
 import 'globals.dart';
 import 'macos/cocoapods.dart';
 import 'project.dart';
@@ -364,7 +364,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   // TODO(stuartmorgan): Revisit the condition here once the plans for handling
   // desktop in existing projects are in place. For now, ignore checkProjects
   // on desktop and always treat it as true.
-  if (flutterDesktopEnabled && project.macos.existsSync()) {
+  if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
     await _writeMacOSPluginRegistrant(project, plugins);
   }
   for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
