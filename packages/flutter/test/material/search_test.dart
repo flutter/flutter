@@ -531,9 +531,7 @@ void main() {
     ));
     await tester.tap(find.byTooltip('Search'));
     await tester.pumpAndSettle();
-
     await tester.showKeyboard(find.byType(TextField));
-
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
@@ -749,5 +747,4 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   List<Widget> buildActions(BuildContext context) {
     return actions;
   }
-
 }

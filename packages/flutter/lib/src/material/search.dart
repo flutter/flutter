@@ -93,12 +93,10 @@ abstract class SearchDelegate<T> {
   /// [textInputAction].
   ///
   /// {@tool sample}
-  ///
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({
   ///     String hintText,
-  ///
   ///   }) : super(
   ///     searchFieldLabel: hintText,
   ///     keyboardType: TextInputType.text,
@@ -124,7 +122,6 @@ abstract class SearchDelegate<T> {
     this.keyboardType,
     this.textInputAction = TextInputAction.search,
   });
-
 
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
