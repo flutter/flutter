@@ -99,7 +99,6 @@ void _updateGeneratedModuleBuildPhaseScript({
   for (String line in xcodeBuildSettings) {
     localsBuffer.writeln('export $line');
   }
-  localsBuffer.writeln('export VERBOSE_SCRIPT_LOGGING=true');
   localsBuffer.writeln('"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" build');
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
