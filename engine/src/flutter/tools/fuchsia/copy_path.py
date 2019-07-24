@@ -3,7 +3,7 @@
 # Copyright 2013 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-""" Gather all the fuchsia artifacts to a destination directory.
+""" Copies paths, creates if they do not exist.
 """
 
 import argparse
@@ -41,7 +41,7 @@ def CopyPath(src, dst):
   except OSError as exc:
     if exc.errno == errno.ENOTDIR:
       if not SameFile(src, dst):
-        shutil.copy(src, dst)
+        shutil.copyfile(src, dst)
     else:
       raise
 

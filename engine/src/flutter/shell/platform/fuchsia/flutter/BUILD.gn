@@ -6,6 +6,7 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/tools/fuchsia/clang.gni")
 import("$flutter_root/tools/fuchsia/package_dir.gni")
 
 shell_gpu_configuration("fuchsia_gpu_configuration") {
@@ -193,7 +194,9 @@ template("jit_runner") {
       },
     ]
 
-    fuchsia_sdk_lib = "//fuchsia/sdk/$host_os/arch/$host_cpu/lib"
+    fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$host_cpu"
+    fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
+    sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
 
     libraries = [
       {
@@ -219,6 +222,27 @@ template("jit_runner") {
       {
         name = "libvulkan.so"
         path = rebase_path("$fuchsia_sdk_lib")
+      },
+      {
+        name = "libzircon.so"
+        path = rebase_path("$sysroot_lib")
+      },
+      {
+        name = "libc.so"
+        path = rebase_path("$sysroot_lib")
+      },
+
+      # Note, we use the md5 hashes here because of gn limitations of json parsing.
+      # This is a hack, and we can migrate to a better way soon.
+      {
+        name = "libc++.so.2"
+        path = rebase_path(
+                "$clang_base/${clang_manifest_json.md5_33bfe15b05ada4ed326fbc33adb39b95}")
+      },
+      {
+        name = "libc++abi.so.1"
+        path = rebase_path(
+                "$clang_base/${clang_manifest_json.md5_916c01a85e3353f124776599819ecb1c}")
       },
     ]
 
