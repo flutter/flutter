@@ -218,7 +218,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     if (!baseDirectory.existsSync())
       baseDirectory.createSync(recursive: true);
     await goldens.auth(baseDirectory);
-//    await goldens.imgtestInit();
+    await goldens.imgtestInit();
     return FlutterSkiaGoldFileComparator(baseDirectory.uri, goldens);
   }
 

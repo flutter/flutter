@@ -159,7 +159,7 @@ class SkiaGoldClient extends GoldensClient {
     assert(testName != null);
     assert(goldenFile != null);
 
-    await imgtestInit();
+//    await imgtestInit();
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
