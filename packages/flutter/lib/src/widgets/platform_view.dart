@@ -35,7 +35,16 @@ typedef PlatformViewSurfaceBuilder = PlatformViewSurface Function(BuildContext c
 /// The function to create a `PlatformViewController`.
 ///
 /// The implementer of a new platform view is responsible to implement this method when constructing a `PlatformViewControllerWidget`.
-/// See `PlatformViewControllerWidget.createPlatformView` for a sample implementation.
+/// This method will get invoked when the state of `PlatformViewControllerWidget` is initialized.
+///
+/// A simple example of implementing this function for foo platform can be:
+/// ```dart
+/// FooPlatformViewController createPlatformView(PlatformViewCreationParams params) {
+///   final FooPlatformViewController controller = FooPlatformViewController(id: params.id);
+///   params.onPlatformViewCreated(id);
+///   return controller;
+/// }
+///```
 typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// The implementer of a new platform view need to implement this.
@@ -88,7 +97,9 @@ abstract class PlatformViewController {
 ///            gestureRecognizers: gestureRecognizers,
 ///             controller: controller,
 ///        );
-///       },
+///       }, onPlatformViewCreated: (int id) {
+///         _onPlatformViewCreated(id);
+///      },
 ///    );
 ///   }
 /// }
@@ -101,52 +112,20 @@ class PlatformViewControllerWidget extends StatefulWidget {
   /// to your widget that is building the `PlatformViewControllerWidget`; it lets the developers who uses your widget be able to get notified when the underlying
   /// platform view is created.
   const PlatformViewControllerWidget({
-    @required this.builder,
-    @required this.createPlatformView,
-    this.onPlatformViewCreated}): assert(builder != null),
-                                  assert(createPlatformView != null);
+    @required PlatformViewSurfaceBuilder builder,
+    @required CreatePlatformView createPlatformView,
+    PlatformViewCreatedCallback onPlatformViewCreated}): assert(builder != null),
+                                  assert(createPlatformView != null),
+                                  _builder = builder,
+                                  _createPlatformView = createPlatformView,
+                                  _onPlatformViewCreated = onPlatformViewCreated;
 
-  /// The method that returns a `PlatformViewSurface` widget.
-  ///
-  /// The implementer of a new platform view is responsible to implement this method,
-  /// A simple example would be:
-  /// ```dart
-  /// builder: (BuildContext context, int id, PlatformViewController controller) {
-  ///   return PlatformViewSurface(
-  ///        context: context,
-  ///        id: id,
-  ///        gestureRecognizers: gestureRecognizers,
-  ///        controller: controller,
-  ///    );
-  /// },
-  /// ```
-  /// See also:
-  /// * `PlatformViewSurface` for more details.
-  final PlatformViewSurfaceBuilder builder;
 
-  /// The method to create the platform view.
-  ///
-  /// The implementer of a new platform view is responsible to define this method and pass it
-  /// to the constructor of `PlatformViewControllerWidget`.
-  /// This method will get invoked when the state of `PlatformViewControllerWidget` is initialized.
-  ///
-  /// A simple example of implementing this function for foo platform can be:
-  /// ```dart
-  /// FooPlatformViewController createPlatformView(PlatformViewCreationParams params) {
-  ///   final FooPlatformViewController controller = FooPlatformViewController(id: params.id);
-  ///   params.onPlatformViewCreated(id);
-  ///   return controller;
-  /// }
-  ///```
-  final CreatePlatformView createPlatformView;
+  final PlatformViewSurfaceBuilder _builder;
 
-  /// Invoked when the platform view is created.
-  ///
-  /// The `createPlatformView` is responsible to invoke the `onPlatformViewCreated` in one of its parameters at the appropriate time.
-  /// This should be propagated to the implementing platform view so the developer who uses the platform view have access to this callback.
-  /// See also
-  /// * `createPlatformView` for a sample of implementing `createPlatformView`, which also provides a sample on how to call `onPlatformViewCreated`.
-  final PlatformViewCreatedCallback onPlatformViewCreated;
+  final CreatePlatformView _createPlatformView;
+
+  final PlatformViewCreatedCallback _onPlatformViewCreated;
 
   @override
   State<StatefulWidget> createState() {
@@ -167,7 +146,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
     if (_controller == null) {
       return const SizedBox.expand();
     }
-    return widget.builder(context, _id, _controller);
+    return widget._builder(context, _id, _controller);
   }
 
   void _initializeOnce() {
@@ -176,7 +155,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
     }
     _initialized = true;
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget.createPlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated, onFocusChanged: _onFocusChanged));
+    _controller = widget._createPlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated, onFocusChanged: _onFocusChanged));
   }
 
   @override
@@ -190,7 +169,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
   }
 
   void _onPlatformViewCreated(int id) {
-    widget.onPlatformViewCreated(id);
+    widget._onPlatformViewCreated(id);
   }
 
   @override
