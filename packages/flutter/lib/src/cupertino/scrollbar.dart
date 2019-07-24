@@ -179,23 +179,34 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     });
   }
 
+  void assertVertical() {
+    assert(
+      widget.controller.position.axis == Axis.vertical,
+      'Scrollbar dragging is only supported for vertical scrolling. Don\'t pass the controller param to a horizontal scrollbar.',
+    );
+  }
+
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
+    assertVertical();
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
   }
 
   void _handleLongPress() {
+    assertVertical();
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
+    assertVertical();
     _dragScrollbar(details.localOffsetFromOrigin.dy);
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
+    assertVertical();
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
     _dragScrollbarStartY = null;
@@ -207,16 +218,19 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // from the right on top of the scrollbar thumb and then drags the scrollbar
   // without releasing.
   void _handleHorizontalDragStart(DragStartDetails details) {
+    assertVertical();
     _horizontalDragScrollbarStartY = details.localPosition.dy;
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
+    assertVertical();
     _dragScrollbar(details.localPosition.dy - _horizontalDragScrollbarStartY);
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
+    assertVertical();
     _horizontalDragScrollbarStartY = null;
     _dragScrollbarStartY = null;
     _startFadeoutTimer();
