@@ -160,8 +160,10 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   const PlatformViewSurface({
     @required this.id,
     @required this.controller,
-    this.gestureRecognizers}) : assert(id != null),
-                                assert(controller != null);
+    this.gestureRecognizers,
+    this.hitTestBehavior = PlatformViewHitTestBehavior.opaque
+  }) : assert(id != null),
+       assert(controller != null);
 
   /// The id of the platform view that is associate with this `PlatformViewSurface`.
   final int id;
@@ -220,6 +222,13 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// See `PlatformViewController` for how to implement a new PlatformViewController.
   final PlatformViewController controller;
+
+  /// {@template flutter.widgets.platformViews.hittestParam}
+  /// How this widget should behave during hit testing.
+  ///
+  /// This defaults to [PlatformViewHitTestBehavior.opaque].
+  /// {@endtemplate}
+  final PlatformViewHitTestBehavior hitTestBehavior;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
