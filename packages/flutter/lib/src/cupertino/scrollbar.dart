@@ -272,14 +272,14 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
             ..onLongPressEnd = _handleLongPressEnd;
         },
       );
-    gestures[ThumbHorizontalDragGestureRecognizer] =
-      GestureRecognizerFactoryWithHandlers<ThumbHorizontalDragGestureRecognizer>(
-        () => ThumbHorizontalDragGestureRecognizer(
+    gestures[_ThumbHorizontalDragGestureRecognizer] =
+      GestureRecognizerFactoryWithHandlers<_ThumbHorizontalDragGestureRecognizer>(
+        () => _ThumbHorizontalDragGestureRecognizer(
           debugOwner: this,
           kind: PointerDeviceKind.touch,
           customPaintKey: _customPaintKey,
         ),
-        (ThumbHorizontalDragGestureRecognizer instance) {
+        (_ThumbHorizontalDragGestureRecognizer instance) {
           instance
             ..onStart = _handleHorizontalDragStart
             ..onUpdate = _handleHorizontalDragUpdate
@@ -347,8 +347,8 @@ class _ThumbLongPressGestureRecognizer extends LongPressGestureRecognizer {
 
 // A horizontal drag gesture detector that only responds to events on the
 // scrollbar's thumb and ignores everything else.
-class ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
-  ThumbHorizontalDragGestureRecognizer({
+class _ThumbHorizontalDragGestureRecognizer extends HorizontalDragGestureRecognizer {
+  _ThumbHorizontalDragGestureRecognizer({
     PointerDeviceKind kind,
     Object debugOwner,
     GlobalKey customPaintKey,

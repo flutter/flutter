@@ -500,6 +500,9 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
     return isFlingGesture(estimate);
   }
 
+  /// Determines if a gesture is a fling based on velocity.
+  ///
+  /// Public to allow it to be overridden.
   bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
