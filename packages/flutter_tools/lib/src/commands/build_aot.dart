@@ -4,14 +4,18 @@
 
 import 'dart:async';
 
+import '../artifacts.dart';
 import '../base/build.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../ios/ios_workflow.dart';
+import '../macos/xcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
@@ -52,6 +56,11 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
+      )
+      ..addFlag('bitcode',
+        defaultsTo: false,
+        help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
+        hide: true,
       );
   }
 
@@ -68,7 +77,15 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
+    final bool bitcode = argResults['bitcode'];
     final BuildMode buildMode = getBuildMode();
+
+    if (bitcode) {
+      if (platform != TargetPlatform.ios) {
+        throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $targetPlatform).');
+      }
+      await validateBitcode();
+    }
 
     Status status;
     if (!argResults['quiet']) {
@@ -118,6 +135,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             packagesPath: PackageMap.globalPackagesPath,
             outputPath: outputPath,
             extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+            bitcode: bitcode,
           ).then<int>((int buildExitCode) {
             return buildExitCode;
           });
@@ -131,8 +149,15 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             'lipo',
             ...dylibs,
             '-create',
-            '-output',
-            fs.path.join(outputPath, 'App.framework', 'App'),
+            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
+          ]);
+          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM'));
+          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
+          await runCheckedAsync(<String>[
+            'lipo',
+            '-create',
+            '-output', fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF', 'App'),
+            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
           ]);
         } else {
           status?.cancel();
@@ -150,6 +175,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           packagesPath: PackageMap.globalPackagesPath,
           outputPath: outputPath,
           extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+          bitcode: false,
         );
         if (snapshotExitCode != 0) {
           status?.cancel();
@@ -174,5 +200,40 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       printStatus(builtMessage);
     }
     return null;
+  }
+}
+
+Future<void> validateBitcode() async {
+  final Artifacts artifacts = Artifacts.instance;
+  if (artifacts is! LocalEngineArtifacts) {
+    throwToolExit('Bitcode is only supported with a local engine built with --bitcode.');
+  }
+  final String flutterFrameworkPath = artifacts.getArtifactPath(Artifact.flutterFramework);
+  if (!fs.isDirectorySync(flutterFrameworkPath)) {
+    throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
+  }
+  final Xcode xcode = context.get<Xcode>();
+
+  // Check for bitcode in Flutter binary.
+  final RunResult otoolResult = await xcode.otool(<String>[
+    '-l', fs.path.join(flutterFrameworkPath, 'Flutter'),
+  ]);
+  if (!otoolResult.stdout.contains('__LLVM')) {
+    throwToolExit('The Flutter.framework at $flutterFrameworkPath does not contain bitcode.');
+  }
+  final RunResult clangResult = await xcode.clang(<String>['--version']);
+  final String clangVersion = clangResult.stdout.split('\n').first;
+  final String engineClangVersion = iosWorkflow.getPlistValueFromFile(
+    fs.path.join(flutterFrameworkPath, 'Info.plist'),
+    'ClangVersion',
+  );
+  if (clangVersion != engineClangVersion) {
+    printStatus(
+      'The Flutter.framework at $flutterFrameworkPath was built '
+      'with "${engineClangVersion ?? 'unknown'}", but the current version '
+      'of clang is "$clangVersion". This may result in failures when '
+      'archiving your application in Xcode.',
+      emphasis: true,
+    );
   }
 }
