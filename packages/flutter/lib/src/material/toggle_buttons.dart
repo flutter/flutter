@@ -736,6 +736,7 @@ class _ToggleButton extends StatelessWidget {
       currentFillColor = fillColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
       currentSplashColor = splashColor
+        ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.primary.withOpacity(0.16);
     } else if (onPressed != null && !selected) {
       currentColor = color
@@ -743,6 +744,7 @@ class _ToggleButton extends StatelessWidget {
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
       currentSplashColor = splashColor
+        ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.onSurface.withOpacity(0.16);
     } else {
       currentColor = disabledColor
