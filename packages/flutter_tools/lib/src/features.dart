@@ -73,7 +73,7 @@ const List<Feature> allFeatures = <Feature>[
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
-  name: 'Flutter Web',
+  name: 'Flutter for Web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
@@ -88,7 +88,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter Desktop for macOS',
+  name: 'Flutter for macOS Desktop',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -99,7 +99,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter Desktop for Linux',
+  name: 'Flutter for Linux Desktop',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -110,7 +110,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter Desktop for Windows',
+  name: 'Flutter for Windows Desktop',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -187,7 +187,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
+        'This setting will take effect on ');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (dev.available) 'dev',

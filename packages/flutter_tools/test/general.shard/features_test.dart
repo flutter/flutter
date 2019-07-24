@@ -78,19 +78,19 @@ void main() {
     }));
 
     test('flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter Web on master, dev channels.');
+      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter for Web. This setting will take effect on master, dev channels.');
     });
 
     test('flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for macOS on the master channel.');
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for macOS Desktop. This setting will take effect on the master channel.');
     });
 
     test('flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Linux on the master channel.');
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for Linux Desktop. This setting will take effect on the master channel.');
     });
 
     test('flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Windows on the master channel.');
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for Windows Desktop. This setting will take effect on the master channel.');
     });
 
     /// Flutter Web
