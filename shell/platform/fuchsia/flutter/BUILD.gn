@@ -197,6 +197,7 @@ template("jit_runner") {
     fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$host_cpu"
     fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
     sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
+    sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"
 
     libraries = [
       {
@@ -231,6 +232,10 @@ template("jit_runner") {
         name = "libc.so"
         path = rebase_path("$sysroot_lib")
       },
+      {
+        name = "ld.so.1"
+        path = rebase_path("$sysroot_dist_lib")
+      },
 
       # Note, we use the md5 hashes here because of gn limitations of json parsing.
       # This is a hack, and we can migrate to a better way soon.
@@ -243,6 +248,11 @@ template("jit_runner") {
         name = "libc++abi.so.1"
         path = rebase_path(
                 "$clang_base/${clang_manifest_json.md5_916c01a85e3353f124776599819ecb1c}")
+      },
+      {
+        name = "libunwind.so.1"
+        path = rebase_path(
+                "$clang_base/${clang_manifest_json.md5_beb70f40d525448b39ea87d9f5811e56}")
       },
     ]
 

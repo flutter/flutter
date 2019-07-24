@@ -39,7 +39,7 @@ template("package_dir") {
   far_base_dir = "$root_out_dir/${pkg_target_name}_far"
 
   copy_sources = [ "$root_out_dir/${invoker.binary}" ]
-  copy_outputs = [ "$far_base_dir/app/bin" ]
+  copy_outputs = [ "$far_base_dir/bin/app" ]
 
   foreach(res, pkg.resources) {
     copy_sources += [ res.path ]

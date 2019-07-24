@@ -30,6 +30,8 @@ def main():
     key, val = line.strip().split('=')
     md5 = hashlib.md5(key.encode()).hexdigest()
     hash_key = 'md5_%s' % md5
+    # Uncomment this line to get the hash keys
+    # print val, hash_key
     output[hash_key] = os.path.dirname(val)
 
   print(json.dumps(output))
