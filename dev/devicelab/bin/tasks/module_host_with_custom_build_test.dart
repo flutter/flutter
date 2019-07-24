@@ -21,8 +21,10 @@ Future<void> main() async {
     section('Find Java');
 
     final String javaHome = await findJavaHome();
-    if (javaHome == null)
+    if (javaHome == null) {
       return TaskResult.failure('Could not find Java');
+    }
+
     print('\nUsing JAVA_HOME=$javaHome');
 
     section('Create Flutter module project');
@@ -62,7 +64,7 @@ Future<void> main() async {
 
       section('Add to existing Android app');
 
-      final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_flavors'));
+      final Directory hostAppDir = Directory(path.join(tempDir.path, 'hello_host_app_with_custom_build'));
       mkdir(hostAppDir);
       recursiveCopy(
         Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'module_host_with_custom_build')),
