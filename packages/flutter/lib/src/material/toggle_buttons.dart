@@ -724,6 +724,7 @@ class _ToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
+    Color currentFillColor;
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
@@ -731,14 +732,18 @@ class _ToggleButton extends StatelessWidget {
       currentColor = selectedColor
         ?? toggleButtonsTheme.selectedColor
         ?? theme.colorScheme.primary;
+      currentFillColor = fillColor
+        ?? theme.colorScheme.primary.withOpacity(0.12);
     } else if (onPressed != null && !selected) {
       currentColor = color
         ?? toggleButtonsTheme.color
-        ?? theme.colorScheme.onSurface;
+        ?? theme.colorScheme.onSurface.withOpacity(0.87);
+      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     } else {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.colorScheme.onSurface.withOpacity(0.38);
+      currentFillColor = theme.colorScheme.onSurface.withOpacity(0.12);
     }
 
     final Widget result = ClipRRect(
@@ -749,7 +754,7 @@ class _ToggleButton extends StatelessWidget {
         ),
         elevation: 0.0,
         highlightElevation: 0.0,
-        fillColor: selected ? fillColor : null,
+        fillColor: currentFillColor,
         focusColor: selected ? focusColor : null,
         highlightColor: highlightColor,
         hoverColor: hoverColor,

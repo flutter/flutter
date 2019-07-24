@@ -38,7 +38,10 @@ void main() {
     final DefaultTextStyle textStyleOne = tester.firstWidget(
       find.widgetWithText(DefaultTextStyle, 'First child'),
     );
-    expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+    expect(
+      textStyleOne.style.color,
+      theme.colorScheme.onSurface.withOpacity(0.87),
+    );
     final DefaultTextStyle textStyleTwo = tester.firstWidget(
       find.widgetWithText(DefaultTextStyle, 'Second child'),
     );
@@ -81,7 +84,10 @@ void main() {
       textStyleOne = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+      expect(
+        textStyleOne.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.87),
+      );
       textStyleTwo = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
@@ -95,11 +101,17 @@ void main() {
       textStyleOne = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyleOne.style.color, theme.colorScheme.onSurface);
+      expect(
+        textStyleOne.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.87),
+      );
       textStyleTwo = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
-      expect(textStyleTwo.style.color, theme.colorScheme.onSurface);
+      expect(
+        textStyleTwo.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.87),
+      );
     },
   );
 
@@ -266,11 +278,17 @@ void main() {
       textStyle = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyle.style.color, theme.colorScheme.onSurface);
+      expect(
+        textStyle.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.87),
+      );
       iconTheme = tester.firstWidget(
         find.widgetWithIcon(IconTheme, Icons.check),
       );
-      expect(iconTheme.data.color, theme.colorScheme.onSurface);
+      expect(
+        iconTheme.data.color,
+        theme.colorScheme.onSurface.withOpacity(0.87),
+      );
 
       await tester.pumpWidget(
         Material(
@@ -435,6 +453,7 @@ void main() {
   );
 
   testWidgets('Default button fillColor', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       Material(
         child: boilerplate(
@@ -457,8 +476,11 @@ void main() {
         matching: find.byType(Material),
       ),
     );
-    expect(material.color, isNull);
-    expect(material.type, MaterialType.transparency);
+    expect(
+      material.color,
+      theme.colorScheme.primary.withOpacity(0.12),
+    );
+    expect(material.type, MaterialType.button);
   });
 
   testWidgets('Custom button fillColor', (WidgetTester tester) async {
