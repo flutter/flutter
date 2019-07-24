@@ -103,6 +103,21 @@ void main() {
       expect(result.exitCode, 0);
     });
 
+    testUsingContext('run all tests inside of a directory with no trailing slash', () async {
+      Cache.flutterRoot = '../..';
+      final ProcessResult result = await _runFlutterTest('tests inside a directory with no trailing slash', automatedTestsDirectory, '../../dev/automated_tests/flutter_test',
+        extraArguments: const <String>['--verbose']);
+      if ((!result.stdout.contains('+1: All tests passed')) ||
+          (!result.stdout.contains('test 0: starting shell process')) ||
+          (!result.stdout.contains('test 0: deleting temporary directory')) ||
+          (!result.stdout.contains('test 0: finished')) ||
+          (!result.stdout.contains('test package returned with exit code 0')))
+        fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+      if (result.stderr.isNotEmpty)
+        fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+      expect(result.exitCode, 0);
+    });
+
   });
 }
 
