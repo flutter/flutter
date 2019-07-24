@@ -479,10 +479,9 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
-  testWidgets('Showing custom search hint', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
     const String searchHint = 'custom search hint';
-    final String defaultSearchHint =
-        const DefaultMaterialLocalizations().searchFieldLabel;
+    final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
     final _TestSearchDelegate delegate =
         _TestSearchDelegate(searchHint: searchHint);
@@ -497,9 +496,8 @@ void main() {
     expect(find.text(defaultSearchHint), findsNothing);
   });
 
-  testWidgets('Showing default search label if no custom label is given', (WidgetTester tester) async {
-    final String searchHint =
-        const DefaultMaterialLocalizations().searchFieldLabel;
+  testWidgets('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
+    final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 

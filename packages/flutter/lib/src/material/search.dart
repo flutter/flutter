@@ -179,7 +179,24 @@ abstract class SearchDelegate<T> {
     _queryTextController.text = value;
   }
 
-  /// The hint text to be shown when the search field is empty.
+  /// The hint text that is shown in the search field when it is empty.
+  ///
+  /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
+  /// {@tool sample}
+  ///
+  /// ```dart
+  /// class CustomSearchHintDelegate extends SearchDelegate {
+  ///
+  ///  final String searchHint;
+  ///
+  ///  CustomSearchHintDelegate({
+  ///    this.searchHint,
+  ///  });
+  ///
+  ///  @override
+  ///  String get searchFieldLabel => this.searchHint;
+  /// ```
+  /// {@end-tool}
   String get searchFieldLabel => null;
 
   /// Transition from the suggestions returned by [buildSuggestions] to the
@@ -420,8 +437,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = widget.delegate.searchFieldLabel ??
-        MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel
+        ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
