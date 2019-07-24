@@ -339,7 +339,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     if (theme.brightness == Brightness.dark) {
       defaultTextStyle = theme.textTheme.body1.copyWith(
         color: Colors.black,
-        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('white', 'black'),
       );
       defaultDecoration = BoxDecoration(
         color: Colors.white.withOpacity(0.9),
@@ -348,7 +347,6 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     } else {
       defaultTextStyle = theme.textTheme.body1.copyWith(
         color: Colors.white,
-        debugLabel: theme.textTheme.body1.debugLabel.replaceAll('black', 'white')
       );
       defaultDecoration = BoxDecoration(
         color: Colors.grey[700].withOpacity(0.9),
