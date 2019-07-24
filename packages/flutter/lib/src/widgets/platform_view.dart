@@ -13,14 +13,13 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 
-/// The function to build a `PlatformViewSurface`.
+/// The factory to construct a `PlatformViewSurface`.
 ///
 /// It is used when constructing a `PlatformViewControllerWidget`.
 /// A sample implementation could be:
 /// ```dart
-/// (BuildContext context, int id, PlatformViewController controller) {
+/// (int id, PlatformViewController controller) {
 ///        return PlatformViewSurface(
-///            context: context,
 ///            id: id,
 ///            gestureRecognizers: gestureRecognizers,
 ///             controller: controller,
@@ -30,7 +29,7 @@ import 'framework.dart';
 ///
 /// See also:
 /// * `PlatformViewSurface` for more details.
-typedef PlatformViewSurfaceBuilder = PlatformViewSurface Function(BuildContext context, int id, PlatformViewController controller);
+typedef PlatformViewSurfaceFactory = PlatformViewSurface Function(BuildContext context, PlatformViewController controller, int id);
 
 /// The function to create a `PlatformViewController`.
 ///
@@ -57,9 +56,8 @@ typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreatio
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewControllerWidget(
 ///       createCallback: createFooWebView,
-///      builder: (BuildContext context, int id, PlatformViewController controller) {
+///       surfaceFactory: (int id, PlatformViewController controller) {
 ///        return PlatformViewSurface(
-///            context: context,
 ///            id: id,
 ///            gestureRecognizers: gestureRecognizers,
 ///             controller: controller,
@@ -75,20 +73,20 @@ class PlatformViewControllerWidget extends StatefulWidget {
 
   /// Construct a `PlatformViewControllerWidget` widget.
   ///
-  /// The [builder] and the [createPlatformView] must not be null. In most cases, the [onPlatformViewCreated] should not be null and you should expose it
+  /// The [surfaceFactory] and the [createPlatformView] must not be null. In most cases, the [onPlatformViewCreated] should not be null and you should expose it
   /// to your widget that is building the `PlatformViewControllerWidget`; it lets the developers who uses your widget be able to get notified when the underlying
   /// platform view is created.
   const PlatformViewControllerWidget({
-    @required PlatformViewSurfaceBuilder builder,
+    @required PlatformViewSurfaceFactory surfaceFactory,
     @required CreatePlatformView createPlatformView,
-    PlatformViewCreatedCallback onPlatformViewCreated}): assert(builder != null),
+    PlatformViewCreatedCallback onPlatformViewCreated}): assert(surfaceFactory != null),
                                   assert(createPlatformView != null),
-                                  _builder = builder,
+                                  _surfaceFactory = surfaceFactory,
                                   _createPlatformView = createPlatformView,
                                   _onPlatformViewCreated = onPlatformViewCreated;
 
 
-  final PlatformViewSurfaceBuilder _builder;
+  final PlatformViewSurfaceFactory _surfaceFactory;
 
   final CreatePlatformView _createPlatformView;
 
@@ -113,7 +111,7 @@ class _PlatformViewControllerWidgetState extends State<PlatformViewControllerWid
     if (_controller == null) {
       return const SizedBox.expand();
     }
-    return widget._builder(context, _id, _controller);
+    return widget._surfaceFactory(context, _controller, _id);
   }
 
   void _initializeOnce() {
@@ -160,15 +158,10 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// See also
   /// * `PlatformViewControllerWidget.builder` for how to construct a `PlatformViewSurface` inside the builder.
   const PlatformViewSurface({
-    @required this.context,
     @required this.id,
     @required this.controller,
-    this.gestureRecognizers}):assert(context != null),
-                                assert(id != null),
+    this.gestureRecognizers}) : assert(id != null),
                                 assert(controller != null);
-
-  /// The context which the widget is built with.
-  final BuildContext context;
 
   /// The id of the platform view that is associate with this `PlatformViewSurface`.
   final int id;

@@ -1673,9 +1673,8 @@ void main() {
       final PlatformViewControllerWidget platformViewControllerWidget = PlatformViewControllerWidget(createPlatformView: (PlatformViewCreationParams params){
         params.onPlatformViewCreated(params.id);
         return FakePlatformViewController();
-      }, builder: (BuildContext context, int id, PlatformViewController controller) {
+      }, surfaceFactory: (BuildContext context, PlatformViewController controller, int id, ) {
         return PlatformViewSurface(
-            context: context,
             id: id,
             gestureRecognizers: null,
             controller: controller,
@@ -1694,9 +1693,8 @@ void main() {
       final PlatformViewControllerWidget platformViewControllerWidget = PlatformViewControllerWidget(createPlatformView: (PlatformViewCreationParams params){
         params.onPlatformViewCreated(params.id);
         return controller;
-      }, builder: (BuildContext context, int id, PlatformViewController controller) {
+      }, surfaceFactory: (BuildContext context,PlatformViewController controller, int id) {
         return PlatformViewSurface(
-            context: context,
             id: id,
             gestureRecognizers: null,
             controller: controller,
