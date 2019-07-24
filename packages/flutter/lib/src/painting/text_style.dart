@@ -536,13 +536,9 @@ class TextStyle extends Diagnosticable {
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   ///
-  /// {@tool sample}
-  ///
   /// Examples of the resulting line heights from different values of `TextStyle.height`:
   ///
   /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
-  ///
-  /// {@end-tool}
   ///
   /// See [StrutStyle] for further control of line height at the paragraph level.
   final double height;
