@@ -19,11 +19,13 @@ import 'msbuild_utils.dart';
 import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo,
+    {String target}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'PROJECT_DIR': windowsProject.project.directory.path,
-    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
+    'TRACK_WIDGET_CREATION':
+        (buildInfo?.trackWidgetCreation == true).toString(),
   };
   if (target != null) {
     environment['FLUTTER_TARGET'] = target;
@@ -31,7 +33,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    environment['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(engineOutPath));
+    environment['FLUTTER_ENGINE'] =
+        fs.path.dirname(fs.path.dirname(engineOutPath));
     environment['LOCAL_ENGINE'] = fs.path.basename(engineOutPath);
   }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
@@ -69,19 +72,20 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   int result;
   try {
     process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printError);
     process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printTrace);
     result = await process.exitCode;
   } finally {
     status.cancel();
   }
   if (result != 0) {
-    throwToolExit('Build process failed');
+    throwToolExit('Build process failed. To view the stack trace, please run `flutter run -d windows -v`. If this does not help you resolve your build failure, please file an issue at https://github.com/flutter/flutter/issues/new/choose');
   }
-  flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
+  flutterUsage.sendTiming(
+      'build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }
