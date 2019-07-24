@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import '../base/io.dart';
 import '../base/os.dart';
@@ -113,10 +112,9 @@ class CrashReportSender {
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
 
-      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
-        stackTraceWithRelativePaths,
+        stackTrace.toString(),
         filename: _kStackTraceFilename,
       ));
 
