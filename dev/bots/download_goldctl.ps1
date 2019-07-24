@@ -6,6 +6,11 @@ $cipd = "C:\Windows\Temp\depot_tools\cipd.bat"
 $ensureFile = "C:\Windows\Temp\depot_tools\ensure.txt"
 $text = "# Ensure File\n$ServiceURL https://chrome-infra-packages.appspot.com\n\n# Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest"
 
+# Check version for changing the the default encoding
+Write-Output "PS Version"
+$PSVersionTable.PSVersion
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
+
 (New-Object System.Net.WebClient).DownloadFile($url, $zipPath)
 Expand-Archive -LiteralPath $zipPath -DestinationPath $path
 #Get-ChildItem
