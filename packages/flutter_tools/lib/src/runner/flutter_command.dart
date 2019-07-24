@@ -288,8 +288,18 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addOption(
       'flavor',
       help: 'Build a custom app flavor as defined by platform-specific build setup.\n'
-        'Supports the use of product flavors in Android Gradle scripts.\n'
-        'Supports the use of custom Xcode schemes.',
+            'Supports the use of product flavors in Android Gradle scripts, and '
+            'the use of custom Xcode schemes.',
+    );
+  }
+
+  void usesTrackWidgetCreation({ bool hasEffect = true, @required bool verboseHelp }) {
+    argParser.addFlag(
+      'track-widget-creation',
+      hide: !hasEffect && !verboseHelp,
+      defaultsTo: false, // this will soon be changed to true
+      help: 'Track widget creation locations. This enables features such as the widget inspector. '
+            'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
   }
 
@@ -384,7 +394,6 @@ abstract class FlutterCommand extends Command<void> {
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
-          printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },

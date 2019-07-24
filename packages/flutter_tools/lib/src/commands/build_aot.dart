@@ -21,7 +21,7 @@ import '../runner/flutter_command.dart';
 import 'build.dart';
 
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand() {
+  BuildAotCommand({bool verboseHelp = false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -36,12 +36,6 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         negatable: false,
         defaultsTo: false,
         help: 'Report timing information about build steps in machine readable form,',
-      )
-      // track-widget-creation is exposed as a flag here but ignored to deal with build
-      // invalidation issues - there are no plans to support it for AOT mode.
-      ..addFlag('track-widget-creation',
-        defaultsTo: false,
-        hide: true,
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
@@ -62,6 +56,10 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
       );
+    // --track-widget-creation is exposed as a flag here to deal with build
+    // invalidation issues, but it is ignored -- there are no plans to support
+    // it for AOT mode.
+    usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
   }
 
   @override
