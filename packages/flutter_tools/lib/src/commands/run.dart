@@ -49,6 +49,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPortOptions();
     usesIpv6Flag();
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
@@ -61,7 +62,6 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
-
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -129,10 +129,6 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
-      )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
       )
       ..addOption('project-root',
         hide: !verboseHelp,

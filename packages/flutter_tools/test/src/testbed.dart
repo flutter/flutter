@@ -25,15 +25,11 @@ import 'context.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
-// A default value should be provided if one of the following criteria is met:
-//    - The vast majority of tests should use this provider. For example,
-//      [BufferLogger], [MemoryFileSystem].
-//    - More TBD.
+// A default value should be provided if the vast majority of tests should use
+// this provider. For example, [BufferLogger], [MemoryFileSystem].
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
-  // Keeps tests fast by avoid actual file system.
-  FileSystem: () => MemoryFileSystem(style: platform.isWindows
-      ? FileSystemStyle.windows
-      : FileSystemStyle.posix),
+  // Keeps tests fast by avoiding the actual file system.
+  FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
