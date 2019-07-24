@@ -97,7 +97,7 @@ void _updateGeneratedModuleBuildPhaseScript({
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
   for (String line in xcodeBuildSettings) {
-    localsBuffer.writeln('export $line');
+    localsBuffer.writeln('export "$line"');
   }
   localsBuffer.writeln('"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" build');
 
