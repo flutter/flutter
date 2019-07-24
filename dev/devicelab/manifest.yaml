@@ -277,6 +277,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  # hello_world__start_up:
+  #   description: >
+  #     Verifies that Hello World can start on an array of devices.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android_esoteric"]
+
   microbenchmarks:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks.
@@ -626,3 +632,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
     flaky: true
+
+  android_splash_screen_integration_test:
+    description: >
+      Runs end-to-end test of Flutter's Android splash behavior.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]

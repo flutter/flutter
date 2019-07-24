@@ -918,10 +918,7 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      // Handle double precision errors which causes this loop to become
-      // stuck in certain configurations.
-      const double minimumDeficit = precisionErrorTolerance;
-      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
+      while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -943,31 +940,30 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > 0.0) {
+      while (deficit > precisionErrorTolerance && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
         // of columns that aren't at their minWidth.
-        do {
-          final double delta = deficit / availableColumns;
-          int newAvailableColumns = 0;
-          for (int x = 0; x < columns; x += 1) {
-            final double availableDelta = widths[x] - minWidths[x];
-            if (availableDelta > 0.0) {
-              if (availableDelta <= delta) {
-                // shrank to minimum
-                deficit -= widths[x] - minWidths[x];
-                widths[x] = minWidths[x];
-              } else {
-                deficit -= delta;
-                widths[x] -= delta;
-                newAvailableColumns += 1;
-              }
+        final double delta = deficit / availableColumns;
+        assert(delta != 0);
+        int newAvailableColumns = 0;
+        for (int x = 0; x < columns; x += 1) {
+          final double availableDelta = widths[x] - minWidths[x];
+          if (availableDelta > 0.0) {
+            if (availableDelta <= delta) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+            } else {
+              deficit -= delta;
+              widths[x] -= delta;
+              newAvailableColumns += 1;
             }
           }
-          availableColumns = newAvailableColumns;
-        } while (deficit > 0.0 && availableColumns > 0);
+        }
+        availableColumns = newAvailableColumns;
       }
     }
     return widths;
