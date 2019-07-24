@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/file_hash_store.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
@@ -95,7 +94,9 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
         );
-        fs.file('foo.dart').createSync(recursive: true);
+        fs.file('foo.dart')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('');
         fs.file('pubspec.yaml').createSync();
       },
       overrides: <Type, Generator>{
@@ -221,25 +222,6 @@ void main() {
       'name':  'foo',
       'stamp': fs.path.join(environment.buildDir.path, 'foo.stamp'),
     });
-  }));
-
-  test('Compute update recognizes added files', () => testbed.run(() async {
-    environment.buildDir.createSync(recursive: true);
-    fs.directory('build').createSync();
-    final FileHashStore fileCache = FileHashStore(environment);
-    fileCache.initialize();
-    final List<File> inputs = fooTarget.resolveInputs(environment);
-    final Map<String, ChangeType> changes = await fooTarget.computeChanges(inputs, environment, fileCache);
-    fileCache.persist();
-
-    expect(changes, <String, ChangeType>{
-      '/foo.dart': ChangeType.Added
-    });
-
-    await buildSystem.build(fooTarget, environment);
-    final Map<String, ChangeType> secondChanges = await fooTarget.computeChanges(inputs, environment, fileCache);
-
-    expect(secondChanges, <String, ChangeType>{});
   }));
 
   test('Can find dependency cycles', () {

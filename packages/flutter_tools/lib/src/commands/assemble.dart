@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
-import '../build_info.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/dart.dart';
@@ -63,9 +60,6 @@ class AssembleCommand extends FlutterCommand {
   @override
   String get name => 'assemble';
 
-  @override
-  bool get isExperimental => true;
-
   /// The target we are building.
   Target get target {
     if (argResults.rest.isEmpty) {
@@ -79,7 +73,9 @@ class AssembleCommand extends FlutterCommand {
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
     final Environment result = Environment(
-      buildDir: fs.directory(getBuildDirectory()),
+      buildDir: flutterProject.directory
+          .childDirectory('.dart_tool')
+          .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(argResults['define']),
     );

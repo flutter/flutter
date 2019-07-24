@@ -29,6 +29,7 @@ abstract class AotAssemblyBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_assembly');
     }
+    final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final List<IOSArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
@@ -46,6 +47,7 @@ abstract class AotAssemblyBase extends Target {
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: outputPath,
         iosArch: iosArchs.single,
+        bitcode: bitcode,
       );
       if (snapshotExitCode != 0) {
         throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -62,6 +64,7 @@ abstract class AotAssemblyBase extends Target {
           packagesPath: environment.projectDir.childFile('.packages').path,
           outputPath: fs.path.join(outputPath, getNameForIOSArch(iosArch)),
           iosArch: iosArch,
+          bitcode: bitcode,
         ));
       }
       final List<int> results = await Future.wait(pending);

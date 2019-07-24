@@ -3,25 +3,33 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/time.dart';
+import 'package:file/memory.dart';
 import 'package:mockito/mockito.dart';
 
+import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/time.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('analytics', () {
     Directory tempDir;
+    MockFlutterConfig mockFlutterConfig;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -30,6 +38,7 @@ void main() {
     setUp(() {
       Cache.flutterRoot = '../..';
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      mockFlutterConfig = MockFlutterConfig();
     });
 
     tearDown(() {
@@ -78,15 +87,55 @@ void main() {
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       Usage: () => Usage(configDirOverride: tempDir.path),
     });
+
+    testUsingContext('Usage records one feature in experiment setting', () async {
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+          .thenReturn(true);
+      final Usage usage = Usage();
+      usage.sendCommand('test');
+
+      expect(fs.file('test').readAsStringSync(), contains('$enabledFlutterFeatures: enable-web'));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      Config: () => mockFlutterConfig,
+      Platform: () => FakePlatform(environment: <String, String>{
+        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+      }),
+      FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('Usage records multiple features in experiment setting', () async {
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+          .thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting))
+          .thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting))
+          .thenReturn(true);
+      final Usage usage = Usage();
+      usage.sendCommand('test');
+
+      expect(fs.file('test').readAsStringSync(), contains('$enabledFlutterFeatures: enable-web,enable-linux-desktop,enable-macos-desktop'));
+    }, overrides: <Type, Generator>{
+      FlutterVersion: () => FlutterVersion(const SystemClock()),
+      Config: () => mockFlutterConfig,
+      Platform: () => FakePlatform(environment: <String, String>{
+        'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+      }),
+      FileSystem: () => MemoryFileSystem(),
+    });
   });
 
   group('analytics with mocks', () {
+    MemoryFileSystem memoryFileSystem;
+    MockStdio mockStdio;
     Usage mockUsage;
     SystemClock mockClock;
     Doctor mockDoctor;
     List<int> mockTimes;
 
     setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+      mockStdio = MockStdio();
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
@@ -148,6 +197,56 @@ void main() {
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
+
+    testUsingContext('command sends localtime', () async {
+      const int kMillis = 1000;
+      mockTimes = <int>[kMillis];
+      // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
+      // will be written to a file.
+      final Usage usage = Usage(versionOverride: 'test');
+      usage.suppressAnalytics = false;
+      usage.enabled = true;
+
+      usage.sendCommand('test');
+
+      final String log = fs.file('analytics.log').readAsStringSync();
+      final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
+      expect(log.contains(dateTime.toString()), isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      SystemClock: () => mockClock,
+      Platform: () => FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+        },
+      ),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('event sends localtime', () async {
+      const int kMillis = 1000;
+      mockTimes = <int>[kMillis];
+      // Since FLUTTER_ANALYTICS_LOG_FILE is set in the environment, analytics
+      // will be written to a file.
+      final Usage usage = Usage(versionOverride: 'test');
+      usage.suppressAnalytics = false;
+      usage.enabled = true;
+
+      usage.sendEvent('test', 'test');
+
+      final String log = fs.file('analytics.log').readAsStringSync();
+      final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
+      expect(log.contains(dateTime.toString()), isTrue);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      SystemClock: () => mockClock,
+      Platform: () => FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'analytics.log',
+        },
+      ),
+      Stdio: () => mockStdio,
+    });
   });
 
   group('analytics bots', () {
@@ -195,3 +294,5 @@ void main() {
 class MockUsage extends Mock implements Usage {}
 
 class MockDoctor extends Mock implements Doctor {}
+
+class MockFlutterConfig extends Mock implements Config {}

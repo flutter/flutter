@@ -73,14 +73,21 @@ void main() {
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
     await buildSystem.build(const UnpackWindows(), environment);
-    final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
+    // Set a date in the far distant past to deal with the limited resolution
+    // of the windows filesystem.
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    fs.file(r'C:\windows\flutter\flutter_export.h').setLastModifiedSync(theDistantPast);
     await buildSystem.build(const UnpackWindows(), environment);
 
-    expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, equals(modified));
+    expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, equals(theDistantPast));
   }));
 
   test('Detects changes in input cache files', () => testbed.run(() async {
     await buildSystem.build(const UnpackWindows(), environment);
+    // Set a date in the far distant past to deal with the limited resolution
+    // of the windows filesystem.
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    fs.file(r'C:\windows\flutter\flutter_export.h').setLastModifiedSync(theDistantPast);
     final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
     fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
 

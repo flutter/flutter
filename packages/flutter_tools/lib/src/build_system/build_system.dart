@@ -21,16 +21,6 @@ import 'source.dart';
 
 export 'source.dart';
 
-/// A description of the update to each input file.
-enum ChangeType {
-  /// The file was added.
-  Added,
-  /// The file was deleted.
-  Removed,
-  /// The file was modified.
-  Modified,
-}
-
 /// Configuration for the build system itself.
 class BuildSystemConfig {
   /// Create a new [BuildSystemConfig].
@@ -125,18 +115,18 @@ abstract class Target {
   /// The action which performs this build step.
   Future<void> build(List<File> inputFiles, Environment environment);
 
-  // final BuildAction buildAction;
-
   /// Collect hashes for all inputs to determine if any have changed.
-  Future<Map<String, ChangeType>> computeChanges(
+  ///
+  /// Returns whether this target can be skipped.
+  Future<bool> computeChanges(
     List<File> inputs,
     Environment environment,
     FileHashStore fileHashStore,
   ) async {
-    final Map<String, ChangeType> updates = <String, ChangeType>{};
     final File stamp = _findStampFile(environment);
     final Set<String> previousInputs = <String>{};
     final List<String> previousOutputs = <String>[];
+    bool canSkip = true;
 
     // If the stamp file doesn't exist, we haven't run this step before and
     // all inputs were added.
@@ -145,6 +135,8 @@ abstract class Target {
       // Something went wrong writing the stamp file.
       if (content == null || content.isEmpty) {
         stamp.deleteSync();
+        // Malformed stamp file, not safe to skip.
+        canSkip = false;
       } else {
         final Map<String, Object> values = json.decode(content);
         final List<Object> inputs = values['inputs'];
@@ -152,12 +144,13 @@ abstract class Target {
         inputs.cast<String>().forEach(previousInputs.add);
         outputs.cast<String>().forEach(previousOutputs.add);
       }
+    } else {
+      // No stamp file, not safe to skip.
+      canSkip = false;
     }
 
-    // For each input type, first determine if we've already computed the hash
-    // for it. If not and it is a directory we skip hashing and instead use a
-    // timestamp. If it is a file we collect it to be sent off for hashing as
-    // a group.
+    // For each input, first determine if we've already computed the hash
+    // for it. Then collect it to be sent off for hashing as a group.
     final List<File> sourcesToHash = <File>[];
     final List<File> missingInputs = <File>[];
     for (File file in inputs) {
@@ -171,19 +164,19 @@ abstract class Target {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          updates[absolutePath] = previousInputs.contains(absolutePath)
-              ? ChangeType.Modified
-              : ChangeType.Added;
+          canSkip = false;
         }
       } else {
         sourcesToHash.add(file);
       }
     }
-    // Check if any outputs were deleted or modified from the previous run.
+
+    // For each outut, first determine if we've already computed the hash
+    // for it. Then collect it to be sent off for hashing as a group.
     for (String previousOutput in previousOutputs) {
       final File file = fs.file(previousOutput);
       if (!file.existsSync()) {
-        updates[previousOutput] = ChangeType.Removed;
+        canSkip = false;
         continue;
       }
       final String absolutePath = file.resolveSymbolicLinksSync();
@@ -191,15 +184,14 @@ abstract class Target {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          updates[absolutePath] = previousInputs.contains(absolutePath)
-              ? ChangeType.Modified
-              : ChangeType.Added;
+          canSkip = false;
         }
       } else {
         sourcesToHash.add(file);
       }
     }
 
+    // If we depend on a file that doesnt exist on disk, kill the build.
     if (missingInputs.isNotEmpty) {
       throw MissingInputException(missingInputs, name);
     }
@@ -208,24 +200,11 @@ abstract class Target {
     // update the result.
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
-      for (File file in dirty) {
-        final String absolutePath = file.resolveSymbolicLinksSync();
-        updates[absolutePath] = previousInputs.contains(absolutePath)
-            ? ChangeType.Modified
-            : ChangeType.Added;
+      if (dirty.isNotEmpty) {
+        canSkip = false;
       }
     }
-
-    // Find which, if any, inputs have been deleted.
-    final Set<String> currentInputPaths = Set<String>.from(
-      inputs.map<String>((File entity) => entity.resolveSymbolicLinksSync())
-    );
-    for (String previousInput in previousInputs) {
-      if (!currentInputPaths.contains(previousInput)) {
-        updates[previousInput] = ChangeType.Removed;
-      }
-    }
-    return updates;
+    return canSkip;
   }
 
   /// Invoke to remove the stamp file if the [buildAction] threw an exception;
@@ -534,14 +513,13 @@ class _BuildInstance {
     bool skipped = false;
     try {
       final List<File> inputs = target.resolveInputs(environment);
-      final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
-      if (updates.isEmpty) {
+      final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
+      if (canSkip) {
         skipped = true;
         printStatus('Skipping target: ${target.name}');
       } else {
         printStatus('${target.name}: Starting');
-        // build actions may be null.
-        await target?.build(inputs, environment);
+        await target.build(inputs, environment);
         printStatus('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment);
@@ -550,7 +528,6 @@ class _BuildInstance {
         target._writeStamp(inputs, outputs, environment);
       }
     } catch (exception, stackTrace) {
-      // TODO(jonahwilliams): test
       target.clearStamp(environment);
       passed = false;
       skipped = false;

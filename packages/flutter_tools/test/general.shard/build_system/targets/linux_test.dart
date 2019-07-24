@@ -1,3 +1,4 @@
+
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -62,10 +63,13 @@ void main() {
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
     await buildSystem.build(const UnpackLinux(), environment);
-    final DateTime modified = fs.file('linux/flutter/libflutter_linux.so').statSync().modified;
+    // Set a date in the far distant past to deal with the limited resolution
+    // of the windows filesystem.
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    fs.file('linux/flutter/libflutter_linux.so').setLastModifiedSync(theDistantPast);
     await buildSystem.build(const UnpackLinux(), environment);
 
-    expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, equals(modified));
+    expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, equals(theDistantPast));
   }));
 
   test('Detects changes in input cache files', () => testbed.run(() async {

@@ -19,7 +19,6 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
-import 'desktop.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
@@ -32,8 +31,8 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
+import 'reporting/usage.dart';
 import 'tester/flutter_tester.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -74,12 +73,10 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
           GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]),
         if (webWorkflow.appliesToHostPlatform)
           const WebValidator(),
-        // Add desktop doctors to workflow if the flag is enabled.
-        if (flutterDesktopEnabled)
-          ...<DoctorValidator>[
-            if (linuxWorkflow.appliesToHostPlatform) LinuxDoctorValidator(),
-            if (windowsWorkflow.appliesToHostPlatform) visualStudioValidator,
-          ],
+        if (linuxWorkflow.appliesToHostPlatform)
+          LinuxDoctorValidator(),
+        if (windowsWorkflow.appliesToHostPlatform)
+          visualStudioValidator,
         if (ideValidators.isNotEmpty)
           ...ideValidators
         else

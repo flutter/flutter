@@ -277,6 +277,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  # hello_world__start_up:
+  #   description: >
+  #     Verifies that Hello World can start on an array of devices.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android_esoteric"]
+
   microbenchmarks:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks.

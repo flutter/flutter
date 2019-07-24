@@ -23,6 +23,9 @@ const String kTargetPlatform = 'TargetPlatform';
 /// The define to control what target file is used.
 const String kTargetFile = 'TargetFile';
 
+/// The define to control whether the AOT snapshot is built with bitcode.
+const String kBitcodeFlag = 'EnableBitcode';
+
 /// The define to control what iOS architectures are built for.
 ///
 /// This is expected to be a comma-separated list of architectures. If not
@@ -123,6 +126,7 @@ abstract class AotElfBase extends Target {
       mainPath: environment.buildDir.childFile('app.dill').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
+      bitcode: false,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

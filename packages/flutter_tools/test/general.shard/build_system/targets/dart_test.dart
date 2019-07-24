@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/ios.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -26,12 +28,14 @@ void main() {
   Environment androidEnvironment;
   Environment iosEnvironment;
   MockProcessManager mockProcessManager;
+  MockXcode mockXcode;
 
   setUpAll(() {
     Cache.disableLocking();
   });
 
   setUp(() {
+    mockXcode = MockXcode();
     mockProcessManager = MockProcessManager();
     testbed = Testbed(setup: () {
       androidEnvironment = Environment(
@@ -166,6 +170,82 @@ flutter_tools:lib/''');
     });
     final BuildResult result = await buildSystem
         .build(const AotAssemblyProfile(), iosEnvironment);
+    expect(result.success, true);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+  }));
+
+  test('aot_assembly_profile with bitcode sends correct argument to snapshotter (one arch)', () => testbed.run(() async {
+    iosEnvironment.defines[kIosArchs] = 'arm64';
+    iosEnvironment.defines[kBitcodeFlag] = 'true';
+
+    final FakeProcessResult fakeProcessResult = FakeProcessResult(
+      stdout: '',
+      stderr: '',
+    );
+    final RunResult fakeRunResult = RunResult(fakeProcessResult, const <String>['foo']);
+    when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+      fs.file(fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App'))
+          .createSync(recursive: true);
+      return fakeProcessResult;
+    });
+
+    when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+
+    final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
+
+    expect(result.success, true);
+    verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
+    verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
+    verify(mockXcode.dsymutil(any)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+  }));
+
+  test('aot_assembly_profile with bitcode sends correct argument to snapshotter (mutli arch)', () => testbed.run(() async {
+    iosEnvironment.defines[kIosArchs] = 'armv7,arm64';
+    iosEnvironment.defines[kBitcodeFlag] = 'true';
+
+    final FakeProcessResult fakeProcessResult = FakeProcessResult(
+      stdout: '',
+      stderr: '',
+    );
+    final RunResult fakeRunResult = RunResult(fakeProcessResult, const <String>['foo']);
+    when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+      fs.file(fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App'))
+          .createSync(recursive: true);
+      return fakeProcessResult;
+    });
+
+    when(mockXcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+    when(mockXcode.dsymutil(any)).thenAnswer((_) => Future<RunResult>.value(fakeRunResult));
+
+    final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
+
+    expect(result.success, true);
+    verify(mockXcode.cc(argThat(contains('-fembed-bitcode')))).called(2);
+    verify(mockXcode.clang(argThat(contains('-fembed-bitcode')))).called(2);
+    verify(mockXcode.dsymutil(any)).called(2);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => mockProcessManager,
+    Xcode: () => mockXcode,
+  }));
+
+  test('aot_assembly_profile will lipo binaries together when multiple archs are requested', () => testbed.run(() async {
+    iosEnvironment.defines[kIosArchs] = 'armv7,arm64';
+    when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+      fs.file(fs.path.join(iosEnvironment.buildDir.path, 'App.framework', 'App'))
+          .createSync(recursive: true);
+      return FakeProcessResult(
+        stdout: '',
+        stderr: '',
+      );
+    });
+    final BuildResult result = await buildSystem.build(const AotAssemblyProfile(), iosEnvironment);
 
     expect(result.success, true);
   }, overrides: <Type, Generator>{
@@ -175,18 +255,26 @@ flutter_tools:lib/''');
 
 class MockProcessManager extends Mock implements ProcessManager {}
 
+class MockXcode extends Mock implements Xcode {}
+
 class FakeGenSnapshot implements GenSnapshot {
+  List<String> lastCallAdditionalArgs;
   @override
   Future<int> run({SnapshotType snapshotType, IOSArch iosArch, Iterable<String> additionalArgs = const <String>[]}) async {
-    final Directory out = fs.file(additionalArgs.last).parent;
+    lastCallAdditionalArgs = additionalArgs.toList();
+    final Directory out = fs.file(lastCallAdditionalArgs.last).parent;
     if (iosArch == null) {
       out.childFile('app.so').createSync();
       out.childFile('gen_snapshot.d').createSync();
       return 0;
     }
     out.childDirectory('App.framework').childFile('App').createSync(recursive: true);
-    out.childFile('snapshot_assembly.S').createSync();
-    out.childFile('snapshot_assembly.o').createSync();
+
+    final String assembly = lastCallAdditionalArgs
+        .firstWhere((String arg) => arg.startsWith('--assembly'))
+        .substring('--assembly='.length);
+    fs.file(assembly).createSync();
+    fs.file(assembly.replaceAll('.S', '.o')).createSync();
     return 0;
   }
 }

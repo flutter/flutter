@@ -150,6 +150,29 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
     );
   }
 
+  /// Builds [TextSpan] from current editing value.
+  ///
+  /// By default makes text in composing range appear as underlined.
+  /// Descendants can override this method to customize appearance of text.
+  TextSpan buildTextSpan({TextStyle style , bool withComposing}) {
+    if (!value.composing.isValid || !withComposing) {
+      return TextSpan(style: style, text: text);
+    }
+    final TextStyle composingStyle = style.merge(
+      const TextStyle(decoration: TextDecoration.underline),
+    );
+    return TextSpan(
+      style: style,
+      children: <TextSpan>[
+        TextSpan(text: value.composing.textBefore(value.text)),
+        TextSpan(
+          style: composingStyle,
+          text: value.composing.textInside(value.text),
+        ),
+        TextSpan(text: value.composing.textAfter(value.text)),
+    ]);
+  }
+
   /// The currently selected [text].
   ///
   /// If the selection is collapsed, then this property gives the offset of the
@@ -288,6 +311,8 @@ class EditableText extends StatefulWidget {
     this.maxLines = 1,
     this.minLines,
     this.expands = false,
+    this.forceLine = true,
+    this.textWidthBasis = TextWidthBasis.parent,
     this.autofocus = false,
     bool showCursor,
     this.showSelectionHandles = false,
@@ -320,6 +345,7 @@ class EditableText extends StatefulWidget {
        assert(autocorrect != null),
        assert(showSelectionHandles != null),
        assert(readOnly != null),
+       assert(forceLine != null),
        assert(style != null),
        assert(cursorColor != null),
        assert(cursorOpacityAnimates != null),
@@ -368,6 +394,9 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool obscureText;
 
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  final TextWidthBasis textWidthBasis;
+
   /// {@template flutter.widgets.editableText.readOnly}
   /// Whether the text can be changed.
   ///
@@ -377,6 +406,18 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Must not be null.
   /// {@endtemplate}
   final bool readOnly;
+
+  /// Whether the text will take the full width regardless of the text width.
+  ///
+  /// When this is set to false, the width will be based on text width, which
+  /// will also be affected by [textWidthBasis].
+  ///
+  /// Defaults to true. Must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [textWidthBasis], which controls the calculation of text width.
+  final bool forceLine;
 
   /// Whether to show selection handles.
   ///
@@ -396,7 +437,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [showSelectionHandles], which controls the visibility of the selection handles..
+  ///  * [showSelectionHandles], which controls the visibility of the selection handles.
   /// {@endtemplate}
   final bool showCursor;
 
@@ -1104,8 +1145,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         }
         break;
       case FloatingCursorDragState.End:
-        _floatingCursorResetController.value = 0.0;
-        _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
+      // We skip animation if no update has happened.
+        if (_lastTextPosition != null && _lastBoundedOffset != null) {
+          _floatingCursorResetController.value = 0.0;
+          _floatingCursorResetController.animateTo(1.0, duration: _floatingCursorResetTime, curve: Curves.decelerate);
+        }
       break;
     }
   }
@@ -1622,6 +1666,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               showCursor: EditableText.debugDeterministicCursor
                   ? ValueNotifier<bool>(widget.showCursor)
                   : _cursorVisibilityNotifier,
+              forceLine: widget.forceLine,
+              readOnly: widget.readOnly,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               minLines: widget.minLines,
@@ -1632,6 +1678,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textAlign: widget.textAlign,
               textDirection: _textDirection,
               locale: widget.locale,
+              textWidthBasis: widget.textWidthBasis,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
               offset: offset,
@@ -1657,32 +1704,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// By default makes text in composing range appear as underlined.
   /// Descendants can override this method to customize appearance of text.
   TextSpan buildTextSpan() {
-    // Read only mode should not paint text composing.
-    if (!widget.obscureText && _value.composing.isValid && !widget.readOnly) {
-      final TextStyle composingStyle = widget.style.merge(
-        const TextStyle(decoration: TextDecoration.underline),
-      );
-      return TextSpan(
-        style: widget.style,
-        children: <TextSpan>[
-          TextSpan(text: _value.composing.textBefore(_value.text)),
-          TextSpan(
-            style: composingStyle,
-            text: _value.composing.textInside(_value.text),
-          ),
-          TextSpan(text: _value.composing.textAfter(_value.text)),
-      ]);
-    }
-
-    String text = _value.text;
     if (widget.obscureText) {
+      String text = _value.text;
       text = RenderEditable.obscuringCharacter * text.length;
       final int o =
         _obscureShowCharTicksPending > 0 ? _obscureLatestCharIndex : null;
       if (o != null && o >= 0 && o < text.length)
         text = text.replaceRange(o, o + 1, _value.text.substring(o, o + 1));
+      return TextSpan(style: widget.style, text: text);
     }
-    return TextSpan(style: widget.style, text: text);
+    // Read only mode should not paint text composing.
+    return widget.controller.buildTextSpan(
+      style: widget.style,
+      withComposing: !widget.readOnly,
+    );
   }
 }
 
@@ -1696,6 +1731,9 @@ class _Editable extends LeafRenderObjectWidget {
     this.cursorColor,
     this.backgroundCursorColor,
     this.showCursor,
+    this.forceLine,
+    this.readOnly,
+    this.textWidthBasis,
     this.hasFocus,
     this.maxLines,
     this.minLines,
@@ -1730,6 +1768,8 @@ class _Editable extends LeafRenderObjectWidget {
   final LayerLink endHandleLayerLink;
   final Color backgroundCursorColor;
   final ValueNotifier<bool> showCursor;
+  final bool forceLine;
+  final bool readOnly;
   final bool hasFocus;
   final int maxLines;
   final int minLines;
@@ -1741,6 +1781,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextDirection textDirection;
   final Locale locale;
   final bool obscureText;
+  final TextWidthBasis textWidthBasis;
   final bool autocorrect;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
@@ -1763,6 +1804,8 @@ class _Editable extends LeafRenderObjectWidget {
       endHandleLayerLink: endHandleLayerLink,
       backgroundCursorColor: backgroundCursorColor,
       showCursor: showCursor,
+      forceLine: forceLine,
+      readOnly: readOnly,
       hasFocus: hasFocus,
       maxLines: maxLines,
       minLines: minLines,
@@ -1779,6 +1822,7 @@ class _Editable extends LeafRenderObjectWidget {
       onCaretChanged: onCaretChanged,
       ignorePointer: rendererIgnoresPointer,
       obscureText: obscureText,
+      textWidthBasis: textWidthBasis,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
       cursorOffset: cursorOffset,
@@ -1797,6 +1841,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..startHandleLayerLink = startHandleLayerLink
       ..endHandleLayerLink = endHandleLayerLink
       ..showCursor = showCursor
+      ..forceLine = forceLine
+      ..readOnly = readOnly
       ..hasFocus = hasFocus
       ..maxLines = maxLines
       ..minLines = minLines
@@ -1812,6 +1858,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
       ..ignorePointer = rendererIgnoresPointer
+      ..textWidthBasis = textWidthBasis
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
       ..cursorRadius = cursorRadius
