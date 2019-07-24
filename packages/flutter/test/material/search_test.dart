@@ -509,7 +509,7 @@ void main() {
     expect(find.text(searchHint), findsOneWidget);
   });
 
-  testWidgets('keyboard show search button', (WidgetTester tester) async {
+  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -521,6 +521,20 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
+
+  testWidgets('keyboard shows corresponding button when text input action is set', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
   group('contributes semantics', () {
@@ -679,19 +693,18 @@ class TestHomePage extends StatelessWidget {
 }
 
 class _TestSearchDelegate extends SearchDelegate<String> {
-
   _TestSearchDelegate({
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-    this.searchHint,
-  });
+    String searchHint,
+    TextInputAction textInputAction = TextInputAction.search,
+  }) : super(searchFieldLabel : searchHint, textInputAction : textInputAction);
 
   final String suggestions;
   final String result;
   final List<Widget> actions;
   final Color hintTextColor = Colors.green;
-  final String searchHint;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
@@ -737,6 +750,4 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return actions;
   }
 
-  @override
-  String get searchFieldLabel => searchHint;
 }
