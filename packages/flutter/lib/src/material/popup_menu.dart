@@ -938,7 +938,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// If this property is null, then [PopupMenuThemeData.color] is used.
   /// If [PopupMenuThemeData.color] is also null, then
-  /// [Theme.of(context).cardColor] is used.
+  /// Theme.of(context).cardColor is used.
   final Color color;
 
   @override
