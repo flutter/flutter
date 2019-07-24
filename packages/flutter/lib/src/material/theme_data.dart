@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
+import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_theme.dart';
@@ -170,6 +171,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    MaterialBannerThemeData bannerTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -270,6 +272,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -328,6 +331,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
+      bannerTheme: bannerTheme,
     );
   }
 
@@ -398,6 +402,7 @@ class ThemeData extends Diagnosticable {
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
+    @required this.bannerTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -450,7 +455,8 @@ class ThemeData extends Diagnosticable {
        assert(floatingActionButtonTheme != null),
        assert(typography != null),
        assert(snackBarTheme != null),
-       assert(bottomSheetTheme != null);
+       assert(bottomSheetTheme != null),
+       assert(bannerTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -768,6 +774,9 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
+  /// A theme for customizing the color and text style a banner.
+  final MaterialBannerThemeData bannerTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -826,6 +835,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    MaterialBannerThemeData bannerTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -885,6 +895,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
+      bannerTheme: bannerTheme ?? this.bannerTheme,
     );
   }
 
@@ -1022,6 +1033,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
+      bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
     );
   }
 
@@ -1086,7 +1098,8 @@ class ThemeData extends Diagnosticable {
            (otherData.typography == typography) &&
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
-           (otherData.bottomSheetTheme == bottomSheetTheme);
+           (otherData.bottomSheetTheme == bottomSheetTheme),
+           (otherData.bannerTheme == bannerTheme);
   }
 
   @override
@@ -1151,6 +1164,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme,
       snackBarTheme,
       bottomSheetTheme,
+      bannerTheme,
     ];
     return hashList(values);
   }
@@ -1212,6 +1226,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
+    properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
   }
 }
 
