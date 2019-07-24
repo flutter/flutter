@@ -134,6 +134,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
+/// See [StrutStyle] for further control of line height at the paragraph level.
+///
 /// ### Wavy red underline with black text
 ///
 /// {@tool sample}
