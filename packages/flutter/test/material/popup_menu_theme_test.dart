@@ -6,6 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+PopupMenuThemeData _popupMenuTheme() {
+  return PopupMenuThemeData(
+    color: Colors.orange,
+    shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    elevation: 12.0,
+    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
+  );
+}
+
 void main() {
   test('PopupMenuThemeData copyWith, ==, hashCode basics', () {
     expect(const PopupMenuThemeData(), const PopupMenuThemeData().copyWith());
@@ -56,8 +65,7 @@ void main() {
     ]);
   });
 
-  testWidgets('Passing no PopupMenuThemeData returns defaults',
-          (WidgetTester tester) async {
+  testWidgets('Passing no PopupMenuThemeData returns defaults', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
@@ -71,15 +79,13 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
-                final List<PopupMenuEntry<Object>> list = <
-                    PopupMenuEntry<Object>>[
-                      PopupMenuItem<void>(
-                        key: popupItemKey,
-                        child: const Text(''),
-                      ),
+                return <PopupMenuEntry<Object>>[
+                  PopupMenuItem<void>(
+                    key: popupItemKey,
+                    child: const Text('Example'),
+                  ),
                 ];
-                return list;
-                },
+              },
             ),
           ],
         ),
@@ -100,17 +106,16 @@ void main() {
     expect(button.elevation, 8.0);
 
     final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
-         find.descendant(
-           of: find.byKey(popupItemKey),
-           matching: find.byType(AnimatedDefaultTextStyle),
-         ).last,
+      find.descendant(
+        of: find.byKey(popupItemKey),
+        matching: find.byType(AnimatedDefaultTextStyle),
+      ).last,
     );
     expect(text.style.fontFamily, 'Roboto');
     expect(text.style.color, const Color(0xdd000000));
   });
 
-  testWidgets('PopupMenuEntry uses values from PopupMenuThemeData',
-          (WidgetTester tester) async {
+  testWidgets('PopupMenuEntry uses values from PopupMenuThemeData', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -125,15 +130,13 @@ void main() {
             PopupMenuButton<void>(
               key: popupButtonKey,
               itemBuilder: (BuildContext context) {
-                final List<PopupMenuEntry<Object>> list = <
-                    PopupMenuEntry<Object>>[
-                      PopupMenuItem<void>(
-                        key: popupItemKey,
-                        child: const Text(''),
-                      ),
+                return <PopupMenuEntry<Object>>[
+                  PopupMenuItem<void>(
+                    key: popupItemKey,
+                    child: const Text('Example'),
+                  ),
                 ];
-                return list;
-                },
+              },
             ),
           ],
         ),
@@ -162,8 +165,7 @@ void main() {
     expect(text.style, popupMenuTheme.textStyle);
   });
 
-  testWidgets('PopupMenuEntry widget properties take priority over theme',
-          (WidgetTester tester) async {
+  testWidgets('PopupMenuEntry widget properties take priority over theme', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -174,8 +176,7 @@ void main() {
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
     );
     const double elevation = 7.0;
-    const TextStyle textStyle = TextStyle(
-        color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
+    const TextStyle textStyle = TextStyle(color: Color(0x00000000), textBaseline: TextBaseline.alphabetic);
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(popupMenuTheme: popupMenuTheme),
@@ -189,16 +190,14 @@ void main() {
               color: color,
               shape: shape,
               itemBuilder: (BuildContext context) {
-                final List<PopupMenuEntry<Object>> list = <
-                    PopupMenuEntry<Object>>[
-                      PopupMenuItem<void>(
-                        key: popupItemKey,
-                        textStyle: textStyle,
-                        child: const Text(''),
-                      ),
+                return <PopupMenuEntry<Object>>[
+                  PopupMenuItem<void>(
+                    key: popupItemKey,
+                    textStyle: textStyle,
+                    child: const Text('Example'),
+                  ),
                 ];
-                return list;
-                },
+              },
             ),
           ],
         ),
@@ -227,8 +226,7 @@ void main() {
     expect(text.style, textStyle);
   });
 
-  testWidgets('ThemeData.popupMenuTheme properties are utilized', (
-      WidgetTester tester) async {
+  testWidgets('ThemeData.popupMenuTheme properties are utilized', (WidgetTester tester) async {
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
     final Key popupItemKey = UniqueKey();
@@ -246,13 +244,12 @@ void main() {
               child: PopupMenuButton<void>(
                 key: popupButtonKey,
                 itemBuilder: (BuildContext context) {
-                  List<PopupMenuEntry<Object>> list = <PopupMenuEntry<Object>>[
+                  return <PopupMenuEntry<Object>>[
                     PopupMenuItem<void>(
                       key: popupItemKey,
-                      child: const Text(''),
+                      child: const Text('Example'),
                     ),
                   ];
-                  return list;
                 },
               ),
             ),
@@ -271,8 +268,7 @@ void main() {
       ).last,
     );
     expect(button.color, Colors.pink);
-    expect(button.shape,
-        BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)));
+    expect(button.shape, BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)));
     expect(button.elevation, 6.0);
 
     final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
@@ -283,13 +279,4 @@ void main() {
     );
     expect(text.style.color, const Color(0xfffff000));
   });
-}
-
-PopupMenuThemeData _popupMenuTheme() {
-  return PopupMenuThemeData(
-    color: Colors.orange,
-    shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
-    elevation: 12.0,
-    textStyle: const TextStyle(color: Color(0xffffffff), textBaseline: TextBaseline.alphabetic),
-  );
 }

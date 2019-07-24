@@ -41,16 +41,16 @@ class PopupMenuThemeData extends Diagnosticable {
     this.textStyle,
   });
 
-  /// Default value for [_PopupMenuRoute.color].
+  /// The background color of the popup menu.
   final Color color;
 
-  /// Default value for [_PopupMenuRoute.shape].
+  /// The shape of the popup menu.
   final ShapeBorder shape;
 
-  /// Default value for [_PopupMenuRoute.elevation].
+  /// The elevation of the popup menu.
   final double elevation;
 
-  /// Default value for [PopupMenuItem.textStyle].
+  /// The text style of items in the popup menu.
   final TextStyle textStyle;
 
   /// Creates a copy of this object with the given fields replaced with the

@@ -602,11 +602,11 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.initialValue,
     this.elevation,
     this.theme,
+    this.popupMenuTheme,
     this.barrierLabel,
     this.semanticLabel,
     this.shape,
     this.color,
-    this.popupMenuTheme,
   });
 
   final RelativeRect position;
@@ -655,7 +655,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     }
 
     Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
-    if(popupMenuTheme != null)
+    if (popupMenuTheme != null)
       menu = PopupMenuTheme(textStyle: popupMenuTheme.textStyle, child: menu);
     if (theme != null)
       menu = Theme(data: theme, child: menu);
@@ -764,10 +764,10 @@ Future<T> showMenu<T>({
     elevation: elevation,
     semanticLabel: label,
     theme: Theme.of(context, shadowThemeOnly: true),
+    popupMenuTheme: PopupMenuTheme.of(context),
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     shape: shape,
     color: color,
-    popupMenuTheme: PopupMenuTheme.of(context),
   ));
 }
 
@@ -929,11 +929,16 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// If provided, the shape used for the menu.
   ///
   /// If this property is null, then [PopupMenuThemeData.shape] is used.
+  /// If [PopupMenuThemeData.shape] is also null, then the default shape for
+  /// [MaterialType.card] is used. This default shape is a rectangle with
+  /// rounded edges of BorderRadius.circular(2.0).
   final ShapeBorder shape;
 
-  /// If provided, the color used for the menu.
+  /// If provided, the background color used for the menu.
   ///
   /// If this property is null, then [PopupMenuThemeData.color] is used.
+  /// If [PopupMenuThemeData.color] is also null, then
+  /// [Theme.of(context).cardColor] is used.
   final Color color;
 
   @override
