@@ -908,8 +908,10 @@ mixin WidgetInspectorService {
 
   static const String _consoleObjectGroup = 'console-group';
 
+  int _errorsSinceReload = 0;
+
   void _reportError(FlutterErrorDetails details) {
-    postEvent('Flutter.Error', _nodeToJson(
+    final Map<String, Object> errorJson = _nodeToJson(
       details.toDiagnosticsNode(),
       _SerializationDelegate(
         groupName: _consoleObjectGroup,
@@ -919,7 +921,21 @@ mixin WidgetInspectorService {
         maxDescendentsTruncatableNode: 5,
         service: this,
       ),
-    ));
+    );
+
+    errorJson['errorsSinceReload'] = _errorsSinceReload;
+    _errorsSinceReload += 1;
+
+    postEvent('Flutter.Error', errorJson);
+  }
+
+  /// Resets the count of errors since the last hot reload.
+  ///
+  /// This data is sent to clients as part of the 'Flutter.Error' service
+  /// protocol event. Clients may choose to display errors received after the
+  /// first error differently.
+  void _resetErrorCount() {
+    _errorsSinceReload = 0;
   }
 
   /// Called to register service extensions.
@@ -1838,6 +1854,7 @@ mixin WidgetInspectorService {
   /// [BindingBase.reassembleApplication].
   void performReassemble() {
     _clearStats();
+    _resetErrorCount();
   }
 }
 
