@@ -107,7 +107,7 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
         extraArguments: const <String>['--verbose']);
-      if ((!result.stdout.contains('+1: All tests passed')) ||
+      if ((!result.stdout.contains('+2: All tests passed')) ||
           (!result.stdout.contains('test 0: starting shell process')) ||
           (!result.stdout.contains('test 0: deleting temporary directory')) ||
           (!result.stdout.contains('test 0: finished')) ||
