@@ -11,7 +11,13 @@ import 'binary_messenger.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
-/// Returns the number of invoke methods waiting for return value.
+/// Returns the number of invoke methods waiting for response.
+///
+/// It currently counts the number of pending [MethodChannel.invokeMethod]
+/// calls.
+///
+/// This method is useful for a testing framework like Espresso to monitor
+/// ongoing platform channel messages and decide whether the app is idle.
 int get pendingChannelInvokeMethodCount => _pendingChannelInvokeMethodCount;
 int _pendingChannelInvokeMethodCount = 0;
 

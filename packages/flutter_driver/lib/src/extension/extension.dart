@@ -371,10 +371,11 @@ class FlutterDriverExtension {
     return null;
   }
 
-  /// Returns a future that waits until the app is idle.
+  /// Returns a future that completes when the app is idle.
   ///
   /// Specifically, it checks:
-  /// * Whether there's no pending [MethodChannel.invokeMethod] calls.
+  ///
+  /// * Whether there are no pending [MethodChannel.invokeMethod] calls.
   /// * Whether the count of transient callbacks is zero, if "frame sync" is enabled.
   /// * Whether there's no pending request for scheduling a new frame, if "frame sync" is enabled.
   ///
