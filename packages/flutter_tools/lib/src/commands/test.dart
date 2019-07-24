@@ -175,11 +175,11 @@ class TestCommand extends FastFlutterCommand {
       }
     } else {
       files = <String>[
-        for (String file in files)
-          if (file.endsWith(platform.pathSeparator))
-            ..._findTests(fs.directory(file))
+        for (String path in files)
+          if (fs.isDirectorySync(path))
+            ..._findTests(fs.directory(path))
           else
-            file
+            path
       ];
     }
 
@@ -263,6 +263,7 @@ class TestCommand extends FastFlutterCommand {
           assetBundle.entries);
     }
   }
+
   bool _needRebuild(Map<String, DevFSContent> entries) {
     final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {
