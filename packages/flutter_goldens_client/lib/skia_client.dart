@@ -177,13 +177,6 @@ class SkiaGoldClient extends GoldensClient {
     );
 
     /* Temp for testing Cirrus */
-    if (result.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('imgtestAdd failed.')..writeln(
-          'stdout: ${result.stdout}')..writeln('stderr: ${result.stderr}');
-      throw NonZeroExitCode(result.exitCode, buf.toString());
-    }
-
     print(result.stdout);
     /* */
 
