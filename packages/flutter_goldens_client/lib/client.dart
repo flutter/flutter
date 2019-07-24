@@ -16,7 +16,7 @@ import 'package:process/process.dart';
 
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 
-/// An base class that provides shared information to the
+/// A base class that provides shared information to the
 /// [FlutterGoldenFileComparator] as well as the [SkiaGoldClient] and
 /// [GoldensRepositoryClient].
 abstract class GoldensClient {
