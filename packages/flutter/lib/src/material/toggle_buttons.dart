@@ -725,8 +725,9 @@ class _ToggleButton extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
     Color currentFillColor;
-    Color currentSplashColor;
+    Color currentFocusColor;
     Color currentHoverColor;
+    Color currentSplashColor;
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
@@ -736,23 +737,29 @@ class _ToggleButton extends StatelessWidget {
         ?? theme.colorScheme.primary;
       currentFillColor = fillColor
         ?? theme.colorScheme.primary.withOpacity(0.12);
-      currentSplashColor = splashColor
-        ?? toggleButtonsTheme.splashColor
-        ?? theme.colorScheme.primary.withOpacity(0.16);
+      currentFocusColor = focusColor
+        ?? toggleButtonsTheme.focusColor
+        ?? theme.colorScheme.primary.withOpacity(0.12);
       currentHoverColor = hoverColor
         ?? toggleButtonsTheme.hoverColor
         ?? theme.colorScheme.primary.withOpacity(0.04);
+      currentSplashColor = splashColor
+        ?? toggleButtonsTheme.splashColor
+        ?? theme.colorScheme.primary.withOpacity(0.16);
     } else if (onPressed != null && !selected) {
       currentColor = color
         ?? toggleButtonsTheme.color
         ?? theme.colorScheme.onSurface.withOpacity(0.87);
       currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
-      currentSplashColor = splashColor
-        ?? toggleButtonsTheme.splashColor
-        ?? theme.colorScheme.onSurface.withOpacity(0.16);
+      currentFocusColor = focusColor
+        ?? toggleButtonsTheme.focusColor
+        ?? theme.colorScheme.onSurface.withOpacity(0.12);
       currentHoverColor = hoverColor
         ?? toggleButtonsTheme.hoverColor
         ?? theme.colorScheme.onSurface.withOpacity(0.04);
+      currentSplashColor = splashColor
+        ?? toggleButtonsTheme.splashColor
+        ?? theme.colorScheme.onSurface.withOpacity(0.16);
     } else {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
@@ -769,7 +776,7 @@ class _ToggleButton extends StatelessWidget {
         elevation: 0.0,
         highlightElevation: 0.0,
         fillColor: currentFillColor,
-        focusColor: selected ? focusColor : null,
+        focusColor: currentFocusColor,
         highlightColor: highlightColor
           ?? theme.colorScheme.surface.withOpacity(0.0),
         hoverColor: currentHoverColor,

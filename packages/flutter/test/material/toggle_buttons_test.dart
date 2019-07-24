@@ -573,7 +573,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.focusColor));
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.12)));
   });
 
   testWidgets('Default InkWell colors - selected', (WidgetTester tester) async {
@@ -637,7 +637,7 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.focusColor));
+    expect(inkFeatures, paints..rect(color: theme.colorScheme.primary.withOpacity(0.12)));
   });
 
   testWidgets('Custom InkWell colors', (WidgetTester tester) async {
