@@ -99,7 +99,7 @@ void main() {
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
-          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t',
         ],
         exitMessageContains: '2 issues found.',
         toolExit: true,
@@ -125,7 +125,7 @@ void main() {
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'onPressed\' is required',
-          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          'info $analyzerSeparator The method \'_incrementCounter\' isn\'t',
           'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
         ],
         exitMessageContains: '3 issues found.',
