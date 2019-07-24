@@ -2560,8 +2560,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// If it does not have a child, grows to fit the parent-provided constraints.
 class RenderMouseListener extends RenderProxyBox {
   /// Creates a render object that forwards pointer events to callbacks.
-  ///
-  /// The [behavior] argument defaults to [HitTestBehavior.deferToChild].
   RenderMouseListener({
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,

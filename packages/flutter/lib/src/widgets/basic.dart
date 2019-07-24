@@ -5743,8 +5743,8 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Listener], a similar widget that tracks pointer events when
-///    the pointer have buttons pressed.
+///  * [Listener], a similar widget that tracks pointer events when the pointer
+///    have buttons pressed.
 class MouseRegion extends SingleChildRenderObjectWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   const MouseRegion({
@@ -5755,31 +5755,17 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
-  /// Called when a pointer enters the region for this widget.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget, or when the widget appears under the
-  /// pointer.
+  /// Called when a mouse pointer that has no button pressed enters the region
+  /// defined by this widget, or when the widget appears under the pointer.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
+  /// Called when a mouse pointer that has no button pressed changes position,
+  /// and the new position is within the region defined by this widget.
   final PointerHoverEventListener onHover;
 
-  /// Called when a pointer leaves the region for this widget.
-  ///
-  /// This is only fired for pointers which report their location when not down
-  /// (e.g. mouse pointers, but not most touch pointers).
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget, or when the widget disappears from
-  /// under the pointer.
+  /// Called when a mouse pointer that has no button pressed leaves the region
+  /// defined by this widget, or when the widget disappears from under the
+  /// pointer.
   final PointerExitEventListener onExit;
 
   @override
