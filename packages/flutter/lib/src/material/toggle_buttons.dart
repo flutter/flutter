@@ -726,6 +726,7 @@ class _ToggleButton extends StatelessWidget {
     Color currentColor;
     Color currentFillColor;
     Color currentSplashColor;
+    Color currentHoverColor;
     final ThemeData theme = Theme.of(context);
     final ToggleButtonsThemeData toggleButtonsTheme = ToggleButtonsTheme.of(context);
 
@@ -738,6 +739,9 @@ class _ToggleButton extends StatelessWidget {
       currentSplashColor = splashColor
         ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.primary.withOpacity(0.16);
+      currentHoverColor = hoverColor
+        ?? toggleButtonsTheme.hoverColor
+        ?? theme.colorScheme.primary.withOpacity(0.04);
     } else if (onPressed != null && !selected) {
       currentColor = color
         ?? toggleButtonsTheme.color
@@ -746,6 +750,9 @@ class _ToggleButton extends StatelessWidget {
       currentSplashColor = splashColor
         ?? toggleButtonsTheme.splashColor
         ?? theme.colorScheme.onSurface.withOpacity(0.16);
+      currentHoverColor = hoverColor
+        ?? toggleButtonsTheme.hoverColor
+        ?? theme.colorScheme.onSurface.withOpacity(0.04);
     } else {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
@@ -765,7 +772,7 @@ class _ToggleButton extends StatelessWidget {
         focusColor: selected ? focusColor : null,
         highlightColor: highlightColor
           ?? theme.colorScheme.surface.withOpacity(0.0),
-        hoverColor: hoverColor,
+        hoverColor: currentHoverColor,
         splashColor: currentSplashColor,
         focusNode: focusNode,
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

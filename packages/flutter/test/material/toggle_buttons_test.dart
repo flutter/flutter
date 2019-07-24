@@ -561,7 +561,10 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.onSurface.withOpacity(0.04)),
+    );
     await hoverGesture.removePointer();
 
     // focusColor
@@ -622,7 +625,10 @@ void main() {
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) {
       return object.runtimeType.toString() == '_RenderInkFeatures';
     });
-    expect(inkFeatures, paints..rect(color: theme.hoverColor));
+    expect(
+      inkFeatures,
+      paints..rect(color: theme.colorScheme.primary.withOpacity(0.04)),
+    );
     await hoverGesture.removePointer();
 
     // focusColor
