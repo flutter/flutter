@@ -582,7 +582,7 @@
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];
-  return [[FlutterEngineRegistrar alloc] initWithPlugin:pluginKey flutterEngine:self];
+  return [[[FlutterEngineRegistrar alloc] initWithPlugin:pluginKey flutterEngine:self] autorelease];
 }
 
 - (BOOL)hasPlugin:(NSString*)pluginKey {
