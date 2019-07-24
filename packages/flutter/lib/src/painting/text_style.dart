@@ -543,6 +543,8 @@ class TextStyle extends Diagnosticable {
   /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
   /// {@end-tool}
+  ///
+  /// See [StrutStyle] for further control of line height at the paragraph level.
   final double height;
 
   /// The locale used to select region-specific glyphs.
