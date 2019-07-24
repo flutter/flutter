@@ -185,8 +185,9 @@ class TestCommand extends FastFlutterCommand {
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
+      final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
-        flutterProject: FlutterProject.current(),
+        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
