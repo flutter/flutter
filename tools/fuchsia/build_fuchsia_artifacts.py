@@ -156,7 +156,7 @@ def main():
 
   targets_to_build = [
       # The Flutter Runner.
-      'flutter/shell/platform/fuchsia/flutter:flutter',
+      'flutter/shell/platform/fuchsia/flutter:flutter_jit_runner',
 
       # The Dart Runner.
       'flutter/shell/platform/fuchsia/dart:dart',
