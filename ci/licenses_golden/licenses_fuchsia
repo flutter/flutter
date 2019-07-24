@@ -1,4 +1,4 @@
-Signature: 669cbadd45a417f2f008d1e06cf4714a
+Signature: fc7738ed29a8de1a0845ab1f8b6d824c
 
 UNUSED LICENSES:
 
@@ -503,8 +503,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1token/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
@@ -1173,8 +1171,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1token/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
@@ -1951,8 +1947,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_token.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1token/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/context.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/cookie.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/debug.fidl
@@ -2590,8 +2584,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1token/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.web/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.service/meta.json
@@ -2987,10 +2979,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/scenic.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/session.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/snapshooter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_snapshot.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/wlan_stats.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/exception.cc
@@ -3431,10 +3423,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/http_service.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/url_loader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/url_request.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.oldhttp/url_response.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_manager.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_trees.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/views.fidl
 ----------------------------------------------------------------------------------------------------
 Copyright 2015 The Fuchsia Authors. All rights reserved.
 
@@ -3629,10 +3617,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/loader.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/runner.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.tracing.provider/provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.policy/presenter.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_containers.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_properties.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1/view_tree_token.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.viewsv1token/view_token.fidl
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/fdio.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/io.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/vfs.h
