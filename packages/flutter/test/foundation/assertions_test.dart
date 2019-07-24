@@ -328,4 +328,28 @@ void main() {
       );
     }
   });
+
+  test('User-thrown exceptions have ErrorSummary properties', () {
+    {
+      DiagnosticsNode node;
+      try {
+        throw 'User thrown string';
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['User thrown string']));
+    }
+
+    {
+      DiagnosticsNode node;
+      try {
+        throw ArgumentError.notNull('myArgument');
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
+    }
+  });
 }
