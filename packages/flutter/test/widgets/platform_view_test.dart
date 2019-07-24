@@ -1712,26 +1712,3 @@ void main() {
     });
   });
 }
-
-
-      // final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
-      // final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
-      // viewsController.registerViewType('webview');
-
-      // await tester.pumpWidget(
-      //   const Center(
-      //     child: SizedBox(
-      //       width: 200.0,
-      //       height: 100.0,
-      //       child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
-      //     ),
-      //   ),
-      // );
-
-      // expect(
-      //   viewsController.views,
-      //   unorderedEquals(<FakeAndroidPlatformView>[
-      //     FakeAndroidPlatformView(currentViewId + 1, 'webview', const Size(200.0, 100.0),
-      //         AndroidViewController.kAndroidLayoutDirectionLtr),
-      //   ]),
-      // );
