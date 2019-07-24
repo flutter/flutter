@@ -5410,7 +5410,14 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 
 // EVENT HANDLING
 
-/// A widget that calls callbacks in response to pointer events.
+/// A widget that calls callbacks in response to common pointer events.
+///
+/// It listens to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled.
+///
+/// It does not listen to events that are exclusive to mouse, such as when the
+/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// these events, use [MouseRegion].
 ///
 /// Rather than listening for raw pointer events, consider listening for
 /// higher-level gestures using [GestureDetector].
@@ -5457,30 +5464,27 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Directionality(
-///     textDirection: TextDirection.ltr,
-///     child: Center(
-///       child: ConstrainedBox(
-///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///         child: Listener(
-///           onPointerDown: _incrementDown,
-///           onPointerMove: _updateLocation,
-///           onPointerUp: _incrementUp,
-///           child: Container(
-///             color: Colors.lightBlueAccent,
-///             child: Column(
-///               mainAxisAlignment: MainAxisAlignment.center,
-///               children: <Widget>[
-///                 Text('You have pressed or released in this area this many times:'),
-///                 Text(
-///                   '$_downCounter presses\n$_upCounter releases',
-///                   style: Theme.of(context).textTheme.display1,
-///                 ),
-///                 Text(
-///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///                 ),
-///               ],
-///             ),
+///   return Center(
+///     child: ConstrainedBox(
+///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///       child: Listener(
+///         onPointerDown: _incrementDown,
+///         onPointerMove: _updateLocation,
+///         onPointerUp: _incrementUp,
+///         child: Container(
+///           color: Colors.lightBlueAccent,
+///           child: Column(
+///             mainAxisAlignment: MainAxisAlignment.center,
+///             children: <Widget>[
+///               Text('You have pressed or released in this area this many times:'),
+///               Text(
+///                 '$_downCounter presses\n$_upCounter releases',
+///                 style: Theme.of(context).textTheme.display1,
+///               ),
+///               Text(
+///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///               ),
+///             ],
 ///           ),
 ///         ),
 ///       ),
@@ -5489,11 +5493,6 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-///
-/// See also:
-///
-///  * [MouseRegion], a similar widget that tracks mouse locations even when
-///    no button is pressed.
 class Listener extends StatelessWidget {
   /// Creates a widget that forwards point events to callbacks.
   ///
@@ -5666,7 +5665,11 @@ class _PointerListener extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that calls callbacks in response to mouse events.
+/// A widget that tracks the movement of mice, even when no button is pressed.
+///
+/// It does not listen to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled. For these events,
+/// use [Listener], or more preferably, [GestureDetector].
 ///
 /// ## Layout behavior
 ///
@@ -5708,30 +5711,27 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   return Directionality(
-///     textDirection: TextDirection.ltr,
-///     child: Center(
-///       child: ConstrainedBox(
-///         constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
-///         child: MouseRegion(
-///           onEnter: _incrementEnter,
-///           onHover: _updateLocation,
-///           onExit: _incrementExit,
-///           child: Container(
-///             color: Colors.lightBlueAccent,
-///             child: Column(
-///               mainAxisAlignment: MainAxisAlignment.center,
-///               children: <Widget>[
-///                 Text('You have entered or exited this box this many times:'),
-///                 Text(
-///                   '$_enterCounter Entries\n$_exitCounter Exits',
-///                   style: Theme.of(context).textTheme.display1,
-///                 ),
-///                 Text(
-///                   'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
-///                 ),
-///               ],
-///             ),
+///   return Center(
+///     child: ConstrainedBox(
+///       constraints: new BoxConstraints.tight(Size(300.0, 200.0)),
+///       child: MouseRegion(
+///         onEnter: _incrementEnter,
+///         onHover: _updateLocation,
+///         onExit: _incrementExit,
+///         child: Container(
+///           color: Colors.lightBlueAccent,
+///           child: Column(
+///             mainAxisAlignment: MainAxisAlignment.center,
+///             children: <Widget>[
+///               Text('You have entered or exited this box this many times:'),
+///               Text(
+///                 '$_enterCounter Entries\n$_exitCounter Exits',
+///                 style: Theme.of(context).textTheme.display1,
+///               ),
+///               Text(
+///                 'The cursor is here: (${x.toStringAsFixed(2)}, ${y.toStringAsFixed(2)})',
+///               ),
+///             ],
 ///           ),
 ///         ),
 ///       ),
@@ -5746,7 +5746,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///  * [Listener], a similar widget that tracks pointer events when
 ///    the pointer have buttons pressed.
 class MouseRegion extends SingleChildRenderObjectWidget {
-  /// Creates a widget that forwards point events to callbacks.
+  /// Creates a widget that forwards mouse events to callbacks.
   const MouseRegion({
     Key key,
     this.onEnter,

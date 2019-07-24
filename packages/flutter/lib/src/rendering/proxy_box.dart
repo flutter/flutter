@@ -2460,16 +2460,18 @@ typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 
-/// Calls callbacks in response to pointer events.
+/// Calls callbacks in response to common pointer events.
+///
+/// It responds to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled.
+///
+/// It does not respond to events that are exclusive to mouse, such as when the
+/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// these events, use [RenderMouseListener].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
-///
-/// See also:
-///
-///  * [RenderMouseListener], which contains events of mouse pointers, including
-///    [onPointerEnter], [onPointerLeave], and [onPointerHover].
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2511,8 +2513,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    // The onEnter, onHover, and onExit events are triggered from within
-    // MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -2546,17 +2546,18 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 }
 
-/// Calls callbacks in response to events of mouse pointers, including
-/// [onEnter], [onHover], and [onExit].
+/// Calls callbacks in response to pointer events that are exclusive to mice.
+///
+/// Simply put, it responds to events that are related to hovering,
+/// i.e. when the mouse enters, exits or hovers a region without pressing.
+///
+/// It does not responds to common events that construct gestures, such as when
+/// the pointer is pressed, moved, then released or canceled. For these events,
+/// use [RenderPointerListener].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
-///
-/// See also:
-///
-///  * [RenderPointerListener], which contains events of all kinds of pointers,
-///    including [onPointerDown], [onPointerUp], and [onPointerMove].
 class RenderMouseListener extends RenderProxyBox {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
