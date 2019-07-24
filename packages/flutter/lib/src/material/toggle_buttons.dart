@@ -18,15 +18,13 @@ import 'toggle_buttons_theme.dart';
 ///
 /// The list of [children] are laid out in a row. The state of each button
 /// is controlled by [isSelected], which is a list of bools that determine
-/// if a button is in an active, disabled, or selected state. They are both
+/// if a button is in an unselected or selected state. They are both
 /// correlated by their index in the list. The length of [isSelected] has to
 /// match the length of the [children] list.
 ///
 /// ## Customizing toggle buttons
-/// The toggle buttons are designed to be configurable, meaning the actions
-/// performed by tapping a toggle button and the desired interface can be
-/// designed. This can be configured using the [onPressed] callback, which
-/// is triggered when a button is pressed.
+/// Each toggle's behavior can be configured by the [onPressed] callback, which
+/// can update the [isSelected] list however it wants to.
 ///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring none of the buttons to be
@@ -59,11 +57,11 @@ import 'toggle_buttons_theme.dart';
 ///   ],
 ///   onPressed: (int index) {
 ///     setState(() {
-///       for (int currentIndex = 0; currentIndex < isSelected.length; currentIndex++) {
-///         if (currentIndex == index) {
-///           isSelected[currentIndex] = true;
+///       for (int buttonIndex = 0; buttonIndex < isSelected.length; buttonIndex++) {
+///         if (buttonIndex == index) {
+///           isSelected[buttonIndex] = true;
 ///         } else {
-///           isSelected[currentIndex] = false;
+///           isSelected[buttonIndex] = false;
 ///         }
 ///       }
 ///     });
@@ -83,11 +81,11 @@ import 'toggle_buttons_theme.dart';
 ///   ],
 ///   onPressed: (int index) {
 ///     setState(() {
-///       for (int currentIndex = 0; currentIndex < isSelected.length; currentIndex++) {
-///         if (currentIndex == index) {
-///           isSelected[currentIndex] = !isSelected[currentIndex];
+///       for (int buttonIndex = 0; buttonIndex < isSelected.length; buttonIndex++) {
+///         if (buttonIndex == index) {
+///           isSelected[buttonIndex] = !isSelected[buttonIndex];
 ///         } else {
-///           isSelected[currentIndex] = false;
+///           isSelected[buttonIndex] = false;
 ///         }
 ///       }
 ///     });
@@ -125,9 +123,9 @@ import 'toggle_buttons_theme.dart';
 /// ```
 ///
 /// ## ToggleButton Borders
-/// The toggle buttons, by default, have a solid, 1 dp border surrounding itself
-/// and separating each button. The toggle button borders' color, width, and
-/// corner radii are configurable.
+/// The toggle buttons, by default, have a solid, 1 logical pixel border
+/// surrounding itself and separating each button. The toggle button borders'
+/// color, width, and corner radii are configurable.
 ///
 /// The [selectedBorderColor] determines the border's color when the button is
 /// selected, while [disabledBorderColor] determines the border's color when
@@ -182,10 +180,11 @@ class ToggleButtons extends StatelessWidget {
 
   static const double _defaultBorderWidth = 1.0;
 
-  /// The corresponding widget values in the toggle buttons.
+  /// The toggle button widgets.
   ///
-  /// These are typically [Icon] or [Text] widgets. The selection state
-  /// corresponds to its state in the [isSelected] list.
+  /// These are typically [Icon] or [Text] widgets. The boolean selection
+  /// state of each widget is defined by the corresponding [isSelected]
+  /// list item.
   ///
   /// The length of children has to match the length of [isSelected]. If
   /// [focusNodes] is not null, the length of children has to also match
@@ -194,24 +193,27 @@ class ToggleButtons extends StatelessWidget {
 
   /// The corresponding selection state of each toggle button.
   ///
-  /// The boolean values in the list map directly to [children] by its index.
-  /// The values in the list cannot be null.
+  /// Each value in this list represents the selection state of the [children]
+  /// widget at the same index.
   ///
   /// The length of [isSelected] has to match the length of [children].
   final List<bool> isSelected;
 
   /// The callback that is called when a button is tapped.
   ///
-  /// When set to null, all toggle buttons will be disabled.
+  /// The index parameter of the callback is the index of the button that is
+  /// tapped or otherwise activated.
+  ///
+  /// When the callback is null, all toggle buttons will be disabled.
   final void Function(int index) onPressed;
 
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// enabled and not selected.
   ///
-  /// If [selected] is set to false and [onPressed] is not null, this color
-  /// will be used.
+  /// If [onPressed] is not null, this color will be used for values in
+  /// [isSelected] that are false.
   ///
-  /// If this property is set to null, then ToggleButtonTheme.of(context).color
+  /// If this property is null, then ToggleButtonTheme.of(context).color
   /// is used. If [ToggleButtonsThemeData.color] is also null, then
   /// Theme.of(context).colorScheme.onSurface is used.
   final Color color;
@@ -219,10 +221,10 @@ class ToggleButtons extends StatelessWidget {
   /// The color for descendant [Text] and [Icon] widgets if the button is
   /// selected.
   ///
-  /// If [selected] is set to true and [onPressed] is not null, this color
-  /// will be used.
+  /// If [onPressed] is not null, this color will be used for values in
+  /// [isSelected] that are true.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).selectedColor is used. If
   /// [ToggleButtonsThemeData.selectedColor] is also null, then
   /// Theme.of(context).colorScheme.primary is used.
@@ -233,7 +235,7 @@ class ToggleButtons extends StatelessWidget {
   ///
   /// If [onPressed] is null, this color will be used.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).disabledColor is used. If
   /// [ToggleButtonsThemeData.disabledColor] is also null, then
   /// Theme.of(context).disabledColor is used.
@@ -241,15 +243,15 @@ class ToggleButtons extends StatelessWidget {
 
   /// The fill color for selected toggle buttons.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).fillColor is used. If
   /// [ToggleButtonsThemeData.fillColor] is also null, then
-  /// the fill color is set to null.
+  /// the fill color is null.
   final Color fillColor;
 
   /// The color to use for filling the button when the button has input focus.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).focusColor is used. If
   /// [ToggleButtonsThemeData.focusColor] is also null, then
   /// Theme.of(context).focusColor is used.
@@ -257,7 +259,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The highlight color for the button's [InkWell].
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).highlightColor is used. If
   /// [ToggleButtonsThemeData.highlightColor] is also null, then
   /// Theme.of(context).highlightColor is used.
@@ -265,7 +267,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The splash color for the button's [InkWell].
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).splashColor is used. If
   /// [ToggleButtonsThemeData.splashColor] is also null, then
   /// Theme.of(context).splashColor is used.
@@ -274,7 +276,7 @@ class ToggleButtons extends StatelessWidget {
   /// The color to use for filling the button when the button has a pointer
   /// hovering over it.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).hoverColor is used. If
   /// [ToggleButtonsThemeData.hoverColor] is also null, then
   /// Theme.of(context).hoverColor is used.
@@ -294,7 +296,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// Whether or not to render a border around each toggle button.
   ///
-  /// When set to true, a border with [borderWidth], [borderRadius] and the
+  /// When true, a border with [borderWidth], [borderRadius] and the
   /// appropriate border color will render. Otherwise, no border will be
   /// rendered.
   final bool renderBorder;
@@ -302,7 +304,7 @@ class ToggleButtons extends StatelessWidget {
   /// The border color to display when the toggle button is enabled and not
   /// selected.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).borderColor is used. If
   /// [ToggleButtonsThemeData.borderColor] is also null, then
   /// Theme.of(context).colorScheme.onSurface is used.
@@ -310,7 +312,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The border color to display when the toggle button is selected.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).selectedBorderColor is used. If
   /// [ToggleButtonsThemeData.selectedBorderColor] is also null, then
   /// Theme.of(context).colorScheme.primary is used.
@@ -318,7 +320,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The border color to display when the toggle button is disabled.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).disabledBorderColor is used. If
   /// [ToggleButtonsThemeData.disabledBorderColor] is also null, then
   /// Theme.of(context).disabledBorderColor is used.
@@ -327,14 +329,14 @@ class ToggleButtons extends StatelessWidget {
   /// The width of the border surrounding each toggle button.
   ///
   /// This applies to both the greater surrounding border, as well as the
-  /// borders dividing each toggle button.
+  /// borders rendered between toggle buttons.
   ///
   /// To render a hairline border (one physical pixel), set borderWidth to 0.0.
   /// See [BorderSide.width] for more details on hairline borders.
   ///
   /// To omit the border entirely, set [renderBorder] to false.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).borderWidth is used. If
   /// [ToggleButtonsThemeData.borderWidth] is also null, then
   /// a width of 1.0 is used.
@@ -342,7 +344,7 @@ class ToggleButtons extends StatelessWidget {
 
   /// The radii of the border's corners.
   ///
-  /// If this property is set to null, then
+  /// If this property is null, then
   /// ToggleButtonTheme.of(context).borderRadius is used. If
   /// [ToggleButtonsThemeData.borderRadius] is also null, then
   /// the buttons default to non-rounded borders.
@@ -610,12 +612,12 @@ class _ToggleButton extends StatelessWidget {
 
   /// The color for [Text] and [Icon] widgets if the button is enabled.
   ///
-  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  /// If [selected] is false and [onPressed] is not null, this color will be used.
   final Color color;
 
   /// The color for [Text] and [Icon] widgets if the button is selected.
   ///
-  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  /// If [selected] is true and [onPressed] is not null, this color will be used.
   final Color selectedColor;
 
   /// The color for [Text] and [Icon] widgets if the button is disabled.
@@ -649,7 +651,7 @@ class _ToggleButton extends StatelessWidget {
 
   /// Called when the button is tapped or otherwise activated.
   ///
-  /// If this is set to null, the button will be disabled, see [enabled].
+  /// If this is null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
 
   /// The width and color of the button's leading side border.

@@ -90,8 +90,6 @@ class ToggleButtonsThemeData extends Diagnosticable {
   final double borderWidth;
 
   /// The radii of the border's corners.
-  ///
-  /// By default, the border's corners are not rounded.
   final BorderRadius borderRadius;
 
   /// Creates a copy of this object but with the given fields replaced with the
