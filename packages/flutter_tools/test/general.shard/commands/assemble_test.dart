@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
@@ -39,11 +38,10 @@ void main() {
         defines: <String, String>{
           'BuildMode': 'debug'
         }, projectDir: fs.currentDirectory,
-        buildDir: fs.directory(getBuildDirectory()),
+        buildDir: fs.directory(fs.path.join('.dart_tool', 'flutter_build')).absolute,
       );
 
-      expect(bufferLogger.statusText.trim(),
-          fs.path.relative(environment.buildDir.path, from: fs.currentDirectory.path));
+      expect(bufferLogger.statusText.trim(), environment.buildDir.path);
     }));
 
     test('Can describe a target', () => testbed.run(() async {
