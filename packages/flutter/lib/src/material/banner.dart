@@ -11,21 +11,35 @@ import 'theme.dart';
 
 /// A Material Design banner.
 ///
-/// TODO: Find out if this is true from design.
-/// The layout will use a single [Row] if there is only one action, otherwise
-/// the actions will be in their own [Row] below the content.
+/// A banner displays an important, succinct message, and provides actions for
+/// users to address (or dismiss the banner). It requires a user action to be
+/// dismissed.
 ///
-/// TODO: Fill in more documentation
+/// Banners should be displayed at the top of the screen, below a top app bar.
+/// They are persistent and nonmodal, allowing the user to either ignore them or
+/// interact with them at any time.
+///
+/// TODO: Find out if this is true from design.
+/// The banner layout will use a single [Row] if there is only one action,
+/// otherwise the actions will be in their own [Row] below the content.
+///
+/// The [actions] and [content] must be provided. An optional leading widget
+/// (typically an [Image]) can also be provided. The [contentTextStyle] and
+/// [backgroundColor] can be provided to customize the banner.
 class MaterialBanner extends StatelessWidget {
   /// Creates a [MaterialBanner].
+  ///
+  /// The [actions] and [content] must be non-null.
   const MaterialBanner({
     Key key,
     @required this.content,
     this.contentTextStyle,
-    this.leading,
     @required this.actions,
+    this.leading,
     this.backgroundColor,
-  }) : super(key: key);
+  }) : assert(content != null),
+       assert(actions != null),
+       super(key: key);
 
   /// The content of the [MaterialBanner].
   ///
@@ -37,11 +51,6 @@ class MaterialBanner extends StatelessWidget {
   /// If null, defaults to [ThemeData.textTheme.body1].
   final TextStyle contentTextStyle;
 
-  /// The (optional) leading widget of the [MaterialBanner].
-  ///
-  /// Typically an [Image] widget.
-  final Widget leading;
-
   /// The set of actions that are displayed at the bottom of the bottom or right
   /// side of the [MaterialBanner].
   ///
@@ -50,6 +59,11 @@ class MaterialBanner extends StatelessWidget {
   /// These widgets will be wrapped in a [ButtonBar], which introduces 8 pixels
   /// of padding on each side.
   final List<Widget> actions;
+
+  /// The (optional) leading widget of the [MaterialBanner].
+  ///
+  /// Typically an [Image] widget.
+  final Widget leading;
 
   /// The background color of the surface of this [MaterialBanner].
   ///
