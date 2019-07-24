@@ -483,8 +483,7 @@ void main() {
     const String searchHint = 'custom search hint';
     final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
 
-    final _TestSearchDelegate delegate =
-        _TestSearchDelegate(searchHint: searchHint);
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHint);
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
