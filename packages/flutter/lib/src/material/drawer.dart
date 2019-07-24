@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'list_tile.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'theme.dart';
 
 /// The possible alignments of a [Drawer].
 enum DrawerAlignment {
@@ -127,7 +128,7 @@ class Drawer extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     String label = semanticLabel;
-    switch (defaultTargetPlatform) {
+    switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         label = semanticLabel;
         break;
@@ -447,6 +448,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         ),
       );
     } else {
+      bool platformHasBackButton;
+      switch (Theme.of(context).platform) {
+        case TargetPlatform.android:
+          platformHasBackButton = true;
+          break;
+        case TargetPlatform.iOS:
+        case TargetPlatform.fuchsia:
+          platformHasBackButton = false;
+          break;
+      }
+      assert(platformHasBackButton != null);
       return GestureDetector(
         key: _gestureDetectorKey,
         onHorizontalDragDown: _handleDragDown,
@@ -461,7 +473,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
               BlockSemantics(
                 child: GestureDetector(
                   // On Android, the back button is used to dismiss a modal.
-                  excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
+                  excludeFromSemantics: platformHasBackButton,
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
