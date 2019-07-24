@@ -355,6 +355,11 @@ class ToggleButtons extends StatelessWidget {
         || index == length - 1 && textDirection == TextDirection.rtl;
   }
 
+  bool _isLastIndex(int index, int length, TextDirection textDirection) {
+    return index == length - 1 && textDirection == TextDirection.ltr
+        || index == 0 && textDirection == TextDirection.rtl;
+  }
+
   BorderRadius _getEdgeBorderRadius(int index, int length, TextDirection textDirection, ToggleButtonsThemeData toggleButtonsTheme) {
     final BorderRadius resultingBorderRadius = borderRadius ?? toggleButtonsTheme.borderRadius ?? BorderRadius.zero;
 
@@ -363,10 +368,7 @@ class ToggleButtons extends StatelessWidget {
         topLeft: resultingBorderRadius.topLeft,
         bottomLeft: resultingBorderRadius.bottomLeft,
       );
-    } else if (
-      index == length - 1 && textDirection == TextDirection.ltr ||
-      index == 0 && textDirection == TextDirection.rtl
-    ) {
+    } else if (_isLastIndex(index, length, textDirection)) {
       return BorderRadius.only(
         topRight: resultingBorderRadius.topRight,
         bottomRight: resultingBorderRadius.bottomRight,
@@ -384,10 +386,7 @@ class ToggleButtons extends StatelessWidget {
         topLeft: resultingBorderRadius.topLeft - Radius.circular(resultingBorderWidth / 2.0),
         bottomLeft: resultingBorderRadius.bottomLeft - Radius.circular(resultingBorderWidth / 2.0),
       );
-    } else if (
-      index == length - 1 && textDirection == TextDirection.ltr ||
-      index == 0 && textDirection == TextDirection.rtl
-    ) {
+    } else if (_isLastIndex(index, length, textDirection)) {
       return BorderRadius.only(
         topRight: resultingBorderRadius.topRight - Radius.circular(resultingBorderWidth / 2.0),
         bottomRight: resultingBorderRadius.bottomRight - Radius.circular(resultingBorderWidth / 2.0),
