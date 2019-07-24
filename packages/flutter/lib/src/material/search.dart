@@ -187,14 +187,27 @@ abstract class SearchDelegate<T> {
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///
-  ///  final String searchHint;
+  ///   final String searchHint;
   ///
-  ///  CustomSearchHintDelegate({
-  ///    this.searchHint,
-  ///  });
+  ///   CustomSearchHintDelegate({
+  ///     this.searchHint,
+  ///   });
   ///
-  ///  @override
-  ///  String get searchFieldLabel => this.searchHint;
+  ///   @override
+  ///   String get searchFieldLabel => this.searchHint;
+  ///
+  ///    @override
+  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///
+  ///   @override
+  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///
+  ///   @override
+  ///   Widget buildResults(BuildContext context) => Text('Results');
+  ///
+  ///   @override
+  ///   List<Widget> buildActions(BuildContext context) => [];
+  /// }
   /// ```
   /// {@end-tool}
   String get searchFieldLabel => null;
