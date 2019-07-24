@@ -75,17 +75,19 @@ class CupertinoScrollbar extends StatefulWidget {
   /// {@tool sample}
   ///
   /// ```dart
-  /// final ScrollController controller = ScrollController();
-  /// return PrimaryScrollController(
-  ///   controller: controller,
-  ///   child: CupertinoScrollbar(
+  /// build(BuildContext context) {
+  ///   final ScrollController controller = ScrollController();
+  ///   return PrimaryScrollController(
   ///     controller: controller,
-  ///     child: ListView.builder(
-  ///       itemCount: 150,
-  ///       itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///     child: CupertinoScrollbar(
+  ///       controller: controller,
+  ///       child: ListView.builder(
+  ///         itemCount: 150,
+  ///         itemBuilder: (BuildContext context, int index) => Text('item $index'),
+  ///       ),
   ///     ),
-  ///   ),
-  /// );
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   final ScrollController controller;
