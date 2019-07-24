@@ -712,6 +712,7 @@ void main() {
   testWidgets(
     'Default border width and border colors for enabled, selected and disabled states',
     (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
       const double defaultBorderWidth = 1.0;
       await tester.pumpWidget(
         Material(
@@ -737,13 +738,13 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -771,13 +772,13 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -804,13 +805,13 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0x61000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.38),
             strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0x61000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.38),
             strokeWidth: defaultBorderWidth,
           ),
       );
@@ -1168,6 +1169,7 @@ void main() {
   testWidgets(
     'Properly draws borders based on state',
     (WidgetTester tester) async {
+      final ThemeData theme = ThemeData();
       await tester.pumpWidget(
         Material(
           child: boilerplate(
@@ -1195,7 +1197,7 @@ void main() {
           // leading side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1208,13 +1210,13 @@ void main() {
           // leading side - selected
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
           // top and bottom - selected
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
@@ -1227,13 +1229,13 @@ void main() {
           // leading side - selected, since previous button is selected
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff2196f3),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           )
           // trailing side, top and bottom - enabled
           ..path(
             style: PaintingStyle.stroke,
-            color: const Color(0xff000000),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: _defaultBorderWidth,
           ),
       );
