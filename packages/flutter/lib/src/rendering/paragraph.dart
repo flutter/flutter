@@ -102,7 +102,7 @@ class RenderParagraph extends RenderBox
            overflow == TextOverflow.ellipsis ||
            overflow == TextOverflow.ellipsisCharacter ?
             _kEllipsis : null,
-         ellipsizeByCharacter: overflow == TextOverflow.ellipsisCharacter,
+         ellipsizedByCharacter: overflow == TextOverflow.ellipsisCharacter,
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
@@ -215,7 +215,7 @@ class RenderParagraph extends RenderBox
       value == TextOverflow.ellipsis ||
       value == TextOverflow.ellipsisCharacter ?
         _kEllipsis : null;
-    _textPainter.ellipsizeByCharacter = value == TextOverflow.ellipsisCharacter;
+    _textPainter.ellipsizedByCharacter = value == TextOverflow.ellipsisCharacter;
     markNeedsLayout();
   }
 
