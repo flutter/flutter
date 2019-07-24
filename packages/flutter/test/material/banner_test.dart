@@ -72,11 +72,12 @@ void main() {
     );
 
     final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopLeft = tester.getTopLeft(find.byType(ButtonBar));
-    expect(contentBottomLeft.dy, lessThan(actionsTopLeft.dy));
+    final Offset actionsTopRight = tester.getTopLeft(find.byType(ButtonBar));
+    expect(contentBottomLeft.dy, lessThan(actionsTopRight.dy));
+    expect(contentBottomLeft.dx, greaterThan(actionsTopRight.dx));
   });
 
-  testWidgets('Actions laid out below content if only one action', (WidgetTester tester) async {
+  testWidgets('Actions laid out beside content if only one action', (WidgetTester tester) async {
     const String contentText = 'Content';
 
     await tester.pumpWidget(
@@ -94,8 +95,9 @@ void main() {
     );
 
     final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
-    final Offset actionsTopLeft = tester.getTopLeft(find.byType(ButtonBar));
-    expect(contentBottomLeft.dy, greaterThan(actionsTopLeft.dy));
+    final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
+    expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
+    expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
   });
 }
 

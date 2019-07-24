@@ -774,7 +774,7 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
-  /// A theme for customizing the color and text style a banner.
+  /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData bannerTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
