@@ -3,9 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show
-  PrimaryPointerGestureRecognizer,
-  GestureDisposition;
 
 import 'basic.dart';
 import 'container.dart';
@@ -84,11 +81,12 @@ class ModalBarrier extends StatelessWidget {
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
-        child: _ModalBarrierGestureDetector(
-          onAnyTapDown: () {
+        child: GestureDetector(
+          onTapDown: (TapDownDetails details) {
             if (dismissible)
               Navigator.maybePop(context);
           },
+          behavior: HitTestBehavior.opaque,
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
@@ -174,105 +172,6 @@ class AnimatedModalBarrier extends AnimatedWidget {
       dismissible: dismissible,
       semanticsLabel: semanticsLabel,
       barrierSemanticsDismissible: barrierSemanticsDismissible,
-    );
-  }
-}
-
-// Recognizes tap down by any pointer button unconditionally. When it receives a
-// PointerDownEvent, it immediately claims victor of arena and calls
-// [onAnyTapDown] without any checks.
-//
-// It is used by ModalBarrier to detect any taps on the overlay.
-class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  _AnyTapGestureRecognizer({
-    Object debugOwner,
-    this.onAnyTapDown,
-  }) : super(debugOwner: debugOwner);
-
-  VoidCallback onAnyTapDown;
-
-  bool _sentTapDown = false;
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    resolve(GestureDisposition.accepted);
-  }
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-    if (!_sentTapDown) {
-      if (onAnyTapDown != null)
-        onAnyTapDown();
-      _sentTapDown = true;
-    }
-  }
-
-  @override
-  void didStopTrackingLastPointer(int pointer) {
-    super.didStopTrackingLastPointer(pointer);
-    _sentTapDown = false;
-  }
-
-  @override
-  String get debugDescription => 'any tap';
-}
-
-class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
-  const _ModalBarrierSemanticsDelegate({this.onAnyTapDown});
-
-  final VoidCallback onAnyTapDown;
-
-  @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    renderObject.onTap = onAnyTapDown;
-  }
-}
-
-class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
-  const _AnyTapGestureRecognizerFactory({this.onAnyTapDown});
-
-  final VoidCallback onAnyTapDown;
-
-  @override
-  _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
-
-  @override
-  void initializer(_AnyTapGestureRecognizer instance) {
-    instance.onAnyTapDown = onAnyTapDown;
-  }
-}
-
-// A GestureDetector used by ModalBarrier. It only has one callback,
-// [onAnyTapDown], which recognizes tap down unconditionally.
-class _ModalBarrierGestureDetector extends StatelessWidget {
-  const _ModalBarrierGestureDetector({
-    Key key,
-    @required this.child,
-    @required this.onAnyTapDown,
-  }) : assert(child != null),
-       assert(onAnyTapDown != null),
-       super(key: key);
-
-  /// The widget below this widget in the tree.
-  /// See [RawGestureDetector.child].
-  final Widget child;
-
-  /// Immediately called when a pointer causes a tap down.
-  /// See [_AnyTapGestureRecognizer.onAnyTapDown].
-  final VoidCallback onAnyTapDown;
-
-  @override
-  Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapDown: onAnyTapDown),
-    };
-
-    return RawGestureDetector(
-      gestures: gestures,
-      behavior: HitTestBehavior.opaque,
-      semantics: _ModalBarrierSemanticsDelegate(onAnyTapDown: onAnyTapDown),
-      child: child,
     );
   }
 }
