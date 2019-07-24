@@ -131,11 +131,17 @@ void main() {
       textStyleOne = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyleOne.style.color, theme.disabledColor);
+      expect(
+        textStyleOne.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
       textStyleTwo = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
-      expect(textStyleTwo.style.color, theme.disabledColor);
+      expect(
+        textStyleTwo.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
 
       await tester.tap(find.text('Second child'));
       await tester.pumpAndSettle();
@@ -146,11 +152,17 @@ void main() {
       textStyleOne = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyleOne.style.color, theme.disabledColor);
+      expect(
+        textStyleOne.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
       textStyleTwo = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'Second child'),
       );
-      expect(textStyleTwo.style.color, theme.disabledColor);
+      expect(
+        textStyleTwo.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
     },
   );
 
@@ -307,11 +319,17 @@ void main() {
       textStyle = tester.firstWidget(
         find.widgetWithText(DefaultTextStyle, 'First child'),
       );
-      expect(textStyle.style.color, theme.disabledColor);
+      expect(
+        textStyle.style.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
       iconTheme = tester.firstWidget(
         find.widgetWithIcon(IconTheme, Icons.check),
       );
-      expect(iconTheme.data.color, theme.disabledColor);
+      expect(
+        iconTheme.data.color,
+        theme.colorScheme.onSurface.withOpacity(0.38),
+      );
     },
   );
 
@@ -326,7 +344,7 @@ void main() {
       // tests are ineffective if the custom colors are the same as the theme's
       expect(theme.colorScheme.onSurface, isNot(enabledColor));
       expect(theme.colorScheme.primary, isNot(selectedColor));
-      expect(theme.disabledColor, isNot(disabledColor));
+      expect(theme.colorScheme.onSurface.withOpacity(0.38), isNot(disabledColor));
 
       await tester.pumpWidget(
         Material(

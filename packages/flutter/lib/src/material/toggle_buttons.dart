@@ -238,7 +238,7 @@ class ToggleButtons extends StatelessWidget {
   /// If this property is null, then
   /// ToggleButtonTheme.of(context).disabledColor is used. If
   /// [ToggleButtonsThemeData.disabledColor] is also null, then
-  /// Theme.of(context).colorScheme.onSurface.withOpacity(0.32) is used.
+  /// Theme.of(context).colorScheme.onSurface.withOpacity(0.38) is used.
   final Color disabledColor;
 
   /// The fill color for selected toggle buttons.
@@ -440,7 +440,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.32),
+          ?? theme.colorScheme.onSurface.withOpacity(0.38),
         width: resultingBorderWidth,
       );
     }
@@ -475,7 +475,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.32),
+          ?? theme.colorScheme.onSurface.withOpacity(0.38),
         width: resultingBorderWidth,
       );
     }
@@ -513,7 +513,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.32),
+          ?? theme.colorScheme.onSurface.withOpacity(0.38),
         width: resultingBorderWidth,
       );
     }
@@ -738,7 +738,7 @@ class _ToggleButton extends StatelessWidget {
     } else {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
-        ?? theme.colorScheme.onSurface.withOpacity(0.32);
+        ?? theme.colorScheme.onSurface.withOpacity(0.38);
     }
 
     final Widget result = ClipRRect(
@@ -938,14 +938,15 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     // The baseline of this widget is the baseline of its child
-    return child.computeDistanceToActualBaseline(baseline) + horizontalBorderSide.width;
+    return child.computeDistanceToActualBaseline(baseline) +
+      horizontalBorderSide.width;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
     return horizontalBorderSide.width +
-           _maxHeight(child, width) +
-           horizontalBorderSide.width;
+      _maxHeight(child, width) +
+      horizontalBorderSide.width;
   }
 
   @override
