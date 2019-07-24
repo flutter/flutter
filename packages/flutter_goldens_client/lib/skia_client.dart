@@ -159,7 +159,7 @@ class SkiaGoldClient extends GoldensClient {
     assert(testName != null);
     assert(goldenFile != null);
 
-//    await imgtestInit();
+    await imgtestInit();
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
@@ -196,7 +196,7 @@ class SkiaGoldClient extends GoldensClient {
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
     /* Temp for testing Cirrus */
-    return 'ebdc2cf73b9033eedada6d5f0595388bebeebe43';
+    return '14aa4d0a45e74e4d01d23a8a9a688db9f9555619';
     /* */
 
 //    if (!flutterRoot.existsSync()) {
