@@ -115,7 +115,6 @@ void main() {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       if (result.stderr.isNotEmpty)
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
-      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       expect(result.exitCode, 0);
     });
 
