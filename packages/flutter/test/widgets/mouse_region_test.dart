@@ -9,28 +9,36 @@ import 'package:flutter/gestures.dart';
 
 
 class HoverClient extends StatefulWidget {
-  const HoverClient({Key key, this.onHover, this.child}) : super(key: key);
+  const HoverClient({
+    Key key,
+    this.onHover,
+    this.child,
+    this.onEnter,
+    this.onExit,
+  }) : super(key: key);
 
   final ValueChanged<bool> onHover;
   final Widget child;
+  final VoidCallback onEnter;
+  final VoidCallback onExit;
 
   @override
   HoverClientState createState() => HoverClientState();
 }
 
 class HoverClientState extends State<HoverClient> {
-  static int numEntries = 0;
-  static int numExits = 0;
 
   void _onExit(PointerExitEvent details) {
-    numExits++;
+    if (widget.onExit != null)
+      widget.onExit();
     if (widget.onHover != null) {
       widget.onHover(false);
     }
   }
 
   void _onEnter(PointerEnterEvent details) {
-    numEntries++;
+    if (widget.onEnter != null)
+      widget.onEnter();
     if (widget.onHover != null) {
       widget.onHover(true);
     }
@@ -47,7 +55,10 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  const HoverFeedback({Key key}) : super(key: key);
+  const HoverFeedback({Key key, this.onEnter, this.onExit}) : super(key: key);
+
+  final VoidCallback onEnter;
+  final VoidCallback onExit;
 
   @override
   _HoverFeedbackState createState() => _HoverFeedbackState();
@@ -62,6 +73,8 @@ class _HoverFeedbackState extends State<HoverFeedback> {
       textDirection: TextDirection.ltr,
       child: HoverClient(
         onHover: (bool hovering) => setState(() => _hovering = hovering),
+        onEnter: widget.onEnter,
+        onExit: widget.onExit,
         child: Text(_hovering ? 'HOVERING' : 'not hovering'),
       ),
     );
@@ -70,11 +83,6 @@ class _HoverFeedbackState extends State<HoverFeedback> {
 
 void main() {
   group('MouseRegion hover detection', () {
-    setUp((){
-      HoverClientState.numExits = 0;
-      HoverClientState.numEntries = 0;
-    });
-
     testWidgets('detects pointer enter', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
@@ -498,29 +506,38 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
 
+      int numEntries = 0;
+      int numExits = 0;
+
       await tester.pumpWidget(
-        const Center(child: HoverFeedback()),
+        Center(child: HoverFeedback(
+          onEnter: () => numEntries++,
+          onExit: () => numExits++,
+        )),
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(Text)));
       await tester.pumpAndSettle();
-      expect(HoverClientState.numEntries, equals(1));
-      expect(HoverClientState.numExits, equals(0));
+      expect(numEntries, equals(1));
+      expect(numExits, equals(0));
       expect(find.text('HOVERING'), findsOneWidget);
 
       await tester.pumpWidget(
         Container(),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(1));
-      expect(HoverClientState.numExits, equals(1));
+      expect(numEntries, equals(1));
+      expect(numExits, equals(1));
 
       await tester.pumpWidget(
-        const Center(child: HoverFeedback()),
+        Center(child: HoverFeedback(
+          onEnter: () => numEntries++,
+          onExit: () => numExits++,
+        )),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(1));
+      expect(numEntries, equals(2));
+      expect(numExits, equals(1));
 
       await gesture.removePointer();
     });
@@ -530,28 +547,40 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
 
+
+      int numEntries = 0;
+      int numExits = 0;
+
       await tester.pumpWidget(
-        Center(child: HoverFeedback(key: feedbackKey)),
+        Center(child: HoverFeedback(
+          key: feedbackKey,
+          onEnter: () => numEntries++,
+          onExit: () => numExits++,
+        )),
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(Text)));
       await tester.pumpAndSettle();
-      expect(HoverClientState.numEntries, equals(1));
-      expect(HoverClientState.numExits, equals(0));
+      expect(numEntries, equals(1));
+      expect(numExits, equals(0));
       expect(find.text('HOVERING'), findsOneWidget);
 
       await tester.pumpWidget(
-        Center(child: Container(child: HoverFeedback(key: feedbackKey))),
+        Center(child: Container(child: HoverFeedback(
+          key: feedbackKey,
+          onEnter: () => numEntries++,
+          onExit: () => numExits++,
+        ))),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(1));
+      expect(numEntries, equals(2));
+      expect(numExits, equals(1));
       await tester.pumpWidget(
         Container(),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(2));
+      expect(numEntries, equals(2));
+      expect(numExits, equals(2));
 
       await gesture.removePointer();
     });
