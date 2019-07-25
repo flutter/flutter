@@ -384,8 +384,6 @@ void main() {
       '.android/Flutter/build.gradle',
       '.android/Flutter/flutter.iml',
       '.android/Flutter/src/main/AndroidManifest.xml',
-      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
-      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       '.android/gradle.properties',
       '.android/gradle/wrapper/gradle-wrapper.jar',

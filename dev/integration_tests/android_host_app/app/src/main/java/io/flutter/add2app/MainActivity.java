@@ -1,14 +1,13 @@
 package io.flutter.add2app;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import io.flutter.facade.Flutter;
+import io.flutter.app.FlutterActivity;
+import io.flutter.view.FlutterMain;
 
-public class MainActivity extends AppCompatActivity {
-
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    setContentView(Flutter.createView(this, getLifecycle(), "route1"));
-  }
+public class MainActivity extends FlutterActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        FlutterMain.startInitialization(getApplicationContext());
+        super.onCreate(savedInstanceState);
+    }
 }
