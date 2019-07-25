@@ -3,12 +3,21 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/common/config.gni")
 
 if (using_fuchsia_sdk) {
+  product_suffix = ""
+
+  if (flutter_runtime_mode == "release") {
+    product_suffix = "product_"
+  }
+
+  flutter_runner_target = "flutter_jit_${product_suffix}runner"
+
   group("fuchsia") {
     deps = [
-      "dart",
-      "flutter:flutter_jit_runner",
+      # "dart",
+      "flutter:$flutter_runner_target",
     ]
   }
 }

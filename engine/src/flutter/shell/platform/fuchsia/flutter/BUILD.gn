@@ -30,6 +30,7 @@ shell_gpu_configuration("fuchsia_gpu_configuration") {
 template("flutter_runner") {
   assert(defined(invoker.output_name), "flutter_runner must define output_name")
   assert(defined(invoker.extra_deps), "flutter_runner must define extra_deps")
+  assert(defined(invoker.product), "flutter_runner must define product")
 
   invoker_output_name = invoker.output_name
   extra_deps = invoker.extra_deps
@@ -128,6 +129,12 @@ template("flutter_runner") {
     # The flags below are needed so that Dart's CPU profiler can walk the
     # C++ stack.
     cflags = [ "-fno-omit-frame-pointer" ]
+
+    if (!invoker.product) {
+      # This flag is needed so that the call to dladdr() in Dart's native symbol
+      # resolver can report good symbol information for the CPU profiler.
+      ldflags = [ "-rdynamic" ]
+    }
   }
 }
 
@@ -141,25 +148,50 @@ template("flutter_runner") {
 # 7. framework and product!! (_framework snapshots and dilp files.)
 # 8. CMX files are also ignored.
 
-flutter_runner("jit") {
-  output_name = "flutter_jit_runner"
+flutter_runner("jit_product") {
+  output_name = "flutter_jit_product_runner"
+  product = true
+  extra_defines = [ "DART_PRODUCT" ]
 
-  extra_deps = [ "$flutter_root/runtime:libdart" ]
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_jit_product",
+    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
+  ]
 }
 
+flutter_runner("jit") {
+  output_name = "flutter_jit_runner"
+  product = false
+
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
+  ]
+}
+
+observatory_target =
+    "//third_party/dart/runtime/observatory:observatory_archive"
+observatory_archive_dir = get_label_info(observatory_target, "target_gen_dir")
+observatory_archive_name = get_label_info(observatory_target, "name")
+observatory_archive_file =
+    "${observatory_archive_dir}/${observatory_archive_name}.tar"
+
 template("jit_runner") {
+  product = defined(invoker.product) && invoker.product
+
   product_suffix = ""
 
-  if (defined(invoker.product) && invoker.product) {
-    product_suffix = "product"
+  if (product) {
+    product_suffix = "_product"
   }
 
   package_dir(target_name) {
-    snapshot_gen_dir = "$root_build_dir/gen/flutter/lib/snapshot"
+    snapshot_gen_dir =
+        "$root_build_dir/gen/flutter/shell/platform/fuchsia/flutter/kernel"
 
     deps = [
       ":jit${product_suffix}",
-      "$flutter_root/lib/snapshot:generate_snapshot_bin",
+      "kernel:kernel_core_snapshot${product_suffix}",
     ]
 
     binary = "flutter_jit${product_suffix}_runner"
@@ -267,4 +299,8 @@ template("jit_runner") {
 
 jit_runner("flutter_jit_runner") {
   product = false
+}
+
+jit_runner("flutter_jit_product_runner") {
+  product = true
 }
