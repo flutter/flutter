@@ -557,10 +557,10 @@ class FlutterDriverExtension {
   }
 
   /// Wait until the given condition is true.
-  /// 
+  ///
   /// In the implementation, we have a repeating timer that runs the condition
   /// with [duration] intervals until the condition is met.
-  /// 
+  ///
   /// [duration] is set to 10 milliseconds by default - 10 milliseconds is
   /// an estimate interval that this timer won't starve other executions in the
   /// same isolate and not too long before the state becomes stale.
