@@ -12,6 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'annotation_test.dart';
 import 'debug.dart';
 
 /// A composited layer.
@@ -151,6 +152,34 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   Iterable<S> findAll<S>(Offset regionOffset);
+
+  /// Determines the list of annotations located at the given position.
+  ///
+  /// Returns true, and adds any annotations that contain the point to the
+  /// given annotation test result, if this render object or one of its
+  /// descendants absorbs the hit (preventing non-ancestral layers below this
+  /// one from being hit).
+  /// Returns false if the hit can continue to other non-ancestral objects below
+  /// this one.
+  bool findAnnotations<S>(AnnotationTestResult<S> result, { @required Offset regionOffset }) {
+    if (findAnnotationsFromChildren(result, regionOffset: regionOffset) ||
+        findAnnotationFromSelf(result, regionOffset: regionOffset)) {
+      return true;
+    }
+    return false;
+  }
+
+  @protected
+  /// TODOC
+  bool findAnnotationFromSelf<S>(AnnotationTestResult<S> result, { @required Offset regionOffset }) {
+    return false;
+  }
+
+  @protected
+  /// TODOC
+  bool findAnnotationsFromChildren<S>(AnnotationTestResult<S> result, { @required Offset regionOffset }) {
+    return false;
+  }
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -632,6 +661,16 @@ class ContainerLayer extends Layer {
   }
 
   @override
+  bool findAnnotationsFromChildren<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    for (Layer child = lastChild; child != null; child = child.previousSibling) {
+      final bool isAbsorbed = child.findAnnotations<S>(result, regionOffset: regionOffset);
+      if (isAbsorbed)
+        return true;
+    }
+    return false;
+  }
+
+  @override
   void attach(Object owner) {
     super.attach(owner);
     Layer child = firstChild;
@@ -861,6 +900,11 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    return super.findAnnotations<S>(result, regionOffset: regionOffset - offset);
+  }
+
+  @override
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
@@ -1017,6 +1061,13 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (!clipRect.contains(regionOffset))
+      return false;
+    return super.findAnnotations<S>(result, regionOffset: regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1098,6 +1149,13 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (!clipRRect.contains(regionOffset))
+      return false;
+    return super.findAnnotations<S>(result, regionOffset: regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1176,6 +1234,13 @@ class ClipPathLayer extends ContainerLayer {
     if (!clipPath.contains(regionOffset))
       return Iterable<S>.empty();
     return super.findAll<S>(regionOffset);
+  }
+
+  @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (!clipPath.contains(regionOffset))
+      return false;
+    return super.findAnnotations<S>(result, regionOffset: regionOffset);
   }
 
   @override
@@ -1313,6 +1378,15 @@ class TransformLayer extends OffsetLayer {
       return Iterable<S>.empty();
     }
     return super.findAll<S>(transformedOffset);
+  }
+
+  @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    final Offset transformedOffset = _transformOffset(regionOffset);
+    if (transformedOffset == null) {
+      return false;
+    }
+    return super.findAnnotations<S>(result, regionOffset: transformedOffset);
   }
 
   @override
@@ -1632,6 +1706,13 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (!clipPath.contains(regionOffset))
+      return false;
+    return super.findAnnotations<S>(result, regionOffset: regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     ui.EngineLayer engineLayer;
     bool enabled = true;
@@ -1746,6 +1827,11 @@ class LeaderLayer extends ContainerLayer {
 
   @override
   Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
+
+  @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    return super.findAnnotations<S>(result, regionOffset: regionOffset - offset);
+  }
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -1892,6 +1978,19 @@ class FollowerLayer extends ContainerLayer {
     return super.findAll<S>(transformedOffset);
   }
 
+  @override
+  bool findAnnotations<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (link.leader == null) {
+      return showWhenUnlinked &&
+        super.findAnnotations(result, regionOffset: regionOffset - unlinkedOffset);
+    }
+    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    if (transformedOffset == null) {
+      return false;
+    }
+    return super.findAnnotations<S>(result, regionOffset: transformedOffset);
+  }
+
   /// The transform that was used during the last composition phase.
   ///
   /// If the [link] was not linked to a [LeaderLayer], or if this layer has
@@ -2033,17 +2132,20 @@ class FollowerLayer extends ContainerLayer {
 /// These values can be retrieved using [Layer.find] with a given [Offset]. If
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
-class AnnotatedRegionLayer<T> extends ContainerLayer {
+class AnnotatedRegionLayer<T> extends ContainerLayer implements AnnotationTestTarget<T> {
   /// Creates a new layer annotated with [value] that clips to rectangle defined
   /// by the [size] and [offset] if provided.
   ///
   /// The [value] provided cannot be null.
-  AnnotatedRegionLayer(this.value, {this.size, Offset offset})
-      : offset = offset ?? Offset.zero,
-        assert(value != null);
+  AnnotatedRegionLayer(T value, {this.size, Offset offset})
+      : assert(value != null),
+        _value = value,
+        offset = offset ?? Offset.zero;
 
   /// The value returned by [find] if the offset is contained within this layer.
-  final T value;
+  @override
+  T get value => _value;
+  final T _value;
 
   /// The [size] is optionally used to clip the hit-testing of [find].
   ///
@@ -2089,6 +2191,20 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       return childResults.followedBy(<S>[typedResult]);
     }
     return childResults;
+  }
+
+  @override
+  bool findAnnotationFromSelf<S>(AnnotationTestResult<S> result, {Offset regionOffset}) {
+    if (size != null && !(offset & size).contains(regionOffset)) {
+      return false;
+    }
+    if (T == S) {
+      final Object untypedTarget = this;
+      final AnnotationTestTarget<S> typedTarget = untypedTarget;
+      result.add(AnnotationTestEntry<S>(typedTarget));
+      return true;
+    }
+    return false;
   }
 
   @override
