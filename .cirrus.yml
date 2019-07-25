@@ -231,7 +231,6 @@ task:
         - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
         - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
-
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
@@ -251,7 +250,7 @@ task:
       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   artifacts_cache:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\engine.version
@@ -419,7 +418,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version

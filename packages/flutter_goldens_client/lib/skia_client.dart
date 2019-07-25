@@ -95,13 +95,13 @@ class SkiaGoldClient extends GoldensClient {
       authArguments,
     );
     // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
-//    if (authResults.exitCode != 0) {
-//      final StringBuffer buf = StringBuffer()
-//        ..writeln('Flutter + Skia Gold auth failed.')
-//        ..writeln('stdout: ${authResults.stdout}')
-//        ..writeln('stderr: ${authResults.stderr}');
-//      throw NonZeroExitCode(authResults.exitCode, buf.toString());
-//    }
+    // if (authResults.exitCode != 0) {
+    //   final StringBuffer buf = StringBuffer()
+    //     ..writeln('Flutter + Skia Gold auth failed.')
+    //     ..writeln('stdout: ${authResults.stdout}')
+    //     ..writeln('stderr: ${authResults.stderr}');
+    //   throw NonZeroExitCode(authResults.exitCode, buf.toString());
+    // }
   }
 
   /// Executes the `imgtest init` command in the goldctl tool.
@@ -140,13 +140,13 @@ class SkiaGoldClient extends GoldensClient {
     );
 
     // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
-//    if (imgtestInitResult.exitCode != 0) {
-//      final StringBuffer buf = StringBuffer()
-//        ..writeln('Flutter + Skia Gold imgtest init failed.')
-//        ..writeln('stdout: ${imgtestInitResult.stdout}')
-//        ..writeln('stderr: ${imgtestInitResult.stderr}');
-//      throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
-//    }
+    // if (imgtestInitResult.exitCode != 0) {
+    //   final StringBuffer buf = StringBuffer()
+    //     ..writeln('Flutter + Skia Gold imgtest init failed.')
+    //     ..writeln('stdout: ${imgtestInitResult.stdout}')
+    //     ..writeln('stderr: ${imgtestInitResult.stderr}');
+    //   throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
+    // }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -169,17 +169,10 @@ class SkiaGoldClient extends GoldensClient {
       '--png-file', goldenFile.path,
     ];
 
-    /* Temp for testing Cirrus */
-    final io.ProcessResult result =
-    /* */
     await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
-
-    /* Temp for testing Cirrus */
-    print(result.stdout);
-    /* */
 
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // So as not to turn the tree red in this initial implementation, this will
@@ -191,21 +184,17 @@ class SkiaGoldClient extends GoldensClient {
 
   /// Returns the current commit hash of the Flutter repository.
   Future<String> _getCurrentCommit() async {
-    /* Temp for testing Cirrus */
-    return '694d54ccac31fe095bcd2804ca70eb9d1437a715';
-    /* */
-
-//    if (!flutterRoot.existsSync()) {
-//      final StringBuffer buf = StringBuffer()
-//        ..writeln('Flutter root could not be found: $flutterRoot');
-//      throw NonZeroExitCode(1, buf.toString());
-//    } else {
-//      final io.ProcessResult revParse = await process.run(
-//        <String>['git', 'rev-parse', 'HEAD'],
-//        workingDirectory: flutterRoot.path,
-//      );
-//      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
-//    }
+    if (!flutterRoot.existsSync()) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Flutter root could not be found: $flutterRoot');
+      throw NonZeroExitCode(1, buf.toString());
+    } else {
+      final io.ProcessResult revParse = await process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: flutterRoot.path,
+      );
+      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+    }
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
