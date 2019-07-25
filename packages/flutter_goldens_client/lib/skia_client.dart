@@ -94,7 +94,7 @@ class SkiaGoldClient extends GoldensClient {
       _goldctl,
       authArguments,
     );
-//    TODO(Piinks): Re-enable after Gold flakes are resolved
+    // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
 //    if (authResults.exitCode != 0) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter + Skia Gold auth failed.')
@@ -139,7 +139,7 @@ class SkiaGoldClient extends GoldensClient {
       imgtestInitArguments,
     );
 
-//    TODO(Piinks): Re-enable after Gold flakes are resolved
+    // TODO(Piinks): Re-enable after Gold flakes are resolved, https://github.com/flutter/flutter/pull/36103
 //    if (imgtestInitResult.exitCode != 0) {
 //      final StringBuffer buf = StringBuffer()
 //        ..writeln('Flutter + Skia Gold imgtest init failed.')
