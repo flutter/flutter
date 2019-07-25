@@ -638,3 +638,4 @@ tasks:
       Runs end-to-end test of Flutter's Android splash behavior.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
