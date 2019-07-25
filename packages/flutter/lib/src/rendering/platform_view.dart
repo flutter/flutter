@@ -783,9 +783,9 @@ class PlatformViewRenderBox extends RenderBox {
 
   /// Sets the [id] of the platform view that is associated with this render object.
   ///
-  /// This value must not be null, and setting it to a new value will trigger a semantics update.
+  /// This value must not be null and non-negative, and setting it to a new value will trigger a semantics update.
   set id(int id) {
-    assert(id != null);
+    assert(id != null && id > -1);
     final bool needsSemanticsUpdate = _id != id;
     _id = id;
     if (needsSemanticsUpdate) {

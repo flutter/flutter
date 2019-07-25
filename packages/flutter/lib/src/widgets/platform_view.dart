@@ -604,7 +604,7 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
     @required this.id,
     @required this.controller,
     PlatformViewRenderBoxLayerFactory customLayerFactory,
-  }) : assert(id != null),
+  }) : assert(id != null && id > -1),
        assert(controller != null),
       _customLayerFactory = customLayerFactory;
 
