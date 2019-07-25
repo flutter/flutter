@@ -150,7 +150,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 
 /// Animates the position of a widget relative to its normal position.
 ///
-/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// The translation is expressed as an [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
@@ -160,7 +160,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// direction, so in right-to-left text, positive x offsets move towards the
 /// left, and in left-to-right text, positive x offsets move towards the right.
 ///
-/// Here's an illustration of the [SlideTransition] widget, with it's [position]
+/// Here's an illustration of the [SlideTransition] widget, with its [position]
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
