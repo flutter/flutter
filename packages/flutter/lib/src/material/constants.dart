@@ -11,6 +11,10 @@ import 'package:flutter/painting.dart';
 /// with. It applies to both dimensions of a region, so a square of size
 /// kMinInteractiveDimension x kMinInteractiveDimension is the smallest
 /// acceptable region that should respond to gestures.
+///
+/// See also:
+///
+///   * [kMinInteractiveDimensionCupertino]
 const double kMinInteractiveDimension = 48.0;
 
 /// The height of the toolbar component of the [AppBar].
