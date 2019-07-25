@@ -2,19 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/dart/dart_tool.gni")
-import("//build/host.gni")
+import("//build/compiled_action.gni")
+import("//build/fuchsia/sdk.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("//topaz/runtime/dart/dart_component.gni")
-import("//topaz/runtime/dart/dart_kernel.gni")
-import("//topaz/runtime/flutter_runner/prebuilt_framework.gni")
+import("$flutter_root/common/config.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
 
 compile_platform("kernel_platform_files") {
   single_root_scheme = "org-dartlang-sdk"
-  single_root_base = rebase_path("../../../../")
+  single_root_base = rebase_path("../../../../../../")
 
-  libraries_specification_uri =
-      "org-dartlang-sdk:///topaz/runtime/flutter_runner/kernel/libraries.json"
+  libraries_specification_uri = "org-dartlang-sdk:///flutter/shell/platform/fuchsia/flutter/kernel/libraries.json"
 
   outputs = [
     "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill",
@@ -30,42 +28,25 @@ compile_platform("kernel_platform_files") {
   ]
 }
 
-dart_kernel("framework_shim") {
-  platform_name = "flutter_runner"
-  platform_deps =
-      [ "//topaz/runtime/flutter_runner/kernel:kernel_platform_files" ]
-  platform_path = "$root_out_dir/flutter_runner_patched_sdk"
-  disable_analysis = true
-  gen_bytecode = true
-  args = []
-
-  main_dart = "framework_shim.dart"
-  deps = [
-    "//third_party/dart-pkg/git/flutter/packages/flutter",
-  ]
-  manifest = "$target_gen_dir/framework_shim.dilpmanifest"
-}
-
 template("core_snapshot") {
   assert(defined(invoker.product),
          "core_snapshot requires 'product' to be defined")
-  assert(defined(invoker.framework),
-         "core_snapshot requires 'framework' to be defined")
 
   suffix = ""
+
   if (invoker.product) {
     suffix = "${suffix}_product"
   }
-  if (invoker.framework) {
-    suffix = "${suffix}_framework"
-  }
 
-  action(target_name) {
-    deps = gen_snapshot_deps + [ ":kernel_platform_files" ]
+  compiled_action(target_name) {
+    deps = [
+      ":kernel_platform_files",
+    ]
 
     platform_dill =
         "$root_out_dir/flutter_runner_patched_sdk/platform_strong.dill"
-    compilation_trace = "//topaz/runtime/flutter_runner/compilation_trace.txt"
+    compilation_trace =
+        "$flutter_root/shell/platform/fuchsia/flutter/compilation_trace.txt"
     inputs = [
       platform_dill,
       compilation_trace,
@@ -86,11 +67,13 @@ template("core_snapshot") {
       snapshot_profile,
     ]
 
+    gen_snapshot_to_use = gen_snapshot
     if (invoker.product) {
-      script = gen_snapshot_product
-    } else {
-      script = gen_snapshot
+      gen_snapshot_to_use = gen_snapshot_product
     }
+
+    tool = gen_snapshot_to_use
+
     args = [
       # TODO(FL-117): Re-enable causal async stack traces when this issue is
       # addressed.
@@ -115,95 +98,18 @@ template("core_snapshot") {
     # No asserts in debug or release product.
     # No asserts in release with flutter_profile=true (non-product)
     # Yes asserts in non-product debug.
-    if (!invoker.product && (!flutter_profile || is_debug)) {
+    if (!invoker.product &&
+        (is_debug || !(flutter_runtime_mode == "profile"))) {
       args += [ "--enable_asserts" ]
     }
     args += [ rebase_path(platform_dill) ]
-
-    if (invoker.framework) {
-      if (prebuilt_framework_path == "") {
-        deps += [ ":framework_shim_kernel" ]
-        inputs += [ "$target_gen_dir/framework_shim_kernel.dil" ]
-        args += [ rebase_path("$target_gen_dir/framework_shim_kernel.dil") ]
-      } else {
-        deps += [ ":extract_prebuilt_framework" ]
-        foreach(package, framework_packages) {
-          args += [ rebase_path(
-                  "$target_gen_dir/data/$prebuilt_framework_name/$package.dilp") ]
-          inputs +=
-              [ "$target_gen_dir/data/$prebuilt_framework_name/$package.dilp" ]
-        }
-      }
-    }
   }
 }
 
 core_snapshot("kernel_core_snapshot") {
   product = false
-  framework = false
-}
-
-core_snapshot("kernel_core_snapshot_framework") {
-  product = false
-  framework = true
 }
 
 core_snapshot("kernel_core_snapshot_product") {
   product = true
-  framework = false
-}
-
-core_snapshot("kernel_core_snapshot_product_framework") {
-  product = true
-  framework = true
-}
-
-dart_tool("extract_far") {
-  main_dart = "extract_far.dart"
-
-  force_prebuilt_dart = true
-  disable_analysis = true
-
-  source_dir = "."
-  sources = [
-    "extract_far.dart",
-  ]
-
-  deps = [
-    "//third_party/dart-pkg/pub/args",
-  ]
-}
-
-if (prebuilt_framework_path != "") {
-  action("extract_prebuilt_framework") {
-    deps = [
-      ":extract_far",
-      "//garnet/bin/far:host",
-    ]
-
-    inputs = [
-      prebuilt_framework_path,
-    ]
-
-    script = get_label_info(":extract_far", "root_out_dir") +
-             "/dart-tools/extract_far"
-    args = [
-      "--far-tool",
-      rebase_path("$host_tools_dir/far"),
-      "--archive",
-      rebase_path(prebuilt_framework_path),
-      "--out-dir",
-      rebase_path(target_gen_dir),
-    ]
-
-    outputs = []
-    foreach(package, framework_packages) {
-      args += [ "data/$prebuilt_framework_name/$package.dilp" ]
-      outputs +=
-          [ "$target_gen_dir/data/$prebuilt_framework_name/$package.dilp" ]
-    }
-    args += [ "data/$prebuilt_framework_name/app.frameworkversion" ]
-    outputs +=
-        [ "$target_gen_dir/data/$prebuilt_framework_name/app.frameworkversion" ]
-  }
 }

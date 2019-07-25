@@ -53,7 +53,9 @@ template("package_dir") {
 
   flutter_meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
 
-  copy("copy_cmx") {
+  cmx_target = "$pkg_target_name.copy_cmx"
+
+  copy("$cmx_target") {
     sources = [
       "${flutter_meta_dir}/${pkg_target_name}.cmx",
     ]
@@ -65,7 +67,7 @@ template("package_dir") {
   action(target_name) {
     script = "$flutter_root/tools/fuchsia/copy_path.py"
     response_file_contents = rebase_path(copy_sources + copy_outputs)
-    deps = pkg.deps + [ ":copy_cmx" ]
+    deps = pkg.deps + [ ":$cmx_target" ]
     args = [ "--file-list={{response_file_name}}" ]
     outputs = copy_outputs
   }
