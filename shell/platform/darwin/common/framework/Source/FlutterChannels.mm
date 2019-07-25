@@ -51,7 +51,7 @@
 - (void)sendMessage:(id)message reply:(FlutterReply)callback {
   FlutterBinaryReply reply = ^(NSData* data) {
     if (callback)
-      callback(data.length > 0 ? [_codec decode:data] : nil);
+      callback([_codec decode:data]);
   };
   [_messenger sendOnChannel:_name message:[_codec encode:message] binaryReply:reply];
 }
