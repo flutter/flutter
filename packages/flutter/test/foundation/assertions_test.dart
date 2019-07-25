@@ -122,6 +122,20 @@ void main() {
     );
   });
 
+  test('FlutterErrorDetails.toStringShort', () {
+    expect(
+        FlutterErrorDetails(
+          exception: 'MESSAGE',
+          library: 'library',
+          context: ErrorDescription('CONTEXTING'),
+          informationCollector: () sync* {
+            yield ErrorDescription('INFO');
+          },
+        ).toStringShort(),
+        'Exception caught by library',
+    );
+  });
+
   test('FlutterError default constructor', () {
     FlutterError error = FlutterError(
       'My Error Summary.\n'

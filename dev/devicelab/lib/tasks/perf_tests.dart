@@ -74,6 +74,13 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
+TaskFunction createHelloWorldStartupTest() {
+  return StartupTest(
+    '${flutterDirectory.path}/examples/hello_world',
+    reportMetrics: false,
+  ).run;
+}
+
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
@@ -224,7 +231,9 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ]);
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
       final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
       await _measureSize('hello_world', output, metrics);
       return null;
@@ -236,7 +245,9 @@ class WebCompileTest {
         '-v',
         '--release',
         '--no-pub',
-      ]);
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
       final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
       await _measureSize('flutter_gallery', output, metrics);
       return null;
@@ -247,7 +258,9 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', '--web', sampleAppName]);
+      await flutter('create', options: <String>['--template=app', '--web', sampleAppName], environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+        });
       await inDirectory(sampleDir, () async {
         await flutter('packages', options: <String>['get']);
         await evalFlutter('build', options: <String>[
@@ -255,7 +268,9 @@ class WebCompileTest {
           '-v',
           '--release',
           '--no-pub',
-        ]);
+        ], environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+        });
         await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
       });
     });

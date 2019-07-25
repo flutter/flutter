@@ -922,4 +922,18 @@ class CupertinoIcons {
   ///
   ///  * [news], same shape, but not filled in.
   static const IconData news_solid = IconData(0xf472, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A outlined brightness icon.
+  ///
+  /// See also:
+  ///
+  ///  * [brightness_solid], same shape, but filled in.
+  static const IconData brightness = IconData(0xf4B6, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// A filled in brightness icon.
+  ///
+  /// See also:
+  ///
+  ///  * [brightness], same shape, but not filled in.
+  static const IconData brightness_solid = IconData(0xf4B7, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

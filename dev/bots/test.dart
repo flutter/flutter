@@ -289,6 +289,9 @@ Future<void> _flutterBuildDart2js(String relativePathToApplication) async {
     workingDirectory: path.join(flutterRoot, relativePathToApplication),
     expectNonZeroExit: false,
     timeout: _kShortTimeout,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    }
   );
   print('Done.');
 }
@@ -370,7 +373,7 @@ Future<void> _runTests() async {
       path.join(flutterRoot, 'packages', 'flutter'),
       tableData: bigqueryApi?.tabledata,
       tests: <String>[
-        'test/widgets/',
+        path.join('test', 'widgets') + path.separator,
       ],
     );
     // Only packages/flutter/test/widgets/widget_inspector_test.dart really
@@ -382,7 +385,7 @@ Future<void> _runTests() async {
       options: <String>['--track-widget-creation'],
       tableData: bigqueryApi?.tabledata,
       tests: <String>[
-        'test/widgets/',
+        path.join('test', 'widgets') + path.separator,
       ],
     );
   }
@@ -958,9 +961,15 @@ Future<void> _androidGradleTests(String subShard) async {
   if (subShard == 'gradle1') {
     await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
     await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+    await _runDevicelabTest('gradle_jetifier_test', env: env);
+    await _runDevicelabTest('gradle_plugins_without_annotations_test', env: env);
+    await _runDevicelabTest('gradle_plugin_dependencies_test', env: env);
+    await _runDevicelabTest('gradle_migrate_settings_test', env: env);
   }
   if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
+    await _runDevicelabTest('build_aar_plugin_test', env: env);
+    await _runDevicelabTest('build_aar_module_test', env: env);
   }
 }

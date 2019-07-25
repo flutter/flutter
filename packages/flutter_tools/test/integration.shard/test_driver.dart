@@ -152,13 +152,13 @@ abstract class FlutterTestDriver {
     if (_processPid == null)
       return -1;
     _debugPrint('Sending SIGTERM to $_processPid..');
-    Process.killPid(_processPid);
+    ProcessSignal.SIGTERM.send(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
   }
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $_processPid..');
-    Process.killPid(_processPid, ProcessSignal.SIGKILL);
+    ProcessSignal.SIGKILL.send(_processPid);
     return _process.exitCode;
   }
 
@@ -653,10 +653,12 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }
 
   Future<Map<String, dynamic>> _waitForJson({
-    Duration timeout,
+    Duration timeout = defaultTimeout,
   }) async {
+    assert(timeout != null);
     return _timeoutWithMessages<Map<String, dynamic>>(
-      () => _stdout.stream.map<Map<String, dynamic>>(_parseJsonResponse).first,
+      () => _stdout.stream.map<Map<String, dynamic>>(_parseJsonResponse)
+          .firstWhere((Map<String, dynamic> output) => output != null),
       timeout: timeout,
       task: 'Waiting for JSON',
     );

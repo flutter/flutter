@@ -134,6 +134,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
 ///
+/// See [StrutStyle] for further control of line height at the paragraph level.
+///
 /// ### Wavy red underline with black text
 ///
 /// {@tool sample}
@@ -161,6 +163,70 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///         text: ' we got it made in the shade',
 ///       ),
 ///     ],
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ### Borders and stroke (Foreground)
+///
+/// {@tool sample}
+/// To create bordered text, a [Paint] with [Paint.style] set to [PaintingStyle.stroke]
+/// should be provided as a [foreground] paint. The following example uses a [Stack]
+/// to produce a stroke and fill effect.
+///
+/// ![Text border](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_border.png)
+///
+/// ```dart
+/// Stack(
+///   children: <Widget>[
+///     // Stroked text as border.
+///     Text(
+///       'Greetings, planet!',
+///       style: TextStyle(
+///         fontSize: 40,
+///         foreground: Paint()
+///           ..style = PaintingStyle.stroke
+///           ..strokeWidth = 6
+///           ..color = Colors.blue[700],
+///       ),
+///     ),
+///     // Solid text as fill.
+///     Text(
+///       'Greetings, planet!',
+///       style: TextStyle(
+///         fontSize: 40,
+///         color: Colors.grey[300],
+///       ),
+///     ),
+///   ],
+/// )
+/// ```
+/// {@end-tool}
+///
+/// ### Gradients (Foreground)
+///
+/// {@tool sample}
+/// The [foreground] property also allows effects such as gradients to be
+/// applied to the text. Here we provide a [Paint] with a [ui.Gradient]
+/// shader.
+///
+/// ![Text gradient](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_gradient.png)
+///
+/// ```dart
+/// Text(
+///   'Greetings, planet!',
+///   style: TextStyle(
+///     fontSize: 40,
+///     foreground: Paint()
+///       ..shader = ui.Gradient.linear(
+///         const Offset(0, 20),
+///         const Offset(150, 20),
+///         <Color>[
+///           Colors.red,
+///           Colors.yellow,
+///         ],
+///       )
 ///   ),
 /// )
 /// ```
@@ -470,13 +536,11 @@ class TextStyle extends Diagnosticable {
   ///
   /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   ///
-  /// {@tool sample}
-  ///
   /// Examples of the resulting line heights from different values of `TextStyle.height`:
   ///
   /// ![Text height comparison diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_comparison_diagram.png)
   ///
-  /// {@end-tool}
+  /// See [StrutStyle] for further control of line height at the paragraph level.
   final double height;
 
   /// The locale used to select region-specific glyphs.
