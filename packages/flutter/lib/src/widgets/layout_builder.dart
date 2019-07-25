@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'debug.dart';
 import 'framework.dart';
 
-export 'sliver_layout_builder.dart';
-
 /// The signature of the [LayoutBuilder] builder function.
 typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
@@ -33,8 +31,9 @@ abstract class ConstrainedLayoutBuilder<ConstraintType extends Constraints> exte
   @override
   _LayoutBuilderElement<ConstraintType> createElement() => _LayoutBuilderElement<ConstraintType>(this);
 
-  /// Called at layout time to construct the widget tree. The builder must not
-  /// return null.
+  /// Called at layout time to construct the widget tree.
+  ///
+  /// The builder must not return null.
   final Widget Function(BuildContext, ConstraintType) builder;
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
