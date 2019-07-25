@@ -39,28 +39,14 @@ Future<void> main() async {
         );
       });
 
-      section('Build ephemeral host app');
+      section('Run flutter pub get');
 
       await inDirectory(projectDir, () async {
         await flutter(
-          'build',
-          options: <String>['apk', '--target-platform=android-arm'],
+          'pub',
+          options: <String>['get'],
         );
       });
-
-      final bool ephemeralHostApkBuilt = exists(File(path.join(
-        projectDir.path,
-        'build',
-        'host',
-        'outputs',
-        'apk',
-        'release',
-        'app-release.apk',
-      )));
-
-      if (!ephemeralHostApkBuilt) {
-        return TaskResult.failure('Failed to build ephemeral host .apk');
-      }
 
       section('Add to existing Android app');
 

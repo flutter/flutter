@@ -7,7 +7,7 @@ android {
         targetCompatibility 1.8
     }
     defaultConfig {
-        applicationId "io.flutter.add2app"
+        applicationId "io.flutter.addtoapp"
         minSdkVersion 16
         targetSdkVersion 28
         versionCode 1
