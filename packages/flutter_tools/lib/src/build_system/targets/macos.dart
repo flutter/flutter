@@ -2,12 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/macos/cocoapods.dart';
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
+import '../../build_info.dart';
 import '../../globals.dart';
+import '../../project.dart';
 import '../build_system.dart';
+import '../exceptions.dart';
+import 'assets.dart';
+import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
 
@@ -77,4 +84,96 @@ class UnpackMacOS extends Target {
       );
     }
   }
+}
+
+/// Tell cocoapods to re-fetch dependencies.
+class DebugMacOSPodInstall extends Target {
+  const DebugMacOSPodInstall();
+
+  @override
+  String get name => 'debug_macos_pod_install';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.flutterMacOSPodspec,
+      platform: TargetPlatform.darwin_x64,
+      mode: BuildMode.debug
+    ),
+    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
+    Source.pattern('{PROJECT_DIR}/macos/Podfile', optional: true),
+    Source.pattern('{PROJECT_DIR}/macos/Runner.xcodeproj/project.pbxproj'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    // No outputs because Cocoapods is full responsible for tracking. plus there
+    // is no concept of an optional output. Instead we will need a build config
+    // phase to conditionally add this rule so that it can be written properly.
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    UnpackMacOS(),
+    FlutterPlugins(),
+  ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'debug_macos_pod_install');
+    }
+    // If there is no podfile do not perform any pods actions.
+    if (!environment.projectDir.childDirectory('macos')
+        .childFile('Podfile').existsSync()) {
+      return;
+    }
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
+    final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
+        mode: buildMode, platform: TargetPlatform.darwin_x64);
+
+    await cocoaPods.processPods(
+      xcodeProject: project.macos,
+      engineDir: enginePath,
+      isSwift: true,
+      dependenciesChanged: true,
+    );
+  }
+}
+
+/// Build all of the artifacts for a debug macOS application.
+class DebugMacOSApplication extends Target {
+  const DebugMacOSApplication();
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final File sourceFile = environment.buildDir.childFile('app.dill');
+    final File destinationFile = environment.buildDir
+        .childDirectory('flutter_assets')
+        .childFile('kernel_blob.bin');
+    sourceFile.copySync(destinationFile.path);
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    FlutterPlugins(),
+    UnpackMacOS(),
+    KernelSnapshot(),
+    CopyAssets(),
+    DebugMacOSPodInstall(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill')
+  ];
+
+  @override
+  String get name => 'debug_macos_application';
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
 }

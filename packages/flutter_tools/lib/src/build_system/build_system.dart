@@ -436,11 +436,14 @@ class Environment {
 
 /// The result information from the build system.
 class BuildResult {
-  BuildResult(this.success, this.exceptions, this.performance);
+  BuildResult(this.success, this.exceptions, this.performance, this.inputFiles,
+      this.outputFiles);
 
   final bool success;
   final Map<String, ExceptionMeasurement> exceptions;
   final Map<String, PerformanceMeasurement> performance;
+  final List<File> inputFiles;
+  final List<File> outputFiles;
 
   bool get hasException => exceptions.isNotEmpty;
 }
@@ -476,6 +479,8 @@ class BuildSystem {
       passed,
       buildInstance.exceptionMeasurements,
       buildInstance.stepTimings,
+      buildInstance.inputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
+      buildInstance.outputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 }
@@ -490,6 +495,8 @@ class _BuildInstance {
   final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
   final Environment environment;
   final FileHashStore fileCache;
+  final Map<String, File> inputFiles = <String, File>{};
+  final Map<String, File> outputFiles = <String, File>{};
 
   // Timings collected during target invocation.
   final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
@@ -514,9 +521,16 @@ class _BuildInstance {
     try {
       final List<File> inputs = target.resolveInputs(environment);
       final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
+      for (File input in inputs) {
+        inputFiles[input.resolveSymbolicLinksSync()] = input;
+      }
       if (canSkip) {
         skipped = true;
         printStatus('Skipping target: ${target.name}');
+        final List<File> outputs = target.resolveOutputs(environment);
+        for (File output in outputs) {
+          inputFiles[output.resolveSymbolicLinksSync()] = output;
+        }
       } else {
         printStatus('${target.name}: Starting');
         await target.build(inputs, environment);
@@ -526,6 +540,9 @@ class _BuildInstance {
         // Update hashes for output files.
         await fileCache.hashFiles(outputs);
         target._writeStamp(inputs, outputs, environment);
+        for (File output in outputs) {
+          inputFiles[output.resolveSymbolicLinksSync()] = output;
+        }
       }
     } catch (exception, stackTrace) {
       target.clearStamp(environment);
@@ -554,10 +571,10 @@ class ExceptionMeasurement {
 
 /// Helper class to collect measurement data.
 class PerformanceMeasurement {
-  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.passed);
+  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skipped, this.passed);
   final int elapsedMilliseconds;
   final String target;
-  final bool skiped;
+  final bool skipped;
   final bool passed;
 }
 

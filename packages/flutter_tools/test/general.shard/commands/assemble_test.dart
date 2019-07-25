@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -31,7 +32,7 @@ void main() {
   test('Can run a build', () => testbed.run(() async {
     when(mockBuildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
         .thenAnswer((Invocation invocation) async {
-      return BuildResult(true, const <String, ExceptionMeasurement>{}, const <String, PerformanceMeasurement>{});
+      return BuildResult(true, const <String, ExceptionMeasurement>{}, const <String, PerformanceMeasurement>{}, <File>[], <File>[]);
     });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
     await commandRunner.run(<String>['assemble', 'unpack_macos']);
