@@ -23,6 +23,7 @@ import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
+import 'ios/devices.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
 import 'linux/linux_doctor.dart';
@@ -748,24 +749,29 @@ class DeviceValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> validDevices = <Device>[];
+    final List<Device> invalidDevices = <Device>[];
     List<ValidationMessage> messages;
-    if (devices.isEmpty) {
+    for (Device device in devices) {
+      if (device is ErroredIOSDevice) {
+        invalidDevices.add(device);
+        messages.add(ValidationMessage.error(device.exception.toString()));
+      } else {
+        validDevices.add(device);
+      }
+    }
+    if (validDevices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         messages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage(message)).toList();
       } else {
         messages = <ValidationMessage>[ValidationMessage.hint(userMessages.devicesMissing)];
       }
-    } else {
-      messages = await Device.descriptions(devices)
-          .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
-    }
-
-    if (devices.isEmpty) {
       return ValidationResult(ValidationType.notAvailable, messages);
-    } else {
-      return ValidationResult(ValidationType.installed, messages, statusInfo: userMessages.devicesAvailable(devices.length));
     }
+    messages = await Device.descriptions(devices) // TODO should this be validDevices or devices?
+        .map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
+    return ValidationResult(ValidationType.installed, messages, statusInfo: userMessages.devicesAvailable(devices.length));
   }
 }
 

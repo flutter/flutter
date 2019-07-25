@@ -182,9 +182,10 @@ class IOSDevice extends Device {
         final String deviceName = await iMobileDevice.getInfoForDevice(id, 'DeviceName');
         final String sdkVersion = await iMobileDevice.getInfoForDevice(id, 'ProductVersion');
         devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
-      } on IOSDeviceNotFoundError catch (error) {
-        // Unable to find device with given udid. Possibly a network device.
-        printTrace('Error getting attached iOS device: $error');
+        
+      } on IOSDeviceError catch (error) {
+        // ideviceinfo failed while trying to query device for info
+        devices.add(ErroredIOSDevice.fromException(error));
       }
     }
     return devices;
@@ -432,6 +433,42 @@ class IOSDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
+  }
+}
+
+/// An [IOSDevice] implementation that is not usable because of an error.
+class ErroredIOSDevice extends IOSDevice {
+  ErroredIOSDevice.fromException(this.exception) : super(exception.deviceId);
+  final IOSDeviceError exception;
+
+  //@override
+  //bool isSupportedForProject(FlutterProject flutterProject) => false;
+
+  @override
+  Future<bool> installApp(ApplicationPackage app) async {
+    assert(false, 'Device is not usable: $exception');
+    return Future<bool>.value(false);
+  }
+
+  @override
+  Future<bool> uninstallApp(ApplicationPackage app) async {
+    assert(false, 'Device is not usable: $exception');
+    return Future<bool>.value(false);
+  }
+
+  @override
+  Future<LaunchResult> startApp(
+    ApplicationPackage package, {
+    String mainPath,
+    String route,
+    DebuggingOptions debuggingOptions,
+    Map<String, dynamic> platformArgs,
+    bool prebuiltApplication = false,
+    bool ipv6 = false,
+    bool usesTerminalUi = true,
+  }) async {
+    assert(false, 'Device is not usable: $exception');
+    return Future<LaunchResult>.value(LaunchResult.failed());
   }
 }
 
