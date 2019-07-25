@@ -754,7 +754,7 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
-      matching: find.byType(Padding).first, // padding instead of margin
+      matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
@@ -797,7 +797,7 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
-      matching: find.byType(Padding).first, // padding instead of margin
+      matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
