@@ -95,6 +95,10 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
 
+    /// The last Material widget under popupButtonApp is the [PopupMenuButton]
+    /// specified above, so by finding the last descendent of popupButtonApp
+    /// that is of type Material, this code retrieves the built
+    /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
       find.descendant(
         of: find.byKey(popupButtonApp),
@@ -105,17 +109,21 @@ void main() {
     expect(button.shape, null);
     expect(button.elevation, 8.0);
 
-    final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
+    /// The last DefaultTextStyle widget under popupItemKey is the
+    /// [PopupMenuItem] specified above, so by finding the last descendent of
+    /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
+    /// built [PopupMenuItem].
+    final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(popupItemKey),
-        matching: find.byType(AnimatedDefaultTextStyle),
+        matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(text.style.fontFamily, 'Roboto');
     expect(text.style.color, const Color(0xdd000000));
   });
 
-  testWidgets('PopupMenuEntry uses values from PopupMenuThemeData', (WidgetTester tester) async {
+  testWidgets('Popup menu uses values from PopupMenuThemeData', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -146,6 +154,10 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
 
+    /// The last Material widget under popupButtonApp is the [PopupMenuButton]
+    /// specified above, so by finding the last descendent of popupButtonApp
+    /// that is of type Material, this code retrieves the built
+    /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
       find.descendant(
         of: find.byKey(popupButtonApp),
@@ -156,16 +168,20 @@ void main() {
     expect(button.shape, popupMenuTheme.shape);
     expect(button.elevation, popupMenuTheme.elevation);
 
-    final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
+    /// The last DefaultTextStyle widget under popupItemKey is the
+    /// [PopupMenuItem] specified above, so by finding the last descendent of
+    /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
+    /// built [PopupMenuItem].
+    final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(popupItemKey),
-        matching: find.byType(AnimatedDefaultTextStyle),
+        matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(text.style, popupMenuTheme.textStyle);
   });
 
-  testWidgets('PopupMenuEntry widget properties take priority over theme', (WidgetTester tester) async {
+  testWidgets('Popup menu widget properties take priority over theme', (WidgetTester tester) async {
     final PopupMenuThemeData popupMenuTheme = _popupMenuTheme();
     final Key popupButtonKey = UniqueKey();
     final Key popupButtonApp = UniqueKey();
@@ -207,6 +223,10 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
 
+    /// The last Material widget under popupButtonApp is the [PopupMenuButton]
+    /// specified above, so by finding the last descendent of popupButtonApp
+    /// that is of type Material, this code retrieves the built
+    /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
       find.descendant(
         of: find.byKey(popupButtonApp),
@@ -217,10 +237,14 @@ void main() {
     expect(button.shape, shape);
     expect(button.elevation, elevation);
 
-    final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
+    /// The last DefaultTextStyle widget under popupItemKey is the
+    /// [PopupMenuItem] specified above, so by finding the last descendent of
+    /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
+    /// built [PopupMenuItem].
+    final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(popupItemKey),
-        matching: find.byType(AnimatedDefaultTextStyle),
+        matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(text.style, textStyle);
@@ -261,6 +285,10 @@ void main() {
     await tester.tap(find.byKey(popupButtonKey));
     await tester.pumpAndSettle();
 
+    /// The last Material widget under popupButtonApp is the [PopupMenuButton]
+    /// specified above, so by finding the last descendent of popupButtonApp
+    /// that is of type Material, this code retrieves the built
+    /// [PopupMenuButton].
     final Material button = tester.widget<Material>(
       find.descendant(
         of: find.byKey(popupButtonApp),
@@ -271,10 +299,14 @@ void main() {
     expect(button.shape, BeveledRectangleBorder(borderRadius: BorderRadius.circular(10)));
     expect(button.elevation, 6.0);
 
-    final AnimatedDefaultTextStyle text = tester.widget<AnimatedDefaultTextStyle>(
+    /// The last DefaultTextStyle widget under popupItemKey is the
+    /// [PopupMenuItem] specified above, so by finding the last descendent of
+    /// popupItemKey that is of type DefaultTextStyle, this code retrieves the
+    /// built [PopupMenuItem].
+    final DefaultTextStyle text = tester.widget<DefaultTextStyle>(
       find.descendant(
         of: find.byKey(popupItemKey),
-        matching: find.byType(AnimatedDefaultTextStyle),
+        matching: find.byType(DefaultTextStyle),
       ).last,
     );
     expect(text.style.color, const Color(0xfffff000));

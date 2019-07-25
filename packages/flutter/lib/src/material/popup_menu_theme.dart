@@ -9,29 +9,26 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines the visual properties of [PopupMenuEntry] widgets.
+/// Defines the visual properties of the routes used to display popup menus
+/// as well as [PopupMenuItem] and [PopupMenuDivider] widgets.
 ///
-/// Descendant widgets obtain the current [PopupMenuEntryThemeData] object
-/// using `Theme.of(context).popupMenuTheme`. Instances of
-/// [PopupMenuEntryThemeData] can be customized with
-/// [PopupMenuEntryThemeData.copyWith].
+/// Descendant widgets obtain the current [PopupMenuThemeData] object
+/// using `PopupMenuTheme.of(context)`. Instances of
+/// [PopupMenuThemeData] can be customized with
+/// [PopupMenuThemeData.copyWith].
 ///
-/// Typically, a [PopupMenuEntryThemeData] is specified as part of the
+/// Typically, a [PopupMenuThemeData] is specified as part of the
 /// overall [Theme] with [ThemeData.popupMenuTheme]. Otherwise,
 /// [PopupMenuTheme] can be used to configure its own widget subtree.
 ///
-/// All [PopupMenuEntryThemeData] properties are `null` by default.
-/// If any of these properties are null, [PopupMenuEntry] will provide its
+/// All [PopupMenuThemeData] properties are `null` by default.
+/// If any of these properties are null, the popup menu will provide its
 /// own defaults.
 ///
 /// See also:
 ///
 ///  * [ThemeData], which describes the overall theme information for the
 ///    application.
-///  * [PopupMenuTheme], an [InheritedWidget] that propagates the theme down its
-///    subtree.
-///  * [PopupMenuThemeData], which describes the actual configuration of a
-///    popup menu theme.
 class PopupMenuThemeData extends Diagnosticable {
   /// Creates the set of properties used to configure [PopupMenuTheme].
   const PopupMenuThemeData({
@@ -145,7 +142,7 @@ class PopupMenuTheme extends InheritedWidget {
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;
 
-  /// The closest instance of this class' [data] value that encloses the given
+  /// The closest instance of this class's [data] value that encloses the given
   /// context. If there is no ancestor, it returns [ThemeData.popupMenuTheme].
   /// Applications can assume that the returned value will not be null.
   ///
