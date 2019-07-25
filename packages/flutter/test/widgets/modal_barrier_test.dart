@@ -62,7 +62,7 @@ void main() {
   });
 
   testWidgets('ModalBarrier does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
-    bool dragged;
+    bool dragged = false;
     final Widget subject = Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
