@@ -7,33 +7,21 @@ import '../../base/file_system.dart';
 import '../../globals.dart';
 import '../build_system.dart';
 
-/// Copies all of the input files to the correct copy dir.
-Future<void> copyWindowsAssets(Map<String, ChangeType> updates,
-    Environment environment) async {
-  // This path needs to match the prefix in the rule below.
-  final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-  for (String input in updates.keys) {
-    final String outputPath = fs.path.join(
-      environment.projectDir.path,
-      'windows',
-      'flutter',
-      fs.path.relative(input, from: basePath),
-    );
-    final File destinationFile = fs.file(outputPath);
-    if (!destinationFile.parent.existsSync()) {
-      destinationFile.parent.createSync(recursive: true);
-    }
-    fs.file(input).copySync(destinationFile.path);
-  }
-}
-
 /// Copies the Windows desktop embedding files to the copy directory.
-const Target unpackWindows = Target(
-  name: 'unpack_windows',
-  inputs: <Source>[
+class UnpackWindows extends Target {
+  const UnpackWindows();
+
+  @override
+  String get name => 'unpack_windows';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/windows.dart'),
     Source.artifact(Artifact.windowsDesktopPath),
-  ],
-  outputs: <Source>[
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.exp'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_windows.dll.lib'),
@@ -44,7 +32,30 @@ const Target unpackWindows = Target(
     Source.pattern('{PROJECT_DIR}/windows/flutter/flutter_glfw.h'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/icudtl.dat'),
     Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
-  ],
-  dependencies: <Target>[],
-  buildAction: copyWindowsAssets,
-);
+  ];
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    // This path needs to match the prefix in the rule below.
+    final String basePath = artifacts.getArtifactPath(Artifact.windowsDesktopPath);
+    for (File input in inputFiles) {
+      if (fs.path.basename(input.path) == 'windows.dart') {
+        continue;
+      }
+      final String outputPath = fs.path.join(
+        environment.projectDir.path,
+        'windows',
+        'flutter',
+        fs.path.relative(input.path, from: basePath),
+      );
+      final File destinationFile = fs.file(outputPath);
+      if (!destinationFile.parent.existsSync()) {
+        destinationFile.parent.createSync(recursive: true);
+      }
+      fs.file(input).copySync(destinationFile.path);
+    }
+  }
+}

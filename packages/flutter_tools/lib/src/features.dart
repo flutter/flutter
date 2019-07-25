@@ -73,7 +73,7 @@ const List<Feature> allFeatures = <Feature>[
 
 /// The [Feature] for flutter web.
 const Feature flutterWebFeature = Feature(
-  name: 'Flutter Web',
+  name: 'Flutter for web',
   configSetting: 'enable-web',
   environmentOverride: 'FLUTTER_WEB',
   master: FeatureChannelSetting(
@@ -88,7 +88,7 @@ const Feature flutterWebFeature = Feature(
 
 /// The [Feature] for macOS desktop.
 const Feature flutterMacOSDesktopFeature = Feature(
-  name: 'Flutter Desktop for macOS',
+  name: 'Flutter for desktop on macOS',
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -99,7 +99,7 @@ const Feature flutterMacOSDesktopFeature = Feature(
 
 /// The [Feature] for Linux desktop.
 const Feature flutterLinuxDesktopFeature = Feature(
-  name: 'Flutter Desktop for Linux',
+  name: 'Flutter for desktop on Linux',
   configSetting: 'enable-linux-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -110,7 +110,7 @@ const Feature flutterLinuxDesktopFeature = Feature(
 
 /// The [Feature] for Windows desktop.
 const Feature flutterWindowsDesktopFeature = Feature(
-  name: 'Flutter Desktop for Windows',
+  name: 'Flutter for desktop on Windows',
   configSetting: 'enable-windows-desktop',
   environmentOverride: 'ENABLE_FLUTTER_DESKTOP',
   master: FeatureChannelSetting(
@@ -139,7 +139,7 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
 /// a "safe" value, such as being off.
 ///
 /// The top level feature settings can be provided to apply to all channels.
-/// Otherwise, more specific settings take precidence over higher level
+/// Otherwise, more specific settings take precedence over higher level
 /// settings.
 class Feature {
   /// Creates a [Feature].
@@ -187,7 +187,8 @@ class Feature {
     if (configSetting == null) {
       return null;
     }
-    final StringBuffer buffer = StringBuffer('Enable or disable $name on ');
+    final StringBuffer buffer = StringBuffer('Enable or disable $name. '
+        'This setting will take effect on ');
     final List<String> channels = <String>[
       if (master.available) 'master',
       if (dev.available) 'dev',
@@ -196,8 +197,12 @@ class Feature {
     ];
     if (channels.length == 1) {
       buffer.write('the ${channels.single} channel.');
+    } else if (channels.length == 2) {
+      buffer.write('the ${channels.join(' and ')} channels.');
     } else {
-      buffer.write('${channels.join(', ')} channels.');
+      final String prefix = (channels.toList()
+        ..removeLast()).join(', ');
+      buffer.write('the $prefix, and ${channels.last} channels.');
     }
     return buffer.toString();
   }

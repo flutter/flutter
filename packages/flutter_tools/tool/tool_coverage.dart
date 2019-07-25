@@ -47,7 +47,7 @@ Future<void> main(List<String> arguments) async {
 /// A platform that loads tests in isolates spawned within this Dart process.
 class VMPlatform extends PlatformPlugin {
   final CoverageCollector coverageCollector = CoverageCollector(
-    flutterProject: FlutterProject.current(),
+    libraryPredicate: (String libraryName) => libraryName.contains(FlutterProject.current().manifest.appName),
   );
   final Map<String, Future<void>> _pending = <String, Future<void>>{};
   final String precompiledPath = path.join('.dart_tool', 'build', 'generated', 'flutter_tools');

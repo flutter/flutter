@@ -25,6 +25,8 @@ import 'material_localizations.dart';
 /// [ReorderableListView] will need to account for this when inserting before
 /// [newIndex].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
+///
 /// {@tool sample}
 ///
 /// ```dart
