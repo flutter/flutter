@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -1390,7 +1391,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           .getHandleSize(renderEditable.preferredLineHeight).height;
         final double interactiveHandleHeight = math.max(
           handleHeight,
-          kMinInteractiveSize,
+          kMinInteractiveDimension,
         );
         final Offset anchor = _selectionOverlay.selectionControls
           .getHandleAnchor(

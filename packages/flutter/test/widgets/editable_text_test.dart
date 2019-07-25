@@ -2103,8 +2103,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                0 + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                0 + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2112,8 +2112,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                viewport.width - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                viewport.width - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2121,8 +2121,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2216,15 +2216,15 @@ void main() {
     expect(
       handles[0].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
-        -kMinInteractiveSize,
-        kMinInteractiveSize,
+        -kMinInteractiveDimension,
+        kMinInteractiveDimension,
       ),
     );
     expect(
       handles[1].localToGlobal(Offset.zero).dx,
       inExclusiveRange(
-        70.0 - kMinInteractiveSize,
-        70.0 + kMinInteractiveSize,
+        70.0 - kMinInteractiveDimension,
+        70.0 + kMinInteractiveDimension,
       ),
     );
     expect(state.selectionOverlay.handlesAreVisible, isTrue);
@@ -2332,8 +2332,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                0 + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                0 + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2341,8 +2341,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                viewport.width - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                viewport.width - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;
@@ -2350,8 +2350,8 @@ void main() {
             expect(
               pos,
               inExclusiveRange(
-                0 - kMinInteractiveSize,
-                viewport.width + kMinInteractiveSize,
+                0 - kMinInteractiveDimension,
+                viewport.width + kMinInteractiveDimension,
               ),
             );
             break;

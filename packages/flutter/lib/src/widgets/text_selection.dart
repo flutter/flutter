@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -619,11 +620,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   }
 }
 
-/// The minimum size that a widget should be in order to be easily interacted
-/// with by the user.
-@visibleForTesting
-const double kMinInteractiveSize = 48.0;
-
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
@@ -750,7 +746,7 @@ class _TextSelectionHandleOverlayState
 
     // Make sure the GestureDetector is big enough to be easily interactive.
     final Rect interactiveRect = handleRect.expandToInclude(
-      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveSize / 2),
+      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveDimension/ 2),
     );
     final RelativeRect padding = RelativeRect.fromLTRB(
       math.max((interactiveRect.width - handleRect.width) / 2, 0),
