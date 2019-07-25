@@ -1,4 +1,4 @@
-Signature: 6c0927af5ef802917dc2b8aefd67f47a
+Signature: c767be68f660b5653c26521375f404a8
 
 UNUSED LICENSES:
 
@@ -4818,14 +4818,12 @@ FILE: ../../../third_party/skia/modules/canvaskit/WasmAliases.h
 FILE: ../../../third_party/skia/modules/canvaskit/particles_bindings.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/skottie_bindings.cpp
 FILE: ../../../third_party/skia/modules/particles/include/SkCurve.h
-FILE: ../../../third_party/skia/modules/particles/include/SkParticleAffector.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleData.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleDrawable.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleEffect.h
 FILE: ../../../third_party/skia/modules/particles/include/SkParticleSerialization.h
 FILE: ../../../third_party/skia/modules/particles/include/SkReflected.h
 FILE: ../../../third_party/skia/modules/particles/src/SkCurve.cpp
-FILE: ../../../third_party/skia/modules/particles/src/SkParticleAffector.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleDrawable.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
