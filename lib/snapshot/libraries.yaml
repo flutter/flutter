@@ -5,7 +5,7 @@
 # Note: if you edit this file, you must also edit libraries.json in this
 # directory:
 #
-# python third_party/dart/tools/yaml2json.py flutter/lib/snapshot/libraries.yaml flutter/lib/snapshot/libraries.json
+#.    python third_party/dart/tools/yaml2json.py flutter/lib/snapshot/libraries.yaml flutter/lib/snapshot/libraries.json
 #
 # We currently have several different files that needs to be updated when
 # changing libraries, sources, and patch files.  See
