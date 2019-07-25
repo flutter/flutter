@@ -382,7 +382,7 @@ void main() {
       viewportDimension: size.height,
     );
 
-    final double minOverscrollLength = 8.0;
+    const double minOverscrollLength = 8.0;
     final ScrollbarPainter p = _buildPainter(
       padding: padding,
       scrollMetrics: metrics,
@@ -412,7 +412,6 @@ void main() {
     expect(captureRect().height, closeTo(fullThumbExtent, .000001));
 
     // Scrolling just to the very end also gives a full sized thumb.
-    final double maxScroll = scrollExtent - size.height;
     p.update(
       metrics.copyWith(
         pixels: scrollExtent,
