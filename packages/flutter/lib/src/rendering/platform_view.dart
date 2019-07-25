@@ -726,6 +726,11 @@ class _MotionEventsDispatcher {
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
 
+/// Implement this if you need to ask [PlatformViewRenderBox] to create a custom layer instead of a standard [PlatformViewLayer].
+///
+/// The [renderBox] is the render object whose [paint] method is invoked to create this layer.
+/// The [context] and [offset] are the two parameters you would normally get in the `RenderBox.paint` method.
+/// The [id] is the platform view is provided to you by the framework.
 typedef PlatformViewRenderBoxLayerFactory = Layer Function(PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id);
 
 /// The render object for `PlatformViewSurface`.
