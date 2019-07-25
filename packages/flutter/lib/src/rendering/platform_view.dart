@@ -732,30 +732,30 @@ class _MotionEventsDispatcher {
 /// The `renderBox` is the render object whose `paint` method is invoked to create this layer.
 /// The `context` and `offset` parameters are the same as what will be passed to the [RenderBox.paint] method.
 /// The `id` is the platform view id provided to you by the framework.
-typedef PlatformViewRenderBoxLayerFactory = Layer Function(PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id);
+typedef PlatformViewRenderBoxLayerBuilder = Layer Function(PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id);
 
 /// The render object for [PlatformViewSurface].
 ///
-/// Creates a [PlatformViewLayer] by default. Implement a custom [customLayerFactory] to create a different layer instead.
+/// Creates a [PlatformViewLayer] by default. Implement a custom [layerBuilder] to create a different layer instead.
 class PlatformViewRenderBox extends RenderBox {
 
   /// Creating a render object for a [PlatformViewSurface].
   ///
   /// The `controller` and `id` must not be null.
-  /// Optionally, you can pass a `customLayerFactory` to generate a custom layer in the [paint] method.
+  /// Optionally, you can pass a `layerBuilder` to generate a custom layer in the [paint] method.
   /// A [PlatformViewLayer] is used by default.
   PlatformViewRenderBox({
     @required PlatformViewController controller,
     @required int id,
-    PlatformViewRenderBoxLayerFactory customLayerFactory,
+    PlatformViewRenderBoxLayerBuilder layerBuilder,
   }) : assert(controller != null),
        assert(id != null),
        _controller = controller,
        _id = id {
-    if (customLayerFactory != null) {
-      _customLayerFactory = customLayerFactory;
+    if (layerBuilder != null) {
+      _layerBuilder = layerBuilder;
     } else {
-      _customLayerFactory = (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id) {
+      _layerBuilder = (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id) {
         return PlatformViewLayer(
             rect: offset & size,
             viewId: _id);
@@ -793,7 +793,7 @@ class PlatformViewRenderBox extends RenderBox {
     }
   }
 
-  PlatformViewRenderBoxLayerFactory _customLayerFactory;
+  PlatformViewRenderBoxLayerBuilder _layerBuilder;
 
   PlatformViewController _controller;
 
@@ -815,8 +815,8 @@ class PlatformViewRenderBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_customLayerFactory != null);
-    context.addLayer(_customLayerFactory(this, context, offset, _id));
+    assert(_layerBuilder != null);
+    context.addLayer(_layerBuilder(this, context, offset, _id));
   }
 
   @override

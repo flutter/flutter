@@ -24,7 +24,7 @@ void main() {
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
-    test('paint should trigger customLayerFactory callback', () {
+    test('paint should trigger layerBuilder callback', () {
       PlatformViewRenderBox callbackRenderBox;
       PaintingContext callbackPaintingContext;
       Offset callbackOffset;
@@ -32,7 +32,7 @@ void main() {
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
         id: 5,
-        customLayerFactory: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
+        layerBuilder: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
           callbackRenderBox = renderBox;
           callbackPaintingContext = context;
           callbackOffset = offset;

@@ -599,14 +599,14 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// this [PlatformViewSurface] in the layer tree. If you want to use
   /// a different type of layer, such as Android,
   /// or a different configuration, such as supporting different sizes,
-  /// provide a [customLayerFactory].
+  /// provide a [layerBuilder].
   const PlatformViewSurface({
     @required this.id,
     @required this.controller,
-    PlatformViewRenderBoxLayerFactory customLayerFactory,
+    PlatformViewRenderBoxLayerBuilder layerBuilder,
   }) : assert(id != null && id > -1),
        assert(controller != null),
-      _customLayerFactory = customLayerFactory;
+      _layerBuilder = layerBuilder;
 
   /// The id of the platform view that is associate with this [PlatformViewSurface].
   ///
@@ -634,11 +634,11 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// See [PlatformViewController] for how to implement a new PlatformViewController.
   final PlatformViewController controller;
 
-  final PlatformViewRenderBoxLayerFactory _customLayerFactory;
+  final PlatformViewRenderBoxLayerBuilder _layerBuilder;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return PlatformViewRenderBox(controller: controller, id: id, customLayerFactory: _customLayerFactory);
+    return PlatformViewRenderBox(controller: controller, id: id, layerBuilder: _layerBuilder);
   }
 
   @override

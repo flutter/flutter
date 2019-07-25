@@ -1683,7 +1683,7 @@ void main() {
     });
 
     testWidgets('PlatformViewSurface should create a custom layer if requested', (WidgetTester tester) async {
-      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 1, customLayerFactory: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
+      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 1, layerBuilder: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
         return TextureLayer(rect: offset & renderBox.size, textureId: id);
       },);
       await tester.pumpWidget(surface);
