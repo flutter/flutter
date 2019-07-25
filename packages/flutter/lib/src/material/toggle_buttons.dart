@@ -440,7 +440,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.38),
+          ?? theme.colorScheme.onSurface.withOpacity(0.12),
         width: resultingBorderWidth,
       );
     }
@@ -475,7 +475,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.38),
+          ?? theme.colorScheme.onSurface.withOpacity(0.12),
         width: resultingBorderWidth,
       );
     }
@@ -513,7 +513,7 @@ class ToggleButtons extends StatelessWidget {
       return BorderSide(
         color: disabledBorderColor
           ?? toggleButtonsTheme.disabledBorderColor
-          ?? theme.colorScheme.onSurface.withOpacity(0.38),
+          ?? theme.colorScheme.onSurface.withOpacity(0.12),
         width: resultingBorderWidth,
       );
     }
@@ -764,7 +764,7 @@ class _ToggleButton extends StatelessWidget {
       currentColor = disabledColor
         ?? toggleButtonsTheme.disabledColor
         ?? theme.colorScheme.onSurface.withOpacity(0.38);
-      currentFillColor = theme.colorScheme.onSurface.withOpacity(0.12);
+      currentFillColor = theme.colorScheme.surface.withOpacity(0.0);
     }
 
     final Widget result = ClipRRect(

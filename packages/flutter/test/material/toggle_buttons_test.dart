@@ -452,7 +452,38 @@ void main() {
     },
   );
 
-  testWidgets('Default button fillColor', (WidgetTester tester) async {
+  testWidgets('Default button fillColor - unselected', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[false],
+            onPressed: (int index) {},
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(RawMaterialButton),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(
+      material.color,
+      theme.colorScheme.surface.withOpacity(0.0),
+    );
+    expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Default button fillColor - selected', (WidgetTester tester) async {
     final ThemeData theme = ThemeData();
     await tester.pumpWidget(
       Material(
@@ -479,6 +510,37 @@ void main() {
     expect(
       material.color,
       theme.colorScheme.primary.withOpacity(0.12),
+    );
+    expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Default button fillColor - disabled', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData();
+    await tester.pumpWidget(
+      Material(
+        child: boilerplate(
+          child: ToggleButtons(
+            isSelected: const <bool>[true],
+            onPressed: null,
+            children: <Widget>[
+              Row(children: const <Widget>[
+                Text('First child'),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Material material = tester.firstWidget<Material>(
+      find.descendant(
+        of: find.byType(RawMaterialButton),
+        matching: find.byType(Material),
+      ),
+    );
+    expect(
+      material.color,
+      theme.colorScheme.surface.withOpacity(0.0),
     );
     expect(material.type, MaterialType.button);
   });
@@ -805,13 +867,13 @@ void main() {
           // trailing side
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.38),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           )
           // leading side, top and bottom
           ..path(
             style: PaintingStyle.stroke,
-            color: theme.colorScheme.onSurface.withOpacity(0.38),
+            color: theme.colorScheme.onSurface.withOpacity(0.12),
             strokeWidth: defaultBorderWidth,
           ),
       );
