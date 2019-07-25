@@ -188,7 +188,7 @@ void main() {
     expect(parentSliver.geometry.scrollExtent, childHeight);
     expect(parentSliver.geometry.paintExtent, childHeight);
 
-    // When child is over-sized.
+    // Make child wider and higher than the viewport.
     setState(() {
         childWidth = 900.0;
         childHeight = 900.0;
