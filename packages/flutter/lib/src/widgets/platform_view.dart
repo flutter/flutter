@@ -581,16 +581,25 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-/// A helper widget provides the implementer of a new platform view certain utilities.
+/// This widget provides the minimal required functionality for a platform view.
 ///
-/// The widget is responsible to handle painting, gestures and semantics.
+/// The render object associated with this widget is [PlatformViewRenderBox].
+///
+/// This widget exists as a helper for easier implementation of a new platform view.
+/// It is entirely up to the implementer to decide whether to use this helper.
+///
+/// See also:
+/// * [PlatformViewRenderBox]
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a `PlatformViewSurface`.
   ///
   /// The [id] and the [controller] must not be null.
-  /// By default, this widget will create a `PlatformViewLayer` with rect = size & offset and the same id of this `PlatformViewSurface`in the layer tree. If you want to use
-  /// a different type of layer (e.g.Android), or a different configuration(e.g. different sizes), implement [customLayerFactory] to have a customized layer created instead.
+  /// By default, this widget will create a [PlatformViewLayer] with rect = size & offset and the same id of
+  /// this [PlatformViewSurface] in the layer tree. If you want to use
+  /// a different type of layer, such as Android,
+  /// or a different configuration, such as supporting different sizes,
+  /// provide a [customLayerFactory].
   const PlatformViewSurface({
     @required this.id,
     @required this.controller,
@@ -599,19 +608,30 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
        assert(controller != null),
       _customLayerFactory = customLayerFactory;
 
-  /// The id of the platform view that is associate with this `PlatformViewSurface`.
+  /// The id of the platform view that is associate with this [PlatformViewSurface].
+  ///
+  /// The id should always be unique and non-negative.
+  /// In most cases, it should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
+  /// It is used when handling semantics, composition orders and etc for the platform view.
   final int id;
 
-  /// The controller that is implemented by the platform view implementer.
+  /// A controller for a platform view.
+  ///
+  /// Someone who is implementing a new platform view using [PlatformViewSurface] should implement
+  /// a [PlatformViewController] and construct the [PlatformViewSurface] with it.
   ///
   /// The controller is responsible for:
-  /// * handling clearing focus
-  /// * dispatching pointer events
-  /// * dispose
+  ///
+  /// * handling clearing focus.
+  ///
+  /// * dispatching pointer events.
+  ///
+  /// * dispose.
+  ///
   /// Some of these are not applicable to certain platforms. For example, iOS does not require
   /// dispatching the pointer events.
   ///
-  /// See `PlatformViewController` for how to implement a new PlatformViewController.
+  /// See [PlatformViewController] for how to implement a new PlatformViewController.
   final PlatformViewController controller;
 
   final PlatformViewRenderBoxLayerFactory _customLayerFactory;
@@ -623,7 +643,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
-    renderObject.controller = controller;
-    renderObject.id = id;
+    renderObject
+      ..controller = controller
+      ..id = id;
   }
 }
