@@ -125,10 +125,6 @@ const Feature flutterBuildPluginAsAarFeature = Feature(
   configSetting: 'enable-build-plugin-as-aar',
   master: FeatureChannelSetting(
     available: true,
-    enabledByDefault: true,
-  ),
-  dev: FeatureChannelSetting(
-    available: true,
     enabledByDefault: false,
   ),
 );
