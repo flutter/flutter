@@ -1,4 +1,4 @@
-package io.flutter.add2app;
+package io.flutter.addtoapp;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
