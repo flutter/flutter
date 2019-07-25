@@ -137,13 +137,14 @@ class SkiaGoldClient extends GoldensClient {
       imgtestInitArguments,
     );
 
-    if (imgtestInitResult.exitCode != 0) {
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Flutter + Skia Gold imgtest init failed.')
-        ..writeln('stdout: ${imgtestInitResult.stdout}')
-        ..writeln('stderr: ${imgtestInitResult.stderr}');
-      throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
-    }
+//    TODO(Piinks): Re-enable after Gold flakes are resolved
+//    if (imgtestInitResult.exitCode != 0) {
+//      final StringBuffer buf = StringBuffer()
+//        ..writeln('Flutter + Skia Gold imgtest init failed.')
+//        ..writeln('stdout: ${imgtestInitResult.stdout}')
+//        ..writeln('stderr: ${imgtestInitResult.stderr}');
+//      throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
+//    }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -158,8 +159,6 @@ class SkiaGoldClient extends GoldensClient {
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
-
-//    await imgtestInit();
 
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
