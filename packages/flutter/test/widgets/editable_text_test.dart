@@ -809,23 +809,25 @@ void main() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
           setState = setter;
-          return MediaQuery(
-            data: const MediaQueryData(devicePixelRatio: 1.0),
-            child: Directionality(
-              textDirection: TextDirection.ltr,
-              child: Center(
-                child: Material(
-                  child: EditableText(
-                    backgroundCursorColor: Colors.grey,
-                    controller: currentController,
-                    focusNode: focusNode,
-                    style: Typography(platform: TargetPlatform.android)
-                        .black
-                        .subhead,
-                    cursorColor: Colors.blue,
-                    selectionControls: materialTextSelectionControls,
-                    keyboardType: TextInputType.text,
-                    onChanged: (String value) { },
+          return MaterialApp(
+            home: MediaQuery(
+              data: const MediaQueryData(devicePixelRatio: 1.0),
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: Center(
+                  child: Material(
+                    child: EditableText(
+                      backgroundCursorColor: Colors.grey,
+                      controller: currentController,
+                      focusNode: focusNode,
+                      style: Typography(platform: TargetPlatform.android)
+                          .black
+                          .subhead,
+                      cursorColor: Colors.blue,
+                      selectionControls: materialTextSelectionControls,
+                      keyboardType: TextInputType.text,
+                      onChanged: (String value) { },
+                    ),
                   ),
                 ),
               ),
@@ -902,6 +904,67 @@ void main() {
       includesNodeWith(flags: <SemanticsFlag>[
         SemanticsFlag.isTextField,
         SemanticsFlag.isFocused,
+      ]),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('EditableText sets multi-line flag in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+        textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              maxLines: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.isMultiline,
       ]),
     );
 

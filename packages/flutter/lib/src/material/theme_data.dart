@@ -28,6 +28,7 @@ import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_theme.dart';
 import 'toggle_buttons_theme.dart';
+import 'tooltip_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -157,10 +158,12 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    TooltipThemeData tooltipTheme,
     CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -230,6 +233,7 @@ class ThemeData extends Diagnosticable {
     final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
+    applyElevationOverlayColor ??= false;
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
@@ -258,6 +262,7 @@ class ThemeData extends Diagnosticable {
 
     sliderTheme ??= const SliderThemeData();
     tabBarTheme ??= const TabBarTheme();
+    tooltipTheme ??= const TooltipThemeData();
     appBarTheme ??= const AppBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
@@ -315,10 +320,12 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: tabBarTheme,
+      tooltipTheme: tooltipTheme,
       cardTheme: cardTheme,
       chipTheme: chipTheme,
       platform: platform,
       materialTapTargetSize: materialTapTargetSize,
+      applyElevationOverlayColor: applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme,
@@ -385,10 +392,12 @@ class ThemeData extends Diagnosticable {
     @required this.accentIconTheme,
     @required this.sliderTheme,
     @required this.tabBarTheme,
+    @required this.tooltipTheme,
     @required this.cardTheme,
     @required this.chipTheme,
     @required this.platform,
     @required this.materialTapTargetSize,
+    @required this.applyElevationOverlayColor,
     @required this.pageTransitionsTheme,
     @required this.appBarTheme,
     @required this.bottomAppBarTheme,
@@ -440,6 +449,7 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(tabBarTheme != null),
+       assert(tooltipTheme != null),
        assert(cardTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
@@ -663,12 +673,17 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
+  /// A theme for customizing the visual properties of [Tooltip]s.
+  ///
+  /// This is the value returned from [TooltipTheme.of].
+  final TooltipThemeData tooltipTheme;
+
   /// The colors and styles used to render [Card].
   ///
   /// This is the value returned from [CardTheme.of].
   final CardTheme cardTheme;
 
-  /// The colors and styles used to render [Chip], [
+  /// The colors and styles used to render [Chip]s.
   ///
   /// This is the value returned from [ChipTheme.of].
   final ChipThemeData chipTheme;
@@ -687,6 +702,38 @@ class ThemeData extends Diagnosticable {
 
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
+
+  /// Apply a semi-transparent white overlay on Material surfaces to indicate
+  /// elevation for dark themes.
+  ///
+  /// Material drop shadows can be difficult to see in a dark theme, so the
+  /// elevation of a surface should be portrayed with an "overlay" in addition
+  /// to the shadow. As the elevation of the component increases, the white
+  /// overlay increases in opacity. [applyElevationOverlayColor] turns the
+  /// application of this overlay on or off.
+  ///
+  /// If [true] a semi-transparent white overlay will be applied to the color
+  /// of [Material] widgets when their [Material.color] is [colorScheme.surface].
+  /// The level of transparency is based on [Material.elevation] as per the
+  /// Material Dark theme specification.
+  ///
+  /// If [false] the surface color will be used unmodified.
+  ///
+  /// Defaults to [false].
+  ///
+  /// Note: this setting is here to maintain backwards compatibility with
+  /// apps that were built before the Material Dark theme specification
+  /// was published. New apps should set this to [true] for any themes
+  /// where [brightness] is [Brightness.dark].
+  ///
+  /// See also:
+  ///
+  ///  * [Material.elevation], which effects how transparent the white overlay is.
+  ///  * [Material.color], the white color overlay will only be applied of the
+  ///    material's color is [colorScheme.surface].
+  ///  * <https://material.io/design/color/dark-theme.html>, which specifies how
+  ///    the overlay should be applied.
+  final bool applyElevationOverlayColor;
 
   /// Default [MaterialPageRoute] transitions per [TargetPlatform].
   ///
@@ -785,10 +832,12 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    TooltipThemeData tooltipTheme,
     CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
     MaterialTapTargetSize materialTapTargetSize,
+    bool applyElevationOverlayColor,
     PageTransitionsTheme pageTransitionsTheme,
     AppBarTheme appBarTheme,
     BottomAppBarTheme bottomAppBarTheme,
@@ -844,10 +893,12 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       cardTheme: cardTheme ?? this.cardTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
       materialTapTargetSize: materialTapTargetSize ?? this.materialTapTargetSize,
+      applyElevationOverlayColor: applyElevationOverlayColor ?? this.applyElevationOverlayColor,
       pageTransitionsTheme: pageTransitionsTheme ?? this.pageTransitionsTheme,
       appBarTheme: appBarTheme ?? this.appBarTheme,
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
@@ -981,10 +1032,12 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
+      tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t),
       cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
       materialTapTargetSize: t < 0.5 ? a.materialTapTargetSize : b.materialTapTargetSize,
+      applyElevationOverlayColor: t < 0.5 ? a.applyElevationOverlayColor : b.applyElevationOverlayColor,
       pageTransitionsTheme: t < 0.5 ? a.pageTransitionsTheme : b.pageTransitionsTheme,
       appBarTheme: AppBarTheme.lerp(a.appBarTheme, b.appBarTheme, t),
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
@@ -1046,10 +1099,12 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.tabBarTheme == tabBarTheme) &&
+           (otherData.tooltipTheme == tooltipTheme) &&
            (otherData.cardTheme == cardTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
            (otherData.materialTapTargetSize == materialTapTargetSize) &&
+           (otherData.applyElevationOverlayColor == applyElevationOverlayColor) &&
            (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
            (otherData.appBarTheme == appBarTheme) &&
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
@@ -1110,10 +1165,12 @@ class ThemeData extends Diagnosticable {
       accentIconTheme,
       sliderTheme,
       tabBarTheme,
+      tooltipTheme,
       cardTheme,
       chipTheme,
       platform,
       materialTapTargetSize,
+      applyElevationOverlayColor,
       pageTransitionsTheme,
       appBarTheme,
       bottomAppBarTheme,
@@ -1172,9 +1229,11 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
+    properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme));
     properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
+    properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor));
     properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
     properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));

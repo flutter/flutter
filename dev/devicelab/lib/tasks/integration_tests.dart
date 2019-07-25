@@ -47,6 +47,13 @@ TaskFunction createPlatformChannelSampleTest() {
   );
 }
 
+TaskFunction createPlatformChannelSwiftSampleTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/platform_channel_swift',
+    'test_driver/button_tap.dart',
+  );
+}
+
 TaskFunction createEmbeddedAndroidViewsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/android_views',
@@ -92,6 +99,13 @@ TaskFunction createFlutterCreateOfflineTest() {
     }
     return TaskResult.success(null);
   };
+}
+
+TaskFunction createAndroidSplashScreenKitchenSinkTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
+    'test_driver/main.dart',
+  );
 }
 
 class DriverTest {

@@ -92,19 +92,21 @@ Widget overlayWithEntry(OverlayEntry entry) {
 }
 
 Widget boilerplate({ Widget child }) {
-  return Localizations(
-    locale: const Locale('en', 'US'),
-    delegates: <LocalizationsDelegate<dynamic>>[
-      WidgetsLocalizationsDelegate(),
-      MaterialLocalizationsDelegate(),
-    ],
-    child: Directionality(
-      textDirection: TextDirection.ltr,
-      child: MediaQuery(
-        data: const MediaQueryData(size: Size(800.0, 600.0)),
-        child: Center(
-          child: Material(
-            child: child,
+  return MaterialApp(
+    home: Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        WidgetsLocalizationsDelegate(),
+        MaterialLocalizationsDelegate(),
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(800.0, 600.0)),
+          child: Center(
+            child: Material(
+              child: child,
+            ),
           ),
         ),
       ),
@@ -971,7 +973,7 @@ void main() {
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     // There should be no composing.
-    expect(renderEditable.isComposingText, false);
+    expect(renderEditable.text, TextSpan(text:'readonly', style: renderEditable.text.style));
   });
 
   testWidgets('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
@@ -3229,6 +3231,30 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Read only TextField identifies as read only text field in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLength: 10,
+              readOnly: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly])
+    );
+
+    semantics.dispose();
+  });
+
   void sendFakeKeyEvent(Map<String, dynamic> data) {
     defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
@@ -5336,6 +5362,66 @@ void main() {
 
       // Long press again keeps the selection menu visible.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'A single tap hides the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Long press shows the selection menu.
+      await tester.longPress(find.byType(TextField));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Tap hides the selection menu.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      expect(find.text('PASTE'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Long press on an autofocused field shows the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                autofocus: true,
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+      // This extra pump allows the selection set by autofocus to propagate to
+      // the RenderEditable.
+      await tester.pump();
+
+      // Long press shows the selection menu.
+      expect(find.text('PASTE'), findsNothing);
+      await tester.longPress(find.byType(TextField));
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
     },

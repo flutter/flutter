@@ -26,7 +26,7 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, Stdout, stdout;
+import 'dart:io' as io show exit, IOSink, Process, ProcessSignal, stderr, stdin, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -116,7 +116,12 @@ void restoreExitFunction() {
 /// Listening on signals that don't exist on the current platform is just a
 /// no-op. This is in contrast to [io.ProcessSignal], where listening to
 /// non-existent signals throws an exception.
-class ProcessSignal implements io.ProcessSignal {
+///
+/// This class does NOT implement io.ProcessSignal, because that class uses
+/// private fields. This means it cannot be used with, e.g., [Process.killPid].
+/// Alternative implementations of the relevant methods that take
+/// [ProcessSignal] instances are available on this class (e.g. "send").
+class ProcessSignal {
   @visibleForTesting
   const ProcessSignal(this._delegate);
 
@@ -129,9 +134,21 @@ class ProcessSignal implements io.ProcessSignal {
 
   final io.ProcessSignal _delegate;
 
-  @override
   Stream<ProcessSignal> watch() {
     return _delegate.watch().map<ProcessSignal>((io.ProcessSignal signal) => this);
+  }
+
+  /// Sends the signal to the given process (identified by pid).
+  ///
+  /// Returns true if the signal was delivered, false otherwise.
+  ///
+  /// On Windows, this can only be used with [ProcessSignal.SIGTERM], which
+  /// terminates the process.
+  ///
+  /// This is implemented by sending the signal using [Process.killPid].
+  bool send(int pid) {
+    assert(!platform.isWindows || this == ProcessSignal.SIGTERM);
+    return io.Process.killPid(pid, _delegate);
   }
 
   @override

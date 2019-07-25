@@ -13,17 +13,19 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/usage.dart';
 import '../resident_runner.dart';
 import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../usage.dart';
 import '../version.dart';
+
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -47,6 +49,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPortOptions();
     usesIpv6Flag();
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
@@ -59,7 +62,6 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
-
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -127,10 +129,6 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
-      )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
       )
       ..addOption('project-root',
         hide: !verboseHelp,
@@ -409,11 +407,11 @@ class RunCommand extends RunCommandBase {
       );
       flutterDevices.add(flutterDevice);
     }
-    // Only support "web mode" on non-stable branches with a single web device
-    // in a "hot mode".
-    final bool webMode = FlutterVersion.instance.isMaster
-      && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
+    // Only support "web mode" with a single web device due to resident runner
+    // refactoring required otherwise.
+    final bool webMode = featureFlags.isWebEnabled &&
+                         devices.length == 1  &&
+                         await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];

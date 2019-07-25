@@ -444,6 +444,24 @@ class PaintingContext extends ClipContext {
     }
   }
 
+  /// Blend further painting with a color filter.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `colorFilter` is the [ColorFilter] value to use when blending the
+  ///   painting done by `painter`.
+  /// * `painter` is a callback that will paint with the `colorFilter` applied.
+  ///   This function calls the `painter` synchronously.
+  ///
+  /// A [RenderObject] that uses this function is very likely to require its
+  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
+  /// ancestor render objects that this render object will include a composited
+  /// layer, which, for example, causes them to use composited clips.
+  void pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter) {
+    assert(colorFilter != null);
+    pushLayer(ColorFilterLayer(colorFilter: colorFilter), painter, offset);
+  }
+
   /// Transform further painting using a matrix.
   ///
   /// * `needsCompositing` is whether the child needs compositing. Typically

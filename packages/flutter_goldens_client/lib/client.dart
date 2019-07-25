@@ -124,8 +124,7 @@ class GoldensClient {
       workingDirectory: repositoryRoot.path,
     );
     if (result.stdout.trim().isNotEmpty) {
-      final StringBuffer buf = StringBuffer();
-      buf
+      final StringBuffer buf = StringBuffer()
         ..writeln('flutter_goldens git checkout at ${repositoryRoot.path} has local changes and cannot be synced.')
         ..writeln('To reset your client to a clean state, and lose any local golden test changes:')
         ..writeln('cd ${repositoryRoot.path}')

@@ -277,6 +277,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  # hello_world__start_up:
+  #   description: >
+  #     Verifies that Hello World can start on an array of devices.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android_esoteric"]
+
   microbenchmarks:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks.
@@ -414,9 +420,16 @@ tasks:
 
   platform_channel_sample_test_ios:
     description: >
-      Runs a driver test on the Platform Channel sample app on iPhone 6.
+      Runs a driver test on the Platform Channel sample app on iPhone 6 Objective-C project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
+
+  platform_channel_sample_test_swift:
+    description: >
+      Runs a driver test on the Platform Channel sample app on iPhone 6 Swift project.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   platform_view_ios__start_up:
     description: >
@@ -618,4 +631,11 @@ tasks:
       Checks that `flutter run` does not leak dart on macOS.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
+
+  android_splash_screen_integration_test:
+    description: >
+      Runs end-to-end test of Flutter's Android splash behavior.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
     flaky: true

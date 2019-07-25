@@ -21,7 +21,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/reporting/usage.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -33,8 +33,8 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context.get<Logger>();
 
-MockDeviceManager get testDeviceManager => context.get<DeviceManager>();
-MockDoctor get testDoctor => context.get<Doctor>();
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>();
+FakeDoctor get testDoctor => context.get<Doctor>();
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -71,8 +71,8 @@ void testUsingContext(
         name: 'mocks',
         overrides: <Type, Generator>{
           Config: () => buildConfig(fs),
-          DeviceManager: () => MockDeviceManager(),
-          Doctor: () => MockDoctor(),
+          DeviceManager: () => FakeDeviceManager(),
+          Doctor: () => FakeDoctor(),
           FlutterVersion: () => MockFlutterVersion(),
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
@@ -82,16 +82,15 @@ void testUsingContext(
           },
           OutputPreferences: () => OutputPreferences(showColor: false),
           Logger: () => BufferLogger(),
-          OperatingSystemUtils: () => MockOperatingSystemUtils(),
+          OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           SimControl: () => MockSimControl(),
-          Usage: () => MockUsage(),
-          XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
+          Usage: () => FakeUsage(),
+          XcodeProjectInterpreter: () => FakeXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
           TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-
           return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
@@ -105,7 +104,6 @@ void testUsingContext(
                     // tests can override this either in the test or during setup.
                     Cache.flutterRoot ??= flutterRoot;
                   }
-
                   return await testMethod();
                 },
               );
@@ -135,7 +133,7 @@ void _printBufferedErrors(AppContext testContext) {
   }
 }
 
-class MockDeviceManager implements DeviceManager {
+class FakeDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
   String _specifiedDeviceId;
@@ -188,22 +186,22 @@ class MockDeviceManager implements DeviceManager {
   List<DeviceDiscovery> get deviceDiscoverers => <DeviceDiscovery>[];
 
   @override
-  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) {
-    return getDevices().toList();
-  }
-
-  @override
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
+
+  @override
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    return devices;
+  }
 }
 
-class MockAndroidLicenseValidator extends AndroidLicenseValidator {
+class FakeAndroidLicenseValidator extends AndroidLicenseValidator {
   @override
   Future<LicensesAccepted> get licensesAccepted async => LicensesAccepted.all;
 }
 
-class MockDoctor extends Doctor {
+class FakeDoctor extends Doctor {
   // True for testing.
   @override
   bool get canListAnything => true;
@@ -220,7 +218,7 @@ class MockDoctor extends Doctor {
     final List<DoctorValidator> superValidators = super.validators;
     return superValidators.map<DoctorValidator>((DoctorValidator v) {
       if (v is AndroidLicenseValidator) {
-        return MockAndroidLicenseValidator();
+        return FakeAndroidLicenseValidator();
       }
       return v;
     }).toList();
@@ -233,9 +231,12 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils implements OperatingSystemUtils {
+class FakeOperatingSystemUtils implements OperatingSystemUtils {
   @override
   ProcessResult makeExecutable(File file) => null;
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) { }
 
   @override
   File which(String execName) => null;
@@ -273,7 +274,7 @@ class MockOperatingSystemUtils implements OperatingSystemUtils {
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
-class MockUsage implements Usage {
+class FakeUsage implements Usage {
   @override
   bool get isFirstRun => false;
 
@@ -302,7 +303,7 @@ class MockUsage implements Usage {
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
 
   @override
-  void sendException(dynamic exception, StackTrace trace) { }
+  void sendException(dynamic exception) { }
 
   @override
   Stream<Map<String, dynamic>> get onSend => null;
@@ -314,7 +315,7 @@ class MockUsage implements Usage {
   void printWelcome() { }
 }
 
-class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
+class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   @override
   bool get isInstalled => true;
 
