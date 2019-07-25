@@ -86,12 +86,13 @@ def CopyFiles(source, destination):
 
 
 def CopyToBucket(source, destination, product=False):
-  far_dir = 'flutter_jit_runner_far'
+  runner_name = 'flutter_jit_runner'
   if product:
-    far_dir = 'flutter_jit_product_runner_far'
+    runner_name = 'flutter_jit_product_runner'
+  far_dir = '%s_far' % runner_name
   source_root = os.path.join(_out_dir, source)
   source = os.path.join(source_root, far_dir)
-  CreateMetaPackage(source)
+  CreateMetaPackage(source, runner_name)
   pm_bin = GetPMBinPath()
   key_path = os.path.join(_script_dir, 'development.key')
 
