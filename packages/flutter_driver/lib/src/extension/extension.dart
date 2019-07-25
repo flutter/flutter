@@ -13,7 +13,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart' show ServicesBinding, pendingChannelInvokeMethodCount;
+import 'package:flutter/services.dart' show MethodChannel, ServicesBinding;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -391,7 +391,7 @@ class FlutterDriverExtension {
   /// Note, disabling frame sync will require the test author to use some other method to avoid flakiness.
   Future<Result> _waitUntilIdle(Command command) async {
     await _waitUntilCondition(() {
-      bool idleCondition = pendingChannelInvokeMethodCount == 0;
+      bool idleCondition = MethodChannel.pendingChannelInvokeMethodCount == 0;
       if (_frameSync) {
         idleCondition = idleCondition &&
             SchedulerBinding.instance.transientCallbackCount == 0 &&
@@ -556,7 +556,16 @@ class FlutterDriverExtension {
     return SetSemanticsResult(semanticsWasEnabled != _semanticsIsEnabled);
   }
 
-  Future<void> _waitUntilCondition(bool condition(),
+  /// Wait until the given condition is true.
+  /// 
+  /// In the implementation, we have a repeating timer that runs the condition
+  /// with [duration] intervals until the condition is met.
+  /// 
+  /// [duration] is set to 10 milliseconds by default - 10 milliseconds is
+  /// an estimate interval that this timer won't starve other executions in the
+  /// same isolate and not too long before the state becomes stale.
+  Future<void> _waitUntilCondition(
+      bool condition(),
       [Duration duration = const Duration(milliseconds: 10)]) {
     final Completer<void> completer = Completer<void>();
     Timer.periodic(duration, (Timer timer) {
