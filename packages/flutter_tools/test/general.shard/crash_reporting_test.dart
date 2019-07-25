@@ -181,6 +181,7 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
   expect(crashInfo.fields['type'], 'DartError');
   expect(crashInfo.fields['error_runtime_type'], 'StateError');
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
+  expect(crashInfo.fields['comments'], 'crash');
 
   final BufferLogger logger = context.get<Logger>();
   expect(logger.statusText, 'Sending crash report to Google.\n'

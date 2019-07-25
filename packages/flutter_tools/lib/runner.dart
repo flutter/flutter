@@ -115,6 +115,7 @@ Future<int> _handleToolError(
         error: error,
         stackTrace: stackTrace,
         getFlutterVersion: getFlutterVersion,
+        command: args.join(' '),
       );
 
       if (error is String)
