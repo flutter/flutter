@@ -263,29 +263,30 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   [self.view addSubview:splashScreenView];
 }
 
-- (void)removeSplashScreenViewIfPresent {
-  if (!_splashScreenView) {
-    return;
+- (void)callViewRenderedCallback {
+  if (_flutterViewRenderedCallback != nil) {
+    _flutterViewRenderedCallback.get()();
+    _flutterViewRenderedCallback.reset();
   }
+}
 
+- (void)removeSplashScreenView:(dispatch_block_t _Nullable)onComplete {
+  NSAssert(_splashScreenView, @"The splash screen view must not be null");
+  UIView* splashScreen = _splashScreenView.get();
+  _splashScreenView.reset();
   [UIView animateWithDuration:0.2
       animations:^{
-        _splashScreenView.get().alpha = 0;
+        splashScreen.alpha = 0;
       }
       completion:^(BOOL finished) {
-        [_splashScreenView.get() removeFromSuperview];
-        _splashScreenView.reset();
-        if (_flutterViewRenderedCallback != nil) {
-          _flutterViewRenderedCallback.get()();
-          _flutterViewRenderedCallback.reset();
+        [splashScreen removeFromSuperview];
+        if (onComplete) {
+          onComplete();
         }
       }];
 }
 
-- (void)installSplashScreenViewCallback {
-  if (!_splashScreenView) {
-    return;
-  }
+- (void)installFirstFrameCallback {
   auto weak_platform_view = [_engine.get() platformView];
   if (!weak_platform_view) {
     return;
@@ -301,7 +302,13 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
       // association. Thus, we are not convinced that the unsafe unretained weak object is in
       // fact alive.
       if (weak_platform_view) {
-        [weak_flutter_view_controller removeSplashScreenViewIfPresent];
+        if (weak_flutter_view_controller->_splashScreenView) {
+          [weak_flutter_view_controller removeSplashScreenView:^{
+            [weak_flutter_view_controller callViewRenderedCallback];
+          }];
+        } else {
+          [weak_flutter_view_controller callViewRenderedCallback];
+        }
       }
     });
   });
@@ -363,8 +370,9 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 - (void)setSplashScreenView:(UIView*)view {
   if (!view) {
     // Special case: user wants to remove the splash screen view.
-    [self removeSplashScreenViewIfPresent];
-    _splashScreenView.reset();
+    if (_splashScreenView) {
+      [self removeSplashScreenView:nil];
+    }
     return;
   }
 
@@ -382,7 +390,7 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 - (void)surfaceUpdated:(BOOL)appeared {
   // NotifyCreated/NotifyDestroyed are synchronous and require hops between the UI and GPU thread.
   if (appeared) {
-    [self installSplashScreenViewCallback];
+    [self installFirstFrameCallback];
     [_engine.get() platformViewsController] -> SetFlutterView(_flutterView.get());
     [_engine.get() platformViewsController] -> SetFlutterViewController(self);
     [_engine.get() platformView] -> NotifyCreated();
