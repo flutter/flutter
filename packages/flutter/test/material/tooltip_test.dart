@@ -608,6 +608,9 @@ void main() {
     // long press once more
     gesture = await tester.startGesture(tester.getCenter(tooltip));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(tooltipText), findsNothing);
+
     await tester.pump(kLongPressTimeout);
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.text(tooltipText), findsOneWidget);
