@@ -89,3 +89,37 @@ task:
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto --unopt
         ninja -C out/fuchsia_profile_unopt
+
+# WINDOWS
+task:
+  gce_instance:
+    image_project: flutter-cirrus
+    image_name: flutter-engine-windows-server-2016-core
+    zone: us-central1-a
+    platform: windows
+    cpu: 32
+    memory: 32Gb
+    disk: 50
+  env:
+    # Cirrus is somehow not picking up the environment variables set in the VM image.
+    PATH: "c:/depot_tools;c:/MinGit/cmd;$PATH"
+    DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+    GYP_MSVS_OVERRIDE_PATH: "c:/Program Files (x86)/Microsoft Visual Studio/2017/Community"
+    ENGINE_PATH: "c:/flutter/engine"
+  setup_script: |
+    REM robocopy can return 1 for successful copy; suppress its error code.
+    REM move somehow doesn't work as it complains that the file is being used by another process.
+    robocopy %CIRRUS_WORKING_DIR% %ENGINE_PATH%/src/flutter /MIR| (cmd /s /c exit /b 0)
+    cd %ENGINE_PATH%/src
+    gclient sync
+  matrix:
+    - name: build_windows_unopt_debug
+      compile_host_script: |
+        cd %ENGINE_PATH%/src
+        python flutter/tools/gn --runtime-mode debug --unoptimized
+        ninja -C out/host_debug_unopt
+    - name: build_windows_opt_debug
+      compile_host_script: |
+        cd %ENGINE_PATH%/src
+        python flutter/tools/gn --runtime-mode debug
+        ninja -C out/host_debug
