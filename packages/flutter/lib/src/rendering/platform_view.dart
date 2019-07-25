@@ -780,7 +780,7 @@ class PlatformViewRenderBox extends RenderBox {
     }
   }
 
-  PlatformViewRenderBoxLayerFactory _customLayerFactory;
+  final PlatformViewRenderBoxLayerFactory _customLayerFactory;
 
   PlatformViewController _controller;
 
