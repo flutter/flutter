@@ -535,6 +535,8 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// This sample shows a `DropdownButton` whose value is one of
 /// "One", "Two", "Free", or "Four".
 ///
+/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
+///
 /// ```dart
 /// String dropdownValue = 'One';
 ///

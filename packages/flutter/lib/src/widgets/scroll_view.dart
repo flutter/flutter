@@ -344,6 +344,8 @@ abstract class ScrollView extends StatelessWidget {
 /// This sample code shows a scroll view that contains a flexible pinned app
 /// bar, a grid, and an infinite list.
 ///
+/// ![A screenshot of the custom scroll view](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_scroll_view.png)
+///
 /// ```dart
 /// CustomScrollView(
 ///   slivers: <Widget>[
@@ -1288,6 +1290,8 @@ class ListView extends BoxScrollView {
 /// Here are two brief snippets showing a [GridView] and its equivalent using
 /// [CustomScrollView]:
 ///
+/// ![A screenshot of a GridView](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view.png)
+///
 /// ```dart
 /// GridView.count(
 ///   primary: false,
@@ -1306,6 +1310,7 @@ class ListView extends BoxScrollView {
 /// ```
 /// {@end-tool}
 /// {@tool sample}
+/// ![A screenshot of a CustomScrollView with a SliverGrid](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view_custom_scroll.png)
 ///
 /// ```dart
 /// CustomScrollView(

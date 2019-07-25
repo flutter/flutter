@@ -21,6 +21,21 @@ import 'package:flutter/widgets.dart';
 ///   uses-material-design: true
 /// ```
 ///
+/// {@tool sample}
+/// This example shows how to use [Icons] to create a heart icon, in the
+/// color purple, and 32 x 32 pixels in size.
+///
+/// ![A purple favorite icon](https://flutter.github.io/assets-for-api-docs/assets/widgets/icons.png)
+///
+/// ```dart
+/// const Icon(
+///   Icons.favorite,
+///   color: Colors.purple,
+///   size: 32.0,
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Icon]
