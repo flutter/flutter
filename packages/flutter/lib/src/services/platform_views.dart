@@ -713,3 +713,18 @@ class UiKitViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
 }
+
+/// A helper class to help implementing a new platform view.
+abstract class PlatformViewController {
+
+  /// This is invoked when the Framework is disposing the platform view. Implement this to properly dispose resources of the new platform view from the platform.
+  ///
+  /// e.g.
+  /// ```dart
+  /// Future<void> dispose() async {
+  ///   await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
+  /// }
+  /// ```
+  /// See `SystemChannels.platform_views` for more details.
+  void dispose();
+}

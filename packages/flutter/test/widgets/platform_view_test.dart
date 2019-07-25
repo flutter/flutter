@@ -1665,4 +1665,33 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('Common PlatformView', () {
+    FakePlatformViewController controller;
+
+    setUp((){
+      controller = FakePlatformViewController();
+    });
+
+    testWidgets('PlatformViewSurface should create platform view layer by default', (WidgetTester tester) async {
+      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 0);
+      await tester.pumpWidget(surface);
+      final PlatformViewLayer layer = tester.layers.firstWhere((Layer layer){
+        return layer is PlatformViewLayer;
+      });
+      expect(layer, isNotNull);
+    });
+
+    testWidgets('PlatformViewSurface should create a custom layer if requested', (WidgetTester tester) async {
+      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 1, customLayerFactory: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
+        return TextureLayer(rect: offset & renderBox.size, textureId: id);
+      },);
+      await tester.pumpWidget(surface);
+      final TextureLayer layer = tester.layers.firstWhere((Layer layer){
+        return layer is TextureLayer;
+      });
+      expect(layer, isNotNull);
+      expect(layer.textureId, 1);
+    });
+  });
 }

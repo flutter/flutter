@@ -580,3 +580,50 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
+
+/// A helper widget provides the implementer of a new platform view certain utilities.
+///
+/// The widget is responsible to handle painting, gestures and semantics.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`.
+  ///
+  /// The [id] and the [controller] must not be null.
+  /// By default, this widget will create a `PlatformViewLayer` with rect = size & offset and the same id of this `PlatformViewSurface`in the layer tree. If you want to use
+  /// a different type of layer (e.g.Android), or a different configuration(e.g. different sizes), implement [customLayerFactory] to have a customized layer created instead.
+  const PlatformViewSurface({
+    @required this.id,
+    @required this.controller,
+    PlatformViewRenderBoxLayerFactory customLayerFactory,
+  }) : assert(id != null),
+       assert(controller != null),
+      _customLayerFactory = customLayerFactory;
+
+  /// The id of the platform view that is associate with this `PlatformViewSurface`.
+  final int id;
+
+  /// The controller that is implemented by the platform view implementer.
+  ///
+  /// The controller is responsible for:
+  /// * handling clearing focus
+  /// * dispatching pointer events
+  /// * dispose
+  /// Some of these are not applicable to certain platforms. For example, iOS does not require
+  /// dispatching the pointer events.
+  ///
+  /// See `PlatformViewController` for how to implement a new PlatformViewController.
+  final PlatformViewController controller;
+
+  final PlatformViewRenderBoxLayerFactory _customLayerFactory;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return PlatformViewRenderBox(controller: controller, id: id, customLayerFactory: _customLayerFactory);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+    renderObject.controller = controller;
+    renderObject.id = id;
+  }
+}

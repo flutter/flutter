@@ -9,6 +9,17 @@ import 'package:collection/collection.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
+/// Used in internal testing.
+class FakePlatformViewController extends PlatformViewController {
+
+  bool disposed = false;
+
+  @override
+  void dispose() {
+    disposed = true;
+  }
+}
+
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
     SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);

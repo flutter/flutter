@@ -725,3 +725,96 @@ class _MotionEventsDispatcher {
   bool isSinglePointerAction(PointerEvent event) =>
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
+
+typedef PlatformViewRenderBoxLayerFactory = Layer Function(PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id);
+
+/// The render object for `PlatformViewSurface`.
+///
+/// It is responsible for painting, gestures and semantics.
+class PlatformViewRenderBox extends RenderBox {
+
+  /// Creating the render object for `PlatformViewSurface`.
+  ///
+  /// [controller], [id] must not be null.
+  /// Optionally, you can pass a [customLayerFactory] to generate a custom layer in the [paint] method.
+  /// A `PlatformViewLayer` is used by default.
+  PlatformViewRenderBox({
+    @required PlatformViewController controller,
+    @required int id,
+    PlatformViewRenderBoxLayerFactory customLayerFactory,
+  }) : assert(controller != null),
+       _controller = controller,
+       _id = id,
+       _customLayerFactory = customLayerFactory;
+
+  /// The `PlatformViewController` associated with this render object.
+  PlatformViewController get controller => _controller;
+  /// Sets the [controller] for this render object.
+  ///
+  /// [controller] must not be null. Setting a new controller will repaint.
+  set controller(PlatformViewController controller) {
+    assert(controller != null);
+    final bool needsPaint = _controller != controller;
+    _controller = controller;
+    if (needsPaint) {
+       markNeedsPaint();
+    }
+  }
+
+  /// The [id] of the platform view that is associated with this render object.
+  int get id => _id;
+  /// Sets the [id] of the platform view that is associated with this render object.
+  ///
+  /// [id] must not be null. Setting a new id will update the semantics.
+  set id(int id) {
+    assert(id != null);
+    final bool needsSemanticsUpdate = _id != id;
+    _id = id;
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  PlatformViewRenderBoxLayerFactory _customLayerFactory;
+
+  PlatformViewController _controller;
+
+  int _id;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_customLayerFactory != null) {
+      context.addLayer(_customLayerFactory(this, context, offset, _id));
+      return;
+    }
+    context.addLayer(PlatformViewLayer(
+      rect: offset & size,
+      viewId: _id,
+    ));
+  }
+
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = true;
+
+    if (_id != null) {
+      config.platformViewId = _id;
+    }
+  }
+}
