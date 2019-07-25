@@ -588,7 +588,8 @@ class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
     @required this.id,
-    @required this.onPlatformViewCreated
+    @required this.onPlatformViewCreated,
+    @required this.onFocusChanged,
   }) : assert(id != null),
        assert(onPlatformViewCreated != null);
 
@@ -599,6 +600,9 @@ class PlatformViewCreationParams {
 
   /// Callback invoked after the platform view has been created.
   final PlatformViewCreatedCallback onPlatformViewCreated;
+
+  /// Notifies the [PlatformViewLink] when the focus is changed from the platform.
+  final ValueChanged<bool> onFocusChanged;
 }
 
 /// A factory for a surface presenting a platform view as part of the widget hierarchy.
@@ -679,6 +683,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   PlatformViewController _controller;
   bool _platformViewCreated = false;
   PlatformViewSurface _surface;
+  FocusNode _focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -686,22 +691,45 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
       return const SizedBox.expand();
     }
     _surface ??= widget._surfaceFactory(context, _controller);
-    return _surface;
+    return Focus(
+      focusNode: _focusNode,
+      onFocusChange: _onFrameworkFocusChange,
+      child: _surface,
+    );
   }
 
   @override
   void initState() {
+    _focusNode = FocusNode(debugLabel: 'PlatformView(id: $_id)',);
     _initialize();
     super.initState();
   }
 
   void _initialize() {
     _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._createPlatformViewController(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _controller = widget._createPlatformViewController(
+      PlatformViewCreationParams._(
+        id:_id,
+        onPlatformViewCreated:_onPlatformViewCreated,
+        onFocusChanged:_onPlatformFocusChange
+      ),
+    );
   }
 
   void _onPlatformViewCreated(int id) {
     setState(() => _platformViewCreated = true);
+  }
+
+  void _onFrameworkFocusChange(bool isFocused) {
+    if (isFocused && _controller != null) {
+      _controller.clearFocus();
+    }
+  }
+
+  void _onPlatformFocusChange(bool isFocused){
+    if (isFocused) {
+      _focusNode.requestFocus();
+    }
   }
 
   @override

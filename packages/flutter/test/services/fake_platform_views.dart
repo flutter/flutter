@@ -18,6 +18,7 @@ class FakePlatformViewController extends PlatformViewController {
   }
 
   bool disposed = false;
+  bool focusCleared = false;
 
   /// Events that are dispatched;
   List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
@@ -35,11 +36,17 @@ class FakePlatformViewController extends PlatformViewController {
   void clearTestingVariables() {
     dispatchedPointerEvents.clear();
     disposed = false;
+    focusCleared = false;
   }
 
   @override
   void dispose() {
     disposed = true;
+  }
+
+  @override
+  void clearFocus() {
+    focusCleared = true;
   }
 }
 
