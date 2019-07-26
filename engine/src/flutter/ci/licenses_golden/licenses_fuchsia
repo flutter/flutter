@@ -1,4 +1,4 @@
-Signature: 61c93b37f21b60978c066aa43a99f4ee
+Signature: 6ba48a46e3aae42aca629318aaa24cf0
 
 UNUSED LICENSES:
 
@@ -1825,6 +1825,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/lib/webview.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_webview_flutter/meta.json
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/sl4f.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/audio.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/device_log.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/dump.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/exceptions.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/input.dart
