@@ -850,8 +850,6 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
 ///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
-///  * [SliverFillViewport], which determines the [itemExtent] based on
-///    [SliverConstraints.viewportMainAxisExtent].
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
@@ -1030,6 +1028,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
+@Deprecated('Use SliverLayoutBuilder instead.')
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
@@ -1359,8 +1358,6 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///
 /// See also:
 ///
-///  * [SliverFillViewport], which sizes its children based on the
-///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [SliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class SliverFillRemaining extends SingleChildRenderObjectWidget {

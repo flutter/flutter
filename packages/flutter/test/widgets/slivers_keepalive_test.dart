@@ -454,15 +454,18 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
           child: CustomScrollView(
             cacheExtent: 0,
             slivers: <Widget>[
-              SliverFillViewport(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    return children[index];
-                  },
-                  childCount: children.length,
-                  findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
+              SliverLayoutBuilder(
+                builder: (BuildContext context, SliverConstraints constraints) => SliverFixedExtentList(
+                  itemExtent: constraints.viewportMainAxisExtent,
+                  delegate: SliverChildBuilderDelegate(
+                    (BuildContext context, int index) {
+                      return children[index];
+                    },
+                    childCount: children.length,
+                    findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -496,10 +499,14 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
           child: CustomScrollView(
             cacheExtent: 0,
             slivers: <Widget>[
-              SliverFillViewport(
-                viewportFraction: widget.viewportFraction,
-                delegate: SliverChildListDelegate(widget.children),
-              )
+              SliverLayoutBuilder(
+                builder: (BuildContext context, SliverConstraints constraints) {
+                  return SliverFixedExtentList(
+                    itemExtent: widget.viewportFraction * constraints.viewportMainAxisExtent,
+                    delegate: SliverChildListDelegate(widget.children),
+                  );
+                },
+              ),
             ],
           ),
         ),

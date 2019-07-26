@@ -27,8 +27,6 @@ import 'sliver.dart';
 ///  * [SliverFixedExtentList], whose itemExtent is a pixel value.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
-///  * [SliverFillViewport], which sizes its children based on the
-///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [SliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class SliverPrototypeExtentList extends SliverMultiBoxAdaptorWidget {

@@ -556,13 +556,59 @@ void main() {
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100.0, 0.0));
-    expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
+    expect(tester.getTopLeft(find.text('Alabama')), Offset.zero);
+    expect(tester.getBottomRight(find.text('Alabama')), const Offset(1000.0, 600.0));
 
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), Offset.zero);
+  });
+
+  testWidgets('All visible pages are able to receive touch events',
+    (WidgetTester tester) async {
+    final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+    int tappedIndex;
+    Iterable<int> visiblePages;
+
+    Widget build() {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: PageView.builder(
+          controller: controller,
+          itemCount: 20,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: () => tappedIndex = index,
+              child: SizedBox.expand(child: Text(index.toString())),
+            );
+          },
+        ),
+      );
+    }
+
+    visiblePages = const <int> [0, 1, 2];
+    await tester.pumpWidget(build());
+
+    // The first 3 items should be visible and tappable.
+    for (int index in visiblePages) {
+      expect(find.text(index.toString()), findsOneWidget);
+      // The center of page 2's x-coordinate is 800, so we have to manually
+      // offset it a bit to make sure the tap lands within the screen.
+      final Offset center = tester.getCenter(find.text(index.toString())).translate(-3, 0);
+      await tester.tapAt(center);
+      expect(tappedIndex, index);
+    }
+
+    controller.jumpToPage(19);
+    await tester.pump();
+    // The last 3 items should be visible and tappable.
+    visiblePages = const <int> [17, 18, 19];
+    for (int index in visiblePages) {
+      expect(find.text(index.toString()), findsOneWidget);
+      await tester.tap(find.text(index.toString()));
+      expect(tappedIndex, index);
+    }
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
