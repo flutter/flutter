@@ -1554,6 +1554,10 @@ class RenderEditable extends RenderBox {
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
       return TextSelection.fromPosition(position);
+    // If text is obscured, the entire sentence should be treated as one word.
+    if (obscureText) {
+      return TextSelection(baseOffset: 0, extentOffset: text.toPlainText().length);
+    }
     return TextSelection(baseOffset: word.start, extentOffset: word.end);
   }
 
