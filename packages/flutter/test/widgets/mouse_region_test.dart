@@ -547,7 +547,6 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
 
-
       int numEntries = 0;
       int numExits = 0;
 
