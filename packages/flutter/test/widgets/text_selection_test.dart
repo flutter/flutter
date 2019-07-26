@@ -535,18 +535,23 @@ void main() {
       ),
     );
 
-    await tester.pump();
     await tester.pumpAndSettle();
 
     final Finder gestureDetector = find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(GestureDetector),
+      of: find.byType(Visibility),
+      matching: find.descendant(
+        of: find.byType(FadeTransition),
+        matching: find.byType(GestureDetector),
+      ),
     );
 
     expect(gestureDetector, findsOneWidget);
-    // The size of the GestureDetector should be reasonably small.
-    expect(tester.renderObject<RenderBox>(gestureDetector).size.width, lessThan(100));
-    expect(tester.renderObject<RenderBox>(gestureDetector).size.height, lessThan(100));
+    // The GestureDetector's size should not exceed that of the TextField.
+    final Rect hitRect = tester.getRect(gestureDetector);
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
+
+    expect(hitRect.size.width, lessThan(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThan(textFieldRect.size.height));
 
     debugDefaultTargetPlatformOverride = null;
   });
