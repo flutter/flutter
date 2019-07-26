@@ -5570,11 +5570,11 @@ class Listener extends StatelessWidget {
   /// How to behave during hit testing.
   final HitTestBehavior behavior;
 
-  // The widget listened by the listener.
+  // The widget listened to by the listener.
   //
-  // The reason why we don't expose it is that once deprecated methods are
-  // removed, Listener will no longer need to store child, but pass child to
-  // super instead.
+  // The reason why we don't expose it is that once the deprecated methods are
+  // removed, Listener will no longer need to store the child, but will pass
+  // the child to `super` instead.
   final Widget _child;
 
   @override

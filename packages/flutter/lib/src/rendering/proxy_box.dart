@@ -2551,13 +2551,13 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// Simply put, it responds to events that are related to hovering,
 /// i.e. when the mouse enters, exits or hovers a region without pressing.
 ///
-/// It does not responds to common events that construct gestures, such as when
+/// It does not respond to common events that construct gestures, such as when
 /// the pointer is pressed, moved, then released or canceled. For these events,
 /// use [RenderPointerListener].
 ///
-/// If it has a child, defers to the child for sizing behavior.
+/// If it has a child, it defers to the child for sizing behavior.
 ///
-/// If it does not have a child, grows to fit the parent-provided constraints.
+/// If it does not have a child, it grows to fit the parent-provided constraints.
 class RenderMouseListener extends RenderProxyBox {
   /// Creates a render object that forwards pointer events to callbacks.
   RenderMouseListener({
