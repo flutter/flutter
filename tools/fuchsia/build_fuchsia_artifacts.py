@@ -85,10 +85,10 @@ def CopyFiles(source, destination):
       raise
 
 
-def CopyToBucket(source, destination, product=False):
-  runner_name = 'flutter_jit_runner'
-  if product:
-    runner_name = 'flutter_jit_product_runner'
+def CopyToBucketWithMode(source, destination, aot, product):
+  mode = 'aot' if aot else 'jit'
+  product_suff = '_product' if product else ''
+  runner_name = 'flutter_%s%s_runner' % (mode, product_suff)
   far_dir = '%s_far' % runner_name
   source_root = os.path.join(_out_dir, source)
   source = os.path.join(source_root, far_dir)
@@ -96,11 +96,17 @@ def CopyToBucket(source, destination, product=False):
   pm_bin = GetPMBinPath()
   key_path = os.path.join(_script_dir, 'development.key')
 
-  destination = os.path.join(_bucket_directory, destination)
+  destination = os.path.join(_bucket_directory, destination, mode)
   CreateFarPackage(pm_bin, source, key_path, destination)
   patched_sdk_dir = os.path.join(source_root, 'flutter_runner_patched_sdk')
   dest_sdk_path = os.path.join(destination, 'flutter_runner_patched_sdk')
-  CopyPath(patched_sdk_dir, dest_sdk_path)
+  if not os.path.exists(dest_sdk_path):
+    CopyPath(patched_sdk_dir, dest_sdk_path)
+
+
+def CopyToBucket(src, dst, product = False):
+  CopyToBucketWithMode(src, dst, False, product)
+  CopyToBucketWithMode(src, dst, True, product)
 
 
 def BuildBucket():
@@ -132,15 +138,24 @@ def ProcessCIPDPakcage(upload, engine_version):
   subprocess.check_call(command, cwd=_bucket_directory)
 
 
+def GetRunnerTarget(product, aot):
+  base = 'flutter/shell/platform/fuchsia/flutter:'
+  target = 'flutter_'
+  if aot:
+    target += 'aot_'
+  else:
+    target += 'jit_'
+  if product:
+    target += 'product_'
+  target += 'runner'
+  return base + target
+
+
 def GetTargetsToBuild(product=False):
-  product_suffix = '_product'
-  if not product:
-    product_suffix = ''
   targets_to_build = [
       # The Flutter Runner.
-      'flutter/shell/platform/fuchsia/flutter:flutter_jit%s_runner' %
-      product_suffix,
-
+      GetRunnerTarget(product, False),
+      GetRunnerTarget(product, True),
       # The Dart Runner.
       # 'flutter/shell/platform/fuchsia/dart:dart',
   ]

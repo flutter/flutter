@@ -5,8 +5,9 @@
 assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
-import("$flutter_root/tools/fuchsia/clang.gni")
+import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/package_dir.gni")
 
 shell_gpu_configuration("fuchsia_gpu_configuration") {
@@ -162,10 +163,35 @@ flutter_runner("jit_product") {
 flutter_runner("jit") {
   output_name = "flutter_jit_runner"
   product = false
+  if (flutter_runtime_mode == "profile") {
+    extra_defines = [ "FLUTTER_PROFILE" ]
+  }
 
   extra_deps = [
     "//third_party/dart/runtime:libdart_jit",
     "//third_party/dart/runtime/platform:libdart_platform_jit",
+  ]
+}
+
+flutter_runner("aot") {
+  output_name = "flutter_aot_runner"
+  product = false
+  if (flutter_runtime_mode == "profile") {
+    extra_defines = [ "FLUTTER_PROFILE" ]
+  }
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_precompiled_runtime",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
+  ]
+}
+
+flutter_runner("aot_product") {
+  output_name = "flutter_aot_product_runner"
+  product = true
+  extra_defines = [ "DART_PRODUCT" ]
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_precompiled_runtime_product",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime_product",
   ]
 }
 
@@ -194,6 +220,10 @@ template("jit_runner") {
       "kernel:kernel_core_snapshot${product_suffix}",
     ]
 
+    if (!product) {
+      deps += [ observatory_target ]
+    }
+
     binary = "flutter_jit${product_suffix}_runner"
 
     resources = [
@@ -202,6 +232,15 @@ template("jit_runner") {
         dest = "icudtl.dat"
       },
     ]
+
+    if (!product) {
+      resources += [
+        {
+          path = rebase_path(observatory_archive_file)
+          dest = "observatory.tar"
+        },
+      ]
+    }
 
     resources += [
       {
@@ -226,67 +265,7 @@ template("jit_runner") {
       },
     ]
 
-    fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$host_cpu"
-    fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
-    sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
-    sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"
-
-    libraries = [
-      {
-        name = "libasync-default.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libtrace-engine.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libfdio.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libmemfs.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libsyslog.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libvulkan.so"
-        path = rebase_path("$fuchsia_sdk_lib")
-      },
-      {
-        name = "libzircon.so"
-        path = rebase_path("$sysroot_lib")
-      },
-      {
-        name = "libc.so"
-        path = rebase_path("$sysroot_lib")
-      },
-      {
-        name = "ld.so.1"
-        path = rebase_path("$sysroot_dist_lib")
-      },
-
-      # Note, we use the md5 hashes here because of gn limitations of json parsing.
-      # This is a hack, and we can migrate to a better way soon.
-      {
-        name = "libc++.so.2"
-        path = rebase_path(
-                "$clang_base/${clang_manifest_json.md5_33bfe15b05ada4ed326fbc33adb39b95}")
-      },
-      {
-        name = "libc++abi.so.1"
-        path = rebase_path(
-                "$clang_base/${clang_manifest_json.md5_916c01a85e3353f124776599819ecb1c}")
-      },
-      {
-        name = "libunwind.so.1"
-        path = rebase_path(
-                "$clang_base/${clang_manifest_json.md5_beb70f40d525448b39ea87d9f5811e56}")
-      },
-    ]
+    libraries = common_libs
 
     meta = [
       {
@@ -295,6 +274,59 @@ template("jit_runner") {
       },
     ]
   }
+}
+
+template("aot_runner") {
+  product = defined(invoker.product) && invoker.product
+  product_suffix = ""
+  if (product) {
+    product_suffix = "_product"
+  }
+
+  package_dir(target_name) {
+    deps = [
+      ":aot${product_suffix}",
+    ]
+
+    if (!product) {
+      deps += [ observatory_target ]
+    }
+
+    binary = "flutter_aot${product_suffix}_runner"
+
+    resources = [
+      {
+        path = rebase_path("//third_party/icu/common/icudtl.dat")
+        dest = "icudtl.dat"
+      },
+    ]
+
+    if (!product) {
+      resources += [
+        {
+          path = rebase_path(observatory_archive_file)
+          dest = "observatory.tar"
+        },
+      ]
+    }
+
+    libraries = common_libs
+
+    meta = [
+      {
+        path = rebase_path("meta/flutter_aot${product_suffix}_runner.cmx")
+        dest = "flutter_aot${product_suffix}_runner.cmx"
+      },
+    ]
+  }
+}
+
+aot_runner("flutter_aot_runner") {
+  product = false
+}
+
+aot_runner("flutter_aot_product_runner") {
+  product = true
 }
 
 jit_runner("flutter_jit_runner") {
