@@ -261,13 +261,14 @@ void main() {
 
   testWidgets('Dropdown form field', (WidgetTester tester) async {
     String value = 'one';
+    int _validateCalled = 0;
 
     await tester.pumpWidget(
       StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return MaterialApp(
             home: Material(
-              child: DropdownButtonFormField<String>(
+              child: my.DropdownButtonFormField<String>(
                 value: value,
                 hint: const Text('Select Value'),
                 decoration: const InputDecoration(
@@ -284,7 +285,8 @@ void main() {
                     value = v;
                   });
                 },
-                validator: (String v) => v == null ? 'Must select value' : null,
+                validator: (String v) {_validateCalled++; return v == null ? 'Must select value' : null;},
+                autovalidate: true,
               ),
             ),
           );
@@ -292,11 +294,13 @@ void main() {
       )
     );
 
+    expect(_validateCalled, 1);
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('three').last);
     await tester.pump();
+    expect(_validateCalled, 2);
     await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
