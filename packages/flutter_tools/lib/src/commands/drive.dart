@@ -85,6 +85,8 @@ class DriveCommand extends RunCommandBase {
   Device get device => _device;
   bool get shouldBuild => argResults['build'];
 
+  bool get verboseSystemLogs => argResults['verbose-system-logs'];
+
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
@@ -264,6 +266,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
+      verboseSystemLogs: command.verboseSystemLogs
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
