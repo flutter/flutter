@@ -105,6 +105,8 @@ class CopyAssets extends Target {
 
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
 /// dependencies declared in `pubspec.yaml`.
+// TODO(jonahwiliams): this should be per platform and located in build
+// outputs.
 class FlutterPlugins extends Target {
   const FlutterPlugins();
 
@@ -127,13 +129,19 @@ class FlutterPlugins extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
+    // The pubspec may change for reasons other than plugins changing, so we compare
+    // the manifest before writing. Some hosting build systems use timestamps
+    // so we need to be careful to avoid tricking them into doing more work than
+    // necessary.
     final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
     final List<Plugin> plugins = findPlugins(project);
     final String pluginManifest = plugins
         .map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}')
         .join('\n');
-    environment.projectDir.childFile('.flutter-plugins')
-      ..createSync()
-      ..writeAsStringSync(pluginManifest);
+    final File flutterPluginsFile = environment.projectDir.childFile('.flutter-plugins');
+    if (!flutterPluginsFile.existsSync() ||
+         flutterPluginsFile.readAsStringSync() != pluginManifest) {
+      flutterPluginsFile.writeAsStringSync(pluginManifest);
+    }
   }
 }

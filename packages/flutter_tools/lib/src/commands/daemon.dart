@@ -406,7 +406,6 @@ class AppDomain extends Domain {
       device,
       flutterProject: flutterProject,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,

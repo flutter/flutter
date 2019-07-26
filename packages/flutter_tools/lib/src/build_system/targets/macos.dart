@@ -16,7 +16,7 @@ import '../exceptions.dart';
 import 'assets.dart';
 import 'dart.dart';
 
-const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
+const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -70,6 +70,7 @@ class UnpackMacOS extends Target {
       .projectDir
       .childDirectory('macos')
       .childDirectory('Flutter')
+      .childDirectory('ephemeral')
       .childDirectory('FlutterMacOS.framework');
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
@@ -99,7 +100,6 @@ class DebugMacOSPodInstall extends Target {
       platform: TargetPlatform.darwin_x64,
       mode: BuildMode.debug
     ),
-    Source.pattern('{PROJECT_DIR}/.flutter-plugins'),
     Source.pattern('{PROJECT_DIR}/macos/Podfile', optional: true),
     Source.pattern('{PROJECT_DIR}/macos/Runner.xcodeproj/project.pbxproj'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
@@ -176,4 +176,18 @@ class DebugMacOSApplication extends Target {
   List<Source> get outputs => const <Source>[
     Source.pattern('{BUILD_DIR}/flutter_assets/kernel_blob.bin'),
   ];
+}
+
+// TODO(jonahwilliams): real AOT implementation.
+class ReleaseMacOSApplication extends DebugMacOSApplication {
+  const ReleaseMacOSApplication();
+
+  @override
+  String get name => 'release_macos_application';
+}
+class ProfileMacOSApplication extends DebugMacOSApplication {
+  const ProfileMacOSApplication();
+
+  @override
+  String get name => 'profile_macos_application';
 }

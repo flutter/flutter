@@ -47,7 +47,7 @@ class AssembleCommand extends FlutterCommand {
     argParser.addOption('build-inputs', help: 'A file path where a newline '
         'separated file containing all inputs used will be written after a build.'
         ' This file is not included as a build input or output. This file is not'
-        ' writen if the build fails for any reason.');
+        ' written if the build fails for any reason.');
     argParser.addOption('build-outputs', help: 'A file path where a newline '
         'separated file containing all outputs used will be written after a build.'
         ' This file is not included as a build input or output. This file is not'

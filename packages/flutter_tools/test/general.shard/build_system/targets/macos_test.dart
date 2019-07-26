@@ -81,21 +81,21 @@ void main() {
   test('Copies files to correct cache directory', () => testbed.run(() async {
     await buildSystem.build(const UnpackMacOS(), environment);
 
-    expect(fs.directory('macos/Flutter/FlutterMacOS.framework').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/FlutterMacOS').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEReshapeListener.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEView.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FLEViewController.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterChannels.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterCodecs.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Modules/module.modulemap').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Resources/icudtl.dat').existsSync(), true);
-    expect(fs.file('macos/Flutter/FlutterMacOS.framework/Resources/info.plist').existsSync(), true);
+    expect(fs.directory('macos/Flutter/ephemeral/FlutterMacOS.framework').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/FlutterMacOS').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEReshapeListener.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEView.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEViewController.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterChannels.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterCodecs.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterMacOS.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Modules/module.modulemap').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Resources/icudtl.dat').existsSync(), true);
+    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Resources/info.plist').existsSync(), true);
   }));
 }
 

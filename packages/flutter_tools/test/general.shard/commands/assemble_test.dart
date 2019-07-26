@@ -38,7 +38,7 @@ void main() {
     await commandRunner.run(<String>['assemble', 'unpack_macos']);
     final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.statusText.trim(), 'build succeeded');
+    expect(bufferLogger.statusText.trim(), 'build succeeded.');
   }));
 }
 

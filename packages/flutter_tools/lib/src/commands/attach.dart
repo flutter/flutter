@@ -257,7 +257,6 @@ class AttachCommand extends FlutterCommand {
         device,
         flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
-        dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],
         viewFilter: argResults['isolate-filter'],

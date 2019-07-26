@@ -171,7 +171,7 @@ abstract class Target {
       }
     }
 
-    // For each outut, first determine if we've already computed the hash
+    // For each output, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     for (String previousOutput in previousOutputs) {
       final File file = fs.file(previousOutput);
@@ -475,12 +475,28 @@ class BuildSystem {
       // Always persist the file cache to disk.
       fileCache.persist();
     }
+    // Remove "inputs" that were outputs of previous builds.
+    buildInstance.inputFiles.removeWhere((String path, File file) {
+      // Leaking implementation detail: remove pubpsec, flutter-plugins, generated.
+      return buildInstance.outputFiles.containsKey(path) ||
+                           path.contains('pubspec.yaml') ||
+                       path.contains('.flutter-plugins') ||
+                               path.contains('xcconfig');
+    });
+    buildInstance.outputFiles.removeWhere((String path, File file) {
+      // Leaking implementation detail: remove pubpsec, flutter-plugins, generated.
+      return path.contains('pubspec.yaml') ||
+         path.contains('.flutter-plugins') ||
+         path.contains('xcconfig');
+    });
     return BuildResult(
       passed,
       buildInstance.exceptionMeasurements,
       buildInstance.stepTimings,
-      buildInstance.inputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
-      buildInstance.outputFiles.values.toList()..sort((File a, File b) => a.path.compareTo(b.path)),
+      buildInstance.inputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
+      buildInstance.outputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 }
@@ -527,21 +543,21 @@ class _BuildInstance {
       if (canSkip) {
         skipped = true;
         printStatus('Skipping target: ${target.name}');
-        final List<File> outputs = target.resolveOutputs(environment);
+        final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         for (File output in outputs) {
-          inputFiles[output.resolveSymbolicLinksSync()] = output;
+          outputFiles[output.resolveSymbolicLinksSync()] = output;
         }
       } else {
         printStatus('${target.name}: Starting');
         await target.build(inputs, environment);
         printStatus('${target.name}: Complete');
 
-        final List<File> outputs = target.resolveOutputs(environment);
+        final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         // Update hashes for output files.
         await fileCache.hashFiles(outputs);
         target._writeStamp(inputs, outputs, environment);
         for (File output in outputs) {
-          inputFiles[output.resolveSymbolicLinksSync()] = output;
+          outputFiles[output.resolveSymbolicLinksSync()] = output;
         }
       }
     } catch (exception, stackTrace) {
