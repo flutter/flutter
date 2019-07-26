@@ -1445,7 +1445,7 @@ void main() {
 
   // Show the selection menu at the given index into the text by tapping to
   // place the cursor and then tapping on the handle.
-  Future _showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
+  Future<void> _showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
     await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
@@ -1548,31 +1548,34 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
+      // Show the selection menu on the first line and verify the selection
+      // toolbar position is below the first line.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
-
-      // Verify the selection toolbar position is below the text.
       expect(find.text('SELECT ALL'), findsOneWidget);
       final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
       expect(firstLineTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
+      expect(firstLineToolbarTopLeft.dy, greaterThan(firstLineTopLeft.dy));
 
+      // Show the selection menu on the second to last line and verify the
+      // selection toolbar position is above that line and above the first
+      // line's toolbar.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
-
-      // Verify the selection toolbar position is below the text.
       expect(find.text('SELECT ALL'), findsOneWidget);
       final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset penultimateLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
-      expect(penultimateLineTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
-      //expect(penultimateLineToolbarTopLeft.dy, greaterThan(firstLineToolbarTopLeft.dy));
+      expect(penultimateLineToolbarTopLeft.dy, lessThan(penultimateLineTopLeft.dy));
+      expect(penultimateLineToolbarTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
 
+      // Show the selection menu on the last line and verify the selection
+      // toolbar position is above that line and below the position of the
+      // second to last line's toolbar.
       await _showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
-
-      // Verify the selection toolbar position is below the text.
       expect(find.text('SELECT ALL'), findsOneWidget);
       final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset lastLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
-      expect(lastLineTopLeft.dy, greaterThan(lastLineToolbarTopLeft.dy));
-      expect(lastLineToolbarTopLeft.dy, greaterThan(firstLineToolbarTopLeft.dy));
+      expect(lastLineToolbarTopLeft.dy, lessThan(lastLineTopLeft.dy));
+      expect(lastLineToolbarTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
     },
   );
 
