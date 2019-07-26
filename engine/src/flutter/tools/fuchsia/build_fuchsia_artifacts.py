@@ -85,10 +85,10 @@ def CopyFiles(source, destination):
       raise
 
 
-def CopyToBucketWithMode(source, destination, aot, product):
+def CopyToBucketWithMode(source, destination, aot, product, runner_type):
   mode = 'aot' if aot else 'jit'
   product_suff = '_product' if product else ''
-  runner_name = 'flutter_%s%s_runner' % (mode, product_suff)
+  runner_name = '%s_%s%s_runner' % (runner_type, mode, product_suff)
   far_dir = '%s_far' % runner_name
   source_root = os.path.join(_out_dir, source)
   source = os.path.join(source_root, far_dir)
@@ -104,9 +104,10 @@ def CopyToBucketWithMode(source, destination, aot, product):
     CopyPath(patched_sdk_dir, dest_sdk_path)
 
 
-def CopyToBucket(src, dst, product = False):
-  CopyToBucketWithMode(src, dst, False, product)
-  CopyToBucketWithMode(src, dst, True, product)
+def CopyToBucket(src, dst, product=False):
+  CopyToBucketWithMode(src, dst, False, product, 'flutter')
+  CopyToBucketWithMode(src, dst, True, product, 'flutter')
+  CopyToBucketWithMode(src, dst, False, product, 'dart')
 
 
 def BuildBucket():
@@ -138,9 +139,12 @@ def ProcessCIPDPakcage(upload, engine_version):
   subprocess.check_call(command, cwd=_bucket_directory)
 
 
-def GetRunnerTarget(product, aot):
-  base = 'flutter/shell/platform/fuchsia/flutter:'
-  target = 'flutter_'
+def GetRunnerTarget(runner_type, product, aot):
+  base = 'flutter/shell/platform/fuchsia/%s:' % runner_type
+  if 'dart' in runner_type:
+    target = 'dart_'
+  else:
+    target = 'flutter_'
   if aot:
     target += 'aot_'
   else:
@@ -154,10 +158,10 @@ def GetRunnerTarget(product, aot):
 def GetTargetsToBuild(product=False):
   targets_to_build = [
       # The Flutter Runner.
-      GetRunnerTarget(product, False),
-      GetRunnerTarget(product, True),
+      GetRunnerTarget('flutter', product, False),
+      GetRunnerTarget('flutter', product, True),
       # The Dart Runner.
-      # 'flutter/shell/platform/fuchsia/dart:dart',
+      GetRunnerTarget('dart_runner', product, False),
   ]
   return targets_to_build
 
@@ -196,7 +200,7 @@ def main():
 
   BuildBucket()
 
-  ProcessCIPDPakcage(args.upload, args.engine_version)
+  # ProcessCIPDPakcage(args.upload, args.engine_version)
 
 
 if __name__ == '__main__':
