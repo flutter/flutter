@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
-final TextEditingController controller = TextEditingController();
+TextEditingController controller;
 final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
@@ -29,6 +29,11 @@ enum HandlePositionInViewport {
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
+    controller = TextEditingController();
+  });
+
+  tearDown(() {
+    controller = null;
   });
 
   // Tests that the desired keyboard action button is requested.
@@ -528,6 +533,21 @@ void main() {
       cause: SelectionChangedCause.tap,
     );
     await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+
+    // Hide the toolbar and clear the text and selection.
+    state.hideToolbar();
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+    state.updateEditingValue(const TextEditingValue(
+      text: '',
+    ));
+    await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
