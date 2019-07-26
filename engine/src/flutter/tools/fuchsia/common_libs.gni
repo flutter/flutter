@@ -1,0 +1,67 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("$flutter_root/tools/fuchsia/clang.gni")
+
+fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$host_cpu"
+fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
+sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
+sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"
+
+common_libs = [
+  {
+    name = "libasync-default.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libtrace-engine.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libfdio.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libmemfs.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libsyslog.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libvulkan.so"
+    path = rebase_path("$fuchsia_sdk_lib")
+  },
+  {
+    name = "libzircon.so"
+    path = rebase_path("$sysroot_lib")
+  },
+  {
+    name = "libc.so"
+    path = rebase_path("$sysroot_lib")
+  },
+  {
+    name = "ld.so.1"
+    path = rebase_path("$sysroot_dist_lib")
+  },
+
+  # Note, we use the md5 hashes here because of gn limitations of json parsing.
+  # This is a hack, and we can migrate to a better way soon.
+  {
+    name = "libc++.so.2"
+    path = rebase_path(
+            "$clang_base/${clang_manifest_json.md5_33bfe15b05ada4ed326fbc33adb39b95}")
+  },
+  {
+    name = "libc++abi.so.1"
+    path = rebase_path(
+            "$clang_base/${clang_manifest_json.md5_916c01a85e3353f124776599819ecb1c}")
+  },
+  {
+    name = "libunwind.so.1"
+    path = rebase_path(
+            "$clang_base/${clang_manifest_json.md5_beb70f40d525448b39ea87d9f5811e56}")
+  },
+]
