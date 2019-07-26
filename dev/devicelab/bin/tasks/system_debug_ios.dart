@@ -39,7 +39,6 @@ Future<void> checkNoWarningHostLaunch(String deviceId) async {
     '--debug',
     '--verbose',
     '--verbose-system-logs',
-    '--local-engine=ios_debug',
     '-d',
     deviceId,
     'lib/empty.dart'
@@ -56,7 +55,6 @@ Future<void> checkNoWarningXcodeLaunch(String deviceId) async {
     'ios',
     '--debug',
     '--verbose',
-    '--local-engine=ios_debug',
     'lib/exit.dart'
   ]);
 
@@ -85,7 +83,6 @@ Future<void> checkWarningHomeScreenLaunch(String deviceId) async {
     '--debug',
     '--verbose',
     '--verbose-system-logs',
-    '--local-engine=ios_debug',
     '-d',
     deviceId,
     'lib/empty.dart'
