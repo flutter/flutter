@@ -99,7 +99,7 @@ class FlutterManifest {
   /// Can be null if version isn't set or has a wrong format.
   String get buildName {
     if (appVersion != null && appVersion.contains('+'))
-      return appVersion.contains('+') ? appVersion.split('+')?.elementAt(0) : appVersion;
+      return appVersion.split('+')?.elementAt(0);
     else
       return appVersion;
   }
@@ -107,10 +107,10 @@ class FlutterManifest {
   /// The build version number from the `pubspec.yaml` file.
   /// Can be null if version isn't set or has a wrong format.
   String get buildNumber {
-    if (appVersion != null) {
-      return appVersion.contains('+') ? appVersion.split('+')?.elementAt(1) : appVersion;
+    if (appVersion != null && appVersion.contains('+')) {
+      return appVersion.split('+')?.elementAt(1);
     } else {
-      return null;
+      return appVersion;
     }
   }
 
