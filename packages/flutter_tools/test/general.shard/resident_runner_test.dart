@@ -352,6 +352,82 @@ void main() {
 
     verify(mockIsolate.flutterExit()).called(1);
   }));
+
+  test('ResidentRunner refreshViews calls flutter device', () => testbed.run(() async {
+    await residentRunner.refreshViews();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpApp calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpApp();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpApp()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpRenderTree calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpRenderTree();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpRenderTree()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpLayerTree calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpLayerTree();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpLayerTree()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpSemanticsTreeInTraversalOrder calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpSemanticsTreeInTraversalOrder()).called(1);
+  }));
+
+  test('ResidentRunner debugDumpSemanticsTreeInInverseHitTestOrder calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugDumpSemanticsTreeInInverseHitTestOrder();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugDumpSemanticsTreeInInverseHitTestOrder()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleDebugPaintSizeEnabled calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleDebugPaintSizeEnabled();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleDebugPaintSizeEnabled()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleDebugCheckElevationsEnabled calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleDebugCheckElevationsEnabled();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleDebugCheckElevationsEnabled()).called(1);
+  }));
+
+  test('ResidentRunner debugTogglePerformanceOverlayOverride calls flutter device', () => testbed.run(()async {
+    await residentRunner.debugTogglePerformanceOverlayOverride();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.debugTogglePerformanceOverlayOverride()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleWidgetInspector calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleWidgetInspector();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleWidgetInspector()).called(1);
+  }));
+
+  test('ResidentRunner debugToggleProfileWidgetBuilds calls flutter device', () => testbed.run(() async {
+    await residentRunner.debugToggleProfileWidgetBuilds();
+
+    verify(mockFlutterDevice.refreshViews()).called(1);
+    verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
+  }));
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}

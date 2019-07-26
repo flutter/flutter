@@ -159,6 +159,7 @@ class StartupTest {
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
+        'timeToFirstFrameRasterizedMicros',
       ]);
     });
   }
@@ -334,7 +335,6 @@ class CompileTest {
         options.add('android-arm');
         break;
     }
-    setLocalEngineOptionIfNecessary(options);
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
@@ -356,7 +356,6 @@ class CompileTest {
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
-    setLocalEngineOptionIfNecessary(options);
     final Map<String, dynamic> metrics = <String, dynamic>{};
 
     switch (deviceOperatingSystem) {
@@ -404,7 +403,6 @@ class CompileTest {
     await flutter('clean');
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
-    setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
