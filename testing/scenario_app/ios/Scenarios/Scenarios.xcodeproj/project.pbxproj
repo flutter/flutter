@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		0DB781F122E933E800E9B371 /* Flutter.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0DB781FE22EA2C6D00E9B371 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
+		0DB781FF22EA2C7200E9B371 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; };
+		0DB7820022EA2C9D00E9B371 /* App.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0DB7820122EA2CA500E9B371 /* App.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */; };
 		242F37A222E636DE001E83D4 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4522E3B61000073EBF /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		242F37A322E636DE001E83D4 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		246B4E4222E3B5F700073EBF /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 246B4E4122E3B5F700073EBF /* App.framework */; };
@@ -45,6 +50,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				0DB781EF22E931BE00E9B371 /* Flutter.framework in CopyFiles */,
+				0DB7820122EA2CA500E9B371 /* App.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -55,6 +61,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				0DB781F122E933E800E9B371 /* Flutter.framework in CopyFiles */,
+				0DB7820022EA2C9D00E9B371 /* App.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +80,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerTest.m; sourceTree = "<group>"; };
 		246B4E4122E3B5F700073EBF /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = App.framework; sourceTree = "<group>"; };
 		246B4E4522E3B61000073EBF /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Flutter.framework; sourceTree = "<group>"; };
 		248D76C722E388370012F0C1 /* Scenarios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scenarios.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +111,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DB781FF22EA2C7200E9B371 /* Flutter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -110,6 +119,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DB781FE22EA2C6D00E9B371 /* Flutter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +162,7 @@
 		248D76E222E388380012F0C1 /* ScenariosTests */ = {
 			isa = PBXGroup;
 			children = (
+				0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */,
 				248D76E322E388380012F0C1 /* ScenariosTests.m */,
 				248D76E522E388380012F0C1 /* Info.plist */,
 			);
@@ -317,6 +328,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				248D76E422E388380012F0C1 /* ScenariosTests.m in Sources */,
+				0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,6 +524,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S8QB4VV633;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = ScenariosTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -535,6 +551,10 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = S8QB4VV633;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = ScenariosTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
