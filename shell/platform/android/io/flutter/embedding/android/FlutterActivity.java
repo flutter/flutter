@@ -490,6 +490,7 @@ public class FlutterActivity extends FragmentActivity
   protected void onNewIntent(@NonNull Intent intent) {
     // Forward Intents to our FlutterFragment in case it cares.
     flutterFragment.onNewIntent(intent);
+    super.onNewIntent(intent);
   }
 
   @Override
