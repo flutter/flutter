@@ -436,8 +436,13 @@ class Environment {
 
 /// The result information from the build system.
 class BuildResult {
-  BuildResult(this.success, this.exceptions, this.performance, this.inputFiles,
-      this.outputFiles);
+  BuildResult({
+    @required this.success,
+    this.exceptions = const <String, ExceptionMeasurement>{},
+    this.performance = const <String, PerformanceMeasurement>{},
+    this.inputFiles = const <File>[],
+    this.outputFiles = const <File>[],
+  });
 
   final bool success;
   final Map<String, ExceptionMeasurement> exceptions;
@@ -490,12 +495,12 @@ class BuildSystem {
          path.contains('xcconfig');
     });
     return BuildResult(
-      passed,
-      buildInstance.exceptionMeasurements,
-      buildInstance.stepTimings,
-      buildInstance.inputFiles.values.toList()
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+      inputFiles: buildInstance.inputFiles.values.toList()
           ..sort((File a, File b) => a.path.compareTo(b.path)),
-      buildInstance.outputFiles.values.toList()
+      outputFiles: buildInstance.outputFiles.values.toList()
           ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }

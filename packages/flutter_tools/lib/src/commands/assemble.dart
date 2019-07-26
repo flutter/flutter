@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/targets/assets.dart';
 import '../build_system/targets/dart.dart';
@@ -33,6 +33,8 @@ const List<Target> _kDefaultTargets = <Target>[
   AotAssemblyProfile(),
   AotAssemblyRelease(),
   DebugMacOSApplication(),
+  ProfileMacOSApplication(),
+  ReleaseMacOSApplication(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

@@ -139,8 +139,7 @@ class FlutterPlugins extends Target {
         .map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}')
         .join('\n');
     final File flutterPluginsFile = environment.projectDir.childFile('.flutter-plugins');
-    if (!flutterPluginsFile.existsSync() ||
-         flutterPluginsFile.readAsStringSync() != pluginManifest) {
+    if (!flutterPluginsFile.existsSync() || flutterPluginsFile.readAsStringSync() != pluginManifest) {
       flutterPluginsFile.writeAsStringSync(pluginManifest);
     }
   }

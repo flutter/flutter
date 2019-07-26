@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/macos/cocoapods.dart';
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../globals.dart';
+import '../../macos/cocoapods.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
@@ -107,7 +106,7 @@ class DebugMacOSPodInstall extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    // No outputs because Cocoapods is full responsible for tracking. plus there
+    // No outputs because Cocoapods is fully responsible for tracking. plus there
     // is no concept of an optional output. Instead we will need a build config
     // phase to conditionally add this rule so that it can be written properly.
   ];
@@ -152,6 +151,9 @@ class DebugMacOSApplication extends Target {
     final File destinationFile = environment.buildDir
         .childDirectory('flutter_assets')
         .childFile('kernel_blob.bin');
+    if (!destinationFile.parent.existsSync()) {
+      destinationFile.parent.createSync(recursive: true);
+    }
     sourceFile.copySync(destinationFile.path);
   }
 
