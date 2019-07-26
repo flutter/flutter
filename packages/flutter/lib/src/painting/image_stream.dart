@@ -677,6 +677,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   Future<void> _decodeNextFrameAndSchedule() async {
     try {
+      if (!SchedulerBinding.instance.framesEnabled) {
+        SchedulerBinding.instance.scheduleFrameCallback((_) {
+          if (hasListeners && _codec != null) {
+            _decodeNextFrameAndSchedule();
+          }
+        });
+        return;
+      }
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
       reportError(
