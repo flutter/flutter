@@ -714,10 +714,19 @@ class UiKitViewController {
   }
 }
 
-/// A helper class to help implementing a new platform view.
+/// An interface for a platform view controller.
+///
+/// Implement this if you use [PlatformViewSurface] to implement a new platform view.
+///
+/// The method `dispose` should be called the new platform view widget is disposed.
 abstract class PlatformViewController {
 
-  /// This is invoked when the Framework is disposing the platform view. Implement this to properly dispose resources of the new platform view from the platform.
+  /// Disposes the associated platform view.
+  ///
+  /// This is invoked when the Framework is disposing the platform view. Implement this to properly disposes
+  /// the resources of the platform view from the platform.
+  ///
+  /// The controller is unusable after this is called.
   ///
   /// e.g.
   /// ```dart

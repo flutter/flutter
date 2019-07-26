@@ -726,42 +726,23 @@ class _MotionEventsDispatcher {
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
 
-/// A callback used by [PlatformViewRenderBox] to create a layer.
+/// A render object for embedding a platform view.
 ///
-/// Implement this if you need to ask [PlatformViewRenderBox] to create a custom layer instead of a standard [PlatformViewLayer].
-/// The `renderBox` is the render object whose `paint` method is invoked to create this layer.
-/// The `context` and `offset` parameters are the same as what will be passed to the [RenderBox.paint] method.
-/// The `id` is the platform view id provided to you by the framework.
-typedef PlatformViewRenderBoxLayerBuilder = Layer Function(PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id);
-
-/// The render object for [PlatformViewSurface].
-///
-/// Creates a [PlatformViewLayer] by default. Implement a custom [layerBuilder] to create a different layer instead.
+/// [PlatformViewRenderBox] presents an existing platform view, integrates it with the gesture arenas system
+/// and adds relevant semantic nodes to the semantics tree.
+/// It inserts a [PlatformViewLayer] to the layer tree.
 class PlatformViewRenderBox extends RenderBox {
 
   /// Creating a render object for a [PlatformViewSurface].
   ///
   /// The `controller` and `id` must not be null.
-  /// Optionally, you can pass a `layerBuilder` to generate a custom layer in the [paint] method.
-  /// A [PlatformViewLayer] is used by default.
   PlatformViewRenderBox({
     @required PlatformViewController controller,
     @required int id,
-    PlatformViewRenderBoxLayerBuilder layerBuilder,
   }) : assert(controller != null),
        assert(id != null),
        _controller = controller,
-       _id = id {
-    if (layerBuilder != null) {
-      _layerBuilder = layerBuilder;
-    } else {
-      _layerBuilder = (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id) {
-        return PlatformViewLayer(
-            rect: offset & size,
-            viewId: _id);
-      };
-    }
-  }
+       _id = id;
 
   /// The [PlatformViewController] associated with this render object.
   PlatformViewController get controller => _controller;
@@ -793,8 +774,6 @@ class PlatformViewRenderBox extends RenderBox {
     }
   }
 
-  PlatformViewRenderBoxLayerBuilder _layerBuilder;
-
   PlatformViewController _controller;
 
   int _id;
@@ -815,18 +794,17 @@ class PlatformViewRenderBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_layerBuilder != null);
-    context.addLayer(_layerBuilder(this, context, offset, _id));
+    assert(_id != null);
+    context.addLayer(PlatformViewLayer(
+            rect: offset & size,
+            viewId: _id));
   }
 
   @override
   void describeSemanticsConfiguration (SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
+    assert(_id != null);
     config.isSemanticBoundary = true;
-
-    if (_id != null) {
-      config.platformViewId = _id;
-    }
+    config.platformViewId = _id;
   }
 }

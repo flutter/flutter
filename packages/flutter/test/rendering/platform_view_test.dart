@@ -24,28 +24,6 @@ void main() {
       expect(platformViewRenderBox.size, const Size(100, 100));
     });
 
-    test('paint should trigger layerBuilder callback', () {
-      PlatformViewRenderBox callbackRenderBox;
-      PaintingContext callbackPaintingContext;
-      Offset callbackOffset;
-      int callbackId;
-      platformViewRenderBox = PlatformViewRenderBox(
-        controller: fakePlatformViewController,
-        id: 5,
-        layerBuilder: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
-          callbackRenderBox = renderBox;
-          callbackPaintingContext = context;
-          callbackOffset = offset;
-          callbackId = id;
-          return PlatformViewLayer(rect: offset & renderBox.size, viewId: id);
-        });
-      layout(platformViewRenderBox, phase: EnginePhase.paint);
-      expect(callbackRenderBox, platformViewRenderBox);
-      expect(callbackPaintingContext, isNotNull);
-      expect(callbackOffset, const Offset(0, 0));
-      expect(callbackId, 5);
-    });
-
     test('send semantics update if id is changed', (){
       final RenderObject tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),

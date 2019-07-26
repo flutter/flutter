@@ -1681,17 +1681,5 @@ void main() {
       });
       expect(layer, isNotNull);
     });
-
-    testWidgets('PlatformViewSurface should create a custom layer if requested', (WidgetTester tester) async {
-      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 1, layerBuilder: (PlatformViewRenderBox renderBox, PaintingContext context, Offset offset, int id){
-        return TextureLayer(rect: offset & renderBox.size, textureId: id);
-      },);
-      await tester.pumpWidget(surface);
-      final TextureLayer layer = tester.layers.firstWhere((Layer layer){
-        return layer is TextureLayer;
-      });
-      expect(layer, isNotNull);
-      expect(layer.textureId, 1);
-    });
   });
 }
