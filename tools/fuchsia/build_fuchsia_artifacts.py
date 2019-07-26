@@ -85,23 +85,43 @@ def CopyFiles(source, destination):
       raise
 
 
+def FindFile(name, path):
+  for root, dirs, files in os.walk(path):
+    if name in files:
+      return os.path.join(root, name)
+
+
+def CopyGenSnapshotIfExists(source, destination):
+  source_root = os.path.join(_out_dir, source)
+  destination_base = os.path.join(destination, 'dart_binaries')
+  gen_snapshot = FindFile('gen_snapshot', source_root)
+  gen_snapshot_product = FindFile('gen_snapshot_product', source_root)
+  if gen_snapshot:
+    dst_path = os.path.join(destination_base, 'gen_snapshot')
+    CopyPath(gen_snapshot, dst_path)
+  if gen_snapshot_product:
+    dst_path = os.path.join(destination_base, 'gen_snapshot_product')
+    CopyPath(gen_snapshot_product, dst_path)
+
+
 def CopyToBucketWithMode(source, destination, aot, product, runner_type):
   mode = 'aot' if aot else 'jit'
   product_suff = '_product' if product else ''
   runner_name = '%s_%s%s_runner' % (runner_type, mode, product_suff)
-  far_dir = '%s_far' % runner_name
+  far_dir_name = '%s_far' % runner_name
   source_root = os.path.join(_out_dir, source)
-  source = os.path.join(source_root, far_dir)
-  CreateMetaPackage(source, runner_name)
+  far_base = os.path.join(source_root, far_dir_name)
+  CreateMetaPackage(far_base, runner_name)
   pm_bin = GetPMBinPath()
   key_path = os.path.join(_script_dir, 'development.key')
 
   destination = os.path.join(_bucket_directory, destination, mode)
-  CreateFarPackage(pm_bin, source, key_path, destination)
+  CreateFarPackage(pm_bin, far_base, key_path, destination)
   patched_sdk_dir = os.path.join(source_root, 'flutter_runner_patched_sdk')
   dest_sdk_path = os.path.join(destination, 'flutter_runner_patched_sdk')
   if not os.path.exists(dest_sdk_path):
     CopyPath(patched_sdk_dir, dest_sdk_path)
+  CopyGenSnapshotIfExists(source_root, destination)
 
 
 def CopyToBucket(src, dst, product=False):
