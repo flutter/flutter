@@ -8,6 +8,7 @@ import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
 import("$flutter_root/tools/fuchsia/common_libs.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
 import("$flutter_root/tools/fuchsia/package_dir.gni")
 
 shell_gpu_configuration("fuchsia_gpu_configuration") {
@@ -195,13 +196,6 @@ flutter_runner("aot_product") {
   ]
 }
 
-observatory_target =
-    "//third_party/dart/runtime/observatory:observatory_archive"
-observatory_archive_dir = get_label_info(observatory_target, "target_gen_dir")
-observatory_archive_name = get_label_info(observatory_target, "name")
-observatory_archive_file =
-    "${observatory_archive_dir}/${observatory_archive_name}.tar"
-
 template("jit_runner") {
   product = defined(invoker.product) && invoker.product
 
@@ -225,6 +219,8 @@ template("jit_runner") {
     }
 
     binary = "flutter_jit${product_suffix}_runner"
+
+    meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
 
     resources = [
       {
@@ -291,6 +287,8 @@ template("aot_runner") {
     if (!product) {
       deps += [ observatory_target ]
     }
+
+    meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
 
     binary = "flutter_aot${product_suffix}_runner"
 

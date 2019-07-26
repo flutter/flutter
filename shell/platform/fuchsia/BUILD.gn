@@ -13,10 +13,11 @@ if (using_fuchsia_sdk) {
   }
 
   flutter_runner_target = "flutter_jit_${product_suffix}runner"
+  dart_runner_target = "dart_jit_${product_suffix}runner"
 
   group("fuchsia") {
     deps = [
-      # "dart",
+      "dart_runner:$dart_runner_target",
       "flutter:$flutter_runner_target",
     ]
   }
