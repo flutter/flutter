@@ -13,9 +13,6 @@ void main() {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
-
-      // TODO(liyuqian): enable the following once it's proved to be non-flaky by transition_perf_test.dart.
-      // await driver.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {

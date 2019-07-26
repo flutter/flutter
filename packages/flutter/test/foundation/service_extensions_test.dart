@@ -79,8 +79,6 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
-    if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
   }
 
   @override
