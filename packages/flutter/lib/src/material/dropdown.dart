@@ -938,9 +938,9 @@ class DropdownButtonFormField<T> extends FormField<T> {
     this.hint,
     this.onChanged,
     this.decoration = const InputDecoration(),
-    this.onSaved,
-    this.validator,
-    this.autovalidate = false,
+    FormFieldSetter<T> onSaved,
+    FormFieldValidator<T> validator,
+    bool autovalidate = false,
     this.disabledHint,
     this.elevation = 8,
     this.style,
@@ -1077,31 +1077,6 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// Specify null to remove the decoration entirely (including the
   /// extra padding introduced by the decoration to save space for the labels).
   final InputDecoration decoration;
-
-  /// An optional method to call with the final value when the form is saved via
-  /// [FormState.save].
-  final FormFieldSetter<T> onSaved;
-
-  /// An optional method that validates an input. Returns an error string to
-  /// display if the input is invalid, or null otherwise.
-  ///
-  /// The returned value is exposed by the [FormFieldState.errorText] property.
-  /// The [DropdownButtonFormField] uses this to override the [InputDecoration.errorText]
-  /// value.
-  ///
-  /// Alternating between error and normal state can cause the height of the
-  /// [DropdownButtonFormField] to change if no other subtext decoration is set on the
-  /// field. To create a field whose height is fixed regardless of whether or
-  /// not an error is displayed, either wrap the  [DropdownButtonFormField] in a fixed
-  /// height parent like [SizedBox], or set the [DropdownButtonFormField.helperText]
-  /// parameter to a space.
-  final FormFieldValidator<T> validator;
-
-  /// If true, this form field will validate and update its error text
-  /// immediately after every change. Otherwise, you must call
-  /// [FormFieldState.validate] to validate. If part of a [Form] that
-  /// auto-validates, this value will be ignored.
-  final bool autovalidate;
 
   @override
   FormFieldState<T> createState() => _DropdownButtonFormFieldState<T>();
