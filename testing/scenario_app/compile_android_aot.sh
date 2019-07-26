@@ -42,6 +42,7 @@ echo "Compiling ELF Shared Library..."
 "$DEVICE_TOOLS/gen_snapshot" --deterministic --snapshot_kind=app-aot-elf --elf="$OUTDIR/libapp.so" --strip "$OUTDIR/app.dill"
 
 mkdir -p "android/app/src/main/jniLibs/arm64-v8a"
+mkdir -p "android/app/libs"
 cp "$OUTDIR/libapp.so" "android/app/src/main/jniLibs/arm64-v8a/"
 cp "$DEVICE_TOOLS/../flutter.jar" "android/app/libs/"
 
