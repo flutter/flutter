@@ -6,15 +6,6 @@
 #import <XCTest/XCTest.h>
 #import "AppDelegate.h"
 
-static NSBundle* FindTestBundle() {
-  for (NSBundle* bundle in [NSBundle allBundles]) {
-    if ([bundle.bundlePath containsString:@".xctext"]) {
-      return bundle;
-    }
-  }
-  return nil;
-}
-
 @interface FlutterViewControllerTest : XCTestCase
 @property(nonatomic, strong) FlutterViewController* flutterViewController;
 @end
@@ -27,16 +18,14 @@ static NSBundle* FindTestBundle() {
 }
 
 - (void)tearDown {
-  [super tearDown];
   if (self.flutterViewController) {
     [self.flutterViewController removeFromParentViewController];
   }
+  [super tearDown];
 }
 
 - (void)testFirstFrameCallback {
-  NSBundle* bundle = FindTestBundle();
-  FlutterDartProject* project = [[FlutterDartProject alloc] initWithPrecompiledDartBundle:bundle];
-  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:project];
+  FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
   self.flutterViewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                      nibName:nil
