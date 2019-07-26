@@ -80,8 +80,10 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
-
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    ));
     final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
     // The exact position of the left side depends on the font the test framework
     // happens to pick, so we don't test that.
@@ -136,8 +138,10 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
-    expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    ));    expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
   }, skip: isBrowser);
 
@@ -452,7 +456,10 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    ));
     final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
 
     final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
@@ -577,8 +584,10 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent;
-
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    ));
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
     expect(tip, paints..rrect(
@@ -618,8 +627,10 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent;
-
+    final RenderBox tip = tester.renderObject(find.ancestor(
+      of: find.text(tooltipText),
+      matching: find.byType(Container),
+    ));
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
     expect(tip, paints..path(
