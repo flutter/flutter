@@ -409,6 +409,6 @@ String generateEncodedString(String s) {
   if (s.runes.every((int code) => code <= 0xFF))
     return generateString(s);
 
-  String unicodeEscapes = s.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
-  return "'${unicodeEscapes}'";
+  final String unicodeEscapes = s.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  return "'$unicodeEscapes'";
 }

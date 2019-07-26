@@ -51,9 +51,9 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
   }
 }
 
-void checkEncodedTranslations(encodedBundle, bundle) {
+void checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
   bool errorFound = false;
-  JsonDecoder decoder = JsonDecoder();
+  const JsonDecoder decoder = JsonDecoder();
   for (String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
       stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
