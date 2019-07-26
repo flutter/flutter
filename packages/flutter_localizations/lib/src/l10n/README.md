@@ -195,8 +195,8 @@ here: https://github.com/flutter/flutter/issues/36704.
 Rather than risking developer's editor sessions, the strings in these arb files
 (and the code generated for them) have been encoded using the appropriate
 escapes for JSON and Dart. The JSON format arb files were rewritten with
-dev/tools/encode_kn_arb_files.dart. The localizations code generator uses
-generateEncodedString() from dev/tools/localizations_utils.
+dev/tools/localization/encode_kn_arb_files.dart. The localizations code
+generator uses generateEncodedString() from dev/tools/localization/localizations_utils.
 
 
 ### Translations Status, Reporting Errors
