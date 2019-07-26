@@ -294,7 +294,9 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>) return false;
+    if (other is! _DropdownRouteResult<T>) {
+      return false;
+    }
     final _DropdownRouteResult<T> typedOther = other;
     return result == typedOther.result;
   }
@@ -421,7 +423,9 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // than the button height and the button is at the very bottom or top of the
     // screen, the menu will be aligned with the bottom or top of the button
     // respectively.
-    if (menuTop < topLimit) menuTop = math.min(buttonTop, topLimit);
+    if (menuTop < topLimit) {
+      menuTop = math.min(buttonTop, topLimit);
+    }
 
     if (menuBottom > bottomLimit) {
       menuBottom = math.max(buttonBottom, bottomLimit);
@@ -447,7 +451,9 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       padding: padding.resolve(textDirection),
     );
 
-    if (theme != null) menu = Theme(data: theme, child: menu);
+    if (theme != null) {
+      menu = Theme(data: theme, child: menu);
+    }
 
     return MediaQuery.removePadding(
       context: context,
@@ -813,8 +819,12 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>>
     Navigator.push(context, _dropdownRoute)
         .then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
-      if (!mounted || newValue == null) return;
-      if (widget.onChanged != null) widget.onChanged(newValue.result);
+      if (!mounted || newValue == null){
+        return;
+      }
+      if (widget.onChanged != null) {
+        widget.onChanged(newValue.result);
+      }
     });
   }
 
