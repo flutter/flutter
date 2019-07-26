@@ -21,6 +21,11 @@ typedef DragTargetWillAccept<T> = bool Function(T data);
 /// Used by [DragTarget.onAccept].
 typedef DragTargetAccept<T> = void Function(T data);
 
+/// Signature for causing a [DragTarget] to reject the given data.
+///
+/// Used by [DragTarget.onReject].
+typedef DragTargetReject<T> = void Function(T data);
+
 /// Signature for building children of a [DragTarget].
 ///
 /// The `candidateData` argument contains the list of drag data that is hovering
@@ -480,6 +485,7 @@ class DragTarget<T> extends StatefulWidget {
     @required this.builder,
     this.onWillAccept,
     this.onAccept,
+    this.onReject,
     this.onLeave,
   }) : super(key: key);
 
@@ -493,12 +499,15 @@ class DragTarget<T> extends StatefulWidget {
   /// piece of data being dragged over this drag target.
   ///
   /// Called when a piece of data enters the target. This will be followed by
-  /// either [onAccept], if the data is dropped, or [onLeave], if the drag
+  /// either [onAccept] or [onReject], if the data is dropped, or [onLeave], if the drag
   /// leaves the target.
   final DragTargetWillAccept<T> onWillAccept;
 
   /// Called when an acceptable piece of data was dropped over this drag target.
   final DragTargetAccept<T> onAccept;
+
+  /// Called when a rejectable piece of data was dropped over this drag target.
+  final DragTargetReject<T> onReject;
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
@@ -550,6 +559,11 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     });
     if (widget.onAccept != null)
       widget.onAccept(avatar.data);
+  }
+
+  void didReject(_DragAvatar<dynamic> avatar){
+    assert(_rejectedAvatars.contains(avatar));
+    if (widget.onReject != null) widget.onReject(avatar.data);
   }
 
   @override
@@ -687,6 +701,10 @@ class _DragAvatar<T> extends Drag {
       _activeTarget.didDrop(this);
       wasAccepted = true;
       _enteredTargets.remove(_activeTarget);
+    } else if (endKind == _DragEndKind.dropped &&
+        _activeTarget == null &&
+        _enteredTargets.isNotEmpty) {
+      _enteredTargets.first.didReject(this);
     }
     _leaveAllEntered();
     _activeTarget = null;
