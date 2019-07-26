@@ -5755,17 +5755,18 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
-  /// Called when a mouse pointer that has no button pressed enters the region
-  /// defined by this widget, or when the widget appears under the pointer.
+  /// Called when a mouse pointer (with or without buttons pressed) enters the
+  /// region defined by this widget, or when the widget appears under the
+  /// pointer.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer that has no button pressed changes position,
-  /// and the new position is within the region defined by this widget.
+  /// Called when a mouse pointer (with or without buttons pressed) changes
+  /// position, and the new position is within the region defined by this widget.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer that has no button pressed leaves the region
-  /// defined by this widget, or when the widget disappears from under the
-  /// pointer.
+  /// Called when a mouse pointer (with or without buttons pressed) leaves the
+  /// region defined by this widget, or when the widget disappears from under
+  /// the pointer.
   final PointerExitEventListener onExit;
 
   @override
