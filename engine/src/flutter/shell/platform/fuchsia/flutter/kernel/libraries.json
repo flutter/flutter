@@ -148,7 +148,7 @@
         "uri": "../../../../../../flutter/shell/platform/fuchsia/dart-pkg/fuchsia/lib/fuchsia.dart"
       },
       "fuchsia.builtin": {
-        "uri": "../../../../../../flutter/shell/platform/fuchsia/dart/embedder/builtin.dart"
+        "uri": "../../../../../../flutter/shell/platform/fuchsia/dart_runner/embedder/builtin.dart"
       },
       "ui": {
         "uri": "../../../../../../flutter/lib/ui/ui.dart"
