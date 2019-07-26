@@ -499,14 +499,6 @@ class FlutterDriver {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
-  /// Waits until the next [Window.onReportTimings] is called.
-  ///
-  /// Use this method to wait for the first frame to be rasterized during the
-  /// app launch.
-  Future<void> waitUntilFirstFrameRasterized() async {
-    await _sendCommand(const WaitUntilFirstFrameRasterized());
-  }
-
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
     final GetOffset command = GetOffset(finder, type, timeout: timeout);
     final GetOffsetResult result = GetOffsetResult.fromJson(await _sendCommand(command));

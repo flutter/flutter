@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -550,14 +550,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   int _deferFirstFrameReportCount = 0;
   bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
-
-  final Completer<void> _firstFrameCompleter = Completer<void>();
-
-  /// Whether the Flutter engine has rasterized the first frame.
-  ///
-  /// {@macro flutter.frame_rasterized_vs_presented}
-  Future<void> get firstFrameRasterized => _firstFrameCompleter.future;
-
   /// Whether the first frame has finished rendering.
   ///
   /// Only useful in profile and debug builds; in release builds, this always
@@ -704,24 +696,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       debugBuildingDirtyElements = true;
       return true;
     }());
-
-    if (_needToReportFirstFrame && _reportFirstFrame) {
-      assert(!_firstFrameCompleter.isCompleted);
-      // TODO(liyuqian): use a broadcast stream approach
-      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
-      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
-        if (!kReleaseMode) {
-          developer.Timeline.instantSync('Rasterized first useful frame');
-          developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-        }
-        if (oldCallback != null) {
-          oldCallback(timings);
-        }
-        WidgetsBinding.instance.window.onReportTimings = oldCallback;
-        _firstFrameCompleter.complete();
-      };
-    }
-
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
@@ -735,10 +709,11 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     }
     if (!kReleaseMode) {
       if (_needToReportFirstFrame && _reportFirstFrame) {
-        developer.Timeline.instantSync('Widgets built first useful frame');
+        developer.Timeline.instantSync('Widgets completed first useful frame');
+        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+        _needToReportFirstFrame = false;
       }
     }
-    _needToReportFirstFrame = false;
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the

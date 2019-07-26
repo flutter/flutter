@@ -183,9 +183,6 @@ void main([List<String> args = const <String>[]]) {
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
-      // Wait for the first frame to be rasterized.
-      await driver.waitUntilFirstFrameRasterized();
-
       if (args.contains('--with_semantics')) {
         print('Enabeling semantics...');
         await driver.setSemantics(true);
@@ -203,6 +200,7 @@ void main([List<String> args = const <String>[]]) {
     });
 
     test('all demos', () async {
+
       // Collect timeline data for just a limited set of demos to avoid OOMs.
       final Timeline timeline = await driver.traceAction(
         () async {

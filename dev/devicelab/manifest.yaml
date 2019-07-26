@@ -251,7 +251,6 @@ tasks:
     description: >
       Measures the startup time of the Complex Layout sample app on Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["mac/android"]
 
   hot_mode_dev_cycle__benchmark:
@@ -449,14 +448,12 @@ tasks:
     description: >
       Measures the startup time of the Flutter Gallery app on iPhone 6.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   complex_layout_ios__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   flutter_gallery_ios__transition_perf:
@@ -464,7 +461,6 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       iOS.
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   hello_world_ios__compile:
@@ -569,7 +565,6 @@ tasks:
     description: >
       Measures the startup time of the Flutter Gallery app on Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__transition_perf:
@@ -577,7 +572,6 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       Android.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__transition_perf_with_semantics:
@@ -585,7 +579,6 @@ tasks:
       Measures the delta in performance of screen transitions without and
       with semantics enabled.
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__memory_nav:
@@ -624,7 +617,6 @@ tasks:
     description: >
       Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery_ios32__transition_perf:
@@ -632,7 +624,6 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       32-bit iOS (iPhone 4S).
     stage: devicelab_ios
-    flaky: true
     required_agent_capabilities: ["mac/ios32"]
 
   run_without_leak_mac:
