@@ -55,11 +55,14 @@ runtime, but not compile time. If so you'll just need to update
 
 See the Chromium instructions on ["Updating a CIPD
 dependency"](https://chromium.googlesource.com/chromium/src/+/master/docs/cipd.md#Updating-a-CIPD-dependency)
-for how to upload a package update to CIPD.
+for how to upload a package update to CIPD. Download and extract the latest
+package from CIPD and then copy
+[shell/platform/android/test/cipd.yaml](cipd.yaml) into the extracted directory
+to use as the base for the pre-existing package. Add new dependencies to `lib/`.
 
-Once you've done that, also make sure to tag the new package version with the
-updated timestamp and robolectric version (most likely still 3.8, unless you've
-migrated all the packges to 4+).
+Once you've uploaded the new version, also make sure to tag it with the updated
+timestamp and robolectric version (most likely still 3.8, unless you've migrated
+all the packges to 4+).
 
     $ cipd set-tag --version=<new_version_hash> -tag "last_updated:<timestamp>"
     $ cipd set-tag --version=<new_version_hash> -tag "robolectric_version:<robolectric_version>"

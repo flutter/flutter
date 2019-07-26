@@ -1,0 +1,4 @@
+package: flutter/android/robolectric_bundle
+description: Robolectric 3.8 and associated runtime dependencies.
+data:
+  - dir: lib
