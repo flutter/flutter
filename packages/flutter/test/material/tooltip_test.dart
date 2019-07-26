@@ -32,6 +32,13 @@ import 'feedback_tester.dart';
 
 const String tooltipText = 'TIP';
 
+Finder _findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
+  );
+}
+
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -80,10 +87,9 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
     // The exact position of the left side depends on the font the test framework
     // happens to pick, so we don't test that.
@@ -138,10 +144,9 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
   }, skip: isBrowser);
@@ -194,10 +199,9 @@ void main() {
      *                   *
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(100.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
@@ -262,10 +266,9 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
@@ -318,10 +321,9 @@ void main() {
      *                   * }- 10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(190.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
@@ -375,10 +377,9 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(14.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
@@ -433,10 +434,9 @@ void main() {
      *                   * }-10.0 margin
      *********************/
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(14.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
@@ -472,34 +472,30 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final Offset topLeftTipInGlobal = tester.getTopLeft(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final Offset topLeftTipInGlobal = tester.getTopLeft(
+      _findTooltipContainer(tooltipText),
+    );
     final Offset topLeftTooltipContentInGlobal = tester.getTopLeft(find.text(tooltipText));
     expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customMarginValue);
     expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customMarginValue);
 
-    final Offset topRightTipInGlobal = tester.getTopRight(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final Offset topRightTipInGlobal = tester.getTopRight(
+      _findTooltipContainer(tooltipText),
+    );
     final Offset topRightTooltipContentInGlobal = tester.getTopRight(find.text(tooltipText));
     expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customMarginValue);
     expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customMarginValue);
 
-    final Offset bottomLeftTipInGlobal = tester.getBottomLeft(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final Offset bottomLeftTipInGlobal = tester.getBottomLeft(
+      _findTooltipContainer(tooltipText),
+    );
     final Offset bottomLeftTooltipContentInGlobal = tester.getBottomLeft(find.text(tooltipText));
     expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customMarginValue);
     expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customMarginValue);
 
-    final Offset bottomRightTipInGlobal = tester.getBottomRight(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final Offset bottomRightTipInGlobal = tester.getBottomRight(
+      _findTooltipContainer(tooltipText),
+    );
     final Offset bottomRightTooltipContentInGlobal = tester.getBottomRight(find.text(tooltipText));
     expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customMarginValue);
     expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customMarginValue);
@@ -606,10 +602,9 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
     expect(tip, paints..rrect(
@@ -649,10 +644,9 @@ void main() {
     (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    final RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    final RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(32.0));
     expect(tip.size.width, equals(74.0));
     expect(tip, paints..path(
@@ -859,20 +853,18 @@ void main() {
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
-    RenderBox tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    RenderBox tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(32.0));
 
     await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsOneWidget);
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
-    tip = tester.renderObject(find.ancestor(
-      of: find.text(tooltipText),
-      matching: find.byType(Container),
-    ));
+    tip = tester.renderObject(
+      _findTooltipContainer(tooltipText),
+    );
     expect(tip.size.height, equals(56.0));
   }, skip: isBrowser);
 
