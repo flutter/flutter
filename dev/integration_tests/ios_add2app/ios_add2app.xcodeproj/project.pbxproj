@@ -333,12 +333,12 @@
 				"${SRCROOT}/flutterapp/.metadata",
 				"${SRCROOT}/flutterapp/.ios/Flutter/App.framework/App",
 				"${SRCROOT}/flutterapp/.ios/Flutter/engine/Flutter.framework/Flutter",
-				"${SRCROOT}/flutterapp/.ios/Flutter/flutter_build_phase.sh",
+				"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh",
 			);
 			name = "[CP-User] Run Flutter Build Script";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/flutterapp/.ios/Flutter/flutter_build_phase.sh\"";
+			shellScript = "source \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
 		};
 		DE5CDCD8B3565EAB9F38F455 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

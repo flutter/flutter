@@ -547,8 +547,8 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
 
-    // Generated build phase script
-    final String buildPhaseScriptPath = fs.path.join('.ios', 'Flutter', 'flutter_build_phase.sh');
+    // Generated export environment variables script
+    final String buildPhaseScriptPath = fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
     expectExists(buildPhaseScriptPath);
     final File buildPhaseScriptFile = fs.file(fs.path.join(projectDir.path, buildPhaseScriptPath));
     final String buildPhaseScript = buildPhaseScriptFile.readAsStringSync();

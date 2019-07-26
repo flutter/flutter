@@ -63,13 +63,16 @@ Future<void> updateGeneratedXcodeProperties({
     useMacOSConfig: useMacOSConfig,
   );
 
-  _updateGeneratedModuleBuildPhaseScript(
+  _updateGeneratedEnvironmentVariablesScript(
     project: project,
     xcodeBuildSettings: xcodeBuildSettings,
     useMacOSConfig: useMacOSConfig,
   );
 }
 
+/// Generate a xcconfig file to inherit FLUTTER_ build settings
+/// for Xcode targets that need them.
+/// See [XcodeBasedProject.generatedXcodePropertiesFile].
 void _updateGeneratedXcodePropertiesFile({
   @required FlutterProject project,
   @required List<String> xcodeBuildSettings,
@@ -87,7 +90,10 @@ void _updateGeneratedXcodePropertiesFile({
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
-void _updateGeneratedModuleBuildPhaseScript({
+/// Generate a script to export all the FLUTTER_ environment variables needed
+/// as flags for Flutter tools.
+/// See [XcodeBasedProject.generatedEnvironmentVariableExportScript].
+void _updateGeneratedEnvironmentVariablesScript({
   @required FlutterProject project,
   @required List<String> xcodeBuildSettings,
   bool useMacOSConfig = false,
@@ -99,11 +105,10 @@ void _updateGeneratedModuleBuildPhaseScript({
   for (String line in xcodeBuildSettings) {
     localsBuffer.writeln('export "$line"');
   }
-  localsBuffer.writeln('"\$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh" build');
 
   final File generatedModuleBuildPhaseScript = useMacOSConfig
-    ? project.macos.moduleBuildPhaseScript
-    : project.ios.moduleBuildPhaseScript;
+    ? project.macos.generatedEnvironmentVariableExportScript
+    : project.ios.generatedEnvironmentVariableExportScript;
   generatedModuleBuildPhaseScript.createSync(recursive: true);
   generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
   os.chmod(generatedModuleBuildPhaseScript, '755');
