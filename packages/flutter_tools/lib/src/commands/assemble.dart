@@ -4,9 +4,13 @@
 
 import '../base/common.dart';
 import '../base/context.dart';
-import '../build_info.dart';
 import '../build_system/build_system.dart';
-import '../convert.dart';
+import '../build_system/targets/assets.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/ios.dart';
+import '../build_system/targets/linux.dart';
+import '../build_system/targets/macos.dart';
+import '../build_system/targets/windows.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -14,30 +18,23 @@ import '../runner/flutter_command.dart';
 /// The [BuildSystem] instance.
 BuildSystem get buildSystem => context.get<BuildSystem>();
 
+/// All currently implemented targets.
+const List<Target> _kDefaultTargets = <Target>[
+  UnpackMacOS(),
+  UnpackLinux(),
+  UnpackWindows(),
+  CopyAssets(),
+  KernelSnapshot(),
+  AotElfProfile(),
+  AotElfRelease(),
+  AotAssemblyProfile(),
+  AotAssemblyRelease(),
+];
+
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
 class AssembleCommand extends FlutterCommand {
   AssembleCommand() {
-    addSubcommand(AssembleRun());
-    addSubcommand(AssembleDescribe());
-    addSubcommand(AssembleListInputs());
-    addSubcommand(AssembleBuildDirectory());
-  }
-  @override
-  String get description => 'Assemble and build flutter resources.';
-
-  @override
-  String get name => 'assemble';
-
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    return null;
-  }
-}
-
-abstract class AssembleBase extends FlutterCommand {
-  AssembleBase() {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
@@ -57,36 +54,19 @@ abstract class AssembleBase extends FlutterCommand {
     );
   }
 
-  /// Returns the provided target platform.
-  ///
-  /// Throws a [ToolExit] if none is provided. This intentionally has no
-  /// default.
-  TargetPlatform get targetPlatform {
-    final String value = argResults['target-platform'] ?? 'darwin-x64';
-    if (value == null) {
-      throwToolExit('--target-platform is required for flutter assemble.');
-    }
-    return getTargetPlatformForName(value);
-  }
+  @override
+  String get description => 'Assemble and build flutter resources.';
 
-  /// Returns the provided build mode.
-  ///
-  /// Throws a [ToolExit] if none is provided. This intentionally has no
-  /// default.
-  BuildMode get buildMode {
-    final String value = argResults['build-mode'] ?? 'debug';
-    if (value == null) {
-      throwToolExit('--build-mode is required for flutter assemble.');
-    }
-    return getBuildModeForName(value);
-  }
+  @override
+  String get name => 'assemble';
 
-  /// The name of the target we are describing or building.
-  String get targetName {
+  /// The target we are building.
+  Target get target {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
-    return argResults.rest.first;
+    final String name = argResults.rest.first;
+    return _kDefaultTargets.firstWhere((Target target) => target.name == name);
   }
 
   /// The environmental configuration for a build invocation.
@@ -115,19 +95,10 @@ abstract class AssembleBase extends FlutterCommand {
     }
     return results;
   }
-}
-
-/// Execute a build starting from a target action.
-class AssembleRun extends AssembleBase {
-  @override
-  String get description => 'Execute the stages for a specified target.';
-
-  @override
-  String get name => 'run';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildResult result = await buildSystem.build(targetName, environment, BuildSystemConfig(
+    final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
     ));
     if (!result.success) {
@@ -142,67 +113,3 @@ class AssembleRun extends AssembleBase {
     return null;
   }
 }
-
-/// Fully describe a target and its dependencies.
-class AssembleDescribe extends AssembleBase {
-  @override
-  String get description => 'List the stages for a specified target.';
-
-  @override
-  String get name => 'describe';
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    try {
-      printStatus(
-        json.encode(buildSystem.describe(targetName, environment))
-      );
-    } on Exception catch (err, stackTrace) {
-      printTrace(stackTrace.toString());
-      throwToolExit(err.toString());
-    }
-    return null;
-  }
-}
-
-/// List input files for a target.
-class AssembleListInputs extends AssembleBase {
-  @override
-  String get description => 'List the inputs for a particular target.';
-
-  @override
-  String get name => 'inputs';
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    try {
-      final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
-      for (Map<String, Object> result in results) {
-        if (result['name'] == targetName) {
-          final List<String> inputs = result['inputs'];
-          inputs.forEach(printStatus);
-        }
-      }
-    } on Exception catch (err, stackTrace) {
-      printTrace(stackTrace.toString());
-      throwToolExit(err.toString());
-    }
-    return null;
-  }
-}
-
-/// Return the build directory for a configuiration.
-class AssembleBuildDirectory extends AssembleBase {
-  @override
-  String get description => 'List the inputs for a particular target.';
-
-  @override
-  String get name => 'build-dir';
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    printStatus(environment.buildDir.path);
-    return null;
-  }
-}
-

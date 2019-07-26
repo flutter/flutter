@@ -42,17 +42,11 @@ void configureProject(Project project, File outputDir) {
     // Check if the project uses the Flutter plugin (defined in flutter.gradle).
     Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
     if (!usesFlutterPlugin) {
-        // Plugins don't include their dependencies under the assumption that the parent project adds them.
-        if (project.properties['android.useAndroidX']) {
-            project.dependencies {
-                compileOnly "androidx.annotation:annotation:+"
-            }
-        } else {
-            project.dependencies {
-                compileOnly "com.android.support:support-annotations:+"
-            }
-        }
         project.dependencies {
+            // Some plugins don't include `annotations` and they don't set
+            // `android.useAndroidX=true` in `gradle.properties`.
+            compileOnly "androidx.annotation:annotation:+"
+            compileOnly "com.android.support:support-annotations:+"
             // The Flutter plugin already adds `flutter.jar`.
             compileOnly project.files("${getFlutterRoot(project)}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
         }

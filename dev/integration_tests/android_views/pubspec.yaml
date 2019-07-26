@@ -7,7 +7,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
-  path_provider: 1.1.2
+  path_provider: 1.2.0
   collection: 1.14.11
   assets_for_android_views:
     git:
@@ -76,4 +76,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 1682
+# PUBSPEC CHECKSUM: a181

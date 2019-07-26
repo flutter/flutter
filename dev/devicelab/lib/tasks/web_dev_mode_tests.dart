@@ -19,7 +19,6 @@ TaskFunction createWebDevModeTest() {
     final List<String> options = <String>[
       '--hot', '-d', 'chrome', '--verbose', '--resident', '--target=lib/main.dart',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int hotRestartCount = 0;
     await inDirectory<void>(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
@@ -37,7 +36,7 @@ TaskFunction createWebDevModeTest() {
           await packagesGet.exitCode;
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
@@ -96,7 +95,7 @@ TaskFunction createWebDevModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run', ...options],
+              flutterCommandArgs('run', options),
               environment: <String, String>{
                 'FLUTTER_WEB': 'true',
               },
