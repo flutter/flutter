@@ -124,10 +124,14 @@ class Tooltip extends StatefulWidget {
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
+  /// Once the pointer leaves the widget, the tooltip will immediately
+  /// disappear.
+  ///
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   final Duration waitDuration;
 
-  /// The length of time that the tooltip will be shown once it has appeared.
+  /// The length of time that the tooltip will be shown after a long press
+  /// is released.
   ///
   /// Defaults to 1.5 seconds.
   final Duration showDuration;
@@ -220,7 +224,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;
     }
     if (_longPressActivated) {
-      // Tool tips activated by long press should stay around for 1.5s.
+      // Tool tips activated by long press should stay around for the showDuration.
       _hideTimer ??= Timer(showDuration, _controller.reverse);
     } else {
       // Tool tips activated by hover should disappear as soon as the mouse
