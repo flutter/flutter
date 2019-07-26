@@ -69,7 +69,7 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
-      BuildSystem: () => BuildSystem(),
+      BuildSystem: () => const BuildSystem(),
       Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
