@@ -17,6 +17,8 @@ void main() {
     testUsingContext('CFBundleVersion for iOS', () async {
       String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
       expect(buildName, '0');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '0.0.1');
+      expect(buildName, '0.0.1');
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz');
       expect(buildName, '123');
       buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz');
@@ -37,6 +39,8 @@ void main() {
     testUsingContext('CFBundleShortVersionString for iOS', () async {
       String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');
       expect(buildName, '0.0.0');
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '0.0.1');
+      expect(buildName, '0.0.1');
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz');
       expect(buildName, '123.456.0');
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz');
