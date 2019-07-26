@@ -65,8 +65,9 @@ class SourceVisitor {
             fs.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kFlutterRootDirectory:
+        // flutter root will not contain a symbolic link.
         segments.addAll(
-            fs.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
+            fs.path.split(environment.flutterRootDir.absolute.path));
         break;
       default:
         throw InvalidPatternException(pattern);

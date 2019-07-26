@@ -8,8 +8,8 @@ import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../globals.dart';
 import '../build_system.dart';
-import 'assets.dart';
-import 'dart.dart';
+
+const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -19,37 +19,20 @@ import 'dart.dart';
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
 // TODO(jonahwilliams): remove shell out.
-Future<void> copyFramework(Map<String, ChangeType> updates,
-    Environment environment) async {
-  final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
-  final Directory targetDirectory = environment
-    .projectDir
-    .childDirectory('macos')
-    .childDirectory('Flutter')
-    .childDirectory('FlutterMacOS.framework');
-  if (targetDirectory.existsSync()) {
-    targetDirectory.deleteSync(recursive: true);
-  }
+class UnpackMacOS extends Target {
+  const UnpackMacOS();
 
-  final ProcessResult result = processManager
-      .runSync(<String>['cp', '-R', basePath, targetDirectory.path]);
-  if (result.exitCode != 0) {
-    throw Exception(
-      'Failed to copy framework (exit ${result.exitCode}:\n'
-      '${result.stdout}\n---\n${result.stderr}',
-    );
-  }
-}
+  @override
+  String get name => 'unpack_macos';
 
-const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework';
-
-/// Copies the macOS desktop framework to the copy directory.
-const Target unpackMacos = Target(
-  name: 'unpack_macos',
-  inputs: <Source>[
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
     Source.artifact(Artifact.flutterMacOSFramework),
-  ],
-  outputs: <Source>[
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
     Source.pattern('$_kOutputPrefix/Headers/FLEOpenGLContextHandling.h'),
@@ -68,33 +51,30 @@ const Target unpackMacos = Target(
     Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
     Source.pattern('$_kOutputPrefix/Resources/info.plist'),
     // Ignore Versions folder for now
-  ],
-  dependencies: <Target>[],
-  buildAction: copyFramework,
-);
+  ];
 
-/// Build a macOS application.
-const Target macosApplication = Target(
-  name: 'debug_macos_application',
-  buildAction: null,
-  inputs: <Source>[],
-  outputs: <Source>[],
-  dependencies: <Target>[
-    unpackMacos,
-    kernelSnapshot,
-    copyAssets,
-  ]
-);
+  @override
+  List<Target> get dependencies => <Target>[];
 
-/// Build a macOS release application.
-const Target macoReleaseApplication = Target(
-  name: 'release_macos_application',
-  buildAction: null,
-  inputs: <Source>[],
-  outputs: <Source>[],
-  dependencies: <Target>[
-    unpackMacos,
-    aotElfRelease,
-    copyAssets,
-  ]
-);
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
+    final Directory targetDirectory = environment
+      .projectDir
+      .childDirectory('macos')
+      .childDirectory('Flutter')
+      .childDirectory('FlutterMacOS.framework');
+    if (targetDirectory.existsSync()) {
+      targetDirectory.deleteSync(recursive: true);
+    }
+
+    final ProcessResult result = await processManager
+        .run(<String>['cp', '-R', basePath, targetDirectory.path]);
+    if (result.exitCode != 0) {
+      throw Exception(
+        'Failed to copy framework (exit ${result.exitCode}:\n'
+        '${result.stdout}\n---\n${result.stderr}',
+      );
+    }
+  }
+}
