@@ -78,7 +78,11 @@ class Tooltip extends StatefulWidget {
 
   /// The empty space that surrounds the tooltip.
   ///
-  /// Defines the tooltip's outer [Container.margin].
+  /// Defines the tooltip's outer [Container.margin]. By default, a
+  /// long tooltip will span the width of its window. If long enough,
+  /// a tooltip might also span the window's height. This property allows
+  /// one to define how much space the tooltip must be inset from the edges
+  /// of their display window.
   ///
   /// If this property is null, then [TooltipThemeData.margin] is used.
   /// If [TooltipThemeData.margin] is also null, the default margin is
