@@ -1461,7 +1461,10 @@ void main() {
 
       // Long press to put the cursor after the "w".
       const int index = 3;
-      await tester.longPressAt(textOffsetToPosition(tester, index));
+      final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
       await tester.pump();
       expect(
         controller.selection,
@@ -1616,7 +1619,7 @@ void main() {
   );
 
   testWidgets(
-    'An obscured CupertinoTextField is not selectable when disabled',
+    'An obscured CupertinoTextField is not selectable by default',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1627,7 +1630,6 @@ void main() {
             child: CupertinoTextField(
               controller: controller,
               obscureText: true,
-              enableInteractiveSelection: false,
             ),
           ),
         ),
@@ -1664,7 +1666,7 @@ void main() {
   );
 
   testWidgets(
-    'An obscured CupertinoTextField is selectable by default',
+    'An obscured CupertinoTextField is selectable when enabled',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: 'Atwater Peel Sherbrooke Bonaventure',
@@ -1675,6 +1677,7 @@ void main() {
             child: CupertinoTextField(
               controller: controller,
               obscureText: true,
+              enableInteractiveSelection: true,
             ),
           ),
         ),
@@ -1689,14 +1692,15 @@ void main() {
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
-      // The obscured text is treated as one word, should select all
+      // The obscured text is not broken into words, so only one letter is
+      // selected at a time.
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 35),
+        const TextSelection(baseOffset: 9, extentOffset: 10),
       );
 
-      // Selected text shows paste toolbar buttons.
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      // Selected text shows 3 toolbar buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
 
       await gesture.up();
       await tester.pump();
@@ -1704,55 +1708,11 @@ void main() {
       // Still selected.
       expect(
         controller.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 35),
+        const TextSelection(baseOffset: 9, extentOffset: 10),
       );
-      expect(find.byType(CupertinoButton), findsNWidgets(1));
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
-
-  testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController(
-      text: 'Atwater Peel Sherbrooke Bonaventure',
-    );
-
-    await tester.pumpWidget(
-      CupertinoApp(
-        home: Center(
-          child: CupertinoTextField(
-            controller: controller,
-            obscureText: true,
-          ),
-        ),
-      ),
-    );
-
-    final Offset textfieldStart = tester.getCenter(find.byType(CupertinoTextField));
-
-    await tester.tapAt(textfieldStart + const Offset(150.0, 5.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    await tester.longPressAt(textfieldStart + const Offset(150.0, 5.0));
-    await tester.pump();
-
-    // Should only have paste option when whole obscure text is selected.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-    expect(find.text('Select All'), findsNothing);
-
-    // Tap to cancel selection.
-    final Offset textfieldEnd = tester.getTopRight(find.byType(CupertinoTextField));
-    await tester.tapAt(textfieldEnd + const Offset(-10.0, 5.0));
-    await tester.pump(const Duration(milliseconds: 50));
-    // Long tap at the end.
-    await tester.longPressAt(textfieldEnd + const Offset(-10.0, 5.0));
-    await tester.pump();
-
-    // Should have paste and select all options when collapse.
-    expect(find.text('Paste'), findsOneWidget);
-    expect(find.text('Select All'), findsOneWidget);
-    expect(find.text('Copy'), findsNothing);
-    expect(find.text('Cut'), findsNothing);
-  });
 
   testWidgets(
     'long press moves cursor to the exact long press position and shows toolbar',
