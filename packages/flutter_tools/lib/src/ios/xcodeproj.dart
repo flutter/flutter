@@ -80,12 +80,17 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
-  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
+  final String buildNameToParse = buildInfo?.buildName ?? project.manifest.buildName;
+  final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildNameToParse);
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  // Drop back to parsing build name if build number is not present. Build number is optional in the manifest, but
+  // FLUTTER_BUILD_NUMBER is required as the backing value for the required CFBundleVersion.
+  buildNumber ??= validatedBuildNumberForPlatform(TargetPlatform.ios, buildNameToParse);
+
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }

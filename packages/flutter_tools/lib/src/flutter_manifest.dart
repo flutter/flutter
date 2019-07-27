@@ -108,9 +108,10 @@ class FlutterManifest {
   /// Can be null if version isn't set or has a wrong format.
   String get buildNumber {
     if (appVersion != null && appVersion.contains('+')) {
-      return appVersion.split('+')?.elementAt(1);
+      final String value = appVersion.split('+')?.elementAt(1);
+      return value;
     } else {
-      return appVersion;
+      return null;
     }
   }
 

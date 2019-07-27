@@ -428,7 +428,7 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '0.0.1',
         expectedBuildName: '0.0.1',
-        expectedBuildNumber: '0.0.1',
+        expectedBuildNumber: null,
       );
     });
 
