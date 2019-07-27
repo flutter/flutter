@@ -28,6 +28,7 @@ class TooltipThemeData extends Diagnosticable {
   const TooltipThemeData({
     this.height,
     this.padding,
+    this.margin,
     this.verticalOffset,
     this.preferBelow,
     this.excludeFromSemantics,
@@ -42,6 +43,9 @@ class TooltipThemeData extends Diagnosticable {
 
   /// If provided, the amount of space by which to inset [Tooltip.child].
   final EdgeInsetsGeometry padding;
+
+  /// If provided, the amount of empty space to surround the [Tooltip].
+  final EdgeInsetsGeometry margin;
 
   /// The vertical gap between the widget and the displayed tooltip.
   ///
@@ -84,6 +88,7 @@ class TooltipThemeData extends Diagnosticable {
   TooltipThemeData copyWith({
     double height,
     EdgeInsetsGeometry padding,
+    EdgeInsetsGeometry margin,
     double verticalOffset,
     bool preferBelow,
     bool excludeFromSemantics,
@@ -95,6 +100,7 @@ class TooltipThemeData extends Diagnosticable {
     return TooltipThemeData(
       height: height ?? this.height,
       padding: padding ?? this.padding,
+      margin: margin ?? this.margin,
       verticalOffset: verticalOffset ?? this.verticalOffset,
       preferBelow: preferBelow ?? this.preferBelow,
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
@@ -117,6 +123,7 @@ class TooltipThemeData extends Diagnosticable {
     return TooltipThemeData(
       height: lerpDouble(a?.height, b?.height, t),
       padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
+      margin: EdgeInsets.lerp(a?.margin, b?.margin, t),
       verticalOffset: lerpDouble(a?.verticalOffset, b?.verticalOffset, t),
       preferBelow: t < 0.5 ? a.preferBelow: b.preferBelow,
       excludeFromSemantics: t < 0.5 ? a.excludeFromSemantics : b.excludeFromSemantics,
@@ -130,6 +137,7 @@ class TooltipThemeData extends Diagnosticable {
     return hashValues(
       height,
       padding,
+      margin,
       verticalOffset,
       preferBelow,
       excludeFromSemantics,
@@ -149,6 +157,7 @@ class TooltipThemeData extends Diagnosticable {
     final TooltipThemeData typedOther = other;
     return typedOther.height == height
         && typedOther.padding == padding
+        && typedOther.margin == margin
         && typedOther.verticalOffset == verticalOffset
         && typedOther.preferBelow == preferBelow
         && typedOther.excludeFromSemantics == excludeFromSemantics
@@ -163,6 +172,7 @@ class TooltipThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
@@ -208,6 +218,7 @@ class TooltipTheme extends InheritedWidget {
     Key key,
     double height,
     EdgeInsetsGeometry padding,
+    EdgeInsetsGeometry margin,
     double verticalOffset,
     bool preferBelow,
     bool excludeFromSemantics,
@@ -219,6 +230,7 @@ class TooltipTheme extends InheritedWidget {
   }) : data = TooltipThemeData(
          height: height,
          padding: padding,
+         margin: margin,
          verticalOffset: verticalOffset,
          preferBelow: preferBelow,
          excludeFromSemantics: excludeFromSemantics,
