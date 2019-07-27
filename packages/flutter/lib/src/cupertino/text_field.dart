@@ -209,7 +209,6 @@ class CupertinoTextField extends StatefulWidget {
     this.textAlign = TextAlign.start,
     this.textAlignVertical,
     this.readOnly = false,
-    ToolbarOptions toolbarOptions,
     this.showCursor,
     this.autofocus = false,
     this.obscureText = false,
@@ -230,7 +229,7 @@ class CupertinoTextField extends StatefulWidget {
     this.keyboardAppearance,
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection = true,
+    this.enableInteractiveSelection,
     this.onTap,
     this.scrollController,
     this.scrollPhysics,
@@ -258,17 +257,6 @@ class CupertinoTextField extends StatefulWidget {
        assert(prefixMode != null),
        assert(suffixMode != null),
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-       toolbarOptions = toolbarOptions ?? obscureText ?
-         const ToolbarOptions(
-           selectAll: true,
-           paste: true,
-         ) :
-         const ToolbarOptions(
-           copy: true,
-           cut: true,
-           selectAll: true,
-           paste: true,
-         ),
        super(key: key);
 
   /// Controls the text being edited.
@@ -369,13 +357,6 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
-
-  /// Configuration of toolbar options.
-  ///
-  /// If not set, select all and paste will default to be enabled. Copy and cut
-  /// will be disabled if [obscureText] is true. If [readOnly] is true,
-  /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.material.inputDecorator.textAlignVertical}
   final TextAlignVertical textAlignVertical;
@@ -517,7 +498,9 @@ class CupertinoTextField extends StatefulWidget {
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
-  bool get selectionEnabled => enableInteractiveSelection;
+  bool get selectionEnabled {
+    return enableInteractiveSelection ?? !obscureText;
+  }
 
   /// {@macro flutter.material.textfield.onTap}
   final GestureTapCallback onTap;
@@ -821,7 +804,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           key: editableTextKey,
           controller: controller,
           readOnly: widget.readOnly,
-          toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
           focusNode: _effectiveFocusNode,

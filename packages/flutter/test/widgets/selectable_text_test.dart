@@ -592,27 +592,6 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
-  testWidgets('selectable text can disable toolbar options', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      overlay(
-        child: const SelectableText(
-          'a selectable text',
-          toolbarOptions: ToolbarOptions(
-            copy: false,
-            selectAll: true,
-          ),
-        ),
-      )
-    );
-    const int dIndex = 5;
-    final Offset dPos = textOffsetToPosition(tester, dIndex);
-    await tester.longPressAt(dPos);
-    await tester.pump();
-    // Context menu should not have copy.
-    expect(find.text('COPY'), findsNothing);
-    expect(find.text('SELECT ALL'), findsOneWidget);
-  });
-
   testWidgets('Can select text by dragging with a mouse', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
