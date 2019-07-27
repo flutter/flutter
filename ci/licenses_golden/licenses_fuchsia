@@ -1,4 +1,4 @@
-Signature: 955ee6e5a5bb905165375a4e5974e9a0
+Signature: 7d4be8eae0db743b119da986f0b939f1
 
 UNUSED LICENSES:
 
@@ -1875,6 +1875,9 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/deprecated_time_zone.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.deprecatedtimezone/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.developer.tiles/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/annotation.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/attachment.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/crash_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/data_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.feedback/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/meta.json
