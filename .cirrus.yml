@@ -63,6 +63,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -73,6 +76,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -310,6 +316,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: powershell dev\bots\download_goldctl.ps1
       test_all_script:
         - dart --enable-asserts dev\bots\test.dart
     - name: tests_framework_other-windows
@@ -317,6 +326,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: powershell dev\bots\download_goldctl.ps1
       test_all_script:
         - dart --enable-asserts dev\bots\test.dart
     - name: tests_extras-windows
@@ -441,7 +453,7 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   depends_on:
     - analyze
   env:
@@ -477,17 +489,27 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_all_script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
     - name: tests_framework_other-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_all_script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
     - name: tests_extras-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
