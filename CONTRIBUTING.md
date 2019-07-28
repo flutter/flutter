@@ -43,12 +43,12 @@ presented.
 3. [Setting up your engine development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Engine-development-environment),
    which describes the steps you need to configure your computer to
    work on Flutter's engine. If you only want to write code for the
-   Flutter framework, you can skip this step. Flutter's engine uses
-   mainly C++, Java, and ObjectiveC.
+   Flutter framework, you can skip this step. Flutter's engine mainly
+   uses C++, Java, and Objective-C.
 
 4. [Setting up your framework development environment](https://github.com/flutter/flutter/wiki/Setting-up-the-Framework-development-environment),
    which describes the steps you need to configure your computer to
-   work on Flutter's framework. Flutter's framework uses mainly Dart.
+   work on Flutter's framework. Flutter's framework mainly uses Dart.
 
 5. [Tree hygiene](https://github.com/flutter/flutter/wiki/Tree-hygiene),
    which covers how to land a PR, how to do code review, how to
