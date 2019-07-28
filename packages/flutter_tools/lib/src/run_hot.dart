@@ -74,6 +74,7 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              stayResident: stayResident,
              hotMode: true,
+             useBuildIsolation: dillOutputPath == null,
              ipv6: ipv6);
 
   final bool benchmarkMode;
@@ -302,8 +303,9 @@ class HotRunner extends ResidentRunner {
         bundleDirty: isFirstUpload == false && rebuildBundle,
         fullRestart: fullRestart,
         projectRootPath: projectRootPath,
-        pathToReload: getReloadPath(fullRestart: fullRestart),
         invalidatedFiles: invalidatedFiles,
+        dillOutputPath: dillOutputPath ?? environment.buildDir.childFile('app.dill').path,
+        pathToReload: getReloadPath(fullRestart: fullRestart),
       ));
     }
     return results;

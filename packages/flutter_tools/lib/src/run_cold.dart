@@ -31,6 +31,7 @@ class ColdRunner extends ResidentRunner {
              hotMode: false,
              usesTerminalUi: usesTerminalUi,
              stayResident: stayResident,
+             useBuildIsolation: false,
              ipv6: ipv6);
 
   final bool traceStartup;

@@ -168,7 +168,6 @@ void main() {
         // output dill, filesystem scheme, and filesystem root.
         final FlutterDevice flutterDevice = flutterDevices.first;
 
-        expect(flutterDevice.dillOutputPath, outputDill);
         expect(flutterDevice.fileSystemScheme, filesystemScheme);
         expect(flutterDevice.fileSystemRoots, const <String>[filesystemRoot]);
       }, overrides: <Type, Generator>{

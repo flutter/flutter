@@ -16,6 +16,8 @@ import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'build_system/build_system.dart';
+import 'build_system/targets/dart.dart';
 import 'codegen.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
@@ -27,11 +29,13 @@ import 'run_cold.dart';
 import 'run_hot.dart';
 import 'vmservice.dart';
 
+// An [Environment] define to isolate flutter run commands.
+const String _kDevicesConnected = 'DevicesConnected';
+
 class FlutterDevice {
   FlutterDevice(
     this.device, {
     @required this.trackWidgetCreation,
-    this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
@@ -56,7 +60,6 @@ class FlutterDevice {
     @required bool trackWidgetCreation,
     @required String target,
     @required BuildMode buildMode,
-    String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
@@ -82,7 +85,6 @@ class FlutterDevice {
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
@@ -99,7 +101,6 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
-  String dillOutputPath;
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
@@ -475,7 +476,8 @@ class FlutterDevice {
     bool bundleDirty = false,
     bool fullRestart = false,
     String projectRootPath,
-    String pathToReload,
+    @required String pathToReload,
+    @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
@@ -515,7 +517,7 @@ class FlutterDevice {
   }
 }
 
-// Shared code between different resident application runners.
+/// Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
     this.flutterDevices, {
@@ -527,13 +529,22 @@ abstract class ResidentRunner {
     this.usesTerminalUi = true,
     this.stayResident = true,
     this.hotMode = true,
-  }) {
-    _mainPath = findMainDartFile(target);
-    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
-    _assetBundle = AssetBundleFactory.instance.createBundle();
-  }
+    @required bool useBuildIsolation,
+  }) : mainPath = findMainDartFile(target),
+       projectRootPath = projectRootPath ?? fs.currentDirectory.path,
+       packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+       assetBundle = AssetBundleFactory.instance.createBundle(),
+       // Create an isolated build environment.
+       environment = _createEnvironment(
+         useBuildIsolation: useBuildIsolation,
+         flutterDevices: flutterDevices,
+         projectRootPath: projectRootPath,
+         target: target,
+         debuggingOptions: debuggingOptions,
+       ) {
+          // Create the isolated build directory if it doesn't already exist.
+          environment?.buildDir?.childFile('app.dill')?.createSync(recursive: true);
+        }
 
   final List<FlutterDevice> flutterDevices;
   final String target;
@@ -542,22 +553,56 @@ abstract class ResidentRunner {
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
+  final String packagesFilePath;
+  final String projectRootPath;
+  final String mainPath;
+  final AssetBundle assetBundle;
+
+  /// An isolated environment for writing incremental compilation artifacts.
+  ///
+  /// By default, the ResidentRunner will output incremental dill files at the
+  /// same location regardless of how the build was run or the connected
+  /// devices. This works when there is a single tool process, but
+  /// multiple tool process sharing the same directory will all attempt to read
+  /// and write to the same file. Rather than using another approach like a
+  /// lockfile, the [Environment] is used to create a unique-ish subdirectory
+  /// where this process would be the only user. The inputs to the name are the
+  /// identifiers of the connected devices.
+  final Environment environment;
+
+  // Create the environment used above, or null if this is not enabled.s
+  static Environment _createEnvironment({
+    @required bool useBuildIsolation,
+    @required List<FlutterDevice> flutterDevices,
+    @required String projectRootPath,
+    @required String target,
+    @required DebuggingOptions debuggingOptions,
+  }) {
+    if (!useBuildIsolation) {
+      return null;
+    }
+    return Environment(
+      projectDir: fs.directory(projectRootPath ?? fs.currentDirectory.path),
+      defines: <String, String>{
+        kTargetFile: fs.path.absolute(target),
+        kBuildMode: getNameForBuildMode(debuggingOptions.buildInfo.mode),
+        _kDevicesConnected: <String>[
+          for (FlutterDevice device in flutterDevices) device.device.id
+        ].join(',')
+    });
+  }
+
   bool _exited = false;
-  bool hotMode ;
-  String _packagesFilePath;
-  String get packagesFilePath => _packagesFilePath;
-  String _projectRootPath;
-  String get projectRootPath => _projectRootPath;
-  String _mainPath;
-  String get mainPath => _mainPath;
+  bool hotMode;
+
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
-  AssetBundle _assetBundle;
-  AssetBundle get assetBundle => _assetBundle;
-
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
+
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
+
   bool get isRunningRelease => debuggingOptions.buildInfo.isRelease;
+
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
   /// Whether this runner can hot restart.
@@ -574,6 +619,9 @@ abstract class ResidentRunner {
   /// Whether this runner can hot reload.
   bool get canHotReload => hotMode;
 
+  /// Whether this runner supports hot restart.
+  bool get supportsRestart => false;
+
   /// Start the app and keep the process running during its lifetime.
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
@@ -589,8 +637,6 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   });
-
-  bool get supportsRestart => false;
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
     final String mode = isRunningProfile ? 'profile' :
