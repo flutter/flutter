@@ -301,6 +301,7 @@ void main() {
     expect(value, equals('three'));
   });
 
+  /*
   testWidgets('Dropdown form field uses form field state', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -362,6 +363,7 @@ void main() {
     form.save();
     expect(value, equals('three'));
   });
+   */
 
   testWidgets('Dropdown in ListView', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/12053
