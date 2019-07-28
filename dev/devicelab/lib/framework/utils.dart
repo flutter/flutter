@@ -13,10 +13,15 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
-import 'adb.dart';
-
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
+
+/// The local engine to use for [flutter] and [evalFlutter], if any.
+String get localEngine => const String.fromEnvironment('localEngine');
+
+/// The local engine source path to use if a local engine is used for [flutter]
+/// and [evalFlutter].
+String get localEngineSrcPath => const String.fromEnvironment('localEngineSrcPath');
 
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
 ProcessManager _processManager = const LocalProcessManager();
@@ -228,7 +233,7 @@ Future<Process> startProcess(
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
-    <String>[executable]..addAll(arguments),
+    <String>[executable, ...arguments],
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
@@ -296,13 +301,16 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// For logging purposes, the command's output is also printed out.
+/// For logging purposes, the command's output is also printed out by default.
 Future<String> eval(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   String workingDirectory,
+  StringBuffer stderr, // if not null, the stderr will be written here
+  bool printStdout = true,
+  bool printStderr = true,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
@@ -313,14 +321,19 @@ Future<String> eval(
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stdout: $line');
+        if (printStdout) {
+          print('stdout: $line');
+        }
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform<String>(utf8.decoder)
       .transform<String>(const LineSplitter())
       .listen((String line) {
-        print('stderr: $line');
+        if (printStderr) {
+          print('stderr: $line');
+        }
+        stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
   await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
@@ -332,12 +345,21 @@ Future<String> eval(
   return output.toString().trimRight();
 }
 
+List<String> flutterCommandArgs(String command, List<String> options) {
+  return <String>[
+    command,
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    ...options,
+  ];
+}
+
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>[command]..addAll(options);
+  final List<String> args = flutterCommandArgs(command, options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -347,10 +369,11 @@ Future<String> evalFlutter(String command, {
   List<String> options = const <String>[],
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
+  StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
-  final List<String> args = <String>[command]..addAll(options);
+  final List<String> args = flutterCommandArgs(command, options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+      canFail: canFail, environment: environment, stderr: stderr);
 }
 
 String get dartBin =>
@@ -526,50 +549,50 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
   return token;
 }
 
+final RegExp _obsRegExp =
+  RegExp('An Observatory debugger .* is available at: ');
+final RegExp _obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
+final RegExp _obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+
 /// Tries to extract a port from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-///
-/// The `multiLine` flag should be set to true if `line` is actually a buffer of many lines.
+/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
 int parseServicePort(String line, {
-  String prefix = 'An Observatory debugger .* is available at: ',
-  bool multiLine = false,
+  Pattern prefix,
 }) {
-  // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
-  final RegExp pattern = RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
-  final Match match = pattern.firstMatch(line);
-  return match == null ? null : int.parse(match.group(2));
+  prefix ??= _obsRegExp;
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
+    return null;
+  }
+  final Match prefixMatch = matchesIter.first;
+  final List<Match> matches =
+    _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
+  return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// If FLUTTER_ENGINE environment variable is set then we need to pass
-/// correct --local-engine setting too.
-void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
-  if (Platform.environment['FLUTTER_ENGINE'] != null) {
-    if (flavor == null) {
-      // If engine flavor was not specified explicitly then scan options looking
-      // for flags that specify the engine flavor (--release, --profile or
-      // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = <String, String>{
-        '--release': 'release',
-        '--debug': 'debug',
-        '--profile': 'profile',
-      };
+/// Tries to extract a Uri from the string.
+///
+/// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
+/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+Uri parseServiceUri(String line, {
+  Pattern prefix,
+}) {
+  prefix ??= _obsRegExp;
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
+    return null;
+  }
+  final Match prefixMatch = matchesIter.first;
+  final List<Match> matches =
+    _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
+  return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
+}
 
-      for (String option in options) {
-        flavor = optionToFlavor[option];
-        if (flavor != null) {
-          break;
-        }
-      }
-
-      flavor ??= 'debug';
-    }
-
-    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
-      DeviceOperatingSystem.ios: 'ios',
-      DeviceOperatingSystem.android: 'android',
-    };
-
-    options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
+/// Checks that the file exists, otherwise throws a [FileSystemException].
+void checkFileExists(String file) {
+  if (!exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
   }
 }

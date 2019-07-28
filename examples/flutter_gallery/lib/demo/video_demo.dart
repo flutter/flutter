@@ -50,8 +50,11 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget fullScreenRoutePageBuilder(BuildContext context,
-        Animation<double> animation, Animation<double> secondaryAnimation) {
+    Widget fullScreenRoutePageBuilder(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
       return _buildFullScreenVideo();
     }
 
@@ -144,7 +147,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
   _VideoPlayPauseState() {
     listener = () {
       if (mounted)
-        setState(() {});
+        setState(() { });
     };
   }
 
@@ -221,7 +224,7 @@ class _FadeAnimationState extends State<FadeAnimation> with SingleTickerProvider
     );
     animationController.addListener(() {
       if (mounted) {
-        setState(() {});
+        setState(() { });
       }
     });
     animationController.forward(from: 0.0);
@@ -372,7 +375,7 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       await controller.initialize();
       if (mounted) {
         print('< VideoDemo initController "$name" done ${isDisposed ? "DISPOSED" : ""}');
-        setState(() {});
+        setState(() { });
       }
     }
 
@@ -402,19 +405,21 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
-            child: ListView(
-              children: <Widget>[
-                VideoCard(
-                  title: 'Butterfly',
-                  subtitle: '… flutters by',
-                  controller: butterflyController,
-                ),
-                VideoCard(
-                  title: 'Bee',
-                  subtitle: '… gently buzzing',
-                  controller: beeController,
-                ),
-              ],
+            child: Scrollbar(
+              child: ListView(
+                children: <Widget>[
+                  VideoCard(
+                    title: 'Butterfly',
+                    subtitle: '… flutters by',
+                    controller: butterflyController,
+                  ),
+                  VideoCard(
+                    title: 'Bee',
+                    subtitle: '… gently buzzing',
+                    controller: beeController,
+                  ),
+                ],
+              ),
             ),
             connectedCompleter: connectedCompleter,
             scaffoldKey: scaffoldKey,

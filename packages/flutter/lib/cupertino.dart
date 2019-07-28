@@ -5,6 +5,8 @@
 /// Flutter widgets implementing the current iOS design language.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3PdUaidHc-E}
 library cupertino;
 
 export 'src/cupertino/action_sheet.dart';

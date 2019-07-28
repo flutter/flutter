@@ -52,7 +52,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 /// in the opposite direction (e.g. allowing the user to swipe horizontally
 /// between the pages represented by the tabs, while the list scrolls
 /// vertically), then any list inside that [TabBarView] would not interact with
-/// the outer [ScrollView]. For example, flinginsg the inner list to scroll to
+/// the outer [ScrollView]. For example, flinging the inner list to scroll to
 /// the top would not cause a collapsed [SliverAppBar] in the outer [ScrollView]
 /// to expand.
 ///
@@ -189,7 +189,7 @@ class NestedScrollView extends StatefulWidget {
     this.physics,
     @required this.headerSliverBuilder,
     @required this.body,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(reverse != null),
        assert(headerSliverBuilder != null),
@@ -272,15 +272,15 @@ class NestedScrollView extends StatefulWidget {
   }
 
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
-    final List<Widget> slivers = <Widget>[];
-    slivers.addAll(headerSliverBuilder(context, bodyIsScrolled));
-    slivers.add(SliverFillRemaining(
-      child: PrimaryScrollController(
-        controller: innerController,
-        child: body,
+    return <Widget>[
+      ...headerSliverBuilder(context, bodyIsScrolled),
+      SliverFillRemaining(
+        child: PrimaryScrollController(
+          controller: innerController,
+          child: body,
+        ),
       ),
-    ));
-    return slivers;
+    ];
   }
 
   @override
@@ -371,7 +371,7 @@ class _NestedScrollViewCustomScrollView extends CustomScrollView {
     @required ScrollController controller,
     @required List<Widget> slivers,
     @required this.handle,
-    DragStartBehavior dragStartBehavior = DragStartBehavior.down,
+    DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : super(
          scrollDirection: scrollDirection,
          reverse: reverse,
@@ -498,8 +498,15 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   bool get hasScrolledBody {
     for (_NestedScrollPosition position in _innerPositions) {
-      if (position.pixels > position.minScrollExtent)
+      // TODO(chunhtai): Replace null check with assert once
+      // https://github.com/flutter/flutter/issues/31195 is fixed.
+      if (
+        position.minScrollExtent != null &&
+        position.pixels != null &&
+        position.pixels > position.minScrollExtent
+      ) {
         return true;
+      }
     }
     return false;
   }
@@ -713,7 +720,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _outerPosition.updateCanDrag(maxInnerExtent);
   }
 
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) async {
@@ -843,7 +851,8 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 }
 
 class _NestedScrollController extends ScrollController {
-  _NestedScrollController(this.coordinator, {
+  _NestedScrollController(
+    this.coordinator, {
     double initialScrollOffset = 0.0,
     String debugLabel,
   }) : super(initialScrollOffset: initialScrollOffset, debugLabel: debugLabel);
@@ -1057,7 +1066,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     ));
   }
 
-  ScrollActivity createBallisticScrollActivity(Simulation simulation, {
+  ScrollActivity createBallisticScrollActivity(
+    Simulation simulation, {
     @required _NestedBallisticScrollActivityMode mode,
     _NestedScrollMetrics metrics,
   }) {
@@ -1079,7 +1089,8 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
   }
 
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) {
@@ -1442,7 +1453,7 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     if (child != null)
       return child.hitTest(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
     return false;

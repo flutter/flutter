@@ -17,7 +17,7 @@ void main() {
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
-      maxHeight: 17.0
+      maxHeight: 17.0,
     );
     BoxConstraints copy = constraints.copyWith();
     expect(copy, equals(constraints));
@@ -25,7 +25,7 @@ void main() {
       minWidth: 13.0,
       maxWidth: 17.0,
       minHeight: 111.0,
-      maxHeight: 117.0
+      maxHeight: 117.0,
     );
     expect(copy.minWidth, 13.0);
     expect(copy.maxWidth, 17.0);
@@ -40,7 +40,7 @@ void main() {
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
-      maxHeight: 17.0
+      maxHeight: 17.0,
     );
     BoxConstraints copy = constraints * 2.0;
     expect(copy.minWidth, 6.0);
@@ -66,7 +66,7 @@ void main() {
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
-      maxHeight: 17.0
+      maxHeight: 17.0,
     );
     BoxConstraints copy = BoxConstraints.lerp(null, constraints, 0.5);
     expect(copy.minWidth, 1.5);
@@ -82,7 +82,7 @@ void main() {
       minWidth: 13.0,
       maxWidth: 17.0,
       minHeight: 111.0,
-      maxHeight: 117.0
+      maxHeight: 117.0,
     ), constraints, 0.2);
     expect(copy.minWidth, 11.0);
     expect(copy.maxWidth, 15.0);
@@ -163,7 +163,7 @@ void main() {
       minWidth: 3.0,
       maxWidth: 2.0,
       minHeight: 11.0,
-      maxHeight: 18.0
+      maxHeight: 18.0,
     );
     final BoxConstraints copy = constraints.normalize();
     expect(copy.minWidth, 3.0);

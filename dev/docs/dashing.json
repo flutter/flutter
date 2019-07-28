@@ -3,90 +3,59 @@
   "package": "flutter",
   "author": {
     "name": "The Flutter Team",
-    "link": "https://flutter.io"
+    "link": "https://flutter.dev"
   },
   "index": "index.html",
   "icon32x32": "flutter/static-assets/favicon.png",
   "allowJS": true,
   "ExternalURL": "https://docs.flutter.io",
   "selectors": {
-
     "#exceptions span.name a": {
       "type": "Exception"
     },
 
-    "body > main > div.col-xs-12.col-sm-9.col-md-8.main-content > h1": {
-      "requiretext": " library",
-      "type": "Library",
-      "regexp": " library",
-      "replacement": ""
+    "h1 > span.kind-library": {
+      "type": "Library"
     },
 
-    "body > main > div.col-xs-12.col-sm-9.main-content > h1": {
-      "requiretext": " class",
-      "type": "Class",
-      "regexp": " class",
-      "replacement": ""
+    "h1 > span.kind-class": {
+      "type": "Class"
     },
 
-    "body > main > div.col-xs-12.col-md-8.main-content > h1": {
-      "requiretext": " function",
-      "type": "Function",
-      "regexp": " function",
-      "replacement": ""
+    "h1 > span.kind-function": {
+      "type": "Function"
     },
 
-    "body > main > div.col-sm-9.col-md-8.main-content > h1": {
-      "requiretext": " typedef",
-      "type": "Type",
-      "regexp": " typedef",
-      "replacement": ""
+    "h1 > span.kind-typedef": {
+      "type": "Type"
     },
 
-    "body > main > .col-xs-12.col-sm-9.col-md-8.main-content > h1": {
-      "requiretext": " enum",
-      "type": "Enum",
-      "regexp": " enum",
-      "replacement": ""
+    "h1 > span.kind-enum": {
+      "type": "Enum"
     },
 
-    "body > main > .col-md-8.main-content > h1": {
-      "requiretext": " constant",
-      "type": "Constant",
-      "regexp": " constant",
-      "replacement": ""
+    "h1 > span.kind-top-level-constant": {
+      "type": "Constant"
     },
 
-    "body > main > div.col-xs-12.col-sm-9 > h1": {
-      "requiretext": " method",
-      "type": "Method",
-      "regexp": " method",
-      "replacement": ""
+    "h1 > span.kind-constant": {
+      "type": "Constant"
     },
 
-    ".callables .callable .name a": {
+    "h1 > span.kind-method": {
       "type": "Method"
     },
 
-    "body > main > .col-xs-12.col-sm-9.col-md-8 > h1": {
-      "requiretext": " property",
-      "type": "Property",
-      "regexp": " property",
-      "replacement": ""
+    "h1 > span.kind-property": {
+      "type": "Property"
     },
 
-    "body > main > .col-xs-12.col-md-8 > h1": {
-      "requiretext": " constructor",
-      "type": "Constructor",
-      "regexp": " constructor",
-      "replacement": ""
+    "h1 > span.kind-top-level-property": {
+      "type": "Property"
     },
 
-    "body > main > .col-xs-12.col-sm-9.main-content > h1": {
-      "requiretext": "operator ",
-      "type": "Operator",
-      "regexp": "operator ",
-      "replacement": ""
+    "h1 > span.kind-constructor": {
+      "type": "Constructor"
     },
 
     ".callables .callable": {
@@ -95,8 +64,6 @@
       "regexp": "operator ",
       "replacement": ""
     }
-
-
   },
   "ignore": [
     "ABOUT"

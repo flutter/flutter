@@ -54,12 +54,10 @@ class _ElevationDemoState extends State<ElevationDemo> {
             onPressed: () {
               setState(() => _showElevation = !_showElevation);
             },
-          )
+          ),
         ],
       ),
-      body: ListView(
-        children: buildCards(),
-      ),
+      body: Scrollbar(child: ListView(children: buildCards())),
     );
   }
 }

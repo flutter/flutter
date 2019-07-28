@@ -536,4 +536,32 @@ void main() {
     expect(tester.getTopLeft(find.byKey(target)), const Offset(600.0, 0.0));
     expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 200.0));
   });
+
+  testWidgets('GridView crossAxisSpacing', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/27151.
+    final Key target = UniqueKey();
+
+    Widget build(TextDirection textDirection) {
+      return Directionality(
+        textDirection: textDirection,
+        child: GridView.count(
+          crossAxisCount: 4,
+          crossAxisSpacing: 8.0,
+          children: <Widget>[
+            Container(key: target),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(TextDirection.ltr));
+
+    expect(tester.getTopLeft(find.byKey(target)), Offset.zero);
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(194.0, 194.0));
+
+    await tester.pumpWidget(build(TextDirection.rtl));
+
+    expect(tester.getTopLeft(find.byKey(target)), const Offset(606.0, 0.0));
+    expect(tester.getBottomRight(find.byKey(target)), const Offset(800.0, 194.0));
+  });
 }

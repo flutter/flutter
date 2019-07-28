@@ -119,8 +119,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double maxHeight;
   final Widget child;
 
-  @override double get minExtent => minHeight;
-  @override double get maxExtent => math.max(maxHeight, minHeight);
+  @override
+  double get minExtent => minHeight;
+  @override
+  double get maxExtent => math.max(maxHeight, minHeight);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
@@ -509,7 +511,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });
-          }
+          },
         ),
       ));
     }
@@ -614,7 +616,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                   tooltip: 'Back',
                   onPressed: () {
                     _handleBackButton(appBarMidScrollOffset);
-                  }
+                  },
                 ),
               ),
             ),

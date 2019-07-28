@@ -66,8 +66,7 @@ class StatefulCreationCounterState extends State<StatefulCreationCounter> {
 }
 
 void main() {
-  testWidgets('reparent state with layout builder',
-      (WidgetTester tester) async {
+  testWidgets('reparent state with layout builder', (WidgetTester tester) async {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
@@ -77,9 +76,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 1);
   });
 
-  testWidgets('Clean then reparent with dependencies',
-      (WidgetTester tester) async {
-
+  testWidgets('Clean then reparent with dependencies', (WidgetTester tester) async {
     int layoutBuilderBuildCount = 0;
 
     StateSetter keyedSetState;
@@ -103,8 +100,7 @@ void main() {
       data: MediaQueryData.fromWindow(ui.window),
       child: Column(
         children: <Widget>[
-          StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
+          StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
             layoutBuilderSetState = setState;
             return LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
@@ -119,11 +115,12 @@ void main() {
                 child: Container(
                   child: Container(
                     child: Container(
-                      child: StatefulBuilder(builder:
-                          (BuildContext context, StateSetter setState) {
-                        childSetState = setState;
-                        return deepChild; // initially a Container, but then the keyedWidget above
-                      }),
+                      child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                          childSetState = setState;
+                          return deepChild; // initially a Container, but then the keyedWidget above
+                        },
+                      ),
                     ),
                   ),
                 ),

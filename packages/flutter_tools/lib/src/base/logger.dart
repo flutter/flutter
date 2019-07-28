@@ -6,14 +6,36 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/context.dart';
 import 'io.dart';
 import 'platform.dart';
 import 'terminal.dart';
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
-const Duration kFastOperation = Duration(seconds: 2);
-const Duration kSlowOperation = Duration(minutes: 2);
+const Duration _kFastOperation = Duration(seconds: 2);
+const Duration _kSlowOperation = Duration(minutes: 2);
+
+/// The [TimeoutConfiguration] instance.
+///
+/// If not provided via injection, a default instance is provided.
+TimeoutConfiguration get timeoutConfiguration => context.get<TimeoutConfiguration>() ?? const TimeoutConfiguration();
+
+class TimeoutConfiguration {
+  const TimeoutConfiguration();
+
+  /// The expected time that various "slow" operations take, such as running
+  /// the analyzer.
+  ///
+  /// Defaults to 2 minutes.
+  Duration get slowOperation => _kSlowOperation;
+
+  /// The expected time that various "fast" operations take, such as a hot
+  /// reload.
+  ///
+  /// Defaults to 2 seconds.
+  Duration get fastOperation => _kFastOperation;
+}
 
 typedef VoidCallback = void Function();
 
@@ -109,7 +131,7 @@ abstract class Logger {
   /// The `timeout` argument sets a duration after which an additional message
   /// may be shown saying that the operation is taking a long time. (Not all
   /// [Status] subclasses show such a message.) Set this to null if the
-  /// operation can legitimately take an abritrary amount of time (e.g. waiting
+  /// operation can legitimately take an arbitrary amount of time (e.g. waiting
   /// for the user).
   ///
   /// The `progressId` argument provides an ID that can be used to identify
@@ -183,7 +205,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printTrace(String message) {}
+  void printTrace(String message) { }
 
   @override
   Status startProgress(
@@ -374,7 +396,7 @@ class VerboseLogger extends Logger {
       timeout: timeout,
       onFinish: () {
         String time;
-        if (timeout == null || timeout > kFastOperation) {
+        if (timeout == null || timeout > timeoutConfiguration.fastOperation) {
           time = getElapsedAsSeconds(timer.elapsed);
         } else {
           time = getElapsedAsMilliseconds(timer.elapsed);
@@ -388,7 +410,7 @@ class VerboseLogger extends Logger {
     )..start();
   }
 
-  void _emit(_LogType type, String message, [StackTrace stackTrace]) {
+  void _emit(_LogType type, String message, [ StackTrace stackTrace ]) {
     if (message.trim().isEmpty)
       return;
 
@@ -464,7 +486,7 @@ abstract class Status {
   final VoidCallback onFinish;
 
   @protected
-  final Stopwatch _stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
 
   @protected
   @visibleForTesting
@@ -472,7 +494,7 @@ abstract class Status {
 
   @protected
   String get elapsedTime {
-    if (timeout == null || timeout > kFastOperation)
+    if (timeout == null || timeout > timeoutConfiguration.fastOperation)
       return getElapsedAsSeconds(_stopwatch.elapsed);
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
@@ -595,6 +617,11 @@ class AnsiSpinner extends Status {
     this.slowWarningCallback,
   }) : super(timeout: timeout, onFinish: onFinish);
 
+  final String _backspaceChar = '\b';
+  final String _clearChar = ' ';
+
+  bool timedOut = false;
+
   int ticks = 0;
   Timer timer;
 
@@ -610,8 +637,8 @@ class AnsiSpinner extends Status {
 
   String get _currentAnimationFrame => _animation[ticks % _animation.length];
   int get _currentLength => _currentAnimationFrame.length + _slowWarning.length;
-  String get _backspace => '\b' * _currentLength;
-  String get _clear => ' ' *  _currentLength;
+  String get _backspace => _backspaceChar * (spinnerIndent + _currentLength);
+  String get _clear => _clearChar *  (spinnerIndent + _currentLength);
 
   @protected
   int get spinnerIndent => 0;
@@ -624,7 +651,7 @@ class AnsiSpinner extends Status {
   }
 
   void _startSpinner() {
-    stdout.write(_clear * (spinnerIndent + 1)); // for _callback to backspace over
+    stdout.write(_clear); // for _callback to backspace over
     timer = Timer.periodic(const Duration(milliseconds: 100), _callback);
     _callback(timer);
   }
@@ -633,17 +660,21 @@ class AnsiSpinner extends Status {
     assert(this.timer == timer);
     assert(timer != null);
     assert(timer.isActive);
-    stdout.write('${_backspace * (spinnerIndent + 1)}');
+    stdout.write(_backspace);
     ticks += 1;
-    stdout.write('${_clear * spinnerIndent}$_currentAnimationFrame');
     if (seemsSlow) {
+      if (!timedOut) {
+        timedOut = true;
+        stdout.write('$_clear\n');
+      }
       if (slowWarningCallback != null) {
-        _slowWarning = ' ' + slowWarningCallback();
+        _slowWarning = slowWarningCallback();
       } else {
-        _slowWarning = ' ' + _defaultSlowWarning;
+        _slowWarning = _defaultSlowWarning;
       }
       stdout.write(_slowWarning);
     }
+    stdout.write('${_clearChar * spinnerIndent}$_currentAnimationFrame');
   }
 
   @override
@@ -657,8 +688,7 @@ class AnsiSpinner extends Status {
   }
 
   void _clearSpinner() {
-    final int width = spinnerIndent + 1;
-    stdout.write('${_backspace * width}${_clear * width}${_backspace * width}');
+    stdout.write('$_backspace$_clear$_backspace');
   }
 
   @override
@@ -748,7 +778,7 @@ class AnsiStatus extends AnsiSpinner {
   }
 
   void _clearStatus() {
-    stdout.write('${_backspace * _totalMessageLength}${_clear * _totalMessageLength}${_backspace * _totalMessageLength}');
+    stdout.write('${_backspaceChar * _totalMessageLength}${_clearChar * _totalMessageLength}${_backspaceChar * _totalMessageLength}');
   }
 
   @override

@@ -31,7 +31,7 @@ void main() {
   }
 
   task(() async {
-    int vmServicePort;
+    Uri vmServiceUri;
     String appId;
 
     final Device device = await devices.workingDevice;
@@ -60,14 +60,14 @@ void main() {
         final dynamic json = parseFlutterResponse(line);
         if (json != null) {
           if (json['event'] == 'app.debugPort') {
-            vmServicePort = Uri.parse(json['params']['wsUri']).port;
-            print('service protocol connection available at port $vmServicePort');
+            vmServiceUri = Uri.parse(json['params']['wsUri']);
+            print('service protocol connection available at $vmServiceUri');
           } else if (json['event'] == 'app.started') {
             appId = json['params']['appId'];
             print('application identifier is $appId');
           }
         }
-        if (vmServicePort != null && appId != null && !ready.isCompleted) {
+        if (vmServiceUri != null && appId != null && !ready.isCompleted) {
           print('run: ready!');
           ready.complete();
           ok ??= true;
@@ -84,9 +84,7 @@ void main() {
       if (!ok)
         throw 'Failed to run test app.';
 
-      final VMServiceClient client = VMServiceClient.connect(
-        'ws://localhost:$vmServicePort/ws'
-      );
+      final VMServiceClient client = VMServiceClient.connect(vmServiceUri);
 
       int id = 1;
       Future<Map<String, dynamic>> sendRequest(String method, dynamic params) async {
@@ -100,7 +98,7 @@ void main() {
         final Map<String, dynamic> req = <String, dynamic>{
           'id': requestId,
           'method': method,
-          'params': params
+          'params': params,
         };
         final String jsonEncoded = json.encode(<Map<String, dynamic>>[req]);
         print('run:stdin: $jsonEncoded');

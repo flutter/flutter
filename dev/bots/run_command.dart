@@ -30,6 +30,53 @@ void printProgress(String action, String workingDir, String command) {
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
 
+Stream<String> runAndGetStdout(String executable, List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool expectNonZeroExit = false,
+  int expectedExitCode,
+  String failureMessage,
+  Duration timeout = _kLongTimeout,
+  Function beforeExit,
+}) async* {
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory);
+
+  printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  final DateTime start = DateTime.now();
+  final Process process = await Process.start(executable, arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
+
+  stderr.addStream(process.stderr);
+  final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
+  await for (String line in lines) {
+    yield line;
+  }
+
+  final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
+    stderr.writeln('Process timed out after $timeout');
+    return expectNonZeroExit ? 0 : 1;
+  });
+  print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
+    if (failureMessage != null) {
+      print(failureMessage);
+    }
+    print(
+        '$redLine\n'
+            '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectNonZeroExit ? (expectedExitCode ?? 'non-zero') : 'zero'}).$reset\n'
+            '${bold}Command:$cyan $commandDescription$reset\n'
+            '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
+            '$redLine'
+    );
+    beforeExit?.call();
+    exit(1);
+  }
+}
+
 Future<void> runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
@@ -38,7 +85,9 @@ Future<void> runCommand(String executable, List<String> arguments, {
   String failureMessage,
   bool printOutput = true,
   bool skip = false,
+  bool expectFlaky = false,
   Duration timeout = _kLongTimeout,
+  bool Function(String) removeLine,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -55,21 +104,31 @@ Future<void> runCommand(String executable, List<String> arguments, {
   );
 
   Future<List<List<int>>> savedStdout, savedStderr;
+  final Stream<List<int>> stdoutSource = process.stdout
+    .transform<String>(const Utf8Decoder())
+    .transform(const LineSplitter())
+    .where((String line) => removeLine == null || !removeLine(line))
+    .map((String line) => '$line\n')
+    .transform(const Utf8Encoder());
   if (printOutput) {
     await Future.wait<void>(<Future<void>>[
-      stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr)
+      stdout.addStream(stdoutSource),
+      stderr.addStream(process.stderr),
     ]);
   } else {
-    savedStdout = process.stdout.toList();
+    savedStdout = stdoutSource.toList();
     savedStderr = process.stderr.toList();
   }
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
-    return expectNonZeroExit ? 0 : 1;
+    return (expectNonZeroExit || expectFlaky) ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  // If the test is flaky we don't care about the actual exit.
+  if (expectFlaky) {
+    return;
+  }
   if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (failureMessage != null) {
       print(failureMessage);

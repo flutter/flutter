@@ -11,7 +11,7 @@ import 'package:matcher/matcher.dart';
 
 import '../widgets/semantics_tester.dart';
 
-MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeData theme}) {
+MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
       theme: theme,
       home: Material(
@@ -24,14 +24,14 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, {ThemeD
                   showDialog<void>(
                     context: context,
                     builder: (BuildContext context) {
-                        return dialog;
+                      return dialog;
                     },
                   );
-                }
-              )
+                },
+              ),
             );
           }
-        )
+        ),
       ),
   );
 }
@@ -60,8 +60,8 @@ void main() {
             onPressed: () {
               didPressOk = true;
             },
-            child: const Text('OK')
-        )
+            child: const Text('OK'),
+        ),
       ],
     );
     await tester.pumpWidget(_appWithAlertDialog(tester, dialog));
@@ -408,7 +408,7 @@ void main() {
     );
     expect(
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+      const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pumpWidget(
       const MediaQuery(
@@ -422,12 +422,12 @@ void main() {
     );
     expect( // no change because this is an animation
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+      const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pump(const Duration(seconds: 1));
     expect( // animation finished
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
+      const Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
     );
   });
 
@@ -463,7 +463,7 @@ void main() {
 
     expect(semantics, isNot(includesNodeWith(
         label: 'Title',
-        flags: <SemanticsFlag>[SemanticsFlag.namesRoute]
+        flags: <SemanticsFlag>[SemanticsFlag.namesRoute],
     )));
 
     await tester.tap(find.text('X'));
@@ -606,5 +606,43 @@ void main() {
     expect(dismissedItems, <int>[0, 1]);
     expect(find.text('0'), findsNothing);
     expect(find.text('1'), findsNothing);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/28505.
+  testWidgets('showDialog only gets Theme from context on the first call', (WidgetTester tester) async {
+    Widget buildFrame(Key builderKey) {
+      return MaterialApp(
+        home: Center(
+          child: Builder(
+            key: builderKey,
+            builder: (BuildContext outerContext) {
+              return RaisedButton(
+                onPressed: () {
+                  showDialog<void>(
+                    context: outerContext,
+                    builder: (BuildContext innerContext) {
+                      return const AlertDialog(title: Text('Title'));
+                    },
+                  );
+                },
+                child: const Text('Show Dialog'),
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+    await tester.pumpAndSettle();
+
+    // Force the Builder to be recreated (new key) which causes outerContext to
+    // be deactivated. If showDialog()'s implementation were to refer to
+    // outerContext again, it would crash.
+    await tester.pumpWidget(buildFrame(UniqueKey()));
+    await tester.pump();
   });
 }

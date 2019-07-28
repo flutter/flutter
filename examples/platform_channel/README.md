@@ -3,7 +3,7 @@
 This project demonstrates how to connect a Flutter app to platform specific services.
 
 You can read more about
-[accessing platform and third-party services in Flutter](https://flutter.io/platform-channels/).
+[accessing platform and third-party services in Flutter](https://flutter.dev/platform-channels/).
 
 ## iOS
 You can use the commands `flutter build` and `flutter run` from the app's root

@@ -60,6 +60,8 @@ enum DismissDirection {
 /// non-null, the Dismissible widget animates its height (or width, whichever is
 /// perpendicular to the dismiss direction) to zero over the [resizeDuration].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=iEMgjrfuc58}
+///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
@@ -91,9 +93,9 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds = const <DismissDirection, double>{},
     this.movementDuration = const Duration(milliseconds: 200),
     this.crossAxisEndOffset = 0.0,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(key != null),
-       assert(secondaryBackground != null ? background != null : true),
+       assert(secondaryBackground == null || background != null),
        assert(dragStartBehavior != null),
        super(key: key);
 
@@ -162,7 +164,6 @@ class Dismissible extends StatefulWidget {
   /// it is positive or negative.
   final double crossAxisEndOffset;
 
-  // TODO(jslavitz): Set the DragStartBehavior default to be start across all widgets.
   /// Determines the way that drag start behavior is handled.
   ///
   /// If set to [DragStartBehavior.start], the drag gesture used to dismiss a
@@ -173,7 +174,7 @@ class Dismissible extends StatefulWidget {
   /// animation smoother and setting it to [DragStartBehavior.down] will make
   /// drag behavior feel slightly more reactive.
   ///
-  /// By default, the drag start behavior is [DragStartBehavior.down].
+  /// By default, the drag start behavior is [DragStartBehavior.start].
   ///
   /// See also:
   ///
@@ -187,7 +188,7 @@ class Dismissible extends StatefulWidget {
 class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
     @required this.axis,
-    @required this.moveAnimation
+    @required this.moveAnimation,
   }) : assert(axis != null),
        assert(moveAnimation != null),
        super(reclip: moveAnimation);
@@ -484,7 +485,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         ).drive(
           Tween<double>(
             begin: 1.0,
-            end: 0.0
+            end: 0.0,
           ),
         );
       });
@@ -537,14 +538,14 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         child: SizedBox(
           width: _sizePriorToCollapse.width,
           height: _sizePriorToCollapse.height,
-          child: background
-        )
+          child: background,
+        ),
       );
     }
 
     Widget content = SlideTransition(
       position: _moveAnimation,
-      child: widget.child
+      child: widget.child,
     );
 
     if (background != null) {
@@ -557,8 +558,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
               axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
               moveAnimation: _moveAnimation,
             ),
-            child: background
-          )
+            child: background,
+          ),
         ));
       }
 

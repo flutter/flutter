@@ -5,7 +5,7 @@
 import 'context.dart';
 
 /// The current system clock instance.
-SystemClock get systemClock => context[SystemClock];
+SystemClock get systemClock => context.get<SystemClock>();
 
 /// A class for making time based operations testable.
 class SystemClock {

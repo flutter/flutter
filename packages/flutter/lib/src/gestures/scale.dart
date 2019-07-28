@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:vector_math/vector_math_64.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -34,45 +36,117 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint = Offset.zero })
-    : assert(focalPoint != null);
+  ScaleStartDetails({ this.focalPoint = Offset.zero, Offset localFocalPoint, })
+    : assert(focalPoint != null), localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
+  ///
   /// Reported in global coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localFocalPoint], which is the same value reported in local
+  ///    coordinates.
   final Offset focalPoint;
 
+  /// The initial focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
+  /// constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [focalPoint], which is the same value reported in global
+  ///    coordinates.
+  final Offset localFocalPoint;
+
   @override
-  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint)';
+  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint)';
 }
 
 /// Details for [GestureScaleUpdateCallback].
 class ScaleUpdateDetails {
   /// Creates details for [GestureScaleUpdateCallback].
   ///
-  /// The [focalPoint], [scale], [rotation] arguments must not be null. The [scale]
+  /// The [focalPoint], [scale], [horizontalScale], [verticalScale], [rotation]
+  /// arguments must not be null. The [scale], [horizontalScale], and [verticalScale]
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
+    Offset localFocalPoint,
     this.scale = 1.0,
+    this.horizontalScale = 1.0,
+    this.verticalScale = 1.0,
     this.rotation = 0.0,
   }) : assert(focalPoint != null),
        assert(scale != null && scale >= 0.0),
-       assert(rotation != null);
+       assert(horizontalScale != null && horizontalScale >= 0.0),
+       assert(verticalScale != null && verticalScale >= 0.0),
+       assert(rotation != null),
+       localFocalPoint = localFocalPoint ?? focalPoint;
 
-  /// The focal point of the pointers in contact with the screen. Reported in
-  /// global coordinates.
+  /// The focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in global coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localFocalPoint], which is the same value reported in local
+  ///    coordinates.
   final Offset focalPoint;
 
-  /// The scale implied by the pointers in contact with the screen. A value
-  /// greater than or equal to zero.
+  /// The focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
+  /// constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [focalPoint], which is the same value reported in global
+  ///    coordinates.
+  final Offset localFocalPoint;
+
+  /// The scale implied by the average distance between the pointers in contact
+  /// with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [horizontalScale], which is the scale along the horizontal axis.
+  ///  * [verticalScale], which is the scale along the vertical axis.
   final double scale;
 
+  /// The scale implied by the average distance along the horizontal axis
+  /// between the pointers in contact with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [scale], which is the general scale implied by the pointers.
+  ///  * [verticalScale], which is the scale along the vertical axis.
+  final double horizontalScale;
+
+  /// The scale implied by the average distance along the vertical axis
+  /// between the pointers in contact with the screen.
+  ///
+  /// This value must be greater than or equal to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [scale], which is the general scale implied by the pointers.
+  ///  * [horizontalScale], which is the scale along the horizontal axis.
+  final double verticalScale;
+
   /// The angle implied by the first two pointers to enter in contact with
-  /// the screen. Expressed in radians.
+  /// the screen.
+  ///
+  /// Expressed in radians.
   final double rotation;
 
   @override
-  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, rotation: $rotation)';
+  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, scale: $scale, horizontalScale: $horizontalScale, verticalScale: $verticalScale, rotation: $rotation)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -121,7 +195,7 @@ class _LineBetweenPointers{
     this.pointerStartLocation = Offset.zero,
     this.pointerStartId = 0,
     this.pointerEndLocation = Offset.zero,
-    this.pointerEndId = 1
+    this.pointerEndId = 1,
   }) : assert(pointerStartLocation != null && pointerEndLocation != null),
        assert(pointerStartId != null && pointerEndId != null),
        assert(pointerStartId != pointerEndId);
@@ -146,7 +220,12 @@ class _LineBetweenPointers{
 /// are no longer in contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// Create a gesture recognizer for interactions intended for scaling content.
-  ScaleGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ///
+  /// {@macro flutter.gestures.gestureRecognizer.kind}
+  ScaleGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
@@ -161,10 +240,16 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   _ScaleState _state = _ScaleState.ready;
 
+  Matrix4 _lastTransform;
+
   Offset _initialFocalPoint;
   Offset _currentFocalPoint;
   double _initialSpan;
   double _currentSpan;
+  double _initialHorizontalSpan;
+  double _currentHorizontalSpan;
+  double _initialVerticalSpan;
+  double _currentVerticalSpan;
   _LineBetweenPointers _initialLine;
   _LineBetweenPointers _currentLine;
   Map<int, Offset> _pointerLocations;
@@ -172,6 +257,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
+
+  double get _horizontalScaleFactor => _initialHorizontalSpan > 0.0 ? _currentHorizontalSpan / _initialHorizontalSpan : 1.0;
+
+  double get _verticalScaleFactor => _initialVerticalSpan > 0.0 ? _currentVerticalSpan / _initialVerticalSpan : 1.0;
 
   double _computeRotationFactor() {
     if (_initialLine == null || _currentLine == null) {
@@ -194,13 +283,17 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  void addPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer);
+  void addAllowedPointer(PointerEvent event) {
+    startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
+      _initialHorizontalSpan = 0.0;
+      _currentHorizontalSpan = 0.0;
+      _initialVerticalSpan = 0.0;
+      _currentVerticalSpan = 0.0;
       _pointerLocations = <int, Offset>{};
       _pointerQueue = <int>[];
     }
@@ -218,15 +311,18 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
+      _lastTransform = event.transform;
     } else if (event is PointerDownEvent) {
       _pointerLocations[event.pointer] = event.position;
       _pointerQueue.add(event.pointer);
       didChangeConfiguration = true;
       shouldStartIfAccepted = true;
+      _lastTransform = event.transform;
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       _pointerLocations.remove(event.pointer);
       _pointerQueue.remove(event.pointer);
       didChangeConfiguration = true;
+      _lastTransform = event.transform;
     }
 
     _updateLines();
@@ -246,11 +342,20 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       focalPoint += _pointerLocations[pointer];
     _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
 
-    // Span is the average deviation from focal point
+    // Span is the average deviation from focal point. Horizontal and vertical
+    // spans are the average deviations from the focal point's horizontal and
+    // vertical coordinates, respectively.
     double totalDeviation = 0.0;
-    for (int pointer in _pointerLocations.keys)
+    double totalHorizontalDeviation = 0.0;
+    double totalVerticalDeviation = 0.0;
+    for (int pointer in _pointerLocations.keys) {
       totalDeviation += (_currentFocalPoint - _pointerLocations[pointer]).distance;
+      totalHorizontalDeviation += (_currentFocalPoint.dx - _pointerLocations[pointer].dx).abs();
+      totalVerticalDeviation += (_currentFocalPoint.dy - _pointerLocations[pointer].dy).abs();
+    }
     _currentSpan = count > 0 ? totalDeviation / count : 0.0;
+    _currentHorizontalSpan = count > 0 ? totalHorizontalDeviation / count : 0.0;
+    _currentVerticalSpan = count > 0 ? totalVerticalDeviation / count : 0.0;
   }
 
   /// Updates [_initialLine] and [_currentLine] accordingly to the situation of
@@ -269,7 +374,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
-        pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
+        pointerEndLocation: _pointerLocations[_pointerQueue[1]],
       );
     } else {
       /// A new rotation process is on the way, set the [_initialLine]
@@ -277,7 +382,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         pointerStartId: _pointerQueue[0],
         pointerStartLocation: _pointerLocations[_pointerQueue[0]],
         pointerEndId: _pointerQueue[1],
-        pointerEndLocation: _pointerLocations[ _pointerQueue[1]]
+        pointerEndLocation: _pointerLocations[_pointerQueue[1]],
       );
       _currentLine = null;
     }
@@ -287,6 +392,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     _initialFocalPoint = _currentFocalPoint;
     _initialSpan = _currentSpan;
     _initialLine = _currentLine;
+    _initialHorizontalSpan = _currentHorizontalSpan;
+    _initialVerticalSpan = _currentVerticalSpan;
     if (_state == _ScaleState.started) {
       if (onEnd != null) {
         final VelocityTracker tracker = _velocityTrackers[pointer];
@@ -327,13 +434,27 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     }
 
     if (_state == _ScaleState.started && onUpdate != null)
-      invokeCallback<void>('onUpdate', () => onUpdate(ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint, rotation: _computeRotationFactor())));
+      invokeCallback<void>('onUpdate', () {
+        onUpdate(ScaleUpdateDetails(
+          scale: _scaleFactor,
+          horizontalScale: _horizontalScaleFactor,
+          verticalScale: _verticalScaleFactor,
+          focalPoint: _currentFocalPoint,
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+          rotation: _computeRotationFactor(),
+        ));
+      });
   }
 
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
     if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart(ScaleStartDetails(focalPoint: _currentFocalPoint)));
+      invokeCallback<void>('onStart', () {
+        onStart(ScaleStartDetails(
+          focalPoint: _currentFocalPoint,
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+        ));
+      });
   }
 
   @override

@@ -29,7 +29,7 @@ public class MainActivity extends FlutterActivity {
             @Override
             public void onFirstFrame() {
                 // Report fully drawn time for Play Store Console.
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     MainActivity.this.reportFullyDrawn();
                 }
                 MainActivity.this.getFlutterView().removeFirstFrameListener(this);

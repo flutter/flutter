@@ -29,6 +29,7 @@ class TabBarTheme extends Diagnosticable {
     this.indicator,
     this.indicatorSize,
     this.labelColor,
+    this.labelPadding,
     this.labelStyle,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
@@ -42,6 +43,9 @@ class TabBarTheme extends Diagnosticable {
 
   /// Default value for [TabBar.labelColor].
   final Color labelColor;
+
+  /// Default value for [TabBar.labelPadding].
+  final EdgeInsetsGeometry labelPadding;
 
   /// Default value for [TabBar.labelStyle].
   final TextStyle labelStyle;
@@ -58,6 +62,7 @@ class TabBarTheme extends Diagnosticable {
     Decoration indicator,
     TabBarIndicatorSize indicatorSize,
     Color labelColor,
+    EdgeInsetsGeometry labelPadding,
     TextStyle labelStyle,
     Color unselectedLabelColor,
     TextStyle unselectedLabelStyle,
@@ -66,6 +71,7 @@ class TabBarTheme extends Diagnosticable {
       indicator: indicator ?? this.indicator,
       indicatorSize: indicatorSize ?? this.indicatorSize,
       labelColor: labelColor ?? this.labelColor,
+      labelPadding: labelPadding ?? this.labelPadding,
       labelStyle: labelStyle ?? this.labelStyle,
       unselectedLabelColor: unselectedLabelColor ?? this.unselectedLabelColor,
       unselectedLabelStyle: unselectedLabelStyle ?? this.unselectedLabelStyle,
@@ -90,6 +96,7 @@ class TabBarTheme extends Diagnosticable {
       indicator: Decoration.lerp(a.indicator, b.indicator, t),
       indicatorSize: t < 0.5 ? a.indicatorSize : b.indicatorSize,
       labelColor: Color.lerp(a.labelColor, b.labelColor, t),
+      labelPadding: EdgeInsets.lerp(a.labelPadding, b.labelPadding, t),
       labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
       unselectedLabelColor: Color.lerp(a.unselectedLabelColor, b.unselectedLabelColor, t),
       unselectedLabelStyle: TextStyle.lerp(a.unselectedLabelStyle, b.unselectedLabelStyle, t),
@@ -102,6 +109,7 @@ class TabBarTheme extends Diagnosticable {
       indicator,
       indicatorSize,
       labelColor,
+      labelPadding,
       labelStyle,
       unselectedLabelColor,
       unselectedLabelStyle,
@@ -118,6 +126,7 @@ class TabBarTheme extends Diagnosticable {
     return typedOther.indicator == indicator
         && typedOther.indicatorSize == indicatorSize
         && typedOther.labelColor == labelColor
+        && typedOther.labelPadding == labelPadding
         && typedOther.labelStyle == labelStyle
         && typedOther.unselectedLabelColor == unselectedLabelColor
         && typedOther.unselectedLabelStyle == unselectedLabelStyle;

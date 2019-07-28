@@ -16,10 +16,10 @@ void main() {
             return const Material(
               child: Center(
                 child: BackButton(),
-              )
+              ),
             );
           },
-        }
+        },
       )
     );
 

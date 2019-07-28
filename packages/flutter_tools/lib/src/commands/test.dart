@@ -5,17 +5,24 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../bundle.dart';
 import '../cache.dart';
+import '../codegen.dart';
+import '../dart/pub.dart';
+import '../devfs.dart';
+import '../globals.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
 
-class TestCommand extends FlutterCommand {
+class TestCommand extends FastFlutterCommand {
   TestCommand({ bool verboseHelp = false }) {
     requiresPubspecYaml();
     usesPubOption();
@@ -35,8 +42,15 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the '
+              'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
+      )
+      ..addFlag('disable-service-auth-codes',
+        hide: !verboseHelp,
+        defaultsTo: false,
+        negatable: false,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).'
       )
       ..addFlag('coverage',
         defaultsTo: false,
@@ -64,12 +78,6 @@ class TestCommand extends FlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('track-widget-creation',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.\n'
-              'This enables testing of features such as the widget inspector.',
-      )
       ..addFlag('update-goldens',
         negatable: false,
         help: 'Whether matchesGoldenFile() calls within your test methods should '
@@ -79,7 +87,31 @@ class TestCommand extends FlutterCommand {
         abbr: 'j',
         defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs');
+        valueHelp: 'jobs'
+      )
+      ..addFlag('test-assets',
+        defaultsTo: true,
+        negatable: true,
+        help: 'Whether to build the assets bundle for testing.\n'
+              'Consider using --no-test-assets if assets are not required.',
+      )
+      ..addOption('platform',
+        allowed: const <String>['tester', 'chrome'],
+        defaultsTo: 'tester',
+        help: 'The platform to run the unit tests on. Defaults to "tester".'
+      );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
+  }
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
+    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{
+      DevelopmentArtifact.universal,
+    };
+    if (argResults['platform'] == 'chrome') {
+      results.add(DevelopmentArtifact.web);
+    }
+    return results;
   }
 
   @override
@@ -89,8 +121,8 @@ class TestCommand extends FlutterCommand {
   String get description => 'Run Flutter unit tests for the current project.';
 
   @override
-  Future<void> validateCommand() async {
-    await super.validateCommand();
+  Future<FlutterCommandResult> runCommand() async {
+    await cache.updateAll(await requiredArtifacts);
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
@@ -98,12 +130,17 @@ class TestCommand extends FlutterCommand {
         'called *_test.dart and must reside in the package\'s \'test\' '
         'directory (or one of its subdirectories).');
     }
-  }
-
-  @override
-  Future<FlutterCommandResult> runCommand() async {
+    if (shouldRunPub) {
+      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+    }
+    final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+      await _buildTestAsset();
+    }
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -136,11 +173,22 @@ class TestCommand extends FlutterCommand {
             'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
+    } else {
+      files = <String>[
+        for (String path in files)
+          if (fs.isDirectorySync(path))
+            ..._findTests(fs.directory(path))
+          else
+            path
+      ];
     }
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
-      collector = CoverageCollector();
+      final String projectName = FlutterProject.current().manifest.appName;
+      collector = CoverageCollector(
+        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
+      );
     }
 
     final bool machine = argResults['machine'];
@@ -157,6 +205,23 @@ class TestCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
+    // Run builders once before all tests.
+    if (flutterProject.hasBuilders) {
+      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+      codegenDaemon.startBuild();
+      await for (CodegenStatus status in codegenDaemon.buildResults) {
+        if (status == CodegenStatus.Succeeded) {
+          break;
+        }
+        if (status == CodegenStatus.Failed) {
+          throwToolExit('Code generation failed.');
+        }
+      }
+    }
+
+    final bool disableServiceAuthCodes =
+      argResults['disable-service-auth-codes'];
+
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -165,11 +230,15 @@ class TestCommand extends FlutterCommand {
       watcher: watcher,
       enableObservatory: collector != null || startPaused,
       startPaused: startPaused,
+      disableServiceAuthCodes: disableServiceAuthCodes,
       ipv6: argResults['ipv6'],
       machine: machine,
       trackWidgetCreation: argResults['track-widget-creation'],
       updateGoldens: argResults['update-goldens'],
       concurrency: jobs,
+      buildTestAssets: buildTestAssets,
+      flutterProject: flutterProject,
+      web: argResults['platform'] == 'chrome',
     );
 
     if (collector != null) {
@@ -181,6 +250,39 @@ class TestCommand extends FlutterCommand {
     if (result != 0)
       throwToolExit(null);
     return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  Future<void> _buildTestAsset() async {
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final int build = await assetBundle.build();
+    if (build != 0) {
+      throwToolExit('Error: Failed to build asset bundle');
+    }
+    if (_needRebuild(assetBundle.entries)) {
+      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
+          assetBundle.entries);
+    }
+  }
+
+  bool _needRebuild(Map<String, DevFSContent> entries) {
+    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    if (!manifest.existsSync()) {
+      return true;
+    }
+    final DateTime lastModified = manifest.lastModifiedSync();
+    final File pub = fs.file('pubspec.yaml');
+    if (pub.lastModifiedSync().isAfter(lastModified)) {
+      return true;
+    }
+
+    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+      // Calling isModified to access file stats first in order for isModifiedAfter
+      // to work.
+      if (entry.isModified && entry.isModifiedAfter(lastModified)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

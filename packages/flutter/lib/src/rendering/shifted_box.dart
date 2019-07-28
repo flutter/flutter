@@ -72,10 +72,17 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (child != null) {
       final BoxParentData childParentData = child.parentData;
-      return child.hitTest(result, position: position - childParentData.offset);
+      return result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
     }
     return false;
   }
@@ -191,7 +198,7 @@ class RenderPadding extends RenderShiftedBox {
     if (child == null) {
       size = constraints.constrain(Size(
         _resolvedPadding.left + _resolvedPadding.right,
-        _resolvedPadding.top + _resolvedPadding.bottom
+        _resolvedPadding.top + _resolvedPadding.bottom,
       ));
       return;
     }
@@ -201,7 +208,7 @@ class RenderPadding extends RenderShiftedBox {
     childParentData.offset = Offset(_resolvedPadding.left, _resolvedPadding.top);
     size = constraints.constrain(Size(
       _resolvedPadding.left + child.size.width + _resolvedPadding.right,
-      _resolvedPadding.top + child.size.height + _resolvedPadding.bottom
+      _resolvedPadding.top + child.size.height + _resolvedPadding.bottom,
     ));
   }
 
@@ -244,7 +251,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// A constructor to be used only when the extending class also has a mixin.
   // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/31543 is fixed.
   @protected
-  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
+  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment, TextDirection textDirection, RenderBox child)
     : this(alignment: alignment, textDirection: textDirection, child: child);
 
   Alignment _resolvedAlignment;
@@ -553,7 +560,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
       minWidth: _minWidth ?? constraints.minWidth,
       maxWidth: _maxWidth ?? constraints.maxWidth,
       minHeight: _minHeight ?? constraints.minHeight,
-      maxHeight: _maxHeight ?? constraints.maxHeight
+      maxHeight: _maxHeight ?? constraints.maxHeight,
     );
   }
 
@@ -869,7 +876,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
       minWidth: minWidth,
       maxWidth: maxWidth,
       minHeight: minHeight,
-      maxHeight: maxHeight
+      maxHeight: maxHeight,
     );
   }
 
@@ -1032,7 +1039,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
-    @required SingleChildLayoutDelegate delegate
+    @required SingleChildLayoutDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate,
        super(child);

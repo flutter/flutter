@@ -25,8 +25,6 @@ void main() {
       ];
       for (String path in paths) {
         await driver.waitUntilNoTransientCallbacks();
-        // TBD: when #11021 has been resolved, this shouldn't be necessary.
-        await new Future<void>.delayed(const Duration(milliseconds: 500));
         final List<int> pixels = await driver.screenshot();
         final File file = new File(path);
         await file.writeAsBytes(pixels);

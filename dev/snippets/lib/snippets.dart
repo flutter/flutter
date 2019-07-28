@@ -5,8 +5,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as path;
 import 'package:dart_style/dart_style.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
 
 import 'configuration.dart';
 
@@ -31,7 +32,8 @@ class SnippetGenerator {
   SnippetGenerator({Configuration configuration})
       : configuration = configuration ??
             // Flutter's root is four directories up from this script.
-            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT'] ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
+            Configuration(flutterRoot: Directory(Platform.environment['FLUTTER_ROOT']
+                ?? path.canonicalize(path.join(path.dirname(path.fromUri(Platform.script)), '..', '..', '..')))) {
     this.configuration.createOutputDirectory();
   }
 
@@ -72,16 +74,16 @@ class SnippetGenerator {
         // Remove any leading/trailing empty comment lines.
         // We don't want to remove ALL empty comment lines, only the ones at the
         // beginning and the end.
-        while (description.last == '// ') {
+        while (description.isNotEmpty && description.last == '// ') {
           description.removeLast();
         }
-        while (description.first == '// ') {
+        while (description.isNotEmpty && description.first == '// ') {
           description.removeAt(0);
         }
         return description.join('\n').trim();
       } else {
         // If the match isn't found in the injections, then just remove the
-        // moustache reference, since we want to allow the sections to be
+        // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
         return injections
@@ -98,7 +100,7 @@ class SnippetGenerator {
   ///
   /// Takes into account the [type] and doesn't substitute in the id and the app
   /// if not a [SnippetType.application] snippet.
-  String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton) {
+  String interpolateSkeleton(SnippetType type, List<_ComponentTuple> injections, String skeleton, Map<String, Object> metadata) {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String language;
@@ -126,14 +128,15 @@ class SnippetGenerator {
       'description': description,
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
-    }..addAll(type == SnippetType.application
-        ? <String, String>{
-            'id':
-                injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'id').mergedContent,
-            'app':
-                htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent),
-          }
-        : <String, String>{'id': '', 'app': ''});
+      'serial': '',
+      'id': metadata['id'],
+      'app': '',
+    };
+    if (type == SnippetType.application) {
+      substitutions
+        ..['serial'] = metadata['serial']?.toString() ?? '0'
+        ..['app'] = htmlEscape.convert(injections.firstWhere((_ComponentTuple tuple) => tuple.name == 'app').mergedContent);
+    }
     return skeleton.replaceAllMapped(RegExp('{{(${substitutions.keys.join('|')})}}'), (Match match) {
       return substitutions[match[1]];
     });
@@ -173,11 +176,22 @@ class SnippetGenerator {
     }
     return <_ComponentTuple>[
       _ComponentTuple('description', description),
-    ]..addAll(components);
+      ...components,
+    ];
   }
 
   String _loadFileAsUtf8(File file) {
     return file.readAsStringSync(encoding: Encoding.getByName('utf-8'));
+  }
+
+  String _addLineNumbers(String app) {
+    final StringBuffer buffer = StringBuffer();
+    int count = 0;
+    for (String line in app.split('\n')) {
+      count++;
+      buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
+    }
+    return buffer.toString();
   }
 
   /// The main routine for generating snippets.
@@ -195,9 +209,15 @@ class SnippetGenerator {
   /// The [id] is a string ID to use for the output file, and to tell the user
   /// about in the `flutter create` hint. It must not be null if the [type] is
   /// [SnippetType.application].
-  String generate(File input, SnippetType type, {String template, String id, File output, Map<String, Object> metadata}) {
+  String generate(
+    File input,
+    SnippetType type, {
+    String template,
+    File output,
+    @required Map<String, Object> metadata,
+  }) {
     assert(template != null || type != SnippetType.application);
-    assert(id != null || type != SnippetType.application);
+    assert(metadata != null && metadata['id'] != null);
     assert(input != null);
     final List<_ComponentTuple> snippetData = parseInput(_loadFileAsUtf8(input));
     switch (type) {
@@ -213,19 +233,18 @@ class SnippetGenerator {
               'The template $template was not found in the templates directory ${templatesDir.path}');
           exit(1);
         }
-        snippetData.add(_ComponentTuple('id', <String>[id]));
         final String templateContents = _loadFileAsUtf8(templateFile);
         String app = interpolateTemplate(snippetData, templateContents);
 
         try {
           app = formatter.format(app);
         } on FormatterException catch (exception) {
-          stderr.write('Code to format:\n$app\n');
+          stderr.write('Code to format:\n${_addLineNumbers(app)}\n');
           errorExit('Unable to format snippet app template: $exception');
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        final File outputFile = output ?? getOutputFile(id);
+        final File outputFile = output ?? getOutputFile(metadata['id']);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
 
@@ -238,11 +257,9 @@ class SnippetGenerator {
         );
         metadata ??= <String, Object>{};
         metadata.addAll(<String, Object>{
-          'id': id,
+          'id': metadata['id'],
           'file': path.basename(outputFile.path),
-          'description': description != null
-              ? description.mergedContent
-              : null,
+          'description': description?.mergedContent,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;
@@ -250,6 +267,6 @@ class SnippetGenerator {
         break;
     }
     final String skeleton = _loadFileAsUtf8(configuration.getHtmlSkeletonFile(type));
-    return interpolateSkeleton(type, snippetData, skeleton);
+    return interpolateSkeleton(type, snippetData, skeleton, metadata);
   }
 }

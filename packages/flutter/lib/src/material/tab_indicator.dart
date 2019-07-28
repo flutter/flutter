@@ -58,7 +58,7 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
+  _UnderlinePainter createBoxPainter([ VoidCallback onChanged ]) {
     return _UnderlinePainter(this, onChanged);
   }
 }

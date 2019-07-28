@@ -9,7 +9,7 @@ import 'framework.dart';
 /// An inherited widget for a [Listenable] [notifier], which updates its
 /// dependencies when the [notifier] is triggered.
 ///
-/// This is a variant of [InheritedWidget], specialised for subclasses of
+/// This is a variant of [InheritedWidget], specialized for subclasses of
 /// [Listenable], such as [ChangeNotifier] or [ValueNotifier].
 ///
 /// Dependents are notified whenever the [notifier] sends notifications, or

@@ -1,34 +1,36 @@
+// Flutter code sample for {{id}}
+
 {{description}}
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 {{code-imports}}
 
 void main() => runApp(new MyApp());
 
+/// This Widget is the main application widget.
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Code Sample for {{id}}',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: new MyStatefulWidget(),
+    return WidgetsApp(
+      title: 'Flutter Code Sample',
+      home: MyStatefulWidget(),
+      color: const Color(0xffffffff),
     );
   }
 }
 
 {{code-preamble}}
 
+/// This is the stateful widget that the main application instantiates.
 class MyStatefulWidget extends StatefulWidget {
   MyStatefulWidget({Key key}) : super(key: key);
 
   @override
-  _MyStatefulWidgetState createState() => new _MyStatefulWidgetState();
+  _MyStatefulWidgetState createState() => _MyStatefulWidgetState();
 }
 
+// This is the private State class that goes with MyStatefulWidget.
 class _MyStatefulWidgetState extends State<MyStatefulWidget> {
   {{code}}
 }

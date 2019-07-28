@@ -15,6 +15,7 @@ import '../common.dart';
 const Duration kBenchmarkTime = Duration(seconds: 15);
 
 Future<void> main() async {
+  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   stock_data.StockData.actuallyFetchData = false;
 
   // We control the framePolicy below to prevent us from scheduling frames in
@@ -32,8 +33,14 @@ Future<void> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final TestViewConfiguration big = TestViewConfiguration(size: const Size(360.0, 640.0));
-    final TestViewConfiguration small = TestViewConfiguration(size: const Size(355.0, 635.0));
+    final TestViewConfiguration big = TestViewConfiguration(
+      size: const Size(360.0, 640.0),
+      window: RendererBinding.instance.window,
+    );
+    final TestViewConfiguration small = TestViewConfiguration(
+      size: const Size(355.0, 635.0),
+      window: RendererBinding.instance.window,
+    );
     final RenderView renderView = WidgetsBinding.instance.renderView;
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 

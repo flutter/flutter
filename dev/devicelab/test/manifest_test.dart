@@ -80,7 +80,7 @@ tasks:
       tasks:
         - a
         - b
-      '''
+      ''',
     );
 
     testManifestError(
@@ -89,7 +89,7 @@ tasks:
       '''
       tasks:
         1: 2
-      '''
+      ''',
     );
 
     testManifestError(
@@ -98,7 +98,7 @@ tasks:
       '''
       tasks:
         foo: 2
-      '''
+      ''',
     );
 
     testManifestError(
@@ -108,7 +108,7 @@ tasks:
       tasks:
         foo:
           bar: 2
-      '''
+      ''',
     );
 
     testManifestError(
@@ -118,7 +118,7 @@ tasks:
       tasks:
         foo:
           required_agent_capabilities: 1
-      '''
+      ''',
     );
 
     testManifestError(
@@ -128,7 +128,7 @@ tasks:
       tasks:
         foo:
           required_agent_capabilities: [1]
-      '''
+      ''',
     );
 
     testManifestError(
@@ -138,7 +138,7 @@ tasks:
       tasks:
         foo:
           required_agent_capabilities: ["a"]
-      '''
+      ''',
     );
 
     testManifestError(
@@ -149,7 +149,7 @@ tasks:
         foo:
           description: b
           required_agent_capabilities: ["a"]
-      '''
+      ''',
     );
 
     testManifestError(
@@ -161,7 +161,7 @@ tasks:
           description: b
           stage: c
           required_agent_capabilities: []
-      '''
+      ''',
     );
 
     testManifestError(
@@ -174,7 +174,7 @@ tasks:
           stage: c
           required_agent_capabilities: ["a"]
           flaky: not-a-boolean
-      '''
+      ''',
     );
 
     test('accepts boolean flaky option', () {

@@ -105,14 +105,20 @@ void main() {
       final PlatformViewCreatedCallback callback = (int id) { createdViews.add(id); };
 
       final AndroidViewController controller1 = PlatformViewsService.initAndroidView(
-          id: 0, viewType: 'webview', layoutDirection: TextDirection.ltr, onPlatformViewCreated:  callback);
+        id: 0,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      )..addOnPlatformViewCreatedListener(callback);
       expect(createdViews, isEmpty);
 
       await controller1.setSize(const Size(100.0, 100.0));
       expect(createdViews, orderedEquals(<int>[0]));
 
       final AndroidViewController controller2 = PlatformViewsService.initAndroidView(
-          id: 5, viewType: 'webview', layoutDirection: TextDirection.ltr, onPlatformViewCreated:  callback);
+        id: 5,
+        viewType: 'webview',
+        layoutDirection: TextDirection.ltr,
+      )..addOnPlatformViewCreatedListener(callback);
       expect(createdViews, orderedEquals(<int>[0]));
 
       await controller2.setSize(const Size(100.0, 200.0));
@@ -147,8 +153,7 @@ void main() {
     });
   });
 
-  group('iOS', ()
-  {
+  group('iOS', () {
     FakeIosPlatformViewsController viewsController;
     setUp(() {
       viewsController = FakeIosPlatformViewsController();
@@ -156,7 +161,7 @@ void main() {
 
     test('create iOS view of unregistered type', () async {
       expect(
-            () {
+        () {
           return PlatformViewsService.initUiKitView(
             id: 0,
             viewType: 'web',

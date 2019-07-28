@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -65,7 +64,8 @@ abstract class RenderSliverBoxChildManager {
   /// Must return the total distance from the start of the child with the
   /// earliest possible index to the end of the child with the last possible
   /// index.
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -84,7 +84,8 @@ abstract class RenderSliverBoxChildManager {
   /// list).
   int get childCount;
 
-  /// Called during [RenderSliverMultiBoxAdaptor.adoptChild].
+  /// Called during [RenderSliverMultiBoxAdaptor.adoptChild] or
+  /// [RenderSliverMultiBoxAdaptor.move].
   ///
   /// Subclasses must ensure that the [SliverMultiBoxAdaptorParentData.index]
   /// field of the child's [RenderObject.parentData] accurately reflects the
@@ -190,9 +191,14 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   ///
   /// The [childManager] argument must not be null.
   RenderSliverMultiBoxAdaptor({
-    @required RenderSliverBoxChildManager childManager
+    @required RenderSliverBoxChildManager childManager,
   }) : assert(childManager != null),
-       _childManager = childManager;
+       _childManager = childManager {
+    assert(() {
+      _debugDanglingKeepAlives = <RenderBox>[];
+      return true;
+    }());
+  }
 
   @override
   void setupParentData(RenderObject child) {
@@ -213,6 +219,27 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// The nodes being kept alive despite not being visible.
   final Map<int, RenderBox> _keepAliveBucket = <int, RenderBox>{};
 
+  List<RenderBox> _debugDanglingKeepAlives;
+
+  /// Indicates whether integrity check is enabled.
+  ///
+  /// Setting this property to true will immediately perform an integrity check.
+  ///
+  /// The integrity check consists of:
+  ///
+  /// 1. Verify that the children index in childList is in ascending order.
+  /// 2. Verify that there is no dangling keepalive child as the result of [move].
+  bool get debugChildIntegrityEnabled => _debugChildIntegrityEnabled;
+  bool _debugChildIntegrityEnabled = true;
+  set debugChildIntegrityEnabled(bool enabled) {
+    assert(enabled != null);
+    assert(() {
+      _debugChildIntegrityEnabled = enabled;
+      return _debugVerifyChildOrder() &&
+        (!_debugChildIntegrityEnabled || _debugDanglingKeepAlives.isEmpty);
+    }());
+  }
+
   @override
   void adoptChild(RenderObject child) {
     super.adoptChild(child);
@@ -223,21 +250,70 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
 
   bool _debugAssertChildListLocked() => childManager.debugAssertChildListLocked();
 
+  /// Verify that the child list index is in strictly increasing order.
+  ///
+  /// This has no effect in release builds.
+  bool _debugVerifyChildOrder(){
+    if (_debugChildIntegrityEnabled) {
+      RenderBox child = firstChild;
+      int index;
+      while (child != null) {
+        index = indexOf(child);
+        child = childAfter(child);
+        assert(child == null || indexOf(child) > index);
+      }
+    }
+    return true;
+  }
+
   @override
   void insert(RenderBox child, { RenderBox after }) {
     assert(!_keepAliveBucket.containsValue(child));
     super.insert(child, after: after);
     assert(firstChild != null);
-    assert(() {
-      int index = indexOf(firstChild);
-      RenderBox child = childAfter(firstChild);
-      while (child != null) {
-        assert(indexOf(child) > index);
-        index = indexOf(child);
-        child = childAfter(child);
+    assert(_debugVerifyChildOrder());
+  }
+
+  @override
+  void move(RenderBox child, { RenderBox after }) {
+    // There are two scenarios:
+    //
+    // 1. The child is not keptAlive.
+    // The child is in the childList maintained by ContainerRenderObjectMixin.
+    // We can call super.move and update parentData with the new slot.
+    //
+    // 2. The child is keptAlive.
+    // In this case, the child is no longer in the childList but might be stored in
+    // [_keepAliveBucket]. We need to update the location of the child in the bucket.
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    if (!childParentData.keptAlive) {
+      super.move(child, after: after);
+      childManager.didAdoptChild(child); // updates the slot in the parentData
+      // Its slot may change even if super.move does not change the position.
+      // In this case, we still want to mark as needs layout.
+      markNeedsLayout();
+    } else {
+      // If the child in the bucket is not current child, that means someone has
+      // already moved and replaced current child, and we cannot remove this child.
+      if (_keepAliveBucket[childParentData.index] == child) {
+        _keepAliveBucket.remove(childParentData.index);
       }
-      return true;
-    }());
+      assert(() {
+        _debugDanglingKeepAlives.remove(child);
+        return true;
+      }());
+      // Update the slot and reinsert back to _keepAliveBucket in the new slot.
+      childManager.didAdoptChild(child);
+      // If there is an existing child in the new slot, that mean that child will
+      // be moved to other index. In other cases, the existing child should have been
+      // removed by updateChild. Thus, it is ok to overwrite it.
+      assert(() {
+        if (_keepAliveBucket.containsKey(childParentData.index))
+          _debugDanglingKeepAlives.add(_keepAliveBucket[childParentData.index]);
+        return true;
+      }());
+      _keepAliveBucket[childParentData.index] = child;
+    }
   }
 
   @override
@@ -248,6 +324,10 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       return;
     }
     assert(_keepAliveBucket[childParentData.index] == child);
+    assert(() {
+      _debugDanglingKeepAlives.remove(child);
+      return true;
+    }());
     _keepAliveBucket.remove(childParentData.index);
     dropChild(child);
   }
@@ -370,7 +450,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during this layout pass. No child should be added during that call except
   /// for the one that is created and returned by `createChild`.
   @protected
-  RenderBox insertAndLayoutLeadingChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutLeadingChild(
+    BoxConstraints childConstraints, {
     bool parentUsesSize = false,
   }) {
     assert(_debugAssertChildListLocked());
@@ -397,7 +478,8 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// Children after the `after` child may be removed in the process. Only the
   /// new child may be added.
   @protected
-  RenderBox insertAndLayoutChild(BoxConstraints childConstraints, {
+  RenderBox insertAndLayoutChild(
+    BoxConstraints childConstraints, {
     @required RenderBox after,
     bool parentUsesSize = false,
   }) {
@@ -475,10 +557,11 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     RenderBox child = lastChild;
+    final BoxHitTestResult boxResult = BoxHitTestResult.wrap(result);
     while (child != null) {
-      if (hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition))
+      if (hitTestBoxChild(boxResult, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition))
         return true;
       child = childBefore(child);
     }

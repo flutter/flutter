@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
-import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -23,7 +22,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 
 /// Interface for classes that register with the Widgets layer binding.
 ///
-/// When used as a mixin, provides noop method implementations.
+/// When used as a mixin, provides no-op method implementations.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
 ///
@@ -141,7 +140,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeMetrics() {
-  ///     setState(() { _lastSize = ui.window.physicalSize; });
+  ///     setState(() { _lastSize = WidgetsBinding.instance.window.physicalSize; });
   ///   }
   ///
   ///   @override
@@ -197,7 +196,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   void didChangeTextScaleFactor() {
-  ///     setState(() { _lastTextScaleFactor = ui.window.textScaleFactor; });
+  ///     setState(() { _lastTextScaleFactor = WidgetsBinding.instance.window.textScaleFactor; });
   ///   }
   ///
   ///   @override
@@ -213,6 +212,9 @@ abstract class WidgetsBindingObserver {
   ///  * [MediaQuery.of], which provides a similar service with less
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
+
+  /// {@macro on_platform_brightness_change}
+  void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
@@ -240,7 +242,7 @@ abstract class WidgetsBindingObserver {
   /// features.
   ///
   /// This method exposes notifications from [Window.onAccessibilityFeaturesChanged].
-  void didChangeAccessibilityFeatures() {}
+  void didChangeAccessibilityFeatures() { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -250,10 +252,11 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     super.initInstances();
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
-    ui.window.onLocaleChanged = handleLocaleChanged;
-    ui.window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
+    window.onLocaleChanged = handleLocaleChanged;
+    window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
+    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -268,7 +271,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initServiceExtensions() {
     super.initServiceExtensions();
 
-    profile(() {
+    if (!kReleaseMode) {
       registerSignalServiceExtension(
         name: 'debugDumpApp',
         callback: () {
@@ -296,11 +299,21 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             // This is defined to return a STRING, not a boolean.
             // Devtools, the Intellij plugin, and the flutter tool all depend
             // on it returning a string and not a boolean.
-            'enabled': _needToReportFirstFrame ? 'false' : 'true'
+            'enabled': _needToReportFirstFrame ? 'false' : 'true',
           };
         },
       );
-    });
+
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabled,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        },
+      );
+    }
 
     assert(() {
       registerBoolServiceExtension(
@@ -314,16 +327,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
-      // Expose the ability to send Widget rebuilds as [Timeline] events.
-      registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
-        getter: () async => debugProfileBuildsEnabled,
-        setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value)
-            debugProfileBuildsEnabled = value;
-        },
-      );
-
       // This service extension is deprecated and will be removed by 12/1/2018.
       // Use ext.flutter.inspector.show instead.
       registerBoolServiceExtension(
@@ -334,7 +337,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
               return Future<void>.value();
             WidgetsApp.debugShowWidgetInspectorOverride = value;
             return _forceRebuild();
-          }
+          },
       );
 
       WidgetInspectorService.instance.initServiceExtensions(registerServiceExtension);
@@ -410,6 +413,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   }
 
   @override
+  void handlePlatformBrightnessChanged() {
+    super.handlePlatformBrightnessChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangePlatformBrightness();
+  }
+
+  @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
     for (WidgetsBindingObserver observer in _observers)
@@ -424,7 +434,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   @protected
   @mustCallSuper
   void handleLocaleChanged() {
-    dispatchLocalesChanged(ui.window.locales);
+    dispatchLocalesChanged(window.locales);
   }
 
   /// Notify all the observers that the locale has changed (using
@@ -557,10 +567,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This is used by [WidgetsApp] to avoid reporting frames that aren't useful
   /// during startup as the "first frame".
   void deferFirstFrameReport() {
-    profile(() {
+    if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 0);
       _deferFirstFrameReportCount += 1;
-    });
+    }
   }
 
   /// When called after [deferFirstFrameReport]: tell the framework to report
@@ -572,10 +582,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This is used by [WidgetsApp] to report when the first useful frame is
   /// painted.
   void allowFirstFrameReport() {
-    profile(() {
+    if (!kReleaseMode) {
       assert(_deferFirstFrameReportCount >= 1);
       _deferFirstFrameReportCount -= 1;
-    });
+    }
   }
 
   void _handleBuildScheduled() {
@@ -697,13 +707,13 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         return true;
       }());
     }
-    profile(() {
+    if (!kReleaseMode) {
       if (_needToReportFirstFrame && _reportFirstFrame) {
         developer.Timeline.instantSync('Widgets completed first useful frame');
         developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         _needToReportFirstFrame = false;
       }
-    });
+    }
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -723,9 +733,15 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
-      child: rootWidget
+      child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
+
+  /// Whether the [renderViewElement] has been initialized.
+  ///
+  /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
+  /// is called in the context of a [TestWidgetsFlutterBinding]).
+  bool get isRootWidgetAttached => _renderViewElement != null;
 
   @override
   Future<void> performReassemble() {
@@ -800,7 +816,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   RenderObjectToWidgetAdapter({
     this.child,
     this.container,
-    this.debugShortDescription
+    this.debugShortDescription,
   }) : super(key: GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
@@ -830,7 +846,7 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// the given element will have an update scheduled to switch to this widget.
   ///
   /// Used by [runApp] to bootstrap applications.
-  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [RenderObjectToWidgetElement<T> element]) {
+  RenderObjectToWidgetElement<T> attachToRenderTree(BuildOwner owner, [ RenderObjectToWidgetElement<T> element ]) {
     if (element == null) {
       owner.lockState(() {
         element = createElement();
@@ -928,7 +944,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: 'attaching to the render tree'
+        context: ErrorDescription('attaching to the render tree'),
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

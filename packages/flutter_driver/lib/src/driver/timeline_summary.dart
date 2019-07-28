@@ -16,7 +16,7 @@ const JsonEncoder _prettyEncoder = JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.
-const Duration kBuildBudget = Duration(milliseconds: 8);
+const Duration kBuildBudget = Duration(milliseconds: 16);
 
 /// Extracts statistics from a [Timeline].
 class TimelineSummary {
@@ -49,7 +49,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameDurations()
+  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
@@ -76,7 +76,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractGpuRasterizerDrawEvents()
+  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawEvents()
       .where((TimedEvent event) => event.duration > kBuildBudget)
       .length;
 
@@ -85,7 +85,7 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
-    return <String, dynamic> {
+    return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
       '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),

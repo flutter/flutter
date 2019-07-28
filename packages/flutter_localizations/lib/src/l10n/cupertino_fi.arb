@@ -1,0 +1,22 @@
+{
+  "datePickerHourSemanticsLabelOne": "klo $hour",
+  "datePickerHourSemanticsLabelOther": "klo $hour",
+  "datePickerMinuteSemanticsLabelOne": "1 minuutti",
+  "datePickerMinuteSemanticsLabelOther": "$minute minuuttia",
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "ap",
+  "postMeridiemAbbreviation": "ip",
+  "todayLabel": "Tänään",
+  "alertDialogLabel": "Ilmoitus",
+  "timerPickerHourLabelOne": "tunti",
+  "timerPickerHourLabelOther": "tuntia",
+  "timerPickerMinuteLabelOne": "min",
+  "timerPickerMinuteLabelOther": "min",
+  "timerPickerSecondLabelOne": "s",
+  "timerPickerSecondLabelOther": "s",
+  "cutButtonLabel": "Leikkaa",
+  "copyButtonLabel": "Kopioi",
+  "pasteButtonLabel": "Liitä",
+  "selectAllButtonLabel": "Valitse kaikki"
+}

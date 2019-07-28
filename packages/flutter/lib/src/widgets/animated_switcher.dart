@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -152,6 +150,7 @@ class AnimatedSwitcher extends StatefulWidget {
     Key key,
     this.child,
     @required this.duration,
+    this.reverseDuration,
     this.switchInCurve = Curves.linear,
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
@@ -179,10 +178,19 @@ class AnimatedSwitcher extends StatefulWidget {
   /// The duration of the transition from the old [child] value to the new one.
   ///
   /// This duration is applied to the given [child] when that property is set to
-  /// a new child. The same duration is used when fading out. Changing
-  /// [duration] will not affect the durations of transitions already in
-  /// progress.
+  /// a new child. The same duration is used when fading out, unless
+  /// [reverseDuration] is set. Changing [duration] will not affect the
+  /// durations of transitions already in progress.
   final Duration duration;
+
+  /// The duration of the transition from the new [child] value to the old one.
+  ///
+  /// This duration is applied to the given [child] when that property is set to
+  /// a new child. Changing [reverseDuration] will not affect the durations of
+  /// transitions already in progress.
+  ///
+  /// If not set, then the value of [duration] is used by default.
+  final Duration reverseDuration;
 
   /// The animation curve to use when transitioning in a new [child].
   ///
@@ -274,11 +282,18 @@ class AnimatedSwitcher extends StatefulWidget {
       alignment: Alignment.center,
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
+  }
 }
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   _ChildEntry _currentEntry;
-  final Set<_ChildEntry> _outgoingEntries = LinkedHashSet<_ChildEntry>();
+  final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
   List<Widget> _outgoingWidgets = const <Widget>[];
   int _childNumber = 0;
 
@@ -321,7 +336,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({@required bool animate}) {
+  void _addEntryForNewChild({ @required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);
@@ -335,6 +350,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       return;
     final AnimationController controller = AnimationController(
       duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
       vsync: this,
     );
     final Animation<double> animation = CurvedAnimation(

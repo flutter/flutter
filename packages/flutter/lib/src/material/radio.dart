@@ -21,13 +21,66 @@ const double _kInnerRadius = 4.5;
 /// be selected. The values are of type `T`, the type parameter of the [Radio]
 /// class. Enums are commonly used for this purpose.
 ///
-/// The radio button itself does not maintain any state. Instead, when the state
-/// of the radio button changes, the widget calls the [onChanged] callback.
-/// Most widget that use a radio button will listen for the [onChanged]
-/// callback and rebuild the radio button with a new [groupValue] to update the
-/// visual appearance of the radio button.
+/// The radio button itself does not maintain any state. Instead, selecting the
+/// radio invokes the [onChanged] callback, passing [value] as a parameter. If
+/// [groupValue] and [value] match, this radio will be selected. Most widgets
+/// will respond to [onChanged] by calling [State.setState] to update the
+/// radio button's [groupValue].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of Radio widgets wrapped in ListTiles, which is similar
+/// to what you could get with the RadioListTile widget.
+///
+/// The currently selected character is passed into `groupValue`, which is
+/// maintained by the example's `State`. In this case, the first `Radio`
+/// will start off selected because `_character` is initialized to
+/// `SingingCharacter.lafayette`.
+///
+/// If the second radio button is pressed, the example's state is updated
+/// with `setState`, updating `_character` to `SingingCharacter.jefferson`.
+/// This causes the buttons to rebuild with the updated `groupValue`, and
+/// therefore the selection of the second button.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
+///
+/// ```dart preamble
+/// enum SingingCharacter { lafayette, jefferson }
+/// ```
+///
+/// ```dart
+/// SingingCharacter _character = SingingCharacter.lafayette;
+///
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       children: <Widget>[
+///         ListTile(
+///           title: const Text('Lafayette'),
+///           leading: Radio(
+///             value: SingingCharacter.lafayette,
+///             groupValue: _character,
+///             onChanged: (SingingCharacter value) {
+///               setState(() { _character = value; });
+///             },
+///           ),
+///         ),
+///         ListTile(
+///           title: const Text('Thomas Jefferson'),
+///           leading: Radio(
+///             value: SingingCharacter.jefferson,
+///             groupValue: _character,
+///             onChanged: (SingingCharacter value) {
+///               setState(() { _character = value; });
+///             },
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -62,7 +115,7 @@ class Radio<T> extends StatefulWidget {
   /// The value represented by this radio button.
   final T value;
 
-  /// The currently selected value for this group of radio buttons.
+  /// The currently selected value for a group of radio buttons.
   ///
   /// This radio button is considered selected if its [value] matches the
   /// [groupValue].
@@ -75,6 +128,9 @@ class Radio<T> extends StatefulWidget {
   /// radio button with the new [groupValue].
   ///
   /// If null, the radio button will be displayed as disabled.
+  ///
+  /// The provided callback will not be invoked if this radio button is already
+  /// selected.
   ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
@@ -214,7 +270,7 @@ class _RenderRadio extends RenderToggleable {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    paintRadialReaction(canvas, offset, const Offset(kRadialReactionRadius, kRadialReactionRadius));
+    paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Offset center = (offset & size).center;
     final Color radioColor = onChanged != null ? activeColor : inactiveColor;

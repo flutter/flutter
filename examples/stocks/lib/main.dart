@@ -51,7 +51,7 @@ class StocksAppState extends State<StocksApp> {
     debugShowPointers: false,
     debugShowRainbow: false,
     showPerformanceOverlay: false,
-    showSemanticsDebugger: false
+    showSemanticsDebugger: false,
   );
 
   @override
@@ -71,12 +71,12 @@ class StocksAppState extends State<StocksApp> {
       case StockMode.optimistic:
         return ThemeData(
           brightness: Brightness.light,
-          primarySwatch: Colors.purple
+          primarySwatch: Colors.purple,
         );
       case StockMode.pessimistic:
         return ThemeData(
           brightness: Brightness.dark,
-          accentColor: Colors.redAccent
+          accentColor: Colors.redAccent,
         );
     }
     assert(_configuration.stockMode != null);
@@ -84,7 +84,7 @@ class StocksAppState extends State<StocksApp> {
   }
 
   Route<dynamic> _getRoute(RouteSettings settings) {
-    if (settings.name == '/stocks') {
+    if (settings.name == '/stock') {
       final String symbol = settings.arguments;
       return MaterialPageRoute<void>(
         settings: settings,
@@ -122,7 +122,7 @@ class StocksAppState extends State<StocksApp> {
       showSemanticsDebugger: _configuration.showSemanticsDebugger,
       routes: <String, WidgetBuilder>{
          '/':         (BuildContext context) => StockHome(stocks, _configuration, configurationUpdater),
-         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater)
+         '/settings': (BuildContext context) => StockSettings(_configuration, configurationUpdater),
       },
       onGenerateRoute: _getRoute,
     );

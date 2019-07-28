@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('button tap test', () {
@@ -19,18 +19,20 @@ void main() {
     });
 
     test('tap on the button, verify result', () async {
-        final SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
-        expect(batteryLevelLabel, isNotNull);
+      final SerializableFinder batteryLevelLabel =
+          find.byValueKey('Battery level label');
+      expect(batteryLevelLabel, isNotNull);
 
-        final SerializableFinder button = find.text('Get Battery Level');
-        await driver.waitFor(button);
-        await driver.tap(button);
+      final SerializableFinder button = find.text('Refresh');
+      await driver.waitFor(button);
+      await driver.tap(button);
 
-        String batteryLevel;
-        while (batteryLevel == null || batteryLevel.isEmpty) {
-          batteryLevel = await driver.getText(batteryLevelLabel);
-        }
-        expect(batteryLevel, isNotEmpty);
+      String batteryLevel;
+      while (batteryLevel == null || batteryLevel.contains('unknown')) {
+        batteryLevel = await driver.getText(batteryLevelLabel);
+      }
+
+      expect(batteryLevel.contains('%'), isTrue);
     });
   });
 }

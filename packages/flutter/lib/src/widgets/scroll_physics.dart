@@ -3,17 +3,25 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
+import 'binding.dart' show WidgetsBinding;
 import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
+
+// Examples can assume:
+// class FooScrollPhysics extends ScrollPhysics {
+//   const FooScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+// }
+// class BarScrollPhysics extends ScrollPhysics {
+//   const BarScrollPhysics({ ScrollPhysics parent }): super(parent: parent);
+// }
 
 /// Determines the physics of a [Scrollable] widget.
 ///
@@ -24,6 +32,9 @@ export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, T
 /// velocity are used as the initial conditions for the particle in the
 /// simulation. The movement of the particle in the simulation is then used to
 /// determine the scroll position for the widget.
+///
+/// Instead of creating your own subclasses, [parent] can be used to combine
+/// [ScrollPhysics] objects of different types to get the desired scroll physics.
 @immutable
 class ScrollPhysics {
   /// Creates an object with the default scroll physics.
@@ -34,7 +45,16 @@ class ScrollPhysics {
   /// If a subclass of [ScrollPhysics] does not override a method, that subclass
   /// will inherit an implementation from this base class that defers to
   /// [parent]. This mechanism lets you assemble novel combinations of
-  /// [ScrollPhysics] subclasses at runtime.
+  /// [ScrollPhysics] subclasses at runtime. For example:
+  ///
+  /// ```dart
+  /// BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics())
+  ///
+  /// ```
+  /// will result in a [ScrollPhysics] that has the combined behavior
+  /// of [BouncingScrollPhysics] and [AlwaysScrollableScrollPhysics]:
+  /// behaviors that are not specified in [BouncingScrollPhysics]
+  /// (e.g. [shouldAcceptUserOffset]) will defer to [AlwaysScrollableScrollPhysics].
   final ScrollPhysics parent;
 
   /// If [parent] is null then return ancestor, otherwise recursively build a
@@ -59,6 +79,18 @@ class ScrollPhysics {
   ///
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
+  ///
+  /// {@tool sample}
+  ///
+  /// In the following example, the [applyTo] method is used to combine the
+  /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]
+  /// `x` has the same behavior as `y`:
+  ///
+  /// ```dart
+  /// final FooScrollPhysics x = FooScrollPhysics().applyTo(BarScrollPhysics());
+  /// const FooScrollPhysics y = FooScrollPhysics(parent: BarScrollPhysics());
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -174,8 +206,8 @@ class ScrollPhysics {
   static final Tolerance _kDefaultTolerance = Tolerance(
     // TODO(ianh): Handle the case of the device pixel ratio changing.
     // TODO(ianh): Get this from the local MediaQuery not dart:ui's window object.
-    velocity: 1.0 / (0.050 * ui.window.devicePixelRatio), // logical pixels per second
-    distance: 1.0 / ui.window.devicePixelRatio // logical pixels
+    velocity: 1.0 / (0.050 * WidgetsBinding.instance.window.devicePixelRatio), // logical pixels per second
+    distance: 1.0 / WidgetsBinding.instance.window.devicePixelRatio, // logical pixels
   );
 
   /// The tolerance to use for ballistic simulations.
@@ -399,7 +431,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
           'The physics object in question was:\n'
           '  $this\n'
           'The position object in question was:\n'
-          '  $position\n'
+          '  $position'
         );
       }
       return true;
@@ -430,7 +462,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
         position.pixels,
         end,
         math.min(0.0, velocity),
-        tolerance: tolerance
+        tolerance: tolerance,
       );
     }
     if (velocity.abs() < tolerance.velocity)

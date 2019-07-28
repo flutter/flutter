@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -373,7 +372,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   CurvedAnimation({
     @required this.parent,
     @required this.curve,
-    this.reverseCurve
+    this.reverseCurve,
   }) : assert(parent != null),
        assert(curve != null) {
     _updateCurveDirection(parent.status);

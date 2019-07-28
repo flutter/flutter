@@ -26,6 +26,9 @@ if (flutterVersionName == null) {
 apply plugin: 'com.android.library'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+group '{{androidIdentifier}}'
+version '1.0'
+
 android {
     compileSdkVersion 28
 
@@ -34,7 +37,12 @@ android {
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
+        {{#androidX}}
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        {{/androidX}}
+        {{^androidX}}
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        {{/androidX}}
     }
 }
 
@@ -44,6 +52,11 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
+    {{#androidX}}
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    {{/androidX}}
+    {{^androidX}}
     implementation 'com.android.support:support-v13:27.1.1'
     implementation 'com.android.support:support-annotations:27.1.1'
+    {{/androidX}}
 }

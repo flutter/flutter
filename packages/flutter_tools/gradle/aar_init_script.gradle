@@ -1,0 +1,122 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+//
+// This script is used to initialize the build in a module or plugin project.
+// During this phase, the script applies the Maven plugin and configures the
+// destination of the local repository.
+// The local repository will contain the AAR and POM files.
+
+import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.maven.MavenDeployer
+import org.gradle.api.plugins.MavenPlugin
+import org.gradle.api.tasks.Upload
+
+void configureProject(Project project, File outputDir) {
+    if (!project.hasProperty("android")) {
+        throw new GradleException("Android property not found.")
+    }
+    if (!project.android.hasProperty("libraryVariants")) {
+        throw new GradleException("Can't generate AAR on a non Android library project.");
+    }
+
+    project.apply plugin: "maven"
+
+    project.android.libraryVariants.all { variant ->
+        addAarTask(project, variant)
+    }
+    // Snapshot versions include the timestamp in the artifact name.
+    // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
+    // This version isn't relevant in Flutter since the pub version is used
+    // to resolve dependencies.
+    project.version = project.version.replace("-SNAPSHOT", "")
+
+    project.uploadArchives {
+        repositories {
+            mavenDeployer {
+                repository(url: "file://${outputDir}/outputs/repo")
+            }
+        }
+    }
+    // Check if the project uses the Flutter plugin (defined in flutter.gradle).
+    Boolean usesFlutterPlugin = project.plugins.find { it.class.name == "FlutterPlugin" } != null
+    if (!usesFlutterPlugin) {
+        project.dependencies {
+            // Some plugins don't include `annotations` and they don't set
+            // `android.useAndroidX=true` in `gradle.properties`.
+            compileOnly "androidx.annotation:annotation:+"
+            compileOnly "com.android.support:support-annotations:+"
+            // The Flutter plugin already adds `flutter.jar`.
+            compileOnly project.files("${getFlutterRoot(project)}/bin/cache/artifacts/engine/android-arm-release/flutter.jar")
+        }
+    }
+}
+
+String getFlutterRoot(Project project) {
+    if (!project.hasProperty("flutter-root")) {
+        throw new GradleException("The `-Pflutter-root` flag must be specified.")
+    }
+    return project.property("flutter-root")
+}
+
+void addAarTask(Project project, variant) {
+    String variantName = variant.name.capitalize()
+    String taskName = "assembleAar${variantName}"
+    project.tasks.create(name: taskName) {
+        // This check is required to be able to configure the archives before `uploadArchives` runs.
+        if (!project.gradle.startParameter.taskNames.contains(taskName)) {
+            return
+        }
+        // NOTE(blasten): `android.defaultPublishConfig` must equal the variant name to build.
+        // Where variant name is `<product-flavor><Build-Type>`. However, it's too late to configure
+        // `defaultPublishConfig` at this point. Therefore, the code below ensures that the
+        // default build config uses the artifacts produced for the specific build variant.
+        Task bundle = project.tasks.findByName("bundle${variantName}Aar") // gradle:3.2.0
+        if (bundle == null) {
+            bundle = project.tasks.findByName("bundle${variantName}") // gradle:3.1.0
+        }
+        if (bundle == null) {
+            throw new GradleException("Can't generate AAR for variant ${variantName}.");
+        }
+        project.uploadArchives.repositories.mavenDeployer {
+            pom {
+                artifactId = "${project.name}_${variant.name.toLowerCase()}"
+            }
+        }
+        // Clear the current archives since the current one is assigned based on
+        // `android.defaultPublishConfig` which defaults to `release`.
+        project.configurations["archives"].artifacts.clear()
+        // Add the artifact that will be published.
+        project.artifacts.add("archives", bundle)
+        // Generate the Maven artifacts.
+        finalizedBy "uploadArchives"
+    }
+}
+
+projectsEvaluated {
+    if (rootProject.property("is-plugin").toBoolean()) {
+        if (rootProject.hasProperty("output-dir")) {
+            rootProject.buildDir = rootProject.property("output-dir")
+        } else {
+            rootProject.buildDir = "../build";
+        }
+        // In plugin projects, the Android library is the root project.
+        configureProject(rootProject, rootProject.buildDir)
+        return
+    }
+    // In module projects, the Android library project is the `:flutter` subproject.
+    Project androidLibrarySubproject = rootProject.subprojects.find { it.name == "flutter" }
+    // In module projects, the `buildDir` is defined in the `:app` subproject.
+    Project appSubproject = rootProject.subprojects.find { it.name == "app" }
+
+    assert appSubproject != null
+    assert androidLibrarySubproject != null
+
+    if (appSubproject.hasProperty("output-dir")) {
+        appSubproject.buildDir = appSubproject.property("output-dir")
+    } else {
+        appSubproject.buildDir = "../build/host"
+    }
+    configureProject(androidLibrarySubproject, appSubproject.buildDir)
+}

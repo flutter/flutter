@@ -103,18 +103,18 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge}) {
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
   }
 
   @override
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
   }
 
@@ -134,7 +134,7 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, {Rect childPaintBounds}) {
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
     painter(this, offset);
   }
 

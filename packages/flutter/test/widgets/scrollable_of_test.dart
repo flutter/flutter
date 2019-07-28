@@ -24,7 +24,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
     _position?.removeListener(listener);
     _position = Scrollable.of(context)?.position;
     _position?.addListener(listener);
-    widget.log('didChangeDependencies ${_position?.pixels}');
+    widget.log('didChangeDependencies ${_position?.pixels?.toStringAsFixed(1)}');
   }
 
   @override
@@ -37,7 +37,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   Widget build(BuildContext context) => widget.child;
 
   void listener() {
-    widget.log('listener ${_position?.pixels}');
+    widget.log('listener ${_position?.pixels?.toStringAsFixed(1)}');
   }
 
 }
@@ -92,8 +92,8 @@ void main() {
         return false;
       },
       child: const SingleChildScrollView(
-        child: SizedBox(height: 1200.0)
-      )
+        child: SizedBox(height: 1200.0),
+      ),
     ));
 
     await tester.startGesture(const Offset(100.0, 100.0));

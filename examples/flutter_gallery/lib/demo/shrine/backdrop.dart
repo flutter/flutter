@@ -66,9 +66,9 @@ class _BackdropTitle extends AnimatedWidget {
     this.onPress,
     @required this.frontTitle,
     @required this.backTitle,
-  })  : assert(frontTitle != null),
-        assert(backTitle != null),
-        super(key: key, listenable: listenable);
+  }) : assert(frontTitle != null),
+       assert(backTitle != null),
+       super(key: key, listenable: listenable);
 
   final Function onPress;
   final Widget frontTitle;
@@ -103,7 +103,7 @@ class _BackdropTitle extends AnimatedWidget {
                   end: const Offset(1.0, 0.0),
                 ).evaluate(animation),
                 child: const ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
-              )
+              ),
             ]),
           ),
         ),
@@ -138,7 +138,7 @@ class _BackdropTitle extends AnimatedWidget {
               ),
             ),
           ],
-        )
+        ),
       ]),
     );
   }
@@ -157,11 +157,11 @@ class Backdrop extends StatefulWidget {
     @required this.frontTitle,
     @required this.backTitle,
     @required this.controller,
-  })  : assert(frontLayer != null),
-        assert(backLayer != null),
-        assert(frontTitle != null),
-        assert(backTitle != null),
-        assert(controller != null);
+  }) : assert(frontLayer != null),
+       assert(backLayer != null),
+       assert(frontTitle != null),
+       assert(backTitle != null),
+       assert(controller != null);
 
   final Widget frontLayer;
   final Widget backLayer;

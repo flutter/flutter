@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -128,7 +127,8 @@ class AssetImage extends AssetBundleImageProvider {
   /// from the set of images to choose from. The [package] argument must be
   /// non-null when fetching an asset that is included in package. See the
   /// documentation for the [AssetImage] class itself for details.
-  const AssetImage(this.assetName, {
+  const AssetImage(
+    this.assetName, {
     this.bundle,
     this.package,
   }) : assert(assetName != null);
@@ -176,13 +176,13 @@ class AssetImage extends AssetBundleImageProvider {
         final String chosenName = _chooseVariant(
           keyName,
           configuration,
-          manifest == null ? null : manifest[keyName]
+          manifest == null ? null : manifest[keyName],
         );
         final double chosenScale = _parseScale(chosenName);
         final AssetBundleImageKey key = AssetBundleImageKey(
           bundle: chosenBundle,
           name: chosenName,
-          scale: chosenScale
+          scale: chosenScale,
         );
         if (completer != null) {
           // We already returned from this function, which means we are in the
@@ -260,15 +260,17 @@ class AssetImage extends AssetBundleImageProvider {
   static final RegExp _extractRatioRegExp = RegExp(r'/?(\d+(\.\d*)?)x$');
 
   double _parseScale(String key) {
-
-    if ( key == assetName){
+    if (key == assetName) {
       return _naturalResolution;
     }
 
-    final File assetPath = File(key);
-    final Directory assetDir = assetPath.parent;
+    final Uri assetUri = Uri.parse(key);
+    String directoryPath = '';
+    if (assetUri.pathSegments.length > 1) {
+      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
+    }
 
-    final Match match = _extractRatioRegExp.firstMatch(assetDir.path);
+    final Match match = _extractRatioRegExp.firstMatch(directoryPath);
     if (match != null && match.groupCount > 0)
       return double.parse(match.group(1));
     return _naturalResolution; // i.e. default to 1.0x

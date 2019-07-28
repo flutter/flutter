@@ -827,7 +827,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.text('X')).size, const Size(100.0, 100.0));
     expect(tester.renderObject<RenderBox>(find.byType(Baseline)).size,
            within<Size>(from: const Size(100.0, 200.0), distance: 0.001));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Spacing with slight overflow', (WidgetTester tester) async {
     await tester.pumpWidget(Wrap(
@@ -848,7 +848,7 @@ void main() {
       const Offset(0.0, 0.0),
       const Offset(210.0, 0.0),
       const Offset(420.0, 0.0),
-      const Offset(0.0, 20.0)
+      const Offset(0.0, 20.0),
     ]);
   });
 

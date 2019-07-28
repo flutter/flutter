@@ -74,14 +74,14 @@ void main() {
     // The `displayColor` is applied to [display4], [display3], [display2],
     // [display1], and [caption]. The `bodyColor` is applied to the remaining
     // text styles.
-    const Color displayColor = Color(1);
-    const Color bodyColor = Color(2);
+    const Color displayColor = Color(0x00000001);
+    const Color bodyColor = Color(0x00000002);
     const String fontFamily = 'fontFamily';
-    const Color decorationColor = Color(3);
+    const Color decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,
-      TextDecoration.lineThrough
+      TextDecoration.lineThrough,
     ]);
 
     final Typography typography = Typography(platform: TargetPlatform.android);

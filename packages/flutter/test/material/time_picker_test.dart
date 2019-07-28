@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // entire file needs triage.
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -40,12 +41,12 @@ class _TimePickerLauncher extends StatelessWidget {
                     context: context,
                     initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
-                }
+                },
               );
             }
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
   }
 }
@@ -132,6 +133,39 @@ void _tests() {
     await gesture.up();
     await finishPicker(tester);
     expect(result.hour, equals(9));
+  });
+
+  testWidgets('tap-select switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0); // 6:00
+    final Offset min45 = Offset(center.dx - 50.0, center.dy); // 45 mins (or 9:00 hours)
+
+    await tester.tapAt(hour6);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(min45);
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 6, minute: 45)));
+  });
+
+  testWidgets('drag-select switches from hour to minute', (WidgetTester tester) async {
+    TimeOfDay result;
+
+    final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
+    final Offset hour3 = Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = Offset(center.dx - 50.0, center.dy);
+
+    TestGesture gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour9 - hour6);
+    await gesture.up();
+    await tester.pump(const Duration(milliseconds: 50));
+    gesture = await tester.startGesture(hour6);
+    await gesture.moveBy(hour3 - hour6);
+    await gesture.up();
+    await finishPicker(tester);
+    expect(result, equals(const TimeOfDay(hour: 9, minute: 15)));
   });
 
   group('haptic feedback', () {
@@ -223,8 +257,11 @@ void _tests() {
   const List<String> labels12To11TwoDigit = <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
   const List<String> labels00To23 = <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
-  Future<void> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
-      { TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0) }) async {
+  Future<void> mediaQueryBoilerplate(
+    WidgetTester tester,
+    bool alwaysUse24HourFormat, {
+    TimeOfDay initialTime = const TimeOfDay(hour: 7, minute: 0),
+  }) async {
     await tester.pumpWidget(
       Localizations(
         locale: const Locale('en', 'US'),
@@ -504,6 +541,86 @@ void _tests() {
     );
 
     semantics.dispose();
+  });
+
+  testWidgets('header touch regions are large enough', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false);
+
+    final Size amSize = tester.getSize(find.ancestor(
+      of: find.text('AM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(amSize.width, greaterThanOrEqualTo(48.0));
+    expect(amSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size pmSize = tester.getSize(find.ancestor(
+      of: find.text('PM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(pmSize.width, greaterThanOrEqualTo(48.0));
+    expect(pmSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size hourSize = tester.getSize(find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    ));
+    expect(hourSize.width, greaterThanOrEqualTo(48.0));
+    expect(hourSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size minuteSize = tester.getSize(find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    ));
+    expect(minuteSize.width, greaterThanOrEqualTo(48.0));
+    expect(minuteSize.height, greaterThanOrEqualTo(48.0));
+  });
+
+  testWidgets('builder parameter', (WidgetTester tester) async {
+    Widget buildFrame(TextDirection textDirection) {
+      return MaterialApp(
+        home: Material(
+          child: Center(
+            child: Builder(
+              builder: (BuildContext context) {
+                return RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showTimePicker(
+                      context: context,
+                      initialTime: const TimeOfDay(hour: 7, minute: 0),
+                      builder: (BuildContext context, Widget child) {
+                        return Directionality(
+                          textDirection: textDirection,
+                          child: child,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    final double ltrOkRight = tester.getBottomRight(find.text('OK')).dx;
+
+    await tester.tap(find.text('OK')); // dismiss the dialog
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl));
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // Verify that the time picker is being laid out RTL.
+    // We expect the left edge of the 'OK' button in the RTL
+    // layout to match the gap between right edge of the 'OK'
+    // button and the right edge of the 800 wide window.
+    expect(tester.getBottomLeft(find.text('OK')).dx, 800 - ltrOkRight);
   });
 }
 

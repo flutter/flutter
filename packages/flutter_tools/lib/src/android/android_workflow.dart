@@ -21,9 +21,9 @@ import 'android_sdk.dart';
 const int kAndroidSdkMinVersion = 28;
 final Version kAndroidSdkBuildToolsMinVersion = Version(28, 0, 3);
 
-AndroidWorkflow get androidWorkflow => context[AndroidWorkflow];
-AndroidValidator get androidValidator => context[AndroidValidator];
-AndroidLicenseValidator get androidLicenseValidator => context[AndroidLicenseValidator];
+AndroidWorkflow get androidWorkflow => context.get<AndroidWorkflow>();
+AndroidValidator get androidValidator => context.get<AndroidValidator>();
+AndroidLicenseValidator get androidLicenseValidator => context.get<AndroidLicenseValidator>();
 
 enum LicensesAccepted {
   none,
@@ -103,6 +103,11 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
       }
       return ValidationResult(ValidationType.missing, messages);
+    }
+
+    if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
+      messages.add(ValidationMessage.hint(userMessages.androidSdkLicenseOnly(kAndroidHome)));
+      return ValidationResult(ValidationType.partial, messages);
     }
 
     messages.add(ValidationMessage(userMessages.androidSdkLocation(androidSdk.directory)));
@@ -249,7 +254,9 @@ class AndroidLicenseValidator extends DoctorValidator {
       }
     }
 
-    _ensureCanRunSdkManager();
+    if (!_canRunSdkManager()) {
+      return LicensesAccepted.unknown;
+    }
 
     final Process process = await runCommand(
       <String>[androidSdk.sdkManagerPath, '--licenses'],
@@ -279,7 +286,9 @@ class AndroidLicenseValidator extends DoctorValidator {
       return false;
     }
 
-    _ensureCanRunSdkManager();
+    if (!_canRunSdkManager()) {
+      throwToolExit(userMessages.androidMissingSdkManager(androidSdk.sdkManagerPath));
+    }
 
     final Version sdkManagerVersion = Version.parse(androidSdk.sdkManagerVersion);
     if (sdkManagerVersion == null || sdkManagerVersion.major < 26) {
@@ -294,7 +303,7 @@ class AndroidLicenseValidator extends DoctorValidator {
 
     // The real stdin will never finish streaming. Pipe until the child process
     // finishes.
-    process.stdin.addStream(stdin); // ignore: unawaited_futures
+    unawaited(process.stdin.addStream(stdin));
     // Wait for stdout and stderr to be fully processed, because process.exitCode
     // may complete first.
     await waitGroup<void>(<Future<void>>[
@@ -306,10 +315,9 @@ class AndroidLicenseValidator extends DoctorValidator {
     return exitCode == 0;
   }
 
-  static void _ensureCanRunSdkManager() {
+  static bool _canRunSdkManager() {
     assert(androidSdk != null);
     final String sdkManagerPath = androidSdk.sdkManagerPath;
-    if (!processManager.canRun(sdkManagerPath))
-      throwToolExit(userMessages.androidMissingSdkManager(sdkManagerPath));
+    return processManager.canRun(sdkManagerPath);
   }
 }

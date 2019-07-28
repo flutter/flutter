@@ -138,7 +138,7 @@ void main() {
         children: <Widget>[
           const DecoratedBox(decoration: kBoxDecorationA),
           Container(
-            child: const DecoratedBox(decoration: kBoxDecorationB)
+            child: const DecoratedBox(decoration: kBoxDecorationB),
           ),
           const DecoratedBox(decoration: kBoxDecorationC),
         ],

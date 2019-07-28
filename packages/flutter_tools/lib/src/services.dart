@@ -26,8 +26,9 @@ dynamic _loadYamlFile(String path) {
 /// Loads all services specified in `pubspec.yaml`. Parses each service config file,
 /// storing meta data in [services] and the list of jar files in [jars].
 Future<void> parseServiceConfigs(
-  List<Map<String, String>> services, { List<File> jars }
-) async {
+  List<Map<String, String>> services, {
+  List<File> jars,
+}) async {
   Map<String, Uri> packageMap;
   try {
     packageMap = PackageMap(PackageMap.globalPackagesPath).map;
@@ -63,7 +64,7 @@ Future<void> parseServiceConfigs(
         'root': serviceRoot,
         'name': service['name'],
         'android-class': service['android-class'],
-        'ios-framework': service['ios-framework']
+        'ios-framework': service['ios-framework'],
       });
     }
 
@@ -95,15 +96,16 @@ Future<String> getServiceFromUrl(String url, String rootDir, String serviceName)
 ///   ]
 /// }
 File generateServiceDefinitions(
-  String dir, List<Map<String, String>> servicesIn
+  String dir,
+  List<Map<String, String>> servicesIn,
 ) {
   final List<Map<String, String>> services =
       servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
         'name': service['name'],
-        'class': service['android-class']
+        'class': service['android-class'],
       }).toList();
 
-  final Map<String, dynamic> jsonObject = <String, dynamic>{ 'services': services };
+  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': services};
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
   return servicesFile;

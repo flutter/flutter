@@ -74,7 +74,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 400.0, // should be overridden by itemExtent
-        child: Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -299,14 +299,14 @@ void main() {
 
     // ListView's height is 600, so items i0-i5 and s0-s4 fit.
     await tester.pumpWidget(buildFrame(itemCount: 25));
-    for(String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5'])
+    for (String s in <String>['i0', 's0', 'i1', 's1', 'i2', 's2', 'i3', 's3', 'i4', 's4', 'i5'])
       expect(find.text(s), findsOneWidget);
     expect(find.text('s5'), findsNothing);
     expect(find.text('i6'), findsNothing);
   });
 }
 
-void check({List<int> visible = const <int>[], List<int> hidden = const <int>[]}) {
+void check({ List<int> visible = const <int>[], List<int> hidden = const <int>[] }) {
   for (int i in visible) {
     expect(find.text('$i'), findsOneWidget);
   }

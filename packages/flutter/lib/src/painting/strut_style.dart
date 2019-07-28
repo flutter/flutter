@@ -5,20 +5,24 @@
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'text_style.dart';
 
 /// Defines the strut, which sets the minimum height a line can be
-/// relative to the baseline. Strut applies to all lines in the pararaph.
+/// relative to the baseline.
 ///
-/// Strut is a feature that allows minimum line heights to be set. The effect is as
-/// if a zero width space was included at the beginning of each line in the
-/// paragraph. This imaginary space is 'shaped' according the properties defined
-/// in this class.
+/// Strut applies to all lines in the paragraph. Strut is a feature that
+/// allows minimum line heights to be set. The effect is as if a zero
+/// width space was included at the beginning of each line in the
+/// paragraph. This imaginary space is 'shaped' according the properties
+/// defined in this class. Flutter's strut is based on
+/// [typesetting strut](https://en.wikipedia.org/wiki/Strut_(typesetting))
+/// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
 ///
-/// No lines may be shorter than the strut. The ascent and descent of the strut
-/// are calculated, and any laid out text that has a shorter ascent or descent than
-/// the strut's ascent or descent will take the ascent and descent of the strut.
-/// Text with ascents or descents larger than the strut's ascent or descent will lay
-/// out as normal and extend past the strut.
+/// No lines may be shorter than the strut. The ascent and descent of the
+/// strut are calculated, and any laid out text that has a shorter ascent or
+/// descent than the strut's ascent or descent will take the ascent and
+/// descent of the strut. Text with ascents or descents larger than the
+/// strut's ascent or descent will layout as normal and extend past the strut.
 ///
 /// Strut is defined independently from any text content or [TextStyle]s.
 ///
@@ -31,16 +35,30 @@ import 'basic_types.dart';
 ///
 /// The sum of these four values is the total height of the line.
 ///
-/// The `ascent + descent` is equivalent to the [fontSize]. Ascent is the font's
-/// spacing above the baseline without leading and descent is the spacing below the
-/// baseline without leading. Leading is split evenly between the top and bottom.
-/// The values for `ascent` and `descent` are provided by the font named by
-/// [fontFamily]. If no [fontFamily] or [fontFamilyFallback] is provided, then the
-/// platform's default family will be used.
+/// Ascent is the font's spacing above the baseline without leading and
+/// descent is the spacing below the baseline without leading. Leading is
+/// split evenly betweenthe top and bottom. The values for `ascent` and
+/// `descent` are provided by the font named by [fontFamily]. If no
+/// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
+/// default family will be used.
 ///
-/// Each line's spacing above the baseline will be at least as tall as the half
-/// leading plus ascent. Each line's spacing below the baseline will be at least as
-/// tall as the half leading plus descent.
+/// When [height] is omitted or null, then the font defined ascent and descent
+/// will be used. The font's combined ascent and descent may be taller or
+/// shorter than the [fontSize]. When [height] is provided, the line's EM-square
+/// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
+/// achieve a final line height of `fontSize * height + fontSize * leading`
+/// logical pixels. The proportion of ascent:descent with [height] specified
+/// is the same as the font metrics defined ascent:descent ratio.
+///
+/// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+///
+/// Each line's spacing above the baseline will be at least as tall as the
+/// half leading plus ascent. Each line's spacing below the baseline will
+/// be at least as tall as the half leading plus descent.
+///
+/// See also:
+///
+///  * [StrutStyle](dart-ui/StrutStyle-class.html), the class in the [dart:ui] library.
 ///
 /// ### Fields and their default values.
 
@@ -55,50 +73,59 @@ import 'basic_types.dart';
 ///
 /// Omitted or null properties will take the default values specified below:
 ///
-///  * [fontFamily]: the name of the font to use when calcualting the strut (e.g., Roboto).
-///    No glyphs from the font will be drawn and the font will be used purely for metrics.
+///  * [fontFamily]: the name of the font to use when calculating the strut
+///    (e.g., Roboto). No glyphs from the font will be drawn and the font will
+///    be used purely for metrics.
 ///
-///  * [fontFamilyFallback]: an ordered list of font family names that will be searched for when
-///    the font in [fontFamily] cannot be found. When all specified font families have been
-///    exhausted an no match was found, the default platform font will be used.
+///  * [fontFamilyFallback]: an ordered list of font family names that will
+///    be searched for when the font in [fontFamily] cannot be found. When
+///    all specified font families have been exhausted an no match was found,
+///    the default platform font will be used.
 ///
-///  * [fontSize]: the size of the ascent plus descent in logical pixels. This is also
-///    used as the basis of the custom leading caluclation. This value cannot
-///    be negative.
+///  * [fontSize]: the size of the ascent plus descent in logical pixels. This
+///    is also used as the basis of the custom leading calculation. This value
+///    cannot be negative.
 ///    Default is 14 logical pixels.
 ///
-///  * [height]: the multiple of [fontSize] to multiply the ascent and descent by.
-///    The [height] will impact the spacing above and below the baseline differently
-///    depending on the ratios between the font's ascent and descent. This property is
-///    separate from the leading multiplier, which is controlled through [leading].
-///    Default is 1.0.
+///  * [height]: the multiple of [fontSize] the line's height should be.
+///    The line's height will take the font's ascent and descent values if
+///    [height] is omitted or null. If provided, the EM-square ascent and
+///    descent (which sum to [fontSize]) is scaled by [height].
+///    The [height] will impact the spacing above and below the baseline
+///    differently depending on the ratios between the font's ascent and
+///    descent. This property is separate from the leading multiplier, which
+///    is controlled through [leading].
+///    Default is null.
 ///
-///  * [leading]: the custom leading to apply to the strut as a multiple of [fontSize].
-///    Leading is additional spacing between lines. Half of the leading is added
-///    to the top and the other half to the bottom of the line height. This differs
-///    from [height] since the spacing is equally distributed above and below the
-///    baseline.
-///    Default is `null`, which will use the font-specified leading.
+///  * [leading]: the custom leading to apply to the strut as a multiple of
+///    [fontSize]. Leading is additional spacing between lines. Half of the
+///    leading is added to the top and the other half to the bottom of the
+///    line height. This differs from [height] since the spacing is equally
+///    distributed above and below the baseline.
+///    Default is null, which will use the font-specified leading.
 ///
-///  * [fontWeight]: the typeface thickness to use when calculating the strut (e.g., bold).
+///  * [fontWeight]: the typeface thickness to use when calculating the strut
+///    (e.g., bold).
 ///    Default is [FontWeight.w400].
 ///
-///  * [fontStyle]: the typeface variant to use when calculating the strut (e.g., italic).
+///  * [fontStyle]: the typeface variant to use when calculating the strut
+///    (e.g., italic).
 ///    Default is [FontStyle.normal].
 ///
-///  * [forceStrutHeight]: when true, all lines will be laid out with the height of the
-///    strut. All line and run-specific metrics will be ignored/overridden and only strut
-///    metrics will be used instead. This property guarantees uniform line spacing, however
-///    text in adjacent lines may overlap. This property should be enabled with caution as
-///    it bypasses a large portion of the vertical layout system.
+///  * [forceStrutHeight]: when true, all lines will be laid out with the
+///    height of the strut. All line and run-specific metrics will be
+///    ignored/overridden and only strut metrics will be used instead.
+///    This property guarantees uniform line spacing, however text in
+///    adjacent lines may overlap. This property should be enabled with
+///    caution as it bypasses a large portion of the vertical layout system.
 ///    The default value is false.
 ///
 /// ### Examples
 ///
 /// {@tool sample}
-/// In this simple case, the text will be rendered at font size 10, however, the vertical
-/// height of each line will be the strut height (Roboto in font size 30 * 1.5) as the text
-/// itself is shorter than the strut.
+/// In this simple case, the text will be rendered at font size 10, however,
+/// the vertical height of each line will be the strut height (Roboto in
+/// font size 30 * 1.5) as the text itself is shorter than the strut.
 ///
 /// ```dart
 /// const Text(
@@ -119,10 +146,10 @@ import 'basic_types.dart';
 /// {@tool sample}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [height] was defined as 1.5 (the default font size is 14), which
-/// caused all lines to be laid out taller than without strut. This extra space was
-/// able to accomodate the larger font size of `Second line!` without causing the line
-/// height to change for the second line only. All lines in this example are thus the
-/// same height (`14 * 1.5`).
+/// caused all lines to be laid out taller than without strut. This extra space
+/// was able to accommodate the larger font size of `Second line!` without
+/// causing the line height to change for the second line only. All lines in
+/// this example are thus the same height (`14 * 1.5`).
 ///
 /// ```dart
 /// const Text.rich(
@@ -263,6 +290,9 @@ class StrutStyle extends Diagnosticable {
   /// The `package` argument must be non-null if the font family is defined in a
   /// package. It is combined with the `fontFamily` argument to set the
   /// [fontFamily] property.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be
+  /// zero or positive.
   const StrutStyle({
     String fontFamily,
     List<String> fontFamilyFallback,
@@ -281,8 +311,62 @@ class StrutStyle extends Diagnosticable {
        assert(leading == null || leading >= 0),
        assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null)));
 
-  /// The name of the font to use when calcualting the strut (e.g., Roboto). If the
-  /// font is defined in a package, this will be prefixed with
+  /// Builds a StrutStyle that contains values of the equivalent properties in
+  /// the provided [textStyle].
+  ///
+  /// The [textStyle] parameter must not be null.
+  ///
+  /// The named parameters override the [textStyle]'s argument's properties.
+  /// Since TextStyle does not contain [leading] or [forceStrutHeight], these
+  /// values will take on default values (null and false) unless otherwise
+  /// specified.
+  ///
+  /// If provided, fontSize must be positive and non-zero, leading must be
+  /// zero or positive.
+  ///
+  /// When [textStyle] has a package and a new [package] is also specified,
+  /// the entire font family fallback list should be redefined since the
+  /// [textStyle]'s package data is inherited by being prepended onto the
+  /// font family names. If [fontFamilyFallback] is meant to be empty, pass
+  /// an empty list instead of null. This prevents the previous package name
+  /// from being prepended twice.
+  StrutStyle.fromTextStyle(
+    TextStyle textStyle, {
+    String fontFamily,
+    List<String> fontFamilyFallback,
+    double fontSize,
+    double height,
+    this.leading, // TextStyle does not have an equivalent (yet).
+    FontWeight fontWeight,
+    FontStyle fontStyle,
+    this.forceStrutHeight,
+    String debugLabel,
+    String package,
+  }) : assert(textStyle != null),
+       assert(fontSize == null || fontSize > 0),
+       assert(leading == null || leading >= 0),
+       assert(package == null || (package != null && (fontFamily != null || fontFamilyFallback != null))),
+       fontFamily = fontFamily != null ? (package == null ? fontFamily : 'packages/$package/$fontFamily') : textStyle.fontFamily,
+       _fontFamilyFallback = fontFamilyFallback ?? textStyle.fontFamilyFallback,
+       height = height ?? textStyle.height,
+       fontSize = fontSize ?? textStyle.fontSize,
+       fontWeight = fontWeight ?? textStyle.fontWeight,
+       fontStyle = fontStyle ?? textStyle.fontStyle,
+       debugLabel = debugLabel ?? textStyle.debugLabel,
+       _package = package; // the textStyle._package data is embedded in the
+                           // fontFamily names, so we no longer need it.
+
+  /// A [StrutStyle] that will have no impact on the text layout.
+  ///
+  /// Equivalent to having no strut at all. All lines will be laid out according to
+  /// the properties defined in [TextStyle].
+  static const StrutStyle disabled = StrutStyle(
+    height: 0.0,
+    leading: 0.0,
+  );
+
+  /// The name of the font to use when calculating the strut (e.g., Roboto). If
+  /// the font is defined in a package, this will be prefixed with
   /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
   /// prefixing is done by the constructor when the `package` argument is
   /// provided.
@@ -334,15 +418,32 @@ class StrutStyle extends Diagnosticable {
   /// The default fontSize is 14 logical pixels.
   final double fontSize;
 
-  /// The multiple of [fontSize] to multiply the ascent and descent by where `ascent + descent = fontSize`.
+  /// The multiple of [fontSize] to multiply the ascent and descent by where
+  /// `ascent + descent = fontSize`.
   ///
-  /// Ascent is the spacing above the baseline and descent is the spacing below the baseline.
+  /// Ascent is the spacing above the baseline and descent is the spacing below
+  /// the baseline.
+  ///
+  /// When [height] is omitted or null, then the font defined ascent and descent
+  /// will be used. The font's combined ascent and descent may be taller or
+  /// shorter than the [fontSize]. When [height] is provided, the line's EM-square
+  /// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
+  /// achieve a final line height of `fontSize * height + fontSize * leading`
+  /// logical pixels. The following diagram illustrates the differences between
+  /// the font metrics defined height and the EM-square height:
+  ///
+  /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   ///
   /// The [height] will impact the spacing above and below the baseline differently
   /// depending on the ratios between the font's ascent and descent. This property is
   /// separate from the leading multiplier, which is controlled through [leading].
   ///
-  /// The default height is 1.0.
+  /// The ratio of ascent:descent with [height] specified is the same as the
+  /// font metrics defined ascent:descent ratio when [height] is null or omitted.
+  ///
+  /// See [TextStyle.height], which works in a similar manner.
+  ///
+  /// The default height is null.
   final double height;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).
@@ -368,9 +469,9 @@ class StrutStyle extends Diagnosticable {
   /// Whether the strut height should be forced.
   ///
   /// When true, all lines will be laid out with the height of the
-  /// strut. All line and run-specific metrics will be ignored/overridden and only strut
-  /// metrics will be used instead. This property guarantees uniform line spacing, however
-  /// text in adjacent lines may overlap.
+  /// strut. All line and run-specific metrics will be ignored/overridden
+  /// and only strut metrics will be used instead. This property guarantees
+  /// uniform line spacing, however text in adjacent lines may overlap.
   ///
   /// This property should be enabled with caution as
   /// it bypasses a large portion of the vertical layout system.
@@ -413,6 +514,32 @@ class StrutStyle extends Diagnosticable {
     return RenderComparison.identical;
   }
 
+  /// Returns a new strut style that inherits its null values from
+  /// corresponding properties in the [other] [TextStyle].
+  ///
+  /// The "missing" properties of the this strut style are _filled_ by
+  /// the properties of the provided [TextStyle]. This is possible because
+  /// [StrutStyle] shares many of the same basic properties as [TextStyle].
+  ///
+  /// If the given text style is null, returns this strut style.
+  StrutStyle inheritFromTextStyle(TextStyle other) {
+    if (other == null)
+      return this;
+
+    return StrutStyle(
+      fontFamily: fontFamily ?? other.fontFamily,
+      fontFamilyFallback: fontFamilyFallback ?? other.fontFamilyFallback,
+      fontSize: fontSize ?? other.fontSize,
+      height: height ?? other.height,
+      leading: leading, // No equivalent property in TextStyle yet.
+      fontWeight: fontWeight ?? other.fontWeight,
+      fontStyle: fontStyle ?? other.fontStyle,
+      forceStrutHeight: forceStrutHeight, // StrutStyle-unique property.
+      debugLabel: debugLabel ?? other.debugLabel,
+      // Package is embedded within the getters for fontFamilyFallback.
+    );
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -442,6 +569,9 @@ class StrutStyle extends Diagnosticable {
     );
   }
 
+  @override
+  String toStringShort() => '$runtimeType';
+
   /// Adds all properties prefixing property names with the optional `prefix`.
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix = '' }) {
@@ -454,7 +584,7 @@ class StrutStyle extends Diagnosticable {
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
     String weightDescription;
     if (fontWeight != null) {
-      weightDescription = '${fontWeight.index + 1}00';
+      weightDescription = 'w${fontWeight.index + 1}00';
     }
     // TODO(jacobr): switch this to use enumProperty which will either cause the
     // weight description to change to w600 from 600 or require existing

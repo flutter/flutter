@@ -25,6 +25,8 @@ import 'framework.dart';
 ///
 /// The type parameter `T` is the type of the model aspect objects.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ml5uefGgkaA}
+///
 /// Widgets create a dependency on an [InheritedModel] with a static method:
 /// [InheritedModel.inheritFrom]. This method's `context` parameter
 /// defines the subtree that will be rebuilt when the model changes.

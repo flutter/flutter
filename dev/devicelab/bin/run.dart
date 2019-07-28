@@ -54,10 +54,17 @@ Future<void> main(List<String> rawArgs) async {
   }
 
   final bool silent = args['silent'];
+  final String localEngine = args['local-engine'];
+  final String localEngineSrcPath = args['local-engine-src-path'];
 
   for (String taskName in _taskNames) {
     section('Running task "$taskName"');
-    final Map<String, dynamic> result = await runTask(taskName, silent: silent);
+    final Map<String, dynamic> result = await runTask(
+      taskName,
+      silent: silent,
+      localEngine: localEngine,
+      localEngineSrcPath: localEngineSrcPath,
+    );
 
     if (!result['success'])
       exitCode = 1;
@@ -100,7 +107,7 @@ final ArgParser _argParser = ArgParser()
     'stage',
     abbr: 's',
     help: 'Name of the stage. Runs all tasks for that stage. '
-        'The tasks and their stages are read from manifest.yaml.',
+          'The tasks and their stages are read from manifest.yaml.',
   )
   ..addFlag(
     'all',
@@ -123,6 +130,19 @@ final ArgParser _argParser = ArgParser()
     'silent',
     negatable: true,
     defaultsTo: false,
+  )
+  ..addOption(
+    'local-engine',
+    help: 'Name of a build output within the engine out directory, if you are '
+          'building Flutter locally. Use this to select a specific version of '
+          'the engine if you have built multiple engine targets. This path is '
+          'relative to --local-engine-src-path/out.',
+  )
+  ..addOption(
+    'local-engine-src-path',
+    help: 'Path to your engine src directory, if you are building Flutter '
+          'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at '
+          'the location based on the value of the --flutter-root option.',
   );
 
 bool _listsEqual(List<dynamic> a, List<dynamic> b) {

@@ -81,7 +81,7 @@ abstract class MethodCodec {
   ///
   /// The specified error [code], human-readable error [message], and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({@required String code, String message, dynamic details});
+  ByteData encodeErrorEnvelope({ @required String code, String message, dynamic details });
 }
 
 

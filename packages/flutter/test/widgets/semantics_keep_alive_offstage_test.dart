@@ -81,7 +81,7 @@ void main() {
 
 final Key paddingWidget = GlobalKey();
 
-Widget _buildTestWidget({bool extraPadding, String text, ScrollController controller}) {
+Widget _buildTestWidget({ bool extraPadding, String text, ScrollController controller }) {
   return MaterialApp(
     home: Scaffold(
       body: Column(
@@ -127,6 +127,7 @@ class ProblemWidget extends StatefulWidget {
 class ProblemWidgetState extends State<ProblemWidget> with AutomaticKeepAliveClientMixin<ProblemWidget> {
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     Widget child = Semantics(
       container: true,
       child: Text(widget.text),

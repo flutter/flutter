@@ -32,7 +32,7 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
         return contacts[random.nextInt(contacts.length)]
             // Randomly adds a telephone icon next to the contact or not.
             ..add(random.nextBool().toString());
-      }
+      },
     );
   }
 
@@ -48,6 +48,15 @@ class _CupertinoRefreshControlDemoState extends State<CupertinoRefreshControlDem
                 : CupertinoColors.darkBackgroundGray,
           ),
           child: CustomScrollView(
+            // If left unspecified, the [CustomScrollView] appends an
+            // [AlwaysScrollableScrollPhysics]. Behind the scene, the ScrollableState
+            // will attach that [AlwaysScrollableScrollPhysics] to the output of
+            // [ScrollConfiguration.of] which will be a [ClampingScrollPhysics]
+            // on Android.
+            // To demonstrate the iOS behavior in this demo and to ensure that the list
+            // always scrolls, we specifically use a [BouncingScrollPhysics] combined
+            // with a [AlwaysScrollableScrollPhysics]
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             slivers: <Widget>[
               CupertinoSliverNavigationBar(
                 largeTitle: const Text('Refresh'),

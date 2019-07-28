@@ -10,46 +10,69 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
+import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'fuchsia/application_package.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
+import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
+          await checkGradleDependencies();
+        }
         return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
+            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
-            ? IOSApp.fromIosProject((await FlutterProject.current()).ios)
+            ? IOSApp.fromIosProject(FlutterProject.current().ios)
             : IOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
-        return applicationBinary != null
-          ? MacOSApp.fromPrebuiltApp(applicationBinary)
-          : null;
+        return applicationBinary == null
+            ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
+            : MacOSApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.web_javascript:
+        if (!FlutterProject.current().web.existsSync()) {
+          return null;
+        }
+        return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
+        return applicationBinary == null
+            ? LinuxApp.fromLinuxProject(FlutterProject.current().linux)
+            : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+        return applicationBinary == null
+            ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
+            : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
-        return null;
+        return applicationBinary == null
+            ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
+            : FuchsiaApp.fromPrebuiltApp(applicationBinary);
     }
     assert(platform != null);
     return null;
@@ -78,7 +101,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -87,20 +110,25 @@ class AndroidApk extends ApplicationPackage {
   factory AndroidApk.fromApk(File apk) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
-      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      printError(userMessages.aaptNotFound);
       return null;
     }
 
-     final List<String> aaptArgs = <String>[
-       aaptPath,
-      'dump',
-      'xmltree',
-      apk.path,
-      'AndroidManifest.xml',
-    ];
+    String apptStdout;
+    try {
+      apptStdout = runCheckedSync(<String>[
+        aaptPath,
+        'dump',
+        'xmltree',
+        apk.path,
+        'AndroidManifest.xml',
+      ]);
+    } catch (error) {
+      printError('Failed to extract manifest from APK: $error.');
+      return null;
+    }
 
-    final ApkManifestData data = ApkManifestData
-        .parseFromXmlDump(runCheckedSync(aaptArgs));
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(apptStdout);
 
     if (data == null) {
       printError('Unable to read manifest info from ${apk.path}.');
@@ -116,7 +144,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -149,23 +177,59 @@ class AndroidApk extends ApplicationPackage {
 
     final File manifest = androidProject.appManifestFile;
 
-    if (!manifest.existsSync())
+    if (!manifest.existsSync()) {
+      printError('AndroidManifest.xml could not be found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     final String manifestString = manifest.readAsStringSync();
-    final xml.XmlDocument document = xml.parse(manifestString);
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(manifestString);
+    } on xml.XmlParserException catch (exception) {
+      String manifestLocation;
+      if (androidProject.isUsingGradle) {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+      } else {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+      }
+      printError('AndroidManifest.xml is not a valid XML document.');
+      printError('Please check $manifestLocation for errors.');
+      throwToolExit('XML Parser error message: ${exception.toString()}');
+    }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
-    if (manifests.isEmpty)
+    if (manifests.isEmpty) {
+      printError('AndroidManifest.xml has no manifest element.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
-    for (xml.XmlElement category in document.findAllElements('category')) {
-      if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
-        final xml.XmlElement activity = category.parent.parent;
-        final String enabled = activity.getAttribute('android:enabled');
-        if (enabled == null || enabled == 'true') {
+    for (xml.XmlElement activity in document.findAllElements('activity')) {
+      final String enabled = activity.getAttribute('android:enabled');
+      if (enabled != null && enabled == 'false') {
+        continue;
+      }
+
+      for (xml.XmlElement element in activity.findElements('intent-filter')) {
+        String actionName = '';
+        String categoryName = '';
+        for (xml.XmlNode node in element.children) {
+          if (!(node is xml.XmlElement)) {
+            continue;
+          }
+          final xml.XmlElement xmlElement = node;
+          final String name = xmlElement.getAttribute('android:name');
+          if (name == 'android.intent.action.MAIN') {
+            actionName = name;
+          } else if (name == 'android.intent.category.LAUNCHER') {
+            categoryName = name;
+          }
+        }
+        if (actionName.isNotEmpty && categoryName.isNotEmpty) {
           final String activityName = activity.getAttribute('android:name');
           launchActivity = '$packageId/$activityName';
           break;
@@ -173,14 +237,17 @@ class AndroidApk extends ApplicationPackage {
       }
     }
 
-    if (packageId == null || launchActivity == null)
+    if (packageId == null || launchActivity == null) {
+      printError('package identifier or launch activity not found.');
+      printError('Please check ${manifest.path} for errors.');
       return null;
+    }
 
     return AndroidApk(
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 
@@ -259,8 +326,22 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   factory IOSApp.fromIosProject(IosProject project) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
+    }
+    if (!project.exists) {
+      // If the project doesn't exist at all the current hint to run flutter
+      // create is accurate.
+      return null;
+    }
+    if (!project.xcodeProject.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj but this file is missing.');
+      return null;
+    }
+    if (!project.xcodeProjectInfoFile.existsSync()) {
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
+      return null;
+    }
     return BuildableIOSApp(project);
   }
 
@@ -314,10 +395,14 @@ class PrebuiltIOSApp extends IOSApp {
 }
 
 class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS });
+  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
 
   AndroidApk android;
   IOSApp iOS;
+  FuchsiaApp fuchsia;
+  LinuxApp linux;
+  MacOSApp macOS;
+  WindowsApp windows;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -325,16 +410,25 @@ class ApplicationPackageStore {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject((await FlutterProject.current()).android);
+        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
-        iOS ??= IOSApp.fromIosProject((await FlutterProject.current()).ios);
+        iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
-      case TargetPlatform.darwin_x64:
-      case TargetPlatform.linux_x64:
-      case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
+        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
+        return fuchsia;
+      case TargetPlatform.darwin_x64:
+        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
+        return macOS;
+      case TargetPlatform.linux_x64:
+        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
+        return linux;
+      case TargetPlatform.windows_x64:
+        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
+        return windows;
       case TargetPlatform.tester:
+      case TargetPlatform.web_javascript:
         return null;
     }
     return null;
@@ -410,15 +504,16 @@ class ApkManifestData {
     final List<String> lines = data.split('\n');
     assert(lines.length > 3);
 
-    final _Element manifest = _Element.fromLine(lines[1], null);
+    final int manifestLine = lines.indexWhere((String line) => line.contains('E: manifest'));
+    final _Element manifest = _Element.fromLine(lines[manifestLine], null);
     _Element currentElement = manifest;
 
-    for (String line in lines.skip(2)) {
+    for (String line in lines.skip(manifestLine)) {
       final String trimLine = line.trimLeft();
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while(level <= currentElement.level) {
+      while (currentElement.parent != null && level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 
@@ -444,8 +539,33 @@ class ApkManifestData {
     _Element launchActivity;
     for (_Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
-      if (enabled == null || enabled.value.contains('0xffffffff')) {
-        launchActivity = activity;
+      final Iterable<_Element> intentFilters = activity
+          .allElements('intent-filter')
+          .cast<_Element>();
+      final bool isEnabledByDefault = enabled == null;
+      final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
+      if (!(isEnabledByDefault || isExplicitlyEnabled)) {
+        continue;
+      }
+
+      for (_Element element in intentFilters) {
+        final _Element action = element.firstElement('action');
+        final _Element category = element.firstElement('category');
+        final String actionAttributeValue = action
+            ?.firstAttribute('android:name')
+            ?.value;
+        final String categoryAttributeValue =
+            category?.firstAttribute('android:name')?.value;
+        final bool isMainAction = actionAttributeValue != null &&
+            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
+        final bool isLauncherCategory = categoryAttributeValue != null &&
+            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
+        if (isMainAction && isLauncherCategory) {
+          launchActivity = activity;
+          break;
+        }
+      }
+      if (launchActivity != null) {
         break;
       }
     }

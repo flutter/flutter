@@ -109,7 +109,7 @@ void main() {
                 },
                 onChangeStart: (double value) {
                   numberOfTimesOnChangeStartIsCalled++;
-                }
+                },
               ),
             ),
           );
@@ -148,7 +148,7 @@ void main() {
                 },
                 onChangeEnd: (double value) {
                   numberOfTimesOnChangeEndIsCalled++;
-                }
+                },
               ),
             ),
           );
@@ -191,7 +191,7 @@ void main() {
                 },
                 onChangeEnd: (double value) {
                   endValue = value;
-                }
+                },
               ),
             ),
           );
@@ -247,7 +247,7 @@ void main() {
                   setState(() {
                     endValue = value;
                   });
-                }
+                },
               ),
             ),
           );
@@ -281,7 +281,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: CupertinoSlider(
         value: 0.5,
-        onChanged: (double v) {},
+        onChanged: (double v) { },
       ),
     ));
 
@@ -366,7 +366,7 @@ void main() {
       CupertinoApp(
         home: Center(
           child: CupertinoSlider(
-            onChanged: (double value) {},
+            onChanged: (double value) { },
             value: 0.5,
           ),
         ),
@@ -383,7 +383,7 @@ void main() {
         theme: const CupertinoThemeData(brightness: Brightness.dark),
         home: Center(
           child: CupertinoSlider(
-            onChanged: (double value) {},
+            onChanged: (double value) { },
             value: 0.5,
           ),
         ),
@@ -402,7 +402,7 @@ void main() {
         home: Center(
           child: CupertinoSlider(
             activeColor: CupertinoColors.activeGreen,
-            onChanged: (double value) {},
+            onChanged: (double value) { },
             value: 0.5,
           ),
         ),

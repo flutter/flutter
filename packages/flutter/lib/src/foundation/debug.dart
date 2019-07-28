@@ -19,12 +19,13 @@ import 'print.dart';
 /// override [debugPrint] themselves and want to check that their own custom
 /// value wasn't overridden by a test.
 ///
-/// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
-/// a complete list.
+/// See [the foundation library](foundation/foundation-library.html)
+/// for a complete list.
 bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
-        debugDefaultTargetPlatformOverride != null)
+        debugDefaultTargetPlatformOverride != null ||
+        debugDoublePrecision != null)
       throw FlutterError(reason);
     return true;
   }());
@@ -71,5 +72,23 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 ///  * [Timeline.startSync], which typically takes this value as its `arguments`
 ///    argument.
 const Map<String, String> timelineWhitelistArguments = <String, String>{
-  'mode': 'basic'
+  'mode': 'basic',
 };
+
+/// Configure [debugFormatDouble] using [num.toStringAsPrecision].
+///
+/// Defaults to null, which uses the default logic of [debugFormatDouble].
+int debugDoublePrecision;
+
+/// Formats a double to have standard formatting.
+///
+/// This behavior can be overriden by [debugDoublePrecision].
+String debugFormatDouble(double value) {
+  if (value == null) {
+    return 'null';
+  }
+  if (debugDoublePrecision != null) {
+    return value.toStringAsPrecision(debugDoublePrecision);
+  }
+  return value.toStringAsFixed(1);
+}

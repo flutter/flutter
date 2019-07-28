@@ -124,7 +124,6 @@ class TrivialComparator implements GoldenFileComparator {
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) {
-    // [autoUpdateGoldenFiles] should never be set in a live widget binding.
     throw StateError('goldenFileComparator has not been initialized');
   }
 }

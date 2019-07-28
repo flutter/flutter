@@ -10,6 +10,7 @@ import 'data/velocity_tracker_data.dart';
 const int _kNumIters = 10000;
 
 void main() {
+  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
   final VelocityTracker tracker = VelocityTracker();
   final Stopwatch watch = Stopwatch();
   print('Velocity tracker benchmark...');

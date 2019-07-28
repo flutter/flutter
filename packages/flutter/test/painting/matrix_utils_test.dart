@@ -9,6 +9,13 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
+  test('MatrixUtils.transformRect handles very small values', () {
+    const Rect evilRect = Rect.fromLTRB(0.0, -1.7976931348623157e+308, 800.0, 1.7976931348623157e+308);
+    final Matrix4 transform = Matrix4.identity()..translate(10.0, 0.0);
+    final Rect transformedRect = MatrixUtils.transformRect(transform, evilRect);
+    expect(transformedRect.isFinite, true);
+  });
+
   test('MatrixUtils.getAsTranslation()', () {
     Matrix4 test;
     test = Matrix4.identity();
@@ -85,5 +92,40 @@ void main() {
       0.0, moreOrLessEquals(-0.8660254037844386), moreOrLessEquals(0.5), moreOrLessEquals(-0.0005),
       0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
     ]);
+  });
+
+  test('forceToPoint', () {
+    const Offset forcedOffset = Offset(20, -30);
+    final Matrix4 forcedTransform = MatrixUtils.forceToPoint(forcedOffset);
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, forcedOffset),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, Offset.zero),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(1, 1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1, -1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-20, 30)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1.2344, 1422434.23)),
+      forcedOffset,
+    );
   });
 }

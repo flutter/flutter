@@ -78,7 +78,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                   builder: (BuildContext context) {
                     return CupertinoDemoTab1(
                       colorItems: colorItems,
-                      colorNameItems: colorNameItems
+                      colorNameItems: colorNameItems,
                     );
                   },
                   defaultTitle: 'Colors',
@@ -430,10 +430,13 @@ class CupertinoDemoTab2 extends StatelessWidget {
       navigationBar: CupertinoNavigationBar(
         trailing: trailingButtons,
       ),
-      child: ListView(
-        children: <Widget>[
-          Tab2Header(),
-        ]..addAll(buildTab2Conversation()),
+      child: CupertinoScrollbar(
+        child: ListView(
+          children: <Widget>[
+            Tab2Header(),
+            ...buildTab2Conversation(),
+          ],
+        ),
       ),
     );
   }
@@ -669,7 +672,7 @@ class Tab2ConversationRow extends StatelessWidget {
 }
 
 List<Widget> buildTab2Conversation() {
- return <Widget>[
+  return <Widget>[
     const Tab2ConversationRow(
       text: "My Xanadu doesn't look right",
     ),
@@ -750,7 +753,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
                         Text(
                           'Sign in',
                           style: TextStyle(color: CupertinoTheme.of(context).primaryColor),
-                        )
+                        ),
                       ],
                     ),
                   ),

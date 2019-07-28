@@ -1,4 +1,4 @@
-# Flutter (https://flutter.io) Developement Environment for Linux
+# Flutter (https://flutter.dev) Development Environment for Linux
 # ===============================================================
 #
 # This environment passes all Linux Flutter Doctor checks and is sufficient
@@ -23,8 +23,24 @@ RUN apt-get install -y --no-install-recommends \
   curl \
   zip \
   unzip \
+  apt-transport-https \
   ca-certificates \
   gnupg
+
+# Add repo for chrome stable
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
+
+# Add repo for gcloud sdk and install it
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+
+RUN curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+    apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+RUN apt-get update && apt-get install -y google-cloud-sdk && \
+    gcloud config set core/disable_usage_reporting true && \
+    gcloud config set component_manager/disable_update_check true
 
 # Add nodejs repository to apt sources and install it.
 ENV NODEJS_INSTALL="/opt/nodejs_install"
@@ -43,7 +59,8 @@ RUN apt-get install -y --no-install-recommends \
   libstdc++6 \
   libglu1-mesa \
   build-essential \
-  default-jdk-headless
+  default-jdk-headless \
+  google-chrome-stable
 
 # Install the Android SDK Dependency.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
@@ -58,7 +75,7 @@ RUN unzip -q -d "${ANDROID_TOOLS_ROOT}" "${ANDROID_SDK_ARCHIVE}"
 # Suppressing output of sdkmanager to keep log size down
 # (it prints install progress WAY too often).
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "tools" > /dev/null
-RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.0" > /dev/null
+RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "build-tools;28.0.3" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platforms;android-28" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "platform-tools" > /dev/null
 RUN yes "y" | "${ANDROID_TOOLS_ROOT}/tools/bin/sdkmanager" "extras;android;m2repository" > /dev/null
@@ -86,6 +103,10 @@ RUN dpkg-query -L nodejs
 # Install Firebase
 # This is why we need nodejs installed.
 RUN /usr/bin/npm --verbose install -g firebase-tools
+# TODO(dnfield): Remove this once Firebase has a fix upstream for
+# https://github.com/flutter/flutter/issues/34435
+COPY patch_firebase.sh /root/patch_firebase.sh
+RUN /root/patch_firebase.sh
 
 # Install dashing
 # This is why we need golang installed.
@@ -100,6 +121,10 @@ ENV LANG en_US.UTF-8
 
 # Install coveralls and Firebase
 # This is why we need ruby installed.
-RUN gem install coveralls
-RUN gem install bundler
+# Skip all the documentation (-N) since it's just on CI.
+RUN gem install coveralls -N
+RUN gem install bundler -N
+# Install fastlane which is used on Linux to build and deploy Android
+# builds to the Play Store.
+RUN gem install fastlane -N
 

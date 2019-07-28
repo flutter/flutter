@@ -14,7 +14,7 @@ void main() {
       body: Center(
         child: RaisedButton(
           child: const Text('Test'),
-          onPressed: () {},
+          onPressed: () { },
           shape: Border.all(
             color: Colors.blue,
           ),

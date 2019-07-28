@@ -14,8 +14,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
-import 'package:flutter_tools/src/run_hot.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
@@ -24,6 +26,7 @@ final ArgParser parser = ArgParser()
   ..addOption('target', help: 'The GN target to attach to')
   ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
+  ..addOption('dev-finder', help: 'The location of the dev_finder binary')
   ..addFlag('verbose', negatable: true);
 
 // Track the original working directory so that the tool can find the
@@ -41,7 +44,7 @@ Future<void> main(List<String> args) async {
   final String buildDirectory = argResults['build-dir'];
   final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
-  final File devFinder = fs.file('$buildDirectory/host_x64/dev_finder');
+  final File devFinder = fs.file(argResults['dev-finder']);
   final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
@@ -52,6 +55,19 @@ Future<void> main(List<String> args) async {
   originalWorkingDirectory = fs.currentDirectory.path;
   fs.currentDirectory = path;
 
+  if (!devFinder.existsSync()) {
+    print('Error: dev_finder not found at ${devFinder.path}.');
+    return 1;
+  }
+  if (!frontendServer.existsSync()) {
+    print(
+      'Error: frontend_server not found at ${frontendServer.path}. This '
+      'Usually means you ran fx set without specifying '
+      '--args=flutter_profile=true.'
+    );
+    return 1;
+  }
+
   // Check for a package with a lib directory.
   final String entrypoint = argResults['entrypoint'];
   String targetFile = 'lib/$entrypoint';
@@ -59,6 +75,7 @@ Future<void> main(List<String> args) async {
     // Otherwise assume the package is flat.
     targetFile = entrypoint;
   }
+  final String deviceName = argResults['device'];
   final List<String> command = <String>[
     'attach',
     '--module',
@@ -73,14 +90,9 @@ Future<void> main(List<String> args) async {
     outputDill,
     '--packages',
     packages,
+    if (deviceName != null && deviceName.isNotEmpty) ...<String>['-d', deviceName],
+    if (verbose) '--verbose',
   ];
-  final String deviceName = argResults['device'];
-  if (deviceName != null && deviceName.isNotEmpty) {
-    command.addAll(<String>['-d', deviceName]);
-  }
-  if (verbose) {
-    command.add('--verbose');
-  }
   Cache.disableLocking(); // ignore: invalid_use_of_visible_for_testing_member
   await runner.run(
     command,
@@ -92,6 +104,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
+      DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
@@ -100,9 +113,21 @@ Future<void> main(List<String> args) async {
         platformKernelDill: platformKernelDill,
         flutterPatchedSdk: flutterPatchedSdk,
       ),
-      HotRunnerConfig: () => HotRunnerConfig()..computeDartDependencies = false,
-    }
+    },
   );
+}
+
+// An implementation of [DeviceManager] that only supports fuchsia devices.
+class _FuchsiaDeviceManager extends DeviceManager {
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+    FuchsiaDevices(),
+  ]);
+
+  @override
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return true;
+  }
 }
 
 List<String> _extractPathAndName(String gnTarget) {

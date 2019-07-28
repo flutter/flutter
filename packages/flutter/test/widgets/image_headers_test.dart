@@ -35,13 +35,13 @@ void main() {
       when(response.listen(any)).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function() onDone = invocation.namedArguments[#onDone];
-        final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
+        final void Function(Object, [ StackTrace ]) onError = invocation.namedArguments[#onError];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
         return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
       });
       return client;
     });
-  });
+  }, skip: isBrowser);
 }
 
 class MockHttpClient extends Mock implements HttpClient {}

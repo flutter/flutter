@@ -207,7 +207,7 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
 
   double _getOffsetFromStartInCrossAxis(double crossAxisStart) {
     if (reverseCrossAxis)
-      return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent;
+      return crossAxisCount * crossAxisStride - crossAxisStart - childCrossAxisExtent - (crossAxisStride - childCrossAxisExtent);
     return crossAxisStart;
   }
 
@@ -579,7 +579,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final BoxConstraints childConstraints = gridGeometry.getBoxConstraints(constraints);
       RenderBox child = childAfter(trailingChildWithLayout);
-      if (child == null) {
+      if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.

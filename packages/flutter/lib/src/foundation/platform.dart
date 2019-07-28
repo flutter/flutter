@@ -2,23 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
-import 'assertions.dart';
-
-/// The platform that user interaction should adapt to target.
-///
-/// The [defaultTargetPlatform] getter returns the current platform.
-enum TargetPlatform {
-  /// Android: <https://www.android.com/>
-  android,
-
-  /// Fuchsia: <https://fuchsia.googlesource.com/>
-  fuchsia,
-
-  /// iOS: <http://www.apple.com/ios/>
-  iOS,
-}
+import '_platform_io.dart'
+  if (dart.library.html) '_platform_web.dart' as _platform;
 
 /// The [TargetPlatform] that matches the platform on which the framework is
 /// currently executing.
@@ -48,30 +33,20 @@ enum TargetPlatform {
 // that would mean we'd be stuck with that platform forever emulating the other,
 // and we'd never be able to introduce dedicated behavior for that platform
 // (since doing so would be a big breaking change).
-TargetPlatform get defaultTargetPlatform {
-  TargetPlatform result;
-  if (Platform.isIOS) {
-    result = TargetPlatform.iOS;
-  } else if (Platform.isAndroid) {
-    result = TargetPlatform.android;
-  } else if (Platform.isFuchsia) {
-    result = TargetPlatform.fuchsia;
-  }
-  assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
-      result = TargetPlatform.android;
-    return true;
-  }());
-  if (debugDefaultTargetPlatformOverride != null)
-    result = debugDefaultTargetPlatformOverride;
-  if (result == null) {
-    throw FlutterError(
-      'Unknown platform.\n'
-      '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
-  }
-  return result;
+TargetPlatform get defaultTargetPlatform => _platform.defaultTargetPlatform;
+
+/// The platform that user interaction should adapt to target.
+///
+/// The [defaultTargetPlatform] getter returns the current platform.
+enum TargetPlatform {
+  /// Android: <https://www.android.com/>
+  android,
+
+  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  fuchsia,
+
+  /// iOS: <http://www.apple.com/ios/>
+  iOS,
 }
 
 /// Override the [defaultTargetPlatform].
@@ -84,7 +59,7 @@ TargetPlatform get defaultTargetPlatform {
 /// (such as [ThemeData.platform] in the material library) instead.
 ///
 /// Setting [debugDefaultTargetPlatformOverride] (as opposed to, say,
-/// [ThemeData.platform]) will cause unexpected and undesireable effects. For
+/// [ThemeData.platform]) will cause unexpected and undesirable effects. For
 /// example, setting this to [TargetPlatform.iOS] when the application is
 /// running on Android will cause the TalkBack accessibility tool on Android to
 /// be confused because it would be receiving data intended for iOS VoiceOver.

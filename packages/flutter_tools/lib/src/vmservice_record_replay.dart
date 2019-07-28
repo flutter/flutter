@@ -180,7 +180,7 @@ class _RecordingSink implements StreamSink<String> {
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 
@@ -272,7 +272,7 @@ class _ReplaySink implements StreamSink<String> {
   }
 
   @override
-  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
+  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 

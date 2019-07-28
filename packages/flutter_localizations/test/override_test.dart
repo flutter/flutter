@@ -29,7 +29,7 @@ class FooMaterialLocalizations extends MaterialLocalizationEn {
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const FooMaterialLocalizationsDelegate({
     this.supportedLanguage = 'en',
-    this.backButtonTooltip = 'foo'
+    this.backButtonTooltip = 'foo',
   });
 
   final String supportedLanguage;
@@ -37,7 +37,7 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
   @override
   bool isSupported(Locale locale) {
-    return supportedLanguage == 'allLanguages' ? true : locale.languageCode == supportedLanguage;
+    return supportedLanguage == 'allLanguages' || locale.languageCode == supportedLanguage;
   }
 
   @override
@@ -121,7 +121,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -153,7 +153,7 @@ void main() {
               },
             ),
           );
-        }
+        },
       );
     }
 
@@ -186,7 +186,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -217,7 +217,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
@@ -246,7 +246,7 @@ void main() {
             MaterialLocalizations.of(context).backButtonTooltip,
             key: textKey,
           );
-        }
+        },
       )
     );
 
