@@ -2991,11 +2991,21 @@ class RenderIgnorePointer extends RenderProxyBox {
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
-    bool ignoringSemantics,
+    bool ignoringSemantics = false,
   }) : _ignoring = ignoring,
+       _wasIgnoring = ignoring,
        _ignoringSemantics = ignoringSemantics,
        super(child) {
     assert(_ignoring != null);
+    assert(_ignoringSemantics != null);
+    if (ignoring && !_ignoringSemantics) {
+      updateMutedSemanticsActions(
+        <SemanticsAction>{
+          SemanticsAction.tap,
+          SemanticsAction.longPress,
+        }
+      );
+    }
   }
 
   /// Whether this render object is ignored during hit testing.
@@ -3009,10 +3019,21 @@ class RenderIgnorePointer extends RenderProxyBox {
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (ignoringSemantics == null)
-      markNeedsSemanticsUpdate();
+    if (_ignoringSemantics)
+      return;
+    if (ignoring) {
+      updateMutedSemanticsActions(
+        <SemanticsAction>{
+        SemanticsAction.tap,
+        SemanticsAction.longPress,
+        }
+      );
+    } else {
+      updateMutedSemanticsActions(<SemanticsAction>{});
+    }
   }
 
+  bool _wasIgnoring;
   /// Whether the semantics of this render object is ignored when compiling the semantics tree.
   ///
   /// If null, defaults to value of [ignoring].
@@ -3021,28 +3042,33 @@ class RenderIgnorePointer extends RenderProxyBox {
   bool get ignoringSemantics => _ignoringSemantics;
   bool _ignoringSemantics;
   set ignoringSemantics(bool value) {
+    assert(ignoringSemantics != null);
     if (value == _ignoringSemantics)
       return;
-    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    bool wasIgnoringSemantics = _ignoringSemantics;
     _ignoringSemantics = value;
-    if (oldEffectiveValue != _effectiveIgnoringSemantics)
-      markNeedsSemanticsUpdate();
+    if (ignoring != _wasIgnoring && !wasIgnoringSemantics) {
+      // Previous update of ignoring does not actually updating muted semantics
+      // because ignoringSemantics was false to avoid unnecessary update.
+      // We have to reapply update now.
+      final bool isIgnoring = ignoring;
+      _ignoring = _wasIgnoring;
+      ignoring = isIgnoring;
+    }
+    _wasIgnoring = _ignoring;
+    markNeedsSemanticsUpdate();
   }
-
-  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
     return !ignoring && super.hitTest(result, position: position);
   }
 
-  // TODO(ianh): figure out a way to still include labels and flags in
-  // descendants, just make them non-interactive, even when
-  // _effectiveIgnoringSemantics is true
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && !_effectiveIgnoringSemantics)
+    if (child != null && !ignoringSemantics) {
       visitor(child);
+    }
   }
 
   @override
@@ -3052,8 +3078,7 @@ class RenderIgnorePointer extends RenderProxyBox {
     properties.add(
       DiagnosticsProperty<bool>(
         'ignoringSemantics',
-        _effectiveIgnoringSemantics,
-        description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,
+        ignoringSemantics,
       )
     );
   }

@@ -825,7 +825,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         child: EditableText(
           key: editableTextKey,
           controller: controller,
-          readOnly: widget.readOnly,
+          readOnly: widget.readOnly || !(widget.enabled ?? true),
           toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,
@@ -869,12 +869,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     );
 
     return Semantics(
-      onTap: () {
-        if (!controller.selection.isValid) {
-          controller.selection = TextSelection.collapsed(offset: controller.text.length);
-        }
-        _requestKeyboard();
-      },
+      onTap: enabled ?
+        () {
+          if (!controller.selection.isValid) {
+            controller.selection = TextSelection.collapsed(offset: controller.text.length);
+          }
+          _requestKeyboard();
+        } : null,
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(

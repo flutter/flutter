@@ -2387,12 +2387,50 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
+  Set<SemanticsAction> _mutedSemanticsActions = <SemanticsAction>{};
+
+  /// Update the set of [SemanticsAction] that will be ignore when constructing
+  /// semantics action handlers.
+  ///
+  /// The muted [SemanticsAction] will apply to all the children in subtree.
+  void updateMutedSemanticsActions(Set<SemanticsAction> actions) {
+    assert(actions != null);
+    if (_mutedSemanticsActions.length == actions.length &&
+        _mutedSemanticsActions.every(actions.contains))
+      return;
+    _mutedSemanticsActions = actions;
+    markNeedsSemanticsUpdate();
+    bool markRenderObjectNeedsSemanticsUpdate(RenderObject renderChild) {
+      renderChild.markNeedsSemanticsUpdate();
+      renderChild.visitChildrenForSemantics(markRenderObjectNeedsSemanticsUpdate);
+    }
+    visitChildrenForSemantics(markRenderObjectNeedsSemanticsUpdate);
+  }
+
+  // Use [_inheritedMutedSemanticsActions] to access
+  Set<SemanticsAction> _cachedMutedSemanticsActions;
+
+  /// The muted [SemanticsAction] that aggregated from parent and current render
+  /// object.
+  Set<SemanticsAction> get _inheritedMutedSemanticsActions {
+    if (_cachedMutedSemanticsActions == null) {
+      _cachedMutedSemanticsActions = <SemanticsAction>{};
+      if (parent is RenderObject) {
+        final RenderObject renderParent = parent;
+        _cachedMutedSemanticsActions.addAll(renderParent._inheritedMutedSemanticsActions);
+      }
+      _cachedMutedSemanticsActions.addAll(_mutedSemanticsActions);
+    }
+    return _cachedMutedSemanticsActions;
+  }
+
   // Use [_semanticsConfiguration] to access.
   SemanticsConfiguration _cachedSemanticsConfiguration;
 
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
       _cachedSemanticsConfiguration = SemanticsConfiguration();
+      _cachedSemanticsConfiguration.mutedActions = _inheritedMutedSemanticsActions;
       describeSemanticsConfiguration(_cachedSemanticsConfiguration);
     }
     return _cachedSemanticsConfiguration;
@@ -2444,6 +2482,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
+    _cachedMutedSemanticsActions = null;
     if (!attached || owner._semanticsOwner == null) {
       _cachedSemanticsConfiguration = null;
       return;

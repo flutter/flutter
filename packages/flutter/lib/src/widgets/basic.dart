@@ -5952,9 +5952,10 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   const IgnorePointer({
     Key key,
     this.ignoring = true,
-    this.ignoringSemantics,
+    this.ignoringSemantics = false,
     Widget child,
   }) : assert(ignoring != null),
+       assert(ignoringSemantics != null),
        super(key: key, child: child);
 
   /// Whether this widget is ignored during hit testing.
@@ -5980,6 +5981,7 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
+    print('ignoring = $ignoring');
     renderObject
       ..ignoring = ignoring
       ..ignoringSemantics = ignoringSemantics;
