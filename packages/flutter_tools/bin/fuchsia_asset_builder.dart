@@ -15,8 +15,7 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/reporting/disabled_usage.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 const String _kOptionPackages = 'packages';
 const String _kOptionAsset = 'asset-dir';

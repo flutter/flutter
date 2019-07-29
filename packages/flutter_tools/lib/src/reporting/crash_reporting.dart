@@ -2,17 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
-
-import '../base/io.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../globals.dart';
-
-import 'usage.dart';
+part of reporting;
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductId = 'Flutter_Tools';

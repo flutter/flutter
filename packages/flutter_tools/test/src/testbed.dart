@@ -8,17 +8,17 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 
 import 'context.dart';
