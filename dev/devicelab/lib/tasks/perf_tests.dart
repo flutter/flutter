@@ -159,6 +159,7 @@ class StartupTest {
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
+        'timeToFirstFrameRasterizedMicros',
       ]);
     });
   }
