@@ -33,7 +33,7 @@ Future<void> main() async {
   });
 }
 
-final String expectedWarning =
+const String expectedWarning =
     'Launching a debug-mode app from the home screen may cause problems.';
 
 // When a debug-mode app is launched from the host there should be no warnings.
