@@ -75,29 +75,33 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// ```
 /// {@end-tool}
 ///
-/// The framework ships with many concrete subclasses of [AnimatedWidget]s for
-/// specific use cases. They are listed in the "see also" section below and
-/// their names usually end in `Transition`. One notable exception is the
-/// [AnimatedBuilder], which is useful for more complex cases involving
-/// additional state.
+/// For more complex case involving additional state, consider using
+/// [AnimatedBuilder].
 ///
 /// ## Relationship to [ImplicitlyAnimatedWidget]s
 ///
-/// [AnimatedWidget]s and their subclasses take an explicit [Listenable]
-/// (usually an [Animation] derived from an [AnimationController]) to power
-/// the animation. In contrast to that, [ImplicitlyAnimatedWidget]s instantiate
-/// and manage their own [AnimationController]s to power the animation. For
-/// multiple parallel animations it is more efficient to instantiate one
-/// [AnimationController] that powers multiple [AnimatedWidget] compared to
-/// using multiple [ImplicitlyAnimatedWidget]s where each one manages their own
-/// [AnimationController]. However, the [ImplicitlyAnimatedWidget]s and their
-/// subclasses are easier to use for simple use cases.
+/// [AnimatedWidget]s (and their subclasses) take an explicit [Listenable] as
+/// argument, which is usually an [Animation] derived from an
+/// [AnimationController]. In most cases, the lifecycle of that
+/// [AnimationController] has to be managed manually by the developer.
+/// In contrast to that, [ImplicitlyAnimatedWidget]s (and their subclasses)
+/// automatically manage their own internal [AnimationController] making those
+/// classes easier to use as no external [Animation] has to be provided by the
+/// developer. If you only need to set a target value for the animation and
+/// configure its duration/curve, consider using (a subclass of)
+/// [ImplicitlyAnimatedWidget]s instead of (a subclass of) this class.
 ///
-/// See also:
+/// ## Common animated widgets
 ///
-///  * [AnimatedBuilder], which is useful for complex animation use cases.
+/// A number of animated widgets ship with the framework. They are usually named
+/// `FooTransition`, where `Foo` is the name of the non-animated
+/// version of that widget. The subclasses of this class should not be confused
+/// with subclasses of [ImplicitlyAnimatedWidget] (see above), which are usually
+/// named `AnimatedFoo`. Commonly used animated widgets include:
+///
+///  * [AnimatedBuilder], which is useful for complex animation use cases and a
+///    notable exception to the naming scheme of [AnimatedWidget] subclasses.
 ///  * [AlignTransition], which is an animated version of [Align].
-///  * [AnimatedModalBarrier], which is an animated version of [ModalBarrier].
 ///  * [DecoratedBoxTransition], which is an animated version of [DecoratedBox].
 ///  * [DefaultTextStyleTransition], which is an animated version of
 ///    [DefaultTextStyle].
@@ -110,6 +114,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 ///  * [SlideTransition], which animates the position of a widget relative to
 ///    its normal position.
 ///  * [FadeTransition], which is an animated version of [Opacity].
+///  * [AnimatedModalBarrier], which is an animated version of [ModalBarrier].
 abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///

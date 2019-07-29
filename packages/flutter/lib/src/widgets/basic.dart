@@ -197,9 +197,9 @@ class Directionality extends InheritedWidget {
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
 ///  * [AnimatedOpacity], which uses an animation internally to efficiently
-///    animate changes in opacity.
+///    animate opacity.
 ///  * [FadeTransition], which uses a provided animation to efficiently animate
-///    changes in opacity.
+///    opacity.
 ///  * [Image], which can directly provide a partially transparent image with
 ///    much less performance hit.
 class Opacity extends SingleChildRenderObjectWidget {
@@ -1711,8 +1711,8 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [AnimatedAlign], which automatically transitions the child's
-///    position over a given duration whenever the given [alignment] changes.
+///  * [AnimatedAlign], which animates changes in [alignment] smoothly over a
+///    given duration.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
@@ -3283,7 +3283,7 @@ class IndexedStack extends Stack {
 ///
 ///  * [AnimatedPositioned], which automatically transitions the child's
 ///    position over a given duration whenever the given position changes.
-///  * [PositionedTransition], which takes an external [Animation] to transition
+///  * [PositionedTransition], which takes a provided [Animation] to transition
 ///    changes in the child's position over a given duration.
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
 class Positioned extends ParentDataWidget<Stack> {
