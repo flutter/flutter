@@ -25,7 +25,6 @@ import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
-import 'sliver_layout_builder.dart';
 import 'viewport.dart';
 
 /// A controller for [PageView].
@@ -760,23 +759,6 @@ class _PageViewState extends State<PageView> {
         ? _kPagePhysics.applyTo(widget.physics)
         : widget.physics;
 
-    Widget buildSlivers(BuildContext context, SliverConstraints constraints) {
-      final double fixedExtent = constraints.viewportMainAxisExtent * widget.controller.viewportFraction;
-      final double padding = math.max(0, constraints.viewportMainAxisExtent - fixedExtent) / 2;
-
-      final EdgeInsets sliverPaddingValue = widget.scrollDirection == Axis.horizontal
-        ? EdgeInsets.symmetric(horizontal: padding)
-        : EdgeInsets.symmetric(vertical: padding);
-
-      return SliverPadding(
-        padding: sliverPaddingValue,
-        sliver: SliverFixedExtentList(
-          delegate: widget.childrenDelegate,
-          itemExtent: fixedExtent,
-        ),
-      );
-    }
-
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
@@ -800,7 +782,10 @@ class _PageViewState extends State<PageView> {
             axisDirection: axisDirection,
             offset: position,
             slivers: <Widget>[
-              SliverLayoutBuilder(builder: buildSlivers),
+              SliverFillViewport(
+                viewportFraction: widget.controller.viewportFraction,
+                delegate: widget.childrenDelegate,
+              ),
             ],
           );
         },
