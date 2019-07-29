@@ -105,7 +105,7 @@ class SourceVisitor {
           sources.add(entity.absolute);
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
-        if (filename.substring(wildcardSegments[0].length).endsWith(segments[1])) {
+        if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
           sources.add(entity.absolute);
         }
       }

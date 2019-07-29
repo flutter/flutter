@@ -546,7 +546,15 @@ class _BuildInstance {
       final List<File> inputs = target.resolveInputs(environment);
       final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
       for (File input in inputs) {
-        // If this input file was output from another rule, then skip it.
+        // The build system should produce a list of aggregate input and output
+        // files for the overall build. The goal is to provide this to a hosting
+        // build system, such as Xcode, to configure logic for when to skip the
+        // rule/phase which contains the flutter build. When looking at the
+        // inputs and outputs for the individual rules, we need to be careful to
+        // remove inputs that were actually output from previous build steps.
+        // This indicates that the file is actual an output or intermediary. If
+        // these files are included as both inputs and outputs then it isn't
+        // possible to construct a DAG describing the build.
         final String resolvedPath = input.resolveSymbolicLinksSync();
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
