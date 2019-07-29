@@ -203,6 +203,10 @@ String _getMessage(SemanticsNode node) {
     annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
     wantsTap = true;
   }
+  if (data.hasFlag(SemanticsFlag.isTextField)) {
+    annotations.add('textfield');
+    wantsTap = true;
+  }
 
   if (data.hasAction(SemanticsAction.tap)) {
     if (!wantsTap)
