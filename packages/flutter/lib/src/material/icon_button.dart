@@ -16,7 +16,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
+// See: <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double _kMinButtonSize = kMinInteractiveDimension;
 
 /// A material design icon button.

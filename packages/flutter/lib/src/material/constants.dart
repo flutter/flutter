@@ -14,7 +14,8 @@ import 'package:flutter/painting.dart';
 ///
 /// See also:
 ///
-///   * [kMinInteractiveDimensionCupertino]
+///  * [kMinInteractiveDimensionCupertino]
+///  * The Material spec on touch targets at <https://material.io/design/usability/accessibility.html#layout-typography>.
 const double kMinInteractiveDimension = 48.0;
 
 /// The height of the toolbar component of the [AppBar].
