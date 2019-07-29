@@ -203,12 +203,13 @@ class FormState extends State<Form> {
       hasError = !field.validate() || hasError;
     return !hasError;
   }
-  
+
   /// Validates every [FormField] that is a descendant of this [Form] until
   /// the first error. Returns true if there are no errors.
   bool validateSilent() {
     for (FormFieldState<dynamic> field in _fields) {
-      if (!field.validateSilent()) return false;
+      if (!field.validateSilent())
+        return false;
     }
     return true;
   }
