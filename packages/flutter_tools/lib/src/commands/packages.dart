@@ -9,7 +9,7 @@ import '../base/os.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 
 class PackagesCommand extends FlutterCommand {
@@ -71,8 +71,8 @@ class PackagesGetCommand extends FlutterCommand {
   }
 
   @override
-  Future<Map<String, String>> get usageValues async {
-    final Map<String, String> usageValues = <String, String>{};
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usageValues = <CustomDimensions, String>{};
     final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
     final String target = findProjectRoot(workingDirectory);
     if (target == null) {
@@ -82,11 +82,11 @@ class PackagesGetCommand extends FlutterCommand {
     final bool hasPlugins = await rootProject.flutterPluginsFile.exists();
     if (hasPlugins) {
       final int numberOfPlugins = (await rootProject.flutterPluginsFile.readAsLines()).length;
-      usageValues[kCommandPackagesNumberPlugins] = '$numberOfPlugins';
+      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '$numberOfPlugins';
     } else {
-      usageValues[kCommandPackagesNumberPlugins] = '0';
+      usageValues[CustomDimensions.commandPackagesNumberPlugins] = '0';
     }
-    usageValues[kCommandPackagesProjectModule] = '${rootProject.isModule}';
+    usageValues[CustomDimensions.commandPackagesProjectModule] = '${rootProject.isModule}';
     return usageValues;
   }
 
@@ -100,11 +100,11 @@ class PackagesGetCommand extends FlutterCommand {
         checkLastModified: false,
       );
       pubGetTimer.stop();
-      flutterUsage.sendEvent('packages-pub-get', 'success');
+      PubGetEvent(success: true).send();
       flutterUsage.sendTiming('packages-pub-get', 'success', pubGetTimer.elapsed);
     } catch (_) {
       pubGetTimer.stop();
-      flutterUsage.sendEvent('packages-pub-get', 'failure');
+      PubGetEvent(success: false).send();
       flutterUsage.sendTiming('packages-pub-get', 'failure', pubGetTimer.elapsed);
       rethrow;
     }

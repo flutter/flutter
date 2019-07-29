@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -53,6 +53,7 @@ void main() {
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
     when(mockDevFS.sources).thenReturn(<Uri>[]);
     when(mockDevFS.destroy()).thenAnswer((Invocation invocation) async { });
+    when(mockDevFS.assetPathsToEvict).thenReturn(<String>{});
     // FlutterDevice Mocks.
     when(mockFlutterDevice.updateDevFS(
       // Intentionally provide empty list to match above mock.
@@ -96,6 +97,19 @@ void main() {
       mockVMService,
     ]);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
+    when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
+      Future<Map<String, dynamic>>.value(<String, dynamic>{
+        'type': 'ReloadReport',
+        'success': true,
+        'details': <String, dynamic>{
+          'loadedLibraryCount': 1,
+          'finalLibraryCount': 1,
+          'receivedLibraryCount': 1,
+          'receivedClassesCount': 1,
+          'receivedProceduresCount': 1,
+        },
+      }),
+    ]);
     // VMService mocks.
     when(mockVMService.wsAddress).thenReturn(testUri);
     when(mockVMService.done).thenAnswer((Invocation invocation) {
@@ -107,6 +121,9 @@ void main() {
     });
     when(mockIsolate.flutterExit()).thenAnswer((Invocation invocation) {
       return Future<Map<String, Object>>.value(null);
+    });
+    when(mockIsolate.reload()).thenAnswer((Invocation invocation) {
+      return Future<ServiceObject>.value(null);
     });
   });
 
@@ -162,11 +179,44 @@ void main() {
     expect(result.fatal, true);
     expect(result.code, 1);
     verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-      reloadExceptionSdkName: 'Example',
-      reloadExceptionEmulator: 'false',
-      reloadExceptionFullRestart: 'false',
+      cdKey(CustomDimensions.hotEventTargetPlatform):
+        getNameForTargetPlatform(TargetPlatform.android_arm),
+      cdKey(CustomDimensions.hotEventSdkName): 'Example',
+      cdKey(CustomDimensions.hotEventEmulator): 'false',
+      cdKey(CustomDimensions.hotEventFullRestart): 'false',
     })).called(1);
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  }));
+
+
+  // Need one for hot restart as well.
+
+  test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: false);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+    expect(verify(flutterUsage.sendEvent('hot', 'reload',
+                  parameters: captureAnyNamed('parameters'))).captured[0],
+      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
+                   getNameForTargetPlatform(TargetPlatform.android_arm))
+    );
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),
   }));
@@ -206,10 +256,11 @@ void main() {
     expect(result.fatal, true);
     expect(result.code, 1);
     verify(flutterUsage.sendEvent('hot', 'exception', parameters: <String, String>{
-      reloadExceptionTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
-      reloadExceptionSdkName: 'Example',
-      reloadExceptionEmulator: 'false',
-      reloadExceptionFullRestart: 'true',
+      cdKey(CustomDimensions.hotEventTargetPlatform):
+        getNameForTargetPlatform(TargetPlatform.android_arm),
+      cdKey(CustomDimensions.hotEventSdkName): 'Example',
+      cdKey(CustomDimensions.hotEventEmulator): 'false',
+      cdKey(CustomDimensions.hotEventFullRestart): 'true',
     })).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockUsage(),

@@ -30,7 +30,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../vmservice.dart';

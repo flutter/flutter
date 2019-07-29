@@ -6,11 +6,11 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_bundle.dart';
-import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -70,7 +70,7 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect(await command.usageValues,
-        containsPair(kCommandBuildBundleIsModule, 'true'));
+        containsPair(CustomDimensions.commandBuildBundleIsModule, 'true'));
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('bundle getUsage indicate that project is not a module', () async {
@@ -80,7 +80,7 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect(await command.usageValues,
-        containsPair(kCommandBuildBundleIsModule, 'false'));
+        containsPair(CustomDimensions.commandBuildBundleIsModule, 'false'));
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('bundle getUsage indicate the target platform', () async {
@@ -90,7 +90,7 @@ void main() {
     final BuildBundleCommand command = await runCommandIn(projectPath);
 
     expect(await command.usageValues,
-        containsPair(kCommandBuildBundleTargetPlatform, 'android-arm'));
+        containsPair(CustomDimensions.commandBuildBundleTargetPlatform, 'android-arm'));
   }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('bundle fails to build for Windows if feature is disabled', () async {
