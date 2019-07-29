@@ -14,7 +14,7 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import 'application_package.dart';
 
 /// Builds the macOS project through xcodebuild and returns the app bundle.

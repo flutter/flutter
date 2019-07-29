@@ -17,7 +17,7 @@ import '../features.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../resident_web_runner.dart';
 import '../run_cold.dart';
@@ -198,7 +198,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<Map<String, String>> get usageValues async {
+  Future<Map<CustomDimensions, String>> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
 
@@ -227,13 +227,13 @@ class RunCommand extends RunCommandBase {
       hostLanguage.add(iosProject.isSwift ? 'swift' : 'objc');
     }
 
-    return <String, String>{
-      kCommandRunIsEmulator: '$isEmulator',
-      kCommandRunTargetName: deviceType,
-      kCommandRunTargetOsVersion: deviceOsVersion,
-      kCommandRunModeName: modeName,
-      kCommandRunProjectModule: '${FlutterProject.current().isModule}',
-      kCommandRunProjectHostLanguage: hostLanguage.join(','),
+    return <CustomDimensions, String>{
+      CustomDimensions.commandRunIsEmulator: '$isEmulator',
+      CustomDimensions.commandRunTargetName: deviceType,
+      CustomDimensions.commandRunTargetOsVersion: deviceOsVersion,
+      CustomDimensions.commandRunModeName: modeName,
+      CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
+      CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
     };
   }
 

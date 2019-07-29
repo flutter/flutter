@@ -28,6 +28,7 @@ import '../widgets/semantics_tester.dart';
 // production code.
 
 const String tooltipText = 'TIP';
+const double _customPaddingValue = 10.0;
 
 void main() {
   test('TooltipThemeData copyWith, ==, hashCode basics', () {
@@ -460,6 +461,118 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
+  testWidgets('Tooltip margin - ThemeData', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Theme(
+                  data: ThemeData(
+                    tooltipTheme: const TooltipThemeData(
+                      padding: EdgeInsets.all(0.0),
+                      margin: EdgeInsets.all(_customPaddingValue),
+                    ),
+                  ),
+                  child: Tooltip(
+                    key: key,
+                    message: tooltipText,
+                    child: Container(
+                      width: 0.0,
+                      height: 0.0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
+    final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
+
+    final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
+    final Offset topLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topLeft(Offset.zero));
+    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customPaddingValue);
+    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customPaddingValue);
+
+    final Offset topRightTipInGlobal = tip.localToGlobal(tip.size.topRight(Offset.zero));
+    final Offset topRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
+    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customPaddingValue);
+    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customPaddingValue);
+
+    final Offset bottomLeftTipInGlobal = tip.localToGlobal(tip.size.bottomLeft(Offset.zero));
+    final Offset bottomLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
+    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customPaddingValue);
+    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customPaddingValue);
+
+    final Offset bottomRightTipInGlobal = tip.localToGlobal(tip.size.bottomRight(Offset.zero));
+    final Offset bottomRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
+    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customPaddingValue);
+    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
+  });
+
+  testWidgets('Tooltip margin - TooltipTheme', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return TooltipTheme(
+                  padding: const EdgeInsets.all(0.0),
+                  margin: const EdgeInsets.all(_customPaddingValue),
+                  child: Tooltip(
+                    key: key,
+                    message: tooltipText,
+                    child: Container(
+                      width: 0.0,
+                      height: 0.0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
+    final RenderBox tooltipContent = tester.renderObject(find.text(tooltipText));
+
+    final Offset topLeftTipInGlobal = tip.localToGlobal(tip.size.topLeft(Offset.zero));
+    final Offset topLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topLeft(Offset.zero));
+    expect(topLeftTooltipContentInGlobal.dx, topLeftTipInGlobal.dx + _customPaddingValue);
+    expect(topLeftTooltipContentInGlobal.dy, topLeftTipInGlobal.dy + _customPaddingValue);
+
+    final Offset topRightTipInGlobal = tip.localToGlobal(tip.size.topRight(Offset.zero));
+    final Offset topRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.topRight(Offset.zero));
+    expect(topRightTooltipContentInGlobal.dx, topRightTipInGlobal.dx - _customPaddingValue);
+    expect(topRightTooltipContentInGlobal.dy, topRightTipInGlobal.dy + _customPaddingValue);
+
+    final Offset bottomLeftTipInGlobal = tip.localToGlobal(tip.size.bottomLeft(Offset.zero));
+    final Offset bottomLeftTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomLeft(Offset.zero));
+    expect(bottomLeftTooltipContentInGlobal.dx, bottomLeftTipInGlobal.dx + _customPaddingValue);
+    expect(bottomLeftTooltipContentInGlobal.dy, bottomLeftTipInGlobal.dy - _customPaddingValue);
+
+    final Offset bottomRightTipInGlobal = tip.localToGlobal(tip.size.bottomRight(Offset.zero));
+    final Offset bottomRightTooltipContentInGlobal = tooltipContent.localToGlobal(tooltipContent.size.bottomRight(Offset.zero));
+    expect(bottomRightTooltipContentInGlobal.dx, bottomRightTipInGlobal.dx - _customPaddingValue);
+    expect(bottomRightTooltipContentInGlobal.dy, bottomRightTipInGlobal.dy - _customPaddingValue);
+  });
+
   testWidgets('Tooltip message textStyle - ThemeData.tooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -641,7 +754,7 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
-      matching: find.byType(Padding),
+      matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
@@ -684,7 +797,7 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),
-      matching: find.byType(Padding),
+      matching: find.byType(Padding).first, // select [Tooltip.padding] instead of [Tooltip.margin]
     ));
     final RenderBox content = tester.renderObject(find.ancestor(
       of: find.text(tooltipText),

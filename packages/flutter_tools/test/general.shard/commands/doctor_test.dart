@@ -16,9 +16,9 @@ import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/proxy_validator.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';

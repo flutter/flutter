@@ -16,7 +16,7 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';

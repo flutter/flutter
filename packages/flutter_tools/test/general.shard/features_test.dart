@@ -436,16 +436,16 @@ void main() {
     /// Plugins as AARS
     test('plugins built as AARs with config on master', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('master');
-      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(false);
 
-      expect(featureFlags.isPluginAsAarEnabled, true);
+      expect(featureFlags.isPluginAsAarEnabled, false);
     }));
 
     test('plugins built as AARs with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(false);
 
-      expect(featureFlags.isPluginAsAarEnabled, true);
+      expect(featureFlags.isPluginAsAarEnabled, false);
     }));
   });
 }

@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -504,6 +504,18 @@ example:org-dartlang-app:/
       Logger: () => BufferLogger(),
       Platform: _kNoColorTerminalPlatform,
     });
+  });
+
+  test('TargetModel values', () {
+    expect(TargetModel('vm'), TargetModel.vm);
+    expect(TargetModel.vm.toString(), 'vm');
+
+    expect(TargetModel('flutter'), TargetModel.flutter);
+    expect(TargetModel.flutter.toString(), 'flutter');
+
+    expect(TargetModel('flutter_runner'), TargetModel.flutterRunner);
+    expect(TargetModel.flutterRunner.toString(), 'flutter_runner');
+    expect(() => TargetModel('foobar'), throwsA(isInstanceOf<AssertionError>()));
   });
 }
 

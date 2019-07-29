@@ -114,7 +114,6 @@ void main() {
         'physical_model_overflow.png',
         version: null,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 

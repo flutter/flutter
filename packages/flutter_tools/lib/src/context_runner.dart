@@ -42,7 +42,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
-import 'reporting/usage.dart';
+import 'reporting/reporting.dart';
 import 'run_hot.dart';
 import 'version.dart';
 import 'web/chrome.dart';
