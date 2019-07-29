@@ -1332,7 +1332,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_default_text_style.mp4}
 ///
 /// For the animation, you can chose a [curve] as well as a [duration] and the
-/// widget will automatically animate to the new target position. If you require
+/// widget will automatically animate to the new default text style. If you require
 /// more control over the animation (e.g. if you want to stop it mid-animation),
 /// consider using an [DefaultTextStyleTransition] instead, which takes a provided
 /// [Animation] as argument. While that allows you to fine-tune the animation,
