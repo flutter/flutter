@@ -106,8 +106,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Animation<double> _fadeoutOpacityAnimation;
   AnimationController _thicknessAnimationController;
   Timer _fadeoutTimer;
-  double _dragScrollbarStartY;
-  double _horizontalDragScrollbarStartY;
+  double _dragScrollbarPositionY;
+  Drag _drag;
 
   double get _thickness {
     return _kScrollbarThickness + _thicknessAnimationController.value * (_kScrollbarThicknessDragging - _kScrollbarThickness);
@@ -164,14 +164,26 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   void _dragScrollbar(double primaryDelta) {
     assert(widget.controller != null);
 
-    // Convert primaryDelta, the amount that the scrollbar moved, into the
-    // coordinate space of the scroll position, and scroll to that
-    // position.
+    // Convert primaryDelta, the amount that the scrollbar moved since the last
+    // time _dragScrollbar was called, into the coordinate space of the scroll
+    // position, and create/update the drag event with that position.
     final double scrollOffsetLocal = _painter.getTrackToScroll(primaryDelta);
-    _dragScrollbarStartY ??= widget.controller.position.pixels;
-    widget.controller.position.jumpTo(
-      _dragScrollbarStartY + scrollOffsetLocal,
-    );
+    final double scrollOffsetGlobal = scrollOffsetLocal + widget.controller.position.pixels;
+
+    if (_drag == null) {
+      _drag = widget.controller.position.drag(
+        DragStartDetails(
+          globalPosition: Offset(0.0, scrollOffsetGlobal),
+        ),
+        () {},
+      );
+    } else {
+      _drag.update(DragUpdateDetails(
+        globalPosition: Offset(0.0, scrollOffsetGlobal),
+        delta: Offset(0.0, -scrollOffsetLocal),
+        primaryDelta: -scrollOffsetLocal,
+      ));
+    }
   }
 
   void _startFadeoutTimer() {
@@ -182,7 +194,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     });
   }
 
-  void assertVertical() {
+  void _assertVertical() {
     assert(
       widget.controller.position.axis == Axis.vertical,
       'Scrollbar dragging is only supported for vertical scrolling. Don\'t pass the controller param to a horizontal scrollbar.',
@@ -192,54 +204,64 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // Long press event callbacks handle the gesture where the user long presses
   // on the scrollbar thumb and then drags the scrollbar without releasing.
   void _handleLongPressStart(LongPressStartDetails details) {
-    assertVertical();
+    _assertVertical();
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
+    _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleLongPress() {
-    assertVertical();
+    _assertVertical();
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    assertVertical();
-    _dragScrollbar(details.localOffsetFromOrigin.dy);
+    _assertVertical();
+    _dragScrollbar(details.localPosition.dy - _dragScrollbarPositionY);
+    _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
-    assertVertical();
-    _startFadeoutTimer();
-    _thicknessAnimationController.reverse();
-    _dragScrollbarStartY = null;
-    final ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
-    scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
+    _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy);
   }
 
   // Horizontal drag event callbacks handle the gesture where the user swipes in
   // from the right on top of the scrollbar thumb and then drags the scrollbar
   // without releasing.
   void _handleHorizontalDragStart(DragStartDetails details) {
-    assertVertical();
-    _horizontalDragScrollbarStartY = details.localPosition.dy;
+    _assertVertical();
+    _dragScrollbarPositionY = details.localPosition.dy;
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    assertVertical();
-    _dragScrollbar(details.localPosition.dy - _horizontalDragScrollbarStartY);
+    _assertVertical();
+    _dragScrollbar(details.localPosition.dy - _dragScrollbarPositionY);
+    _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleHorizontalDragEnd(DragEndDetails details) {
-    assertVertical();
-    _horizontalDragScrollbarStartY = null;
-    _dragScrollbarStartY = null;
+    _handleDragScrollEnd(details.velocity.pixelsPerSecond.dy);
+  }
+
+  void _handleDragScrollEnd(double trackVelocityY) {
+    _assertVertical();
     _startFadeoutTimer();
     _thicknessAnimationController.reverse();
-    final ScrollPositionWithSingleContext scrollPosition = widget.controller.position;
-    scrollPosition.goBallistic(details.velocity.pixelsPerSecond.dy);
+    _dragScrollbarPositionY = null;
+    final double scrollVelocityY = _painter.getTrackToScroll(trackVelocityY);
+    _drag?.end(DragEndDetails(
+      primaryVelocity: -scrollVelocityY,
+      velocity: Velocity(
+        pixelsPerSecond: Offset(
+          0.0,
+          -scrollVelocityY,
+        ),
+      ),
+    ));
+    _drag = null;
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
@@ -259,7 +281,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
       _painter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
-      if (_dragScrollbarStartY == null) {
+      if (_dragScrollbarPositionY == null) {
         _startFadeoutTimer();
       }
     }
