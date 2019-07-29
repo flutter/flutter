@@ -602,14 +602,14 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// This widget handles:
 ///   * Rendering of a platform view. The platform view will be layed out to fills all available space
 ///     the parent of this object must provide bounded layout constraints.
-///   * Semantics update. A semantics node will be created for this widget, if has a [SemanticsConfiguration.platformViewId]
-///     same as the `id` that is used to construct this widget.
+///   * Semantics update. A semantics node will be created for this widget, which has a [SemanticsConfiguration.platformViewId]
+///     same as the `controller.id`.
 ///
 /// This widget creates a [PlatformViewRenderBox] to add a [PlatformViewLayer]
 /// to the layer tree. Then you would need to composite the UI when the layer is visited
 /// in the "paint" traversal in the Flutter Engine.
-/// The `id` and `controller` is required when constructing
-/// this widget, they are required by [PlatformViewRenderBox] to handle things
+/// The `controller` is required when constructing this widget,
+/// it is required by [PlatformViewRenderBox] to handle things
 /// such as Semantics updates.
 ///
 /// To create a new PlatformView using this widget, you would need to first
@@ -624,7 +624,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewSurface(
 ///       controller: controller,
-///     );
+///     )..id = id;
 ///    };
 ///   }
 /// }
