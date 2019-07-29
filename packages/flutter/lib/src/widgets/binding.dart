@@ -304,6 +304,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         },
       );
 
+      // This returns 'true' when the first frame is rasterized, and the trace
+      // event 'Rasterized first useful frame' is sent out.
+      registerServiceExtension(
+        name: 'didSendFirstFrameRasterizedEvent',
+        callback: (_) async {
+          return <String, dynamic>{
+            // This is defined to return a STRING, not a boolean.
+            // Devtools, the Intellij plugin, and the flutter tool all depend
+            // on it returning a string and not a boolean.
+            'enabled': firstFrameRasterized ? 'true' : 'false',
+          };
+        },
+      );
+
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',
@@ -556,9 +570,15 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// Whether the Flutter engine has rasterized the first frame.
   ///
   /// {@macro flutter.frame_rasterized_vs_presented}
-  Future<void> get firstFrameRasterized => _firstFrameCompleter.future;
+  bool get firstFrameRasterized => _firstFrameCompleter.isCompleted;
 
-  /// Whether the first frame has finished rendering.
+  /// A future that completes when the Flutter engine has rasterized the first
+  /// frame.
+  ///
+  /// {@macro flutter.frame_rasterize`_vs_presented}
+  Future<void> get waitUntilFirstFrameRasterized => _firstFrameCompleter.future;
+
+  /// Whether the first frame has finished building.
   ///
   /// Only useful in profile and debug builds; in release builds, this always
   /// return false. This can be deferred using [deferFirstFrameReport] and
@@ -567,6 +587,8 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   ///
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
+  ///
+  /// See also [firstFrameRasterized].
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"

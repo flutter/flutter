@@ -1313,7 +1313,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
+    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameRasterizedEvent');
     // result might be null when the service extension is not initialized
     return result != null && result['enabled'] == 'true';
   }

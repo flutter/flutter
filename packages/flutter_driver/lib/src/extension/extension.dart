@@ -224,7 +224,7 @@ class FlutterDriverExtension {
 
   // This can be used to wait for the first frame being rasterized during app launch.
   Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
-    await WidgetsBinding.instance.firstFrameRasterized;
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     return null;
   }
 

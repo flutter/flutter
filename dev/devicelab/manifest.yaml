@@ -245,6 +245,7 @@ tasks:
     description: >
       Verifies that Platform View can be used from an Android project.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["mac/android"]
 
   complex_layout__start_up:
@@ -295,6 +296,7 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an Android project.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["mac/android"]
 
   integration_ui:
@@ -436,6 +438,7 @@ tasks:
     description: >
       Verifies that Platform View can be used from an iOS project.
     stage: devicelab_ios
+    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   complex_layout_scroll_perf_ios__timeline_summary:
@@ -484,6 +487,7 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
+    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   integration_ui_ios:
