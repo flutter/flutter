@@ -60,17 +60,18 @@ class CupertinoScrollbar extends StatefulWidget {
 
   /// The [ScrollController] used to implement Scrollbar dragging.
   ///
-  /// Starting in iOS13, a long press on the scroll bar or a drag in from the
-  /// side enlarges the scrollbar thumb and makes it interactive. Dragging it
-  /// then causes the view to scroll.
+  /// Scrollbar dragging is started with a long press or a drag in from the side
+  /// on top of the scrollbar thumb, which enlarges the thumb and makes it
+  /// interactive. Dragging it then causes the view to scroll. This feature was
+  /// introduced in iOS 13.
   ///
   /// In order to enable this feature, pass an active ScrollController to this
   /// parameter.  A stateful ancestor of this CupertinoScrollbar needs to
   /// manage the ScrollController and either pass it to a scrollable descendant
   /// or use a PrimaryScrollController to share it.
   ///
-  /// Here is an example of using PrimaryScrollController to enable iOS13's
-  /// draggable scrollbar:
+  /// Here is an example of using PrimaryScrollController to enable scrollbar
+  /// dragging:
   ///
   /// {@tool sample}
   ///
