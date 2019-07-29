@@ -32,7 +32,7 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
 }
 
 class MockMultiChildRenderObjectWidget extends MultiChildRenderObjectWidget {
-  MockMultiChildRenderObjectWidget({Key key, List<Widget> children}) : super(key: key, children: children);
+  MockMultiChildRenderObjectWidget({ Key key, List<Widget> children }) : super(key: key, children: children);
 
   @override
   RenderObject createRenderObject(BuildContext context) => null;
