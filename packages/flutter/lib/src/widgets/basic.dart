@@ -3028,6 +3028,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///
 /// Using a [Stack] you can position widgets over one another.
 ///
+/// ![A screenshot of the Stack widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/stack.png)
+///
 /// ```dart
 /// Stack(
 ///   children: <Widget>[
@@ -3055,6 +3057,8 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///
 /// This example shows how [Stack] can be used to enhance text visibility
 /// by adding gradient backdrops.
+///
+/// ![A screenshot of the Stack widget using a gradient to enhance text visibility](https://flutter.github.io/assets-for-api-docs/assets/widgets/stack_with_gradient.png)
 ///
 /// ```dart
 /// SizedBox(
@@ -3880,6 +3884,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// places text centered in the first two cells and the Flutter logo centered in
 /// the third:
 ///
+/// ![A screenshot of the Row widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/row.png)
+///
 /// ```dart
 /// Row(
 ///   children: <Widget>[
@@ -3912,8 +3918,6 @@ class Flex extends MultiChildRenderObjectWidget {
 /// warning box on the edge that is overflowing. If there is room on the outside
 /// of the row, the amount of overflow is printed in red lettering.
 ///
-/// {@tool sample}
-///
 /// #### Story time
 ///
 /// Suppose, for instance, that you had this code:
@@ -3927,7 +3931,10 @@ class Flex extends MultiChildRenderObjectWidget {
 ///   ],
 /// )
 /// ```
-/// {@end-tool}
+///
+/// You will see this issue when you run the app:
+///
+/// ![A screenshot of the error using the Row widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_error.png)
 ///
 /// The row first asks its first child, the [FlutterLogo], to lay out, at
 /// whatever size the logo would like. The logo is friendly and happily decides
@@ -3944,6 +3951,8 @@ class Flex extends MultiChildRenderObjectWidget {
 /// {@tool sample}
 /// The fix is to wrap the second child in an [Expanded] widget, which tells the
 /// row that the child should be given the remaining room:
+///
+/// ![A screenshot of the Row widget after applying the fix](https://flutter.github.io/assets-for-api-docs/assets/widgets/row_fixed.png)
 ///
 /// ```dart
 /// Row(
@@ -4068,6 +4077,8 @@ class Row extends Flex {
 /// This example uses a [Column] to arrange three widgets vertically, the last
 /// being made to fill all the remaining space.
 ///
+/// ![A screenshot of the Column widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/column.png)
+///
 /// ```dart
 /// Column(
 ///   children: <Widget>[
@@ -4090,6 +4101,8 @@ class Row extends Flex {
 /// [CrossAxisAlignment.start], so that the children are left-aligned. The
 /// [mainAxisSize] is set to [MainAxisSize.min], so that the column shrinks to
 /// fit the children.
+///
+/// ![A screenshot of the Column widget with a customized crossAxisAlignment and mainAxisSize](https://flutter.github.io/assets-for-api-docs/assets/widgets/column_properties.png)
 ///
 /// ```dart
 /// Column(
@@ -4713,13 +4726,14 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
 ///
+///
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+///
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with. The color of the button in the menu changes to
-/// indicate which one has been selected.
-///
-/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
+/// as it is interacted with, shown above. The color of the button in the menu
+/// changes to indicate which one has been selected.
 ///
 /// ```dart main
 /// import 'package:flutter/material.dart';
@@ -5925,6 +5939,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -5975,6 +5990,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       focused: focused,
       inMutuallyExclusiveGroup: inMutuallyExclusiveGroup,
       obscured: obscured,
+      multiline: multiline,
       scopesRoute: scopesRoute,
       namesRoute: namesRoute,
       hidden: hidden,
@@ -6085,6 +6101,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       liveRegion: properties.liveRegion,
       inMutuallyExclusiveGroup: properties.inMutuallyExclusiveGroup,
       obscured: properties.obscured,
+      multiline: properties.multiline,
       scopesRoute: properties.scopesRoute,
       namesRoute: properties.namesRoute,
       hidden: properties.hidden,
@@ -6150,6 +6167,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..focused = properties.focused
       ..inMutuallyExclusiveGroup = properties.inMutuallyExclusiveGroup
       ..obscured = properties.obscured
+      ..multiline = properties.multiline
       ..hidden = properties.hidden
       ..image = properties.image
       ..liveRegion = properties.liveRegion

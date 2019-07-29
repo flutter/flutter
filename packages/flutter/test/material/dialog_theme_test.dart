@@ -134,7 +134,6 @@ void main() {
         'dialog_theme.dialog_with_custom_border.png',
         version: null,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 

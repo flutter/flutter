@@ -154,6 +154,19 @@ Currently there are only three stages defined, `devicelab`,
 ../../bin/cache/dart-sdk/bin/dart bin/run.dart -s {NAME_OF_STAGE}
 ```
 
+## Running tests against a local engine build
+
+To run device lab tests against a local engine build, pass the appropriate
+flags to `bin/run.dart`:
+
+```sh
+../../bin/cache/dart-sdk/bin/dart bin/run.dart --task=[some_task] \
+  --local-engine-src-path=[path_to_local]/engine/src \
+  --local-engine=[local_engine_architecture]
+```
+
+An example of of a local engine architecture is `android_debug_unopt_x86`.
+
 # Reproducing broken builds locally
 
 To reproduce the breakage locally `git checkout` the corresponding Flutter

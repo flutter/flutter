@@ -845,8 +845,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   /// The time stamp for the frame currently being processed.
   ///
-  /// This is only valid while [handleBeginFrame] is running, i.e. while a frame
-  /// is being produced.
+  /// This is only valid while between the start of [handleBeginFrame] and the
+  /// end of the corresponding [handleDrawFrame], i.e. while a frame is being
+  /// produced.
   Duration get currentFrameTimeStamp {
     assert(_currentFrameTimeStamp != null);
     return _currentFrameTimeStamp;

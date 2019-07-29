@@ -216,6 +216,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       _trackExtent * fractionVisible
     );
 
+    final double fractionOverscrolled = 1.0 - _lastMetrics.extentInside / _lastMetrics.viewportDimension;
     final double safeMinLength = math.min(minLength, _trackExtent);
     final double newMinLength = (_beforeExtent > 0 && _afterExtent > 0)
       // Thumb extent is no smaller than minLength if scrolling normally.
@@ -231,7 +232,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       // [0.8, 1.0] to [0.0, 1.0], so 0% to 20% of overscroll will produce
       // values for the thumb that range between minLength and the smallest
       // possible value, minOverscrollLength.
-      : safeMinLength * ((fractionVisible - 0.8).clamp(0.0, 0.2) / 0.2);
+      : safeMinLength * (1.0 - fractionOverscrolled.clamp(0.0, 0.2) / 0.2);
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.

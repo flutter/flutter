@@ -13,17 +13,19 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../resident_runner.dart';
 import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../usage.dart';
 import '../version.dart';
+
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -47,6 +49,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
     usesPortOptions();
     usesIpv6Flag();
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     usesIsolateFilterOption(hide: !verboseHelp);
   }
 
@@ -59,7 +62,6 @@ class RunCommand extends RunCommandBase {
   RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {
     requiresPubspecYaml();
     usesFilesystemOptions(hide: !verboseHelp);
-
     argParser
       ..addFlag('start-paused',
         negatable: false,
@@ -127,10 +129,6 @@ class RunCommand extends RunCommandBase {
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
-      )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
       )
       ..addOption('project-root',
         hide: !verboseHelp,
@@ -200,7 +198,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<Map<String, String>> get usageValues async {
+  Future<Map<CustomDimensions, String>> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
 
@@ -229,13 +227,13 @@ class RunCommand extends RunCommandBase {
       hostLanguage.add(iosProject.isSwift ? 'swift' : 'objc');
     }
 
-    return <String, String>{
-      kCommandRunIsEmulator: '$isEmulator',
-      kCommandRunTargetName: deviceType,
-      kCommandRunTargetOsVersion: deviceOsVersion,
-      kCommandRunModeName: modeName,
-      kCommandRunProjectModule: '${FlutterProject.current().isModule}',
-      kCommandRunProjectHostLanguage: hostLanguage.join(','),
+    return <CustomDimensions, String>{
+      CustomDimensions.commandRunIsEmulator: '$isEmulator',
+      CustomDimensions.commandRunTargetName: deviceType,
+      CustomDimensions.commandRunTargetOsVersion: deviceOsVersion,
+      CustomDimensions.commandRunModeName: modeName,
+      CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
+      CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
     };
   }
 
@@ -409,11 +407,11 @@ class RunCommand extends RunCommandBase {
       );
       flutterDevices.add(flutterDevice);
     }
-    // Only support "web mode" on non-stable branches with a single web device
-    // in a "hot mode".
-    final bool webMode = FlutterVersion.instance.isMaster
-      && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
+    // Only support "web mode" with a single web device due to resident runner
+    // refactoring required otherwise.
+    final bool webMode = featureFlags.isWebEnabled &&
+                         devices.length == 1  &&
+                         await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
@@ -450,8 +448,8 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        stayResident: stayResident,
         ipv6: ipv6,
+        stayResident: stayResident,
       );
     }
 
@@ -463,7 +461,14 @@ class RunCommand extends RunCommandBase {
     final Completer<void> appStartedTimeRecorder = Completer<void>.sync();
     // This callback can't throw.
     unawaited(appStartedTimeRecorder.future.then<void>(
-      (_) { appStartedTime = systemClock.now(); }
+      (_) {
+        appStartedTime = systemClock.now();
+        if (stayResident) {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }
+      }
     ));
 
     final int result = await runner.run(
@@ -471,8 +476,9 @@ class RunCommand extends RunCommandBase {
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
-    if (result != 0)
+    if (result != 0) {
       throwToolExit(null, exitCode: result);
+    }
     return FlutterCommandResult(
       ExitStatus.success,
       timingLabelParts: <String>[

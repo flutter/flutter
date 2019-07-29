@@ -288,13 +288,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   void _checkLongPressStart() {
     assert(_initialButtons == kPrimaryButton);
-    final LongPressStartDetails details = LongPressStartDetails(
-      globalPosition: _longPressOrigin.global,
-      localPosition: _longPressOrigin.local,
-    );
-    if (onLongPressStart != null)
+    if (onLongPressStart != null) {
+      final LongPressStartDetails details = LongPressStartDetails(
+        globalPosition: _longPressOrigin.global,
+        localPosition: _longPressOrigin.local,
+      );
       invokeCallback<void>('onLongPressStart',
         () => onLongPressStart(details));
+    }
     if (onLongPress != null)
       invokeCallback<void>('onLongPress', onLongPress);
   }

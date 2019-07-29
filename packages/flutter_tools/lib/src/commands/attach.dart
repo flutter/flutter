@@ -89,16 +89,13 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
-      )..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.',
-        defaultsTo: false,
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input and provide output '
               'and progress in machine friendly format.',
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
     hotRunnerFactory ??= HotRunnerFactory();
   }
 
@@ -277,7 +274,7 @@ class AttachCommand extends FlutterCommand {
             target: targetFile,
             debuggingOptions: debuggingOptions,
             packagesFilePath: globalResults['packages'],
-            usesTerminalUI: daemon == null,
+            usesTerminalUi: daemon == null,
             projectRootPath: argResults['project-root'],
             dillOutputPath: argResults['output-dill'],
             ipv6: usesIpv6,
@@ -312,7 +309,15 @@ class AttachCommand extends FlutterCommand {
         result = await app.runner.waitForAppToFinish();
         assert(result != null);
       } else {
-        result = await runner.attach();
+        final Completer<void> onAppStart = Completer<void>.sync();
+        unawaited(onAppStart.future.whenComplete(() {
+          TerminalHandler(runner)
+            ..setupTerminal()
+            ..registerSignalHandlers();
+        }));
+        result = await runner.attach(
+          appStartedCompleter: onAppStart,
+        );
         assert(result != null);
       }
       if (result != 0) {
@@ -350,7 +355,7 @@ class HotRunnerFactory {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
+    bool usesTerminalUi = true,
     bool benchmarkMode = false,
     File applicationBinary,
     bool hostIsIde = false,
@@ -364,7 +369,7 @@ class HotRunnerFactory {
     devices,
     target: target,
     debuggingOptions: debuggingOptions,
-    usesTerminalUI: usesTerminalUI,
+    usesTerminalUi: usesTerminalUi,
     benchmarkMode: benchmarkMode,
     applicationBinary: applicationBinary,
     hostIsIde: hostIsIde,

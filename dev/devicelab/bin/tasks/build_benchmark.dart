@@ -8,5 +8,5 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/tasks/build_benchmarks.dart';
 
 Future<void> main() async {
-  await task(createBuildbenchmarkTask());
+  await task(createAndroidBuildBenchmarkTask());
 }

@@ -9,13 +9,13 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../cache.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
-import '../usage.dart';
+import '../reporting/reporting.dart';
+
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
@@ -94,11 +94,13 @@ class AOTSnapshotter {
     @required String outputPath,
     IOSArch iosArch,
     List<String> extraGenSnapshotOptions = const <String>[],
+    @required bool bitcode,
   }) async {
-    FlutterProject flutterProject;
-    if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = FlutterProject.current();
+    if (bitcode && platform != TargetPlatform.ios) {
+      printError('Bitcode is only supported for iOS.');
+      return 1;
     }
+
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
@@ -122,8 +124,6 @@ class AOTSnapshotter {
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = <String>{};
-
-    final String depfilePath = fs.path.join(outputDir.path, 'snapshot.d');
     final List<String> genSnapshotArgs = <String>[
       '--deterministic',
     ];
@@ -165,26 +165,6 @@ class AOTSnapshotter {
       return 1;
     }
 
-    // If inputs and outputs have not changed since last run, skip the build.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: '$depfilePath.fingerprint',
-      paths: <String>[mainPath, ...inputPaths, ...outputPaths],
-      properties: <String, String>{
-        'buildMode': buildMode.toString(),
-        'targetPlatform': platform.toString(),
-        'entryPoint': mainPath,
-        'extraGenSnapshotOptions': extraGenSnapshotOptions.join(' '),
-        'engineHash': Cache.instance.engineRevision,
-        'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
-      },
-      depfilePaths: <String>[],
-    );
-    // TODO(jonahwilliams): re-enable once this can be proved correct.
-    // if (await fingerprinter.doesFingerprintMatch()) {
-    //   printTrace('Skipping AOT snapshot build. Fingerprint match.');
-    //   return 0;
-    // }
-
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
     final int genSnapshotExitCode =
       await _timedStep('snapshot(CompileTime)', 'aot-snapshot',
@@ -198,6 +178,21 @@ class AOTSnapshotter {
       return genSnapshotExitCode;
     }
 
+    // TODO(dnfield): This should be removed when https://github.com/dart-lang/sdk/issues/37560
+    // is resolved.
+    // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
+    // gen_snapshot would provide an argument to do this automatically.
+    if (platform == TargetPlatform.ios && bitcode) {
+      final IOSink sink = fs.file('$assembly.bitcode').openWrite();
+      for (String line in await fs.file(assembly).readAsLines()) {
+        if (line.startsWith('.section __DWARF')) {
+          break;
+        }
+        sink.writeln(line);
+      }
+      await sink.close();
+    }
+
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
@@ -206,13 +201,15 @@ class AOTSnapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      final RunResult result = await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
+      final RunResult result = await _buildIosFramework(
+        iosArch: iosArch,
+        assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
+        outputPath: outputDir.path,
+        bitcode: bitcode,
+      );
       if (result.exitCode != 0)
         return result.exitCode;
     }
-
-    // Compute and record build fingerprint.
-    await fingerprinter.writeFingerprint();
     return 0;
   }
 
@@ -222,13 +219,21 @@ class AOTSnapshotter {
     @required IOSArch iosArch,
     @required String assemblyPath,
     @required String outputPath,
+    @required bool bitcode,
   }) async {
     final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
     printStatus('Building App.framework for $targetArch...');
     final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
-    final RunResult compileResult = await xcode.cc(<String>[...commonBuildOptions, '-c', assemblyPath, '-o', assemblyO]);
+    final RunResult compileResult = await xcode.cc(<String>[
+      ...commonBuildOptions,
+      '-c',
+      assemblyPath,
+      '-o',
+      assemblyO,
+      if (bitcode) '-fembed-bitcode',
+    ]);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
@@ -243,14 +248,23 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
+      if (bitcode) '-fembed-bitcode',
       '-o', appLib,
       assemblyO,
     ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      return linkResult;
     }
-    return linkResult;
+    final RunResult dsymResult = await xcode.dsymutil(<String>[
+      appLib,
+      '-o', fs.path.join(outputPath, 'App.framework.dSYM'),
+    ]);
+    if (dsymResult.exitCode != 0) {
+      printError('Failed to extract dSYM out of dynamic lib');
+    }
+    return dsymResult;
   }
 
   /// Compiles a Dart file to kernel.
