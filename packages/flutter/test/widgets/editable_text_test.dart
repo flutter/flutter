@@ -268,6 +268,39 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
+  testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.visiblePassword,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.visiblePassword'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
+  });
+
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
