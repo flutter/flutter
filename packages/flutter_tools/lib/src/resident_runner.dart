@@ -539,7 +539,7 @@ abstract class ResidentRunner {
          useBuildIsolation: useBuildIsolation,
          flutterDevices: flutterDevices,
          projectRootPath: projectRootPath,
-         target: target,
+         target: findMainDartFile(target),
          debuggingOptions: debuggingOptions,
        ) {
           // Create the isolated build directory if it doesn't already exist.
