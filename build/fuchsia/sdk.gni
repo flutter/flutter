@@ -18,20 +18,22 @@ _fuchsia_sdk_path = "//fuchsia/sdk/$host_os"
 
 template("_fuchsia_sysroot") {
   assert(defined(invoker.meta), "The meta.json file path must be specified.")
+  assert(target_cpu == "x64" || target_cpu == "arm64",
+         "We currently only support 'x64' and 'arm64' targets for fuchsia.")
 
   meta_json = read_file(invoker.meta, "json")
 
   assert(meta_json.type == "sysroot")
 
   meta_json_versions = meta_json.versions
-  defs = meta_json_versions.x64
+  defs = meta_json_versions[target_cpu]
 
   _libs = []
   _lib_dirs = []
   _include_dirs = []
 
   foreach(link_lib, defs.link_libs) {
-    if (link_lib != "arch/x64/sysroot/lib/Scrt1.o") {
+    if (link_lib != "arch/${target_cpu}/sysroot/lib/Scrt1.o") {
       _libs += [ "$_fuchsia_sdk_path/$link_lib" ]
     }
   }
@@ -53,6 +55,8 @@ template("_fuchsia_sysroot") {
 
 template("_fuchsia_fidl_library") {
   assert(defined(invoker.meta), "The meta.json file path must be specified.")
+  assert(target_cpu == "x64" || target_cpu == "arm64",
+         "We currently only support 'x64' and 'arm64' targets for fuchsia.")
 
   meta_json = read_file(invoker.meta, "json")
 
@@ -194,8 +198,8 @@ template("_fuchsia_cc_prebuilt_library") {
   }
 
   meta_json_binaries = meta_json.binaries
-  meta_json_binaries_x64 = meta_json_binaries.x64
-  prebuilt_lib = meta_json_binaries_x64.link
+  meta_json_binaries_arch = meta_json_binaries[target_cpu]
+  prebuilt_lib = meta_json_binaries_arch.link
   _libs = [ "$_fuchsia_sdk_path/$prebuilt_lib" ]
 
   config_name = "config_$target_name"
