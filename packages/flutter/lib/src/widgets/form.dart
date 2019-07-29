@@ -380,7 +380,7 @@ class FormFieldState<T> extends State<FormField<T>> {
     if (widget.validator != null)
       _errorText = widget.validator(_value);
   }
-  
+
   /// Calls [FormField.validator] to validate the field. Returns true if there
   /// were no errors. Doesn't set [errorText] and doesn't rebuild the widget.
   bool validateSilent() {
