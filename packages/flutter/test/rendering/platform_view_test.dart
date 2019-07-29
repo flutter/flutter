@@ -14,7 +14,7 @@ void main() {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
     setUp((){
-      fakePlatformViewController = FakePlatformViewController()..id = 0;
+      fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(controller: fakePlatformViewController);
     });
 
@@ -48,7 +48,7 @@ void main() {
 
       semanticsUpdateCount = 0;
 
-      final FakePlatformViewController updatedFakePlatformViewController = FakePlatformViewController()..id = 10;
+      final FakePlatformViewController updatedFakePlatformViewController = FakePlatformViewController(10);
       platformViewRenderBox.controller = updatedFakePlatformViewController;
       pumpFrame(phase: EnginePhase.flushSemantics);
       // Update id should update the semantics.

@@ -12,12 +12,14 @@ import 'package:flutter/services.dart';
 /// Used in internal testing.
 class FakePlatformViewController extends PlatformViewController {
 
-  bool disposed = false;
+  FakePlatformViewController(int id) {
+    _id = id;
+  }
+
+  int _id;
 
   @override
-  void dispose() {
-    disposed = true;
-  }
+  int get id => _id; 
 }
 
 class FakeAndroidPlatformViewsController {

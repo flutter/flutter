@@ -1670,7 +1670,7 @@ void main() {
     FakePlatformViewController controller;
 
     setUp((){
-      controller = FakePlatformViewController()..id = 0;
+      controller = FakePlatformViewController(0);
     });
 
     testWidgets('PlatformViewSurface should create platform view layer by default', (WidgetTester tester) async {
