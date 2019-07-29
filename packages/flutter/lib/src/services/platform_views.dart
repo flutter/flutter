@@ -722,7 +722,7 @@ abstract class PlatformViewController {
   /// The platform view id associated with this controller.
   ///
   /// The id should always be unique and non-negative.
-  /// In most cases, it should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
+  /// It should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
   /// It is used when handling semantics, composition orders and etc.
   int id;
 }

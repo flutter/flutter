@@ -614,9 +614,8 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///
 /// To create a new PlatformView using this widget, you would need to first
 /// implement a [PlatformViewController]. You also need to
-/// create an unique `id` for each instance of the new platform view.
-/// The [PlatformViewsRegistry.getNextPlatformViewId] should help
-/// you generate the `id`.
+/// create an unique `id` for each instance of the new platform view using
+/// [PlatformViewsRegistry.getNextPlatformViewId].
 /// Then in your PlatformView widget state, return this widget in the build method.
 /// ```dart
 /// class FooPlatformViewState extends State<FooPlatformView> {
@@ -631,7 +630,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// ```
 /// The [PlatformViewSurface] is not responsible for the life cycle of the platform view
 /// nor handling the focus. The [FooPlatformViewState] in the above example should be responsible
-/// for constructing the [PlatformViewController] with a unique id, usually using [platformViewsRegistry.getNextPlatformViewId];
+/// for constructing the [PlatformViewController] with a unique id, using [PlatformViewsRegistry.getNextPlatformViewId];
 /// it should also handle the [Focus] if necessary. Moreover, it should manage the life cycle of the
 /// "PlatformView".
 ///
