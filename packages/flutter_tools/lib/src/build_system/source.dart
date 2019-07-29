@@ -89,7 +89,7 @@ class SourceVisitor {
     // `foo_.dart`. To do so, we first subtract the first section from the
     // string if the first segment matches.
     final List<String> wildcardSegments = wildcardFile.split('*');
-    if (segments.length > 2) {
+    if (wildcardSegments.length > 2) {
       throw InvalidPatternException(pattern);
     }
     if (!fs.directory(filePath).existsSync()) {
