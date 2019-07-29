@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show debugDefaultTargetPlatformOverride;
 
 void main() {
   int tapCount;
@@ -515,6 +516,44 @@ void main() {
     final FakeRenderEditable renderEditable = tester.renderObject(find.byType(FakeEditable));
     expect(state.showToolbarCalled, isFalse);
     expect(renderEditable.selectWordsInRangeCalled, isFalse);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/37032.
+  testWidgets("selection handle's GestureDetector should not cover the entire screen",
+    (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final TextEditingController controller = TextEditingController(text: 'a');
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TextField(
+            autofocus: true,
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    final Finder gestureDetector = find.descendant(
+      of: find.byType(Visibility),
+      matching: find.descendant(
+        of: find.byType(FadeTransition),
+        matching: find.byType(GestureDetector),
+      ),
+    );
+
+    expect(gestureDetector, findsOneWidget);
+    // The GestureDetector's size should not exceed that of the TextField.
+    final Rect hitRect = tester.getRect(gestureDetector);
+    final Rect textFieldRect = tester.getRect(find.byType(TextField));
+
+    expect(hitRect.size.width, lessThan(textFieldRect.size.width));
+    expect(hitRect.size.height, lessThan(textFieldRect.size.height));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }
 

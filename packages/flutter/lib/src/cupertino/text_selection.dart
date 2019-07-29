@@ -402,7 +402,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
         );
       // iOS doesn't draw anything for collapsed selections.
       case TextSelectionHandleType.collapsed:
-        return Container();
+        return const SizedBox();
     }
     assert(type != null);
     return null;

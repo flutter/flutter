@@ -31,7 +31,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
-import 'reporting/usage.dart';
+import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -236,7 +236,7 @@ class Doctor {
           break;
       }
 
-      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
+      DoctorResultEvent(validator: validator, result: result).send();
 
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',

@@ -11,12 +11,10 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/fingerprint.dart';
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'base/terminal.dart';
-import 'cache.dart';
 import 'codegen.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
@@ -51,6 +49,8 @@ class TargetModel {
         return flutter;
       case 'flutter_runner':
         return flutterRunner;
+      case 'vm':
+        return vm;
     }
     assert(false);
     return null;
@@ -63,6 +63,9 @@ class TargetModel {
 
   /// The fuchsia patched SDK.
   static const TargetModel flutterRunner = TargetModel._('flutter_runner');
+
+  /// The Dart vm.
+  static const TargetModel vm = TargetModel._('vm');
 
   final String _value;
 
@@ -218,49 +221,20 @@ class KernelCompiler {
     bool aot = false,
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     String packagesPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     bool targetProductVm = false,
     String initializeFromDill,
+    String platformDill,
   }) async {
     final String frontendServer = artifacts.getArtifactPath(
       Artifact.frontendServerSnapshotForEngineDartSdk
     );
-    FlutterProject flutterProject;
-    if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = FlutterProject.current();
-    }
-
-    // TODO(cbracken): eliminate pathFilter.
-    // Currently the compiler emits buildbot paths for the core libs in the
-    // depfile. None of these are available on the local host.
-    Fingerprinter fingerprinter;
-    if (depFilePath != null) {
-      fingerprinter = Fingerprinter(
-        fingerprintPath: '$depFilePath.fingerprint',
-        paths: <String>[mainPath],
-        properties: <String, String>{
-          'entryPoint': mainPath,
-          'trackWidgetCreation': trackWidgetCreation.toString(),
-          'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
-          'engineHash': Cache.instance.engineRevision,
-          'buildersUsed': '${flutterProject != null && flutterProject.hasBuilders}',
-        },
-        depfilePaths: <String>[depFilePath],
-        pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
-      );
-
-      if (await fingerprinter.doesFingerprintMatch()) {
-        printTrace('Skipping kernel compilation. Fingerprint match.');
-        return CompilerOutput(outputFilePath, 0, /* sources */ null);
-      }
-    }
-
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!sdkRoot.endsWith('/'))
+    if (!sdkRoot.endsWith('/')) {
       sdkRoot = '$sdkRoot/';
+    }
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
@@ -288,9 +262,6 @@ class KernelCompiler {
     } else if (aot) {
       command.add('-Ddart.vm.profile=true');
     }
-    if (incrementalCompilerByteStorePath != null) {
-      command.add('--incremental');
-    }
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
@@ -312,6 +283,9 @@ class KernelCompiler {
     }
     if (initializeFromDill != null) {
       command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
+    }
+    if (platformDill != null) {
+      command.addAll(<String>[ '--platform', platformDill]);
     }
 
     if (extraFrontEndOptions != null)
@@ -337,9 +311,6 @@ class KernelCompiler {
       .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
-      if (fingerprinter != null) {
-        await fingerprinter.writeFingerprint();
-      }
       return _stdoutHandler.compilerOutput.future;
     }
     return null;

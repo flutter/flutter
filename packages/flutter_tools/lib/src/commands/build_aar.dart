@@ -9,7 +9,7 @@ import '../base/context.dart';
 import '../base/os.dart';
 import '../build_info.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
@@ -38,20 +38,20 @@ class BuildAarCommand extends BuildSubCommand {
   final String name = 'aar';
 
   @override
-  Future<Map<String, String>> get usageValues async {
-    final Map<String, String> usage = <String, String>{};
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
     final FlutterProject futterProject = _getProject();
     if (futterProject == null) {
       return usage;
     }
     if (futterProject.manifest.isModule) {
-      usage[kCommandBuildAarProjectType] = 'module';
+      usage[CustomDimensions.commandBuildAarProjectType] = 'module';
     } else if (futterProject.manifest.isPlugin) {
-      usage[kCommandBuildAarProjectType] = 'plugin';
+      usage[CustomDimensions.commandBuildAarProjectType] = 'plugin';
     } else {
-      usage[kCommandBuildAarProjectType] = 'app';
+      usage[CustomDimensions.commandBuildAarProjectType] = 'app';
     }
-    usage[kCommandBuildAarTargetPlatform] =
+    usage[CustomDimensions.commandBuildAarTargetPlatform] =
         (argResults['target-platform'] as List<String>).join(',');
     return usage;
   }

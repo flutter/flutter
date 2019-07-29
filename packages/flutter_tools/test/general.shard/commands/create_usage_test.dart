@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -43,25 +43,35 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'module'));
+      await runner.run(<String>[
+        'create', '--flutter-root=flutter', '--no-pub', '--template=module', 'testy']);
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateProjectType, 'module'));
 
-      await runner.run(<String>['create',  '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'app'));
+      await runner.run(<String>[
+        'create',  '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateProjectType, 'app'));
 
-      await runner.run(<String>['create',  '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'package'));
+      await runner.run(<String>[
+        'create',  '--flutter-root=flutter', '--no-pub', '--template=package', 'testy']);
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateProjectType, 'package'));
 
-      await runner.run(<String>['create',  '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'plugin'));
+      await runner.run(<String>[
+        'create', '--flutter-root=flutter', '--no-pub', '--template=plugin', 'testy']);
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateProjectType, 'plugin'));
     }));
 
     test('set iOS host language type as usage value', () => testbed.run(() async {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'objc'));
+      await runner.run(<String>[
+        'create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateIosLanguage, 'objc'));
 
       await runner.run(<String>[
         'create',
@@ -71,7 +81,8 @@ void main() {
         '--ios-language=swift',
         'testy',
       ]);
-      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'swift'));
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
 
     }));
 
@@ -80,7 +91,8 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
-      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'java'));
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'java'));
 
       await runner.run(<String>[
         'create',
@@ -90,7 +102,8 @@ void main() {
         '--android-language=kotlin',
         'testy',
       ]);
-      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'kotlin'));
+      expect(await command.usageValues,
+             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
     }));
   });
 }

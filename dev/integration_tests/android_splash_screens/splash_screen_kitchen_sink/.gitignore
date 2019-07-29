@@ -1,3 +1,6 @@
+# Overrides for this project
+!flutter_splash_screen.png
+
 # Miscellaneous
 *.class
 *.log

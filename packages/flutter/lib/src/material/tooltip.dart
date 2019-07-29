@@ -51,6 +51,7 @@ class Tooltip extends StatefulWidget {
     @required this.message,
     this.height,
     this.padding,
+    this.margin,
     this.verticalOffset,
     this.preferBelow,
     this.excludeFromSemantics,
@@ -74,6 +75,19 @@ class Tooltip extends StatefulWidget {
   ///
   /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsetsGeometry padding;
+
+  /// The empty space that surrounds the tooltip.
+  ///
+  /// Defines the tooltip's outer [Container.margin]. By default, a
+  /// long tooltip will span the width of its window. If long enough,
+  /// a tooltip might also span the window's height. This property allows
+  /// one to define how much space the tooltip must be inset from the edges
+  /// of their display window.
+  ///
+  /// If this property is null, then [TooltipThemeData.margin] is used.
+  /// If [TooltipThemeData.margin] is also null, the default margin is
+  /// 0.0 logical pixels on all sides.
+  final EdgeInsetsGeometry margin;
 
   /// The vertical gap between the widget and the displayed tooltip.
   ///
@@ -145,6 +159,7 @@ class Tooltip extends StatefulWidget {
     properties.add(StringProperty('message', message, showName: false));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: null));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true, defaultValue: null));
     properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: null));
@@ -158,6 +173,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   static const double _defaultVerticalOffset = 24.0;
   static const bool _defaultPreferBelow = true;
   static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
+  static const EdgeInsetsGeometry _defaultMargin = EdgeInsets.all(0.0);
   static const Duration _fadeInDuration = Duration(milliseconds: 150);
   static const Duration _fadeOutDuration = Duration(milliseconds: 75);
   static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
@@ -166,6 +182,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   double height;
   EdgeInsetsGeometry padding;
+  EdgeInsetsGeometry margin;
   Decoration decoration;
   TextStyle textStyle;
   double verticalOffset;
@@ -273,6 +290,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       message: widget.message,
       height: height,
       padding: padding,
+      margin: margin,
       decoration: decoration,
       textStyle: textStyle,
       animation: CurvedAnimation(
@@ -360,6 +378,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
     height = widget.height ?? tooltipTheme.height ?? _defaultTooltipHeight;
     padding = widget.padding ?? tooltipTheme.padding ?? _defaultPadding;
+    margin = widget.margin ?? tooltipTheme.margin ?? _defaultMargin;
     verticalOffset = widget.verticalOffset ?? tooltipTheme.verticalOffset ?? _defaultVerticalOffset;
     preferBelow = widget.preferBelow ?? tooltipTheme.preferBelow ?? _defaultPreferBelow;
     excludeFromSemantics = widget.excludeFromSemantics ?? tooltipTheme.excludeFromSemantics ?? _defaultExcludeFromSemantics;
@@ -447,6 +466,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.message,
     this.height,
     this.padding,
+    this.margin,
     this.decoration,
     this.textStyle,
     this.animation,
@@ -458,6 +478,7 @@ class _TooltipOverlay extends StatelessWidget {
   final String message;
   final double height;
   final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
   final Decoration decoration;
   final TextStyle textStyle;
   final Animation<double> animation;
@@ -482,6 +503,7 @@ class _TooltipOverlay extends StatelessWidget {
               child: Container(
                 decoration: decoration,
                 padding: padding,
+                margin: margin,
                 child: Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
