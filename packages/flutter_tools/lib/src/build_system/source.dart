@@ -74,41 +74,41 @@ class SourceVisitor {
     }
     rawParts.skip(1).forEach(segments.add);
     final String filePath = fs.path.joinAll(segments);
-    if (hasWildcard) {
-      // Perform a simple match by splitting the wildcard containing file one
-      // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
-      // that part of the file matches. If there are values before and after
-      // the `*` we need to check that both match without overlapping. For
-      // example, `foo_*_.dart`. We want to match `foo_b_.dart` but not
-      // `foo_.dart`. To do so, we first subtract the first section from the
-      // string if the first segment matches.
-      final List<String> segments = wildcardFile.split('*');
-      if (segments.length > 2) {
-        throw InvalidPatternException(pattern);
-      }
-      if (!fs.directory(filePath).existsSync()) {
-        throw Exception('$filePath does not exist!');
-      }
-      for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
-        final String filename = fs.path.basename(entity.path);
-        if (segments.isEmpty) {
-          sources.add(fs.file(entity.absolute));
-        } else if (segments.length == 1) {
-          if (filename.startsWith(segments[0]) ||
-              filename.endsWith(segments[0])) {
-            sources.add(entity.absolute);
-          }
-        } else if (filename.startsWith(segments[0])) {
-          if (filename.substring(segments[0].length).endsWith(segments[1])) {
-            sources.add(entity.absolute);
-          }
-        }
-      }
-    } else {
+    if (!hasWildcard) {
       if (optional && !fs.isFileSync(filePath)) {
         return;
       }
       sources.add(fs.file(fs.path.normalize(filePath)));
+      return;
+    }
+    // Perform a simple match by splitting the wildcard containing file one
+    // the `*`. For example, for `/*.dart`, we get [.dart]. We then check
+    // that part of the file matches. If there are values before and after
+    // the `*` we need to check that both match without overlapping. For
+    // example, `foo_*_.dart`. We want to match `foo_b_.dart` but not
+    // `foo_.dart`. To do so, we first subtract the first section from the
+    // string if the first segment matches.
+    final List<String> wildcardSegments = wildcardFile.split('*');
+    if (segments.length > 2) {
+      throw InvalidPatternException(pattern);
+    }
+    if (!fs.directory(filePath).existsSync()) {
+      throw Exception('$filePath does not exist!');
+    }
+    for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
+      final String filename = fs.path.basename(entity.path);
+      if (wildcardSegments.isEmpty) {
+        sources.add(fs.file(entity.absolute));
+      } else if (wildcardSegments.length == 1) {
+        if (filename.startsWith(wildcardSegments[0]) ||
+            filename.endsWith(wildcardSegments[0])) {
+          sources.add(entity.absolute);
+        }
+      } else if (filename.startsWith(wildcardSegments[0])) {
+        if (filename.substring(wildcardSegments[0].length).endsWith(segments[1])) {
+          sources.add(entity.absolute);
+        }
+      }
     }
   }
 

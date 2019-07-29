@@ -138,6 +138,14 @@ void main() {
     expect(stampContents['inputs'], <Object>['/foo.dart']);
   }));
 
+  test('Creates a BuildResult with inputs and outputs', () => testbed.run(() async {
+    final BuildResult result = await buildSystem.build(fooTarget, environment);
+
+    expect(result.inputFiles.single.path, fs.path.absolute('foo.dart'));
+    expect(result.outputFiles.single.path,
+        fs.path.absolute(fs.path.join(environment.buildDir.path, 'out')));
+  }));
+
   test('Does not re-invoke build if stamp is valid', () => testbed.run(() async {
     await buildSystem.build(fooTarget, environment);
     await buildSystem.build(fooTarget, environment);

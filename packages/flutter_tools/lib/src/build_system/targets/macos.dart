@@ -106,6 +106,7 @@ class DebugMacOSPodInstall extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
+    // TODO(jonahwilliams): introduce configuration/planning phase to build.
     // No outputs because Cocoapods is fully responsible for tracking. plus there
     // is no concept of an optional output. Instead we will need a build config
     // phase to conditionally add this rule so that it can be written properly.

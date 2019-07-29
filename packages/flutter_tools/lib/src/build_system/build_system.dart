@@ -480,20 +480,23 @@ class BuildSystem {
       // Always persist the file cache to disk.
       fileCache.persist();
     }
-    // Remove "inputs" that were outputs of previous builds.
-    buildInstance.inputFiles.removeWhere((String path, File file) {
-      // Leaking implementation detail: remove pubpsec, flutter-plugins, generated.
-      return buildInstance.outputFiles.containsKey(path) ||
-                           path.contains('pubspec.yaml') ||
-                       path.contains('.flutter-plugins') ||
-                               path.contains('xcconfig');
-    });
-    buildInstance.outputFiles.removeWhere((String path, File file) {
-      // Leaking implementation detail: remove pubpsec, flutter-plugins, generated.
-      return path.contains('pubspec.yaml') ||
-         path.contains('.flutter-plugins') ||
-         path.contains('xcconfig');
-    });
+    // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
+    // the flutter tool writing these files unconditionally. Since Xcode uses
+    // timestamps to track files, this leads to unecessary rebuilds if they
+    // are included. Once all the places that write these files have been
+    // tracked down and moved into assemble, these checks should be removable.
+    {
+      buildInstance.inputFiles.removeWhere((String path, File file) {
+        return path.contains('pubspec.yaml') ||
+           path.contains('.flutter-plugins') ||
+           path.contains('xcconfig');
+      });
+      buildInstance.outputFiles.removeWhere((String path, File file) {
+        return path.contains('pubspec.yaml') ||
+           path.contains('.flutter-plugins') ||
+           path.contains('xcconfig');
+      });
+    }
     return BuildResult(
       success: passed,
       exceptions: buildInstance.exceptionMeasurements,
@@ -543,7 +546,12 @@ class _BuildInstance {
       final List<File> inputs = target.resolveInputs(environment);
       final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
       for (File input in inputs) {
-        inputFiles[input.resolveSymbolicLinksSync()] = input;
+        // If this input file was output from another rule, then skip it.
+        final String resolvedPath = input.resolveSymbolicLinksSync();
+        if (outputFiles.containsKey(resolvedPath)) {
+          continue;
+        }
+        inputFiles[resolvedPath] = input;
       }
       if (canSkip) {
         skipped = true;
