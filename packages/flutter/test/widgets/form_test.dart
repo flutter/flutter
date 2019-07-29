@@ -462,6 +462,7 @@ void main() {
 
     expect(fieldValue, isNull);
     expect(formKey.currentState.validate(), isTrue);
+    expect(formKey.currentState.validateSilent(), isTrue);
 
     await tester.enterText(find.byType(TextFormField), 'Test');
     await tester.pumpWidget(builder(false));
@@ -469,12 +470,14 @@ void main() {
     // Form wasn't saved yet.
     expect(fieldValue, null);
     expect(formKey.currentState.validate(), isFalse);
+    expect(formKey.currentState.validateSilent(), isFalse);
 
     formKey.currentState.save();
 
     // Now fieldValue is saved.
     expect(fieldValue, 'Test');
     expect(formKey.currentState.validate(), isFalse);
+    expect(formKey.currentState.validateSilent(), isFalse);
 
     // Now remove the field with an error.
     await tester.pumpWidget(builder(true));
@@ -483,5 +486,6 @@ void main() {
     formKey.currentState.reset();
     formKey.currentState.save();
     expect(formKey.currentState.validate(), isTrue);
+    expect(formKey.currentState.validateSilent(), isTrue);
   });
 }
