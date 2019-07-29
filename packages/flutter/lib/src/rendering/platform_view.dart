@@ -728,55 +728,38 @@ class _MotionEventsDispatcher {
 
 /// A render object for embedding a platform view.
 ///
-/// [PlatformViewRenderBox] presents an existing platform view, integrates it with the gesture arenas system
+/// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer, integrates it with the gesture arenas system
 /// and adds relevant semantic nodes to the semantics tree.
-/// It inserts a [PlatformViewLayer] to the layer tree.
 class PlatformViewRenderBox extends RenderBox {
 
   /// Creating a render object for a [PlatformViewSurface].
   ///
-  /// The `controller` and `id` must not be null.
+  /// The `controller` and `id`  parameters must not be null.
   PlatformViewRenderBox({
     @required PlatformViewController controller,
-    @required int id,
-  }) : assert(controller != null),
-       assert(id != null),
-       _controller = controller,
-       _id = id;
 
-  /// The [PlatformViewController] associated with this render object.
-  PlatformViewController get controller => _controller;
+  }) : assert(controller != null && controller.id != null && controller.id > -1),
+       _controller = controller;
 
   /// Sets the [controller] for this render object.
   ///
-  /// This value must not be null, and setting it to a new value will result in a repaint
+  /// This value must not be null, and setting it to a new value will result in a repaint.
   set controller(PlatformViewController controller) {
     assert(controller != null);
-    final bool needsPaint = _controller != controller;
-    _controller = controller;
-    if (needsPaint) {
-       markNeedsPaint();
+    assert(controller.id != null && controller.id > -1);
+
+    if ( _controller == controller) {
+      return;
     }
-  }
-
-  /// The [id] of the platform view that is associated with this render object.
-  int get id => _id;
-
-  /// Sets the [id] of the platform view that is associated with this render object.
-  ///
-  /// This value must not be null and non-negative, and setting it to a new value will trigger a semantics update.
-  set id(int id) {
-    assert(id != null && id > -1);
-    final bool needsSemanticsUpdate = _id != id;
-    _id = id;
+    final bool needsSemanticsUpdate = _controller.id != controller.id;
+     _controller = controller;
+     markNeedsPaint();
     if (needsSemanticsUpdate) {
       markNeedsSemanticsUpdate();
     }
   }
 
   PlatformViewController _controller;
-
-  int _id;
 
   @override
   bool get sizedByParent => true;
@@ -794,17 +777,17 @@ class PlatformViewRenderBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_id != null);
+    assert(_controller.id != null);
     context.addLayer(PlatformViewLayer(
             rect: offset & size,
-            viewId: _id));
+            viewId: _controller.id));
   }
 
   @override
   void describeSemanticsConfiguration (SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    assert(_id != null);
+    assert(_controller.id != null);
     config.isSemanticBoundary = true;
-    config.platformViewId = _id;
+    config.platformViewId = _controller.id;
   }
 }

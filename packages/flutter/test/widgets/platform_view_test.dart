@@ -1670,11 +1670,11 @@ void main() {
     FakePlatformViewController controller;
 
     setUp((){
-      controller = FakePlatformViewController();
+      controller = FakePlatformViewController()..id = 0;
     });
 
     testWidgets('PlatformViewSurface should create platform view layer by default', (WidgetTester tester) async {
-      final PlatformViewSurface surface = PlatformViewSurface(controller: controller, id: 0);
+      final PlatformViewSurface surface = PlatformViewSurface(controller: controller);
       await tester.pumpWidget(surface);
       final PlatformViewLayer layer = tester.layers.firstWhere((Layer layer){
         return layer is PlatformViewLayer;

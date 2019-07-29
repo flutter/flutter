@@ -714,26 +714,15 @@ class UiKitViewController {
   }
 }
 
-/// An interface for a platform view controller.
+/// An interface for a controlling a single platform view.
 ///
-/// Implement this if you use [PlatformViewSurface] to implement a new platform view.
-///
-/// The method `dispose` should be called the new platform view widget is disposed.
+/// Used by [PlatformViewSurface] to interface with the platform it embeds.
 abstract class PlatformViewController {
 
-  /// Disposes the associated platform view.
+  /// The platform view id associated with this controller.
   ///
-  /// This is invoked when the Framework is disposing the platform view. Implement this to properly disposes
-  /// the resources of the platform view from the platform.
-  ///
-  /// The controller is unusable after this is called.
-  ///
-  /// e.g.
-  /// ```dart
-  /// Future<void> dispose() async {
-  ///   await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
-  /// }
-  /// ```
-  /// See `SystemChannels.platform_views` for more details.
-  void dispose();
+  /// The id should always be unique and non-negative.
+  /// In most cases, it should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
+  /// It is used when handling semantics, composition orders and etc.
+  int id;
 }

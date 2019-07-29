@@ -14,8 +14,8 @@ void main() {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
     setUp((){
-      fakePlatformViewController = FakePlatformViewController();
-      platformViewRenderBox = PlatformViewRenderBox(controller: fakePlatformViewController, id: 0);
+      fakePlatformViewController = FakePlatformViewController()..id = 0;
+      platformViewRenderBox = PlatformViewRenderBox(controller: fakePlatformViewController);
     });
 
     test('layout should size to max constraint', () {
@@ -48,7 +48,8 @@ void main() {
 
       semanticsUpdateCount = 0;
 
-      platformViewRenderBox.id = 10;
+      final FakePlatformViewController updatedFakePlatformViewController = FakePlatformViewController()..id = 10;
+      platformViewRenderBox.controller = updatedFakePlatformViewController;
       pumpFrame(phase: EnginePhase.flushSemantics);
       // Update id should update the semantics.
       expect(semanticsUpdateCount, 1);

@@ -583,8 +583,8 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// Embeds an existing platform view in the widget tree.
 ///
-/// A "PlatformView" is a view that being displayed with the help of the platform's UI system
-/// rather than completely being painted by the Flutter Engine. For example, the webview_flutter
+/// A "platform view" is a UI component of the platform Flutter is running on;
+/// for example on Android, android.view.Views are platform views. For example, the webview_flutter
 /// plugin used a pre-made "PlatformView" -- such as "AndroidView" for Android and "UIKitView" for iOS
 /// -- to display the platform's WebView.
 ///
@@ -623,7 +623,6 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewSurface(
-///       id: id,
 ///       controller: controller,
 ///     );
 ///    };
@@ -632,7 +631,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// ```
 /// The [PlatformViewSurface] is not responsible for the life cycle of the platform view
 /// nor handling the focus. The [FooPlatformViewState] in the above example should be responsible
-/// for constructing the [PlatformViewController], generating an `id` and pass them to the [PlatformViewSurface];
+/// for constructing the [PlatformViewController] with a unique id, usually using [platformViewsRegistry.getNextPlatformViewId];
 /// it should also handle the [Focus] if necessary. Moreover, it should manage the life cycle of the
 /// "PlatformView".
 ///
@@ -645,20 +644,12 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a `PlatformViewSurface`.
   ///
-  /// The [id] and the [controller] must not be null.
+  /// The [controller] must not be null.
   /// By default, this widget will create a [PlatformViewLayer] with rect = size & offset and the same id of
   /// this [PlatformViewSurface] in the layer tree.
   const PlatformViewSurface({
-    @required this.id,
     @required this.controller,
-  }) : assert(id != null && id > -1),
-       assert(controller != null);
-  /// The id of the platform view that is associate with this [PlatformViewSurface].
-  ///
-  /// The id should always be unique and non-negative.
-  /// In most cases, it should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
-  /// It is used when handling semantics, composition orders and etc for the platform view.
-  final int id;
+  }) : assert(controller != null);
 
   /// A controller for a platform view.
   ///
@@ -677,13 +668,12 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return PlatformViewRenderBox(controller: controller, id: id);
+    return PlatformViewRenderBox(controller: controller);
   }
 
   @override
   void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
     renderObject
-      ..controller = controller
-      ..id = id;
+      ..controller = controller;
   }
 }
