@@ -112,7 +112,19 @@ vars = {
 
   # Checkout Windows dependencies only if we are building on Windows.
   'download_windows_deps' : 'host_os == "win"',
+
+  # An LLVM backend needs LLVM binaries and headers. To avoid build time
+  # increases we can use prebuilts. We don't want to download this on every
+  # CQ/CI bot nor do we want the average Dart developer to incur that cost.
+  # So by default we will not download prebuilts. This varible is needed in
+  # the flutter engine to ensure that Dart gn has access to it as well.
+  "checkout_llvm": False,
 }
+
+gclient_gn_args_file = 'src/third_party/dart/build/config/gclient_args.gni'
+gclient_gn_args = [
+  'checkout_llvm'
+]
 
 # Only these hosts are allowed for dependencies in this DEPS file.
 # If you need to add a new host, contact chrome infrastructure team.
