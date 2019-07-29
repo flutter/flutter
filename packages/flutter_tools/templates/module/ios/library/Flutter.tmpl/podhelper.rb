@@ -12,22 +12,18 @@
 def install_all_flutter_pods(flutter_application_path = nil, flutter_application_name = nil)
   flutter_application_name ||= File.basename(File.expand_path(flutter_application_path))
   flutter_application_path ||= File.join('..', '..')
+  install_flutter_engine_pod
   install_flutter_plugin_pods(flutter_application_path)
   install_flutter_application_pod(flutter_application_path, flutter_application_name)
 end
 
-# Install pods needed to embed Flutter engine and plugins
-# from the Flutter module Podfile.
+# Install Flutter engine pod.
 #
 # @example
 #   target 'MyApp' do
-#     install_flutter_plugin_pods 'my_flutter'
+#     install_flutter_engine_pod
 #   end
-# @param [String] flutter_application_path Path of the root directory of the Flutter module.
-#                                          Optional, defaults to two levels up from the directory of this script.
-#                                          MyApp/my_flutter/.ios/Flutter/../..
-def install_flutter_plugin_pods(flutter_application_path)
-  flutter_application_path ||= File.join('..', '..')
+def install_flutter_engine_pod
   engine_dir = File.join(__dir__, 'engine')
   if !File.exist?(engine_dir)
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
@@ -39,6 +35,19 @@ def install_flutter_plugin_pods(flutter_application_path)
   end
 
   pod 'Flutter', :path => engine_dir, :inhibit_warnings => true
+end
+
+# Install Flutter plugin pods.
+#
+# @example
+#   target 'MyApp' do
+#     install_flutter_plugin_pods 'my_flutter'
+#   end
+# @param [String] flutter_application_path Path of the root directory of the Flutter module.
+#                                          Optional, defaults to two levels up from the directory of this script.
+#                                          MyApp/my_flutter/.ios/Flutter/../..
+def install_flutter_plugin_pods(flutter_application_path)
+  flutter_application_path ||= File.join('..', '..')
   pod 'FlutterPluginRegistrant', :path => File.join(__dir__, 'FlutterPluginRegistrant'), :inhibit_warnings => true
 
   symlinks_dir = File.join(__dir__, '.symlinks')
@@ -52,7 +61,15 @@ def install_flutter_plugin_pods(flutter_application_path)
   end
 end
 
-# Install pod needed to embed Flutter application.
+# Install Flutter application pod.
+#
+# @example
+#   target 'MyApp' do
+#     install_flutter_application_pod '../flutter_settings_repository', 'settings_module'
+#   end
+# @param [String] flutter_application_path Path of the root directory of the Flutter module.
+#                                          Optional, defaults to two levels up from the directory of this script.
+#                                          MyApp/my_flutter/.ios/Flutter/../..
 def install_flutter_application_pod(flutter_application_path, flutter_application_name)
   app_framework_dir = File.join(__dir__, 'App.framework')
   app_framework_dylib = File.join(app_framework_dir, 'App')
