@@ -33,6 +33,9 @@ Future<void> main() async {
   });
 }
 
+final String expectedWarning =
+    'Launching a debug-mode app from the home screen may cause problems.';
+
 // When a debug-mode app is launched from the host there should be no warnings.
 Future<void> checkNoWarningHostLaunch(String deviceId) async {
   final String output = await evalFlutter('drive', options: <String>[
@@ -44,19 +47,15 @@ Future<void> checkNoWarningHostLaunch(String deviceId) async {
     'lib/empty.dart'
   ]);
 
-  expect(!output.contains('_XXX_'));
+  expect(!output.contains(expectedWarning));
 }
 
 // When a debug-mode app is launched from Xcode there should be no warnings. The
 // Xcode launch is simulated by keeping LLDB attached throughout the lifetime of
 // the app.
 Future<void> checkNoWarningXcodeLaunch(String deviceId) async {
-  await flutter('build', options: <String>[
-    'ios',
-    '--debug',
-    '--verbose',
-    'lib/exit.dart'
-  ]);
+  await flutter('build',
+      options: <String>['ios', '--debug', '--verbose', 'lib/exit.dart']);
 
   final String output = await eval(
       '${flutterDirectory.path}/bin/cache/artifacts/ios-deploy/ios-deploy',
@@ -69,7 +68,7 @@ Future<void> checkNoWarningXcodeLaunch(String deviceId) async {
         '--verbose-logging',
       ]);
 
-  expect(output.contains('success') && !output.contains('_XXX_'));
+  expect(output.contains('success') && !output.contains(expectedWarning));
 }
 
 // When a debug-mode app is launched from the home screen there should be a
@@ -89,5 +88,5 @@ Future<void> checkWarningHomeScreenLaunch(String deviceId) async {
   ], environment: <String, String>{
     'FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE': 'true'
   });
-  expect(output.contains('_XXX_'));
+  expect(output.contains(expectedWarning));
 }
