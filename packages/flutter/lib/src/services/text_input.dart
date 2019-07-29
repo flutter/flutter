@@ -96,14 +96,19 @@ class TextInputType {
   /// Requests a keyboard with ready access to the "/" and "." keys.
   static const TextInputType url = TextInputType._(6);
 
+  /// Optimize for passwords that are visible to the user.
+  ///
+  /// Requests a keyboard with ready access to both letters and numbers.
+  static const TextInputType visiblePassword = TextInputType._(7);
+
   /// All possible enum values.
   static const List<TextInputType> values = <TextInputType>[
-    text, multiline, number, phone, datetime, emailAddress, url,
+    text, multiline, number, phone, datetime, emailAddress, url, visiblePassword,
   ];
 
   // Corresponding string name for each of the [values].
   static const List<String> _names = <String>[
-    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url',
+    'text', 'multiline', 'number', 'phone', 'datetime', 'emailAddress', 'url', 'visiblePassword',
   ];
 
   // Enum value name, this is what enum.toString() would normally return.
