@@ -26,7 +26,11 @@ template("_fuchsia_sysroot") {
   assert(meta_json.type == "sysroot")
 
   meta_json_versions = meta_json.versions
-  defs = meta_json_versions[target_cpu]
+  if (target_cpu == "x64") {
+    defs = meta_json_versions.x64
+  } else {
+    defs = meta_json_versions.arm64
+  }
 
   _libs = []
   _lib_dirs = []
@@ -198,7 +202,11 @@ template("_fuchsia_cc_prebuilt_library") {
   }
 
   meta_json_binaries = meta_json.binaries
-  meta_json_binaries_arch = meta_json_binaries[target_cpu]
+  if (target_cpu == "x64") {
+    meta_json_binaries_arch = meta_json_binaries.x64
+  } else {
+    meta_json_binaries_arch = meta_json_binaries.arm64
+  }
   prebuilt_lib = meta_json_binaries_arch.link
   _libs = [ "$_fuchsia_sdk_path/$prebuilt_lib" ]
 
