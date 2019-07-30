@@ -315,6 +315,12 @@ public class FlutterMain {
         }
     }
 
+    @NonNull
+    public static String findAppBundlePath() {
+        return sFlutterAssetsDir;
+    }
+
+    @Deprecated
     @Nullable
     public static String findAppBundlePath(@NonNull Context applicationContext) {
         return sFlutterAssetsDir;

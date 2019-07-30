@@ -128,7 +128,7 @@ public class FlutterEngine implements LifecycleOwner {
     flutterJNI.addEngineLifecycleListener(engineLifecycleListener);
     attachToJni();
 
-    this.dartExecutor = new DartExecutor(flutterJNI);
+    this.dartExecutor = new DartExecutor(flutterJNI, context.getAssets());
     this.dartExecutor.onAttachedToJNI();
 
     // TODO(mattcarroll): FlutterRenderer is temporally coupled to attach(). Remove that coupling if possible.
