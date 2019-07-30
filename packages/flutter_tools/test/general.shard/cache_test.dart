@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:file_testing/file_testing.dart';
@@ -11,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show InternetAddress, SocketException;
@@ -23,7 +22,18 @@ import '../src/testbed.dart';
 
 void main() {
   group('$Cache.checkLockAcquired', () {
+    MockFileSystem mockFileSystem;
+    MemoryFileSystem memoryFileSystem;
+    MockFile mockFile;
+    MockRandomAccessFile mockRandomAccessFile;
+
     setUp(() {
+      mockFileSystem = MockFileSystem();
+      memoryFileSystem = MemoryFileSystem();
+      mockFile = MockFile();
+      mockRandomAccessFile = MockRandomAccessFile();
+      when(mockFileSystem.path).thenReturn(memoryFileSystem.path);
+
       Cache.enableLocking();
     });
 
@@ -31,6 +41,7 @@ void main() {
       // Restore locking to prevent potential side-effects in
       // tests outside this group (this option is globally shared).
       Cache.enableLocking();
+      Cache.releaseLockEarly();
     });
 
     test('should throw when locking is not acquired', () {
@@ -43,10 +54,21 @@ void main() {
     });
 
     testUsingContext('should not throw when lock is acquired', () async {
+      when(mockFileSystem.file(argThat(endsWith('lockfile')))).thenReturn(mockFile);
+      when(mockFile.openSync(mode: anyNamed('mode'))).thenReturn(mockRandomAccessFile);
       await Cache.lock();
       Cache.checkLockAcquired();
+      Cache.releaseLockEarly();
     }, overrides: <Type, Generator>{
-      FileSystem: () => MockFileSystem(),
+      FileSystem: () => mockFileSystem,
+    });
+
+    testUsingContext('throws tool exit when lockfile open fails', () async {
+      when(mockFileSystem.file(argThat(endsWith('lockfile')))).thenReturn(mockFile);
+      when(mockFile.openSync(mode: anyNamed('mode'))).thenThrow(const FileSystemException());
+      expect(() async => await Cache.lock(), throwsA(isA<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
@@ -166,7 +188,7 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
-    FileSystem: () => MockFileSystem(),
+    FileSystem: () => MemoryFileSystem(),
   });
 
   test('Unstable artifacts', () {
@@ -247,21 +269,8 @@ class FakeCachedArtifact extends EngineCachedArtifact {
   List<String> getPackageDirs() => packageDirs;
 }
 
-class MockFileSystem extends ForwardingFileSystem {
-  MockFileSystem() : super(MemoryFileSystem());
-
-  @override
-  File file(dynamic path) {
-    return MockFile();
-  }
-}
-
-class MockFile extends Mock implements File {
-  @override
-  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
-    return MockRandomAccessFile();
-  }
-}
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFile extends Mock implements File {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
