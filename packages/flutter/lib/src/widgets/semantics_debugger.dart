@@ -228,7 +228,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         || pointerPosition != oldDelegate.pointerPosition;
   }
 
-  String _getMessage(SemanticsNode node) {
+  @visibleForTesting
+  String getMessage(SemanticsNode node) {
     final SemanticsData data = node.getSemanticsData();
     final List<String> annotations = <String>[];
 
@@ -296,14 +297,8 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     return message.trim();
   }
 
-  static const TextStyle _messageStyle = TextStyle(
-    color: Color(0xFF000000),
-    fontSize: 10.0,
-    height: 0.8,
-  );
-
   void _paintMessage(Canvas canvas, SemanticsNode node) {
-    final String message = _getMessage(node);
+    final String message = getMessage(node);
     if (message.isEmpty)
       return;
     final Rect rect = node.rect;
@@ -311,7 +306,11 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     canvas.clipRect(rect);
     final TextPainter textPainter = TextPainter()
       ..text = TextSpan(
-        style: _messageStyle,
+        style: const TextStyle(
+          color: Color(0xFF000000),
+          fontSize: 10.0,
+          height: 0.8,
+        ),
         text: message,
       )
       ..textDirection = TextDirection.ltr // _getMessage always returns LTR text, even if node.label is RTL
