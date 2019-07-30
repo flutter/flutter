@@ -21,6 +21,7 @@ const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 44.0;
 // Padding when positioning toolbar below selection.
 const double _kToolbarContentDistanceBelow = 16.0;
+const double _kToolbarContentDistance = 8.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
@@ -162,11 +163,12 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
         : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
     final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
       + _kToolbarScreenPadding
-      + _kToolbarHeight;
+      + _kToolbarHeight
+      + _kToolbarContentDistance;
     final double availableHeight = globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
     final bool fitsAbove = toolbarHeightNeeded <= availableHeight;
     final double y = fitsAbove
-        ? startTextSelectionPoint.point.dy - textLineHeight
+        ? startTextSelectionPoint.point.dy - _kToolbarContentDistance - textLineHeight
         : startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistanceBelow;
     final Offset preciseMidpoint = Offset(x, y);
 
