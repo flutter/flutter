@@ -4,12 +4,15 @@
 
 package io.flutter.embedding.android;
 
+import android.app.Activity;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LifecycleRegistry;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -17,29 +20,24 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.util.TypedValue;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
+import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 
 /**
  * {@code Activity} which displays a fullscreen Flutter UI.
  * <p>
- * WARNING: THIS CLASS IS EXPERIMENTAL. DO NOT SHIP A DEPENDENCY ON THIS CODE.
- * IF YOU USE IT, WE WILL BREAK YOU.
- * <p>
  * {@code FlutterActivity} is the simplest and most direct way to integrate Flutter within an
  * Android app.
+ * <p>
+ * <strong>Dart entrypoint, initial route, and app bundle path</strong>
  * <p>
  * The Dart entrypoint executed within this {@code Activity} is "main()" by default. The entrypoint
  * may be specified explicitly by passing the name of the entrypoint method as a {@code String} in
@@ -49,11 +47,18 @@ import io.flutter.view.FlutterMain;
  * route may be specified explicitly by passing the name of the route as a {@code String} in
  * {@link #EXTRA_INITIAL_ROUTE}, e.g., "my/deep/link".
  * <p>
- * The app bundle path, Dart entrypoint, and initial route can each be controlled in a subclass of
+ * The Dart entrypoint and initial route can each be controlled using a {@link IntentBuilder}
+ * via the following methods:
+ * <ul>
+ *   <li>{@link IntentBuilder#dartEntrypoint}</li>
+ *   <li>{@link IntentBuilder#initialRoute}</li>
+ * </ul>
+ * <p>
+ * The app bundle path, Dart entrypoint, and initial route can also be controlled in a subclass of
  * {@code FlutterActivity} by overriding their respective methods:
  * <ul>
  *   <li>{@link #getAppBundlePath()}</li>
- *   <li>{@link #getDartEntrypoint()}</li>
+ *   <li>{@link #getDartEntrypointFunctionName()}</li>
  *   <li>{@link #getInitialRoute()}</li>
  * </ul>
  * If Flutter is needed in a location that cannot use an {@code Activity}, consider using
@@ -64,6 +69,19 @@ import io.flutter.view.FlutterMain;
  * {@link FlutterView}. Using a {@link FlutterView} requires forwarding some calls from an
  * {@code Activity}, as well as forwarding lifecycle calls from an {@code Activity} or a
  * {@code Fragment}.
+ * <p>
+ * <strong>FlutterActivity responsibilities</strong>
+ * <p>
+ * {@code FlutterActivity} maintains the following responsibilities:
+ * <ul>
+ *   <li>Displays an Android launch screen.</li>
+ *   <li>Displays a Flutter splash screen.</li>
+ *   <li>Configures the status bar appearance.</li>
+ *   <li>Chooses the Dart execution app bundle path and entrypoint.</li>
+ *   <li>Chooses Flutter's initial route.</li>
+ *   <li>Renders {@code Activity} transparently, if desired.</li>
+ *   <li>Offers hooks for subclasses to provide and configure a {@link FlutterEngine}.</li>
+ * </ul>
  * <p>
  * <strong>Launch Screen and Splash Screen</strong>
  * <p>
@@ -116,11 +134,9 @@ import io.flutter.view.FlutterMain;
  *     />
  * }
  */
-// TODO(mattcarroll): explain each call forwarded to Fragment (first requires resolution of PluginRegistry API).
-public class FlutterActivity extends FragmentActivity
-    implements FlutterFragment.FlutterEngineProvider,
-    FlutterFragment.FlutterEngineConfigurator,
-    FlutterFragment.SplashScreenProvider {
+public class FlutterActivity extends Activity
+    implements FlutterActivityAndFragmentDelegate.Host,
+    LifecycleOwner {
   private static final String TAG = "FlutterActivity";
 
   // Meta-data arguments, processed from manifest XML.
@@ -138,13 +154,6 @@ public class FlutterActivity extends FragmentActivity
   protected static final String DEFAULT_DART_ENTRYPOINT = "main";
   protected static final String DEFAULT_INITIAL_ROUTE = "/";
   protected static final String DEFAULT_BACKGROUND_MODE = BackgroundMode.opaque.name();
-
-  // FlutterFragment management.
-  private static final String TAG_FLUTTER_FRAGMENT = "flutter_fragment";
-  // TODO(mattcarroll): replace ID with R.id when build system supports R.java
-  private static final int FRAGMENT_CONTAINER_ID = 609893468; // random number
-  @Nullable
-  private FlutterFragment flutterFragment;
 
   /**
    * Creates an {@link Intent} that launches a {@code FlutterActivity}, which executes
@@ -174,6 +183,19 @@ public class FlutterActivity extends FragmentActivity
     private String initialRoute = DEFAULT_INITIAL_ROUTE;
     private String backgroundMode = DEFAULT_BACKGROUND_MODE;
 
+    /**
+     * Constructor that allows this {@code IntentBuilder} to be used by subclasses of
+     * {@code FlutterActivity}.
+     * <p>
+     * Subclasses of {@code FlutterActivity} should provide their own static version of
+     * {@link #createBuilder()}, which returns an instance of {@code IntentBuilder}
+     * constructed with a {@code Class} reference to the {@code FlutterActivity} subclass,
+     * e.g.:
+     * <p>
+     * {@code
+     * return new IntentBuilder(MyFlutterActivity.class);
+     * }
+     */
     protected IntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
       this.activityClass = activityClass;
     }
@@ -232,16 +254,32 @@ public class FlutterActivity extends FragmentActivity
     }
   }
 
+  // Delegate that runs all lifecycle and OS hook logic that is common between
+  // FlutterActivity and FlutterFragment. See the FlutterActivityAndFragmentDelegate
+  // implementation for details about why it exists.
+  private FlutterActivityAndFragmentDelegate delegate;
+
+  @NonNull
+  private LifecycleRegistry lifecycle;
+
+  public FlutterActivity() {
+    lifecycle = new LifecycleRegistry(this);
+  }
+
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     switchLaunchThemeForNormalTheme();
 
     super.onCreate(savedInstanceState);
 
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_CREATE);
+
+    delegate = new FlutterActivityAndFragmentDelegate(this);
+    delegate.onAttach(this);
+
     configureWindowForTransparency();
-    setContentView(createFragmentContainer());
+    setContentView(createFlutterView());
     configureStatusBarForFullscreenFlutterExperience();
-    ensureFlutterFragmentCreated();
   }
 
   /**
@@ -288,31 +326,6 @@ public class FlutterActivity extends FragmentActivity
     }
   }
 
-  /**
-   * Extracts a {@link Drawable} from the {@code Activity}'s {@code windowBackground}.
-   * <p>
-   * Returns null if no {@code windowBackground} is set for the activity.
-   */
-  private Drawable getLaunchScreenDrawableFromActivityTheme() {
-    TypedValue typedValue = new TypedValue();
-    if (!getTheme().resolveAttribute(
-        android.R.attr.windowBackground,
-        typedValue,
-        true)) {
-      return null;
-    }
-    if (typedValue.resourceId == 0) {
-      return null;
-    }
-    try {
-      return getResources().getDrawable(typedValue.resourceId, getTheme());
-    } catch (Resources.NotFoundException e) {
-      Log.e(TAG, "Splash screen requested in AndroidManifest.xml, but no windowBackground"
-          + " is available in the theme.");
-      return null;
-    }
-  }
-
   @Nullable
   @Override
   public SplashScreen provideSplashScreen() {
@@ -340,7 +353,11 @@ public class FlutterActivity extends FragmentActivity
       );
       Bundle metadata = activityInfo.metaData;
       Integer splashScreenId = metadata != null ? metadata.getInt(SPLASH_SCREEN_META_DATA_KEY) : null;
-      return splashScreenId != null ? getResources().getDrawable(splashScreenId, getTheme()) : null;
+      return splashScreenId != null
+          ? Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP
+            ? getResources().getDrawable(splashScreenId, getTheme())
+            : getResources().getDrawable(splashScreenId)
+          : null;
     } catch (PackageManager.NameNotFoundException e) {
       // This is never expected to happen.
       return null;
@@ -365,6 +382,14 @@ public class FlutterActivity extends FragmentActivity
     }
   }
 
+  @NonNull
+  private View createFlutterView() {
+    return delegate.onCreateView(
+        null /* inflater */,
+        null /* container */,
+        null /* savedInstanceState */);
+  }
+
   private void configureStatusBarForFullscreenFlutterExperience() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
       Window window = getWindow();
@@ -374,177 +399,126 @@ public class FlutterActivity extends FragmentActivity
     }
   }
 
-  /**
-   * Creates a {@link FrameLayout} with an ID of {@code #FRAGMENT_CONTAINER_ID} that will contain
-   * the {@link FlutterFragment} displayed by this {@code FlutterActivity}.
-   * <p>
-   * @return the FrameLayout container
-   */
-  @NonNull
-  private View createFragmentContainer() {
-    FrameLayout container = new FrameLayout(this);
-    container.setId(FRAGMENT_CONTAINER_ID);
-    container.setLayoutParams(new ViewGroup.LayoutParams(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.MATCH_PARENT
-    ));
-    return container;
-  }
-
-  /**
-   * Ensure that a {@link FlutterFragment} is attached to this {@code FlutterActivity}.
-   * <p>
-   * If no {@link FlutterFragment} exists in this {@code FlutterActivity}, then a {@link FlutterFragment}
-   * is created and added. If a {@link FlutterFragment} does exist in this {@code FlutterActivity}, then
-   * a reference to that {@link FlutterFragment} is retained in {@code #flutterFragment}.
-   */
-  private void ensureFlutterFragmentCreated() {
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    flutterFragment = (FlutterFragment) fragmentManager.findFragmentByTag(TAG_FLUTTER_FRAGMENT);
-    if (flutterFragment == null) {
-      // No FlutterFragment exists yet. This must be the initial Activity creation. We will create
-      // and add a new FlutterFragment to this Activity.
-      flutterFragment = createFlutterFragment();
-      fragmentManager
-          .beginTransaction()
-          .add(FRAGMENT_CONTAINER_ID, flutterFragment, TAG_FLUTTER_FRAGMENT)
-          .commit();
-    }
-  }
-
-  /**
-   * Creates the instance of the {@link FlutterFragment} that this {@code FlutterActivity} displays.
-   * <p>
-   * Subclasses may override this method to return a specialization of {@link FlutterFragment}.
-   */
-  @NonNull
-  protected FlutterFragment createFlutterFragment() {
-    BackgroundMode backgroundMode = getBackgroundMode();
-
-    Log.d(TAG, "Creating FlutterFragment:\n"
-        + "Background transparency mode: " + backgroundMode + "\n"
-        + "Dart entrypoint: " + getDartEntrypoint() + "\n"
-        + "Initial route: " + getInitialRoute() + "\n"
-        + "App bundle path: " + getAppBundlePath() + "\n"
-        + "Will attach FlutterEngine to Activity: " + shouldAttachEngineToActivity());
-
-    return new FlutterFragment.Builder()
-        .dartEntrypoint(getDartEntrypoint())
-        .initialRoute(getInitialRoute())
-        .appBundlePath(getAppBundlePath())
-        .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
-        .renderMode(backgroundMode == BackgroundMode.opaque
-            ? FlutterView.RenderMode.surface
-            : FlutterView.RenderMode.texture)
-        .transparencyMode(backgroundMode == BackgroundMode.opaque
-            ? FlutterView.TransparencyMode.opaque
-            : FlutterView.TransparencyMode.transparent)
-        .shouldAttachEngineToActivity(shouldAttachEngineToActivity())
-        .build();
-  }
-
-  /**
-   * Hook for subclasses to control whether or not the {@link FlutterFragment} within this
-   * {@code Activity} automatically attaches its {@link FlutterEngine} to this {@code Activity}.
-   * <p>
-   * For an explanation of why this control exists, see {@link FlutterFragment.Builder#shouldAttachEngineToActivity()}.
-   * <p>
-   * This property is controlled with a protected method instead of an {@code Intent} argument because
-   * the only situation where changing this value would help, is a situation in which
-   * {@code FlutterActivity} is being subclassed to utilize a custom and/or cached {@link FlutterEngine}.
-   * <p>
-   * Defaults to {@code true}.
-   */
-  protected boolean shouldAttachEngineToActivity() {
-    return true;
-  }
-
-  /**
-   * Hook for subclasses to easily provide a custom {@code FlutterEngine}.
-   */
-  @Nullable
   @Override
-  public FlutterEngine provideFlutterEngine(@NonNull Context context) {
-    // No-op. Hook for subclasses.
-    return null;
+  protected void onStart() {
+    super.onStart();
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_START);
+    delegate.onStart();
   }
 
-  /**
-   * Hook for subclasses to easily configure a {@code FlutterEngine}, e.g., register
-   * plugins.
-   * <p>
-   * This method is called after {@link #provideFlutterEngine(Context)}.
-   */
   @Override
-  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    // No-op. Hook for subclasses.
+  protected void onResume() {
+    super.onResume();
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_RESUME);
+    delegate.onResume();
   }
 
   @Override
   public void onPostResume() {
     super.onPostResume();
-    flutterFragment.onPostResume();
+    delegate.onPostResume();
+  }
+
+  @Override
+  protected void onPause() {
+    super.onPause();
+    delegate.onPause();
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE);
+  }
+
+  @Override
+  protected void onStop() {
+    super.onStop();
+    delegate.onStop();
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_STOP);
+  }
+
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    delegate.onDestroyView();
+    delegate.onDetach();
+    lifecycle.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY);
+  }
+
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    delegate.onActivityResult(requestCode, resultCode, data);
   }
 
   @Override
   protected void onNewIntent(@NonNull Intent intent) {
-    // Forward Intents to our FlutterFragment in case it cares.
-    flutterFragment.onNewIntent(intent);
+    // TODO(mattcarroll): change G3 lint rule that forces us to call super
     super.onNewIntent(intent);
+    delegate.onNewIntent(intent);
   }
 
   @Override
   public void onBackPressed() {
-    flutterFragment.onBackPressed();
+    delegate.onBackPressed();
   }
 
   @Override
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    flutterFragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    delegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
   }
 
   @Override
   public void onUserLeaveHint() {
-    flutterFragment.onUserLeaveHint();
+    delegate.onUserLeaveHint();
   }
 
   @Override
   public void onTrimMemory(int level) {
     super.onTrimMemory(level);
-    flutterFragment.onTrimMemory(level);
-  }
-
-  @SuppressWarnings("unused")
-  @Nullable
-  protected FlutterEngine getFlutterEngine() {
-    return flutterFragment.getFlutterEngine();
+    delegate.onTrimMemory(level);
   }
 
   /**
-   * The path to the bundle that contains this Flutter app's resources, e.g., Dart code snapshots.
-   * <p>
-   * When this {@code FlutterActivity} is run by Flutter tooling and a data String is included
-   * in the launching {@code Intent}, that data String is interpreted as an app bundle path.
-   * <p>
-   * By default, the app bundle path is obtained from {@link FlutterMain#findAppBundlePath(Context)}.
-   * <p>
-   * Subclasses may override this method to return a custom app bundle path.
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain a {@code Context} reference as
+   * needed.
+   */
+  @Override
+  @NonNull
+  public Context getContext() {
+    return this;
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain an {@code Activity} reference as
+   * needed. This reference is used by the delegate to instantiate a {@link FlutterView},
+   * a {@link PlatformPlugin}, and to determine if the {@code Activity} is changing
+   * configurations.
+   */
+  @Override
+  @NonNull
+  public Activity getActivity() {
+    return this;
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain a {@code Lifecycle} reference as
+   * needed. This reference is used by the delegate to provide Flutter plugins with access
+   * to lifecycle events.
+   */
+  @Override
+  @NonNull
+  public Lifecycle getLifecycle() {
+    return lifecycle;
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain Flutter shell arguments when
+   * initializing Flutter.
    */
   @NonNull
-  protected String getAppBundlePath() {
-    // If this Activity was launched from tooling, and the incoming Intent contains
-    // a custom app bundle path, return that path.
-    // TODO(mattcarroll): determine if we should have an explicit FlutterTestActivity instead of conflating.
-    if (isDebuggable() && Intent.ACTION_RUN.equals(getIntent().getAction())) {
-      String appBundlePath = getIntent().getDataString();
-      if (appBundlePath != null) {
-        return appBundlePath;
-      }
-    }
-
-    // Return the default app bundle path.
-    // TODO(mattcarroll): move app bundle resolution into an appropriately named class.
-    return FlutterMain.findAppBundlePath(getApplicationContext());
+  @Override
+  public FlutterShellArgs getFlutterShellArgs() {
+    return FlutterShellArgs.fromIntent(getIntent());
   }
 
   /**
@@ -565,7 +539,7 @@ public class FlutterActivity extends FragmentActivity
    * Subclasses may override this method to directly control the Dart entrypoint.
    */
   @NonNull
-  protected String getDartEntrypoint() {
+  public String getDartEntrypointFunctionName() {
     if (getIntent().hasExtra(EXTRA_DART_ENTRYPOINT)) {
       return getIntent().getStringExtra(EXTRA_DART_ENTRYPOINT);
     }
@@ -601,7 +575,7 @@ public class FlutterActivity extends FragmentActivity
    * Subclasses may override this method to directly control the initial route.
    */
   @NonNull
-  protected String getInitialRoute() {
+  public String getInitialRoute() {
     if (getIntent().hasExtra(EXTRA_INITIAL_ROUTE)) {
       return getIntent().getStringExtra(EXTRA_INITIAL_ROUTE);
     }
@@ -620,6 +594,69 @@ public class FlutterActivity extends FragmentActivity
   }
 
   /**
+   * The path to the bundle that contains this Flutter app's resources, e.g., Dart code snapshots.
+   * <p>
+   * When this {@code FlutterActivity} is run by Flutter tooling and a data String is included
+   * in the launching {@code Intent}, that data String is interpreted as an app bundle path.
+   * <p>
+   * By default, the app bundle path is obtained from {@link FlutterMain#findAppBundlePath(Context)}.
+   * <p>
+   * Subclasses may override this method to return a custom app bundle path.
+   */
+  @NonNull
+  public String getAppBundlePath() {
+    // If this Activity was launched from tooling, and the incoming Intent contains
+    // a custom app bundle path, return that path.
+    // TODO(mattcarroll): determine if we should have an explicit FlutterTestActivity instead of conflating.
+    if (isDebuggable() && Intent.ACTION_RUN.equals(getIntent().getAction())) {
+      String appBundlePath = getIntent().getDataString();
+      if (appBundlePath != null) {
+        return appBundlePath;
+      }
+    }
+
+    // Return the default app bundle path.
+    // TODO(mattcarroll): move app bundle resolution into an appropriately named class.
+    return FlutterMain.findAppBundlePath(getApplicationContext());
+  }
+
+  /**
+   * Returns true if Flutter is running in "debug mode", and false otherwise.
+   * <p>
+   * Debug mode allows Flutter to operate with hot reload and hot restart. Release mode does not.
+   */
+  private boolean isDebuggable() {
+    return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain the desired {@link FlutterView.RenderMode}
+   * that should be used when instantiating a {@link FlutterView}.
+   */
+  @NonNull
+  @Override
+  public FlutterView.RenderMode getRenderMode() {
+    return getBackgroundMode() == BackgroundMode.opaque
+        ? FlutterView.RenderMode.surface
+        : FlutterView.RenderMode.texture;
+  }
+
+  /**
+   * {@link FlutterActivityAndFragmentDelegate.Host} method that is used by
+   * {@link FlutterActivityAndFragmentDelegate} to obtain the desired
+   * {@link FlutterView.TransparencyMode} that should be used when instantiating a
+   * {@link FlutterView}.
+   */
+  @NonNull
+  @Override
+  public FlutterView.TransparencyMode getTransparencyMode() {
+    return getBackgroundMode() == BackgroundMode.opaque
+        ? FlutterView.TransparencyMode.opaque
+        : FlutterView.TransparencyMode.transparent;
+  }
+
+  /**
    * The desired window background mode of this {@code Activity}, which defaults to
    * {@link BackgroundMode#opaque}.
    */
@@ -633,13 +670,100 @@ public class FlutterActivity extends FragmentActivity
   }
 
   /**
-   * Returns true if Flutter is running in "debug mode", and false otherwise.
+   * Hook for subclasses to easily provide a custom {@link FlutterEngine}.
    * <p>
-   * Debug mode allows Flutter to operate with hot reload and hot restart. Release mode does not.
+   * This hook is where a cached {@link FlutterEngine} should be provided, if a cached
+   * {@link FlutterEngine} is desired.
    */
-  private boolean isDebuggable() {
-    return (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+  @Nullable
+  @Override
+  public FlutterEngine provideFlutterEngine(@NonNull Context context) {
+    // No-op. Hook for subclasses.
+    return null;
   }
+
+  /**
+   * Hook for subclasses to obtain a reference to the {@link FlutterEngine} that is owned
+   * by this {@code FlutterActivity}.
+   */
+  @Nullable
+  protected FlutterEngine getFlutterEngine() {
+    return delegate.getFlutterEngine();
+  }
+
+  @Nullable
+  @Override
+  public PlatformPlugin providePlatformPlugin(@Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
+    if (activity != null) {
+      return new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel());
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Hook for subclasses to easily configure a {@code FlutterEngine}, e.g., register
+   * plugins.
+   * <p>
+   * This method is called after {@link #provideFlutterEngine(Context)}.
+   */
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    // No-op. Hook for subclasses.
+  }
+
+  /**
+   * Hook for subclasses to control whether or not the {@link FlutterFragment} within this
+   * {@code Activity} automatically attaches its {@link FlutterEngine} to this {@code Activity}.
+   * <p>
+   * This property is controlled with a protected method instead of an {@code Intent} argument because
+   * the only situation where changing this value would help, is a situation in which
+   * {@code FlutterActivity} is being subclassed to utilize a custom and/or cached {@link FlutterEngine}.
+   * <p>
+   * Defaults to {@code true}.
+   * <p>
+   * Control surfaces are used to provide Android resources and lifecycle events to
+   * plugins that are attached to the {@link FlutterEngine}. If {@code shouldAttachEngineToActivity}
+   * is true then this {@code FlutterActivity} will connect its {@link FlutterEngine} to itself,
+   * along with any plugins that are registered with that {@link FlutterEngine}. This allows
+   * plugins to access the {@code Activity}, as well as receive {@code Activity}-specific calls,
+   * e.g., {@link Activity#onNewIntent(Intent)}. If {@code shouldAttachEngineToActivity} is false,
+   * then this {@code FlutterActivity} will not automatically manage the connection between its
+   * {@link FlutterEngine} and itself. In this case, plugins will not be offered a reference to
+   * an {@code Activity} or its OS hooks.
+   * <p>
+   * Returning false from this method does not preclude a {@link FlutterEngine} from being
+   * attaching to a {@code FlutterActivity} - it just prevents the attachment from happening
+   * automatically. A developer can choose to subclass {@code FlutterActivity} and then
+   * invoke {@link ActivityControlSurface#attachToActivity(Activity, Lifecycle)}
+   * and {@link ActivityControlSurface#detachFromActivity()} at the desired times.
+   * <p>
+   * One reason that a developer might choose to manually manage the relationship between the
+   * {@code Activity} and {@link FlutterEngine} is if the developer wants to move the
+   * {@link FlutterEngine} somewhere else. For example, a developer might want the
+   * {@link FlutterEngine} to outlive this {@code FlutterActivity} so that it can be used
+   * later in a different {@code Activity}. To accomplish this, the {@link FlutterEngine} may
+   * need to be disconnected from this {@code FluttterActivity} at an unusual time, preventing
+   * this {@code FlutterActivity} from correctly managing the relationship between the
+   * {@link FlutterEngine} and itself.
+   */
+  @Override
+  public boolean shouldAttachEngineToActivity() {
+    return true;
+  }
+
+  /**
+   * Returns true if the {@link FlutterEngine} backing this {@code FlutterActivity} should
+   * outlive this {@code FlutterActivity}, or be destroyed when the {@code FlutterActivity}
+   * is destroyed.
+   */
+  @Override
+  public boolean retainFlutterEngineAfterHostDestruction() {
+    return false;
+  }
+
+  @Override
+  public void onFirstFrameRendered() {}
 
   /**
    * The mode of the background of a {@code FlutterActivity}, either opaque or transparent.

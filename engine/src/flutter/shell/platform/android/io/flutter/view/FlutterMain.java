@@ -14,6 +14,7 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -22,7 +23,6 @@ import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.util.PathUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -55,6 +55,13 @@ public class FlutterMain {
     private static final String DEFAULT_LIBRARY = "libflutter.so";
     private static final String DEFAULT_KERNEL_BLOB = "kernel_blob.bin";
     private static final String DEFAULT_FLUTTER_ASSETS_DIR = "flutter_assets";
+
+    private static boolean isRunningInRobolectricTest = false;
+
+    @VisibleForTesting
+    public static void setIsRunningInRobolectricTest(boolean isRunningInRobolectricTest) {
+        FlutterMain.isRunningInRobolectricTest = isRunningInRobolectricTest;
+    }
 
     @NonNull
     private static String fromFlutterAssets(@NonNull String filePath) {
@@ -96,6 +103,10 @@ public class FlutterMain {
      * @param applicationContext The Android application context.
      */
     public static void startInitialization(@NonNull Context applicationContext) {
+        // Do nothing if we're running this in a Robolectric test.
+        if (isRunningInRobolectricTest) {
+            return;
+        }
         startInitialization(applicationContext, new Settings());
     }
 
@@ -105,6 +116,11 @@ public class FlutterMain {
      * @param settings Configuration settings.
      */
     public static void startInitialization(@NonNull Context applicationContext, @NonNull Settings settings) {
+        // Do nothing if we're running this in a Robolectric test.
+        if (isRunningInRobolectricTest) {
+            return;
+        }
+
         if (Looper.myLooper() != Looper.getMainLooper()) {
           throw new IllegalStateException("startInitialization must be called on the main thread");
         }
@@ -140,6 +156,11 @@ public class FlutterMain {
      * @param args Flags sent to the Flutter runtime.
      */
     public static void ensureInitializationComplete(@NonNull Context applicationContext, @Nullable String[] args) {
+        // Do nothing if we're running this in a Robolectric test.
+        if (isRunningInRobolectricTest) {
+            return;
+        }
+
         if (Looper.myLooper() != Looper.getMainLooper()) {
           throw new IllegalStateException("ensureInitializationComplete must be called on the main thread");
         }
@@ -207,6 +228,11 @@ public class FlutterMain {
         @NonNull Handler callbackHandler,
         @NonNull Runnable callback
     ) {
+        // Do nothing if we're running this in a Robolectric test.
+        if (isRunningInRobolectricTest) {
+            return;
+        }
+
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw new IllegalStateException("ensureInitializationComplete must be called on the main thread");
         }

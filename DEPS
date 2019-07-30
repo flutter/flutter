@@ -474,7 +474,7 @@ deps = {
      'packages': [
        {
         'package': 'flutter/android/robolectric_bundle',
-        'version': 'last_updated:2019-07-22@11:16:04-07:00'
+        'version': 'last_updated:2019-07-29T15:27:42-0700'
        }
      ],
      'condition': 'download_android_deps',

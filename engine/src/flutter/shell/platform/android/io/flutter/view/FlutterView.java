@@ -199,7 +199,12 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
 
         // Create and setup plugins
         PlatformPlugin platformPlugin = new PlatformPlugin(activity, platformChannel);
-        addActivityLifecycleListener(platformPlugin);
+        addActivityLifecycleListener(new ActivityLifecycleListener() {
+            @Override
+            public void onPostResume() {
+                platformPlugin.updateSystemUiOverlays();
+            }
+        });
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         PlatformViewsController platformViewsController = mNativeView.getPluginRegistry().getPlatformViewsController();
         mTextInputPlugin = new TextInputPlugin(this, dartExecutor, platformViewsController);
