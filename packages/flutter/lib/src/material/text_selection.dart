@@ -158,9 +158,6 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
         ? endpoints[1]
         : null;
-    final double x = (endTextSelectionPoint == null)
-        ? startTextSelectionPoint.point.dx
-        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
     final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
@@ -170,7 +167,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     final double y = fitsAbove
         ? startTextSelectionPoint.point.dy - _kToolbarContentDistance - textLineHeight
         : startTextSelectionPoint.point.dy + _kToolbarHeight + _kToolbarContentDistanceBelow;
-    final Offset preciseMidpoint = Offset(x, y);
+    final Offset preciseMidpoint = Offset(position.dx, y);
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
