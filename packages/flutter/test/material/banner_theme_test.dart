@@ -66,7 +66,7 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, const BoxDecoration(color: const Color(0xfffafafa)));
+    expect(container.decoration, const BoxDecoration(color: Color(0xfffafafa)));
     expect(content.text.style, Typography().englishLike.body1.merge(Typography().black.body1));
   });
 
