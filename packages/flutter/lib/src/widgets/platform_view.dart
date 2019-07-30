@@ -597,7 +597,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///     same as the `controller.viewId`.
 ///
 /// This widget creates a [PlatformViewRenderBox] to add a [PlatformViewLayer]
-/// to the layer tree. Then you would need to composite the UI when the layer is visited
+/// to the layer tree. The UI component needs to be composited when the layer is visited
 /// in the "paint" traversal in the Flutter Engine.
 /// The `controller` is required when constructing this widget,
 /// it is required by [PlatformViewRenderBox] to handle things
