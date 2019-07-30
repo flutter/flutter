@@ -50,6 +50,9 @@ class DevelopmentArtifact {
   /// Artifacts required for Fuchsia.
   static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
+  /// Artifacts required for the Flutter Runner.
+  static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
+
   /// Artifacts required for any development platform.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
@@ -63,6 +66,7 @@ class DevelopmentArtifact {
     linux,
     fuchsia,
     universal,
+    flutterRunner,
   ];
 }
 
@@ -83,6 +87,7 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
+      _artifacts.add(FlutterRunnerSDKArtifacts(this));
       for (String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
@@ -870,6 +875,9 @@ class GradleWrapper extends CachedArtifact {
   }
 }
 
+ const String _cipdBaseUrl =
+    'https://chrome-infra-packages.appspot.com/dl';
+
 /// Common functionality for pulling Fuchsia SDKs.
 abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
   _FuchsiaSDKArtifacts(Cache cache, String platform)
@@ -877,9 +885,6 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
        super('fuchsia-$platform', cache, const <DevelopmentArtifact> {
     DevelopmentArtifact.fuchsia,
   });
-
-  static const String _cipdBaseUrl =
-      'https://chrome-infra-packages.appspot.com/dl';
 
   final String _path;
 
@@ -890,6 +895,30 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
     final String url = '$_cipdBaseUrl/$_path/+/$version';
     return _downloadZipArchive('Downloading package fuchsia SDK...',
                                Uri.parse(url), location);
+  }
+}
+
+/// The pre-built flutter runner for Fuchsia development.
+class FlutterRunnerSDKArtifacts extends CachedArtifact {
+  FlutterRunnerSDKArtifacts(Cache cache)
+      : super('flutter_runner', cache, const <DevelopmentArtifact>{
+    DevelopmentArtifact.flutterRunner,
+  });
+
+  @override
+  Directory get location => cache.getArtifactDirectory('flutter_runner');
+
+  @override
+  String get version => cache.getVersionFor('engine');
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isLinux && !platform.isMacOS) {
+      return Future<void>.value();
+    }
+    final String url = '$_cipdBaseUrl/flutter/fuchsia/+/git_revision:$version';
+    await _downloadZipArchive('Downloading package flutter runner...',
+        Uri.parse(url), location);
   }
 }
 

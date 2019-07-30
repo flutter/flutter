@@ -479,7 +479,37 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
-  testWidgets('keyboard show search button', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
+    const String searchHint = 'custom search hint';
+    final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHint);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+    expect(find.text(defaultSearchHint), findsNothing);
+  });
+
+  testWidgets('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
+    final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+  });
+
+  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -491,6 +521,18 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
+
+  testWidgets('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.showKeyboard(find.byType(TextField));
+    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
   group('contributes semantics', () {
@@ -649,12 +691,13 @@ class TestHomePage extends StatelessWidget {
 }
 
 class _TestSearchDelegate extends SearchDelegate<String> {
-
   _TestSearchDelegate({
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-  });
+    String searchHint,
+    TextInputAction textInputAction = TextInputAction.search,
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
 
   final String suggestions;
   final String result;

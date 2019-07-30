@@ -1,9 +1,8 @@
 platform :ios, '9.0'
 
-# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
-install! 'cocoapods', :disable_input_output_paths => true
+flutter_application_path = '../hello'
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'Host' do
-  flutter_application_path = '../hello'
-  eval(File.read("#{flutter_application_path}/.ios/Flutter/podhelper.rb"))
+  install_all_flutter_pods flutter_application_path
 end

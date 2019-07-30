@@ -13,26 +13,9 @@
 		74F9786E215AB9E9005A0F04 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786D215AB9E9005A0F04 /* Assets.xcassets */; };
 		74F97871215AB9E9005A0F04 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 74F9786F215AB9E9005A0F04 /* LaunchScreen.storyboard */; };
 		74F97874215AB9E9005A0F04 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 74F97873215AB9E9005A0F04 /* main.m */; };
-		74F978AF215AD6F9005A0F04 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 74F978AC215AD6E8005A0F04 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		DAEA7B95412864C7F3A4AE98 /* libPods-Host.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2499C53F0BD30E24745E2F6B /* libPods-Host.a */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		74F978A2215ACF9B005A0F04 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				74F978AF215AD6F9005A0F04 /* App.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		2499C53F0BD30E24745E2F6B /* libPods-Host.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Host.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		74F97861215AB9E8005A0F04 /* Host.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Host.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		74F97864215AB9E8005A0F04 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		74F97865215AB9E8005A0F04 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -43,10 +26,6 @@
 		74F97870215AB9E9005A0F04 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		74F97872215AB9E9005A0F04 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		74F97873215AB9E9005A0F04 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		74F9787B215ABA08005A0F04 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
-		74F9787C215ABA73005A0F04 /* Flutter.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Flutter.xcconfig; sourceTree = "<group>"; };
-		74F9787D215ABA9D005A0F04 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		74F978AC215AD6E8005A0F04 /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = ../../hello/.ios/Flutter/App.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +33,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DAEA7B95412864C7F3A4AE98 /* libPods-Host.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,8 +42,6 @@
 		74F97858215AB9E8005A0F04 = {
 			isa = PBXGroup;
 			children = (
-				74F978A3215AD111005A0F04 /* Flutter */,
-				74F9787A215AB9F3005A0F04 /* Config */,
 				74F97863215AB9E8005A0F04 /* Host */,
 				74F97862215AB9E8005A0F04 /* Products */,
 				74F9788B215AC328005A0F04 /* Frameworks */,
@@ -97,30 +73,11 @@
 			path = Host;
 			sourceTree = "<group>";
 		};
-		74F9787A215AB9F3005A0F04 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				74F9787C215ABA73005A0F04 /* Flutter.xcconfig */,
-				74F9787B215ABA08005A0F04 /* Debug.xcconfig */,
-				74F9787D215ABA9D005A0F04 /* Release.xcconfig */,
-			);
-			path = Config;
-			sourceTree = "<group>";
-		};
 		74F9788B215AC328005A0F04 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				2499C53F0BD30E24745E2F6B /* libPods-Host.a */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		74F978A3215AD111005A0F04 /* Flutter */ = {
-			isa = PBXGroup;
-			children = (
-				74F978AC215AD6E8005A0F04 /* App.framework */,
-			);
-			path = Flutter;
 			sourceTree = "<group>";
 		};
 		A4A9971F50C4EE357B74B6E0 /* Pods */ = {
@@ -137,13 +94,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 74F97877215AB9E9005A0F04 /* Build configuration list for PBXNativeTarget "Host" */;
 			buildPhases = (
-				EDACAC7378E52BD5BBDB34D5 /* [CP] Check Pods Manifest.lock */,
-				74F9787E215ABB1B005A0F04 /* Run Script */,
 				74F9785D215AB9E8005A0F04 /* Sources */,
 				74F9785E215AB9E8005A0F04 /* Frameworks */,
 				74F9785F215AB9E8005A0F04 /* Resources */,
-				53642CAE5328D86A50FDAD59 /* [CP] Embed Pods Frameworks */,
-				74F978A2215ACF9B005A0F04 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -198,56 +151,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		53642CAE5328D86A50FDAD59 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Host/Pods-Host-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		74F9787E215ABB1B005A0F04 /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n";
-		};
-		EDACAC7378E52BD5BBDB34D5 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Host-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		74F9785D215AB9E8005A0F04 /* Sources */ = {
@@ -317,6 +220,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -376,6 +280,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -396,7 +301,6 @@
 		};
 		74F97878215AB9E9005A0F04 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 74F9787B215ABA08005A0F04 /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -414,7 +318,6 @@
 		};
 		74F97879215AB9E9005A0F04 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 74F9787D215ABA9D005A0F04 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

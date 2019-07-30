@@ -169,6 +169,15 @@ void main() {
     FileSystem: () => MockFileSystem(),
   });
 
+  test('Unstable artifacts', () {
+    expect(DevelopmentArtifact.web.unstable, true);
+    expect(DevelopmentArtifact.linux.unstable, true);
+    expect(DevelopmentArtifact.macOS.unstable, true);
+    expect(DevelopmentArtifact.windows.unstable, true);
+    expect(DevelopmentArtifact.fuchsia.unstable, true);
+    expect(DevelopmentArtifact.flutterRunner.unstable, true);
+  });
+
   group('EngineCachedArtifact', () {
     FakeHttpClient fakeHttpClient;
     FakePlatform fakePlatform;
