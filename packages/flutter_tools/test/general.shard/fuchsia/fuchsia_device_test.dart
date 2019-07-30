@@ -19,7 +19,6 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/application_package.dart';
 import 'package:flutter_tools/src/fuchsia/amber_ctl.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
-import 'package:flutter_tools/src/fuchsia/fuchsia_dev_finder.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
@@ -46,22 +45,6 @@ void main() {
       final FuchsiaDevice device = FuchsiaDevice(deviceId, name: name);
       expect(device.id, deviceId);
       expect(device.name, name);
-    });
-
-    test('parse dev_finder output', () {
-      const String example = '192.168.42.56 paper-pulp-bush-angel';
-      final List<FuchsiaDevice> names = parseListDevices(example);
-
-      expect(names.length, 1);
-      expect(names.first.name, 'paper-pulp-bush-angel');
-      expect(names.first.id, '192.168.42.56');
-    });
-
-    test('parse junk dev_finder output', () {
-      const String example = 'junk';
-      final List<FuchsiaDevice> names = parseListDevices(example);
-
-      expect(names.length, 0);
     });
 
     testUsingContext('default capabilities', () async {
@@ -120,7 +103,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(
             sshConfig: sshConfig,
-            devFinder: devFinder,
             platformKernelDill: platformDill,
             flutterPatchedSdk: patchedSdk,
           ),
@@ -145,7 +127,6 @@ void main() {
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () => FuchsiaArtifacts(
             sshConfig: sshConfig,
-            devFinder: devFinder,
             platformKernelDill: platformDill,
             flutterPatchedSdk: patchedSdk,
           ),
@@ -204,7 +185,6 @@ void main() {
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
             sshConfig: mockFile,
-            devFinder: mockFile,
           ),
     });
 
@@ -275,7 +255,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
         FuchsiaArtifacts: () =>
-            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+            FuchsiaArtifacts(sshConfig: sshConfig),
       });
 
       testUsingContext('cuts off prior logs', () async {
@@ -301,7 +281,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 29, 45)),
         FuchsiaArtifacts: () =>
-            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+            FuchsiaArtifacts(sshConfig: sshConfig),
       });
 
       testUsingContext('can be parsed for all apps', () async {
@@ -330,7 +310,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
         FuchsiaArtifacts: () =>
-            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+            FuchsiaArtifacts(sshConfig: sshConfig),
       });
     });
   });
@@ -510,18 +490,6 @@ void main() {
       FileSystem: () => memoryFileSystem,
       FuchsiaDeviceTools: () => fuchsiaDeviceTools,
       FuchsiaSdk: () => fuchsiaSdk,
-      OperatingSystemUtils: () => osUtils,
-    });
-
-    testUsingContext('fail with correct LaunchResult when dev_finder fails', () async {
-      final LaunchResult launchResult =
-          await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
-      expect(launchResult.started, isFalse);
-      expect(launchResult.hasObservatory, isFalse);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
-      FuchsiaDeviceTools: () => fuchsiaDeviceTools,
-      FuchsiaSdk: () => MockFuchsiaSdk(devFinder: FailingDevFinder()),
       OperatingSystemUtils: () => osUtils,
     });
 
@@ -1029,45 +997,16 @@ class FailingKernelCompiler implements FuchsiaKernelCompiler {
   }
 }
 
-class FakeFuchsiaDevFinder implements FuchsiaDevFinder {
-  @override
-  Future<List<String>> list() async {
-    return <String>['192.168.42.172 scare-cable-skip-joy'];
-  }
-
-  @override
-  Future<String> resolve(String deviceName) async {
-    return '192.168.42.10';
-  }
-}
-
-class FailingDevFinder implements FuchsiaDevFinder {
-  @override
-  Future<List<String>> list() async {
-    return null;
-  }
-
-  @override
-  Future<String> resolve(String deviceName) async {
-    return null;
-  }
-}
-
 class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
   MockFuchsiaSdk({
     FuchsiaPM pm,
     FuchsiaKernelCompiler compiler,
-    FuchsiaDevFinder devFinder,
   }) : fuchsiaPM = pm ?? FakeFuchsiaPM(),
-       fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler(),
-       fuchsiaDevFinder = devFinder ?? FakeFuchsiaDevFinder();
+       fuchsiaKernelCompiler = compiler ?? FakeFuchsiaKernelCompiler();
 
   @override
   final FuchsiaPM fuchsiaPM;
 
   @override
   final FuchsiaKernelCompiler fuchsiaKernelCompiler;
-
-  @override
-  final FuchsiaDevFinder fuchsiaDevFinder;
 }

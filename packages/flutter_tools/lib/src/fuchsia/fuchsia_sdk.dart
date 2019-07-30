@@ -13,7 +13,6 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 
-import 'fuchsia_dev_finder.dart';
 import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
 
@@ -32,30 +31,10 @@ class FuchsiaSdk {
   FuchsiaPM get fuchsiaPM => _fuchsiaPM ??= FuchsiaPM();
   FuchsiaPM _fuchsiaPM;
 
-  /// Interface to the 'dev_finder' tool.
-  FuchsiaDevFinder _fuchsiaDevFinder;
-  FuchsiaDevFinder get fuchsiaDevFinder =>
-      _fuchsiaDevFinder ??= FuchsiaDevFinder();
-
   /// Interface to the 'kernel_compiler' tool.
   FuchsiaKernelCompiler _fuchsiaKernelCompiler;
   FuchsiaKernelCompiler get fuchsiaKernelCompiler =>
       _fuchsiaKernelCompiler ??= FuchsiaKernelCompiler();
-
-  /// Example output:
-  ///    $ dev_finder list -full
-  ///    > 192.168.42.56 paper-pulp-bush-angel
-  Future<String> listDevices() async {
-    if (fuchsiaArtifacts.devFinder == null ||
-        !fuchsiaArtifacts.devFinder.existsSync()) {
-      return null;
-    }
-    final List<String> devices = await fuchsiaDevFinder.list();
-    if (devices == null) {
-      return null;
-    }
-    return devices.isNotEmpty ? devices[0] : null;
-  }
 
   /// Returns the fuchsia system logs for an attached device.
   Stream<String> syslogs(String id) {
@@ -102,7 +81,6 @@ class FuchsiaArtifacts {
   /// Creates a new [FuchsiaArtifacts].
   FuchsiaArtifacts({
     this.sshConfig,
-    this.devFinder,
     this.platformKernelDill,
     this.flutterPatchedSdk,
     this.kernelCompiler,
@@ -124,7 +102,6 @@ class FuchsiaArtifacts {
     final String tools = fs.path.join(fuchsia, 'tools');
     final String dartPrebuilts = fs.path.join(tools, 'dart_prebuilts');
 
-    final File devFinder = fs.file(fs.path.join(tools, 'dev_finder'));
     final File platformDill = fs.file(fs.path.join(
           dartPrebuilts, 'flutter_runner', 'platform_strong.dill'));
     final File patchedSdk = fs.file(fs.path.join(
@@ -145,7 +122,6 @@ class FuchsiaArtifacts {
     }
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
-      devFinder: devFinder.existsSync() ? devFinder : null,
       platformKernelDill: platformDill.existsSync() ? platformDill : null,
       flutterPatchedSdk: patchedSdk.existsSync() ? patchedSdk : null,
       kernelCompiler: kernelCompiler.existsSync() ? kernelCompiler : null,
@@ -160,9 +136,6 @@ class FuchsiaArtifacts {
   /// Fuchsia device.
   final File sshConfig;
 
-  /// The location of the dev finder tool used to locate connected
-  /// Fuchsia devices.
-  final File devFinder;
 
   /// The location of the Fuchsia-specific platform dill.
   final File platformKernelDill;

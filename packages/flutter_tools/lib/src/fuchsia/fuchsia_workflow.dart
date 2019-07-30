@@ -20,13 +20,11 @@ class FuchsiaWorkflow implements Workflow {
   bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
 
   @override
-  bool get canListDevices {
-    return fuchsiaArtifacts.devFinder != null;
-  }
+  bool get canListDevices => true;
 
   @override
   bool get canLaunchDevices {
-    return fuchsiaArtifacts.devFinder != null && fuchsiaArtifacts.sshConfig != null;
+    return fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

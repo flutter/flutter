@@ -21,7 +21,11 @@ dependencies:
   json_rpc_2: 2.1.0
   linter: 0.1.93
   meta: 1.1.7
-  multicast_dns: 0.1.1
+  multicast_dns:
+    git:
+      url: git@github.com:jonahwilliams/packages.git
+      path: packages/multicast_dns
+      ref: mdns_updates
   mustache: 1.1.1
   package_config: 1.0.5
   platform: 2.2.0

@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -21,6 +19,7 @@ import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../mdns.dart';
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -145,33 +144,15 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (!fuchsiaWorkflow.canListDevices) {
       return <Device>[];
     }
-    final String text = await fuchsiaSdk.listDevices();
-    if (text == null || text.isEmpty) {
-      return <Device>[];
-    }
-    final List<FuchsiaDevice> devices = parseListDevices(text);
-    return devices;
+    return fuchsiaDeviceDiscovery
+      .discover()
+      .map((FuchsiaDeviceDiscoveryResult result) {
+        return FuchsiaDevice(result.address.address, name: result.name);
+    }).toList();
   }
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-@visibleForTesting
-List<FuchsiaDevice> parseListDevices(String text) {
-  final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-  for (String rawLine in text.trim().split('\n')) {
-    final String line = rawLine.trim();
-    // ['ip', 'device name']
-    final List<String> words = line.split(' ');
-    if (words.length < 2) {
-      continue;
-    }
-    final String name = words[1];
-    final String id = words[0];
-    devices.add(FuchsiaDevice(id, name: name));
-  }
-  return devices;
 }
 
 class FuchsiaDevice extends Device {
@@ -237,7 +218,7 @@ class FuchsiaDevice extends Device {
     // Stop the app if it's currently running.
     await stopApp(package);
     // Find out who the device thinks we are.
-    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(name);
+    final InternetAddress host = await fuchsiaDeviceDiscovery.resolve(name);
     if (host == null) {
       printError('Failed to resolve host for Fuchsia device');
       return LaunchResult.failed();
@@ -275,7 +256,7 @@ class FuchsiaDevice extends Device {
       // Start up a package server.
       const String packageServerName = 'flutter_tool';
       fuchsiaPackageServer = FuchsiaPackageServer(
-          packageRepo.path, packageServerName, host, port);
+          packageRepo.path, packageServerName, host.address, port);
       if (!await fuchsiaPackageServer.start()) {
         printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();

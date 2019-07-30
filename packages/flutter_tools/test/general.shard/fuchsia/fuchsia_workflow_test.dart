@@ -27,7 +27,7 @@ void main() {
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: null, sshConfig: null),
+          FuchsiaArtifacts(sshConfig: null),
     });
 
     testUsingContext(
@@ -38,7 +38,7 @@ void main() {
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: devFinder, sshConfig: null),
+          FuchsiaArtifacts(sshConfig: null),
     });
 
     testUsingContext(
@@ -49,7 +49,7 @@ void main() {
       expect(fuchsiaWorkflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       FuchsiaArtifacts: () =>
-          FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
+          FuchsiaArtifacts(sshConfig: sshConfig),
     });
   });
 }

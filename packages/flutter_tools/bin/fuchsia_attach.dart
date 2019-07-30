@@ -85,7 +85,7 @@ Future<void> main(List<String> args) async {
     '--target',
     targetFile,
     '--target-model',
-    'flutter', // TODO(jonahwilliams): change to flutter_runner when dart SDK rolls
+    'flutter',
     '--output-dill',
     outputDill,
     '--packages',
@@ -105,7 +105,7 @@ Future<void> main(List<String> args) async {
     verboseHelp: false,
     overrides: <Type, Generator>{
       DeviceManager: () => _FuchsiaDeviceManager(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
+      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
         frontendServer: frontendServer,
