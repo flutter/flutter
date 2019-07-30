@@ -55,7 +55,8 @@ Future<void> updateGeneratedXcodeProperties({
     buildInfo: buildInfo,
     targetOverride: targetOverride,
     useMacOSConfig: useMacOSConfig,
-    setSymroot: setSymroot
+    setSymroot: setSymroot,
+    buildDirOverride: buildDirOverride
   );
 
   _updateGeneratedXcodePropertiesFile(
@@ -122,6 +123,7 @@ List<String> _xcodeBuildSettingsLines({
   String targetOverride,
   bool useMacOSConfig = false,
   bool setSymroot = true,
+  String buildDirOverride,
 }) {
   final List<String> xcodeBuildSettings = <String>[];
 
