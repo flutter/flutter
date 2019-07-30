@@ -33,6 +33,7 @@ void main() {
   });
 
   tearDown(() {
+    controller.dispose();
     controller = null;
   });
 
