@@ -10,6 +10,7 @@ import '../../foundation.dart' show immutable;
 import '../widgets/framework.dart' show BuildContext;
 import '../widgets/media_query.dart';
 import 'theme.dart';
+import 'interface_level.dart';
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
@@ -174,6 +175,16 @@ class CupertinoDynamicColor extends Color {
     // If any of the elevated colors were specified.
     if (dependencyBitMask & 4 != 0) {
       // Something similar.
+      final CupertinoUserInterfaceLevelData level =
+        CupertinoUserInterfaceLevel.of(context, nullOk: nullOk)
+        ?? CupertinoUserInterfaceLevelData.base;
+
+      switch (level) {
+        case CupertinoUserInterfaceLevelData.base:
+          break;
+        case CupertinoUserInterfaceLevelData.elevated:
+          configBitMask |= 4;
+      }
     }
 
     return _colorMap[configBitMask] ?? defaultColor;
@@ -181,11 +192,9 @@ class CupertinoDynamicColor extends Color {
 
   @override
   bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-
-    return ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
-      .equals(_colorMap, other._colorMap);
+    return other.runtimeType == runtimeType
+    && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
+        .equals(_colorMap, other._colorMap);
   }
 
   @override
