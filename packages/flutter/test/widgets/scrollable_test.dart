@@ -8,13 +8,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-Future<void> pumpTest(WidgetTester tester, TargetPlatform platform) async {
+Future<void> pumpTest(WidgetTester tester, TargetPlatform platform, {bool scrollable = true}) async {
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
     ),
-    home: const CustomScrollView(
-      slivers: <Widget>[
+    home: CustomScrollView(
+      physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+      slivers: const <Widget>[
         SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
@@ -234,6 +235,17 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
     // Pointer signals should not cause overscroll.
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    expect(getScrollOffset(tester), 0.0);
+  });
+
+  testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.fuchsia, scrollable: false);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
     expect(getScrollOffset(tester), 0.0);
   });
 }
