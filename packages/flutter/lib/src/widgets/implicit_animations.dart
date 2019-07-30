@@ -256,7 +256,7 @@ class TextStyleTween extends Tween<TextStyle> {
 ///  * [AnimatedPadding], which is an implicitly animated version of [Padding].
 ///  * [AnimatedPhysicalModel], which is an implicitly animated version of
 ///    [PhysicalModel].
-///  * [AnimatedPositioned], which is an implicitly animated version of 
+///  * [AnimatedPositioned], which is an implicitly animated version of
 ///    [Positioned].
 ///  * [AnimatedPositionedDirectional], which is an implicitly animated version
 ///    of [PositionedDirectional].
