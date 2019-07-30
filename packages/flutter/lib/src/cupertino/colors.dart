@@ -193,8 +193,8 @@ class CupertinoDynamicColor extends Color {
   @override
   bool operator ==(dynamic other) {
     return other.runtimeType == runtimeType
-    && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
-        .equals(_colorMap, other._colorMap);
+        && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
+            .equals(_colorMap, other._colorMap);
   }
 
   @override
