@@ -172,7 +172,6 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Create the DartEntrypoint that we expect to be executed.
     DartExecutor.DartEntrypoint dartEntrypoint = new DartExecutor.DartEntrypoint(
-        RuntimeEnvironment.application.getAssets(),
         "/my/bundle/path",
         "myEntrypoint"
     );

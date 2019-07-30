@@ -293,7 +293,6 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
     // Configure the Dart entrypoint and execute it.
     DartExecutor.DartEntrypoint entrypoint = new DartExecutor.DartEntrypoint(
-        host.getContext().getResources().getAssets(),
         host.getAppBundlePath(),
         host.getDartEntrypointFunctionName()
     );

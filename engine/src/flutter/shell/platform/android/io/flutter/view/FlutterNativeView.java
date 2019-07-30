@@ -43,7 +43,7 @@ public class FlutterNativeView implements BinaryMessenger {
         mPluginRegistry = new FlutterPluginRegistry(this, context);
         mFlutterJNI = new FlutterJNI();
         mFlutterJNI.setRenderSurface(new RenderSurfaceImpl());
-        this.dartExecutor = new DartExecutor(mFlutterJNI);
+        this.dartExecutor = new DartExecutor(mFlutterJNI, context.getAssets());
         mFlutterJNI.addEngineLifecycleListener(new EngineLifecycleListenerImpl());
         attach(this, isBackgroundView);
         assertAttached();
