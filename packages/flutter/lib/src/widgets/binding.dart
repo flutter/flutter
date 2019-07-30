@@ -570,12 +570,21 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// Whether the Flutter engine has rasterized the first frame.
   ///
   /// {@macro flutter.frame_rasterized_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [waitUntilFirstFrameRasterized], the future when [firstFrameRasterized]
+  ///    becomes true.
   bool get firstFrameRasterized => _firstFrameCompleter.isCompleted;
 
   /// A future that completes when the Flutter engine has rasterized the first
   /// frame.
   ///
-  /// {@macro flutter.frame_rasterize`_vs_presented}
+  /// {@macro flutter.frame_rasterize_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether this future has completed or not.
   Future<void> get waitUntilFirstFrameRasterized => _firstFrameCompleter.future;
 
   /// Whether the first frame has finished building.
@@ -588,7 +597,9 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
   ///
-  /// See also [firstFrameRasterized].
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether the first frame has finished rendering.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
