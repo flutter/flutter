@@ -3,6 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:ui' show Color;
+import 'package:collection/collection.dart';
+import 'package:flutter/src/widgets/basic.dart';
+
+import '../../foundation.dart' show immutable;
+import '../widgets/framework.dart' show BuildContext;
+import '../widgets/media_query.dart';
+import 'theme.dart';
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
@@ -79,4 +86,116 @@ class CupertinoColors {
   ///
   /// This is SystemRed in the iOS palette.
   static const Color destructiveRed = Color(0xFFFF3B30);
+}
+
+@immutable
+class CupertinoDynamicColor extends Color {
+  CupertinoDynamicColor({
+    this.defaultColor,
+    this.normalColor,
+    this.darkColor,
+    this.highContrastColor,
+    this.darkHighContrastColor,
+    this.elevatedColor,
+    this.darkElevatedColor,
+    this.elevatedHighContrastColor,
+    this.darkElevatedHighContrastColor,
+  }) : assert(defaultColor != null || normalColor != null
+                                   && darkColor != null
+                                   && elevatedColor != null
+                                   && highContrastColor != null
+                                   && darkElevatedColor != null
+                                   && darkHighContrastColor != null
+                                   && darkElevatedHighContrastColor != null
+                                   && elevatedHighContrastColor != null),
+       super(defaultColor?.value ?? normalColor?.value);
+
+  final Color defaultColor;
+  final Color normalColor;
+  final Color darkColor;
+  final Color highContrastColor;
+  final Color darkHighContrastColor;
+  final Color elevatedColor;
+  final Color darkElevatedColor;
+  final Color elevatedHighContrastColor;
+  final Color darkElevatedHighContrastColor;
+
+  List<Color> get _colorMap => <Color> [
+    normalColor,
+    darkColor,
+    highContrastColor,
+    darkHighContrastColor,
+    elevatedColor,
+    darkElevatedColor,
+    elevatedHighContrastColor,
+    darkElevatedHighContrastColor,
+  ];
+
+
+  static Color resolve(Color resolvable, BuildContext context) => (resolvable is CupertinoDynamicColor)
+                                                                    ? resolvable.resolveFrom(context)
+                                                                    : resolvable;
+
+  @override
+  Color resolveFrom(BuildContext context, { bool nullOk = false }) {
+    int dependencyBitMask, configBitMask = 0;
+
+    for (int i = 0; i < _colorMap.length; i++) {
+      if (_colorMap[i] == null)
+        continue;
+
+      dependencyBitMask |= i;
+    }
+
+    // If any of the dark colors were specified.
+    if (dependencyBitMask & 1 != 0) {
+      final CupertinoThemeData themeData = CupertinoTheme.of(context).noDefault();
+      final Brightness brightness = themeData.brightness
+        ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness
+        ?? Brightness.light;
+
+      switch (brightness) {
+        case Brightness.light:
+          break;
+        case Brightness.dark:
+          configBitMask |= 1;
+      }
+    }
+
+    // If any of the high contrast colors were specified.
+    if (dependencyBitMask & 2 != 0) {
+      final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrastContent
+        ?? false;
+
+        configBitMask |= isHighContrastEnabled ? 2 : 0;
+    }
+
+    // If any of the elevated colors were specified.
+    if (dependencyBitMask & 4 != 0) {
+      // Something similar.
+    }
+
+    return _colorMap[configBitMask] ?? defaultColor;
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+
+    return ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
+      .equals(_colorMap, other._colorMap);
+  }
+
+  @override
+  int get hashCode => _colorMap.map((Color color) => color ?? defaultColor).hashCode;
+}
+
+class _ColorMapElementEquality<E> extends DefaultEquality<E> {
+  const _ColorMapElementEquality(this.nullFallbackValue) : super();
+  final E nullFallbackValue;
+
+  @override
+  bool equals(Object e1, Object e2) => super.equals(e1, e2)
+                                    || super.equals(e1 ?? nullFallbackValue, e2 ?? nullFallbackValue);
 }

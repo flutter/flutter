@@ -96,6 +96,7 @@ class MediaQueryData {
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
+    this.highContrastContent = false,
     this.disableAnimations = false,
     this.boldText = false,
   });
@@ -118,6 +119,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
+      highContrastContent = false,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -242,6 +244,13 @@ class MediaQueryData {
   ///
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool invertColors;
+
+  /// Whether the platform is requesting high contrast colors to be used when
+  /// displaying content.
+  ///
+  /// This flag is currently only updated on iOS devices that are running iOS 13
+  /// or above, and Android devices that are running Android Q and above.
+  final bool highContrastContent;
 
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
