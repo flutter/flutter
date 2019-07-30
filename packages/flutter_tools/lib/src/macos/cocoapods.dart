@@ -30,11 +30,11 @@ const String unknownCocoaPodsConsequence = '''
   Ensure that the output of 'pod --version' contains only digits and . to be recognized by Flutter.''';
 
 const String cocoaPodsInstallInstructions = '''
-  brew install cocoapods
+  sudo gem install cocoapods
   pod setup''';
 
 const String cocoaPodsUpgradeInstructions = '''
-  brew upgrade cocoapods
+  sudo gem install cocoapods
   pod setup''';
 
 CocoaPods get cocoaPods => context.get<CocoaPods>();

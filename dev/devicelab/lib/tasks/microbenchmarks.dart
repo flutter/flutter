@@ -35,7 +35,6 @@ TaskFunction createMicrobenchmarkTask() {
             '-d',
             device.deviceId,
           ];
-          setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
             options: options,
@@ -51,10 +50,13 @@ TaskFunction createMicrobenchmarkTask() {
     final Map<String, double> allResults = <String, double>{
       ...await _runMicrobench('lib/stocks/layout_bench.dart'),
       ...await _runMicrobench('lib/stocks/build_bench.dart'),
+      ...await _runMicrobench('lib/geometry/matrix_utils_transform_bench.dart'),
       ...await _runMicrobench('lib/geometry/rrect_contains_bench.dart'),
       ...await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'),
       ...await _runMicrobench('lib/gestures/gesture_detector_bench.dart'),
       ...await _runMicrobench('lib/stocks/animation_bench.dart'),
+      ...await _runMicrobench('lib/language/sync_star_bench.dart'),
+      ...await _runMicrobench('lib/language/sync_star_semantics_bench.dart'),
     };
 
     return TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
@@ -67,7 +69,7 @@ Future<Process> _startFlutter({
   bool canFail = false,
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>['run', ...options];
+  final List<String> args = flutterCommandArgs('run', options);
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 

@@ -14,7 +14,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
 final ArgParser parser = ArgParser()
@@ -101,6 +104,7 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
+      DeviceManager: () => _FuchsiaDeviceManager(),
       FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
         parent: CachedArtifacts(),
@@ -111,6 +115,19 @@ Future<void> main(List<String> args) async {
       ),
     },
   );
+}
+
+// An implementation of [DeviceManager] that only supports fuchsia devices.
+class _FuchsiaDeviceManager extends DeviceManager {
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+    FuchsiaDevices(),
+  ]);
+
+  @override
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return true;
+  }
 }
 
 List<String> _extractPathAndName(String gnTarget) {

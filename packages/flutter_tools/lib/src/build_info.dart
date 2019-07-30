@@ -119,8 +119,6 @@ const List<String> _kBuildModes = <String>[
   'debug',
   'profile',
   'release',
-  'dynamic-profile',
-  'dynamic-release',
 ];
 
 /// Return the name for the build mode, or "any" if null.

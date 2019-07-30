@@ -78,12 +78,6 @@ class TestCommand extends FastFlutterCommand {
         help: 'Handle machine structured JSON command input\n'
               'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('track-widget-creation',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Track widget creation locations.\n'
-              'This enables testing of features such as the widget inspector.',
-      )
       ..addFlag('update-goldens',
         negatable: false,
         help: 'Whether matchesGoldenFile() calls within your test methods should '
@@ -106,6 +100,7 @@ class TestCommand extends FastFlutterCommand {
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".'
       );
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
 
   @override
@@ -180,18 +175,19 @@ class TestCommand extends FastFlutterCommand {
       }
     } else {
       files = <String>[
-        for (String file in files)
-          if (file.endsWith(platform.pathSeparator))
-            ..._findTests(fs.directory(file))
+        for (String path in files)
+          if (fs.isDirectorySync(path))
+            ..._findTests(fs.directory(path))
           else
-            file
+            path
       ];
     }
 
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
+      final String projectName = FlutterProject.current().manifest.appName;
       collector = CoverageCollector(
-        flutterProject: FlutterProject.current(),
+        libraryPredicate: (String libraryName) => libraryName.contains(projectName),
       );
     }
 
@@ -267,6 +263,7 @@ class TestCommand extends FastFlutterCommand {
           assetBundle.entries);
     }
   }
+
   bool _needRebuild(Map<String, DevFSContent> entries) {
     final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {

@@ -776,12 +776,73 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
 /// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
+/// The [body] is a [Text] placed in a [Center] in order to center the text
+/// within the [Scaffold]. The [FloatingActionButton] is connected to a
+/// callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget with a body and floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() => _count++),
+///       tooltip: 'Increment Counter',
+///       child: const Icon(Icons.add),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows a [Scaffold] with a [backgroundColor], [body] and
+/// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
+/// to center the text within the [Scaffold]. The [FloatingActionButton] is
+/// connected to a callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget example with a background color](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_background_color.png)
+///
+/// ```dart
+/// int _count = 0;
+///
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Sample Code'),
+///     ),
+///     body: Center(
+///       child: Text('You have pressed the button $_count times.')
+///     ),
+///     backgroundColor: Colors.blueGrey.shade200,
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () => setState(() => _count++),
+///       tooltip: 'Increment Counter',
+///       child: const Icon(Icons.add),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
-/// to center the text within the [Scaffold] and the [FloatingActionButton] is
+/// to center the text within the [Scaffold]. The [FloatingActionButton] is
 /// centered and docked within the [BottomAppBar] using
 /// [FloatingActionButtonLocation.centerDocked]. The [FloatingActionButton] is
 /// connected to a callback that increments a counter.
+///
+/// ![A screenshot of the Scaffold widget with a bottom navigation bar and docked floating action button](https://flutter.github.io/assets-for-api-docs/assets/material/scaffold_bottom_app_bar.png)
 ///
 /// ```dart
 /// int _count = 0;
@@ -795,6 +856,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///       child: Text('You have pressed the button $_count times.'),
 ///     ),
 ///     bottomNavigationBar: BottomAppBar(
+///       shape: const CircularNotchedRectangle(),
 ///       child: Container(height: 50.0,),
 ///     ),
 ///     floatingActionButton: FloatingActionButton(

@@ -64,15 +64,18 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
-    if (device == null)
+    if (device == null) {
       throwToolExit('Must have a connected device');
-    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot)
+    }
+    if (argResults[_kType] == _kDeviceType && !device.supportsScreenshot) {
       throwToolExit('Screenshot not supported for ${device.name}.');
-    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryUri] == null)
+    }
+    if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryUri] == null) {
       throwToolExit('Observatory URI must be specified for screenshot type ${argResults[_kType]}');
-    return super.verifyThenRunCommand();
+    }
+    return super.verifyThenRunCommand(commandPath);
   }
 
   @override

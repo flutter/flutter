@@ -22,9 +22,11 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
-  'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
-  'test_api': '0.2.5', //  |
-  'test_core': '0.2.5' //  |
+  'test': '1.6.3',         //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
+  'test_api': '0.2.5',     //  |
+  'test_core': '0.2.5',    //  |
+  'build_runner': '1.6.1', // TODO(jonahwilliams): allow newer versions
+  'build_modules': '2.3.0'
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -249,7 +251,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(context: PubContext.updatePackages, directory: tempDir.path, upgrade: true, checkLastModified: false);
+        await pubGet(
+          context: PubContext.updatePackages,
+          directory: tempDir.path,
+          upgrade: true,
+          checkLastModified: false,
+        );
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive

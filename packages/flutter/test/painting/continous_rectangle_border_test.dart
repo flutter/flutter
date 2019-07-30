@@ -75,7 +75,6 @@ void main() {
         'continuous_rectangle_border.golden_test_even_radii.png',
         version: null,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -100,7 +99,6 @@ void main() {
         'continuous_rectangle_border.golden_test_varying_radii.png',
         version: null,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -122,7 +120,6 @@ void main() {
         'continuous_rectangle_border.golden_test_large_radii.png',
         version: null,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 

@@ -103,6 +103,10 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         childParentData.layoutOffset = 0.0;
 
         if (scrollOffset == 0.0) {
+          // insertAndLayoutLeadingChild only lays out the children before
+          // firstChild. In this case, nothing has been laid out. We have
+          // to lay out firstChild manually.
+          firstChild.layout(childConstraints, parentUsesSize: true);
           earliestUsefulChild = firstChild;
           leadingChildWithLayout = earliestUsefulChild;
           trailingChildWithLayout ??= earliestUsefulChild;

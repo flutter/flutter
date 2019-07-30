@@ -292,6 +292,23 @@ class TextSpan extends InlineSpan {
   }
 
   @override
+  void computeSemanticsInformation(List<InlineSpanSemanticsInformation> collector) {
+    assert(debugAssertIsValid());
+    if (text != null || semanticsLabel != null) {
+      collector.add(InlineSpanSemanticsInformation(
+        text,
+        semanticsLabel: semanticsLabel,
+        recognizer: recognizer,
+      ));
+    }
+    if (children != null) {
+      for (InlineSpan child in children) {
+        child.computeSemanticsInformation(collector);
+      }
+    }
+  }
+
+  @override
   int codeUnitAtVisitor(int index, Accumulator offset) {
     if (text == null) {
       return null;

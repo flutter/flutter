@@ -45,6 +45,26 @@ abstract class GoldenFileComparator {
   /// The method by which [golden] is located and by which its bytes are written
   /// is left up to the implementation class.
   Future<void> update(Uri golden, Uint8List imageBytes);
+
+  /// Returns a new golden file [Uri] to incorporate any [version] number with
+  /// the [key].
+  ///
+  /// The [version] is an optional int that can be used to differentiate
+  /// historical golden files.
+  ///
+  /// Version numbers are used in golden file tests for package:flutter. You can
+  /// learn more about these tests [here](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
+  Uri getTestUri(Uri key, int version) {
+    if (version == null)
+      return key;
+    final String keyString = key.toString();
+    final String extension = path.extension(keyString);
+    return Uri.parse(
+      keyString
+        .split(extension)
+        .join() + '.' + version.toString() + extension
+    );
+  }
 }
 
 /// Compares rasterized image bytes against a golden image file.
@@ -126,6 +146,11 @@ class TrivialComparator implements GoldenFileComparator {
   Future<void> update(Uri golden, Uint8List imageBytes) {
     throw StateError('goldenFileComparator has not been initialized');
   }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return key;
+  }
 }
 
 /// The default [GoldenFileComparator] implementation for `flutter test`.
@@ -140,7 +165,7 @@ class TrivialComparator implements GoldenFileComparator {
 ///
 /// When using `flutter test --update-goldens`, [LocalFileComparator]
 /// updates the files on disk to match the rendering.
-class LocalFileComparator implements GoldenFileComparator {
+class LocalFileComparator extends GoldenFileComparator {
   /// Creates a new [LocalFileComparator] for the specified [testFile].
   ///
   /// Golden file keys will be interpreted as file paths relative to the

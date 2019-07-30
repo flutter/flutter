@@ -459,7 +459,7 @@ class FlutterErrorDetails extends Diagnosticable {
 
   @override
   String toStringShort() {
-    return library != null ? 'Exception Caught By $library' : 'Exception Caught';
+    return library != null ? 'Exception caught by $library' : 'Exception caught';
   }
 
   @override

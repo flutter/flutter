@@ -107,7 +107,7 @@ final ArgParser _argParser = ArgParser()
     'stage',
     abbr: 's',
     help: 'Name of the stage. Runs all tasks for that stage. '
-        'The tasks and their stages are read from manifest.yaml.',
+          'The tasks and their stages are read from manifest.yaml.',
   )
   ..addFlag(
     'all',

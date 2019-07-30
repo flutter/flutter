@@ -191,7 +191,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   flavors_test:
     description: >
@@ -276,6 +275,12 @@ tasks:
       Measures starting memory usage of the simplest Flutter app.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+
+  # hello_world__start_up:
+  #   description: >
+  #     Verifies that Hello World can start on an array of devices.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android_esoteric"]
 
   microbenchmarks:
     description: >
@@ -625,4 +630,11 @@ tasks:
       Checks that `flutter run` does not leak dart on macOS.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
+
+  android_splash_screen_integration_test:
+    description: >
+      Runs end-to-end test of Flutter's Android splash behavior.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
     flaky: true

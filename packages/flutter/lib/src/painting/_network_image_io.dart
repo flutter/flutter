@@ -87,7 +87,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       });
       final HttpClientResponse response = await request.close();
       if (response.statusCode != HttpStatus.ok)
-        throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
+        throw image_provider.NetworkImageLoadException(statusCode: response.statusCode, uri: resolved);
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,

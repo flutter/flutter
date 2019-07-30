@@ -141,6 +141,44 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('semanticsLabel can be shorter than text', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: RichText(
+        text: TextSpan(
+        children: <InlineSpan>[
+          const TextSpan(
+            text: 'Some Text',
+            semanticsLabel: '',
+          ),
+          TextSpan(
+            text: 'Clickable',
+            recognizer: TapGestureRecognizer()..onTap = () { },
+          ),
+        ]),
+      ),
+    ));
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics(
+          children: <TestSemantics>[
+            TestSemantics(
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'Clickable',
+              actions: <SemanticsAction>[SemanticsAction.tap],
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
   testWidgets('recognizers split semantic node', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
