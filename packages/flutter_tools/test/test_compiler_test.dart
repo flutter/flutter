@@ -50,6 +50,25 @@ void main() {
       fs.currentDirectory = originalCurrentDirectory;
     });
 
+    test('Creates lock file', () => testbed.run(() async {
+      // The lock file shouldn't exist before we start.
+      expect(fs.file(testCompiler.testLockFilePath).existsSync(), false);
+
+      // Make sure the compiler has been created.
+      when(residentCompiler.recompile(
+        'test/foo.dart',
+        <Uri>[Uri.parse('test/foo.dart')],
+        outputPath: testCompiler.outputDill.path,
+      )).thenAnswer((Invocation invocation) async {
+        fs.file('abc.dill').createSync();
+        return const CompilerOutput('abc.dill', 0, <Uri>[]);
+      });
+      expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
+
+      // Verify the lock file exists.
+      expect(fs.file(testCompiler.testLockFilePath).existsSync(), true);
+    }));
+
     test('Reports a dill file when compile is successful', () => testbed.run(() async {
       when(residentCompiler.recompile(
         'test/foo.dart',
@@ -101,6 +120,8 @@ class FakeTestCompiler extends TestCompiler {
 
   @override
   Future<ResidentCompiler> createCompiler() async {
+    // Still call the correct createCompiler to ensure proper initialization of locks etc.
+    await super.createCompiler();
     return residentCompiler;
   }
 }
