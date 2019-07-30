@@ -584,26 +584,17 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// Embeds an existing platform view in the widget tree.
 ///
 /// A "platform view" is a UI component of the platform Flutter is running on;
-/// for example on Android, android.view.Views are platform views. For example, the webview_flutter
-/// plugin used a pre-made "PlatformView" -- such as "AndroidView" for Android and "UIKitView" for iOS
-/// -- to display the platform's WebView.
+/// for example on Android, android.view.Views are platform views.
 ///
-/// If you are developing a Flutter app or a Flutter package/plugin for a platform that is officially
-/// supported by Flutter, Android for example, you are mostly unlikely to use this widget.
-///
-/// Here are some scenarios that you might need to implement a new "PlatformView".
-///   * You are working on a new Platform that is currently not officially
-///     supported by Flutter.
-///   * You need to display some UI that is only available from the platform's UI system
-///     and Flutter doesn't not have a pre-made "PlatformView" for that platform for you to use.
-///   * Rarely, The Flutter pre-made "PlatformView" does not suffices your need and you want
-///     to implement your own "PlatformView".
+/// This widget can be used when developing a new "PlatformView". Generally, a
+/// new "PlatformView" is only required when a platform view class does not exist
+/// in the Flutter Framework for the platform Flutter is running on.
 ///
 /// This widget handles:
 ///   * Rendering of a platform view. The platform view will be layed out to fills all available space
 ///     the parent of this object must provide bounded layout constraints.
 ///   * Semantics update. A semantics node will be created for this widget, which has a [SemanticsConfiguration.platformViewId]
-///     same as the `controller.id`.
+///     same as the `controller.viewId`.
 ///
 /// This widget creates a [PlatformViewRenderBox] to add a [PlatformViewLayer]
 /// to the layer tree. Then you would need to composite the UI when the layer is visited
@@ -612,11 +603,10 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// it is required by [PlatformViewRenderBox] to handle things
 /// such as Semantics updates.
 ///
-/// To create a new PlatformView using this widget, you would need to first
-/// implement a [PlatformViewController]. You also need to
-/// create an unique `id` for each instance of the new platform view using
-/// [PlatformViewsRegistry.getNextPlatformViewId].
-/// Then in your PlatformView widget state, return this widget in the build method.
+/// To create a new PlatformView using this widget, a [PlatformViewController] has to be implemented.
+/// An unique `id` also needs to be generated using [PlatformViewsRegistry.getNextPlatformViewId]
+/// for each instance of the new platform view.
+/// Finally, return this widget in the build method.
 /// ```dart
 /// class FooPlatformViewState extends State<FooPlatformView> {
 ///   @override
@@ -636,16 +626,16 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///
 /// See also:
 /// * [PlatformViewRenderBox], the render object created by this widget
-/// * [UIKitView], a pre-made iOS "PlatformView".
-/// * [AndroidView], a pre-made Android "PlatformView".
+/// * [UIKitView], an iOS "PlatformView".
+/// * [AndroidView], an Android "PlatformView".
 /// * [PlatformViewController] for how to implement a new [PlatformViewController].
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a `PlatformViewSurface`.
   ///
   /// The [controller] must not be null.
-  /// By default, this widget will create a [PlatformViewLayer] with rect = size & offset and the same id of
-  /// this [PlatformViewSurface] in the layer tree.
+  /// This widget will create a [PlatformViewLayer] with rect = size & offset and the same id of
+  /// `controller.viewId` in the layer tree.
   const PlatformViewSurface({
     @required this.controller,
   }) : assert(controller != null);

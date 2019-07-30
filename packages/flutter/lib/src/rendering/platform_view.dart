@@ -734,11 +734,11 @@ class PlatformViewRenderBox extends RenderBox {
 
   /// Creating a render object for a [PlatformViewSurface].
   ///
-  /// The `controller` and `id`  parameters must not be null.
+  /// The `controller` parameter must not be null.
   PlatformViewRenderBox({
     @required PlatformViewController controller,
 
-  }) : assert(controller != null && controller.id != null && controller.id > -1),
+  }) : assert(controller != null && controller.viewId != null && controller.viewId > -1),
        _controller = controller;
 
   /// Sets the [controller] for this render object.
@@ -746,12 +746,12 @@ class PlatformViewRenderBox extends RenderBox {
   /// This value must not be null, and setting it to a new value will result in a repaint.
   set controller(PlatformViewController controller) {
     assert(controller != null);
-    assert(controller.id != null && controller.id > -1);
+    assert(controller.viewId != null && controller.viewId > -1);
 
     if ( _controller == controller) {
       return;
     }
-    final bool needsSemanticsUpdate = _controller.id != controller.id;
+    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
      _controller = controller;
      markNeedsPaint();
     if (needsSemanticsUpdate) {
@@ -777,17 +777,17 @@ class PlatformViewRenderBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    assert(_controller.id != null);
+    assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
             rect: offset & size,
-            viewId: _controller.id));
+            viewId: _controller.viewId));
   }
 
   @override
   void describeSemanticsConfiguration (SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    assert(_controller.id != null);
+    assert(_controller.viewId != null);
     config.isSemanticBoundary = true;
-    config.platformViewId = _controller.id;
+    config.platformViewId = _controller.viewId;
   }
 }
