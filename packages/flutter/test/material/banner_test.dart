@@ -25,7 +25,7 @@ void main() {
     );
 
     final Container container = _getContainerFromBanner(tester);
-    expect(container.decoration, BoxDecoration(color: color));
+    expect(container.decoration, const BoxDecoration(color: color));
   });
 
   testWidgets('Custom content TextStyle respected', (WidgetTester tester) async {

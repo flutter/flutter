@@ -66,7 +66,7 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, BoxDecoration(color: const Color(0xfffafafa)));
+    expect(container.decoration, const BoxDecoration(color: const Color(0xfffafafa)));
     expect(content.text.style, Typography().englishLike.body1.merge(Typography().black.body1));
   });
 
@@ -118,13 +118,13 @@ void main() {
 
     final Container container = _getContainerFromBanner(tester);
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
-    expect(container.decoration, BoxDecoration(color: backgroundColor));
+    expect(container.decoration, const BoxDecoration(color: backgroundColor));
     expect(content.text.style, textStyle);
   });
 }
 
 MaterialBannerThemeData _bannerTheme() {
-  return MaterialBannerThemeData(
+  return const MaterialBannerThemeData(
     backgroundColor: Colors.orange,
     contentTextStyle: TextStyle(color: Colors.pink),
   );
