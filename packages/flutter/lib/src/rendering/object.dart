@@ -1933,8 +1933,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// For production code, consider [layer].
   // Deprecated as of July 17, 2019.
   @Deprecated('use the "layer" getter instead.')
-  ContainerLayer get debugLayer {
-    ContainerLayer result;
+  OffsetLayer get debugLayer {
+    OffsetLayer result;
     assert(() {
       result = _layer;
       return true;

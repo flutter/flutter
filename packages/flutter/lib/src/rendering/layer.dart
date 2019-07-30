@@ -1711,7 +1711,7 @@ class LayerLink {
 ///
 /// This layer collapses the accumulated offset into a transform and passes
 /// [Offset.zero] to its child layers in the [addToScene]/[addChildrenToScene]
-/// methods, so that [applyTransform] will work reliably.
+/// methods, so that [applyTransform] works reliably.
 class LeaderLayer extends ContainerLayer {
   /// Creates a leader layer.
   ///

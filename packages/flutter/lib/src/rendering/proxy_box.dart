@@ -1774,7 +1774,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
       );
       context.pushLayer(layer, super.paint, offset);
       assert(() {
-        layer?.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
     } else {
@@ -1900,7 +1900,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
       );
       context.pushLayer(layer, super.paint, offset);
       assert(() {
-        layer?.debugCreator = debugCreator;
+        layer.debugCreator = debugCreator;
         return true;
       }());
     } else {
