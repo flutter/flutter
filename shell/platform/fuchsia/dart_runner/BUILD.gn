@@ -98,7 +98,7 @@ template("jit_runner_package") {
   package_dir(target_name) {
     deps = [
       ":dart_jit${product_suffix}_runner_bin",
-      "$flutter_runner_base/kernel:kernel_core_snapshot${product_suffix}",
+      "kernel:kernel_core_snapshot${product_suffix}",
     ]
 
     if (!invoker.product) {
@@ -109,30 +109,27 @@ template("jit_runner_package") {
 
     meta_dir = "$flutter_root/shell/platform/fuchsia/dart_runner/meta"
 
-    snapshot_gen_dir =
-        "$root_build_dir/gen/flutter/shell/platform/fuchsia/flutter/kernel"
-
     libraries = common_libs
 
     resources = [
       {
-        path = rebase_path(
-                "$snapshot_gen_dir/vm_isolate_snapshot${product_suffix}.bin")
+        path =
+            rebase_path("$target_gen_dir/kernel/vm_data${product_suffix}.bin")
         dest = "vm_snapshot_data.bin"
       },
       {
         path = rebase_path(
-                "$snapshot_gen_dir/vm_snapshot_instructions${product_suffix}.bin")
+                "$target_gen_dir/kernel/vm_instructions${product_suffix}.bin")
         dest = "vm_snapshot_instructions.bin"
       },
       {
         path = rebase_path(
-                "$snapshot_gen_dir/isolate_snapshot${product_suffix}.bin")
+                "$target_gen_dir/kernel/isolate_data${product_suffix}.bin")
         dest = "isolate_core_snapshot_data.bin"
       },
       {
         path = rebase_path(
-                "$snapshot_gen_dir/isolate_snapshot_instructions${product_suffix}.bin")
+                "$target_gen_dir/kernel/isolate_instructions${product_suffix}.bin")
         dest = "isolate_core_snapshot_instructions.bin"
       },
     ]

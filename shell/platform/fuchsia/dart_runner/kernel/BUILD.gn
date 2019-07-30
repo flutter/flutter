@@ -2,16 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/dart/dart_tool.gni")
+import("//build/compiled_action.gni")
+import("//build/fuchsia/sdk.gni")
 import("//third_party/dart/utils/compile_platform.gni")
-import("//topaz/runtime/dart/dart_component.gni")
+import("$flutter_root/common/config.gni")
+import("$flutter_root/tools/fuchsia/dart.gni")
 
 compile_platform("kernel_platform_files") {
   single_root_scheme = "org-dartlang-sdk"
-  single_root_base = rebase_path("../../../../")
+  single_root_base = rebase_path("../../../../../../")
 
-  libraries_specification_uri =
-      "org-dartlang-sdk:///topaz/runtime/dart_runner/kernel/libraries.json"
+  libraries_specification_uri = "org-dartlang-sdk:///flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.json"
 
   outputs = [
     "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill",
@@ -33,11 +34,15 @@ template("create_kernel_core_snapshot") {
   if (invoker.product) {
     product_suffix = "_product"
   }
-  action(target_name) {
-    deps = gen_snapshot_deps + [ ":kernel_platform_files" ]
+
+  compiled_action(target_name) {
+    deps = [
+      ":kernel_platform_files",
+    ]
 
     platform_dill = "$root_out_dir/dart_runner_patched_sdk/platform_strong.dill"
-    compilation_trace = "//topaz/runtime/flutter_runner/compilation_trace.txt"
+    compilation_trace =
+        "$flutter_root/shell/platform/fuchsia/flutter/compilation_trace.txt"
     inputs = [
       platform_dill,
       compilation_trace,
@@ -58,11 +63,12 @@ template("create_kernel_core_snapshot") {
       snapshot_profile,
     ]
 
+    gen_snapshot_to_use = gen_snapshot
     if (invoker.product) {
-      script = gen_snapshot_product
-    } else {
-      script = gen_snapshot
+      gen_snapshot_to_use = gen_snapshot_product
     }
+
+    tool = gen_snapshot_to_use
 
     args = [
       # TODO(FL-117): Re-enable causal async stack traces when this issue is
@@ -88,7 +94,8 @@ template("create_kernel_core_snapshot") {
     # No asserts in debug or release product.
     # No asserts in release with flutter_profile=true (non-product)
     # Yes asserts in non-product debug.
-    if (!invoker.product && (!flutter_profile || is_debug)) {
+    if (!invoker.product &&
+        (is_debug || !(flutter_runtime_mode == "profile"))) {
       args += [ "--enable_asserts" ]
     }
     args += [ rebase_path(platform_dill) ]
