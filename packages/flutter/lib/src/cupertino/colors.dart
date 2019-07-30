@@ -9,8 +9,8 @@ import 'package:flutter/src/widgets/basic.dart';
 import '../../foundation.dart' show immutable;
 import '../widgets/framework.dart' show BuildContext;
 import '../widgets/media_query.dart';
-import 'theme.dart';
 import 'interface_level.dart';
+import 'theme.dart';
 
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
@@ -89,8 +89,17 @@ class CupertinoColors {
   static const Color destructiveRed = Color(0xFFFF3B30);
 }
 
+/// A color that can be resolved to different [Color]s, based on the [BuildContext]
+/// provided.
+///
+/// A [CupertinoDynamicColor] itself can be used as a concrete [Color] for painting,
+/// as it is a subclass of [Color], but it is rarely desirable.
 @immutable
 class CupertinoDynamicColor extends Color {
+  /// Create a Color that can be resolved to different [Color]s in different [BuildContext].
+  ///
+  /// [defaultColor] will be used in other colors' absence, and it must not be null,
+  /// unless none of the other colors is null.
   CupertinoDynamicColor({
     this.defaultColor,
     this.normalColor,
@@ -111,14 +120,41 @@ class CupertinoDynamicColor extends Color {
                                    && elevatedHighContrastColor != null),
        super(defaultColor?.value ?? normalColor?.value);
 
+  /// The defaultColor color to use when the requested color is not specified.
+  ///
+  /// Must not be null unless all other colors are specified.
   final Color defaultColor;
+
+  /// The color to use when the [BuildContext] implies a combination of light mode,
+  /// normal contrast, and base interface elevation.
   final Color normalColor;
+
+  /// The color to use when the [BuildContext] implies a combination of dark mode,
+  /// normal contrast, and base interface elevation.
   final Color darkColor;
+
+  /// The color to use when the [BuildContext] implies a combination of light mode,
+  /// high contrast, and base interface elevation.
   final Color highContrastColor;
+
+  /// The color to use when the [BuildContext] implies a combination of dark mode,
+  /// high contrast, and base interface elevation.
   final Color darkHighContrastColor;
+
+  /// The color to use when the [BuildContext] implies a combination of light mode,
+  /// normal contrast, and elevated interface elevation.
   final Color elevatedColor;
+
+  /// The color to use when the [BuildContext] implies a combination of dark mode,
+  /// normal contrast, and elevated interface elevation.
   final Color darkElevatedColor;
+
+  /// The color to use when the [BuildContext] implies a combination of light mode,
+  /// high contrast, and elevated interface elevation.
   final Color elevatedHighContrastColor;
+
+  /// The color to use when the [BuildContext] implies a combination of dark mode,
+  /// high contrast, and elevated interface elevation.
   final Color darkElevatedHighContrastColor;
 
   List<Color> get _colorMap => <Color> [
@@ -132,24 +168,45 @@ class CupertinoDynamicColor extends Color {
     darkElevatedHighContrastColor,
   ];
 
-
+  /// Resolve the givin [Color] to a concrete [Color], using the given [BuildContext].
   static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false })
     => (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context, nullOk: nullOk)
       : resolvable;
 
-  @override
+  /// Resolve this [CupertinoDynamicColor] to a concrete [Color], using the given
+  /// [BuildContext].
+  ///
+  /// Calling this function may create dependencies on the closest instance of some
+  /// [InheritedWidget]s that enclose the given [BuildContext]. More specifically:
+  ///
+  /// * If any of the dark colors are specified ([darkColor], [darkHighContrastColor]
+  /// or [darkElevatedHighContrastColor]), this function will call [CupertinoTheme.of],
+  /// and then [MediaQuery.of] if brightness wasn't specified in the theme data retrived
+  /// from the previous [CupertinoTheme.of] call.
+  ///
+  /// * If any of the high contrast colors are specified, [MediaQuery.of] will be
+  /// called to retrieve the accessibility high contrast setting.
+  ///
+  /// * If any of the elevated colors are specified, [CupertinoUserInterfaceLevel.of]
+  /// will be called to retrieve the user interface elevation.
   Color resolveFrom(BuildContext context, { bool nullOk = false }) {
     int dependencyBitMask, configBitMask = 0;
+    final List<Color> colors = _colorMap;
 
-    for (int i = 0; i < _colorMap.length; i++) {
-      if (_colorMap[i] == null)
-        continue;
-
-      dependencyBitMask |= i;
+    for (int i = 0; i < colors.length; i++) {
+      // bitShift - color variant
+      //    0     - color vibrancy
+      //    1     - accessibility contrast
+      //    2     - user interface level
+      for(int bitShift = 0; bitShift < 3; bitShift ++) {
+        final int mask = 1 << bitShift;
+        final bool isSameColor = colors[i] ?? defaultColor == colors[i | mask] ?? defaultColor;
+        dependencyBitMask |= isSameColor ? 0 : mask;
+      }
     }
 
-    // If any of the dark colors were specified.
+    // If this CupertinoDynamicColor cares about color vibrancy.
     if (dependencyBitMask & 1 != 0) {
       final CupertinoThemeData themeData = CupertinoTheme.of(context).noDefault();
       final Brightness brightness = themeData.brightness
@@ -164,7 +221,7 @@ class CupertinoDynamicColor extends Color {
       }
     }
 
-    // If any of the high contrast colors were specified.
+    // If this CupertinoDynamicColor cares about accessibility contrast.
     if (dependencyBitMask & 2 != 0) {
       final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrastContent
         ?? false;
@@ -172,7 +229,7 @@ class CupertinoDynamicColor extends Color {
         configBitMask |= isHighContrastEnabled ? 2 : 0;
     }
 
-    // If any of the elevated colors were specified.
+    // If this CupertinoDynamicColor cares about user interface elevation.
     if (dependencyBitMask & 4 != 0) {
       // Something similar.
       final CupertinoUserInterfaceLevelData level =
