@@ -105,11 +105,11 @@ task:
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
-    - name: build_fuchsia_unopt_profile
+    - name: build_fuchsia_unopt_profile_x64
       compile_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --runtime-mode profile --fuchsia --no-lto --unopt
-        ninja -C out/fuchsia_profile_unopt
+        ninja -C out/fuchsia_profile_unopt_x64
 
 # WINDOWS
 task:

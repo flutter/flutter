@@ -131,12 +131,11 @@ def CopyToBucket(src, dst, product=False):
   CopyToBucketWithMode(src, dst, False, product, 'dart')
 
 
-def BuildBucket():
+def BuildBucket(runtime_mode, arch, product):
   RemoveDirectoryIfExists(_bucket_directory)
-
-  CopyToBucket('fuchsia_debug/', 'flutter/debug/')
-  CopyToBucket('fuchsia_profile/', 'flutter/profile/')
-  CopyToBucket('fuchsia_release/', 'flutter/release/', True)
+  out_dir = 'fuchsia_%s_%s/' % (runtime_mode, arch)
+  bucket_dir = 'flutter/%s/%s/' % (arch, runtime_mode)
+  CopyToBucket(out_dir, bucket_dir, product)
 
 
 def ProcessCIPDPakcage(upload, engine_version):
@@ -187,6 +186,24 @@ def GetTargetsToBuild(product=False):
   return targets_to_build
 
 
+def BuildTarget(runtime_mode, arch, product):
+  out_dir = 'fuchsia_%s_%s' % (runtime_mode, arch)
+  flags = [
+      '--fuchsia',
+      # The source does not require LTO and LTO is not wired up for targets.
+      '--no-lto',
+      '--fuchsia-cpu',
+      arch,
+      '--runtime-mode',
+      runtime_mode
+  ]
+
+  RunGN(out_dir, flags)
+  BuildNinjaTargets(out_dir, GetTargetsToBuild(product))
+
+  return
+
+
 def main():
   parser = argparse.ArgumentParser()
 
@@ -203,23 +220,15 @@ def main():
 
   args = parser.parse_args()
 
-  common_flags = [
-      '--fuchsia',
-      # The source does not require LTO and LTO is not wired up for targets.
-      '--no-lto',
-  ]
-
-  RunGN('fuchsia_debug', common_flags + ['--runtime-mode', 'debug'])
-
-  RunGN('fuchsia_profile', common_flags + ['--runtime-mode', 'profile'])
-
-  RunGN('fuchsia_release', common_flags + ['--runtime-mode', 'release'])
-
-  BuildNinjaTargets('fuchsia_debug', GetTargetsToBuild())
-  BuildNinjaTargets('fuchsia_profile', GetTargetsToBuild())
-  BuildNinjaTargets('fuchsia_release', GetTargetsToBuild(True))
-
-  BuildBucket()
+  archs = ['x64', 'arm64']
+  runtime_modes = ['debug', 'profile', 'release']
+  product_modes = [False, False, True]
+  for arch in archs:
+    for i in range(3):
+      runtime_mode = runtime_modes[i]
+      product = product_modes[i]
+      BuildTarget(runtime_mode, arch, product)
+      BuildBucket(runtime_mode, arch, product)
 
   ProcessCIPDPakcage(args.upload, args.engine_version)
 
