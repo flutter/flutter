@@ -634,25 +634,14 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   /// Construct a `PlatformViewSurface`.
   ///
   /// The [controller] must not be null.
-  /// This widget will create a [PlatformViewLayer] with rect = size & offset and the same id of
-  /// `controller.viewId` in the layer tree.
   const PlatformViewSurface({
     @required this.controller,
   }) : assert(controller != null);
 
-  /// A controller for a platform view.
+  /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///
-  /// Someone who is implementing a new platform view using [PlatformViewSurface] should implement
-  /// a [PlatformViewController] and construct the [PlatformViewSurface] with it.
-  ///
-  /// The controller is responsible for:
-  ///
-  ///   * disposing the resources of the platform view from the platform.
-  ///
-  /// Some of these are not applicable to certain platforms. For example, iOS does not require
-  /// dispatching the pointer events.
-  ///
-  /// See [PlatformViewController] for how to implement a new PlatformViewController.
+  /// [PlatformViewController] is used for dispatching touch events to the platform view.
+  /// [PlatformViewController.viewId] identifies the platform view whose contents are painted by this widget.
   final PlatformViewController controller;
 
   @override

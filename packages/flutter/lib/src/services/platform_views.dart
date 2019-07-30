@@ -719,13 +719,11 @@ class UiKitViewController {
 /// Used by [PlatformViewSurface] to interface with the platform view it embeds.
 abstract class PlatformViewController {
 
-  /// The platform view id associated with this controller.
+  /// The viewId associated with this controller.
   ///
   /// The viewId should always be unique and non-negative. And it must be set
   /// to a non-null value at the construction, or right after construction.
   ///
   /// The viewId should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
-  ///
-  /// It is used when handling semantics, composition orders and etc.
   int get viewId;
 }
