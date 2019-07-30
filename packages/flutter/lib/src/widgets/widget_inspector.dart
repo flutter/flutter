@@ -10,6 +10,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui
     show
         ClipOp,
+        EngineLayer,
         Image,
         ImageByteFormat,
         Paragraph,
@@ -52,8 +53,9 @@ class _ProxyLayer extends Layer {
   final Layer _layer;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    _layer.addToScene(builder, layerOffset);
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    _layer.engineLayer = _layer.addToScene(builder, layerOffset);
+    return null;
   }
 
   @override
@@ -313,8 +315,9 @@ Rect _calculateSubtreeBounds(RenderObject object) {
 /// screenshots render to the scene in the local coordinate system of the layer.
 class _ScreenshotContainerLayer extends OffsetLayer {
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
+    return null; // this does not have an engine layer.
   }
 }
 
@@ -2503,9 +2506,9 @@ class _InspectorOverlayLayer extends Layer {
   double _textPainterMaxWidth;
 
   @override
-  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     if (!selection.active)
-      return;
+      return null;
 
     final RenderObject selected = selection.current;
     final List<_TransformedRect> candidates = <_TransformedRect>[];
@@ -2528,6 +2531,7 @@ class _InspectorOverlayLayer extends Layer {
       _picture = _buildPicture(state);
     }
     builder.addPicture(layerOffset, _picture);
+    return null; // this does not have an engine layer.
   }
 
   ui.Picture _buildPicture(_InspectorOverlayRenderState state) {
