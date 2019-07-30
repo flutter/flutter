@@ -500,7 +500,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets('can only show toolbar when there is text and a selection', (WidgetTester tester) async {
+  testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -517,17 +517,12 @@ void main() {
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
 
+    // Can't show the toolbar when there's no focus.
     expect(state.showToolbar(), false);
     await tester.pump();
     expect(find.text('PASTE'), findsNothing);
 
-    controller.text = 'blah';
-    await tester.pump();
-    expect(state.showToolbar(), false);
-    await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
-
-    // Select something. Doesn't really matter what.
+    // Can show the toolbar when focused even though there's no text.
     state.renderEditable.selectWordsInRange(
       from: const Offset(0, 0),
       cause: SelectionChangedCause.tap,
@@ -537,15 +532,52 @@ void main() {
     await tester.pump();
     expect(find.text('PASTE'), findsOneWidget);
 
-    // Hide the toolbar and clear the text and selection.
+    // Hide the menu again.
     state.hideToolbar();
     await tester.pump();
+    expect(find.text('PASTE'), findsNothing);
+
+    // Can show the menu with text and a selection.
+    controller.text = 'blah';
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
+  testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35998.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Add text and an empty selection.
+    controller.text = 'blah';
+    await tester.pump();
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    // Clear the text and selection.
     expect(find.text('PASTE'), findsNothing);
     state.updateEditingValue(const TextEditingValue(
       text: '',
     ));
     await tester.pump();
-    expect(find.text('PASTE'), findsNothing);
 
     // Should be able to show the toolbar.
     expect(state.showToolbar(), true);
