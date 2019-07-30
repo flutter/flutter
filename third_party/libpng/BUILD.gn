@@ -30,7 +30,7 @@ source_set("libpng") {
   ]
 
   if ((is_ios && !use_ios_simulator) ||
-      ((is_android || is_linux) &&
+      ((is_android || is_linux || is_fuchsia) &&
        (current_cpu == "arm" || current_cpu == "arm64"))) {
     if (is_android) {
       import("//build/config/android/config.gni")
