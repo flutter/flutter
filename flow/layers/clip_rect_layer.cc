@@ -33,13 +33,8 @@ void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   FML_DCHECK(needs_system_composite());
 
-  scenic::Rectangle shape(context.session(),   // session
-                          clip_rect_.width(),  //  width
-                          clip_rect_.height()  //  height
-  );
-
   // TODO(liyuqian): respect clip_behavior_
-  SceneUpdateContext::Clip clip(context, shape, clip_rect_);
+  SceneUpdateContext::Clip clip(context, clip_rect_);
   UpdateSceneChildren(context);
 }
 

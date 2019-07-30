@@ -328,15 +328,8 @@ void SceneUpdateContext::Frame::AddPaintLayer(Layer* layer) {
 }
 
 SceneUpdateContext::Clip::Clip(SceneUpdateContext& context,
-                               scenic::Shape& shape,
                                const SkRect& shape_bounds)
     : Entity(context) {
-  shape_node().SetShape(shape);
-  shape_node().SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
-                              shape_bounds.height() * 0.5f + shape_bounds.top(),
-                              0.f);
-  entity_node().SetClip(0u, true /* clip to self */);
-
   SetEntityNodeClipPlanes(&entity_node(), shape_bounds);
 }
 
