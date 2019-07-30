@@ -1,4 +1,4 @@
-Signature: a2621bdc9fa78609100e299d17058f2a
+Signature: 7bb6ad799217d030a727d78bac17f1f6
 
 UNUSED LICENSES:
 
@@ -1985,6 +1985,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/internal.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/event_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/transition.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
@@ -3067,7 +3068,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/string.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/traits.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/vector.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/internal/logging.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/string.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/interface_handle.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/interface_request.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/synchronous_proxy.h
