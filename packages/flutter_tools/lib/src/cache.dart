@@ -141,12 +141,21 @@ class Cache {
     if (!_lockEnabled)
       return;
     assert(_lock == null);
-    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
+    final File lockFile =
+        fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile'));
+    try {
+      _lock = lockFile.openSync(mode: FileMode.write);
+    } on FileSystemException catch (e) {
+      printError('Failed to open or create the artifact cache lockfile: "$e"');
+      printError('Please ensure you have permissions to create or open '
+                 '${lockFile.path}');
+      throwToolExit('Failed to open or create the lockfile');
+    }
     bool locked = false;
     bool printed = false;
     while (!locked) {
       try {
-        await _lock.lock();
+        _lock.lockSync();
         locked = true;
       } on FileSystemException {
         if (!printed) {
