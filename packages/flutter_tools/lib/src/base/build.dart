@@ -257,9 +257,12 @@ class AOTSnapshotter {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
       return linkResult;
     }
+    // See https://github.com/flutter/flutter/issues/22560
+    // These have to be placed in a .noindex folder to prevent Xcode from
+    // using Spotlight to find them and potentially attach the wrong ones.
     final RunResult dsymResult = await xcode.dsymutil(<String>[
       appLib,
-      '-o', fs.path.join(outputPath, 'App.framework.dSYM'),
+      '-o', fs.path.join(outputPath, 'App.framework.dSYM.noindex'),
     ]);
     if (dsymResult.exitCode != 0) {
       printError('Failed to extract dSYM out of dynamic lib');

@@ -210,7 +210,11 @@ void main() {
 
       verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
       verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
-      verify(xcode.dsymutil(any)).called(1);
+      verify(xcode.dsymutil(<String>[
+        'build/foo/App.framework/App',
+        '-o',
+        'build/foo/App.framework.dSYM.noindex',
+      ])).called(1);
 
       final File assemblyFile = fs.file(assembly);
       final File assemblyBitcodeFile = fs.file('$assembly.bitcode');
