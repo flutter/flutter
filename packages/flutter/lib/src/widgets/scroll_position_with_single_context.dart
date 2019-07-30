@@ -116,7 +116,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     super.beginActivity(newActivity);
     _currentDrag?.dispose();
     _currentDrag = null;
-    if (!activity.isScrolling)
+    if (!activity.isScrolling && !(activity is HoldScrollActivity))
       updateUserScrollDirection(ScrollDirection.idle);
   }
 
