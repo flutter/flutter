@@ -60,7 +60,7 @@ class _DropdownMenuPainter extends CustomPainter {
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height), 
+      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
       end: size.height,
     );
 
@@ -71,9 +71,9 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_DropdownMenuPainter oldPainter) {
-    return oldPainter.color != color 
-        || oldPainter.elevation != elevation 
-        || oldPainter.selectedIndex != selectedIndex 
+    return oldPainter.color != color
+        || oldPainter.elevation != elevation
+        || oldPainter.selectedIndex != selectedIndex
         || oldPainter.resize != resize;
   }
 }
@@ -265,9 +265,9 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
-    return buttonRect != oldDelegate.buttonRect 
-        || menuTop != oldDelegate.menuTop 
-        || menuHeight != oldDelegate.menuHeight 
+    return buttonRect != oldDelegate.buttonRect
+        || menuTop != oldDelegate.menuTop
+        || menuHeight != oldDelegate.menuHeight
         || textDirection != oldDelegate.textDirection;
   }
 }
@@ -282,7 +282,7 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>) 
+    if (other is! _DropdownRouteResult<T>)
       return false;
     final _DropdownRouteResult<T> typedOther = other;
     return result == typedOther.result;
@@ -406,7 +406,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
     // than the button height and the button is at the very bottom or top of the
     // screen, the menu will be aligned with the bottom or top of the button
     // respectively.
-    if (menuTop < topLimit) 
+    if (menuTop < topLimit)
       menuTop = math.min(buttonTop, topLimit);
 
     if (menuBottom > bottomLimit) {
@@ -430,7 +430,7 @@ class _DropdownRoutePage<T> extends StatelessWidget {
       padding: padding.resolve(textDirection),
     );
 
-    if (theme != null) 
+    if (theme != null)
       menu = Theme(data: theme, child: menu);
 
     return MediaQuery.removePadding(
@@ -782,9 +782,9 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
 
     Navigator.push(context, _dropdownRoute).then<void>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
-      if (!mounted || newValue == null) 
+      if (!mounted || newValue == null)
         return;
-      if (widget.onChanged != null) 
+      if (widget.onChanged != null)
         widget.onChanged(newValue.result);
     });
   }
@@ -801,7 +801,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   Color get _iconColor {
     // These colors are not defined in the Material Design spec.
     if (_enabled) {
-      if (widget.iconEnabledColor != null) 
+      if (widget.iconEnabledColor != null)
         return widget.iconEnabledColor;
 
       switch (Theme.of(context).brightness) {
@@ -1088,7 +1088,7 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T value) {
     super.didChange(value);
-    if (widget.onChanged != null) 
+    if (widget.onChanged != null)
       widget.onChanged(value);
   }
 }

@@ -76,6 +76,57 @@ Widget buildFrame({
   );
 }
 
+Widget buildFormFrame({
+  Key buttonKey,
+  bool autovalidate = false,
+  String value = 'two',
+  ValueChanged<String> onChanged,
+  Widget icon,
+  Color iconDisabledColor,
+  Color iconEnabledColor,
+  double iconSize = 24.0,
+  bool isDense = false,
+  bool isExpanded = false,
+  Widget hint,
+  Widget disabledHint,
+  Widget underline,
+  List<String> items = menuItems,
+  Alignment alignment = Alignment.center,
+  TextDirection textDirection = TextDirection.ltr,
+}) {
+  return TestApp(
+    textDirection: textDirection,
+    child: Material(
+      child: Align(
+        alignment: alignment,
+        child: RepaintBoundary(
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            autovalidate: autovalidate,
+            value: value,
+            hint: hint,
+            disabledHint: disabledHint,
+            onChanged: onChanged,
+            icon: icon,
+            iconSize: iconSize,
+            iconDisabledColor: iconDisabledColor,
+            iconEnabledColor: iconEnabledColor,
+            isDense: isDense,
+            isExpanded: isExpanded,
+            items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
 class TestApp extends StatefulWidget {
   const TestApp({ this.textDirection, this.child });
   final TextDirection textDirection;
@@ -456,6 +507,27 @@ void main() {
         buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
   });
 
+  testWidgets('Arrow icon aligns with the edge of button in form field when expanded', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    // There shouldn't be overflow when expanded although list contains longer items.
+    final List<String> items = <String>['1234567890','abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890'];
+
+    Widget build() => buildFormFrame(buttonKey: buttonKey, value: '1234567890', isExpanded: true, onChanged: onChanged, items: items);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    final RenderBox arrowIcon = tester.renderObject<RenderBox>(find.byIcon(Icons.arrow_drop_down));
+    assert(arrowIcon.attached);
+
+    // Arrow icon should be aligned with far right of button when expanded
+    expect(arrowIcon.localToGlobal(Offset.zero).dx,
+        buttonBox.size.centerRight(Offset(-arrowIcon.size.width, 0.0)).dx);
+  });
+
+
   testWidgets('Dropdown button icon will accept widgets as icons', (WidgetTester tester) async {
     final Widget customWidget = Container(
       decoration: ShapeDecoration(
@@ -619,6 +691,39 @@ void main() {
     // The two RenderParagraph objects, for the 'two' items' Text children,
     // should have the same size and location.
     checkSelectedItemTextGeometry(tester, 'two');
+  });
+
+  testWidgets('Dropdown button form field with isDense:true aligns selected menu item', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    Widget build() => buildFormFrame(buttonKey: buttonKey, value: value, isDense: true, onChanged: onChanged);
+
+    await tester.pumpWidget(build());
+    final RenderBox buttonBox = tester.renderObject<RenderBox>(find.byKey(buttonKey));
+    assert(buttonBox.attached);
+
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the menu animation
+
+    // The selected dropdown item is both in menu we just popped up, and in
+    // the IndexedStack contained by the dropdown button. Both of them should
+    // have the same vertical center as the button.
+    final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
+    expect(itemBoxes.length, equals(2));
+
+    // When isDense is true, the button's height is reduced. The menu items'
+    // heights are not.
+    final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
+    expect(menuItemHeight, greaterThanOrEqualTo(buttonBox.size.height));
+
+    for (RenderBox itemBox in itemBoxes) {
+      assert(itemBox.attached);
+      final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
+      final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
+      expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
+    }
   });
 
   testWidgets('Dropdown button can have a text style with no fontSize specified', (WidgetTester tester) async {
