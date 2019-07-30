@@ -626,4 +626,55 @@ void main() {
       expect(exit.single.delta, const Offset(0.0, 0.0));
     });
   });
+
+  testWidgets('MouseRegion should not crash when taking closure arguments', (WidgetTester tester) async {
+
+    await tester.pumpWidget(_TestHoveringWidget());
+    expect(find.text('Nope'), findsOneWidget);
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(gesture.removePointer);
+    await gesture.addPointer();
+    // Move to a position out of MouseRegion
+    await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+    await tester.pumpAndSettle();
+    expect(find.text('Nope'), findsOneWidget);
+
+    // Move into MouseRegion
+    await gesture.moveBy(const Offset(-20, 0));
+    print('Before pump');
+    await tester.pumpAndSettle();
+    expect(find.text('Hovered'), findsOneWidget);
+  });
+}
+
+class _TestHoveringWidget extends StatefulWidget {
+  @override
+  _TestHoveringWidgetState createState() => _TestHoveringWidgetState();
+}
+
+class _TestHoveringWidgetState extends State<_TestHoveringWidget> {
+
+  bool hovered = false;
+
+  void _onEnter(PointerEnterEvent _) { print('onEnter'); setState(() { hovered = true; }); }
+  void _onExit(PointerExitEvent _) { print('onExit'); setState(() { hovered = false; }); }
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Padding(
+        padding: const EdgeInsets.all(100),
+        child: MouseRegion(
+          onEnter: (_) { _onEnter(null); },
+          onExit: (_) { _onExit(null); },
+          // onEnter: _onEnter,
+          // onExit: hovered ? _onExit : null,
+          // onExit: _onExit,
+          child: Text(hovered ? 'Hovered' : 'Nope'),
+        ),
+      )
+    );
+  }
 }
