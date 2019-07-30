@@ -284,6 +284,7 @@ class MediaQueryData {
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
+    bool highContrastContent,
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
@@ -299,6 +300,7 @@ class MediaQueryData {
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
+      highContrastContent: highContrastContent ?? this.highContrastContent,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
@@ -347,6 +349,7 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrastContent: highContrastContent,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -394,6 +397,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrastContent: highContrastContent,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -441,6 +445,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
+      highContrastContent: highContrastContent,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -461,6 +466,7 @@ class MediaQueryData {
         && typedOther.viewPadding == viewPadding
         && typedOther.viewInsets == viewInsets
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && typedOther.highContrastContent == highContrastContent
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
         && typedOther.accessibleNavigation == accessibleNavigation
@@ -478,6 +484,7 @@ class MediaQueryData {
       viewPadding,
       viewInsets,
       alwaysUse24HourFormat,
+      highContrastContent,
       disableAnimations,
       invertColors,
       accessibleNavigation,
@@ -497,6 +504,7 @@ class MediaQueryData {
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
              'accessibleNavigation: $accessibleNavigation, '
+             'highContrastContent: $highContrastContent,'
              'disableAnimations: $disableAnimations, '
              'invertColors: $invertColors, '
              'boldText: $boldText'
