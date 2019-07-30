@@ -397,7 +397,7 @@ void main() {
                 Semantics(
                   container: true,
                   key: checkboxDisabled,
-                  child: Checkbox(
+                  child: const Checkbox(
                     value: true,
                     onChanged: null,
                   ),
@@ -405,7 +405,7 @@ void main() {
                 Semantics(
                   container: true,
                   key: checkboxDisabledUnchecked,
-                  child: Checkbox(
+                  child: const Checkbox(
                     value: false,
                     onChanged: null,
                   ),
