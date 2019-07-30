@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "klo $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minuutti",
   "datePickerMinuteSemanticsLabelOther": "$minute minuuttia",
-  "datePickerDateOrder": "mdy",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "ap",
   "postMeridiemAbbreviation": "ip",

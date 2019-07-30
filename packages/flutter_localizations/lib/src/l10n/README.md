@@ -186,6 +186,19 @@ dart dev/tools/localizations/gen_localizations.dart --overwrite
 ```
 
 
+### Special handling for the Kannada (kn) translations
+
+Originally, the cupertino_kn.arb and material_kn.arb files contained unicode
+characters that can cause current versions of Emacs on Linux to crash. There is
+more information here: https://github.com/flutter/flutter/issues/36704.
+
+Rather than risking developers' editor sessions, the strings in these arb files
+(and the code generated for them) have been encoded using the appropriate
+escapes for JSON and Dart. The JSON format arb files were rewritten with
+dev/tools/localization/encode_kn_arb_files.dart. The localizations code
+generator uses generateEncodedString() from dev/tools/localization/localizations_utils.
+
+
 ### Translations Status, Reporting Errors
 
 The translations (the `.arb` files) in this directory are based on the

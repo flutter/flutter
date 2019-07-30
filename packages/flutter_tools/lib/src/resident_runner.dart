@@ -175,8 +175,20 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty)
       return;
     final List<Future<void>> futures = <Future<void>>[];
+    // If any of the flutter views are paused, we might not be able to
+    // cleanly exit since the service extension may not have been registered.
+    if (flutterViews.any((FlutterView view) {
+      return view != null &&
+             view.uiIsolate != null &&
+             view.uiIsolate.pauseEvent.isPauseEvent;
+      }
+    )) {
+      await device.stopApp(package);
+      return;
+    }
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
+        assert(!view.uiIsolate.pauseEvent.isPauseEvent);
         futures.add(view.uiIsolate.flutterExit());
       }
     }
@@ -559,6 +571,9 @@ abstract class ResidentRunner {
     });
   }
 
+  /// Whether this runner can hot reload.
+  bool get canHotReload => hotMode;
+
   /// Start the app and keep the process running during its lifetime.
   ///
   /// Returns the exit code that we should use for the flutter tool process; 0
@@ -664,7 +679,14 @@ abstract class ResidentRunner {
     }
   }
 
+  /// Take a screenshot on the provided [device].
+  ///
+  /// If the device has a connected vmservice, this method will attempt to hide
+  /// and restore the debug banner before taking the screenshot.
+  ///
+  /// Throws an [AssertionError] if [Devce.supportsScreenshot] is not true.
   Future<void> screenshot(FlutterDevice device) async {
+    assert(device.device.supportsScreenshot);
     final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
@@ -838,45 +860,19 @@ abstract class ResidentRunner {
 
   /// Called right before we exit.
   Future<void> cleanupAtFinish();
-
-  /// Called when the runner should handle a terminal command.
-  Future<void> handleTerminalCommand(String code) async {
-    switch (code) {
-      case 'r':
-        final OperationResult result = await restart(fullRestart: false);
-        if (!result.isOk) {
-          printStatus('Try again after fixing the above error(s).', emphasis: true);
-        }
-        return;
-      case 'R':
-        // If hot restart is not supported for all devices, ignore the command.
-        if (!canHotRestart) {
-          return;
-        }
-        final OperationResult result = await restart(fullRestart: true);
-        if (!result.isOk) {
-          printStatus('Try again after fixing the above error(s).', emphasis: true);
-        }
-        return;
-      case 'l':
-      case 'L':
-        final List<FlutterView> views = flutterDevices.expand((FlutterDevice d) => d.views).toList();
-        printStatus('Connected ${pluralize('view', views.length)}:');
-        for (FlutterView v in views) {
-          printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
-        }
-    }
-  }
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message);
+  OperationResult(this.code, this.message, { this.fatal = false });
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
+
+  /// Whether this error should cause the runner to exit.
+  final bool fatal;
 
   bool get isOk => code == 0;
 
@@ -918,6 +914,9 @@ class TerminalHandler {
   bool _processingUserRequest = false;
   StreamSubscription<void> subscription;
 
+  @visibleForTesting
+  String lastReceivedCommand;
+
   void setupTerminal() {
     if (!logger.quiet) {
       printStatus('');
@@ -929,8 +928,14 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGINT.watch().listen((io.ProcessSignal signal) {
+      _cleanUp(signal);
+      io.exit(0);
+    });
+    io.ProcessSignal.SIGTERM.watch().listen((io.ProcessSignal signal) {
+      _cleanUp(signal);
+      io.exit(0);
+    });
     if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart)
       return;
     io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
@@ -964,6 +969,14 @@ class TerminalHandler {
           return true;
         }
         return false;
+      case 'l':
+        final List<FlutterView> views = residentRunner.flutterDevices
+            .expand((FlutterDevice d) => d.views).toList();
+        printStatus('Connected ${pluralize('view', views.length)}:');
+        for (FlutterView v in views) {
+          printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
+        }
+        return true;
       case 'L':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpLayerTree();
@@ -1000,6 +1013,31 @@ class TerminalHandler {
             await residentRunner.screenshot(device);
         }
         return true;
+      case 'r':
+        if (!residentRunner.canHotReload) {
+          return false;
+        }
+        final OperationResult result = await residentRunner.restart(fullRestart: false);
+        if (result.fatal) {
+          throwToolExit(result.message);
+        }
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return true;
+      case 'R':
+        // If hot restart is not supported for all devices, ignore the command.
+        if (!residentRunner.canHotRestart || !residentRunner.hotMode) {
+          return false;
+        }
+        final OperationResult result = await residentRunner.restart(fullRestart: true);
+        if (result.fatal) {
+          throwToolExit(result.message);
+        }
+        if (!result.isOk) {
+          printStatus('Try again after fixing the above error(s).', emphasis: true);
+        }
+        return true;
       case 'S':
         if (residentRunner.supportsServiceProtocol) {
           await residentRunner.debugDumpSemanticsTreeInTraversalOrder();
@@ -1031,10 +1069,8 @@ class TerminalHandler {
         await residentRunner.debugToggleDebugCheckElevationsEnabled();
         return true;
     }
-
     return false;
   }
-
 
   Future<void> processTerminalInput(String command) async {
     // When terminal doesn't support line mode, '\n' can sneak into the input.
@@ -1045,12 +1081,12 @@ class TerminalHandler {
     }
     _processingUserRequest = true;
     try {
-      final bool handled = await _commonTerminalInputHandler(command);
-      if (!handled)
-        await residentRunner.handleTerminalCommand(command);
+      lastReceivedCommand = command;
+      await _commonTerminalInputHandler(command);
     } catch (error, st) {
       printError('$error\n$st');
-      await _cleanUpAndExit(null);
+      await _cleanUp(null);
+      rethrow;
     } finally {
       _processingUserRequest = false;
     }
@@ -1072,11 +1108,10 @@ class TerminalHandler {
     }
   }
 
-  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
+  Future<void> _cleanUp(io.ProcessSignal signal) async {
     terminal.singleCharMode = false;
-    await subscription.cancel();
+    await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
-    io.exit(0);
   }
 }
 

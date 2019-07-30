@@ -81,7 +81,7 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// Defaults to [Colors.black38] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white30] when it is [Brightness.dark]. This adheres to the
+  /// [Colors.white38] when it is [Brightness.dark]. This adheres to the
   /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
   /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color disabledColor;

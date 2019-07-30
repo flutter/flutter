@@ -419,6 +419,7 @@ Matcher matchesSemantics({
   bool isInMutuallyExclusiveGroup = false,
   bool isHeader = false,
   bool isObscured = false,
+  bool isMultiline = false,
   bool namesRoute = false,
   bool scopesRoute = false,
   bool isHidden = false,
@@ -479,6 +480,8 @@ Matcher matchesSemantics({
     flags.add(SemanticsFlag.isHeader);
   if (isObscured)
     flags.add(SemanticsFlag.isObscured);
+  if (isMultiline)
+    flags.add(SemanticsFlag.isMultiline);
   if (namesRoute)
     flags.add(SemanticsFlag.namesRoute);
   if (scopesRoute)
@@ -1712,7 +1715,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _getTestNameUri(key, version);
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1734,19 +1737,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
-
-  Uri _getTestNameUri(Uri key, int version) {
-    return version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
+  Description describe(Description description) {
+    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 

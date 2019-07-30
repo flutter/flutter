@@ -18,10 +18,10 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
@@ -63,6 +63,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -73,6 +76,9 @@ task:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -219,7 +225,11 @@ task:
         - ./dev/bots/firebase_testlab.sh
         - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
         - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
-
+    - name: customer_testing-linux
+      script:
+        - rm -rf bin/cache/pkg/tests
+        - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
@@ -229,6 +239,7 @@ task:
     cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
   git_fetch_script:
     - git clean -xfd
     - git fetch origin
@@ -239,17 +250,17 @@ task:
       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   artifacts_cache:
     folder: bin\cache\artifacts
     fingerprint_script: echo %OS% & type bin\internal\engine.version
   setup_script:
-    - bin\flutter.bat config --no-analytics
-    - bin\flutter.bat doctor -v
-    - bin\flutter.bat update-packages
+    - flutter config --no-analytics
+    - flutter doctor -v
+    - flutter update-packages
     - git fetch origin master
   test_all_script:
-    - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
+    - dart --enable-asserts dev\bots\test.dart
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-windows
@@ -279,6 +290,7 @@ task:
     cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
+    PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
   git_fetch_script:
     - git clean -xfd
     - git fetch origin
@@ -289,42 +301,79 @@ task:
       - ps:  $Env:OS; Get-ChildItem -Path "$Env:CIRRUS_WORKING_DIR" pubspec.yaml -Recurse | Select-String -Pattern "PUBSPEC CHECKSUM" -SimpleMatch
   flutter_pkg_cache:
     folder: bin\cache\pkg
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   artifacts_cache:
     folder: bin\cache\artifacts
-    fingerprint_script: echo %OS% & type bin\internal\engine.version
+    fingerprint_script: echo %OS% & type bin\internal\*.version
   setup_script:
-    - bin\flutter.bat config --no-analytics
-    - bin\flutter.bat doctor -v
-    - bin\flutter.bat update-packages
+    - flutter config --no-analytics
+    - flutter doctor -v
+    - flutter update-packages
     - git fetch origin master
-  test_all_script:
-    - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
     - name: tests_widgets-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: widgets
+        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: powershell dev\bots\download_goldctl.ps1
+      test_all_script:
+        - dart --enable-asserts dev\bots\test.dart
     - name: tests_framework_other-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: framework_other
+        GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: powershell dev\bots\download_goldctl.ps1
+      test_all_script:
+        - dart --enable-asserts dev\bots\test.dart
     - name: tests_extras-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
         SUBSHARD: extras
+      test_all_script:
+        - dart --enable-asserts dev\bots\test.dart
     - name: build_tests-windows
       env:
         SHARD: build_tests
       container:
         cpu: 4
         memory: 12G
+      test_all_script:
+        - dart --enable-asserts dev\bots\test.dart
     - name: integration_tests-windows
       env:
         SHARD: integration_tests
+      container:
+        cpu: 4
+        memory: 12G
+      test_all_script:
+        - dart --enable-asserts dev\bots\test.dart
+    - name: customer_testing-windows
+      test_script:
+        - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
+        - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
+        - dart --enable-asserts dev\customer_testing\run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
+    - name: integration_tests_gradle1-windows
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle1
+      test_script:
+        - dart --enable-asserts dev\bots\test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: integration_tests_gradle2-windows
+      env:
+        SHARD: integration_tests
+        SUBSHARD: gradle2
+      test_script:
+        - dart --enable-asserts dev\bots\test.dart
       container:
         cpu: 4
         memory: 12G
@@ -387,7 +436,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
@@ -395,9 +444,9 @@ task:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
     - bin/flutter update-packages
-  test_all_script: |
-    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+  test_all_script:
+    - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+    - bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-macos
@@ -422,43 +471,13 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   osx_instance:
-    image: mojave-xcode-10.1
+    image: mojave-xcode-10.2
   depends_on:
     - analyze
   env:
     CIRRUS_WORKING_DIR: "/tmp/flutter sdk"
     COCOAPODS_DISABLE_STATS: true
-  matrix:
-    - name: tests_widgets-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: widgets
-    - name: tests_framework_other-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: framework_other
-    - name: tests_extras-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: extras
-    - name: $SHARD-macos
-      env:
-        matrix:
-          # The flakiness of this target has increased beyond tolerable levels. Until we can stabilize it,
-          # keep the shard disabled.
-          # - SHARD: integration_tests
-          - SHARD: build_tests
-            COCOAPODS_DISABLE_STATS: true
-            FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-      osx_instance:
-        image: mojave-flutter
-      remove_preinstalled_fluuter_script: rm -rf $FLUTTER_HOME
-    - name: add2app-macos
-      env:
-        SHARD: add2app_test
+    PATH: "$CIRRUS_WORKING_DIR/bin:$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin:$PATH"
   # occasionally the clock on these machines is out of sync
   # with the actual time - this should help to verify
   print_date_script:
@@ -474,7 +493,7 @@ task:
     fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
   flutter_pkg_cache:
     folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
+    fingerprint_script: echo $OS; cat bin/internal/*.version
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
@@ -482,9 +501,69 @@ task:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
     - bin/flutter update-packages
-  test_all_script: |
-    ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-    bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
+  matrix:
+    - name: tests_widgets-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: widgets
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
+    - name: tests_framework_other-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: framework_other
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
+    - name: tests_extras-macos
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: extras
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+    - name: build_tests-macos
+      env:
+        SHARD: build_tests
+        COCOAPODS_DISABLE_STATS: true
+        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
+      osx_instance:
+        image: mojave-flutter
+      remove_preinstalled_flutter_script: rm -rf $FLUTTER_HOME
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+    - name: integration_tests-macos
+      env:
+        SHARD: integration_tests
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+    - name: add2app-macos
+      env:
+        SHARD: add2app_test
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+    - name: customer_testing-macos
+      test_script:
+        - rm -rf bin/cache/pkg/tests
+        - git clone https://github.com/flutter/tests.git bin/cache/pkg/tests
+        - dart --enable-asserts dev/customer_testing/run_tests.dart --skip-on-fetch-failure --skip-template bin/cache/pkg/tests/registry/*.test
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or release.)

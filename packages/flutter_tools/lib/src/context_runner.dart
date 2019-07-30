@@ -21,12 +21,14 @@ import 'base/platform.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
+import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
+import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
@@ -40,8 +42,8 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode.dart';
 import 'macos/xcode_validator.dart';
+import 'reporting/reporting.dart';
 import 'run_hot.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'web/chrome.dart';
 import 'web/workflow.dart';
@@ -67,6 +69,7 @@ Future<T> runInContext<T>(
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
+      BuildSystem: () => const BuildSystem(),
       Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
@@ -77,6 +80,7 @@ Future<T> runInContext<T>(
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
+      FeatureFlags: () => const FeatureFlags(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
@@ -85,9 +89,8 @@ Future<T> runInContext<T>(
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GenSnapshot: () => const GenSnapshot(),
       HotRunnerConfig: () => HotRunnerConfig(),
-      IMobileDevice: () => const IMobileDevice(),
+      IMobileDevice: () => IMobileDevice(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
-      IOSValidator: () => const IOSValidator(),
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
