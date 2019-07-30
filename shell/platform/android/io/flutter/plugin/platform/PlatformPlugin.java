@@ -25,7 +25,7 @@ import io.flutter.plugin.common.ActivityLifecycleListener;
 /**
  * Android implementation of the platform plugin.
  */
-public class PlatformPlugin implements ActivityLifecycleListener {
+public class PlatformPlugin {
     public static final int DEFAULT_SYSTEM_UI = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 
@@ -181,7 +181,15 @@ public class PlatformPlugin implements ActivityLifecycleListener {
         updateSystemUiOverlays();
     }
 
-    private void updateSystemUiOverlays(){
+    /**
+     * Refreshes Android's window system UI (AKA system chrome) to match Flutter's desired
+     * {@link PlatformChannel.SystemChromeStyle}.
+     * <p>
+     * Updating the system UI Overlays is accomplished by altering the decor view of the
+     * {@link Window} associated with the {@link Activity} that was provided to this
+     * {@code PlatformPlugin}.
+     */
+    public void updateSystemUiOverlays(){
         activity.getWindow().getDecorView().setSystemUiVisibility(mEnabledOverlays);
         if (currentTheme != null) {
             setSystemChromeSystemUIOverlayStyle(currentTheme);
@@ -262,10 +270,5 @@ public class PlatformPlugin implements ActivityLifecycleListener {
         ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("text label?", text);
         clipboard.setPrimaryClip(clip);
-    }
-
-    @Override
-    public void onPostResume() {
-        updateSystemUiOverlays();
     }
 }

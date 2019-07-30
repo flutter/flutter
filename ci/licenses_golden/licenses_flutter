@@ -551,12 +551,16 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Andro
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/AndroidTouchProcessor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/DrawableSplashScreen.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterEngineConfigurator.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterEngineProvider.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterFragment.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSplashView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterSurfaceView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreen.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/SplashScreenProvider.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEnginePluginRegistry.java

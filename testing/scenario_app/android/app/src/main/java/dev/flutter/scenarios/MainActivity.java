@@ -45,27 +45,15 @@ public class MainActivity extends FlutterActivity implements OnFirstFrameRendere
         }
     }
 
-    private FlutterShellArgs getFlutterShellArgs() {
+    @Override
+    @NonNull
+    public FlutterShellArgs getFlutterShellArgs() {
         FlutterShellArgs args = FlutterShellArgs.fromIntent(getIntent());
         args.add(FlutterShellArgs.ARG_TRACE_STARTUP);
         args.add(FlutterShellArgs.ARG_ENABLE_DART_PROFILING);
         args.add(FlutterShellArgs.ARG_VERBOSE_LOGGING);
 
         return args;
-    }
-
-    @Override
-    @NonNull
-    protected FlutterFragment createFlutterFragment() {
-        return new FlutterFragment.Builder()
-                .dartEntrypoint(getDartEntrypoint())
-                .initialRoute(getInitialRoute())
-                .appBundlePath(getAppBundlePath())
-                .flutterShellArgs(getFlutterShellArgs())
-                .renderMode(FlutterView.RenderMode.surface)
-                .transparencyMode(FlutterView.TransparencyMode.opaque)
-                .shouldAttachEngineToActivity(true)
-                .build();
     }
 
     private void writeTimelineData(Uri logFile) {

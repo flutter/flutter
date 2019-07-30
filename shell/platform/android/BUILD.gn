@@ -127,12 +127,16 @@ action("flutter_shell_java") {
     "io/flutter/embedding/android/AndroidTouchProcessor.java",
     "io/flutter/embedding/android/DrawableSplashScreen.java",
     "io/flutter/embedding/android/FlutterActivity.java",
+    "io/flutter/embedding/android/FlutterActivityAndFragmentDelegate.java",
+    "io/flutter/embedding/android/FlutterEngineConfigurator.java",
+    "io/flutter/embedding/android/FlutterEngineProvider.java",
     "io/flutter/embedding/android/FlutterFragment.java",
     "io/flutter/embedding/android/FlutterSplashView.java",
     "io/flutter/embedding/android/FlutterSurfaceView.java",
     "io/flutter/embedding/android/FlutterTextureView.java",
     "io/flutter/embedding/android/FlutterView.java",
     "io/flutter/embedding/android/SplashScreen.java",
+    "io/flutter/embedding/android/SplashScreenProvider.java",
     "io/flutter/embedding/engine/FlutterEngine.java",
     "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
     "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
@@ -325,6 +329,7 @@ action("robolectric_tests") {
   sources = [
     "test/io/flutter/FlutterTestSuite.java",
     "test/io/flutter/SmokeTest.java",
+    "test/io/flutter/embedding/android/FlutterActivityAndFragmentDelegateTest.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
 
@@ -340,7 +345,13 @@ action("robolectric_tests") {
     "//third_party/robolectric/lib/junit-3.8.jar",
     "//third_party/robolectric/lib/junit-4.13-beta-3.jar",
     "//third_party/robolectric/lib/robolectric-3.8.jar",
+    "//third_party/robolectric/lib/shadows-framework-3.8.jar",
     "//third_party/robolectric/lib/annotations-3.8.jar",
+    "//third_party/robolectric/lib/runtime-1.1.1.jar",
+    "//third_party/robolectric/lib/common-1.1.1.jar",
+    "//third_party/robolectric/lib/common-java8-1.1.1.jar",
+    "//third_party/robolectric/lib/support-annotations-28.0.0.jar",
+    "//third_party/robolectric/lib/mockito-all-1.10.19.jar",
   ]
 
   inputs = _jar_dependencies
