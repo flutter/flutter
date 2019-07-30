@@ -221,6 +221,54 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 }
 
+/// Toolbar configuration for [EditableText].
+///
+/// Toolbar is a context menu that will show up when user right click or long
+/// press the [EditableText]. It includes several options: cut, copy, paste,
+/// and select all.
+///
+/// [EditableText] and its derived widgets have their own default [ToolbarOptions].
+/// Create a custom [ToolbarOptions] if you want explicit control over the toolbar
+/// option.
+class ToolbarOptions {
+  /// Create a toolbar configuration with given options.
+  ///
+  /// All options default to false if they are not explicitly set.
+  const ToolbarOptions({
+    this.copy = false,
+    this.cut = false,
+    this.paste = false,
+    this.selectAll = false,
+  }) : assert(copy != null),
+       assert(cut != null),
+       assert(paste != null),
+       assert(selectAll != null);
+
+  /// Whether to show copy option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool copy;
+
+  /// Whether to show cut option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, cut will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool cut;
+
+  /// Whether to show paste option in toolbar.
+  ///
+  /// If [EditableText.readOnly] is set to true, paste will be disabled regardless.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool paste;
+
+  /// Whether to show select all option in toolbar.
+  ///
+  /// Defaults to false. Must not be null.
+  final bool selectAll;
+}
+
 /// A basic text input field.
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
@@ -336,14 +384,21 @@ class EditableText extends StatefulWidget {
     this.scrollPadding = const EdgeInsets.all(20.0),
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.enableInteractiveSelection,
+    this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.toolbarOptions = const ToolbarOptions(
+      copy: true,
+      cut: true,
+      paste: true,
+      selectAll: true
+    )
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(showSelectionHandles != null),
+       assert(enableInteractiveSelection != null),
        assert(readOnly != null),
        assert(forceLine != null),
        assert(style != null),
@@ -367,6 +422,7 @@ class EditableText extends StatefulWidget {
        assert(rendererIgnoresPointer != null),
        assert(scrollPadding != null),
        assert(dragStartBehavior != null),
+       assert(toolbarOptions != null),
        _strutStyle = strutStyle,
        keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
@@ -418,6 +474,12 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [textWidthBasis], which controls the calculation of text width.
   final bool forceLine;
+
+  /// Configuration of toolbar options.
+  ///
+  /// By default, all options are enabled. If [readOnly] is true,
+  /// paste and cut will be disabled regardless.
+  final ToolbarOptions toolbarOptions;
 
   /// Whether to show selection handles.
   ///
@@ -903,9 +965,7 @@ class EditableText extends StatefulWidget {
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
-  bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
-  }
+  bool get selectionEnabled => enableInteractiveSelection;
 
   @override
   EditableTextState createState() => EditableTextState();
@@ -969,16 +1029,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
 
   @override
-  bool get cutEnabled => !widget.readOnly;
+  bool get cutEnabled => widget.toolbarOptions.cut && !widget.readOnly;
 
   @override
-  bool get copyEnabled => true;
+  bool get copyEnabled => widget.toolbarOptions.copy;
 
   @override
-  bool get pasteEnabled => !widget.readOnly;
+  bool get pasteEnabled => widget.toolbarOptions.paste && !widget.readOnly;
 
   @override
-  bool get selectAllEnabled => true;
+  bool get selectAllEnabled => widget.toolbarOptions.selectAll;
 
   // State lifecycle:
 
