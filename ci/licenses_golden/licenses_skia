@@ -1,4 +1,4 @@
-Signature: 45bbcd05cb7f14360e67966898988212
+Signature: 739430fa4ce01ab6c7b3685ae34f07ce
 
 UNUSED LICENSES:
 
@@ -4685,6 +4685,8 @@ FILE: ../../../third_party/skia/experimental/editor/run_handler.cpp
 FILE: ../../../third_party/skia/experimental/editor/run_handler.h
 FILE: ../../../third_party/skia/experimental/editor/stringslice.cpp
 FILE: ../../../third_party/skia/experimental/editor/stringslice.h
+FILE: ../../../third_party/skia/experimental/editor/word_boundaries.cpp
+FILE: ../../../third_party/skia/experimental/editor/word_boundaries.h
 FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkShape.h
 FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
@@ -4991,6 +4993,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.fp
