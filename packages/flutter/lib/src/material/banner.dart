@@ -20,9 +20,9 @@ import 'theme.dart';
 /// They are persistent and nonmodal, allowing the user to either ignore them or
 /// interact with them at any time.
 ///
-/// TODO: Find out if this is true from design.
-/// The banner layout will use a single [Row] if there is only one action,
-/// otherwise the actions will be in their own [Row] below the content.
+/// The [actions] will be placed beside the [content] if there is only one.
+/// Otherwise, the [actions] will be placed below the [content]. Use
+/// [forceActionsBelow] to override this behavior.
 ///
 /// The [actions] and [content] must be provided. An optional leading widget
 /// (typically an [Image]) can also be provided. The [contentTextStyle] and
@@ -30,7 +30,7 @@ import 'theme.dart';
 class MaterialBanner extends StatelessWidget {
   /// Creates a [MaterialBanner].
   ///
-  /// The [actions] and [content] must be non-null.
+  /// The [actions], [content], and [forceActionsBelow] must be non-null.
   const MaterialBanner({
     Key key,
     @required this.content,
@@ -38,8 +38,10 @@ class MaterialBanner extends StatelessWidget {
     @required this.actions,
     this.leading,
     this.backgroundColor,
+    this.forceActionsBelow = false,
   }) : assert(content != null),
        assert(actions != null),
+       assert(forceActionsBelow != null),
        super(key: key);
 
   /// The content of the [MaterialBanner].
@@ -73,13 +75,20 @@ class MaterialBanner extends StatelessWidget {
   /// If `null`, [ThemeData.canvasColor] is used.
   final Color backgroundColor;
 
+  /// An override to force the [actions] to be below the [content] regardless of
+  /// how many there are.
+  ///
+  /// If this is `true`, the [actions] will be placed below the [content]. If
+  /// this is `false`, the [actions] will be placed next to the [content] if
+  /// [actions.length] is `1` and below the [content] if greater than `1`.
+  final bool forceActionsBelow;
+
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
-    // TODO: Is this the right condition? Should it be able to be forced into single row?
-    final bool isSingleRow = actions.length == 1;
+    final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
     final EdgeInsetsDirectional padding = isSingleRow
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0);

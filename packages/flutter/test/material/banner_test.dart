@@ -86,7 +86,7 @@ void main() {
           content: const Text(contentText),
           actions: <Widget>[
             FlatButton(
-              child: const Text('Action 1'),
+              child: const Text('Action'),
               onPressed: () { },
             ),
           ],
@@ -98,6 +98,30 @@ void main() {
     final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
     expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
+  });
+
+  testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {
+    const String contentText = 'Content';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBanner(
+          forceActionsBelow: true,
+          content: const Text(contentText),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset contentBottomLeft = tester.getBottomLeft(find.text(contentText));
+    final Offset actionsTopRight = tester.getTopLeft(find.byType(ButtonBar));
+    expect(contentBottomLeft.dy, lessThan(actionsTopRight.dy));
+    expect(contentBottomLeft.dx, greaterThan(actionsTopRight.dx));
   });
 }
 
