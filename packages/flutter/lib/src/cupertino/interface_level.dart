@@ -4,30 +4,53 @@
 
 import '../widgets/framework.dart';
 
+/// Indicates the visual level for a piece of content.
 enum CupertinoUserInterfaceLevelData {
-  elevated, base
+  /// The level for your window's main content.
+  base,
+
+  /// The level for content visually above [base].
+  elevated,
 }
 
+/// Establishes a subtree in which [CupertinoUserInterfaceLevel.of] resolve to
+/// the given data.
+///
+/// Querying the current elevation status using [CupertinoUserInterfaceLevel.of]
+/// will cause your widget to rebuild automatically whenever the [CupertinoUserInterfaceLevelData]
+/// changes.
+///
+/// If no [CupertinoUserInterfaceLevel] is in scope then the [CupertinoUserInterfaceLevel.of]
+/// method will throw an exception, unless the `nullOk` argument is set to true,
+/// in which case it returns null.
 class CupertinoUserInterfaceLevel extends InheritedWidget {
+  /// Creates a
   const CupertinoUserInterfaceLevel({
     Key key,
-    @required this.data,
+    @required CupertinoUserInterfaceLevelData data,
     Widget child,
   })
     : assert(data != null),
+      _data = data,
       super(key: key, child: child);
 
-  final CupertinoUserInterfaceLevelData data;
+  final CupertinoUserInterfaceLevelData _data;
 
   @override
-  bool updateShouldNotify(CupertinoUserInterfaceLevel oldWidget) => oldWidget.data != data;
+  bool updateShouldNotify(CupertinoUserInterfaceLevel oldWidget) => oldWidget._data != _data;
 
+  /// The data from the closest instance of this class that encloses the given
+  /// context.
+  ///
+  /// You can use this function to query the user interface elevation level within
+  /// the given [BuildContext]. When that information changes, your widget will
+  /// be scheduled to be rebuilt, keeping your widget up-to-date.
   static CupertinoUserInterfaceLevelData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
     final CupertinoUserInterfaceLevel query = context.inheritFromWidgetOfExactType(CupertinoUserInterfaceLevel);
     if (query != null)
-      return query.data;
+      return query._data;
     if (nullOk)
       return null;
     throw FlutterError(

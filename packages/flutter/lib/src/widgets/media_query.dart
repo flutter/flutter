@@ -245,8 +245,10 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool invertColors;
 
-  /// Whether the platform is requesting high contrast colors to be used when
-  /// displaying content.
+  /// Whether the user requested a high contrast between foreground and background
+  /// content, in either:
+  /// * Settings -> Accessibility -> Increase Contrast (iOS)
+  /// * Settings -> Accessibility -> High contrast text (Android)
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
   /// or above, and Android devices that are running Android Q and above.
