@@ -28,12 +28,12 @@ toolchain("fuchsia") {
   strip = "${toolchain_bin}/llvm-strip"
 
   if (target_cpu == "arm64") {
-    target_triple_flags = "--target=arm64-fuchsia"
+    target_triple_flags = "--target=aarch64-fuchsia"
   } else {
     target_triple_flags = "--target=x86_64-fuchsia"
   }
 
-  sysroot_flags = "--sysroot ${fuchsia_sdk}/arch/x64/sysroot"
+  sysroot_flags = "--sysroot ${fuchsia_sdk}/arch/${target_cpu}/sysroot"
 
   # These library switches can apply to all tools below.
   lib_switch = "-l"
