@@ -94,12 +94,12 @@ def FindFile(name, path):
 def CopyGenSnapshotIfExists(source, destination):
   source_root = os.path.join(_out_dir, source)
   destination_base = os.path.join(destination, 'dart_binaries')
-  gen_snapshot = FindFile('gen_snapshot', source_root)
-  gen_snapshot_product = FindFile('gen_snapshot_product', source_root)
-  if gen_snapshot:
+  gen_snapshot = os.path.join(source_root, 'gen_snapshot')
+  gen_snapshot_product = os.path.join(source_root, 'gen_snapshot_product')
+  if os.path.isfile(gen_snapshot):
     dst_path = os.path.join(destination_base, 'gen_snapshot')
     CopyPath(gen_snapshot, dst_path)
-  if gen_snapshot_product:
+  if os.path.isfile(gen_snapshot_product):
     dst_path = os.path.join(destination_base, 'gen_snapshot_product')
     CopyPath(gen_snapshot_product, dst_path)
 
@@ -132,7 +132,6 @@ def CopyToBucket(src, dst, product=False):
 
 
 def BuildBucket(runtime_mode, arch, product):
-  RemoveDirectoryIfExists(_bucket_directory)
   out_dir = 'fuchsia_%s_%s/' % (runtime_mode, arch)
   bucket_dir = 'flutter/%s/%s/' % (arch, runtime_mode)
   CopyToBucket(out_dir, bucket_dir, product)
@@ -182,6 +181,8 @@ def GetTargetsToBuild(product=False):
       GetRunnerTarget('flutter', product, True),
       # The Dart Runner.
       GetRunnerTarget('dart_runner', product, False),
+      'third_party/dart/runtime/bin:gen_snapshot',
+      'third_party/dart/runtime/bin:gen_snapshot_product'
   ]
   return targets_to_build
 
@@ -219,6 +220,7 @@ def main():
       help='Specifies the flutter engine SHA.')
 
   args = parser.parse_args()
+  RemoveDirectoryIfExists(_bucket_directory)
 
   archs = ['x64', 'arm64']
   runtime_modes = ['debug', 'profile', 'release']
