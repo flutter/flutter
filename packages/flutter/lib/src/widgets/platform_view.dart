@@ -618,11 +618,11 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 ///   }
 /// }
 /// ```
-/// The [PlatformViewSurface] is not responsible for the life cycle of the platform view
-/// nor handling the focus. The [FooPlatformViewState] in the above example should be responsible
+/// The [FooPlatformViewState] in the above example should be responsible
 /// for constructing the [PlatformViewController] with a unique id, using [PlatformViewsRegistry.getNextPlatformViewId];
-/// it should also handle the [Focus] if necessary. Moreover, it should manage the life cycle of the
-/// "PlatformView".
+/// it should also handle the [Focus] if necessary; it should also manage the life time of the
+/// resources that are generated in the engine for this "PlatformView", for example, dispose the resources at
+/// an appropriate time.
 ///
 /// See also:
 /// * [PlatformViewRenderBox], the render object created by this widget
