@@ -1,4 +1,4 @@
-Signature: 0f047e5036b6499e977ac23d1edf363b
+Signature: 45bbcd05cb7f14360e67966898988212
 
 UNUSED LICENSES:
 
@@ -1887,7 +1887,6 @@ FILE: ../../../third_party/skia/gm/cubicpaths.cpp
 FILE: ../../../third_party/skia/gm/degeneratesegments.cpp
 FILE: ../../../third_party/skia/gm/dftext.cpp
 FILE: ../../../third_party/skia/gm/drawbitmaprect.cpp
-FILE: ../../../third_party/skia/gm/drawlooper.cpp
 FILE: ../../../third_party/skia/gm/emptypath.cpp
 FILE: ../../../third_party/skia/gm/encode.cpp
 FILE: ../../../third_party/skia/gm/extractbitmap.cpp
@@ -1919,7 +1918,6 @@ FILE: ../../../third_party/skia/gm/poly2poly.cpp
 FILE: ../../../third_party/skia/gm/quadpaths.cpp
 FILE: ../../../third_party/skia/gm/rasterhandleallocator.cpp
 FILE: ../../../third_party/skia/gm/shadertext3.cpp
-FILE: ../../../third_party/skia/gm/shadows.cpp
 FILE: ../../../third_party/skia/gm/strokefill.cpp
 FILE: ../../../third_party/skia/gm/strokerects.cpp
 FILE: ../../../third_party/skia/gm/strokes.cpp
@@ -1984,7 +1982,6 @@ FILE: ../../../third_party/skia/samplecode/SampleStrokeRect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextBox.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextEffects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleTextureDomain.cpp
-FILE: ../../../third_party/skia/samplecode/SampleTiling.cpp
 FILE: ../../../third_party/skia/samplecode/SampleVertices.cpp
 FILE: ../../../third_party/skia/samplecode/SampleWritePixels.cpp
 FILE: ../../../third_party/skia/samplecode/SampleXfermodesBlur.cpp
@@ -3027,7 +3024,6 @@ TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/bench/BlendmodeBench.cpp
 FILE: ../../../third_party/skia/bench/BlurImageFilterBench.cpp
 FILE: ../../../third_party/skia/bench/BlurRectBench.cpp
-FILE: ../../../third_party/skia/bench/BlurRoundRectBench.cpp
 FILE: ../../../third_party/skia/bench/ChartBench.cpp
 FILE: ../../../third_party/skia/bench/CmapBench.cpp
 FILE: ../../../third_party/skia/bench/ColorFilterBench.cpp
@@ -3045,7 +3041,6 @@ FILE: ../../../third_party/skia/bench/MemsetBench.cpp
 FILE: ../../../third_party/skia/bench/MergeBench.cpp
 FILE: ../../../third_party/skia/bench/PerlinNoiseBench.cpp
 FILE: ../../../third_party/skia/bench/PremulAndUnpremulAlphaOpsBench.cpp
-FILE: ../../../third_party/skia/bench/RectoriBench.cpp
 FILE: ../../../third_party/skia/bench/RegionContainBench.cpp
 FILE: ../../../third_party/skia/bench/ResultsWriter.h
 FILE: ../../../third_party/skia/bench/SortBench.cpp
@@ -3084,7 +3079,6 @@ FILE: ../../../third_party/skia/gm/imagesource.cpp
 FILE: ../../../third_party/skia/gm/internal_links.cpp
 FILE: ../../../third_party/skia/gm/inversepaths.cpp
 FILE: ../../../third_party/skia/gm/lumafilter.cpp
-FILE: ../../../third_party/skia/gm/megalooper.cpp
 FILE: ../../../third_party/skia/gm/mixedtextblobs.cpp
 FILE: ../../../third_party/skia/gm/nested.cpp
 FILE: ../../../third_party/skia/gm/nonclosedpaths.cpp
