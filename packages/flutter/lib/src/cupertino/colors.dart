@@ -132,9 +132,10 @@ class CupertinoDynamicColor extends Color {
   ];
 
 
-  static Color resolve(Color resolvable, BuildContext context) => (resolvable is CupertinoDynamicColor)
-                                                                    ? resolvable.resolveFrom(context)
-                                                                    : resolvable;
+  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false })
+    => (resolvable is CupertinoDynamicColor)
+      ? resolvable.resolveFrom(context, nullOk: nullOk)
+      : resolvable;
 
   @override
   Color resolveFrom(BuildContext context, { bool nullOk = false }) {
