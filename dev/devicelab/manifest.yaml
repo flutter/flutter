@@ -191,7 +191,6 @@ tasks:
       Measures the runtime performance of backdrop filter blurs on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   flavors_test:
     description: >
