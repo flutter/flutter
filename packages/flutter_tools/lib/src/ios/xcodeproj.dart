@@ -10,7 +10,6 @@ import '../artifacts.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
@@ -49,96 +48,25 @@ Future<void> updateGeneratedXcodeProperties({
   bool useMacOSConfig = false,
   bool setSymroot = true,
 }) async {
-  final List<String> xcodeBuildSettings = _xcodeBuildSettingsLines(
-    project: project,
-    buildInfo: buildInfo,
-    targetOverride: targetOverride,
-    useMacOSConfig: useMacOSConfig,
-    setSymroot: setSymroot
-  );
-
-  _updateGeneratedXcodePropertiesFile(
-    project: project,
-    xcodeBuildSettings: xcodeBuildSettings,
-    useMacOSConfig: useMacOSConfig,
-  );
-
-  _updateGeneratedEnvironmentVariablesScript(
-    project: project,
-    xcodeBuildSettings: xcodeBuildSettings,
-    useMacOSConfig: useMacOSConfig,
-  );
-}
-
-/// Generate a xcconfig file to inherit FLUTTER_ build settings
-/// for Xcode targets that need them.
-/// See [XcodeBasedProject.generatedXcodePropertiesFile].
-void _updateGeneratedXcodePropertiesFile({
-  @required FlutterProject project,
-  @required List<String> xcodeBuildSettings,
-  bool useMacOSConfig = false,
-}) {
   final StringBuffer localsBuffer = StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
-  xcodeBuildSettings.forEach(localsBuffer.writeln);
-  final File generatedXcodePropertiesFile = useMacOSConfig
-    ? project.macos.generatedXcodePropertiesFile
-    : project.ios.generatedXcodePropertiesFile;
-
-  generatedXcodePropertiesFile.createSync(recursive: true);
-  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
-}
-
-/// Generate a script to export all the FLUTTER_ environment variables needed
-/// as flags for Flutter tools.
-/// See [XcodeBasedProject.generatedEnvironmentVariableExportScript].
-void _updateGeneratedEnvironmentVariablesScript({
-  @required FlutterProject project,
-  @required List<String> xcodeBuildSettings,
-  bool useMacOSConfig = false,
-}) {
-  final StringBuffer localsBuffer = StringBuffer();
-
-  localsBuffer.writeln('#!/bin/sh');
-  localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
-  for (String line in xcodeBuildSettings) {
-    localsBuffer.writeln('export "$line"');
-  }
-
-  final File generatedModuleBuildPhaseScript = useMacOSConfig
-    ? project.macos.generatedEnvironmentVariableExportScript
-    : project.ios.generatedEnvironmentVariableExportScript;
-  generatedModuleBuildPhaseScript.createSync(recursive: true);
-  generatedModuleBuildPhaseScript.writeAsStringSync(localsBuffer.toString());
-  os.chmod(generatedModuleBuildPhaseScript, '755');
-}
-
-/// List of lines of build settings. Example: 'FLUTTER_BUILD_DIR=build'
-List<String> _xcodeBuildSettingsLines({
-  @required FlutterProject project,
-  @required BuildInfo buildInfo,
-  String targetOverride,
-  bool useMacOSConfig = false,
-  bool setSymroot = true,
-}) {
-  final List<String> xcodeBuildSettings = <String>[];
 
   final String flutterRoot = fs.path.normalize(Cache.flutterRoot);
-  xcodeBuildSettings.add('FLUTTER_ROOT=$flutterRoot');
+  localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  xcodeBuildSettings.add('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
+  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(project.directory.path)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   if (targetOverride != null)
-    xcodeBuildSettings.add('FLUTTER_TARGET=$targetOverride');
+    localsBuffer.writeln('FLUTTER_TARGET=$targetOverride');
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
-  xcodeBuildSettings.add('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
+  localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 
   if (setSymroot) {
-    xcodeBuildSettings.add('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+    localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
   }
 
   if (!project.isModule) {
@@ -147,26 +75,26 @@ List<String> _xcodeBuildSettingsLines({
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     // However, this is necessary for regular projects using Cocoapods.
     final String frameworkDir = useMacOSConfig
-      ? flutterMacOSFrameworkDir(buildInfo.mode)
-      : flutterFrameworkDir(buildInfo.mode);
-    xcodeBuildSettings.add('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
+        ? flutterMacOSFrameworkDir(buildInfo.mode)
+        : flutterFrameworkDir(buildInfo.mode);
+    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
   final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
   if (buildName != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NAME=$buildName');
+    localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
   final String buildNumber = validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
   if (buildNumber != null) {
-    xcodeBuildSettings.add('FLUTTER_BUILD_NUMBER=$buildNumber');
+    localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    xcodeBuildSettings.add('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
-    xcodeBuildSettings.add('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+    localsBuffer.writeln('FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    localsBuffer.writeln('LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
 
     // Tell Xcode not to build universal binaries for local engines, which are
     // single-architecture.
@@ -178,15 +106,19 @@ List<String> _xcodeBuildSettingsLines({
     // Skip this step for macOS builds.
     if (!useMacOSConfig) {
       final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
-      xcodeBuildSettings.add('ARCHS=$arch');
+      localsBuffer.writeln('ARCHS=$arch');
     }
   }
 
   if (buildInfo.trackWidgetCreation) {
-    xcodeBuildSettings.add('TRACK_WIDGET_CREATION=true');
+    localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  return xcodeBuildSettings;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+      ? project.macos.generatedXcodePropertiesFile
+      : project.ios.generatedXcodePropertiesFile;
+  generatedXcodePropertiesFile.createSync(recursive: true);
+  generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
 XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
