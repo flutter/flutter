@@ -334,7 +334,7 @@ bool ParagraphTxt::ComputeLineBreaks() {
 
         // Inject custom width into minikin breaker. (Uses LibTxt-minikin
         // patch).
-        breaker_.setCustomCharWidth(run.start, placeholder_run.width);
+        breaker_.setCustomCharWidth(run_start, placeholder_run.width);
 
         // Called with nullptr as paint in order to use the custom widths passed
         // above.
