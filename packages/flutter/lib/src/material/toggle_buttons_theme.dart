@@ -216,6 +216,8 @@ class ToggleButtonsThemeData extends Diagnosticable {
 class ToggleButtonsTheme extends InheritedWidget {
   /// Creates a toggle buttons theme that controls the color and border
   /// parameters for [ToggleButtons].
+  ///
+  /// The data argument must not be null.
   const ToggleButtonsTheme({
     Key key,
     @required this.data,

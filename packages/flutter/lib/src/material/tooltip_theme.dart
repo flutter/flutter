@@ -214,6 +214,8 @@ class TooltipThemeData extends Diagnosticable {
 class TooltipTheme extends InheritedWidget {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
+  ///
+  /// The data argument must not be null.
   const TooltipTheme({
     Key key,
     @required this.data,
