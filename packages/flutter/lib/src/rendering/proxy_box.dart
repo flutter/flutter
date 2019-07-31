@@ -2467,7 +2467,7 @@ typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 ///
 /// It does not respond to events that are exclusive to mouse, such as when the
 /// mouse enters, exits or hovers a region without pressing any buttons. For
-/// these events, use [RenderMouseListener].
+/// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
@@ -2558,9 +2558,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// If it has a child, it defers to the child for sizing behavior.
 ///
 /// If it does not have a child, it grows to fit the parent-provided constraints.
-class RenderMouseListener extends RenderProxyBox {
+class RenderMouseRegion extends RenderProxyBox {
   /// Creates a render object that forwards pointer events to callbacks.
-  RenderMouseListener({
+  RenderMouseRegion({
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,

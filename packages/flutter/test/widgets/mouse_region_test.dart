@@ -154,7 +154,7 @@ void main() {
           onExit: (PointerExitEvent details) => exit = details,
         ),
       ));
-      final RenderMouseListener renderListener = tester.renderObject(find.byType(MouseRegion));
+      final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(const Offset(400.0, 300.0));
       await tester.pump();
@@ -223,8 +223,8 @@ void main() {
           ],
         ),
       );
-      final RenderMouseListener renderListener1 = tester.renderObject(find.byKey(key1));
-      final RenderMouseListener renderListener2 = tester.renderObject(find.byKey(key2));
+      final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
       Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
@@ -308,8 +308,8 @@ void main() {
           ],
         ),
       );
-      final RenderMouseListener renderListener1 = tester.renderObject(find.byKey(key1));
-      final RenderMouseListener renderListener2 = tester.renderObject(find.byKey(key2));
+      final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
       final Offset center1 = tester.getCenter(find.byKey(key1));
       final Offset center2 = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center1);
@@ -372,7 +372,7 @@ void main() {
         ),
       );
 
-      RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion).first);
+      RenderMouseRegion listener = tester.renderObject(find.byType(MouseRegion).first);
       expect(listener.needsCompositing, isTrue);
 
       await tester.pumpWidget(
@@ -466,7 +466,7 @@ void main() {
           child: const MouseRegion(),
         ),
       );
-      final RenderMouseListener listener = tester.renderObject(find.byType(MouseRegion));
+      final RenderMouseRegion listener = tester.renderObject(find.byType(MouseRegion));
       expect(listener.needsCompositing, isFalse);
       // No TransformLayer for `Transform.scale` is added because composting is
       // not required and therefore the transform is executed on the canvas
