@@ -112,8 +112,6 @@ void main() {
           actions: <AndroidSemanticsAction>[
             AndroidSemanticsAction.click,
             AndroidSemanticsAction.accessibilityFocus,
-            AndroidSemanticsAction.setSelection,
-            AndroidSemanticsAction.copy,
           ],
         ));
 
