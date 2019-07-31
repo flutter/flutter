@@ -3,8 +3,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# TODO(jonahwilliams): refactor this and xcode_backend.sh into one script
-# once macOS supports the same configuration as iOS.
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -33,18 +31,6 @@ if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
 fi
 
-# Set the track widget creation flag.
-track_widget_creation_flag=""
-if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-  track_widget_creation_flag="--track-widget-creation"
-fi
-
-# Copy the framework and handle local engine builds.
-framework_name="FlutterMacOS.framework"
-ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
-framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
-flutter_framework="${framework_path}/${framework_name}"
-
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
@@ -63,22 +49,40 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-  flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/${framework_name}"
 fi
-
-RunCommand mkdir -p -- "$ephemeral_dir"
-RunCommand rm -rf -- "${ephemeral_dir}/${framework_name}"
-RunCommand cp -Rp -- "${flutter_framework}" "${ephemeral_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
+case "$build_mode" in
+    debug)
+        build_target="debug_macos_application"
+        ;;
+    profile)
+        build_target="profile_macos_application"
+        ;;
+    release)
+        build_target="release_macos_application"
+        ;;
+    *)
+        EchoError "Unknown build mode ${build_mode}"
+        exit -1
+        ;;
+esac
 
+# The path where the input/output xcfilelists are stored. These are used by xcode
+# to conditionally skip this script phase if neither have changed.
+build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
+build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
+
+# TODO(jonahwilliams): support flavors https://github.com/flutter/flutter/issues/32923
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=darwin-x64                                            \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
-    ${track_widget_creation_flag}                                           \
     ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}
+    ${local_engine_flag}                                                    \
+    assemble                                                                \
+    -dTargetFile="${target_path}"                                           \
+    -dTargetPlatform=darwin-x64                                             \
+    -dBuildMode="${build_mode}"                                             \
+    --build-inputs="${build_inputs_path}"                                   \
+    --build-outputs="${build_outputs_path}"                                 \
+    "${build_target}"

@@ -36,7 +36,6 @@ void main() {
 
     testUsingContext('defaults', () async {
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable(any)).thenReturn('foo');
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'macOS');
       expect(await device.installApp(mockMacOSApp), true);
@@ -54,7 +53,7 @@ void main() {
 tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applications/foo
 ''';
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
+      when(mockMacOSApp.executable).thenReturn('tester');
       when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
         return ProcessResult(1, 0, psOut, '');
       });
@@ -68,27 +67,35 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
     });
 
     group('startApp', () {
-      final MockMacOSApp macOSApp = MockMacOSApp();
-      final MockFileSystem mockFileSystem = MockFileSystem();
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final MockFile mockFile = MockFile();
-      when(macOSApp.executable(any)).thenReturn('test');
-      when(mockFileSystem.file('test')).thenReturn(mockFile);
-      when(mockFile.existsSync()).thenReturn(true);
-      when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
-        return FakeProcess(
-          exitCode: Completer<int>().future,
-          stdout: Stream<List<int>>.fromIterable(<List<int>>[
-            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
-          ]),
-          stderr: const Stream<List<int>>.empty(),
-        );
-      });
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
-        return ProcessResult(0, 1, '', '');
+      MockMacOSApp macOSApp;
+      MockFileSystem mockFileSystem;
+      MockProcessManager mockProcessManager;
+      MockFile mockFile;
+
+
+      setUp(() {
+        macOSApp = MockMacOSApp();
+        mockFileSystem = MockFileSystem();
+        mockProcessManager = MockProcessManager();
+        mockFile = MockFile();
+        when(mockFileSystem.file('test')).thenReturn(mockFile);
+        when(mockFile.existsSync()).thenReturn(true);
+        when(macOSApp.executable).thenReturn('test');
+        when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
+          return FakeProcess(
+            exitCode: Completer<int>().future,
+            stdout: Stream<List<int>>.fromIterable(<List<int>>[
+              utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
+            ]),
+            stderr: const Stream<List<int>>.empty(),
+          );
+        });
+        when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+          return ProcessResult(0, 1, '', '');
+        });
       });
 
-      testUsingContext('Can run from prebuilt application', () async {
+      testUsingContext('can run from prebuilt application', () async {
         final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
         expect(result.started, true);
         expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
@@ -137,7 +144,7 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
 
 class MockPlatform extends Mock implements Platform {}
 
-class MockMacOSApp extends Mock implements MacOSApp {}
+class MockMacOSApp extends Mock implements PrebuiltMacOSApp {}
 
 class MockFileSystem extends Mock implements FileSystem {}
 

@@ -14,7 +14,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
-/// A command to build a macos desktop target through a build shell script.
+/// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand() {
     usesTargetOption();
