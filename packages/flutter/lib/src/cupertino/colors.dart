@@ -185,7 +185,7 @@ class CupertinoDynamicColor extends Color {
   ];
 
   /// Resolves the given [Color] to a concrete [Color], using the given [BuildContext].
-  /// If the given color is already a concrete [Color], return it as is.
+  /// If the given color is already a concrete [Color], it will be returned as is.
   static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false })
     => (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context, nullOk: nullOk)
@@ -245,7 +245,6 @@ class CupertinoDynamicColor extends Color {
 
     // If this CupertinoDynamicColor cares about user interface elevation.
     if (dependencyBitMask & 4 != 0) {
-      // Something similar.
       final CupertinoUserInterfaceLevelData level =
         CupertinoUserInterfaceLevel.of(context, nullOk: nullOk)
         ?? CupertinoUserInterfaceLevelData.base;
