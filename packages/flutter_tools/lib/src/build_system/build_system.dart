@@ -461,9 +461,6 @@ class BuildSystem {
     final FileHashStore fileCache = FileHashStore(environment)
       ..initialize();
 
-    // Perform sanity checks on build.
-    checkCycles(target);
-
     final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
     bool passed = true;
     try {
@@ -559,27 +556,6 @@ class PerformanceMeasurement {
   final String target;
   final bool skiped;
   final bool passed;
-}
-
-/// Check if there are any dependency cycles in the target.
-///
-/// Throws a [CycleException] if one is encountered.
-void checkCycles(Target initial) {
-  void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
-    if (stack.contains(target)) {
-      throw CycleException(stack..add(target));
-    }
-    if (visited.contains(target)) {
-      return;
-    }
-    visited.add(target);
-    stack.add(target);
-    for (Target dependency in target.dependencies) {
-      checkInternal(dependency, visited, stack);
-    }
-    stack.remove(target);
-  }
-  checkInternal(initial, <Target>{}, <Target>{});
 }
 
 /// Verifies that all files exist and are in a subdirectory of [Environment.buildDir].

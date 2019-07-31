@@ -144,9 +144,6 @@ abstract class Source {
   /// This source is produced by invoking the provided function.
   const factory Source.function(InputFunction function) = _FunctionSource;
 
-  /// This source is produced by the [SourceBehavior] class.
-  const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
-
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
@@ -176,18 +173,6 @@ abstract class SourceBehavior {
 
   /// The outputs for a particular target.
   List<File> outputs(Environment environment);
-}
-
-class _SourceBehavior implements Source {
-  const _SourceBehavior(this.value);
-
-  final SourceBehavior value;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitBehavior(value);
-
-  @override
-  bool get implicit => true;
 }
 
 class _FunctionSource implements Source {

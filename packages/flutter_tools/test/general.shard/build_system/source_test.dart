@@ -34,7 +34,6 @@ void main() {
     expect(const Source.pattern('{PROJECT_DIR}/foo').implicit, false);
     expect(const Source.pattern('{PROJECT_DIR}/*foo').implicit, true);
     expect(Source.function((Environment environment) => <File>[]).implicit, true);
-    expect(Source.behavior(TestBehavior()).implicit, true);
   }));
 
   test('can substitute {PROJECT_DIR}/foo', () => testbed.run(() {
