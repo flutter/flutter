@@ -724,6 +724,6 @@ abstract class PlatformViewController {
   /// The viewId should always be unique and non-negative. And it must be set
   /// to a non-null value at the construction, or right after construction.
   ///
-  /// The viewId should be generated with [PlatformViewsRegistry.getNextPlatformViewId].
+  /// See also [PlatformViewRegistry] which is a helper for managing platform view ids.
   int get viewId;
 }

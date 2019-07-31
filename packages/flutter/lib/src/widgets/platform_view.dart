@@ -581,54 +581,21 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
   }
 }
 
-/// Embeds an existing platform view in the widget tree.
+/// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
 ///
-/// A "platform view" is a UI component of the platform Flutter is running on;
-/// for example on Android, android.view.Views are platform views.
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
 ///
-/// This widget can be used when developing a new "PlatformView". Generally, a
-/// new "PlatformView" is only required when a platform view class does not exist
-/// in the Flutter Framework for the platform Flutter is running on.
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
 ///
-/// This widget handles:
-///   * Rendering of a platform view. The platform view will be layed out to fills all available space
-///     the parent of this object must provide bounded layout constraints.
-///   * Semantics update. A semantics node will be created for this widget, which has a [SemanticsConfiguration.platformViewId]
-///     same as the `controller.viewId`.
-///
-/// This widget creates a [PlatformViewRenderBox] to add a [PlatformViewLayer]
-/// to the layer tree. The UI component needs to be composited when the layer is visited
-/// in the "paint" traversal in the Flutter Engine.
-/// The `controller` is required when constructing this widget,
-/// it is required by [PlatformViewRenderBox] to handle things
-/// such as Semantics updates.
-///
-/// To create a new PlatformView using this widget, a [PlatformViewController] has to be implemented.
-/// An unique `id` also needs to be generated using [PlatformViewsRegistry.getNextPlatformViewId]
-/// for each instance of the new platform view.
-/// Finally, return this widget in the build method.
-/// ```dart
-/// class FooPlatformViewState extends State<FooPlatformView> {
-///   @override
-///   Widget build(BuildContext context) {
-///     return PlatformViewSurface(
-///       controller: controller,
-///     )..id = id;
-///    };
-///   }
-/// }
-/// ```
-/// The [FooPlatformViewState] in the above example should be responsible
-/// for constructing the [PlatformViewController] with a unique id, using [PlatformViewsRegistry.getNextPlatformViewId];
-/// it should also handle the [Focus] if necessary; it should also manage the life time of the
-/// resources that are generated in the engine for this "PlatformView", for example, dispose the resources at
-/// an appropriate time.
+/// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
 ///
 /// See also:
-/// * [PlatformViewRenderBox], the render object created by this widget
-/// * [UIKitView], an iOS "PlatformView".
-/// * [AndroidView], an Android "PlatformView".
-/// * [PlatformViewController] for how to implement a new [PlatformViewController].
+/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+// TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 
   /// Construct a `PlatformViewSurface`.
