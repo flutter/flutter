@@ -195,7 +195,6 @@ class SelectableText extends StatefulWidget {
     this.textDirection,
     this.showCursor = false,
     this.autofocus = false,
-    ToolbarOptions toolbarOptions,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -214,11 +213,6 @@ class SelectableText extends StatefulWidget {
           'A non-null String must be provided to a SelectableText widget.',
         ),
         textSpan = null,
-        toolbarOptions = toolbarOptions ??
-          const ToolbarOptions(
-            selectAll: true,
-            copy: true,
-          ),
         super(key: key);
 
   /// Creates a selectable text widget with a [TextSpan].
@@ -235,7 +229,6 @@ class SelectableText extends StatefulWidget {
     this.textDirection,
     this.showCursor = false,
     this.autofocus = false,
-    ToolbarOptions toolbarOptions,
     this.maxLines,
     this.cursorWidth = 2.0,
     this.cursorRadius,
@@ -254,11 +247,6 @@ class SelectableText extends StatefulWidget {
       'A non-null TextSpan must be provided to a SelectableText.rich widget.',
     ),
     data = null,
-    toolbarOptions = toolbarOptions ??
-      const ToolbarOptions(
-        selectAll: true,
-        copy: true,
-      ),
     super(key: key);
 
   /// The text to display.
@@ -336,13 +324,6 @@ class SelectableText extends StatefulWidget {
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
-
-  /// Configuration of toolbar options.
-  ///
-  /// Paste and cut will be disabled regardless.
-  ///
-  /// If not set, select all and copy will be enabled by default.
-  final ToolbarOptions toolbarOptions;
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
@@ -562,7 +543,6 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         textDirection: widget.textDirection,
         autofocus: widget.autofocus,
         forceLine: false,
-        toolbarOptions: widget.toolbarOptions,
         maxLines: widget.maxLines ?? defaultTextStyle.maxLines,
         selectionColor: themeData.textSelectionColor,
         selectionControls: widget.selectionEnabled ? textSelectionControls : null,

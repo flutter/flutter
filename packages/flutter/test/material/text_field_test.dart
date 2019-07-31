@@ -741,7 +741,9 @@ void main() {
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    await tester.longPressAt(ePos, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
     await tester.pump();
 
     // 'def' is selected.
@@ -864,7 +866,7 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
-  testWidgets('does not paint toolbar when no options available on ios', (WidgetTester tester) async {
+  testWidgets('does not paint tool bar when no options available on ios', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -886,7 +888,7 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
   });
 
-  testWidgets('text field build empty toolbar when no options available android', (WidgetTester tester) async {
+  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -1083,7 +1085,9 @@ void main() {
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    await tester.longPressAt(ePos, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
     await tester.pump();
 
     expect(controller.selection.isCollapsed, true);
@@ -1564,36 +1568,9 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
-  testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is not selectable by default', (WidgetTester tester) async {
     // This is a regression test for
-    // https://github.com/flutter/flutter/issues/32845
-
-    final TextEditingController controller = TextEditingController();
-    Widget buildFrame(bool obscureText) {
-      return overlay(
-        child: TextField(
-          controller: controller,
-          obscureText: obscureText,
-        ),
-      );
-    }
-
-    // Obscure text and don't enable or disable selection.
-    await tester.pumpWidget(buildFrame(true));
-    await tester.enterText(find.byType(TextField), 'abcdefghi');
-    await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
-
-    // Long press does select text.
-    final Offset ePos = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(ePos, pointer: 7);
-    await tester.pump();
-    expect(controller.selection.isCollapsed, false);
-  });
-
-  testWidgets('An obscured TextField is not selectable when disabled', (WidgetTester tester) async {
-    // This is a regression test for
-    // https://github.com/flutter/flutter/issues/32845
+    // https://github.com/flutter/flutter/issues/24100
 
     final TextEditingController controller = TextEditingController();
     Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
@@ -1606,75 +1583,49 @@ void main() {
       );
     }
 
-    // Explicitly disabled selection on obscured text.
-    await tester.pumpWidget(buildFrame(true, false));
+    // Obscure text and don't enable or disable selection
+    await tester.pumpWidget(buildFrame(true, null));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
-    // Long press doesn't select text.
-    final Offset ePos2 = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(ePos2, pointer: 7);
+    // Long press doesn't select anything
+    final Offset ePos = textOffsetToPosition(tester, 1);
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture.up();
     await tester.pump();
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is selectable when enabled', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/24100
+
     final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+          enableInteractiveSelection: enableInteractiveSelection,
+        ),
+      );
+    }
 
-    await tester.pumpWidget(overlay(
-      child: TextField(
-        controller: controller,
-        obscureText: true,
-      ),
-    ));
-    await tester.enterText(find.byType(TextField), 'abcde fghi');
+    // Explicitly allow selection on obscured text
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
 
-    // Long press does select text.
-    final Offset bPos = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(bPos, pointer: 7);
+    // Long press does select text
+    final Offset ePos2 = textOffsetToPosition(tester, 1);
+    final TestGesture gesture2 = await tester.startGesture(ePos2, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await gesture2.up();
     await tester.pump();
-    final TextSelection selection = controller.selection;
-    expect(selection.isCollapsed, false);
-    expect(selection.baseOffset, 0);
-    expect(selection.extentOffset, 10);
-  });
-
-  testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
-    final TextEditingController controller = TextEditingController();
-
-    await tester.pumpWidget(overlay(
-      child: TextField(
-        controller: controller,
-        obscureText: true,
-      ),
-    ));
-    await tester.enterText(find.byType(TextField), 'abcde fghi');
-    await skipPastScrollingAnimation(tester);
-
-    // Long press to select text.
-    final Offset bPos = textOffsetToPosition(tester, 1);
-    await tester.longPressAt(bPos, pointer: 7);
-    await tester.pump();
-
-    // Should only have paste option when whole obscure text is selected.
-    expect(find.text('PASTE'), findsOneWidget);
-    expect(find.text('COPY'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
-    expect(find.text('SELECT ALL'), findsNothing);
-
-    // Long press at the end
-    final Offset iPos = textOffsetToPosition(tester, 10);
-    final Offset slightRight = iPos + const Offset(30.0, 0.0);
-    await tester.longPressAt(slightRight, pointer: 7);
-    await tester.pump();
-
-    // Should have paste and select all options when collapse.
-    expect(find.text('PASTE'), findsOneWidget);
-    expect(find.text('SELECT ALL'), findsOneWidget);
-    expect(find.text('COPY'), findsNothing);
-    expect(find.text('CUT'), findsNothing);
+    expect(controller.selection.isCollapsed, false);
   });
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
