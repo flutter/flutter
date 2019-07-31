@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
-
 #include <memory>
 #include <vector>
 
+#include "flutter/shell/platform/common/cpp/client_wrapper/include/flutter/plugin_registrar.h"
 #include "flutter/shell/platform/common/cpp/client_wrapper/testing/stub_flutter_api.h"
 #include "gtest/gtest.h"
 
@@ -18,10 +17,19 @@ namespace {
 class TestApi : public testing::StubFlutterApi {
  public:
   // |flutter::testing::StubFlutterApi|
-  void MessengerSend(const char* channel,
+  bool MessengerSend(const char* channel,
                      const uint8_t* message,
                      const size_t message_size) override {
     last_data_sent_ = message;
+    return message_engine_result;
+  }
+  bool MessengerSendWithReply(const char* channel,
+                              const uint8_t* message,
+                              const size_t message_size,
+                              const FlutterDesktopBinaryReply reply,
+                              void* user_data) override {
+    last_data_sent_ = message;
+    return message_engine_result;
   }
 
   const uint8_t* last_data_sent() { return last_data_sent_; }

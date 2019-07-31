@@ -21,6 +21,10 @@ namespace testing {
 // from the actual library.
 class StubFlutterApi {
  public:
+  // Used by the callers to simulate a result from the engine when sending a
+  // message.
+  bool message_engine_result = true;
+
   // Sets |stub| as the instance to which calls to the Flutter library C APIs
   // will be forwarded.
   static void SetTestStub(StubFlutterApi* stub);
@@ -34,9 +38,20 @@ class StubFlutterApi {
   virtual void RegistrarEnableInputBlocking(const char* channel) {}
 
   // Called for FlutterDesktopMessengerSend.
-  virtual void MessengerSend(const char* channel,
+  virtual bool MessengerSend(const char* channel,
                              const uint8_t* message,
-                             const size_t message_size) {}
+                             const size_t message_size) {
+    return message_engine_result;
+  }
+
+  // Called for FlutterDesktopMessengerSendWithReply.
+  virtual bool MessengerSendWithReply(const char* channel,
+                                      const uint8_t* message,
+                                      const size_t message_size,
+                                      const FlutterDesktopBinaryReply reply,
+                                      void* user_data) {
+    return message_engine_result;
+  }
 
   // Called for FlutterDesktopMessengerSendResponse.
   virtual void MessengerSendResponse(
