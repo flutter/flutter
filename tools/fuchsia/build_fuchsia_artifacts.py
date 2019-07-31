@@ -94,12 +94,12 @@ def FindFile(name, path):
 def CopyGenSnapshotIfExists(source, destination):
   source_root = os.path.join(_out_dir, source)
   destination_base = os.path.join(destination, 'dart_binaries')
-  gen_snapshot = os.path.join(source_root, 'gen_snapshot')
-  gen_snapshot_product = os.path.join(source_root, 'gen_snapshot_product')
-  if os.path.isfile(gen_snapshot):
+  gen_snapshot = FindFile('gen_snapshot', source_root)
+  gen_snapshot_product = FindFile('gen_snapshot_product', source_root)
+  if gen_snapshot:
     dst_path = os.path.join(destination_base, 'gen_snapshot')
     CopyPath(gen_snapshot, dst_path)
-  if os.path.isfile(gen_snapshot_product):
+  if gen_snapshot_product:
     dst_path = os.path.join(destination_base, 'gen_snapshot_product')
     CopyPath(gen_snapshot_product, dst_path)
 
@@ -187,8 +187,6 @@ def GetTargetsToBuild(product=False):
       GetRunnerTarget('flutter', product, True),
       # The Dart Runner.
       GetRunnerTarget('dart_runner', product, False),
-      'third_party/dart/runtime/bin:gen_snapshot',
-      'third_party/dart/runtime/bin:gen_snapshot_product'
   ]
   return targets_to_build
 
@@ -225,18 +223,27 @@ def main():
       required=True,
       help='Specifies the flutter engine SHA.')
 
+  parser.add_argument(
+      '--runtime-mode',
+      type=str,
+      choices=['debug', 'profile', 'release', 'all'],
+      default='all')
+
   args = parser.parse_args()
   RemoveDirectoryIfExists(_bucket_directory)
+  build_mode = args.runtime_mode
 
   archs = ['x64', 'arm64']
   runtime_modes = ['debug', 'profile', 'release']
   product_modes = [False, False, True]
+
   for arch in archs:
     for i in range(3):
       runtime_mode = runtime_modes[i]
       product = product_modes[i]
-      BuildTarget(runtime_mode, arch, product)
-      BuildBucket(runtime_mode, arch, product)
+      if build_mode == 'all' or runtime_mode == build_mode:
+        BuildTarget(runtime_mode, arch, product)
+        BuildBucket(runtime_mode, arch, product)
 
   ProcessCIPDPakcage(args.upload, args.engine_version)
 
