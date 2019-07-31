@@ -789,7 +789,7 @@ void main() {
       home: FloatingActionButton(
         onPressed: () {},
         foregroundColor: foregroundColor,
-        child: Icon(Icons.access_alarm),
+        child: const Icon(Icons.access_alarm),
       ),
     ));
 
