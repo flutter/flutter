@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:args/args.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -49,17 +50,21 @@ class PrecacheCommand extends FlutterCommand {
     if (argResults['all-platforms']) {
       cache.includeAllPlatforms = true;
     }
+    return await precacheArtifacts(argResults);
+  }
+
+  static Future<FlutterCommandResult> precacheArtifacts([ArgResults argResults]) async {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
-      if (argResults[artifact.name]) {
+      if (argResults != null && argResults[artifact.name]) {
         requiredArtifacts.add(artifact);
       }
     }
-    final bool forceUpdate = argResults['force'];
+    final bool forceUpdate = argResults == null ? false : argResults['force'];
     if (forceUpdate || !cache.isUpToDate()) {
       await cache.updateAll(requiredArtifacts);
     } else {

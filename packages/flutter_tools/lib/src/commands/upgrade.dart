@@ -12,6 +12,7 @@ import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
+import '../commands/precache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -185,16 +186,7 @@ class UpgradeCommandRunner {
   Future<void> precacheArtifacts() async {
     printStatus('');
     printStatus('Upgrading engine...');
-    final int code = await runCommandAndStreamOutput(
-      <String>[
-        fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
-      ],
-      workingDirectory: Cache.flutterRoot,
-      allowReentrantFlutter: true,
-    );
-    if (code != 0) {
-      throwToolExit(null, exitCode: code);
-    }
+    await PrecacheCommand.precacheArtifacts();
   }
 
   /// Update the user's packages.
