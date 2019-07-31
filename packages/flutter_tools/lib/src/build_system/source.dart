@@ -38,7 +38,9 @@ class SourceVisitor {
 
   /// Visit a [Source] which contains a file uri.
   ///
-  /// The uri may that may include constants defined in an [Environment].
+  /// The uri may that may include constants defined in an [Environment]. If
+  /// [optional] is true, the file is not required to exist. In this case, it
+  /// is never resolved as an input.
   void visitPattern(String pattern, bool optional) {
     // perform substitution of the environmental values and then
     // of the local values.

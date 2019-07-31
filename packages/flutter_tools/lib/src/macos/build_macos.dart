@@ -23,7 +23,7 @@ Future<PrebuiltMacOSApp> buildMacOS({
   BuildInfo buildInfo,
   String targetOverride = 'lib/main.dart',
 }) async {
-  // Create the environment used to process the build. This need sto mtach what
+  // Create the environment used to process the build. This needs to match what
   // is provided in bin/macos_build_flutter_assets.sh otherwise the directories
   // will be different.
   final Environment environment = Environment(
@@ -54,7 +54,7 @@ Future<PrebuiltMacOSApp> buildMacOS({
   }
   // Set debug or release mode.
   String config = 'Debug';
-  if (buildInfo.isRelease == true) {
+  if (buildInfo?.isRelease ?? false) {
     config = 'Release';
   }
   // Invoke Xcode with correct configuration.

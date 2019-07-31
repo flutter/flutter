@@ -113,14 +113,13 @@ class AssembleCommand extends FlutterCommand {
         printError('${data.value.exception}');
       }
       throwToolExit('build failed.');
-    } else {
-      printStatus('build succeeded.');
-      if (argResults.wasParsed('build-inputs')) {
-        writeListIfChanged(result.inputFiles, argResults['build-inputs']);
-      }
-      if (argResults.wasParsed('build-outputs')) {
-        writeListIfChanged(result.outputFiles, argResults['build-outputs']);
-      }
+    }
+    printStatus('build succeeded.');
+    if (argResults.wasParsed('build-inputs')) {
+      writeListIfChanged(result.inputFiles, argResults['build-inputs']);
+    }
+    if (argResults.wasParsed('build-outputs')) {
+      writeListIfChanged(result.outputFiles, argResults['build-outputs']);
     }
     return null;
   }

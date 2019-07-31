@@ -80,17 +80,17 @@ class MacOSDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
+    Cache.releaseLockEarly();
     // Stop any running applications with the same executable.
     PrebuiltMacOSApp prebuiltMacOSApp;
-    if (!prebuiltApplication) {
-      Cache.releaseLockEarly();
+    if (prebuiltApplication) {
+      prebuiltMacOSApp = package;
+    } else {
       prebuiltMacOSApp = await buildMacOS(
         flutterProject: FlutterProject.current(),
         buildInfo: debuggingOptions?.buildInfo,
         targetOverride: mainPath,
       );
-    } else {
-      prebuiltMacOSApp = package;
     }
 
     // Ensure that the executable is locatable.
