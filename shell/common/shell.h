@@ -35,6 +35,18 @@
 
 namespace flutter {
 
+/// Error exit codes for the Dart isolate.
+enum class DartErrorCode {
+  /// No error has occurred.
+  NoError = 0,
+  /// The Dart error code for an API error.
+  ApiError = 253,
+  /// The Dart error code for a compilation error.
+  CompilationError = 254,
+  /// The Dart error code for an unkonwn error.
+  UnknownError = 255
+};
+
 //------------------------------------------------------------------------------
 /// Perhaps the single most important class in the Flutter engine repository.
 /// When embedders create a Flutter application, they are referring to the
@@ -165,6 +177,19 @@ class Shell final : public PlatformView::Delegate,
   ///
   ~Shell();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Starts an isolate for the given RunConfiguration.
+  ///
+  void RunEngine(RunConfiguration run_configuration);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Starts an isolate for the given RunConfiguration. The
+  ///             result_callback will be called with the status of the
+  ///             operation.
+  ///
+  void RunEngine(RunConfiguration run_configuration,
+                 std::function<void(Engine::RunStatus)> result_callback);
+
   //------------------------------------------------------------------------------
   /// @return     The settings used to launch this shell.
   ///
@@ -191,12 +216,18 @@ class Shell final : public PlatformView::Delegate,
   ///
   fml::WeakPtr<Rasterizer> GetRasterizer();
 
+// TODO(dnfield): Remove this when either Topaz is up to date or flutter_runner
+// is built out of this repo.
+#ifdef OS_FUCHSIA
   //------------------------------------------------------------------------------
-  /// @brief      Engines may only be accessed on the UI thread.
+  /// @brief      Engines may only be accessed on the UI thread. This method is
+  ///             deprecated, and implementers should instead use other API
+  ///             available on the Shell or the PlatformView.
   ///
   /// @return     A weak pointer to the engine.
   ///
   fml::WeakPtr<Engine> GetEngine();
+#endif  // OS_FUCHSIA
 
   //----------------------------------------------------------------------------
   /// @brief      Platform views may only be accessed on the platform task
@@ -252,6 +283,25 @@ class Shell final : public PlatformView::Delegate,
   ///          thread, 'kDeadlineExceeded' if there is a timeout.
   ///
   fml::Status WaitForFirstFrame(fml::TimeDelta timeout);
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to get the last error from the Dart UI
+  ///             Isolate, if one exists.
+  ///
+  /// @return     Returns the last error code from the UI Isolate.
+  ///
+  std::optional<DartErrorCode> GetUIIsolateLastError() const;
+
+  //----------------------------------------------------------------------------
+  /// @brief      Used by embedders to check if the Engine is running and has
+  ///             any live ports remaining. For example, the Flutter tester uses
+  ///             this method to check whether it should continue to wait for
+  ///             a running test or not.
+  ///
+  /// @return     Returns if the shell has an engine and the engine has any live
+  ///             Dart ports.
+  ///
+  bool EngineHasLivePorts() const;
 
  private:
   using ServiceProtocolHandler =
