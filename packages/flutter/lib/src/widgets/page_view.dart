@@ -368,8 +368,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       forcePixels(getPixelsFromPage(oldPage));
   }
 
+  double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
+
   double getPageFromPixels(double pixels, double viewportDimension) {
-    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -377,9 +379,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
     return actual;
   }
 
-  double getPixelsFromPage(double page) {
-    return page * viewportDimension * viewportFraction;
-  }
+  double getPixelsFromPage(double page) => page * viewportDimension * viewportFraction + _initialPageOffset;
 
   @override
   double get page {
@@ -418,6 +418,14 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    return super.applyContentDimensions(
+      minScrollExtent + _initialPageOffset,
+      maxScrollExtent - _initialPageOffset
+    );
   }
 
   @override

@@ -1062,11 +1062,14 @@ class SliverFillViewport extends StatelessWidget {
         final double fixedExtent = constraints.viewportMainAxisExtent * viewportFraction;
         final double padding = math.max(0, constraints.viewportMainAxisExtent - fixedExtent) / 2;
 
-        final bool isHorizontal = constraints.axisDirection == AxisDirection.left
-                               || constraints.axisDirection == AxisDirection.right;
-        final EdgeInsets sliverPaddingValue = isHorizontal
-          ? EdgeInsets.symmetric(horizontal: padding)
-          : EdgeInsets.symmetric(vertical: padding);
+        EdgeInsets sliverPaddingValue;
+        switch (constraints.axis) {
+          case Axis.horizontal:
+            sliverPaddingValue = EdgeInsets.symmetric(horizontal: padding);
+            break;
+          case Axis.vertical:
+            sliverPaddingValue = EdgeInsets.symmetric(vertical: padding);
+        }
 
         return SliverPadding(
           padding: sliverPaddingValue,
