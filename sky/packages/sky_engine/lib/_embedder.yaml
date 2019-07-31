@@ -4,6 +4,7 @@ embedded_libs:
   "dart:convert": "convert/convert.dart"
   "dart:core": "core/core.dart"
   "dart:developer": "developer/developer.dart"
+  "dart:ffi": "ffi/ffi.dart"
   "dart:io": "io/io.dart"
   "dart:isolate": "isolate/isolate.dart"
   "dart:math": "math/math.dart"
