@@ -13,8 +13,8 @@ import 'theme.dart';
 /// A Material Design banner.
 ///
 /// A banner displays an important, succinct message, and provides actions for
-/// users to address (or dismiss the banner). It requires a user action to be
-/// dismissed.
+/// users to address (or dismiss the banner). A user action is required for it
+/// to be dismissed.
 ///
 /// Banners should be displayed at the top of the screen, below a top app bar.
 /// They are persistent and nonmodal, allowing the user to either ignore them or
@@ -38,6 +38,8 @@ class MaterialBanner extends StatelessWidget {
     @required this.actions,
     this.leading,
     this.backgroundColor,
+    this.padding,
+    this.leadingPadding,
     this.forceActionsBelow = false,
   }) : assert(content != null),
        assert(actions != null),
@@ -54,8 +56,8 @@ class MaterialBanner extends StatelessWidget {
   /// If null, defaults to [ThemeData.textTheme.body1].
   final TextStyle contentTextStyle;
 
-  /// The set of actions that are displayed at the bottom of the bottom or right
-  /// side of the [MaterialBanner].
+  /// The set of actions that are displayed at the bottom or trailing side of
+  /// the [MaterialBanner].
   ///
   /// Typically this is a list of [FlatButton] widgets.
   ///
@@ -65,22 +67,39 @@ class MaterialBanner extends StatelessWidget {
 
   /// The (optional) leading widget of the [MaterialBanner].
   ///
-  /// Typically an [Image] widget.
+  /// Typically an [Icon] widget.
   final Widget leading;
 
-  /// The background color of the surface of this [MaterialBanner].
+  /// The color of the surface of this [MaterialBanner].
   ///
   /// This sets the [Material.color] on this [MaterialBanner]'s [Container].
   ///
   /// If `null`, [ThemeData.canvasColor] is used.
   final Color backgroundColor;
 
+  /// The amount of space by which to inset the [content], [actions], and
+  /// [leading] widgets.
+  ///
+  /// If the [actions] are below the [content], this defaults to
+  /// `EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0)`.
+  ///
+  /// If the [actions] are trailing the [content], this defaults to
+  /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
+  final EdgeInsetsGeometry padding;
+
+
+  /// The amount of space by which to inset the [leading] widget.
+  ///
+  /// This defaults to `EdgeInsetsDirectional.only(end: 16.0)`.
+  final EdgeInsetsGeometry leadingPadding;
+
   /// An override to force the [actions] to be below the [content] regardless of
   /// how many there are.
   ///
   /// If this is `true`, the [actions] will be placed below the [content]. If
-  /// this is `false`, the [actions] will be placed next to the [content] if
-  /// [actions.length] is `1` and below the [content] if greater than `1`.
+  /// this is `false`, the [actions] will be placed to the trailing side of the
+  /// [content] if [actions.length] is `1` and below the [content] if greater
+  /// than `1`.
   final bool forceActionsBelow;
 
   @override
@@ -89,7 +108,7 @@ class MaterialBanner extends StatelessWidget {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
-    final EdgeInsetsDirectional padding = isSingleRow
+    final EdgeInsetsDirectional padding = this.padding ?? isSingleRow
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0);
 
@@ -110,7 +129,7 @@ class MaterialBanner extends StatelessWidget {
               children: <Widget>[
                 if (leading != null)
                   Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 16.0),
+                    padding: leadingPadding ?? const EdgeInsetsDirectional.only(end: 16.0),
                     child: leading,
                   ),
                 Flexible(
