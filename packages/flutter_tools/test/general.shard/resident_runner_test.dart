@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
+import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -478,6 +479,30 @@ void main() {
 
     verify(mockFlutterDevice.refreshViews()).called(1);
     verify(mockFlutterDevice.toggleProfileWidgetBuilds()).called(1);
+  }));
+
+  test('ResidentRunner throws if connectToServiceProtocol is called when debugging is disabled', () => testbed.run(() {
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.disabled(BuildInfo.release)
+    );
+
+    expect(() => residentRunner.connectToServiceProtocol(), throwsA(isInstanceOf<Exception>()));
+  }));
+
+  test('ResidentRunner throws if no views are discovered when connectToServiceProtocol is called', () => testbed.run(() {
+    when(mockFlutterDevice.views).thenReturn(<FlutterView>[]);
+
+    expect(() => residentRunner.connectToServiceProtocol(), throwsA(isInstanceOf<Exception>()));
+  }));
+
+  test('ColdRunner does not support reload or restart', () => testbed.run(() {
+    final ColdRunner coldRunner = ColdRunner(<FlutterDevice>[mockFlutterDevice]);
+
+    expect(() => coldRunner.restart(), throwsA(isInstanceOf<UnsupportedError>()));
   }));
 }
 

@@ -51,7 +51,6 @@ class DeviceReloadReport {
   List<Map<String, dynamic>> reports; // List has one report per Flutter view.
 }
 
-// TODO(mklim): Test this, flutter/flutter#23031.
 class HotRunner extends ResidentRunner {
   HotRunner(
     List<FlutterDevice> devices, {
@@ -481,8 +480,11 @@ class HotRunner extends ResidentRunner {
            )
           )
          )) {
-      if (printErrors)
+      if (printErrors) {
+        // TODO(jonahwilliams): this message is dumped as raw json and formatted
+        // quite poorly. It should be cleaned up and presented in a nicer way.
         printError('Hot reload received invalid response: $reloadReport');
+      }
       return false;
     }
     if (!reloadReport['success']) {
@@ -648,7 +650,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw 'Application isolate not found';
+          throw Exception('Application isolate not found');
         }
       }
     }
@@ -701,9 +703,8 @@ class HotRunner extends ResidentRunner {
             final Map<String, dynamic> firstReport = reports.first;
             // Don't print errors because they will be printed further down when
             // `validateReloadReport` is called again.
-            await device.updateReloadStatus(
-              validateReloadReport(firstReport, printErrors: false),
-            );
+            final bool isReportValid = validateReloadReport(firstReport, printErrors: false);
+            await device.updateReloadStatus(isReportValid);
             completer.complete(DeviceReloadReport(device, reports));
           },
         ));

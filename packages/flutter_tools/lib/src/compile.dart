@@ -81,7 +81,7 @@ class CompilerOutput {
   final List<Uri> sources;
 }
 
-enum StdoutState { CollectDiagnostic, CollectDependencies }
+enum StdoutState { CollectDiagnostic, CollectDependencies, RejectCompile }
 
 /// Handles stdin/stdout communication with the frontend server.
 class StdoutHandler {
@@ -110,6 +110,11 @@ class StdoutHandler {
       if (_expectSources) {
         if (state == StdoutState.CollectDiagnostic) {
           state = StdoutState.CollectDependencies;
+          return;
+        }
+        if (state == StdoutState.RejectCompile) {
+          state = StdoutState.CollectDiagnostic;
+          compilerOutput.complete(null);
           return;
         }
       }
@@ -654,6 +659,7 @@ class ResidentCompiler {
       return Future<CompilerOutput>.value(null);
     }
     _stdoutHandler.reset();
+    _stdoutHandler.state = StdoutState.RejectCompile;
     _server.stdin.writeln('reject');
     printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;

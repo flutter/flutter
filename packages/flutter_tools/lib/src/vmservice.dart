@@ -369,7 +369,7 @@ class VMService {
 }
 
 /// An error that is thrown when constructing/updating a service object.
-class VMServiceObjectLoadError {
+class VMServiceObjectLoadError implements Exception {
   VMServiceObjectLoadError(this.message, this.map);
   final String message;
   final Map<String, dynamic> map;
