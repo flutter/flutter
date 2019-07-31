@@ -9,6 +9,7 @@ import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
 import("//third_party/dart/sdk/lib/convert/convert_sources.gni")
 import("//third_party/dart/sdk/lib/core/core_sources.gni")
 import("//third_party/dart/sdk/lib/developer/developer_sources.gni")
+import("//third_party/dart/sdk/lib/ffi/ffi_sources.gni")
 import("//third_party/dart/sdk/lib/internal/internal_sources.gni")
 import("//third_party/dart/sdk/lib/io/io_sources.gni")
 import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
@@ -95,6 +96,14 @@ copy("io") {
   ]
 }
 
+copy("ffi") {
+  lib_path = rebase_path("ffi", "", dart_sdk_lib_path)
+  sources = rebase_path(ffi_sdk_sources, "", lib_path)
+  outputs = [
+    "$root_gen_dir/dart-pkg/sky_engine/lib/ffi/{{source_file_part}}",
+  ]
+}
+
 copy("isolate") {
   lib_path = rebase_path("isolate", "", dart_sdk_lib_path)
   sources = rebase_path(isolate_sdk_sources, "", lib_path)
@@ -135,6 +144,7 @@ group("copy_dart_sdk") {
     ":convert",
     ":core",
     ":developer",
+    ":ffi",
     ":internal",
     ":io",
     ":isolate",
