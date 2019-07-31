@@ -77,8 +77,7 @@ class MaterialBanner extends StatelessWidget {
   /// If `null`, [ThemeData.canvasColor] is used.
   final Color backgroundColor;
 
-  /// The amount of space by which to inset the [content], [actions], and
-  /// [leading] widgets.
+  /// The amount of space by which to inset the [content]'s parent [Row].
   ///
   /// If the [actions] are below the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0)`.
@@ -108,9 +107,9 @@ class MaterialBanner extends StatelessWidget {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
-    final EdgeInsetsDirectional padding = this.padding ?? isSingleRow
+    final EdgeInsetsGeometry padding = this.padding ?? (isSingleRow
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
-        : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0);
+        : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
 
     final Widget buttonBar = ButtonTheme.bar(
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
