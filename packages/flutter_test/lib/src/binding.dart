@@ -808,6 +808,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
+    /// Navigation related actions (pop, push, replace) broadcasts these actions via
+    /// platform messages.
+    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {});
+
     defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
       String key = utf8.decode(message.buffer.asUint8List());
       File asset = File(path.join(assetFolderPath, key));
