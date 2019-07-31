@@ -214,32 +214,11 @@ class TooltipThemeData extends Diagnosticable {
 class TooltipTheme extends InheritedWidget {
   /// Creates a tooltip theme that controls the configurations for
   /// [Tooltip].
-  TooltipTheme({
+  const TooltipTheme({
     Key key,
-    double height,
-    EdgeInsetsGeometry padding,
-    EdgeInsetsGeometry margin,
-    double verticalOffset,
-    bool preferBelow,
-    bool excludeFromSemantics,
-    Decoration decoration,
-    TextStyle textStyle,
-    Duration waitDuration,
-    Duration showDuration,
+    @required this.data,
     Widget child,
-  }) : data = TooltipThemeData(
-         height: height,
-         padding: padding,
-         margin: margin,
-         verticalOffset: verticalOffset,
-         preferBelow: preferBelow,
-         excludeFromSemantics: excludeFromSemantics,
-         decoration: decoration,
-         textStyle: textStyle,
-         waitDuration: waitDuration,
-         showDuration: showDuration,
-       ),
-       super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant [Tooltip] widgets.
   final TooltipThemeData data;

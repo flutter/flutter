@@ -124,20 +124,11 @@ class PopupMenuThemeData extends Diagnosticable {
 class PopupMenuTheme extends InheritedWidget {
   /// Creates a popup menu theme that controls the configurations for
   /// popup menus in its widget subtree.
-  PopupMenuTheme({
+  const PopupMenuTheme({
     Key key,
-    Color color,
-    ShapeBorder shape,
-    double elevation,
-    TextStyle textStyle,
+    @required this.data,
     Widget child,
-  }) : data = PopupMenuThemeData(
-         color: color,
-         shape: shape,
-         elevation: elevation,
-         textStyle: textStyle,
-       ),
-       super(key: key, child: child);
+  }) : assert(data != null), super(key: key, child: child);
 
   /// The properties for descendant popup menu widgets.
   final PopupMenuThemeData data;
