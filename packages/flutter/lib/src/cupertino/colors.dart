@@ -207,11 +207,11 @@ class CupertinoDynamicColor extends Color {
     final List<Color> colors = _colorMap;
 
     for (int i = 0; i < colors.length; i++) {
-      // bitShift - represented trait
-      //    0     - color vibrancy
-      //    1     - accessibility contrast
-      //    2     - user interface level
       for(int bitShift = 0; bitShift < 3; bitShift ++) {
+        // mask - represented trait
+        // 001  - color vibrancy
+        // 010  - accessibility contrast
+        // 100  - user interface level
         final int mask = 1 << bitShift;
         if (i & mask != 0 || dependencyBitMask & mask != 0)
           continue;
