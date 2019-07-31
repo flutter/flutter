@@ -100,7 +100,7 @@ class MacOSDevice extends Device {
     }
 
     // Make sure to call stop app after we've built.
-    await stopApp(package);
+    await stopApp(prebuiltMacOSApp);
     final Process process = await processManager.start(<String>[
       prebuiltMacOSApp.executable,
     ]);
