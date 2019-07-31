@@ -155,9 +155,6 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
-        ? endpoints[1]
-        : null;
     final double toolbarHeightNeeded = MediaQuery.of(context).padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
