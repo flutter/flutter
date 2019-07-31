@@ -2568,7 +2568,7 @@ class RenderMouseRegion extends RenderProxyBox {
   }) : _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
-       _isAnnotationActive = false,
+       _annotationIsActive = false,
        super(child) {
     _hoverAnnotation = MouseTrackerAnnotation(
       onEnter: _handleEnter,
@@ -2639,17 +2639,17 @@ class RenderMouseRegion extends RenderProxyBox {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    final bool wasAnnotationActive = _isAnnotationActive;
-    final bool shouldAnnotationBeActive = (
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
         _onEnter != null ||
         _onHover != null ||
         _onExit != null
       ) &&
       RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (wasAnnotationActive != shouldAnnotationBeActive) {
+    if (annotationWasActive != annotationWillBeActive) {
       markNeedsPaint();
       markNeedsCompositingBitsUpdate();
-      _isAnnotationActive = shouldAnnotationBeActive;
+      _annotationIsActive = annotationWillBeActive;
     }
   }
 
@@ -2692,14 +2692,14 @@ class RenderMouseRegion extends RenderProxyBox {
     super.detach();
   }
 
-  bool _isAnnotationActive;
+  bool _annotationIsActive;
 
   @override
-  bool get needsCompositing => super.needsCompositing || _isAnnotationActive;
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_isAnnotationActive) {
+    if (_annotationIsActive) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
