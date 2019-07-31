@@ -123,7 +123,7 @@ void main() {
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
-    final ColorScheme colorScheme = ColorScheme.light().copyWith(surface: Colors.purple);
+    final ColorScheme colorScheme = const ColorScheme.light().copyWith(surface: Colors.purple);
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(colorScheme: colorScheme),
       home: Scaffold(
