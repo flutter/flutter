@@ -394,8 +394,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -500,8 +500,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -545,8 +545,8 @@ void main() {
             return Container(
               height: 200.0,
               color: index % 2 == 0
-                  ? const Color(0xFF0000FF)
-                  : const Color(0xFF00FF00),
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
               child: Text(kStates[index]),
             );
           },
@@ -563,6 +563,42 @@ void main() {
     await tester.pump();
 
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100, 0));
+  });
+
+  testWidgets(
+    'Updating PageView large viewportFraction',
+    (WidgetTester tester) async {
+      Widget build(PageController controller) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: kStates.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 200.0,
+                color: index % 2 == 0
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                child: Text(kStates[index]),
+              );
+            },
+          ),
+        );
+      }
+
+      final PageController oldController = PageController(viewportFraction: 5/4);
+      await tester.pumpWidget(build(oldController));
+
+      expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
+      expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
+
+      final PageController newController = PageController(viewportFraction: 4);
+      await tester.pumpWidget(build(newController));
+      newController.jumpToPage(10);
+      await tester.pump();
+
+      expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
   });
 
   testWidgets(

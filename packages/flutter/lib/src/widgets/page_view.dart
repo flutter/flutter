@@ -364,8 +364,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return;
     final double oldPage = page;
     _viewportFraction = value;
+
     if (oldPage != null)
-      forcePixels(getPixelsFromPage(oldPage));
+      // This part should only be reacheable when it will definitely trigger a rebuild.
+      correctPixels(getPixelsFromPage(oldPage));
   }
 
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
@@ -422,9 +424,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
     return super.applyContentDimensions(
-      minScrollExtent + _initialPageOffset,
-      maxScrollExtent - _initialPageOffset
+      newMinScrollExtent,
+      math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
     );
   }
 
