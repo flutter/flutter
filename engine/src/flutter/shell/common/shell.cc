@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #define RAPIDJSON_HAS_STDSTRING 1
-
 #include "flutter/shell/common/shell.h"
 
 #include <memory>
@@ -372,6 +371,79 @@ void Shell::NotifyLowMemoryWarning() const {
   // to purge them.
 }
 
+void Shell::RunEngine(RunConfiguration run_configuration) {
+  RunEngine(std::move(run_configuration), nullptr);
+}
+
+void Shell::RunEngine(RunConfiguration run_configuration,
+                      std::function<void(Engine::RunStatus)> result_callback) {
+  auto result = [platform_runner = task_runners_.GetPlatformTaskRunner(),
+                 result_callback](Engine::RunStatus run_result) {
+    if (!result_callback) {
+      return;
+    }
+    platform_runner->PostTask(
+        [result_callback, run_result]() { result_callback(run_result); });
+  };
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  if (!weak_engine_) {
+    result(Engine::RunStatus::Failure);
+  }
+  fml::TaskRunner::RunNowOrPostTask(
+      task_runners_.GetUITaskRunner(),
+      fml::MakeCopyable(
+          [run_configuration = std::move(run_configuration),
+           weak_engine = weak_engine_, result]() mutable {
+            if (!weak_engine) {
+              FML_LOG(ERROR)
+                  << "Could not launch engine with configuration - no engine.";
+              result(Engine::RunStatus::Failure);
+              return;
+            }
+            auto run_result = weak_engine->Run(std::move(run_configuration));
+            if (run_result == flutter::Engine::RunStatus::Failure) {
+              FML_LOG(ERROR) << "Could not launch engine with configuration.";
+            }
+            result(run_result);
+          }));
+}
+
+std::optional<DartErrorCode> Shell::GetUIIsolateLastError() const {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  // We're using the unique_ptr here because we're sure we're on the Platform
+  // Thread and callers expect this to be synchronous.
+  if (!engine_) {
+    return std::nullopt;
+  }
+  switch (engine_->GetUIIsolateLastError()) {
+    case tonic::kCompilationErrorType:
+      return DartErrorCode::CompilationError;
+    case tonic::kApiErrorType:
+      return DartErrorCode::ApiError;
+    case tonic::kUnknownErrorType:
+      return DartErrorCode::UnknownError;
+    case tonic::kNoError:
+      return DartErrorCode::NoError;
+  }
+  return DartErrorCode::UnknownError;
+}
+
+bool Shell::EngineHasLivePorts() const {
+  FML_DCHECK(is_setup_);
+  FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
+
+  // We're using the unique_ptr here because we're sure we're on the Platform
+  // Thread and callers expect this to be synchronous.
+  if (!engine_) {
+    return false;
+  }
+  return engine_->UIIsolateHasLivePorts();
+}
+
 bool Shell::IsSetup() const {
   return is_setup_;
 }
@@ -425,10 +497,14 @@ fml::WeakPtr<Rasterizer> Shell::GetRasterizer() {
   return weak_rasterizer_;
 }
 
+// TODO(dnfield): Remove this when either Topaz is up to date or flutter_runner
+// is built out of this repo.
+#ifdef OS_FUCHSIA
 fml::WeakPtr<Engine> Shell::GetEngine() {
   FML_DCHECK(is_setup_);
   return weak_engine_;
 }
+#endif  // OS_FUCHSIA
 
 fml::WeakPtr<PlatformView> Shell::GetPlatformView() {
   FML_DCHECK(is_setup_);
@@ -907,7 +983,7 @@ void Shell::ReportTimings() {
 
   auto timings = std::move(unreported_timings_);
   unreported_timings_ = {};
-  task_runners_.GetUITaskRunner()->PostTask([timings, engine = GetEngine()] {
+  task_runners_.GetUITaskRunner()->PostTask([timings, engine = weak_engine_] {
     if (engine) {
       engine->ReportTimings(std::move(timings));
     }

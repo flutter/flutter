@@ -63,8 +63,6 @@
 
   int64_t _nextTextureId;
 
-  uint64_t _nextPointerFlowId;
-
   BOOL _allowHeadlessExecution;
   FlutterBinaryMessengerRelay* _binaryMessenger;
 }
@@ -126,24 +124,17 @@
 }
 
 - (void)updateViewportMetrics:(flutter::ViewportMetrics)viewportMetrics {
-  self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(
-      [engine = self.shell.GetEngine(), metrics = viewportMetrics]() {
-        if (engine) {
-          engine->SetViewportMetrics(std::move(metrics));
-        }
-      });
+  if (!self.platformView) {
+    return;
+  }
+  self.platformView->SetViewportMetrics(std::move(viewportMetrics));
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
-  TRACE_EVENT0("flutter", "dispatchPointerDataPacket");
-  TRACE_FLOW_BEGIN("flutter", "PointerEvent", _nextPointerFlowId);
-  self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = self.shell.GetEngine(), packet = std::move(packet), flow_id = _nextPointerFlowId] {
-        if (engine) {
-          engine->DispatchPointerDataPacket(*packet, flow_id);
-        }
-      }));
-  _nextPointerFlowId++;
+  if (!self.platformView) {
+    return;
+  }
+  self.platformView->DispatchPointerDataPacket(std::move(packet));
 }
 
 - (fml::WeakPtr<flutter::PlatformView>)platformView {
@@ -312,18 +303,8 @@
 
 - (void)launchEngine:(NSString*)entrypoint libraryURI:(NSString*)libraryOrNil {
   // Launch the Dart application with the inferred run configuration.
-  self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
-      [engine = _shell->GetEngine(),
-       config = [_dartProject.get() runConfigurationForEntrypoint:entrypoint
-                                                     libraryOrNil:libraryOrNil]  //
-  ]() mutable {
-        if (engine) {
-          auto result = engine->Run(std::move(config));
-          if (result == flutter::Engine::RunStatus::Failure) {
-            FML_LOG(ERROR) << "Could not launch engine with configuration.";
-          }
-        }
-      }));
+  self.shell.RunEngine([_dartProject.get() runConfigurationForEntrypoint:entrypoint
+                                                            libraryOrNil:libraryOrNil]);
 }
 
 - (BOOL)createShell:(NSString*)entrypoint libraryURI:(NSString*)libraryURI {

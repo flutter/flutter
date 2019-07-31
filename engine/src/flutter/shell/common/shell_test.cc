@@ -75,13 +75,14 @@ void ShellTest::PlatformViewNotifyCreated(Shell* shell) {
 void ShellTest::RunEngine(Shell* shell, RunConfiguration configuration) {
   fml::AutoResetWaitableEvent latch;
   fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(),
-      fml::MakeCopyable([&latch, config = std::move(configuration),
-                         engine = shell->GetEngine()]() mutable {
-        ASSERT_TRUE(engine);
-        ASSERT_EQ(engine->Run(std::move(config)), Engine::RunStatus::Success);
-        latch.Signal();
-      }));
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [shell, &latch, &configuration]() {
+        shell->RunEngine(std::move(configuration),
+                         [&latch](Engine::RunStatus run_status) {
+                           ASSERT_EQ(run_status, Engine::RunStatus::Success);
+                           latch.Signal();
+                         });
+      });
   latch.Wait();
 }
 
@@ -91,7 +92,7 @@ void ShellTest::PumpOneFrame(Shell* shell) {
   // won't be rasterized.
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, engine = shell->GetEngine()]() {
+      [&latch, engine = shell->weak_engine_]() {
         engine->SetViewportMetrics({1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0});
         engine->animator_->BeginFrame(fml::TimePoint::Now(),
                                       fml::TimePoint::Now());
@@ -101,7 +102,7 @@ void ShellTest::PumpOneFrame(Shell* shell) {
 
   latch.Reset();
   // Call |Render| to rasterize a layer tree and trigger |OnFrameRasterized|
-  fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->GetEngine();
+  fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->weak_engine_;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, runtime_delegate]() {
         auto layer_tree = std::make_unique<LayerTree>();

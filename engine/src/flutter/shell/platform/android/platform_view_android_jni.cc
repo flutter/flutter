@@ -276,7 +276,7 @@ static void SetViewportMetrics(JNIEnv* env,
       static_cast<double>(physicalViewInsetLeft),
   };
 
-  ANDROID_SHELL_HOLDER->SetViewportMetrics(metrics);
+  ANDROID_SHELL_HOLDER->GetPlatformView()->SetViewportMetrics(metrics);
 }
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong shell_holder) {
@@ -387,7 +387,8 @@ static void DispatchPointerDataPacket(JNIEnv* env,
                                       jint position) {
   uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
   auto packet = std::make_unique<flutter::PointerDataPacket>(data, position);
-  ANDROID_SHELL_HOLDER->DispatchPointerDataPacket(std::move(packet));
+  ANDROID_SHELL_HOLDER->GetPlatformView()->DispatchPointerDataPacket(
+      std::move(packet));
 }
 
 static void DispatchSemanticsAction(JNIEnv* env,

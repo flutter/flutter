@@ -20,6 +20,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter {
 
@@ -30,35 +31,20 @@ class ScriptCompletionTaskObserver {
   ScriptCompletionTaskObserver(Shell& shell,
                                fml::RefPtr<fml::TaskRunner> main_task_runner,
                                bool run_forever)
-      : engine_(shell.GetEngine()),
+      : shell_(shell),
         main_task_runner_(std::move(main_task_runner)),
         run_forever_(run_forever) {}
 
   int GetExitCodeForLastError() const {
-    // Exit codes used by the Dart command line tool.
-    const int kApiErrorExitCode = 253;
-    const int kCompilationErrorExitCode = 254;
-    const int kErrorExitCode = 255;
-    switch (last_error_) {
-      case tonic::kCompilationErrorType:
-        return kCompilationErrorExitCode;
-      case tonic::kApiErrorType:
-        return kApiErrorExitCode;
-      case tonic::kUnknownErrorType:
-        return kErrorExitCode;
-      default:
-        return 0;
-    }
+    return static_cast<int>(last_error_.value_or(DartErrorCode::NoError));
   }
 
   void DidProcessTask() {
-    if (engine_) {
-      last_error_ = engine_->GetUIIsolateLastError();
-      if (engine_->UIIsolateHasLivePorts()) {
-        // The UI isolate still has live ports and is running. Nothing to do
-        // just yet.
-        return;
-      }
+    last_error_ = shell_.GetUIIsolateLastError();
+    if (shell_.EngineHasLivePorts()) {
+      // The UI isolate still has live ports and is running. Nothing to do
+      // just yet.
+      return;
     }
 
     if (run_forever_) {
@@ -76,10 +62,10 @@ class ScriptCompletionTaskObserver {
   }
 
  private:
-  fml::WeakPtr<Engine> engine_;
+  Shell& shell_;
   fml::RefPtr<fml::TaskRunner> main_task_runner_;
   bool run_forever_ = false;
-  tonic::DartErrorHandleType last_error_ = tonic::kUnknownErrorType;
+  std::optional<DartErrorCode> last_error_;
   bool has_terminated = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ScriptCompletionTaskObserver);
@@ -175,47 +161,30 @@ int RunTester(const flutter::Settings& settings, bool run_forever) {
 
   bool engine_did_run = false;
 
-  fml::AutoResetWaitableEvent sync_run_latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(),
-      fml::MakeCopyable([&sync_run_latch, &completion_observer,
-                         engine = shell->GetEngine(),
-                         config = std::move(run_configuration),
-                         &engine_did_run]() mutable {
-        fml::MessageLoop::GetCurrent().AddTaskObserver(
-            reinterpret_cast<intptr_t>(&completion_observer),
-            [&completion_observer]() { completion_observer.DidProcessTask(); });
-        if (engine->Run(std::move(config)) !=
-            flutter::Engine::RunStatus::Failure) {
-          engine_did_run = true;
+  fml::MessageLoop::GetCurrent().AddTaskObserver(
+      reinterpret_cast<intptr_t>(&completion_observer),
+      [&completion_observer]() { completion_observer.DidProcessTask(); });
 
-          flutter::ViewportMetrics metrics;
-          metrics.device_pixel_ratio = 3.0;
-          metrics.physical_width = 2400;   // 800 at 3x resolution
-          metrics.physical_height = 1800;  // 600 at 3x resolution
-          engine->SetViewportMetrics(metrics);
+  shell->RunEngine(std::move(run_configuration),
+                   [&engine_did_run](Engine::RunStatus run_status) mutable {
+                     if (run_status != flutter::Engine::RunStatus::Failure) {
+                       engine_did_run = true;
+                     }
+                   });
 
-        } else {
-          FML_DLOG(ERROR) << "Could not launch the engine with configuration.";
-        }
-        sync_run_latch.Signal();
-      }));
-  sync_run_latch.Wait();
+  flutter::ViewportMetrics metrics;
+  metrics.device_pixel_ratio = 3.0;
+  metrics.physical_width = 2400;   // 800 at 3x resolution
+  metrics.physical_height = 1800;  // 600 at 3x resolution
+  shell->GetPlatformView()->SetViewportMetrics(metrics);
 
   // Run the message loop and wait for the script to do its thing.
   fml::MessageLoop::GetCurrent().Run();
 
   // Cleanup the completion observer synchronously as it is living on the
   // stack.
-  fml::AutoResetWaitableEvent latch;
-  fml::TaskRunner::RunNowOrPostTask(
-      shell->GetTaskRunners().GetUITaskRunner(),
-      [&latch, &completion_observer] {
-        fml::MessageLoop::GetCurrent().RemoveTaskObserver(
-            reinterpret_cast<intptr_t>(&completion_observer));
-        latch.Signal();
-      });
-  latch.Wait();
+  fml::MessageLoop::GetCurrent().RemoveTaskObserver(
+      reinterpret_cast<intptr_t>(&completion_observer));
 
   if (!engine_did_run) {
     // If the engine itself didn't have a chance to run, there is no point in

@@ -30,11 +30,6 @@ class AndroidShellHolder {
 
   void Launch(RunConfiguration configuration);
 
-  void SetViewportMetrics(const flutter::ViewportMetrics& metrics);
-
-  void DispatchPointerDataPacket(
-      std::unique_ptr<flutter::PointerDataPacket> packet);
-
   const flutter::Settings& GetSettings() const;
 
   fml::WeakPtr<PlatformViewAndroid> GetPlatformView();
