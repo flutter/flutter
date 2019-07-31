@@ -50,18 +50,18 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     return tonic::ToDart("Image decoder not available.");
   }
 
-  auto raw_codec_wrapper = new DartPersistentValue(
-      dart_state, Dart_HandleFromWeakPersistent(dart_wrapper()));
+  // The SingleFrameCodec must be deleted on the UI thread.  Allocate a RefPtr
+  // on the heap to ensure that the SingleFrameCodec remains alive until the
+  // decoder callback is invoked on the UI thread.  The callback can then
+  // drop the reference.
+  fml::RefPtr<SingleFrameCodec>* raw_codec_ref =
+      new fml::RefPtr<SingleFrameCodec>(this);
 
-  // We dont want to to put the raw codec in a lambda capture because we have
-  // to mutate (i.e destroy) it in the callback. Using MakeCopyable will create
-  // a shared pointer for the captures which can be destroyed on any thread. But
-  // we have to ensure that the DartPersistentValue is only destroyed on the UI
-  // thread.
-  decoder->Decode(descriptor_, [raw_codec_wrapper](auto image) {
-    std::unique_ptr<DartPersistentValue> codec_wrapper(raw_codec_wrapper);
+  decoder->Decode(descriptor_, [raw_codec_ref](auto image) {
+    std::unique_ptr<fml::RefPtr<SingleFrameCodec>> codec_ref(raw_codec_ref);
+    fml::RefPtr<SingleFrameCodec> codec(std::move(*codec_ref));
 
-    auto state = codec_wrapper->dart_state().lock();
+    auto state = codec->pending_callbacks_.front().dart_state().lock();
 
     if (!state) {
       // This is probably because the isolate has been terminated before the
@@ -71,9 +71,6 @@ Dart_Handle SingleFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     }
 
     tonic::DartState::Scope scope(state.get());
-
-    SingleFrameCodec* codec = tonic::DartConverter<SingleFrameCodec*>::FromDart(
-        codec_wrapper->value());
 
     if (image.get()) {
       auto canvas_image = fml::MakeRefCounted<CanvasImage>();
