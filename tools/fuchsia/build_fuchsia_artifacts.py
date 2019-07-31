@@ -156,13 +156,6 @@ def ProcessCIPDPakcage(upload, engine_version):
     ]
 
   subprocess.check_call(command, cwd=_bucket_directory)
-  if upload and IsLinux():
-    stamp_file_path = os.path.join(_script_dir, 'fuchsia.stamp')
-    stamp_file = open(stamp_file_path, 'w')
-    stamp_file.write('https://chrome-infra-packages.appspot.com/p/flutter/fuchsia/+/git_revision:%s' % engine_version)
-    stamp_file.close()
-    subprocess.check_call(['gsutil', 'cp', 'gs://flutter_infra/flutter/%s/fuchsia.stamp' % engine_version, stamp_file_path])
-
 
 def GetRunnerTarget(runner_type, product, aot):
   base = 'flutter/shell/platform/fuchsia/%s:' % runner_type
