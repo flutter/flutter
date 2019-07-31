@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -226,7 +226,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesNumberPlugins, '0'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesNumberPlugins, '0'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that the project is not a module in usage value', () async {
@@ -237,7 +238,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'false'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesProjectModule, 'false'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that the project is a module in usage value', () async {
@@ -248,7 +250,8 @@ void main() {
       final PackagesCommand command = await runCommandIn(projectPath, 'get');
       final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
 
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'true'));
+      expect(await getCommand.usageValues,
+             containsPair(CustomDimensions.commandPackagesProjectModule, 'true'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {

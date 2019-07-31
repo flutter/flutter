@@ -2865,7 +2865,6 @@ void main() {
           'input_decorator.outline_icon_label.ltr.png',
           version: null,
         ),
-        skip: !isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
@@ -2875,10 +2874,8 @@ void main() {
           'input_decorator.outline_icon_label.rtl.png',
           version: null,
         ),
-        skip: !isLinux,
       );
     },
-    skip: !isLinux,
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {

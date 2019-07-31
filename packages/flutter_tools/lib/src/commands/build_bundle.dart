@@ -10,7 +10,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
 import 'build.dart';
 
@@ -41,10 +41,6 @@ class BuildBundleCommand extends BuildSubCommand {
           'windows-x64',
         ],
       )
-      ..addFlag('track-widget-creation',
-        hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
-      )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
@@ -59,6 +55,7 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+    usesTrackWidgetCreation(verboseHelp: verboseHelp);
 
     bundleBuilder ??= BundleBuilder();
   }
@@ -77,17 +74,15 @@ class BuildBundleCommand extends BuildSubCommand {
       ' iOS runtimes.';
 
   @override
-  Future<Map<String, String>> get usageValues async {
+  Future<Map<CustomDimensions, String>> get usageValues async {
     final String projectDir = fs.file(targetFile).parent.parent.path;
     final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
-
     if (futterProject == null) {
-      return const <String, String>{};
+      return const <CustomDimensions, String>{};
     }
-
-    return <String, String>{
-      kCommandBuildBundleTargetPlatform: argResults['target-platform'],
-      kCommandBuildBundleIsModule: '${futterProject.isModule}'
+    return <CustomDimensions, String>{
+      CustomDimensions.commandBuildBundleTargetPlatform: argResults['target-platform'],
+      CustomDimensions.commandBuildBundleIsModule: '${futterProject.isModule}'
     };
   }
 

@@ -13,15 +13,15 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -91,7 +91,6 @@ void testUsingContext(
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
-
           return runZoned<Future<dynamic>>(() {
             try {
               return context.run<dynamic>(
@@ -105,7 +104,6 @@ void testUsingContext(
                     // tests can override this either in the test or during setup.
                     Cache.flutterRoot ??= flutterRoot;
                   }
-
                   return await testMethod();
                 },
               );

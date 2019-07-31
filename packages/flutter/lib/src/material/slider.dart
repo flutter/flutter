@@ -698,7 +698,7 @@ class _RenderSlider extends RenderBox {
   // other than the track shape. It is assumed that these shapes are vertically
   // centered on the track.
   double get _maxSliderPartWidth => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
-  double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.width).reduce(math.max);
+  double get _maxSliderPartHeight => _sliderPartSizes.map((Size size) => size.height).reduce(math.max);
   List<Size> get _sliderPartSizes => <Size>[
     _sliderTheme.overlayShape.getPreferredSize(isInteractive, isDiscrete),
     _sliderTheme.thumbShape.getPreferredSize(isInteractive, isDiscrete),

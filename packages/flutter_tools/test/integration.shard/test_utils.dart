@@ -51,6 +51,5 @@ Future<void> getPackages(String folder) async {
   process.stderr.transform(utf8.decoder).listen(errorOutput.write);
   final int exitCode = await process.exitCode;
   if (exitCode != 0)
-    throw Exception(
-        'flutter pub get failed: ${errorOutput.toString()}');
+    throw Exception('flutter pub get failed: $errorOutput');
 }

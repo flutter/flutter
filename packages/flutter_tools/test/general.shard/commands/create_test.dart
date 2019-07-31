@@ -100,6 +100,7 @@ void main() {
       '.android/app/',
       '.gitignore',
       '.ios/Flutter',
+      '.ios/Flutter/flutter_project.podspec',
       '.metadata',
       'lib/main.dart',
       'pubspec.yaml',
@@ -545,6 +546,23 @@ void main() {
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
+
+    // Generated export environment variables script
+    final String buildPhaseScriptPath = fs.path.join('.ios', 'Flutter', 'flutter_export_environment.sh');
+    expectExists(buildPhaseScriptPath);
+    final File buildPhaseScriptFile = fs.file(fs.path.join(projectDir.path, buildPhaseScriptPath));
+    final String buildPhaseScript = buildPhaseScriptFile.readAsStringSync();
+    expect(buildPhaseScript, contains('FLUTTER_ROOT='));
+    expect(buildPhaseScript, contains('FLUTTER_APPLICATION_PATH='));
+    expect(buildPhaseScript, contains('FLUTTER_TARGET='));
+
+    // Generated podspec
+    final String podspecPath = fs.path.join('.ios', 'Flutter', 'flutter_project.podspec');
+    expectExists(podspecPath);
+    final File podspecFile = fs.file(fs.path.join(projectDir.path, podspecPath));
+    final String podspec = podspecFile.readAsStringSync();
+    expect(podspec, contains('Flutter module - flutter_project'));
+
     // App identification
     final String xcodeProjectPath = fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);

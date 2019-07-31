@@ -5,9 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,6 +12,8 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 

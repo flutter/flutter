@@ -14,84 +14,87 @@ import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
 void main() {
-  group('unpack_windows', () {
-    Testbed testbed;
-    BuildSystem buildSystem;
-    Environment environment;
-    Platform platform;
+  Testbed testbed;
+  const BuildSystem buildSystem = BuildSystem();
+  Environment environment;
+  Platform platform;
 
-    setUpAll(() {
-      Cache.disableLocking();
-    });
-
-    setUp(() {
-      Cache.flutterRoot = '';
-      platform = MockPlatform();
-      when(platform.isWindows).thenReturn(true);
-      when(platform.isMacOS).thenReturn(false);
-      when(platform.isLinux).thenReturn(false);
-      when(platform.pathSeparator).thenReturn(r'\');
-      testbed = Testbed(setup: () {
-        environment = Environment(
-          projectDir: fs.currentDirectory,
-        );
-        buildSystem = BuildSystem(<String, Target>{
-          unpackWindows.name: unpackWindows,
-        });
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.exp').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.lib').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.pdb').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\lutter_export.h').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_plugin_registrar.h').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_glfw.h').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat').createSync();
-        fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
-        fs.directory('windows').createSync();
-      }, overrides: <Type, Generator>{
-        FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-        Platform: () => platform,
-      });
-    });
-
-    test('Copies files to correct cache directory', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
-
-      expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_windows.dll').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.exp').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.lib').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.pdb').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_plugin_registrar.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\flutter_glfw.h').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\icudtl.dat').existsSync(), true);
-      expect(fs.file(r'C:\windows\flutter\cpp_client_wrapper\foo').existsSync(), true);
-    }));
-
-    test('Does not re-copy files unecessarily', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
-      final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
-      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
-
-      expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, equals(modified));
-    }));
-
-    test('Detects changes in input cache files', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
-      final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
-      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
-
-      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
-
-      expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, isNot(modified));
-    }), skip: true); // TODO(jonahwilliams): track down flakiness.
+  setUpAll(() {
+    Cache.disableLocking();
+    Cache.flutterRoot = '';
   });
+
+  setUp(() {
+    platform = MockPlatform();
+    when(platform.isWindows).thenReturn(true);
+    when(platform.isMacOS).thenReturn(false);
+    when(platform.isLinux).thenReturn(false);
+    when(platform.pathSeparator).thenReturn(r'\');
+    testbed = Testbed(setup: () {
+      environment = Environment(
+        projectDir: fs.currentDirectory,
+      );
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.exp').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.lib').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_windows.dll.pdb').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\lutter_export.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_plugin_registrar.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_glfw.h').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\icudtl.dat').createSync();
+      fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\cpp_client_wrapper\foo').createSync(recursive: true);
+      fs.file(r'C:\packages\flutter_tools\lib\src\build_system\targets\windows.dart').createSync(recursive: true);
+      fs.directory('windows').createSync();
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+      Platform: () => platform,
+    });
+  });
+
+  test('Copies files to correct cache directory', () => testbed.run(() async {
+    await buildSystem.build(const UnpackWindows(), environment);
+
+    expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.exp').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.lib').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_windows.dll.pdb').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_plugin_registrar.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\flutter_glfw.h').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\icudtl.dat').existsSync(), true);
+    expect(fs.file(r'C:\windows\flutter\cpp_client_wrapper\foo').existsSync(), true);
+  }));
+
+  test('Does not re-copy files unecessarily', () => testbed.run(() async {
+    await buildSystem.build(const UnpackWindows(), environment);
+    // Set a date in the far distant past to deal with the limited resolution
+    // of the windows filesystem.
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    fs.file(r'C:\windows\flutter\flutter_export.h').setLastModifiedSync(theDistantPast);
+    await buildSystem.build(const UnpackWindows(), environment);
+
+    expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, equals(theDistantPast));
+  }));
+
+  test('Detects changes in input cache files', () => testbed.run(() async {
+    await buildSystem.build(const UnpackWindows(), environment);
+    // Set a date in the far distant past to deal with the limited resolution
+    // of the windows filesystem.
+    final DateTime theDistantPast = DateTime(1991, 8, 23);
+    fs.file(r'C:\windows\flutter\flutter_export.h').setLastModifiedSync(theDistantPast);
+    final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
+    fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
+
+    await buildSystem.build(const UnpackWindows(), environment);
+
+    expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, isNot(modified));
+  }));
 }
 
 class MockPlatform extends Mock implements Platform {}

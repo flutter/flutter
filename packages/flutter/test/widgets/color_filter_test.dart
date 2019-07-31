@@ -21,7 +21,6 @@ void main() {
         'color_filter_red.png',
         version: 1,
       ),
-      skip: !isLinux
     );
   });
 
@@ -63,7 +62,6 @@ void main() {
         'color_filter_sepia.png',
         version: 1,
       ),
-      skip: !isLinux
     );
   });
 }

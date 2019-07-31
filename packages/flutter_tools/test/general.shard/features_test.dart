@@ -78,19 +78,33 @@ void main() {
     }));
 
     test('flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter Web on master, dev channels.');
+      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter for web. This setting will take effect on the master and dev channels.');
     });
 
     test('flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for macOS on the master channel.');
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on macOS. This setting will take effect on the master channel.');
     });
 
     test('flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Linux on the master channel.');
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Linux. This setting will take effect on the master channel.');
     });
 
     test('flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter Desktop for Windows on the master channel.');
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Windows. This setting will take effect on the master channel.');
+    });
+
+    test('help string on multiple channels', () {
+      const Feature testFeature = Feature(
+        name: 'example',
+        master: FeatureChannelSetting(available: true),
+        dev: FeatureChannelSetting(available: true),
+        beta: FeatureChannelSetting(available: true),
+        stable: FeatureChannelSetting(available: true),
+        configSetting: 'foo',
+      );
+
+      expect(testFeature.generateHelpMessage(), 'Enable or disable example. '
+          'This setting will take effect on the master, dev, beta, and stable channels.');
     });
 
     /// Flutter Web
@@ -417,6 +431,21 @@ void main() {
       when(mockPlatform.environment).thenReturn(<String, String>{'ENABLE_FLUTTER_DESKTOP': 'true'});
 
       expect(featureFlags.isWindowsEnabled, false);
+    }));
+
+    /// Plugins as AARS
+    test('plugins built as AARs with config on master', () => testbed.run(() {
+      when(mockFlutterVerion.channel).thenReturn('master');
+      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(false);
+
+      expect(featureFlags.isPluginAsAarEnabled, false);
+    }));
+
+    test('plugins built as AARs with config on dev', () => testbed.run(() {
+      when(mockFlutterVerion.channel).thenReturn('dev');
+      when<bool>(mockFlutterConfig.getValue('enable-build-plugin-as-aar')).thenReturn(false);
+
+      expect(featureFlags.isPluginAsAarEnabled, false);
     }));
   });
 }

@@ -1,0 +1,22 @@
+{
+  "datePickerHourSemanticsLabelOne": "$hour बजे",
+  "datePickerHourSemanticsLabelOther": "$hour बजे",
+  "datePickerMinuteSemanticsLabelOne": "१ मिनेट",
+  "datePickerMinuteSemanticsLabelOther": "$minute मिनेट",
+  "datePickerDateOrder": "mdy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "पूर्वाह्न",
+  "postMeridiemAbbreviation": "अपराह्न",
+  "todayLabel": "आज",
+  "alertDialogLabel": "अलर्ट",
+  "timerPickerHourLabelOne": "घन्टा",
+  "timerPickerHourLabelOther": "घन्टा",
+  "timerPickerMinuteLabelOne": "मिनेट",
+  "timerPickerMinuteLabelOther": "मिनेट",
+  "timerPickerSecondLabelOne": "सेकेन्ड",
+  "timerPickerSecondLabelOther": "सेकेन्ड",
+  "cutButtonLabel": "काट्नुहोस्",
+  "copyButtonLabel": "प्रतिलिपि गर्नुहोस्",
+  "pasteButtonLabel": "टाँस्नुहोस्",
+  "selectAllButtonLabel": "सबै चयन गर्नुहोस्"
+}

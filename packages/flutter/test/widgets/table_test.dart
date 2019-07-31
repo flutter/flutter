@@ -376,6 +376,36 @@ void main() {
     // If the above bug is present this test will never terminate.
   });
 
+  testWidgets('Calculating flex columns with small width deficit', (WidgetTester tester) async {
+    const SizedBox cell = SizedBox(width: 1, height: 1);
+    // If the error is present, pumpWidget() will fail due to an unsatisfied
+    // assertion during the layout phase.
+    await tester.pumpWidget(
+      ConstrainedBox(
+        constraints: BoxConstraints.tight(const Size(600, 800)),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Table(
+            columnWidths: const <int, TableColumnWidth>{
+              0: FlexColumnWidth(1.0),
+              1: FlexColumnWidth(0.123),
+              2: FlexColumnWidth(0.123),
+              3: FlexColumnWidth(0.123),
+              4: FlexColumnWidth(0.123),
+              5: FlexColumnWidth(0.123),
+              6: FlexColumnWidth(0.123),
+            },
+            children: <TableRow>[
+              TableRow(children: List<Widget>.filled(7, cell)),
+              TableRow(children: List<Widget>.filled(7, cell)),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Table widget - repump test', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

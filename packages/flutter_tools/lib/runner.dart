@@ -19,8 +19,7 @@ import 'src/base/utils.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/reporting/crash_reporting.dart';
-import 'src/reporting/usage.dart';
+import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/version.dart';
@@ -115,6 +114,7 @@ Future<int> _handleToolError(
         error: error,
         stackTrace: stackTrace,
         getFlutterVersion: getFlutterVersion,
+        command: args.join(' '),
       );
 
       if (error is String)

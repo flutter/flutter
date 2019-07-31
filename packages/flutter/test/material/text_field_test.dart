@@ -416,7 +416,7 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -448,7 +448,7 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -501,7 +501,6 @@ void main() {
         'text_field_opacity_test.0.png',
         version: 2,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 

@@ -481,7 +481,7 @@ void main() {
         version: 2,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -514,7 +514,7 @@ void main() {
         version: 2,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets(
     'can control text content via controller',
@@ -2901,7 +2901,6 @@ void main() {
         'text_field_test.disabled.png',
         version: 0,
       ),
-      skip: !isLinux,
     );
   });
 

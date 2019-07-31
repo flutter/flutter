@@ -12,19 +12,9 @@ void main() {
   test('Exceptions', () {
     final MissingInputException missingInputException = MissingInputException(
         <File>[fs.file('foo'), fs.file('bar')], 'example');
-    final CycleException cycleException = CycleException(const <Target>{
-      Target(
-        name: 'foo',
-        buildAction: null,
-        inputs: <Source>[],
-        outputs: <Source>[],
-      ),
-      Target(
-        name: 'bar',
-        buildAction: null,
-        inputs: <Source>[],
-        outputs: <Source>[],
-      )
+    final CycleException cycleException = CycleException(<Target>{
+      TestTarget()..name = 'foo',
+      TestTarget()..name = 'bar',
     });
     final InvalidPatternException invalidPatternException = InvalidPatternException(
       'ABC'
@@ -69,4 +59,25 @@ void main() {
         'Target example required define foobar but it was not provided'
     );
   });
+}
+
+class TestTarget extends Target {
+  TestTarget([this._build]);
+
+  final Future<void> Function(List<File> inputFiles, Environment environment) _build;
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) => _build(inputFiles, environment);
+
+  @override
+  List<Target> dependencies = <Target>[];
+
+  @override
+  List<Source> inputs = <Source>[];
+
+  @override
+  String name = 'test';
+
+  @override
+  List<Source> outputs = <Source>[];
 }

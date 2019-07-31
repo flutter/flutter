@@ -24,10 +24,13 @@ import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'page_transitions_theme.dart';
+import 'popup_menu_theme.dart';
 import 'slider_theme.dart';
 import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_theme.dart';
+import 'toggle_buttons_theme.dart';
+import 'tooltip_theme.dart';
 import 'typography.dart';
 
 export 'package:flutter/services.dart' show Brightness;
@@ -136,6 +139,7 @@ class ThemeData extends Diagnosticable {
     Color disabledColor,
     Color buttonColor,
     ButtonThemeData buttonTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
     Color secondaryHeaderColor,
     Color textSelectionColor,
     Color cursorColor,
@@ -156,6 +160,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    TooltipThemeData tooltipTheme,
     CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
@@ -171,6 +176,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
   }) {
     brightness ??= Brightness.light;
@@ -253,12 +259,14 @@ class ThemeData extends Diagnosticable {
       splashColor: splashColor,
       materialTapTargetSize: materialTapTargetSize,
     );
+    toggleButtonsTheme ??= const ToggleButtonsThemeData();
     disabledColor ??= isDark ? Colors.white38 : Colors.black38;
     highlightColor ??= isDark ? _kDarkThemeHighlightColor : _kLightThemeHighlightColor;
     splashColor ??= isDark ? _kDarkThemeSplashColor : _kLightThemeSplashColor;
 
     sliderTheme ??= const SliderThemeData();
     tabBarTheme ??= const TabBarTheme();
+    tooltipTheme ??= const TooltipThemeData();
     appBarTheme ??= const AppBarTheme();
     bottomAppBarTheme ??= const BottomAppBarTheme();
     cardTheme ??= const CardTheme();
@@ -272,6 +280,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
+    popupMenuTheme ??= const PopupMenuThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
 
     return ThemeData.raw(
@@ -297,6 +306,7 @@ class ThemeData extends Diagnosticable {
       disabledColor: disabledColor,
       buttonTheme: buttonTheme,
       buttonColor: buttonColor,
+      toggleButtonsTheme: toggleButtonsTheme,
       toggleableActiveColor: toggleableActiveColor,
       secondaryHeaderColor: secondaryHeaderColor,
       textSelectionColor: textSelectionColor,
@@ -316,6 +326,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme,
       sliderTheme: sliderTheme,
       tabBarTheme: tabBarTheme,
+      tooltipTheme: tooltipTheme,
       cardTheme: cardTheme,
       chipTheme: chipTheme,
       platform: platform,
@@ -331,6 +342,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
+      popupMenuTheme: popupMenuTheme,
       bannerTheme: bannerTheme,
     );
   }
@@ -368,6 +380,7 @@ class ThemeData extends Diagnosticable {
     @required this.disabledColor,
     @required this.buttonTheme,
     @required this.buttonColor,
+    @required this.toggleButtonsTheme,
     @required this.secondaryHeaderColor,
     @required this.textSelectionColor,
     @required this.cursorColor,
@@ -387,6 +400,7 @@ class ThemeData extends Diagnosticable {
     @required this.accentIconTheme,
     @required this.sliderTheme,
     @required this.tabBarTheme,
+    @required this.tooltipTheme,
     @required this.cardTheme,
     @required this.chipTheme,
     @required this.platform,
@@ -402,6 +416,7 @@ class ThemeData extends Diagnosticable {
     @required this.cupertinoOverrideTheme,
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
+    @required this.popupMenuTheme,
     @required this.bannerTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
@@ -425,6 +440,7 @@ class ThemeData extends Diagnosticable {
        assert(disabledColor != null),
        assert(toggleableActiveColor != null),
        assert(buttonTheme != null),
+       assert(toggleButtonsTheme != null),
        assert(secondaryHeaderColor != null),
        assert(textSelectionColor != null),
        assert(cursorColor != null),
@@ -443,6 +459,7 @@ class ThemeData extends Diagnosticable {
        assert(accentIconTheme != null),
        assert(sliderTheme != null),
        assert(tabBarTheme != null),
+       assert(tooltipTheme != null),
        assert(cardTheme != null),
        assert(chipTheme != null),
        assert(platform != null),
@@ -456,6 +473,7 @@ class ThemeData extends Diagnosticable {
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
+       assert(popupMenuTheme != null),
        assert(bannerTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
@@ -593,6 +611,9 @@ class ThemeData extends Diagnosticable {
   /// and [FlatButton].
   final ButtonThemeData buttonTheme;
 
+  /// Defines the default configuration of [ToggleButtons] widgets.
+  final ToggleButtonsThemeData toggleButtonsTheme;
+
   /// The default fill color of the [Material] used in [RaisedButton]s.
   final Color buttonColor;
 
@@ -664,12 +685,17 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the size, shape, and color of the tab bar indicator.
   final TabBarTheme tabBarTheme;
 
+  /// A theme for customizing the visual properties of [Tooltip]s.
+  ///
+  /// This is the value returned from [TooltipTheme.of].
+  final TooltipThemeData tooltipTheme;
+
   /// The colors and styles used to render [Card].
   ///
   /// This is the value returned from [CardTheme.of].
   final CardTheme cardTheme;
 
-  /// The colors and styles used to render [Chip], [
+  /// The colors and styles used to render [Chip]s.
   ///
   /// This is the value returned from [ChipTheme.of].
   final ChipThemeData chipTheme;
@@ -774,6 +800,10 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
 
+  /// A theme for customizing the color, shape, elevation, and text style of
+  /// popup menus.
+  final PopupMenuThemeData popupMenuTheme;
+
   /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData bannerTheme;
 
@@ -800,6 +830,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
+    ToggleButtonsTheme toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
@@ -820,6 +851,7 @@ class ThemeData extends Diagnosticable {
     IconThemeData accentIconTheme,
     SliderThemeData sliderTheme,
     TabBarTheme tabBarTheme,
+    TooltipThemeData tooltipTheme,
     CardTheme cardTheme,
     ChipThemeData chipTheme,
     TargetPlatform platform,
@@ -835,6 +867,7 @@ class ThemeData extends Diagnosticable {
     CupertinoThemeData cupertinoOverrideTheme,
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
+    PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -861,6 +894,7 @@ class ThemeData extends Diagnosticable {
       disabledColor: disabledColor ?? this.disabledColor,
       buttonColor: buttonColor ?? this.buttonColor,
       buttonTheme: buttonTheme ?? this.buttonTheme,
+      toggleButtonsTheme: toggleButtonsTheme ?? this.toggleButtonsTheme,
       secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
       textSelectionColor: textSelectionColor ?? this.textSelectionColor,
       cursorColor: cursorColor ?? this.cursorColor,
@@ -880,6 +914,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: accentIconTheme ?? this.accentIconTheme,
       sliderTheme: sliderTheme ?? this.sliderTheme,
       tabBarTheme: tabBarTheme ?? this.tabBarTheme,
+      tooltipTheme: tooltipTheme ?? this.tooltipTheme,
       cardTheme: cardTheme ?? this.cardTheme,
       chipTheme: chipTheme ?? this.chipTheme,
       platform: platform ?? this.platform,
@@ -895,6 +930,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
+      popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
     );
   }
@@ -998,6 +1034,7 @@ class ThemeData extends Diagnosticable {
       unselectedWidgetColor: Color.lerp(a.unselectedWidgetColor, b.unselectedWidgetColor, t),
       disabledColor: Color.lerp(a.disabledColor, b.disabledColor, t),
       buttonTheme: t < 0.5 ? a.buttonTheme : b.buttonTheme,
+      toggleButtonsTheme: ToggleButtonsThemeData.lerp(a.toggleButtonsTheme, b.toggleButtonsTheme, t),
       buttonColor: Color.lerp(a.buttonColor, b.buttonColor, t),
       secondaryHeaderColor: Color.lerp(a.secondaryHeaderColor, b.secondaryHeaderColor, t),
       textSelectionColor: Color.lerp(a.textSelectionColor, b.textSelectionColor, t),
@@ -1018,6 +1055,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme: IconThemeData.lerp(a.accentIconTheme, b.accentIconTheme, t),
       sliderTheme: SliderThemeData.lerp(a.sliderTheme, b.sliderTheme, t),
       tabBarTheme: TabBarTheme.lerp(a.tabBarTheme, b.tabBarTheme, t),
+      tooltipTheme: TooltipThemeData.lerp(a.tooltipTheme, b.tooltipTheme, t),
       cardTheme: CardTheme.lerp(a.cardTheme, b.cardTheme, t),
       chipTheme: ChipThemeData.lerp(a.chipTheme, b.chipTheme, t),
       platform: t < 0.5 ? a.platform : b.platform,
@@ -1033,6 +1071,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
+      popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
     );
   }
@@ -1065,6 +1104,7 @@ class ThemeData extends Diagnosticable {
            (otherData.disabledColor == disabledColor) &&
            (otherData.buttonTheme == buttonTheme) &&
            (otherData.buttonColor == buttonColor) &&
+           (otherData.toggleButtonsTheme == toggleButtonsTheme) &&
            (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
            (otherData.textSelectionColor == textSelectionColor) &&
            (otherData.cursorColor == cursorColor) &&
@@ -1084,6 +1124,7 @@ class ThemeData extends Diagnosticable {
            (otherData.accentIconTheme == accentIconTheme) &&
            (otherData.sliderTheme == sliderTheme) &&
            (otherData.tabBarTheme == tabBarTheme) &&
+           (otherData.tooltipTheme == tooltipTheme) &&
            (otherData.cardTheme == cardTheme) &&
            (otherData.chipTheme == chipTheme) &&
            (otherData.platform == platform) &&
@@ -1099,6 +1140,7 @@ class ThemeData extends Diagnosticable {
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
+           (otherData.popupMenuTheme == popupMenuTheme) &&
            (otherData.bannerTheme == bannerTheme);
   }
 
@@ -1130,6 +1172,7 @@ class ThemeData extends Diagnosticable {
       disabledColor,
       buttonTheme,
       buttonColor,
+      toggleButtonsTheme,
       toggleableActiveColor,
       secondaryHeaderColor,
       textSelectionColor,
@@ -1149,6 +1192,7 @@ class ThemeData extends Diagnosticable {
       accentIconTheme,
       sliderTheme,
       tabBarTheme,
+      tooltipTheme,
       cardTheme,
       chipTheme,
       platform,
@@ -1164,6 +1208,7 @@ class ThemeData extends Diagnosticable {
       cupertinoOverrideTheme,
       snackBarTheme,
       bottomSheetTheme,
+      popupMenuTheme,
       bannerTheme,
     ];
     return hashList(values);
@@ -1203,6 +1248,7 @@ class ThemeData extends Diagnosticable {
     properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor));
     properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
     properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme));
     properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme));
     properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
     properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
@@ -1212,6 +1258,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
     properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
     properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
+    properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme));
     properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
     properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
@@ -1226,6 +1273,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
+    properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
   }
 }

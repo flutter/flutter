@@ -37,8 +37,7 @@ void main() {
         'shadow.BoxDecoration.enabled.png',
         version: null,
       ),
-      skip: !isLinux
-    ); // shadows render differently on different platforms
+    );
     debugDisableShadows = true;
   }, skip: isBrowser);
 
@@ -70,7 +69,7 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  });
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -107,8 +106,7 @@ void main() {
         'shadow.PhysicalModel.enabled.png',
         version: null,
       ),
-      skip: !isLinux,
-    ); // shadows render differently on different platforms
+    );
     debugDisableShadows = true;
   }, skip: isBrowser);
 
@@ -144,5 +142,5 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  });
 }
