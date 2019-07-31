@@ -1022,8 +1022,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const TooltipTheme(
+      const MaterialApp(
+        home: TooltipTheme(
           data: TooltipThemeData(),
           child: Center(
             child: Tooltip(
@@ -1100,8 +1100,8 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: const TooltipTheme(
+      const MaterialApp(
+        home: TooltipTheme(
           data: TooltipThemeData(excludeFromSemantics: true),
           child: Center(
             child: Tooltip(
