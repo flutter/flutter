@@ -52,6 +52,7 @@ void main() {
     // DevFS Mocks
     when(mockDevFS.lastCompiled).thenReturn(DateTime(2000));
     when(mockDevFS.sources).thenReturn(<Uri>[]);
+    when(mockDevFS.baseUri).thenReturn(Uri());
     when(mockDevFS.destroy()).thenAnswer((Invocation invocation) async { });
     when(mockDevFS.assetPathsToEvict).thenReturn(<String>{});
     // FlutterDevice Mocks.
@@ -80,6 +81,7 @@ void main() {
     ]);
     when(mockFlutterDevice.device).thenReturn(mockDevice);
     when(mockFlutterView.uiIsolate).thenReturn(mockIsolate);
+    when(mockFlutterView.runFromSource(any, any, any)).thenAnswer((Invocation invocation) async {});
     when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.observatoryUris).thenReturn(<Uri>[
       testUri,
@@ -189,9 +191,6 @@ void main() {
     Usage: () => MockUsage(),
   }));
 
-
-  // Need one for hot restart as well.
-
   test('ResidentRunner can send target platform to analytics from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
@@ -213,6 +212,36 @@ void main() {
     expect(result.fatal, false);
     expect(result.code, 0);
     expect(verify(flutterUsage.sendEvent('hot', 'reload',
+                  parameters: captureAnyNamed('parameters'))).captured[0],
+      containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
+                   getNameForTargetPlatform(TargetPlatform.android_arm))
+    );
+  }, overrides: <Type, Generator>{
+    Usage: () => MockUsage(),
+  }));
+
+  test('ResidentRunner can send target platform to analytics from full restart', () => testbed.run(() async {
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    unawaited(residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    ));
+
+    final OperationResult result = await residentRunner.restart(fullRestart: true);
+    expect(result.fatal, false);
+    expect(result.code, 0);
+    expect(verify(flutterUsage.sendEvent('hot', 'restart',
                   parameters: captureAnyNamed('parameters'))).captured[0],
       containsPair(cdKey(CustomDimensions.hotEventTargetPlatform),
                    getNameForTargetPlatform(TargetPlatform.android_arm))

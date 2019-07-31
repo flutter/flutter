@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -64,6 +65,17 @@ void main() {
         await runner.run(<String>['dummy']);
 
         expect(versionChecked, isTrue);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: () => platform,
+      }, initializeFlutterRoot: false);
+
+      testUsingContext('throw tool exit if the version file cannot be written', () async {
+        final MockFlutterVersion version = FlutterVersion.instance;
+        when(version.ensureVersionFile()).thenThrow(const FileSystemException());
+
+        expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));
+
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         Platform: () => platform,

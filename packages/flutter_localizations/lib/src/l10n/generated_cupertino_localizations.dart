@@ -6707,6 +6707,154 @@ class CupertinoLocalizationKm extends GlobalCupertinoLocalizations {
   String get todayLabel => r'ថ្ងៃនេះ';
 }
 
+/// The translations for Kannada (`kn`).
+class CupertinoLocalizationKn extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Kannada.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationKn({
+    String localeName = 'kn',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => '\u{c8e}\u{c9a}\u{ccd}\u{c9a}\u{cb0}\u{cbf}\u{c95}\u{cc6}';
+
+  @override
+  String get anteMeridiemAbbreviation => '\u{cac}\u{cc6}\u{cb3}\u{cbf}\u{c97}\u{ccd}\u{c97}\u{cc6}';
+
+  @override
+  String get copyButtonLabel => '\u{ca8}\u{c95}\u{cb2}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get cutButtonLabel => '\u{c95}\u{ca4}\u{ccd}\u{ca4}\u{cb0}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelFew => null;
+
+  @override
+  String get datePickerHourSemanticsLabelMany => null;
+
+  @override
+  String get datePickerHourSemanticsLabelOne => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => '\u{24}\u{68}\u{6f}\u{75}\u{72}\u{20}\u{c97}\u{c82}\u{c9f}\u{cc6}';
+
+  @override
+  String get datePickerHourSemanticsLabelTwo => null;
+
+  @override
+  String get datePickerHourSemanticsLabelZero => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelFew => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelMany => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => '\u{31}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => '\u{24}\u{6d}\u{69}\u{6e}\u{75}\u{74}\u{65}\u{20}\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{cb7}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get datePickerMinuteSemanticsLabelTwo => null;
+
+  @override
+  String get datePickerMinuteSemanticsLabelZero => null;
+
+  @override
+  String get pasteButtonLabel => '\u{c85}\u{c82}\u{c9f}\u{cbf}\u{cb8}\u{cbf}';
+
+  @override
+  String get postMeridiemAbbreviation => '\u{cb8}\u{c82}\u{c9c}\u{cc6}';
+
+  @override
+  String get selectAllButtonLabel => '\u{c8e}\u{cb2}\u{ccd}\u{cb2}\u{cb5}\u{ca8}\u{ccd}\u{ca8}\u{cc2}\u{20}\u{c86}\u{caf}\u{ccd}\u{c95}\u{cc6}\u{cae}\u{cbe}\u{ca1}\u{cbf}';
+
+  @override
+  String get timerPickerHourLabelFew => null;
+
+  @override
+  String get timerPickerHourLabelMany => null;
+
+  @override
+  String get timerPickerHourLabelOne => '\u{c97}\u{c82}\u{c9f}\u{cc6}';
+
+  @override
+  String get timerPickerHourLabelOther => '\u{c97}\u{c82}\u{c9f}\u{cc6}\u{c97}\u{cb3}\u{cc1}';
+
+  @override
+  String get timerPickerHourLabelTwo => null;
+
+  @override
+  String get timerPickerHourLabelZero => null;
+
+  @override
+  String get timerPickerMinuteLabelFew => null;
+
+  @override
+  String get timerPickerMinuteLabelMany => null;
+
+  @override
+  String get timerPickerMinuteLabelOne => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
+
+  @override
+  String get timerPickerMinuteLabelOther => '\u{ca8}\u{cbf}\u{cae}\u{cbf}\u{2e}';
+
+  @override
+  String get timerPickerMinuteLabelTwo => null;
+
+  @override
+  String get timerPickerMinuteLabelZero => null;
+
+  @override
+  String get timerPickerSecondLabelFew => null;
+
+  @override
+  String get timerPickerSecondLabelMany => null;
+
+  @override
+  String get timerPickerSecondLabelOne => '\u{cb8}\u{cc6}\u{2e}';
+
+  @override
+  String get timerPickerSecondLabelOther => '\u{cb8}\u{cc6}\u{2e}';
+
+  @override
+  String get timerPickerSecondLabelTwo => null;
+
+  @override
+  String get timerPickerSecondLabelZero => null;
+
+  @override
+  String get todayLabel => '\u{c87}\u{c82}\u{ca6}\u{cc1}';
+}
+
 /// The translations for Korean (`ko`).
 class CupertinoLocalizationKo extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for Korean.
@@ -12696,6 +12844,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'ka', // Georgian
   'kk', // Kazakh
   'km', // Khmer Central Khmer
+  'kn', // Kannada
   'ko', // Korean
   'ky', // Kirghiz Kyrgyz
   'lo', // Lao
@@ -12783,6 +12932,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `ka` - Georgian
 ///  * `kk` - Kazakh
 ///  * `km` - Khmer Central Khmer
+///  * `kn` - Kannada
 ///  * `ko` - Korean
 ///  * `ky` - Kirghiz Kyrgyz
 ///  * `lo` - Lao
@@ -12976,6 +13126,8 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
       return CupertinoLocalizationKk(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'km':
       return CupertinoLocalizationKm(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'kn':
+      return CupertinoLocalizationKn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ko':
       return CupertinoLocalizationKo(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'ky':

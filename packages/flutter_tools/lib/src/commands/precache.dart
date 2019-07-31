@@ -31,6 +31,8 @@ class PrecacheCommand extends FlutterCommand {
         help: 'Precache artifacts for Fuchsia development.');
     argParser.addFlag('universal', negatable: true, defaultsTo: true,
         help: 'Precache artifacts required for any development platform.');
+    argParser.addFlag('flutter_runner', negatable: true, defaultsTo: false,
+        help: 'Precache the flutter runner artifacts.', hide: true);
   }
 
   @override

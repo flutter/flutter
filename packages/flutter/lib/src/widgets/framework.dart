@@ -1688,8 +1688,9 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
       assert(() {
         final int index = children.indexOf(null);
         if (index >= 0) {
-          throw AssertionError(
-            "The widget's children must not contain any null values, but a null value was found at index $index"
+          throw FlutterError(
+            "$runtimeType's children must not contain any null values, "
+            'but a null value was found at index $index'
           );
         }
         return true;

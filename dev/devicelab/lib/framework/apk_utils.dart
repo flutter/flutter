@@ -34,6 +34,7 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
+/// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
   if (!File(apk).existsSync())
     throw TaskResult.failure(
@@ -50,9 +51,14 @@ Future<Iterable<String>> getFilesInApk(String apk) async {
       .map((String line) => line.split(' ').last)
       .toList();
 }
-
+/// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
   return getFilesInApk(bundle);
+}
+
+/// Returns the list of files inside an Android Archive.
+Future<Iterable<String>> getFilesInAar(String aar) {
+  return getFilesInApk(aar);
 }
 
 void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
