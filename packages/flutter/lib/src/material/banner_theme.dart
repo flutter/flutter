@@ -31,15 +31,11 @@ class MaterialBannerThemeData extends Diagnosticable {
     this.contentTextStyle,
   });
 
-  /// Default value for [MaterialBanner.backgroundColor].
-  ///
-  /// If null, [MaterialBanner] uses [ThemeData.canvasColor].
+  /// The background color of a [MaterialBanner].
   final Color backgroundColor;
 
   /// Used to configure the [DefaultTextStyle] for the [MaterialBanner.content]
   /// widget.
-  ///
-  /// If null, defaults to [ThemeData.textTheme.body1].
   final TextStyle contentTextStyle;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -102,23 +98,20 @@ class MaterialBannerThemeData extends Diagnosticable {
 class MaterialBannerTheme extends InheritedWidget {
   /// Creates a banner theme that controls the configurations for
   /// [MaterialBanner]s in its widget subtree.
-  MaterialBannerTheme({
+  const MaterialBannerTheme({
     Key key,
-    Color backgroundColor,
-    TextStyle contentTextStyle,
+    this.data,
     Widget child,
-  }) : data = MaterialBannerThemeData(
-         backgroundColor: backgroundColor,
-         contentTextStyle: contentTextStyle,
-       ),
-       super(key: key, child: child);
+  }) : super(key: key, child: child);
 
   /// The properties for descendant [MaterialBanner] widgets.
   final MaterialBannerThemeData data;
 
   /// The closest instance of this class' [data] value that encloses the given
-  /// context. If there is no ancestor, it returns [ThemeData.bannerTheme].
-  /// Applications can assume that the returned value will not be null.
+  /// context.
+  ///
+  /// If there is no ancestor, it returns [ThemeData.bannerTheme]. Applications
+  /// can assume that the returned value will not be null.
   ///
   /// Typical usage is as follows:
   ///

@@ -118,8 +118,16 @@ class MaterialBanner extends StatelessWidget {
       ),
     );
 
+    final Color backgroundColor = this.backgroundColor
+        ?? bannerTheme.backgroundColor
+        ?? theme.colorScheme.surface
+        ?? theme.canvasColor;
+    final TextStyle textStyle = contentTextStyle
+        ?? bannerTheme.contentTextStyle
+        ?? theme.textTheme.body1;
+
     return Container(
-      color: backgroundColor ?? bannerTheme.backgroundColor ?? theme.canvasColor,
+      color: backgroundColor,
       child: Column(
         children: <Widget>[
           Padding(
@@ -135,7 +143,7 @@ class MaterialBanner extends StatelessWidget {
                   child: DefaultTextStyle(
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
-                    style: contentTextStyle ?? bannerTheme.contentTextStyle ?? theme.textTheme.body1,
+                    style: textStyle,
                     child: content,
                   ),
                 ),

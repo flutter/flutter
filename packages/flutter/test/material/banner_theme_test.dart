@@ -121,6 +121,27 @@ void main() {
     expect(container.decoration, const BoxDecoration(color: backgroundColor));
     expect(content.text.style, textStyle);
   });
+
+  testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
+    final ColorScheme colorScheme = ColorScheme.light().copyWith(surface: Colors.purple);
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(colorScheme: colorScheme),
+      home: Scaffold(
+        body: MaterialBanner(
+          content: const Text('Content'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Container container = _getContainerFromBanner(tester);
+    expect(container.decoration, BoxDecoration(color: colorScheme.surface));
+  });
 }
 
 MaterialBannerThemeData _bannerTheme() {
