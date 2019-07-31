@@ -73,7 +73,7 @@
 }
 
 - (id)decode:(NSData*)message {
-  if (message.length == 0)
+  if (message == nil)
     return nil;
   BOOL isSimpleValue = NO;
   id decoded = nil;
