@@ -195,33 +195,27 @@ class CupertinoDynamicColor extends Color {
   /// [BuildContext].
   ///
   /// Calling this function may create dependencies on the closest instance of some
-  /// [InheritedWidget]s that enclose the given [BuildContext]. More specifically:
+  /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
+  /// is different from [normalColor], this function will call [CupertinoTheme.of],
+  /// and then [MediaQuery.of] if brightness wasn't specified in the theme data
+  /// retrived from the previous [CupertinoTheme.of] call.
   ///
-  /// * If any of the dark colors is different from its light counterpart (or vise versa),
-  /// this function will call [CupertinoTheme.of], and then [MediaQuery.of] if
-  /// brightness wasn't specified in the theme data retrived from the previous
-  /// [CupertinoTheme.of] call.
-  ///
-  /// * If any of the high contrast colors is different from its normal contrast
-  /// counterpart (or vise versa), [MediaQuery.of] will be called to retrieve the
-  /// accessibility high contrast setting.
-  ///
-  /// * If any of the elevated colors is different from its base elevation counterpart,
-  /// [CupertinoUserInterfaceLevel.of] will be called to retrieve the user interface elevation.
+  /// If any of the required dependecies is missing from the given context, an exception
+  /// will be thrown unless [nullOk] is set to `true`.
   Color resolveFrom(BuildContext context, { bool nullOk = false }) {
-    int dependencyBitMask, configBitMask = 0;
+    int dependencyBitMask = 0, configBitMask = 0;
     final List<Color> colors = _colorMap;
 
     for (int i = 0; i < colors.length; i++) {
-      // bitShift - color variant
+      // bitShift - represented trait
       //    0     - color vibrancy
       //    1     - accessibility contrast
       //    2     - user interface level
       for(int bitShift = 0; bitShift < 3; bitShift ++) {
         final int mask = 1 << bitShift;
-        if (i & mask != 0)
+        if (i & mask != 0 || dependencyBitMask & mask != 0)
           continue;
-        final bool isSameColor = colors[i] ?? defaultColor == colors[i | mask] ?? defaultColor;
+        final bool isSameColor = (colors[i] ?? defaultColor) == (colors[i | mask] ?? defaultColor);
         dependencyBitMask |= isSameColor ? 0 : mask;
       }
     }
