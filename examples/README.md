@@ -39,5 +39,3 @@ projects don't do that to avoid having several copies of the wrapper binary in
 the Flutter repo. Instead, the Gradle wrapper is injected by Flutter tooling,
 and the wrapper files are .gitignore'd to avoid making the Flutter repository
 dirty as a side effect of running the examples.
-
-This is a test.
