@@ -381,14 +381,12 @@ void main() {
           ),
         ),
         home: Scaffold(
-          body: Center(
-            child: Focus(
-              focusNode: focusNode,
-              child: ChoiceChip(
-                label: const Text('Chip'),
-                selected: selected,
-                onSelected: enabled ? (_) {} : null,
-              ),
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              label: const Text('Chip'),
+              selected: selected,
+              onSelected: enabled ? (_) {} : null,
             ),
           ),
         ),

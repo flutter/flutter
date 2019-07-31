@@ -1770,15 +1770,13 @@ void main() {
     Widget chipWidget({ bool enabled = true, bool selected = false }) {
       return MaterialApp(
         home: Scaffold(
-          body: Center(
-            child: Focus(
-              focusNode: focusNode,
-              child: ChoiceChip(
-                label: const Text('Chip'),
-                selected: selected,
-                onSelected: enabled ? (_) {} : null,
-                labelStyle: TextStyle(color: MaterialStateColor.resolveWith(getTextColor)),
-              ),
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              label: const Text('Chip'),
+              selected: selected,
+              onSelected: enabled ? (_) {} : null,
+              labelStyle: TextStyle(color: MaterialStateColor.resolveWith(getTextColor)),
             ),
           ),
         ),
