@@ -26,6 +26,7 @@ source_set("cpp") {
   ]
 
   public_deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.io",
     "$fuchsia_sdk_root/fidl:fuchsia.sys",
     "$fuchsia_sdk_root/pkg:fdio",
   ]
