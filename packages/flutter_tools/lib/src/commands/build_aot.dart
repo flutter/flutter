@@ -149,12 +149,12 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
             '-create',
             '-output', fs.path.join(outputPath, 'App.framework', 'App'),
           ]);
-          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM'));
-          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
+          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM.noindex'));
+          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
           await runCheckedAsync(<String>[
             'lipo',
             '-create',
-            '-output', fs.path.join(outputPath, 'App.framework.dSYM', 'Contents', 'Resources', 'DWARF', 'App'),
+            '-output', fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF', 'App'),
             ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
           ]);
         } else {

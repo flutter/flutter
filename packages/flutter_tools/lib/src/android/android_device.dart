@@ -678,8 +678,11 @@ List<AndroidDevice> getAdbDevices() {
   try {
     text = runSync(<String>[adbPath, 'devices', '-l']);
   } on ArgumentError catch (exception) {
-    throwToolExit('Unable to run "adb", check your Android SDK installation and '
+    throwToolExit('Unable to find "adb", check your Android SDK installation and '
       'ANDROID_HOME environment variable: ${exception.message}');
+  } on ProcessException catch (exception) {
+    throwToolExit('Unable to run "adb", check your Android SDK installation and '
+      'ANDROID_HOME environment variable: ${exception.executable}');
   }
   final List<AndroidDevice> devices = <AndroidDevice>[];
   parseADBDeviceOutput(text, devices: devices);

@@ -89,6 +89,40 @@ Future<T> showSearch<T>({
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
 
+  /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
+  /// [textInputAction].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// class CustomSearchHintDelegate extends SearchDelegate {
+  ///   CustomSearchHintDelegate({
+  ///     String hintText,
+  ///   }) : super(
+  ///     searchFieldLabel: hintText,
+  ///     keyboardType: TextInputType.text,
+  ///     textInputAction: TextInputAction.search,
+  ///   );
+  ///
+  ///   @override
+  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///
+  ///   @override
+  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///
+  ///   @override
+  ///   Widget buildResults(BuildContext context) => Text('results');
+  ///
+  ///   @override
+  ///   List<Widget> buildActions(BuildContext context) => [];
+  /// }
+  /// ```
+  /// {@end-tool}
+  SearchDelegate({
+    this.searchFieldLabel,
+    this.keyboardType,
+    this.textInputAction = TextInputAction.search,
+  });
+
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
   ///
@@ -224,6 +258,22 @@ abstract class SearchDelegate<T> {
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
   }
+
+  /// The hint text that is shown in the search field when it is empty.
+  ///
+  /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
+  final String searchFieldLabel;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to the default value specified in [TextField].
+  final TextInputType keyboardType;
+
+  /// The text input action configuring the soft keyboard to a particular action
+  /// button.
+  ///
+  /// Defaults to [TextInputAction.search].
+  final TextInputAction textInputAction;
 
   /// [Animation] triggered when the search pages fades in or out.
   ///
@@ -417,7 +467,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -459,7 +510,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
             style: theme.textTheme.title,
-            textInputAction: TextInputAction.search,
+            textInputAction: widget.delegate.textInputAction,
+            keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
