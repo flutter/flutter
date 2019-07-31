@@ -54,7 +54,7 @@ Future<PrebuiltMacOSApp> buildMacOS({
   }
   // Set debug or release mode.
   String config = 'Debug';
-  if (buildInfo?.isRelease ?? false) {
+  if (buildInfo.isRelease ?? false) {
     config = 'Release';
   }
   // Invoke Xcode with correct configuration.
