@@ -415,6 +415,23 @@ flutter:
       );
     });
 
+    test('parses major.minor.patch with no build version', () async {
+      const String manifest = '''
+name: test
+version: 0.0.1
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '0.0.1',
+        expectedBuildName: '0.0.1',
+        expectedBuildNumber: null,
+      );
+    });
+
     test('parses major.minor.patch+build version clause 2', () async {
       const String manifest = '''
 name: test
