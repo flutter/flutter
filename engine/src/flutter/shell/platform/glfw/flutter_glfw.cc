@@ -810,18 +810,47 @@ FlutterDesktopWindowRef FlutterDesktopRegistrarGetWindow(
   return registrar->window;
 }
 
-void FlutterDesktopMessengerSend(FlutterDesktopMessengerRef messenger,
-                                 const char* channel,
-                                 const uint8_t* message,
-                                 const size_t message_size) {
+bool FlutterDesktopMessengerSendWithReply(FlutterDesktopMessengerRef messenger,
+                                          const char* channel,
+                                          const uint8_t* message,
+                                          const size_t message_size,
+                                          const FlutterDesktopBinaryReply reply,
+                                          void* user_data) {
+  FlutterPlatformMessageResponseHandle* response_handle = nullptr;
+  if (reply != nullptr && user_data != nullptr) {
+    FlutterEngineResult result = FlutterPlatformMessageCreateResponseHandle(
+        messenger->engine, reply, user_data, &response_handle);
+    if (result != kSuccess) {
+      std::cout << "Failed to create response handle\n";
+      return false;
+    }
+  }
+
   FlutterPlatformMessage platform_message = {
       sizeof(FlutterPlatformMessage),
       channel,
       message,
       message_size,
+      response_handle,
   };
 
-  FlutterEngineSendPlatformMessage(messenger->engine, &platform_message);
+  FlutterEngineResult message_result =
+      FlutterEngineSendPlatformMessage(messenger->engine, &platform_message);
+
+  if (response_handle != nullptr) {
+    FlutterPlatformMessageReleaseResponseHandle(messenger->engine,
+                                                response_handle);
+  }
+
+  return message_result == kSuccess;
+}
+
+bool FlutterDesktopMessengerSend(FlutterDesktopMessengerRef messenger,
+                                 const char* channel,
+                                 const uint8_t* message,
+                                 const size_t message_size) {
+  return FlutterDesktopMessengerSendWithReply(messenger, channel, message,
+                                              message_size, nullptr, nullptr);
 }
 
 void FlutterDesktopMessengerSendResponse(

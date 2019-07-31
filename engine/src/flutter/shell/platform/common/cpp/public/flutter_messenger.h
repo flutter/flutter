@@ -21,6 +21,11 @@ typedef struct FlutterDesktopMessenger* FlutterDesktopMessengerRef;
 typedef struct _FlutterPlatformMessageResponseHandle
     FlutterDesktopMessageResponseHandle;
 
+// The callback expected as a response of a binary message.
+typedef void (*FlutterDesktopBinaryReply)(const uint8_t* data,
+                                          size_t data_size,
+                                          void* user_data);
+
 // A message received from Flutter.
 typedef struct {
   // Size of this struct as created by Flutter.
@@ -46,11 +51,19 @@ typedef void (*FlutterDesktopMessageCallback)(
     void* /* user data */);
 
 // Sends a binary message to the Flutter side on the specified channel.
-FLUTTER_EXPORT void FlutterDesktopMessengerSend(
+FLUTTER_EXPORT bool FlutterDesktopMessengerSend(
     FlutterDesktopMessengerRef messenger,
     const char* channel,
     const uint8_t* message,
     const size_t message_size);
+
+FLUTTER_EXPORT bool FlutterDesktopMessengerSendWithReply(
+    FlutterDesktopMessengerRef messenger,
+    const char* channel,
+    const uint8_t* message,
+    const size_t message_size,
+    const FlutterDesktopBinaryReply reply,
+    void* user_data);
 
 // Sends a reply to a FlutterDesktopMessage for the given response handle.
 //
