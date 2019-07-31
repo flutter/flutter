@@ -207,6 +207,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _assertVertical();
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
+    _dragScrollbar(details.localPosition.dy);
     _dragScrollbarPositionY = details.localPosition.dy;
   }
 
@@ -231,9 +232,10 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   // without releasing.
   void _handleHorizontalDragStart(DragStartDetails details) {
     _assertVertical();
-    _dragScrollbarPositionY = details.localPosition.dy;
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
+    _dragScrollbar(details.localPosition.dy);
+    _dragScrollbarPositionY = details.localPosition.dy;
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
