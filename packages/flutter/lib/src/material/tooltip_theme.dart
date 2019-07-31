@@ -196,9 +196,11 @@ class TooltipThemeData extends Diagnosticable {
 ///
 /// ```dart
 /// TooltipTheme(
-///   decoration: BoxDecoration(
-///     color: Colors.blue.withOpacity(0.9),
-///     borderRadius: BorderRadius.zero,
+///   data: TooltipThemeData(
+///     decoration: BoxDecoration(
+///       color: Colors.blue.withOpacity(0.9),
+///       borderRadius: BorderRadius.zero,
+///     ),
 ///   ),
 ///   child: Tooltip(
 ///     message: 'Example tooltip',
