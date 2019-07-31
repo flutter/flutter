@@ -259,7 +259,7 @@ class Hero extends StatefulWidget {
     assert(navigator != null);
     final Map<Object, _HeroState> result = <Object, _HeroState>{};
 
-    void addHero(StatefulElement hero, Object tag) {
+    void inviteHero(StatefulElement hero, Object tag) {
       assert(() {
         if (result.containsKey(tag)) {
           throw FlutterError(
@@ -273,29 +273,34 @@ class Hero extends StatefulWidget {
         }
         return true;
       }());
+      final Hero heroWidget = hero.widget;
       final _HeroState heroState = hero.state;
-      result[tag] = heroState;
+      if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
+        result[tag] = heroState;
+      } else {
+        // If transition is not allowed, we need to make sure hero is not hidden.
+        // A hero can be hidden previously due to hero transition.
+        heroState.ensurePlaceholderIsHidden();
+      }
     }
 
     void visitor(Element element) {
       if (element.widget is Hero) {
         final StatefulElement hero = element;
         final Hero heroWidget = element.widget;
-        if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
-          final Object tag = heroWidget.tag;
-          assert(tag != null);
-          if (Navigator.of(hero) == navigator) {
-            addHero(hero, tag);
-          } else {
-            // The nearest navigator to the Hero is not the Navigator that is
-            // currently transitioning from one route to another. This means
-            // the Hero is inside a nested Navigator and should only be
-            // considered for animation if it is part of the top-most route in
-            // that nested Navigator and if that route is also a PageRoute.
-            final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
-            if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
-              addHero(hero, tag);
-            }
+        final Object tag = heroWidget.tag;
+        assert(tag != null);
+        if (Navigator.of(hero) == navigator) {
+          inviteHero(hero, tag);
+        } else {
+          // The nearest navigator to the Hero is not the Navigator that is
+          // currently transitioning from one route to another. This means
+          // the Hero is inside a nested Navigator and should only be
+          // considered for animation if it is part of the top-most route in
+          // that nested Navigator and if that route is also a PageRoute.
+          final ModalRoute<dynamic> heroRoute = ModalRoute.of(hero);
+          if (heroRoute != null && heroRoute is PageRoute && heroRoute.isCurrent) {
+            inviteHero(hero, tag);
           }
         }
       }
@@ -345,11 +350,19 @@ class _HeroState extends State<Hero> {
     });
   }
 
-  void endFlight() {
+  void ensurePlaceholderIsHidden() {
     if (mounted) {
       setState(() {
         _placeholderSize = null;
       });
+    }
+  }
+
+  // When `keepPlaceholder` is true, the placeholder will continue to be shown
+  // after the flight ends.
+  void endFlight({ bool keepPlaceholder = false }) {
+    if (!keepPlaceholder) {
+      ensurePlaceholderIsHidden();
     }
   }
 
@@ -360,13 +373,13 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
-    final bool isHeroInFlight = _placeholderSize != null;
+    final bool showPlaceholder = _placeholderSize != null;
 
-    if (isHeroInFlight && widget.placeholderBuilder != null) {
+    if (showPlaceholder && widget.placeholderBuilder != null) {
       return widget.placeholderBuilder(context, _placeholderSize, widget.child);
     }
 
-    if (isHeroInFlight && !_shouldIncludeChild) {
+    if (showPlaceholder && !_shouldIncludeChild) {
       return SizedBox(
         width: _placeholderSize.width,
         height: _placeholderSize.height,
@@ -377,9 +390,9 @@ class _HeroState extends State<Hero> {
       width: _placeholderSize?.width,
       height: _placeholderSize?.height,
       child: Offstage(
-        offstage: isHeroInFlight,
+        offstage: showPlaceholder,
         child: TickerMode(
-          enabled: !isHeroInFlight,
+          enabled: !showPlaceholder,
           child: KeyedSubtree(key: _key, child: widget.child),
         )
       ),
@@ -520,9 +533,13 @@ class _HeroFlight {
       assert(overlayEntry != null);
       overlayEntry.remove();
       overlayEntry = null;
-
-      manifest.fromHero.endFlight();
-      manifest.toHero.endFlight();
+      // We want to keep the hero underneath the current page hidden. If
+      // [AnimationStatus.completed], toHero will be the one on top and we keep
+      // fromHero hidden. If [AnimationStatus.dismissed], the animation is
+      // triggered but canceled before it finishes. In this case, we keep toHero
+      // hidden instead.
+      manifest.fromHero.endFlight(keepPlaceholder: status == AnimationStatus.completed);
+      manifest.toHero.endFlight(keepPlaceholder: status == AnimationStatus.dismissed);
       onFlightEnded(this);
     }
   }
@@ -572,7 +589,6 @@ class _HeroFlight {
   // routes with the same hero. Redirect the in-flight hero to the new toRoute.
   void divert(_HeroFlightManifest newManifest) {
     assert(manifest.tag == newManifest.tag);
-
     if (manifest.type == HeroFlightDirection.push && newManifest.type == HeroFlightDirection.pop) {
       // A push flight was interrupted by a pop.
       assert(newManifest.animation.status == AnimationStatus.reverse);
@@ -600,9 +616,8 @@ class _HeroFlight {
           end: 1.0,
         ),
       );
-
       if (manifest.fromHero != newManifest.toHero) {
-        manifest.fromHero.endFlight();
+        manifest.fromHero.endFlight(keepPlaceholder: true);
         newManifest.toHero.startFlight();
         heroRectTween = _doCreateRectTween(
             heroRectTween.end,
@@ -630,8 +645,8 @@ class _HeroFlight {
       else
         _proxyAnimation.parent = newManifest.animation;
 
-      manifest.fromHero.endFlight();
-      manifest.toHero.endFlight();
+      manifest.fromHero.endFlight(keepPlaceholder: true);
+      manifest.toHero.endFlight(keepPlaceholder: true);
 
       // Let the heroes in each of the routes rebuild with their placeholders.
       newManifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: newManifest.type == HeroFlightDirection.push);
