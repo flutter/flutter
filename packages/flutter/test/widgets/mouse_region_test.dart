@@ -629,8 +629,8 @@ void main() {
 
   testWidgets('MouseRegion should not crash when taking closure arguments', (WidgetTester tester) async {
 
-    await tester.pumpWidget(_TestHoveringWidget());
-    expect(find.text('Nope'), findsOneWidget);
+    await tester.pumpWidget(_HoverClientWithClosures());
+    expect(find.text('not hovering'), findsOneWidget);
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     addTearDown(gesture.removePointer);
@@ -638,43 +638,33 @@ void main() {
     // Move to a position out of MouseRegion
     await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
     await tester.pumpAndSettle();
-    expect(find.text('Nope'), findsOneWidget);
+    expect(find.text('not hovering'), findsOneWidget);
 
     // Move into MouseRegion
     await gesture.moveBy(const Offset(-20, 0));
-    print('Before pump');
     await tester.pumpAndSettle();
-    expect(find.text('Hovered'), findsOneWidget);
+    expect(find.text('HOVERING'), findsOneWidget);
   });
 }
 
-class _TestHoveringWidget extends StatefulWidget {
+class _HoverClientWithClosures extends StatefulWidget {
   @override
-  _TestHoveringWidgetState createState() => _TestHoveringWidgetState();
+  _HoverClientWithClosuresState createState() => _HoverClientWithClosuresState();
 }
 
-class _TestHoveringWidgetState extends State<_TestHoveringWidget> {
+class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
 
-  bool hovered = false;
-
-  void _onEnter(PointerEnterEvent _) { print('onEnter'); setState(() { hovered = true; }); }
-  void _onExit(PointerExitEvent _) { print('onExit'); setState(() { hovered = false; }); }
+  bool _hovering = false;
 
   @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Padding(
-        padding: const EdgeInsets.all(100),
-        child: MouseRegion(
-          onEnter: (_) { _onEnter(null); },
-          onExit: (_) { _onExit(null); },
-          // onEnter: _onEnter,
-          // onExit: hovered ? _onExit : null,
-          // onExit: _onExit,
-          child: Text(hovered ? 'Hovered' : 'Nope'),
-        ),
-      )
+      child: MouseRegion(
+        onEnter: (PointerEnterEvent _) { setState(() { _hovering = true; }); },
+        onExit: (PointerExitEvent _) { setState(() { _hovering = false; }); },
+        child: Text(_hovering ? 'HOVERING' : 'not hovering'),
+      ),
     );
   }
 }
