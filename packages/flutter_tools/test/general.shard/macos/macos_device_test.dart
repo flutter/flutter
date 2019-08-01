@@ -48,24 +48,6 @@ void main() {
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('stopApp', () async {
-      const String psOut = r'''
-tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applications/foo
-''';
-      final MockMacOSApp mockMacOSApp = MockMacOSApp();
-      when(mockMacOSApp.executable).thenReturn('tester');
-      when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
-        return ProcessResult(1, 0, psOut, '');
-      });
-      when(mockProcessManager.run(<String>['kill', '17193'])).thenAnswer((Invocation invocation) async {
-        return ProcessResult(2, 0, '', '');
-      });
-      expect(await device.stopApp(mockMacOSApp), true);
-      verify(mockProcessManager.run(<String>['kill', '17193']));
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
     group('startApp', () {
       MockMacOSApp macOSApp;
       MockFileSystem mockFileSystem;

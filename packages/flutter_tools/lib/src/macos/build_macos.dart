@@ -30,9 +30,10 @@ Future<PrebuiltMacOSApp> buildMacOS({
     projectDir: flutterProject.directory,
     buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
     defines: <String, String>{
-      kBuildMode: buildInfo.isDebug == true ? 'debug' : 'release',
+      // TODO(jonahwilliams): support other build types.
+      kBuildMode: 'debug',
       kTargetPlatform: 'darwin-x64',
-      kTargetFile: fs.file(targetOverride).absolute.path
+      kTargetFile: targetOverride,
     },
   );
 
