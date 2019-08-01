@@ -364,10 +364,15 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return;
     final double oldPage = page;
     _viewportFraction = value;
-
-    if (oldPage != null)
+    if (oldPage != null) {
+      assert(() {
+        final Element storageContext = context.storageContext;
+        if (!storageContext.owner.debugBuilding)
+          throw "$runtimeType's viewportFraction was called outside of the build phase.";
+      }());
       // This part should only be reacheable when it will definitely trigger a rebuild.
       correctPixels(getPixelsFromPage(oldPage));
+    }
   }
 
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);

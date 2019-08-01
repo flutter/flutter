@@ -556,13 +556,13 @@ void main() {
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100, 0));
+    expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100.0, 0.0));
     expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
 
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100, 0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
   testWidgets(
