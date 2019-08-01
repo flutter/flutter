@@ -79,6 +79,7 @@ Widget buildFrame({
 Widget buildFormFrame({
   Key buttonKey,
   bool autovalidate = false,
+  int elevation = 8,
   String value = 'two',
   ValueChanged<String> onChanged,
   Widget icon,
@@ -103,6 +104,7 @@ Widget buildFormFrame({
           child: DropdownButtonFormField<String>(
             key: buttonKey,
             autovalidate: autovalidate,
+            elevation: elevation,
             value: value,
             hint: hint,
             disabledHint: disabledHint,
@@ -1293,7 +1295,7 @@ void main() {
     expect(tester.widget<DecoratedBox>(decoratedBox).decoration, defaultDecoration);
   });
 
-    testWidgets('Dropdown form field', (WidgetTester tester) async {
+    testWidgets('Dropdown form field with autovalidation test', (WidgetTester tester) async {
     String value = 'one';
     int _validateCalled = 0;
 
@@ -1308,18 +1310,21 @@ void main() {
                 decoration: const InputDecoration(
                   prefixIcon: Icon(Icons.fastfood)
                 ),
-                items: menuItems.map((String val) {
+                items: menuItems.map((String value) {
                   return DropdownMenuItem<String>(
-                    value: val,
-                    child: Text(val),
+                    value: value,
+                    child: Text(value),
                   );
                 }).toList(),
-                onChanged: (String v) {
+                onChanged: (String newValue) {
                   setState(() {
-                    value = v;
+                    value = newValue;
                   });
                 },
-                validator: (String v) {_validateCalled++; return v == null ? 'Must select value' : null;},
+                validator: (String currentValue) {
+                  _validateCalled++; 
+                  return currentValue == null ? 'Must select value' : null;
+                },
                 autovalidate: true,
               ),
             ),
@@ -1332,7 +1337,7 @@ void main() {
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('three').last);
+    await tester.tap(find.text('three'));
     await tester.pump();
     expect(_validateCalled, 2);
     await tester.pumpAndSettle();
@@ -1343,7 +1348,10 @@ void main() {
     final Key buttonKey = UniqueKey();
 
     // There shouldn't be overflow when expanded although list contains longer items.
-    final List<String> items = <String>['1234567890','abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890'];
+    final List<String> items = <String>[
+      '1234567890',
+      'abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890',
+    ];
 
     await tester.pumpWidget(
       buildFormFrame(
@@ -1351,7 +1359,8 @@ void main() {
         value: '1234567890',
         isExpanded: true,
         onChanged: onChanged,
-        items: items),
+        items: items,
+      ),
     );
     final RenderBox buttonBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
@@ -1379,13 +1388,13 @@ void main() {
         buttonKey: buttonKey,
         value: value,
         isDense: true,
-        onChanged: onChanged
+        onChanged: onChanged,
       ),
     );
     final RenderBox buttonBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
-    assert(buttonBox.attached);
+    expect(buttonBox.attached, isTrue);
 
     await tester.tap(find.text('two'));
     await tester.pump();
@@ -1413,7 +1422,7 @@ void main() {
     }
   });
 
-  testWidgets('Dropdown button form field changes style when specified', (WidgetTester tester) async {
+  testWidgets('Dropdown button form field - custom text style', (WidgetTester tester) async {
     const String value = 'foo';
     final UniqueKey itemKey = UniqueKey();
 
@@ -1452,37 +1461,48 @@ void main() {
     expect(richText.text.style.fontSize, 20.0);
   });
 
-  testWidgets('disabledHint displays on empty items or onChanged for form field', (WidgetTester tester) async {
+  testWidgets('Dropdown form field - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String> items, ValueChanged<String> onChanged }) => buildFormFrame(
-      items: items,
-      onChanged: onChanged,
-      buttonKey: buttonKey,
-      value: null,
-      hint: const Text('enabled'),
-      disabledHint: const Text('disabled'),
-    );
-
+    Widget build({ List<String> items}){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('enabled'),
+        disabledHint: const Text('disabled'),
+      );
+    }
     // [disabledHint] should display when [items] is null
-    await tester.pumpWidget(build(items: null, onChanged: onChanged));
+    await tester.pumpWidget(build(items: null));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
 
     // [disabledHint] should display when [items] is an empty list.
-    await tester.pumpWidget(build(items: <String>[], onChanged: onChanged));
+    await tester.pumpWidget(build(items: <String>[]));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
+  });
 
+  testWidgets('Dropdown form field - disabled hint should be of same size as enabled hint', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items}){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        hint: const Text('enabled'),
+        disabledHint: const Text('disabled'),
+      );
+    }
+    
+    await tester.pumpWidget(build(items: null));
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
 
-    // A Dropdown button with a disabled hint should be the same size as a
-    // one with a regular enabled hint.
-    await tester.pumpWidget(build(items: menuItems, onChanged: onChanged));
-    expect(find.text('disabled'), findsNothing);
-    expect(find.text('enabled'), findsOneWidget);
+    await tester.pumpWidget(build(items: menuItems));
     final RenderBox enabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
     );
@@ -1490,7 +1510,7 @@ void main() {
     expect(enabledHintBox.size, equals(disabledHintBox.size));
   });
 
-  testWidgets('Drop down form field icon should have the passed in size and color instead of defaults', (WidgetTester tester) async {
+  testWidgets('Dropdown form field - Custom icon size and colors', (WidgetTester tester) async {
     final Key iconKey = UniqueKey();
     final Icon customIcon = Icon(Icons.assessment, key: iconKey);
 

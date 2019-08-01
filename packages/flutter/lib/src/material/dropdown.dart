@@ -747,7 +747,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       return;
     }
 
-    assert(widget.value == null
+    assert(
+      widget.value == null
       || widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length ==1);
     _selectedIndex = null;
     for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
@@ -1004,7 +1005,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
   /// if the first item were selected.
   final T value;
 
-  /// Displayed if [value] is null.
+  /// A placeholder widget that is displayed if no item is selected.
   final Widget hint;
 
   /// A message to show when the dropdown is disabled.
