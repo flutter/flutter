@@ -212,9 +212,10 @@ class _BottomSheetState extends State<BottomSheet> {
 
 // MODAL BOTTOM SHEETS
 class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
-  _ModalBottomSheetLayout(this.progress, this.isScrollControlled);
+  _ModalBottomSheetLayout(this.progress, this.bottomInset, this.isScrollControlled);
 
   final double progress;
+  final double bottomInset;
   final bool isScrollControlled;
 
   @override
@@ -231,12 +232,12 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    return Offset(0.0, size.height - childSize.height * progress);
+    return Offset(0.0, size.height - bottomInset - childSize.height * progress);
   }
 
   @override
   bool shouldRelayout(_ModalBottomSheetLayout oldDelegate) {
-    return progress != oldDelegate.progress;
+    return progress != oldDelegate.progress || bottomInset != oldDelegate.bottomInset;
   }
 }
 
@@ -287,6 +288,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
         // Disable the initial animation when accessible navigation is on so
         // that the semantics are added to the tree at the correct time.
         final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+        final double bottomInset = widget.route.resizeToAvoidBottomInset ? MediaQuery.of(context).viewInsets.bottom : 0.0;
         return Semantics(
           scopesRoute: true,
           namesRoute: true,
@@ -294,7 +296,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
           explicitChildNodes: true,
           child: ClipRect(
             child: CustomSingleChildLayout(
-              delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
+              delegate: _ModalBottomSheetLayout(animationValue, bottomInset, widget.isScrollControlled),
               child: BottomSheet(
                 animationController: widget.route._animationController,
                 onClosing: () {
@@ -321,6 +323,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.theme,
     this.barrierLabel,
     this.backgroundColor,
+    this.resizeToAvoidBottomInset,
     this.elevation,
     this.shape,
     @required this.isScrollControlled,
@@ -332,6 +335,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ThemeData theme;
   final bool isScrollControlled;
   final Color backgroundColor;
+  final bool resizeToAvoidBottomInset;
   final double elevation;
   final ShapeBorder shape;
 
@@ -405,6 +409,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// that a modal [BottomSheet] needs to be displayed above all other content
 /// but the caller is inside another [Navigator].
 ///
+/// The `resizeToAvoidBottomInset` parameter ensures that the modal bottomSheet is
+/// not overlayed by the keyboard when it is displayed by resizing it
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -419,6 +426,7 @@ Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   Color backgroundColor,
+  bool resizeToAvoidBottomInset = false,
   double elevation,
   ShapeBorder shape,
   bool isScrollControlled = false,
@@ -437,6 +445,7 @@ Future<T> showModalBottomSheet<T>({
     isScrollControlled: isScrollControlled,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     backgroundColor: backgroundColor,
+    resizeToAvoidBottomInset: resizeToAvoidBottomInset,
     elevation: elevation,
     shape: shape,
   ));
