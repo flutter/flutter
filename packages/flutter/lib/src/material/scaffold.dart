@@ -14,7 +14,6 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'divider.dart';
 import 'drawer.dart';
@@ -2140,12 +2139,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             ),
           ),
           child: SafeArea(
-            child: ButtonTheme.bar(
-              child: SafeArea(
-                top: false,
-                child: ButtonBar(
-                  children: widget.persistentFooterButtons,
-                ),
+            child: SafeArea(
+              top: false,
+              child: ButtonBar(
+                children: widget.persistentFooterButtons,
               ),
             ),
           ),
