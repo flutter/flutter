@@ -31,7 +31,6 @@ class FlutterDevice {
   FlutterDevice(
     this.device, {
     @required this.trackWidgetCreation,
-    this.dillOutputPath,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.viewFilter,
@@ -56,7 +55,6 @@ class FlutterDevice {
     @required bool trackWidgetCreation,
     @required String target,
     @required BuildMode buildMode,
-    String dillOutputPath,
     List<String> fileSystemRoots,
     String fileSystemScheme,
     String viewFilter,
@@ -82,7 +80,6 @@ class FlutterDevice {
     return FlutterDevice(
       device,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       fileSystemRoots: fileSystemRoots,
       fileSystemScheme:fileSystemScheme,
       viewFilter: viewFilter,
@@ -99,7 +96,6 @@ class FlutterDevice {
   List<VMService> vmServices;
   DevFS devFS;
   ApplicationPackage package;
-  String dillOutputPath;
   List<String> fileSystemRoots;
   String fileSystemScheme;
   StreamSubscription<String> _loggingSubscription;
@@ -476,6 +472,7 @@ class FlutterDevice {
     bool fullRestart = false,
     String projectRootPath,
     String pathToReload,
+    @required String dillOutputPath,
     @required List<Uri> invalidatedFiles,
   }) async {
     final Status devFSStatus = logger.startProgress(
@@ -527,12 +524,25 @@ abstract class ResidentRunner {
     this.usesTerminalUi = true,
     this.stayResident = true,
     this.hotMode = true,
+    this.dillOutputPath,
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
     _packagesFilePath =
         packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
     _assetBundle = AssetBundleFactory.instance.createBundle();
+    // TODO(jonahwilliams): this is transitionary logic to allow us to support
+    // platforms that are not yet using flutter assemble. In the "new world",
+    // builds are isolated based on a number of factors. Thus, we cannot assume
+    // that a debug build will create the expected `build/app.dill` file. For
+    // now, I'm working around this by just creating it if it is missing here.
+    // In the future, once build & run are more strongly separated, the build
+    // environment will be plumbed through so that it all comes from a single
+    // source of truth, the [Environment].
+    final File dillOutput = fs.file(dillOutputPath ?? fs.path.join('build', 'app.dill'));
+    if (!dillOutput.existsSync()) {
+      dillOutput.createSync(recursive: true);
+    }
   }
 
   final List<FlutterDevice> flutterDevices;
@@ -542,6 +552,7 @@ abstract class ResidentRunner {
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
+  final String dillOutputPath;
   bool _exited = false;
   bool hotMode ;
   String _packagesFilePath;

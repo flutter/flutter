@@ -406,7 +406,6 @@ class AppDomain extends Domain {
       device,
       flutterProject: flutterProject,
       trackWidgetCreation: trackWidgetCreation,
-      dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
@@ -664,7 +663,7 @@ class DeviceDomain extends Domain {
           final Map<String, Object> response = await _deviceToMap(device);
           sendEvent(eventName, response);
         } catch (err) {
-          printError(err);
+          printError('$err');
         }
       });
     };

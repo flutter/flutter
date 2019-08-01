@@ -171,7 +171,7 @@ abstract class Target {
       }
     }
 
-    // For each outut, first determine if we've already computed the hash
+    // For each output, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     for (String previousOutput in previousOutputs) {
       final File file = fs.file(previousOutput);
@@ -436,11 +436,19 @@ class Environment {
 
 /// The result information from the build system.
 class BuildResult {
-  BuildResult(this.success, this.exceptions, this.performance);
+  BuildResult({
+    @required this.success,
+    this.exceptions = const <String, ExceptionMeasurement>{},
+    this.performance = const <String, PerformanceMeasurement>{},
+    this.inputFiles = const <File>[],
+    this.outputFiles = const <File>[],
+  });
 
   final bool success;
   final Map<String, ExceptionMeasurement> exceptions;
   final Map<String, PerformanceMeasurement> performance;
+  final List<File> inputFiles;
+  final List<File> outputFiles;
 
   bool get hasException => exceptions.isNotEmpty;
 }
@@ -472,10 +480,31 @@ class BuildSystem {
       // Always persist the file cache to disk.
       fileCache.persist();
     }
+    // TODO(jonahwilliams): this is a bit of a hack, due to various parts of
+    // the flutter tool writing these files unconditionally. Since Xcode uses
+    // timestamps to track files, this leads to unecessary rebuilds if they
+    // are included. Once all the places that write these files have been
+    // tracked down and moved into assemble, these checks should be removable.
+    {
+      buildInstance.inputFiles.removeWhere((String path, File file) {
+        return path.contains('pubspec.yaml') ||
+           path.contains('.flutter-plugins') ||
+           path.contains('xcconfig');
+      });
+      buildInstance.outputFiles.removeWhere((String path, File file) {
+        return path.contains('pubspec.yaml') ||
+           path.contains('.flutter-plugins') ||
+           path.contains('xcconfig');
+      });
+    }
     return BuildResult(
-      passed,
-      buildInstance.exceptionMeasurements,
-      buildInstance.stepTimings,
+      success: passed,
+      exceptions: buildInstance.exceptionMeasurements,
+      performance: buildInstance.stepTimings,
+      inputFiles: buildInstance.inputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
+      outputFiles: buildInstance.outputFiles.values.toList()
+          ..sort((File a, File b) => a.path.compareTo(b.path)),
     );
   }
 }
@@ -490,6 +519,8 @@ class _BuildInstance {
   final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
   final Environment environment;
   final FileHashStore fileCache;
+  final Map<String, File> inputFiles = <String, File>{};
+  final Map<String, File> outputFiles = <String, File>{};
 
   // Timings collected during target invocation.
   final Map<String, PerformanceMeasurement> stepTimings = <String, PerformanceMeasurement>{};
@@ -514,18 +545,41 @@ class _BuildInstance {
     try {
       final List<File> inputs = target.resolveInputs(environment);
       final bool canSkip = await target.computeChanges(inputs, environment, fileCache);
+      for (File input in inputs) {
+        // The build system should produce a list of aggregate input and output
+        // files for the overall build. The goal is to provide this to a hosting
+        // build system, such as Xcode, to configure logic for when to skip the
+        // rule/phase which contains the flutter build. When looking at the
+        // inputs and outputs for the individual rules, we need to be careful to
+        // remove inputs that were actually output from previous build steps.
+        // This indicates that the file is actual an output or intermediary. If
+        // these files are included as both inputs and outputs then it isn't
+        // possible to construct a DAG describing the build.
+        final String resolvedPath = input.resolveSymbolicLinksSync();
+        if (outputFiles.containsKey(resolvedPath)) {
+          continue;
+        }
+        inputFiles[resolvedPath] = input;
+      }
       if (canSkip) {
         skipped = true;
         printStatus('Skipping target: ${target.name}');
+        final List<File> outputs = target.resolveOutputs(environment, implicit: true);
+        for (File output in outputs) {
+          outputFiles[output.resolveSymbolicLinksSync()] = output;
+        }
       } else {
         printStatus('${target.name}: Starting');
         await target.build(inputs, environment);
         printStatus('${target.name}: Complete');
 
-        final List<File> outputs = target.resolveOutputs(environment);
+        final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         // Update hashes for output files.
         await fileCache.hashFiles(outputs);
         target._writeStamp(inputs, outputs, environment);
+        for (File output in outputs) {
+          outputFiles[output.resolveSymbolicLinksSync()] = output;
+        }
       }
     } catch (exception, stackTrace) {
       target.clearStamp(environment);
@@ -554,10 +608,10 @@ class ExceptionMeasurement {
 
 /// Helper class to collect measurement data.
 class PerformanceMeasurement {
-  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skiped, this.passed);
+  PerformanceMeasurement(this.target, this.elapsedMilliseconds, this.skipped, this.passed);
   final int elapsedMilliseconds;
   final String target;
-  final bool skiped;
+  final bool skipped;
   final bool passed;
 }
 

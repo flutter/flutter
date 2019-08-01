@@ -664,6 +664,14 @@ class MacOSProject implements XcodeBasedProject {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
+  /// The xcfilelist used to track the inputs for the Flutter script phase in
+  /// the Xcode build.
+  File get inputFileList => ephemeralDirectory.childFile('FlutterInputs.xcfilelist');
+
+  /// The xcfilelist used to track the outputs for the Flutter script phase in
+  /// the Xcode build.
+  File get outputFileList => ephemeralDirectory.childFile('FlutterOutputs.xcfilelist');
+
   @override
   File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
 

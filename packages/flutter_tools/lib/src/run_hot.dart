@@ -63,7 +63,7 @@ class HotRunner extends ResidentRunner {
     this.hostIsIde = false,
     String projectRootPath,
     String packagesFilePath,
-    this.dillOutputPath,
+    String dillOutputPath,
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
@@ -74,13 +74,13 @@ class HotRunner extends ResidentRunner {
              packagesFilePath: packagesFilePath,
              stayResident: stayResident,
              hotMode: true,
+             dillOutputPath: dillOutputPath,
              ipv6: ipv6);
 
   final bool benchmarkMode;
   final File applicationBinary;
   final bool hostIsIde;
   bool _didAttach = false;
-  final String dillOutputPath;
 
   final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
@@ -304,6 +304,7 @@ class HotRunner extends ResidentRunner {
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: fullRestart),
         invalidatedFiles: invalidatedFiles,
+        dillOutputPath: dillOutputPath,
       ));
     }
     return results;
