@@ -212,7 +212,7 @@ void main() {
 
       final String log = fs.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
-      expect(log.contains(dateTime.toString()), isTrue);
+      expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       SystemClock: () => mockClock,
@@ -237,7 +237,7 @@ void main() {
 
       final String log = fs.file('analytics.log').readAsStringSync();
       final DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(kMillis);
-      expect(log.contains(dateTime.toString()), isTrue);
+      expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
       SystemClock: () => mockClock,
