@@ -10,7 +10,7 @@ application_snapshot("kernel_compiler") {
   main_dart = "compiler.dart"
 
   deps = [
-    "../flutter/kernel:kernel_platform_files",
+    "../flutter/kernel:kernel_platform_files($host_toolchain)",
   ]
 
   dot_packages = rebase_path("//third_party/dart/.packages")
