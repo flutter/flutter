@@ -19,16 +19,14 @@ void main() {
     await tester.pumpWidget(
       SingleChildScrollView(
         child: ListBody(
-          children: <Widget>[
-            ButtonTheme.bar(
-              layoutBehavior: ButtonBarLayoutBehavior.constrained,
-              child: const Directionality(
-                textDirection: TextDirection.ltr,
-                child: ButtonBar(
-                  children: <Widget>[
-                    SizedBox(width: 10.0, height: 10.0),
-                  ],
-                ),
+          children: const <Widget>[
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: ButtonBar(
+                layoutBehavior: ButtonBarLayoutBehavior.constrained,
+                children: <Widget>[
+                  SizedBox(width: 10.0, height: 10.0),
+                ],
               ),
             ),
           ],
@@ -65,12 +63,11 @@ void main() {
     expect(tester.getBottomRight(buttonBar).dy - tester.getTopRight(buttonBar).dy, 26.0);
   });
 
-  testWidgets('ButtonBar FlatButton inherits Theme accentColor', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/22789
-
+  testWidgets('ButtonBar FlatButton uses primary color from color scheme', (WidgetTester tester) async {
+    const Color primaryColor = Color(0x00000001);
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(accentColor: const Color(0x00000001)),
+        theme: ThemeData(colorScheme: ColorScheme.light().copyWith(primary: primaryColor)),
         home: Builder(
           builder: (BuildContext context) {
             return Center(
@@ -104,7 +101,7 @@ void main() {
       ),
     );
 
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).textStyle.color, const Color(0x00000001));
+    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).textStyle.color, primaryColor);
 
     // Show the dialog
     await tester.tap(find.text('button'));
@@ -114,6 +111,6 @@ void main() {
       of: find.text('enabled'),
       matching: find.byType(RawMaterialButton),
     );
-    expect(tester.widget<RawMaterialButton>(dialogButton).textStyle.color, const Color(0x00000001));
+    expect(tester.widget<RawMaterialButton>(dialogButton).textStyle.color, primaryColor);
   });
 }
