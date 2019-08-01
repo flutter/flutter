@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart' show Diagnosticable;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -311,4 +312,186 @@ class _CupertinoAppState extends State<CupertinoApp> {
       ),
     );
   }
+}
+
+@immutable
+class CupertinoSystemColorData extends Diagnosticable {
+  const CupertinoSystemColorData(
+    @required this.label,
+    @required this.secondaryLabel,
+    @required this.tertiaryLabel,
+    @required this.quaternaryLabel,
+    @required this.systemFill,
+    @required this.secondarySystemFill,
+    @required this.tertiarySystemFill,
+    @required this.quaternarySystemFill,
+    @required this.placeholderText,
+    @required this.systemBackground,
+    @required this.secondarySystemBackground,
+    @required this.tertiarySystemBackground,
+    @required this.systemGroupedBackground,
+    @required this.secondarySystemGroupedBackground,
+    @required this.tertiarySystemGroupedBackground,
+    @required this.separator,
+    @required this.opaqueSeparator,
+    @required this.link,
+    @required this.systemBlue,
+    @required this.systemGreen,
+    @required this.systemIndigo,
+    @required this.systemOrange,
+    @required this.systemPink,
+    @required this.systemPurple,
+    @required this.systemRed,
+    @required this.systemTeal,
+    @required this.systemYellow,
+    @required this.systemGray,
+    @required this.systemGray2,
+    @required this.systemGray3,
+    @required this.systemGray4,
+    @required this.systemGray5,
+    @required this.systemGray6,
+  ) : assert(label != null),
+      assert(label != null),
+      assert(secondaryLabel != null),
+      assert(tertiaryLabel != null),
+      assert(quaternaryLabel != null),
+      assert(systemFill != null),
+      assert(secondarySystemFill != null),
+      assert(tertiarySystemFill != null),
+      assert(quaternarySystemFill != null),
+      assert(placeholderText != null),
+      assert(systemBackground != null),
+      assert(secondarySystemBackground != null),
+      assert(tertiarySystemBackground != null),
+      assert(systemGroupedBackground != null),
+      assert(secondarySystemGroupedBackground != null),
+      assert(tertiarySystemGroupedBackground != null),
+      assert(separator != null),
+      assert(opaqueSeparator != null),
+      assert(link != null),
+      assert(systemBlue != null),
+      assert(systemGreen != null),
+      assert(systemIndigo != null),
+      assert(systemOrange != null),
+      assert(systemPink != null),
+      assert(systemPurple != null),
+      assert(systemRed != null),
+      assert(systemTeal != null),
+      assert(systemYellow != null),
+      assert(systemGray != null),
+      assert(systemGray2 != null),
+      assert(systemGray3 != null),
+      assert(systemGray4 != null),
+      assert(systemGray5 != null),
+      assert(systemGray6 != null),
+      super();
+  // Label Colors
+  /// The color for text labels containing primary content.
+  final CupertinoDynamicColor label;
+
+  /// The color for text labels containing secondary content.
+  final CupertinoDynamicColor secondaryLabel;
+
+  /// The color for text labels containing tertiary content.
+  final CupertinoDynamicColor tertiaryLabel;
+
+  /// The color for text labels containing quaternary content.
+  final CupertinoDynamicColor quaternaryLabel;
+
+  // FIll Colors
+  /// An overlay fill color for thin and small shapes.
+  final CupertinoDynamicColor systemFill;
+
+  /// An overlay fill color for medium-size shapes.
+  final CupertinoDynamicColor secondarySystemFill;
+
+  /// An overlay fill color for large shapes.
+  final CupertinoDynamicColor tertiarySystemFill;
+
+  /// An overlay fill color for large areas containing complex content.
+  final CupertinoDynamicColor quaternarySystemFill;
+
+  // Text Colors
+  /// The color for placeholder text in controls or text views.
+  final CupertinoDynamicColor placeholderText;
+
+  // Standard Content Background Colors
+  // Use these colors for standard table views and designs that have a white primary background in a light environment.
+
+  /// The color for the main background of your interface.
+  final CupertinoDynamicColor systemBackground;
+
+  /// The color for content layered on top of the main background.
+  final CupertinoDynamicColor secondarySystemBackground;
+
+  /// The color for content layered on top of secondary backgrounds.
+  final CupertinoDynamicColor tertiarySystemBackground;
+
+  // Grouped Content Background Colors
+  // Use these colors for grouped content, including table views and platter-based designs.
+
+  /// The color for the main background of your grouped interface.
+  final CupertinoDynamicColor systemGroupedBackground;
+
+  /// The color for content layered on top of the main background of your grouped interface.
+  final CupertinoDynamicColor secondarySystemGroupedBackground;
+
+  /// The color for content layered on top of secondary backgrounds of your grouped interface.
+  final CupertinoDynamicColor tertiarySystemGroupedBackground;
+
+  // Separator Colors
+  /// The color for thin borders or divider lines that allows some underlying content to be visible.
+  final CupertinoDynamicColor separator;
+
+  /// The color for borders or divider lines that hide any underlying content.
+  final CupertinoDynamicColor opaqueSeparator;
+
+  /// The color for links.
+  final CupertinoDynamicColor link;
+
+  /// A blue color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemBlue;
+
+  /// A green color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemGreen;
+
+  /// An indigo color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemIndigo;
+
+  /// An orange color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemOrange;
+
+  /// A pink color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemPink;
+
+  /// A purple color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemPurple;
+
+  /// A red color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemRed;
+
+  /// A teal color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemTeal;
+
+  /// A yellow color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemYellow;
+
+  /// The base gray color.
+  final CupertinoDynamicColor systemGray;
+
+  /// A second-level shade of grey.
+  final CupertinoDynamicColor systemGray2;
+
+  /// A third-level shade of grey.
+  final CupertinoDynamicColor systemGray3;
+
+  /// A fourth-level shade of grey.
+  final CupertinoDynamicColor systemGray4;
+
+  /// A fifth-level shade of grey.
+  final CupertinoDynamicColor systemGray5;
+
+  /// A sixth-level shade of grey.
+  final CupertinoDynamicColor systemGray6;
+
 }

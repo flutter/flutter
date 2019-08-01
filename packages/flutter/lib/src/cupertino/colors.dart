@@ -101,15 +101,15 @@ class CupertinoDynamicColor extends Color {
   /// [defaultColor] will be used in other colors' absence, and it must not be null,
   /// unless all the other colors are not null.
   CupertinoDynamicColor({
-    this.defaultColor,
-    this.normalColor,
-    this.darkColor,
-    this.highContrastColor,
-    this.darkHighContrastColor,
-    this.elevatedColor,
-    this.darkElevatedColor,
-    this.elevatedHighContrastColor,
-    this.darkElevatedHighContrastColor,
+    Color defaultColor,
+    Color normalColor,
+    Color darkColor,
+    Color highContrastColor,
+    Color darkHighContrastColor,
+    Color elevatedColor,
+    Color darkElevatedColor,
+    Color elevatedHighContrastColor,
+    Color darkElevatedHighContrastColor,
   }) : assert(defaultColor != null || normalColor != null
                                    && darkColor != null
                                    && elevatedColor != null
@@ -118,7 +118,25 @@ class CupertinoDynamicColor extends Color {
                                    && darkHighContrastColor != null
                                    && darkElevatedHighContrastColor != null
                                    && elevatedHighContrastColor != null),
-       super(defaultColor?.value ?? normalColor?.value);
+       this._(
+         defaultColor,
+         <Color> [
+           normalColor,
+           darkColor,
+           highContrastColor,
+           darkHighContrastColor,
+           elevatedColor,
+           darkElevatedColor,
+           elevatedHighContrastColor,
+           darkElevatedHighContrastColor,
+         ]
+       );
+
+  CupertinoDynamicColor._(
+    this.defaultColor,
+    this._colorMap,
+  ) : assert(defaultColor != null || !_colorMap.contains(null)),
+      super(defaultColor?.value ?? _colorMap[0].value);
 
   /// The defaultColor color to use when the requested color is not specified.
   ///
@@ -129,60 +147,51 @@ class CupertinoDynamicColor extends Color {
   /// normal contrast, and base interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color normalColor;
+  Color get normalColor => _colorMap[0];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color darkColor;
+  Color get darkColor => _colorMap[1];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color highContrastColor;
+  Color get highContrastColor => _colorMap[2];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color darkHighContrastColor;
+  Color get darkHighContrastColor => _colorMap[3];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color elevatedColor;
+  Color get elevatedColor => _colorMap[4];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color darkElevatedColor;
+  Color get darkElevatedColor => _colorMap[5];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color elevatedHighContrastColor;
+  Color get elevatedHighContrastColor => _colorMap[6];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  final Color darkElevatedHighContrastColor;
+  Color get darkElevatedHighContrastColor => _colorMap[7];
 
-  List<Color> get _colorMap => <Color> [
-    normalColor,
-    darkColor,
-    highContrastColor,
-    darkHighContrastColor,
-    elevatedColor,
-    darkElevatedColor,
-    elevatedHighContrastColor,
-    darkElevatedHighContrastColor,
-  ];
+  final List<Color> _colorMap;
 
   /// Resolves the given [Color] to a concrete [Color], using the given [BuildContext].
   /// If the given color is already a concrete [Color], it will be returned as is.
@@ -191,8 +200,14 @@ class CupertinoDynamicColor extends Color {
       ? resolvable.resolveFrom(context, nullOk: nullOk)
       : resolvable;
 
-  /// Resolves this [CupertinoDynamicColor] to a concrete [Color], using the given
-  /// [BuildContext].
+  /// Resolves this [CupertinoDynamicColor] so that the resulting [CupertinoDynamicColor]'s
+  /// default color is one of the colors that matches the given [BuildContext]'s traits.
+  ///
+  /// For example, if the given [BuildContext] indicates the widgets in the subtree
+  /// should be displayed in dark mode, high contrast, and elevated interface
+  /// elevation, the resolved [CupertinoDynamicColor] will be the same as this
+  /// [CupertinoDynamicColor], except that its [defaultColor] will be `darkElevatedHighContrastColor`
+  /// from this [CupertinoDynamicColor].
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
@@ -202,7 +217,7 @@ class CupertinoDynamicColor extends Color {
   ///
   /// If any of the required dependecies is missing from the given context, an exception
   /// will be thrown unless [nullOk] is set to `true`.
-  Color resolveFrom(BuildContext context, { bool nullOk = false }) {
+  CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
     int dependencyBitMask = 0, configBitMask = 0;
     final List<Color> colors = _colorMap;
 
@@ -257,7 +272,20 @@ class CupertinoDynamicColor extends Color {
       }
     }
 
-    return _colorMap[configBitMask] ?? defaultColor;
+    final Color resolved = _colorMap[configBitMask] ?? defaultColor;
+    return resolved == defaultColor
+      ? this
+      : CupertinoDynamicColor(
+          defaultColor: resolved,
+          normalColor: normalColor,
+          darkColor: darkColor,
+          highContrastColor: highContrastColor,
+          darkHighContrastColor: darkHighContrastColor,
+          elevatedColor: elevatedColor,
+          darkElevatedColor: darkElevatedColor,
+          elevatedHighContrastColor: elevatedHighContrastColor,
+          darkElevatedHighContrastColor: darkElevatedHighContrastColor,
+        );
   }
 
   @override
