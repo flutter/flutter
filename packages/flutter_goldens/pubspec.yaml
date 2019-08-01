@@ -10,7 +10,7 @@ dependencies:
     sdk: flutter
   file: 5.0.8+1
   meta: 1.1.7
-  platform: 2.2.0
+  platform: 2.2.1
   process: 3.0.9
   flutter_goldens_client:
     path: ../flutter_goldens_client

@@ -13,7 +13,7 @@ dependencies:
   image: 2.1.4
   meta: 1.1.7
   path: 1.6.2
-  platform: 2.2.0
+  platform: 2.2.1
   process: 3.0.9
   stack_trace: 1.9.3
   vm_service_client: 0.2.6+2
