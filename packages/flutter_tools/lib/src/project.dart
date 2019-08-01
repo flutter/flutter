@@ -260,6 +260,12 @@ abstract class XcodeBasedProject {
   /// The Flutter-managed Xcode config file for [mode].
   File xcodeConfigFor(String mode);
 
+  /// The script that exports environment variables needed for Flutter tools.
+  /// Can be run first in a Xcode Script build phase to make FLUTTER_ROOT,
+  /// LOCAL_ENGINE, and other Flutter variables available to any flutter
+  /// tooling (`flutter build`, etc) to convert into flags.
+  File get generatedEnvironmentVariableExportScript;
+
   /// The CocoaPods 'Podfile'.
   File get podfile;
 
@@ -316,6 +322,9 @@ class IosProject implements XcodeBasedProject {
 
   @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
+
+  @override
+  File get generatedEnvironmentVariableExportScript => _flutterLibRoot.childDirectory('Flutter').childFile('flutter_export_environment.sh');
 
   @override
   File get podfile => hostAppRoot.childFile('Podfile');
@@ -655,11 +664,22 @@ class MacOSProject implements XcodeBasedProject {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
+  /// The xcfilelist used to track the inputs for the Flutter script phase in
+  /// the Xcode build.
+  File get inputFileList => ephemeralDirectory.childFile('FlutterInputs.xcfilelist');
+
+  /// The xcfilelist used to track the outputs for the Flutter script phase in
+  /// the Xcode build.
+  File get outputFileList => ephemeralDirectory.childFile('FlutterOutputs.xcfilelist');
+
   @override
   File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
 
   @override
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
+
+  @override
+  File get generatedEnvironmentVariableExportScript => managedDirectory.childFile('flutter_export_environment.sh');
 
   @override
   File get podfile => _macOSDirectory.childFile('Podfile');

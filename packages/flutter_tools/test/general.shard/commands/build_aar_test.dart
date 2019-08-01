@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/android/aar.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
-import 'package:flutter_tools/src/reporting/usage.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -51,7 +51,7 @@ void main() {
 
       final BuildAarCommand command = await runCommandIn(projectPath);
       expect(await command.usageValues,
-          containsPair(kCommandBuildAarProjectType, 'module'));
+          containsPair(CustomDimensions.commandBuildAarProjectType, 'module'));
 
     }, overrides: <Type, Generator>{
       AarBuilder: () => mockAarBuilder,
@@ -63,7 +63,7 @@ void main() {
 
       final BuildAarCommand command = await runCommandIn(projectPath);
       expect(await command.usageValues,
-          containsPair(kCommandBuildAarProjectType, 'plugin'));
+          containsPair(CustomDimensions.commandBuildAarProjectType, 'plugin'));
 
     }, overrides: <Type, Generator>{
       AarBuilder: () => mockAarBuilder,
@@ -76,7 +76,7 @@ void main() {
       final BuildAarCommand command = await runCommandIn(projectPath,
           arguments: <String>['--target-platform=android-arm']);
       expect(await command.usageValues,
-          containsPair(kCommandBuildAarTargetPlatform, 'android-arm'));
+          containsPair(CustomDimensions.commandBuildAarTargetPlatform, 'android-arm'));
 
     }, overrides: <Type, Generator>{
       AarBuilder: () => mockAarBuilder,

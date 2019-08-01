@@ -4,17 +4,17 @@
 
 import 'dart:async';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:file/file.dart';
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -200,6 +200,8 @@ void main() {
         await project.ensureReadyForPlatformSpecificTooling();
         final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
+        expectExists(flutter.childFile('flutter_export_environment.sh'));
+        expectExists(flutter.childFile('${project.manifest.appName}.podspec'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
             .childDirectory('FlutterPluginRegistrant')

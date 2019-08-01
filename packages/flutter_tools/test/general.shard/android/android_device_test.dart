@@ -34,7 +34,12 @@ void main() {
   });
 
   group('getAdbDevices', () {
-    final MockProcessManager mockProcessManager = MockProcessManager();
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+    });
+
     testUsingContext('throws on missing adb path', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);
@@ -42,10 +47,22 @@ void main() {
       final File adbExe = fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
-      ))
-      .thenAnswer(
-        (_) => throw ArgumentError(adbExe.path),
-      );
+      )).thenThrow(ArgumentError(adbExe.path));
+      expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to find "adb".*${adbExe.path}')));
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws on failing adb', () {
+      final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final File adbExe = fs.file(getAdbPath(androidSdk));
+      when(mockProcessManager.runSync(
+        <String>[adbExe.path, 'devices', '-l'],
+      )).thenThrow(ProcessException(adbExe.path, <String>['devices', '-l']));
       expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => MockAndroidSdk(),

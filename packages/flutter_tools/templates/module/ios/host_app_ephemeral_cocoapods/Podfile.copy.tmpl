@@ -1,8 +1,18 @@
 platform :ios, '8.0'
 
+flutter_application_path = '../'
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
+
 target 'Runner' do
-  flutter_application_path = '../'
-  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  install_flutter_plugin_pods flutter_application_path
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      config.build_settings['ENABLE_BITCODE'] = 'NO'
+    end
+  end
 end
 
 # Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.

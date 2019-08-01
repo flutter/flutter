@@ -31,7 +31,7 @@ import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
-import 'reporting/usage.dart';
+import 'reporting/reporting.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
@@ -236,7 +236,7 @@ class Doctor {
           break;
       }
 
-      flutterUsage.sendEvent('doctorResult.${validator.runtimeType.toString()}', result.typeStr);
+      DoctorResultEvent(validator: validator, result: result).send();
 
       if (result.statusInfo != null) {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
@@ -334,6 +334,15 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
+  List<ValidationResult> _subResults;
+
+  /// Subvalidator results.
+  ///
+  /// To avoid losing information when results are merged, the subresults are
+  /// cached on this field when they are available. The results are in the same
+  /// order as the subvalidator list.
+  List<ValidationResult> get subResults => _subResults;
+
   @override
   String get slowWarning => _currentSlowWarning;
   String _currentSlowWarning = 'Initializing...';
@@ -356,6 +365,7 @@ class GroupedValidator extends DoctorValidator {
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     assert(results.isNotEmpty, 'Validation results should not be empty');
+    _subResults = results;
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;

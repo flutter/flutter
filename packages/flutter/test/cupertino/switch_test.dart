@@ -546,7 +546,6 @@ void main() {
         'switch.tap.off.png',
         version: 0,
       ),
-      skip: !isLinux,
     );
 
     await tester.tap(find.byKey(switchKey));
@@ -561,7 +560,6 @@ void main() {
         'switch.tap.turningOn.png',
         version: 0,
       ),
-      skip: !isLinux,
     );
 
     await tester.pumpAndSettle();
@@ -571,7 +569,6 @@ void main() {
         'switch.tap.on.png',
         version: 0,
       ),
-      skip: !isLinux,
     );
   });
 

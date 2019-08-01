@@ -11,7 +11,7 @@ import '../base/file_system.dart';
 import '../convert.dart';
 import '../features.dart';
 import '../globals.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 

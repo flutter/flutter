@@ -965,5 +965,6 @@ Future<void> _androidGradleTests(String subShard) async {
   if (subShard == 'gradle2') {
     await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
+    await _runDevicelabTest('module_host_with_custom_build_test', env: env);
   }
 }
