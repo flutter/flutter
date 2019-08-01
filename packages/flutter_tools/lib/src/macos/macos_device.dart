@@ -107,6 +107,10 @@ class MacOSDevice extends Device {
     final Process process = await processManager.start(<String>[
       prebuiltMacOSApp.executable,
     ]);
+    // Bring app to foreground.
+    await processManager.run(<String>[
+      'open', prebuiltMacOSApp.bundleName,
+    ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
@@ -114,10 +118,6 @@ class MacOSDevice extends Device {
     final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
-      // Bring app to foreground.
-      await processManager.run(<String>[
-        'open', prebuiltMacOSApp.bundleName,
-      ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');

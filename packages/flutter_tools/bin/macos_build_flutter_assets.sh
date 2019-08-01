@@ -90,7 +90,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     assemble                                                                \
     -dTargetFile="${target_path}"                                           \
     -dTargetPlatform=darwin-x64                                             \
-    -dBuildMode=debug                                                       \
+    -dBuildMode="${build_mode}"                                                       \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     "${build_target}"

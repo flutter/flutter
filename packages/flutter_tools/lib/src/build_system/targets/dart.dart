@@ -110,7 +110,6 @@ class KernelSnapshot extends Target {
   }
 }
 
-
 /// Supports compiling a dart kernel file to an ELF binary.
 abstract class AotElfBase extends Target {
   const AotElfBase();

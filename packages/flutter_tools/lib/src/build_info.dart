@@ -271,6 +271,7 @@ enum TargetPlatform {
 enum IOSArch {
   armv7,
   arm64,
+  x86_64,
 }
 
 enum AndroidArch {
@@ -291,6 +292,8 @@ String getNameForIOSArch(IOSArch arch) {
       return 'armv7';
     case IOSArch.arm64:
       return 'arm64';
+    case IOSArch.x86_64:
+      return 'x86_64';
   }
   assert(false);
   return null;

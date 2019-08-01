@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/macos/xcode.dart';
+
 import '../../artifacts.dart';
+import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
@@ -81,6 +84,96 @@ class UnpackMacOS extends Target {
       );
     }
   }
+}
+
+class MacOSAotAssembly extends Target {
+  const MacOSAotAssembly();
+
+  @override
+  String get name => 'macos_aot_assembly';
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
+    final String outputPath = fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral');
+    if (environment.defines[kBuildMode] == null) {
+      throw MissingDefineException(kBuildMode, 'macos_aot_assembly');
+    }
+    if (environment.defines[kTargetPlatform] == null) {
+      throw MissingDefineException(kTargetPlatform, 'macos_aot_assembly');
+    }
+    final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
+    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
+    if (targetPlatform != TargetPlatform.darwin_x64) {
+      throw Exception('macos_aot_assembly is only supported for iOS applications');
+    }
+    final int snapshotExitCode = await snapshotter.build(
+      platform: targetPlatform,
+      buildMode: buildMode,
+      mainPath: environment.buildDir.childFile('app.dill').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+      outputPath: outputPath,
+      iosArch: IOSArch.x86_64,
+      bitcode: bitcode,
+    );
+    if (snapshotExitCode != 0) {
+      throw Exception('AOT snapshotter exited with code $snapshotExitCode');
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill')
+  ];
+
+  @override
+  List<Source> get outputs => <Source>[
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App')
+  ];
+}
+
+/// Because we need to unconditionally create an App.framework
+class DummyMacOSAotAssembly extends Target {
+  const DummyMacOSAotAssembly();
+
+  @override
+  String get name => 'dummy_macos_aot_assembly';
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final String outputPath = fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral');
+    final String outputFile = fs.path.join(outputPath, 'App.framework', 'App');
+    fs.file(outputFile).createSync(recursive: true);
+    // TODO(jonahwilliams): rewrite this in dart.
+    final ProcessResult processResult = await processManager.run(<String>[
+      environment.flutterRootDir
+        .childDirectory('packages')
+        .childDirectory('flutter_tools')
+        .childDirectory('bin')
+        .childFile('hack_script.sh').path,
+      outputFile,
+    ], runInShell: true);
+    if (processResult.exitCode != 0) {
+      throw Exception('Failed to compile debug App.framework');
+    }
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[
+    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App')
+  ];
 }
 
 /// Tell cocoapods to re-fetch dependencies.
@@ -162,6 +255,7 @@ class DebugMacOSApplication extends Target {
     KernelSnapshot(),
     CopyAssets(),
     DebugMacOSPodInstall(),
+    DummyMacOSAotAssembly(),
   ];
 
   @override
@@ -178,16 +272,33 @@ class DebugMacOSApplication extends Target {
   ];
 }
 
-// TODO(jonahwilliams): real AOT implementation.
 class ReleaseMacOSApplication extends DebugMacOSApplication {
   const ReleaseMacOSApplication();
 
   @override
   String get name => 'release_macos_application';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    FlutterPlugins(),
+    UnpackMacOS(),
+    MacOSAotAssembly(),
+    CopyAssets(),
+    DebugMacOSPodInstall(),
+  ];
 }
 class ProfileMacOSApplication extends DebugMacOSApplication {
   const ProfileMacOSApplication();
 
   @override
   String get name => 'profile_macos_application';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    FlutterPlugins(),
+    UnpackMacOS(),
+    MacOSAotAssembly(),
+    CopyAssets(),
+    DebugMacOSPodInstall(),
+  ];
 }
