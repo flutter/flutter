@@ -1449,7 +1449,6 @@ void main() {
     await tester.tapAt(tester.getCenter(find.byType(EditableText)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-    await tester.pumpAndSettle();
     expect(find.text('SELECT ALL'), findsNothing);
 
     // Tap the selection handle to bring up the "paste / select all" menu for
@@ -1555,7 +1554,6 @@ void main() {
       final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
       expect(firstLineTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
-      expect(firstLineToolbarTopLeft.dy, greaterThan(firstLineTopLeft.dy));
 
       // Show the selection menu on the second to last line and verify the
       // selection toolbar position is above that line and above the first
