@@ -1044,14 +1044,32 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void _verifyInvariants() {
     super._verifyInvariants();
-    assert(
-      _currentFakeAsync.periodicTimerCount == 0,
-      'A periodic Timer is still running even after the widget tree was disposed.'
-    );
-    assert(
-      _currentFakeAsync.nonPeriodicTimerCount == 0,
-      'A Timer is still pending even after the widget tree was disposed.'
-    );
+    try {
+      assert(
+        _currentFakeAsync.periodicTimerCount == 0,
+        'A periodic Timer is still running even after the widget tree was '
+        'disposed.',
+      );
+      assert(
+        _currentFakeAsync.nonPeriodicTimerCount == 0,
+        'A Timer is still pending even after the widget tree was disposed.',
+      );
+    } on AssertionError {
+      debugPrint('Pending timers:');
+      for (String timerInfo in _currentFakeAsync.pendingTimersDebugInfo) {
+        final int firstLineEnd = timerInfo.indexOf('\n');
+        assert(firstLineEnd != -1);
+
+        // No need to include the newline.
+        final String firstLine = timerInfo.substring(0, firstLineEnd);
+        final String stackTrace = timerInfo.substring(firstLineEnd + 1);
+
+        debugPrint(firstLine);
+        debugPrintStack(stackTrace: StackTrace.fromString(stackTrace));
+        debugPrint('');
+      }
+      rethrow;
+    }
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
