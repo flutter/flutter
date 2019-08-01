@@ -836,6 +836,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/natives.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/system.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart-pkg/zircon/sdk_ext/system.h
+FILE: ../../../flutter/shell/platform/fuchsia/dart/compiler.dart
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.cc
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/builtin_libraries.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/dart_component_controller.cc

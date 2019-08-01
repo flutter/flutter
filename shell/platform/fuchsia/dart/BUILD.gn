@@ -1,0 +1,37 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//third_party/dart/build/dart/dart_action.gni")
+import("//third_party/dart/utils/application_snapshot.gni")
+import("//third_party/dart/utils/compile_platform.gni")
+
+application_snapshot("kernel_compiler") {
+  main_dart = "compiler.dart"
+
+  deps = [
+    "../flutter/kernel:kernel_platform_files",
+  ]
+
+  dot_packages = rebase_path("//third_party/dart/.packages")
+
+  training_args = [ "--train" ]
+
+  kernel_compiler_files =
+      exec_script("//third_party/dart/tools/list_dart_files.py",
+                  [
+                    "absolute",
+                    rebase_path("."),
+                  ],
+                  "list lines")
+
+  kernel_compiler_files +=
+      exec_script("//third_party/dart/tools/list_dart_files.py",
+                  [
+                    "absolute",
+                    rebase_path("//third_party/dart/pkg"),
+                  ],
+                  "list lines")
+
+  inputs = kernel_compiler_files
+}
