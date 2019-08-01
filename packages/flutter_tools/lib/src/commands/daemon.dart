@@ -663,7 +663,7 @@ class DeviceDomain extends Domain {
           final Map<String, Object> response = await _deviceToMap(device);
           sendEvent(eventName, response);
         } catch (err) {
-          printError(err);
+          printError('$err');
         }
       });
     };
