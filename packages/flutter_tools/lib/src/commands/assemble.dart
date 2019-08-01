@@ -2,40 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/build_system/phases.dart';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
-import '../build_system/targets/assets.dart';
-import '../build_system/targets/dart.dart';
-import '../build_system/targets/ios.dart';
-import '../build_system/targets/linux.dart';
-import '../build_system/targets/macos.dart';
-import '../build_system/targets/windows.dart';
+import '../build_system/definitions.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
 /// The [BuildSystem] instance.
 BuildSystem get buildSystem => context.get<BuildSystem>();
-
-/// All currently implemented targets.
-const List<Target> _kDefaultTargets = <Target>[
-  UnpackMacOS(),
-  UnpackLinux(),
-  UnpackWindows(),
-  CopyAssets(),
-  KernelSnapshot(),
-  AotElfProfile(),
-  AotElfRelease(),
-  AotAssemblyProfile(),
-  AotAssemblyRelease(),
-  DebugMacOSApplication(),
-  ProfileMacOSApplication(),
-  ReleaseMacOSApplication(),
-];
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
@@ -66,17 +46,17 @@ class AssembleCommand extends FlutterCommand {
   @override
   String get name => 'assemble';
 
-  /// The target we are building.
-  Target get target {
+  /// The [BuildDefinition] we are building.
+  BuildDefinition createBuildDefinition() {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    return _kDefaultTargets.firstWhere((Target target) => target.name == name);
+    return kAllBuildDefinitions.firstWhere((BuildDefinition definition) => definition.name == name);
   }
 
   /// The environmental configuration for a build invocation.
-  Environment get environment {
+  Environment createEnvironment() {
     final FlutterProject flutterProject = FlutterProject.current();
     final Environment result = Environment(
       buildDir: flutterProject.directory
@@ -104,6 +84,9 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final Environment environment = createEnvironment();
+    final BuildDefinition buildDefinition = createBuildDefinition();
+    final Target target = await buildDefinition.createBuild(environment);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults['resource-pool-size'],
     ));

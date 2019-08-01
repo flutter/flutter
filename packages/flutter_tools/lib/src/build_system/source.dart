@@ -114,15 +114,6 @@ class SourceVisitor {
     }
   }
 
-  /// Visit a [Source] which contains a [SourceBehavior].
-  void visitBehavior(SourceBehavior sourceBehavior) {
-    if (inputs) {
-      sources.addAll(sourceBehavior.inputs(environment));
-    } else {
-      sources.addAll(sourceBehavior.outputs(environment));
-    }
-  }
-
   /// Visit a [Source] which is defined by an [Artifact] from the flutter cache.
   ///
   /// If the [Artifact] points to a directory then all child files are included.
@@ -167,17 +158,6 @@ abstract class Source {
   /// provided they do not use any wildcards. [Source.behavior] and
   /// [Source.function] are always implicit.
   bool get implicit;
-}
-
-/// An interface for describing input and output copies together.
-abstract class SourceBehavior {
-  const SourceBehavior();
-
-  /// The inputs for a particular target.
-  List<File> inputs(Environment environment);
-
-  /// The outputs for a particular target.
-  List<File> outputs(Environment environment);
 }
 
 class _FunctionSource implements Source {

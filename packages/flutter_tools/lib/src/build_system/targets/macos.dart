@@ -12,10 +12,35 @@ import '../../macos/cocoapods.dart';
 import '../../project.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
+import '../phases.dart';
 import 'assets.dart';
 import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
+
+/// The macOS plugin phase conditionally inserts a pod install target.
+class MacOSPluginPhase extends BuildPhase {
+  const MacOSPluginPhase();
+
+  @override
+  List<String> get dependencies => const <String>[];
+
+  @override
+  String get name => 'plugins';
+
+  @override
+  Future<List<Target>> plan(Environment environment) async {
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    if (flutterProject.macos.podfile.existsSync()) {
+      return const <Target>[
+        DebugMacOSPodInstall(),
+      ];
+    }
+    return const <Target>[
+      FlutterPlugins(),
+    ];
+  }
+}
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -106,10 +131,7 @@ class DebugMacOSPodInstall extends Target {
 
   @override
   List<Source> get outputs => const <Source>[
-    // TODO(jonahwilliams): introduce configuration/planning phase to build.
-    // No outputs because Cocoapods is fully responsible for tracking. plus there
-    // is no concept of an optional output. Instead we will need a build config
-    // phase to conditionally add this rule so that it can be written properly.
+    Source.pattern('{PROJECT_DIR}/macos/Podfile.lock'),
   ];
 
   @override
@@ -122,11 +144,6 @@ class DebugMacOSPodInstall extends Target {
   Future<void> build(List<File> inputFiles, Environment environment) async {
     if (environment.defines[kBuildMode] == null) {
       throw MissingDefineException(kBuildMode, 'debug_macos_pod_install');
-    }
-    // If there is no podfile do not perform any pods actions.
-    if (!environment.projectDir.childDirectory('macos')
-        .childFile('Podfile').existsSync()) {
-      return;
     }
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
@@ -142,9 +159,22 @@ class DebugMacOSPodInstall extends Target {
   }
 }
 
-/// Build all of the artifacts for a debug macOS application.
-class DebugMacOSApplication extends Target {
-  const DebugMacOSApplication();
+/// Copy the kernel dill to the correct asset directory
+class CopyKernelDill extends Target {
+  const CopyKernelDill();
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/app.dill')
+  ];
+
+  @override
+  String get name => 'copy_kernel_dill';
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/flutter_assets/kernel_blob.bin'),
+  ];
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
@@ -160,37 +190,6 @@ class DebugMacOSApplication extends Target {
 
   @override
   List<Target> get dependencies => const <Target>[
-    FlutterPlugins(),
-    UnpackMacOS(),
     KernelSnapshot(),
-    CopyAssets(),
-    DebugMacOSPodInstall(),
   ];
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill')
-  ];
-
-  @override
-  String get name => 'debug_macos_application';
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/flutter_assets/kernel_blob.bin'),
-  ];
-}
-
-// TODO(jonahwilliams): real AOT implementation.
-class ReleaseMacOSApplication extends DebugMacOSApplication {
-  const ReleaseMacOSApplication();
-
-  @override
-  String get name => 'release_macos_application';
-}
-class ProfileMacOSApplication extends DebugMacOSApplication {
-  const ProfileMacOSApplication();
-
-  @override
-  String get name => 'profile_macos_application';
 }

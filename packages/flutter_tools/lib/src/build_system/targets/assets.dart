@@ -16,7 +16,7 @@ class AssetsBuildPhase extends BuildPhase {
   const AssetsBuildPhase();
 
   @override
-  Future<List<Target>> application(Environment environment) async {
+  Future<List<Target>> plan(Environment environment) async {
     final List<Source> inputs = <Source>[
       const Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/assets.dart'),
       const Source.pattern('{PROJECT_DIR}/pubspec.yaml'),

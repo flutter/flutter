@@ -101,49 +101,17 @@ void main() {
     expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Resources/info.plist').existsSync(), true);
   }));
 
-  test('debug macOS application copies kernel blob', () => testbed.run(() async {
+  test('CopyKernelDill copies kernel blob', () => testbed.run(() async {
     final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
     final String outputKernel = fs.path.join(environment.buildDir.path, 'flutter_assets', 'kernel_blob.bin');
     fs.file(inputKernel)
       ..createSync(recursive: true)
       ..writeAsStringSync('testing');
 
-    await const DebugMacOSApplication().build(<File>[], environment);
+    await const CopyKernelDill().build(<File>[], environment);
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
   }));
-
-  test('profile macOS application copies kernel blob', () => testbed.run(() async {
-    final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
-    final String outputKernel = fs.path.join(environment.buildDir.path, 'flutter_assets', 'kernel_blob.bin');
-    fs.file(inputKernel)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('testing');
-
-    await const ProfileMacOSApplication().build(<File>[], environment);
-
-    expect(fs.file(outputKernel).readAsStringSync(), 'testing');
-  }));
-
-  test('release macOS application copies kernel blob', () => testbed.run(() async {
-    final String inputKernel = fs.path.join(environment.buildDir.path, 'app.dill');
-    final String outputKernel = fs.path.join(environment.buildDir.path, 'flutter_assets', 'kernel_blob.bin');
-    fs.file(inputKernel)
-      ..createSync(recursive: true)
-      ..writeAsStringSync('testing');
-
-    await const ReleaseMacOSApplication().build(<File>[], environment);
-
-    expect(fs.file(outputKernel).readAsStringSync(), 'testing');
-  }));
-
-  // Changing target names will require a corresponding update in flutter_tools/bin/macos_build_flutter_assets.sh.
-  test('Target names match those expected by bin scripts', () => testbed.run(() async {
-    expect(const DebugMacOSApplication().name, 'debug_macos_application');
-    expect(const ProfileMacOSApplication().name, 'profile_macos_application');
-    expect(const ReleaseMacOSApplication().name, 'release_macos_application');
-  }));
-
 
   test('DebugMacOSPodInstall throws if missing build mode', () => testbed.run(() async {
     expect(() => const DebugMacOSPodInstall().build(<File>[], environment),

@@ -143,15 +143,3 @@ void main() {
     expect(visitor.sources, isEmpty);
   }));
 }
-
-class TestBehavior extends SourceBehavior {
-  @override
-  List<File> inputs(Environment environment) {
-    return null;
-  }
-
-  @override
-  List<File> outputs(Environment environment) {
-    return null;
-  }
-}
