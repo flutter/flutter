@@ -74,6 +74,14 @@ esac
 build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
 build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
 
+# Precache artifacts
+RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+    ${verbose_flag}                                                         \
+    precache                                                                \
+    --no-android                                                            \
+    --no-ios                                                                \
+    --macos                                                                 \
+
 # TODO(jonahwilliams): support flavors https://github.com/flutter/flutter/issues/32923
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \

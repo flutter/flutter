@@ -43,6 +43,9 @@ List<File> listDartSources(Environment environment) {
   final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
+    if (!libDirectory.existsSync()) {
+      continue;
+    }
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         dartFiles.add(entity);
