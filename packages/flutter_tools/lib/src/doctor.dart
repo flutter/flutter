@@ -334,6 +334,15 @@ class GroupedValidator extends DoctorValidator {
 
   final List<DoctorValidator> subValidators;
 
+  List<ValidationResult> _subResults;
+
+  /// Subvalidator results.
+  ///
+  /// To avoid losing information when results are merged, the subresults are
+  /// cached on this field when they are available. The results are in the same
+  /// order as the subvalidator list.
+  List<ValidationResult> get subResults => _subResults;
+
   @override
   String get slowWarning => _currentSlowWarning;
   String _currentSlowWarning = 'Initializing...';
@@ -356,6 +365,7 @@ class GroupedValidator extends DoctorValidator {
 
   ValidationResult _mergeValidationResults(List<ValidationResult> results) {
     assert(results.isNotEmpty, 'Validation results should not be empty');
+    _subResults = results;
     ValidationType mergedType = results[0].type;
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;

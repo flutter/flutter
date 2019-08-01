@@ -54,6 +54,8 @@ enum Artifact {
   windowsDesktopPath,
   /// The root of the sky_engine package
   skyEnginePath,
+  /// The location of the macOS engine podspec file.
+  flutterMacOSPodspec,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -119,6 +121,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return '';
     case Artifact.skyEnginePath:
       return 'sky_engine';
+    case Artifact.flutterMacOSPodspec:
+      return 'FlutterMacOS.podspec';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -269,6 +273,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
+      case Artifact.flutterMacOSPodspec:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
@@ -384,6 +389,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.skyEnginePath:
         return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
+      case Artifact.flutterMacOSPodspec:
+        return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;

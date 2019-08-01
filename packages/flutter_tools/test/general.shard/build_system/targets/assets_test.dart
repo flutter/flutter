@@ -65,4 +65,15 @@ flutter:
     // See https://github.com/flutter/flutter/issues/35293
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);
   }));
+
+  test('FlutterPlugins updates required files as needed', () => testbed.run(() async {
+    fs.file('pubspec.yaml')
+      ..writeAsStringSync('name: foo\ndependencies:\n  foo: any\n');
+
+    await const FlutterPlugins().build(<File>[], Environment(
+      projectDir: fs.currentDirectory,
+    ));
+
+    expect(fs.file('.flutter-plugins').existsSync(), true);
+  }));
 }

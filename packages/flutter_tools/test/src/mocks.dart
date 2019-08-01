@@ -152,11 +152,12 @@ typedef ProcessFactory = Process Function(List<String> command);
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
-  bool succeed = true;
+  bool canRunSucceeds = true;
+  bool runSucceeds = true;
   List<String> commands;
 
   @override
-  bool canRun(dynamic command, { String workingDirectory }) => succeed;
+  bool canRun(dynamic command, { String workingDirectory }) => canRunSucceeds;
 
   @override
   Future<Process> start(
@@ -167,7 +168,7 @@ class MockProcessManager implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    if (!succeed) {
+    if (!runSucceeds) {
       final String executable = command[0];
       final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
