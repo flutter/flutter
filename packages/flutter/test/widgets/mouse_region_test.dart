@@ -625,25 +625,24 @@ void main() {
       expect(exit.single.position, const Offset(400.0, 300.0));
       expect(exit.single.delta, const Offset(0.0, 0.0));
     });
-  });
 
-  testWidgets('MouseRegion should not crash when taking closure arguments', (WidgetTester tester) async {
+    testWidgets('detects pointer enter with closure arguments', (WidgetTester tester) async {
+      await tester.pumpWidget(_HoverClientWithClosures());
+      expect(find.text('not hovering'), findsOneWidget);
 
-    await tester.pumpWidget(_HoverClientWithClosures());
-    expect(find.text('not hovering'), findsOneWidget);
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer();
+      // Move to a position out of MouseRegion
+      await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+      await tester.pumpAndSettle();
+      expect(find.text('not hovering'), findsOneWidget);
 
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
-    await gesture.addPointer();
-    // Move to a position out of MouseRegion
-    await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
-    await tester.pumpAndSettle();
-    expect(find.text('not hovering'), findsOneWidget);
-
-    // Move into MouseRegion
-    await gesture.moveBy(const Offset(-20, 0));
-    await tester.pumpAndSettle();
-    expect(find.text('HOVERING'), findsOneWidget);
+      // Move into MouseRegion
+      await gesture.moveBy(const Offset(-20, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('HOVERING'), findsOneWidget);
+    });
   });
 }
 
