@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
+import 'dart:io' as io show Platform;
 
 import 'package:meta/meta.dart';
 
@@ -379,8 +379,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
 
-  Map<String, String> envVars = Platform.environment;
-  if (envVars.containsKey('CI') && envVars['CI'] == 'true') {
+  if (io.Platform.environment.containsKey('CI') && io.Platform.environment['CI'] == 'true') {
     buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
   }
 
