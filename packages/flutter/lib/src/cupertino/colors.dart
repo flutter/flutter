@@ -110,17 +110,9 @@ class CupertinoDynamicColor extends Color {
     Color darkElevatedColor,
     Color elevatedHighContrastColor,
     Color darkElevatedHighContrastColor,
-  }) : assert(defaultColor != null || normalColor != null
-                                   && darkColor != null
-                                   && elevatedColor != null
-                                   && highContrastColor != null
-                                   && darkElevatedColor != null
-                                   && darkHighContrastColor != null
-                                   && darkElevatedHighContrastColor != null
-                                   && elevatedHighContrastColor != null),
-       this._(
+  }) : this._(
          defaultColor,
-         <Color> [
+         <Color>[
            normalColor,
            darkColor,
            highContrastColor,
@@ -132,10 +124,45 @@ class CupertinoDynamicColor extends Color {
          ]
        );
 
+  CupertinoDynamicColor.withVibrancyAndContrast(
+    Color defaultColor,
+    Color normalColor,
+    Color darkColor,
+    Color highContrastColor,
+    Color darkHighContrastColor,
+  ) : this(
+    defaultColor: defaultColor,
+    normalColor: normalColor,
+    darkColor: darkColor,
+    highContrastColor: highContrastColor,
+    darkHighContrastColor: darkHighContrastColor,
+    elevatedColor: normalColor,
+    darkElevatedColor: darkColor,
+    elevatedHighContrastColor: highContrastColor,
+    darkElevatedHighContrastColor: darkHighContrastColor,
+  );
+
+  CupertinoDynamicColor.withVibrancy(
+    Color defaultColor,
+    Color normalColor,
+    Color darkColor,
+  ) : this(
+    defaultColor: defaultColor,
+    normalColor: normalColor,
+    darkColor: darkColor,
+    highContrastColor: normalColor,
+    darkHighContrastColor: darkColor,
+    elevatedColor: normalColor,
+    darkElevatedColor: darkColor,
+    elevatedHighContrastColor: normalColor,
+    darkElevatedHighContrastColor: darkColor,
+  );
+
   CupertinoDynamicColor._(
     this.defaultColor,
     this._colorMap,
   ) : assert(defaultColor != null || !_colorMap.contains(null)),
+      assert(_colorMap.length == 8),
       super(defaultColor?.value ?? _colorMap[0].value);
 
   /// The defaultColor color to use when the requested color is not specified.

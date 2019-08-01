@@ -314,9 +314,27 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 }
 
+class _CupertinoSystemColor extends InheritedWidget {
+  const _CupertinoSystemColor({
+    Key key,
+    this.data,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  final CupertinoSystemColorData data;
+
+  @override
+  bool updateShouldNotify(_CupertinoSystemColor oldWidget) => oldWidget.data != data;
+}
+
+class CupertinoSystemColor {
+  const CupertinoSystemColor._();
+  //static CupertinoSystemColorData of(BuildContext context) {}
+}
+
 @immutable
 class CupertinoSystemColorData extends Diagnosticable {
-  const CupertinoSystemColorData(
+  const CupertinoSystemColorData({
     @required this.label,
     @required this.secondaryLabel,
     @required this.tertiaryLabel,
@@ -350,40 +368,40 @@ class CupertinoSystemColorData extends Diagnosticable {
     @required this.systemGray4,
     @required this.systemGray5,
     @required this.systemGray6,
-  ) : assert(label != null),
-      assert(secondaryLabel != null),
-      assert(tertiaryLabel != null),
-      assert(quaternaryLabel != null),
-      assert(systemFill != null),
-      assert(secondarySystemFill != null),
-      assert(tertiarySystemFill != null),
-      assert(quaternarySystemFill != null),
-      assert(placeholderText != null),
-      assert(systemBackground != null),
-      assert(secondarySystemBackground != null),
-      assert(tertiarySystemBackground != null),
-      assert(systemGroupedBackground != null),
-      assert(secondarySystemGroupedBackground != null),
-      assert(tertiarySystemGroupedBackground != null),
-      assert(separator != null),
-      assert(opaqueSeparator != null),
-      assert(link != null),
-      assert(systemBlue != null),
-      assert(systemGreen != null),
-      assert(systemIndigo != null),
-      assert(systemOrange != null),
-      assert(systemPink != null),
-      assert(systemPurple != null),
-      assert(systemRed != null),
-      assert(systemTeal != null),
-      assert(systemYellow != null),
-      assert(systemGray != null),
-      assert(systemGray2 != null),
-      assert(systemGray3 != null),
-      assert(systemGray4 != null),
-      assert(systemGray5 != null),
-      assert(systemGray6 != null),
-      super();
+  }) : assert(label != null),
+       assert(secondaryLabel != null),
+       assert(tertiaryLabel != null),
+       assert(quaternaryLabel != null),
+       assert(systemFill != null),
+       assert(secondarySystemFill != null),
+       assert(tertiarySystemFill != null),
+       assert(quaternarySystemFill != null),
+       assert(placeholderText != null),
+       assert(systemBackground != null),
+       assert(secondarySystemBackground != null),
+       assert(tertiarySystemBackground != null),
+       assert(systemGroupedBackground != null),
+       assert(secondarySystemGroupedBackground != null),
+       assert(tertiarySystemGroupedBackground != null),
+       assert(separator != null),
+       assert(opaqueSeparator != null),
+       assert(link != null),
+       assert(systemBlue != null),
+       assert(systemGreen != null),
+       assert(systemIndigo != null),
+       assert(systemOrange != null),
+       assert(systemPink != null),
+       assert(systemPurple != null),
+       assert(systemRed != null),
+       assert(systemTeal != null),
+       assert(systemYellow != null),
+       assert(systemGray != null),
+       assert(systemGray2 != null),
+       assert(systemGray3 != null),
+       assert(systemGray4 != null),
+       assert(systemGray5 != null),
+       assert(systemGray6 != null),
+       super();
   // Label Colors
   /// The color for text labels containing primary content.
   final CupertinoDynamicColor label;
@@ -496,38 +514,77 @@ class CupertinoSystemColorData extends Diagnosticable {
   @override
   bool operator ==(dynamic other) {
     return other.runtimeType == runtimeType
-        && label == label,
-        && secondaryLabel == secondaryLabel,
-        && tertiaryLabel == tertiaryLabel,
-        && quaternaryLabel == quaternaryLabel,
-        && systemFill == systemFill,
-        && secondarySystemFill == secondarySystemFill,
-        && tertiarySystemFill == tertiarySystemFill,
-        && quaternarySystemFill == quaternarySystemFill,
-        && placeholderText == placeholderText,
-        && systemBackground == systemBackground,
-        && secondarySystemBackground == secondarySystemBackground,
-        && tertiarySystemBackground == tertiarySystemBackground,
-        && systemGroupedBackground == systemGroupedBackground,
-        && secondarySystemGroupedBackground == secondarySystemGroupedBackground,
-        && tertiarySystemGroupedBackground == tertiarySystemGroupedBackground,
-        && separator == separator,
-        && opaqueSeparator== opaqueSeparator,
-        && link == link,
-        && systemBlue == systemBlue,
-        && systemGreen == systemGreen,
-        && systemIndigo == systemIndigo,
-        && systemOrange == systemOrange,
-        && systemPink == systemPink,
-        && systemPurple == systemPurple,
-        && systemRed == systemRed,
-        && systemTeal == systemTeal,
-        && systemYellow == systemYellow,
-        && systemGray == systemGray,
-        && systemGray2 == systemGray2,
-        && systemGray3 == systemGray3,
-        && systemGray4 == systemGray4,
-        && systemGray5 == systemGray5,
+        && label == label
+        && secondaryLabel == secondaryLabel
+        && tertiaryLabel == tertiaryLabel
+        && quaternaryLabel == quaternaryLabel
+        && systemFill == systemFill
+        && secondarySystemFill == secondarySystemFill
+        && tertiarySystemFill == tertiarySystemFill
+        && quaternarySystemFill == quaternarySystemFill
+        && placeholderText == placeholderText
+        && systemBackground == systemBackground
+        && secondarySystemBackground == secondarySystemBackground
+        && tertiarySystemBackground == tertiarySystemBackground
+        && systemGroupedBackground == systemGroupedBackground
+        && secondarySystemGroupedBackground == secondarySystemGroupedBackground
+        && tertiarySystemGroupedBackground == tertiarySystemGroupedBackground
+        && separator == separator
+        && opaqueSeparator== opaqueSeparator
+        && link == link
+        && systemBlue == systemBlue
+        && systemGreen == systemGreen
+        && systemIndigo == systemIndigo
+        && systemOrange == systemOrange
+        && systemPink == systemPink
+        && systemPurple == systemPurple
+        && systemRed == systemRed
+        && systemTeal == systemTeal
+        && systemYellow == systemYellow
+        && systemGray == systemGray
+        && systemGray2 == systemGray2
+        && systemGray3 == systemGray3
+        && systemGray4 == systemGray4
+        && systemGray5 == systemGray5
         && systemGray6 == systemGray6;
   }
+
+  @override
+  int get hashCode => hashList(<Color>[label,
+                                secondaryLabel,
+                                tertiaryLabel,
+                                quaternaryLabel,
+                                systemFill,
+                                secondarySystemFill,
+                                tertiarySystemFill,
+                                quaternarySystemFill,
+                                placeholderText,
+                                systemBackground,
+                                secondarySystemBackground,
+                                tertiarySystemBackground,
+                                systemGroupedBackground,
+                                secondarySystemGroupedBackground,
+                                tertiarySystemGroupedBackground,
+                                separator,
+                                opaqueSeparator,
+                                link,
+                                systemBlue,
+                                systemGreen,
+                                systemIndigo,
+                                systemOrange,
+                                systemPink,
+                                systemPurple,
+                                systemRed,
+                                systemTeal,
+                                systemYellow,
+                                systemGray,
+                                systemGray2,
+                                systemGray3,
+                                systemGray4,
+                                systemGray5,
+                                systemGray6,
+                            ]);
+
+  //static final CupertinoSystemColorData defaultSystemColor = CupertinoSystemColorData(
+  //);
 }
