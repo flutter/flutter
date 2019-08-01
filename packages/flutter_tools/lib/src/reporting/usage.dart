@@ -223,7 +223,7 @@ class _UsageImpl implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): systemClock.now().toString(),
+      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
     };
     _analytics.sendScreenView(command, parameters: paramsWithLocalTime);
   }
@@ -240,7 +240,7 @@ class _UsageImpl implements Usage {
 
     final Map<String, String> paramsWithLocalTime = <String, String>{
       ...?parameters,
-      cdKey(CustomDimensions.localTime): systemClock.now().toString(),
+      cdKey(CustomDimensions.localTime): formatDateTime(systemClock.now()),
     };
 
     _analytics.sendEvent(category, parameter, parameters: paramsWithLocalTime);
