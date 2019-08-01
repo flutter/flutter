@@ -20,7 +20,7 @@ def main():
 
   fat_gen_snapshot = os.path.join(args.dst, 'gen_snapshot')
   arm64_gen_snapshot = os.path.join(args.arm64_out_dir, 'clang_x64', 'gen_snapshot')
-  armv7_gen_snapshot = os.path.join(args.armv7_out_dir, 'clang_x86', 'gen_snapshot')
+  armv7_gen_snapshot = os.path.join(args.armv7_out_dir, 'clang_x64', 'gen_snapshot')
 
   if not os.path.isfile(arm64_gen_snapshot):
     print 'Cannot find x86_64 (arm64) gen_snapshot at', arm64_gen_snapshot
