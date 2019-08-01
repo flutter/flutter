@@ -22,6 +22,7 @@ _script_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..'))
 _src_root_dir = os.path.join(_script_dir, '..', '..', '..')
 _out_dir = os.path.join(_src_root_dir, 'out')
 _bucket_directory = os.path.join(_out_dir, 'fuchsia_bucket')
+_fuchsia_base = 'flutter/shell/platform/fuchsia'
 
 
 def IsLinux():
@@ -164,7 +165,7 @@ def ProcessCIPDPakcage(upload, engine_version):
 
 
 def GetRunnerTarget(runner_type, product, aot):
-  base = 'flutter/shell/platform/fuchsia/%s:' % runner_type
+  base = '%s/%s:' % (_fuchsia_base, runner_type)
   if 'dart' in runner_type:
     target = 'dart_'
   else:
@@ -186,6 +187,7 @@ def GetTargetsToBuild(product=False):
       GetRunnerTarget('flutter', product, True),
       # The Dart Runner.
       GetRunnerTarget('dart_runner', product, False),
+      '%s/dart:kernel_compiler' % _fuchsia_base,
   ]
   return targets_to_build
 
