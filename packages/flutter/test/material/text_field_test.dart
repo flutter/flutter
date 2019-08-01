@@ -499,7 +499,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile(
         'text_field_opacity_test.0.png',
-        version: 2,
+        version: 3,
       ),
       skip: !isLinux,
     );
