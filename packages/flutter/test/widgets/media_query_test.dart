@@ -58,6 +58,7 @@ void main() {
     expect(copied.padding, data.padding);
     expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
+    expect(copied.systemGestureInsets, data.systemGestureInsets);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
     expect(copied.invertColors, data.invertColors);
@@ -75,6 +76,7 @@ void main() {
       padding: const EdgeInsets.all(9.10938),
       viewPadding: const EdgeInsets.all(11.24031),
       viewInsets: const EdgeInsets.all(1.67262),
+      systemGestureInsets: const EdgeInsets.all(1.5556),
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
       invertColors: true,
@@ -88,6 +90,7 @@ void main() {
     expect(copied.padding, const EdgeInsets.all(9.10938));
     expect(copied.viewPadding, const EdgeInsets.all(11.24031));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
+    expect(copied.systemGestureInsets, const EdgeInsets.all(1.5556));
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
     expect(copied.invertColors, true);

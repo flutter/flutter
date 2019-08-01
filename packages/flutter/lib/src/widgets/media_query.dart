@@ -92,6 +92,7 @@ class MediaQueryData {
     this.platformBrightness = Brightness.light,
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
+    this.systemGestureInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
@@ -114,6 +115,7 @@ class MediaQueryData {
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      systemGestureInsets = EdgeInsets.fromWindowPadding(window.systemGestureInsets, window.devicePixelRatio),
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
@@ -210,6 +212,55 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
+  /// The parts of the display that contain system gestures, typically swipes
+  /// from the edge of the screen for navigation.
+  ///
+  /// {@tool snippet --template=stateful_widget_scaffold}
+  ///
+  /// When using Android Q with full gestural navigation turned on,
+  /// [BottomAppBar.child] can use [MediaQuery.systemGestureInsets] with
+  /// [Padding] to avoid overlapping its contents with the device's system
+  /// gesture areas.
+  ///
+  /// ```dart imports
+  /// import 'package:flutter/services.dart';
+  /// ```
+  ///
+  /// ```dart
+  /// @override
+  /// void initState() {
+  ///   SystemChrome.setEnabledSystemUIOverlays([SystemUiOverlay.top]);
+  ///   super.initState();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     appBar: AppBar(
+  ///       title: Text(widget.title),
+  ///     ),
+  ///     bottomNavigationBar: BottomAppBar(
+  ///       color: Colors.green,
+  ///       child: Padding(
+  ///         padding: EdgeInsets.only(
+  ///           bottom: MediaQuery.of(context).systemGestureInsets.bottom,
+  ///         ),
+  ///         child: Row(
+  ///           mainAxisAlignment: MainAxisAlignment.spaceAround,
+  ///           children: <Widget>[
+  ///             IconButton(onPressed: () {}, icon: Icon(Icons.menu)),
+  ///             IconButton(onPressed: () {}, icon: Icon(Icons.mail)),
+  ///             IconButton(onPressed: () {}, icon: Icon(Icons.radio_button_checked)),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  final EdgeInsets systemGestureInsets;
+
   /// Whether to use 24-hour format when formatting time.
   ///
   /// The behavior of this flag is different across platforms:
@@ -274,6 +325,7 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
+    EdgeInsets systemGestureInsets,
     bool alwaysUse24HourFormat,
     bool disableAnimations,
     bool invertColors,
@@ -288,6 +340,7 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
+      systemGestureInsets: systemGestureInsets ?? this.systemGestureInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       disableAnimations: disableAnimations ?? this.disableAnimations,
