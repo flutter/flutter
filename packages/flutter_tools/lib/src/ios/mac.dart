@@ -379,8 +379,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
 
-  // Disable Xcode indexing in CI environment  
-  if (Platform.environment.containsKey('CI') && Platform.environment['CI'] == 'true') {
+  Map<String, String> envVars = Platform.environment;
+  if (envVars.containsKey('CI') && envVars['CI'] == 'true') {
     buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
   }
 
