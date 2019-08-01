@@ -351,7 +351,6 @@ class CupertinoSystemColorData extends Diagnosticable {
     @required this.systemGray5,
     @required this.systemGray6,
   ) : assert(label != null),
-      assert(label != null),
       assert(secondaryLabel != null),
       assert(tertiaryLabel != null),
       assert(quaternaryLabel != null),
@@ -494,4 +493,41 @@ class CupertinoSystemColorData extends Diagnosticable {
   /// A sixth-level shade of grey.
   final CupertinoDynamicColor systemGray6;
 
+  @override
+  bool operator ==(dynamic other) {
+    return other.runtimeType == runtimeType
+        && label == label,
+        && secondaryLabel == secondaryLabel,
+        && tertiaryLabel == tertiaryLabel,
+        && quaternaryLabel == quaternaryLabel,
+        && systemFill == systemFill,
+        && secondarySystemFill == secondarySystemFill,
+        && tertiarySystemFill == tertiarySystemFill,
+        && quaternarySystemFill == quaternarySystemFill,
+        && placeholderText == placeholderText,
+        && systemBackground == systemBackground,
+        && secondarySystemBackground == secondarySystemBackground,
+        && tertiarySystemBackground == tertiarySystemBackground,
+        && systemGroupedBackground == systemGroupedBackground,
+        && secondarySystemGroupedBackground == secondarySystemGroupedBackground,
+        && tertiarySystemGroupedBackground == tertiarySystemGroupedBackground,
+        && separator == separator,
+        && opaqueSeparator== opaqueSeparator,
+        && link == link,
+        && systemBlue == systemBlue,
+        && systemGreen == systemGreen,
+        && systemIndigo == systemIndigo,
+        && systemOrange == systemOrange,
+        && systemPink == systemPink,
+        && systemPurple == systemPurple,
+        && systemRed == systemRed,
+        && systemTeal == systemTeal,
+        && systemYellow == systemYellow,
+        && systemGray == systemGray,
+        && systemGray2 == systemGray2,
+        && systemGray3 == systemGray3,
+        && systemGray4 == systemGray4,
+        && systemGray5 == systemGray5,
+        && systemGray6 == systemGray6;
+  }
 }
