@@ -79,7 +79,7 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build invokes build script', () async {
+  testUsingContext('macOS build invokes xcode build', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.directory('macos').createSync();
@@ -91,8 +91,8 @@ void main() {
       projectDir: flutterProject.directory,
       buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
       defines: <String, String>{
-        kBuildMode: 'release',
-        kTargetFile: fs.path.absolute(fs.path.join('lib', 'main.dart')),
+        kBuildMode: 'debug',
+        kTargetFile: 'lib/main.dart',
         kTargetPlatform: 'darwin-x64',
       }
     );
