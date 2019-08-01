@@ -413,6 +413,7 @@ Information about project "Runner":
       final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
+      expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), isNotNull);
     }
 
     testUsingOsxContext('extract build name and number from pubspec.yaml', () async {
@@ -448,7 +449,7 @@ flutter:
         manifestString: manifest,
         buildInfo: buildInfo,
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '1.0.0',
       );
     });
 
@@ -467,6 +468,24 @@ flutter:
         buildInfo: buildInfo,
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '1',
+      );
+    });
+
+    testUsingOsxContext('allow build info to override build name with build number fallback', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      await checkBuildVersion(
+        manifestString: manifest,
+        buildInfo: buildInfo,
+        expectedBuildName: '1.0.2',
+        expectedBuildNumber: '1.0.2',
       );
     });
 

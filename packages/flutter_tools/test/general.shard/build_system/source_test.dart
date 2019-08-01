@@ -135,6 +135,14 @@ void main() {
 
     expect(() => invalidBase.accept(visitor), throwsA(isInstanceOf<InvalidPatternException>()));
   }));
+
+  test('can substitute optional files', () => testbed.run(() {
+    const Source missingSource = Source.pattern('{PROJECT_DIR}/foo', optional: true);
+
+    expect(fs.file('foo').existsSync(), false);
+    missingSource.accept(visitor);
+    expect(visitor.sources, isEmpty);
+  }));
 }
 
 class TestBehavior extends SourceBehavior {

@@ -757,7 +757,9 @@ void main() {
       );
     });
 
-    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers', (WidgetTester tester) async {
+    // This test makes sure it doesn't crash.
+    // https://github.com/flutter/flutter/issues/21514
+    testWidgets('RenderAndroidView reconstructed with same gestureRecognizers does not crash', (WidgetTester tester) async {
       final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
       viewsController.registerViewType('webview');
 
