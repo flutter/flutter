@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:meta/meta.dart';
 
@@ -377,6 +378,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
   buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+
+  // Disable Xcode indexing in CI environment  
+  if (Platform.environment.containsKey('CI') && Platform.environment['CI'] == 'true') {
+    buildCommands.add('COMPILER_INDEX_STORE_ENABLE=NO');
+  }
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
