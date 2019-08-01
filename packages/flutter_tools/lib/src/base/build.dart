@@ -56,6 +56,15 @@ class GenSnapshot {
 
     final String snapshotterPath = getSnapshotterPath(snapshotType);
 
+    // iOS gen_snapshot is a multi-arch binary. Running as an i386 binary will
+    // generate armv7 code. Running as an x86_64 binary will generate arm64
+    // code. /usr/bin/arch can be used to run binaries with the specified
+    // architecture.
+    if (snapshotType.platform == TargetPlatform.ios) {
+      final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath, ...args]);
+    }
+
     StringConverter outputFilter;
     if (additionalArgs.contains('--strip')) {
       // Filter out gen_snapshot's warning message about stripping debug symbols
