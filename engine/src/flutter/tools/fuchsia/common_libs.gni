@@ -4,7 +4,7 @@
 
 import("$flutter_root/tools/fuchsia/clang.gni")
 
-fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$host_cpu"
+fuchsia_sdk_base = "//fuchsia/sdk/$host_os/arch/$target_cpu"
 fuchsia_sdk_lib = "$fuchsia_sdk_base/lib"
 sysroot_lib = "$fuchsia_sdk_base/sysroot/lib"
 sysroot_dist_lib = "$fuchsia_sdk_base/sysroot/dist/lib"

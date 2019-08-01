@@ -17,6 +17,7 @@ if (using_fuchsia_sdk) {
 
   group("fuchsia") {
     deps = [
+      "dart:kernel_compiler",
       "dart_runner:$dart_runner_target",
       "flutter:$flutter_runner_target",
     ]
