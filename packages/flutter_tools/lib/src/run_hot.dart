@@ -155,6 +155,12 @@ class HotRunner extends ResidentRunner {
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
+      // https://github.com/flutter/flutter/issues/33050
+      // TODO(blasten): Remove this check once https://b.corp.google.com/issues/132325318 has been fixed.
+      if (error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
+        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        printStatus('Learn more about the status of this issue on https://b.corp.google.com/issues/132325318.');
+      }
       return 2;
     }
 

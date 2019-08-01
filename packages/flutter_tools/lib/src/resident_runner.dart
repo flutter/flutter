@@ -512,6 +512,12 @@ class FlutterDevice {
   }
 }
 
+// Issue: https://github.com/flutter/flutter/issues/33050
+// Matches the following patterns:
+//    HttpException: Connection closed before full header was received, uri = *
+//    HttpException: , uri = *
+final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
+
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
