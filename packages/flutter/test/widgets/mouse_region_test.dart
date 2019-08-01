@@ -630,4 +630,54 @@ void main() {
       expect(exit.single.delta, const Offset(0.0, 0.0));
     });
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/35114.
+  testWidgets('RenderMouseRegion should paint child only once when hover annotation is attached',
+          (WidgetTester tester) async {
+        final _TestPainter painter = _TestPainter();
+        await tester.pumpWidget(
+          MouseRegion(
+            onEnter: (_) {},
+            onExit: (_) {},
+            child: Container(
+              width: 300,
+              height: 300,
+              color: const Color(0xFF00FF00),
+              child: CustomPaint(size: const Size(300, 300), painter: painter),
+            ),
+          ),
+        );
+
+        // At this point it should have painted once.
+        expect(painter.paintCounter, 1);
+
+        // Hover over container area so it repaints with hover annotation.
+        final TestGesture gesture =
+        await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await gesture.addPointer();
+        await gesture.moveTo(tester.getCenter(find.byType(Container)));
+        await tester.pumpAndSettle();
+        await gesture.removePointer();
+
+        expect(painter.paintCounter, 2);
+      });
+}
+
+class _TestPainter extends CustomPainter {
+  _TestPainter();
+
+  int paintCounter = 0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    canvas.drawLine(
+        const Offset(10, 10), const Offset(20, 20),
+        Paint()
+          ..color = const Color(0xFFFF0000)
+          ..style = PaintingStyle.fill);
+    paintCounter++;
+  }
+
+  @override
+  bool shouldRepaint(_TestPainter oldPainter) => true;
 }

@@ -2727,8 +2727,9 @@ class RenderMouseRegion extends RenderProxyBox {
         offset: offset,
       );
       context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
     }
-    super.paint(context, offset);
   }
 
   @override
