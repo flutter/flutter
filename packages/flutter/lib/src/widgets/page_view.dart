@@ -359,7 +359,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-  // Only call this from places that will definitely trigger a rebuild.
+
   set viewportFraction(double value) {
     if (_viewportFraction == value)
       return;
