@@ -359,18 +359,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
+  // Only call this from places that will definitely trigger a rebuild.
   set viewportFraction(double value) {
     if (_viewportFraction == value)
       return;
     final double oldPage = page;
     _viewportFraction = value;
     if (oldPage != null) {
-      assert(() {
-        final Element storageContext = context.storageContext;
-        if (!storageContext.owner.debugBuilding)
-          throw "$runtimeType's viewportFraction was called outside of the build phase.";
-      }());
-      // This part should only be reacheable when it will definitely trigger a rebuild.
       correctPixels(getPixelsFromPage(oldPage));
     }
   }
