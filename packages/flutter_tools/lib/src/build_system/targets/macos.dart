@@ -41,9 +41,6 @@ class UnpackMacOS extends Target {
   List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
-    Source.pattern('$_kOutputPrefix/Headers/FLEOpenGLContextHandling.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FLEReshapeListener.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FLEView.h'),
     Source.pattern('$_kOutputPrefix/Headers/FLEViewController.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
