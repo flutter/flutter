@@ -64,7 +64,7 @@ void SceneUpdateContext::CreateFrame(scenic::EntityNode entity_node,
                                      Layer* layer) {
   // Frames always clip their children.
   SetEntityNodeClipPlanes(entity_node, rrect.getBounds());
-  // TODO(SCN-1274): AddPart() and SetClip() will be deleted.
+  // TODO(SCN-1274): SetClip() will be deleted.
   entity_node.SetClip(0u, true /* clip to self */);
 
   // We don't need a shape if the frame is zero size.
@@ -285,9 +285,7 @@ SceneUpdateContext::Transform::~Transform() {
 }
 
 SceneUpdateContext::Shape::Shape(SceneUpdateContext& context)
-    : Entity(context), shape_node_(context.session()) {
-  entity_node().AddPart(shape_node_);
-}
+    : Entity(context), shape_node_(context.session()) {}
 
 SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
                                  const SkRRect& rrect,
