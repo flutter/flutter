@@ -1,4 +1,4 @@
-Signature: 5538b45c80a534ef7ac09eff3d913557
+Signature: 0a19f8a97f4f776602f3bbf8af16bb81
 
 UNUSED LICENSES:
 
@@ -3404,7 +3404,6 @@ FILE: ../../../third_party/skia/src/core/SkExecutor.cpp
 FILE: ../../../third_party/skia/src/core/SkFontMgrPriv.h
 FILE: ../../../third_party/skia/src/core/SkGaussFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkGaussFilter.h
-FILE: ../../../third_party/skia/src/core/SkImageFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkMaskBlurFilter.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskBlurFilter.h
 FILE: ../../../third_party/skia/src/core/SkPromiseImageTexture.cpp
@@ -4826,9 +4825,12 @@ FILE: ../../../third_party/skia/modules/particles/src/SkParticleEffect.cpp
 FILE: ../../../third_party/skia/modules/particles/src/SkReflected.cpp
 FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
+FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.cpp
@@ -4927,6 +4929,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.h
 FILE: ../../../third_party/skia/modules/skottie/src/effects/FillEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GaussianBlurEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GradientEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/HueSaturationEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionBlurEffect.cpp
