@@ -54,7 +54,7 @@ class CupertinoTheme extends StatelessWidget {
   /// exist in the ancestry tree.
   static CupertinoThemeData of(BuildContext context) {
     final _InheritedCupertinoTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedCupertinoTheme);
-    return inheritedTheme?.theme?.data ?? const CupertinoThemeData();
+    return (inheritedTheme?.theme?.data ?? const CupertinoThemeData())._resolveFrom(context, nullOk: true);
   }
 
   /// The widget below this widget in the tree.
@@ -226,6 +226,20 @@ class CupertinoThemeData extends Diagnosticable {
       _textTheme,
       _barBackgroundColor,
       _scaffoldBackgroundColor,
+    );
+  }
+
+  CupertinoThemeData _resolveFrom(BuildContext context, { bool nullOk = false }) {
+    Color convertColor(Color color) => color == null
+      ? null
+      : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+
+    return copyWith(
+      primaryColor: convertColor(primaryColor),
+      primaryContrastingColor: convertColor(primaryContrastingColor),
+      textTheme: textTheme.resolveFrom(context, nullOk: nullOk),
+      barBackgroundColor: convertColor(barBackgroundColor),
+      scaffoldBackgroundColor: convertColor(scaffoldBackgroundColor),
     );
   }
 
