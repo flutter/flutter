@@ -13,6 +13,13 @@ import 'media_query.dart';
 // String _name;
 
 /// The text style to apply to descendant [Text] widgets without explicit style.
+///
+/// See also:
+///
+///  * [AnimatedDefaultTextStyle], which animates changes in the text style
+///    smoothly over a given duration.
+///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
+///    animate changes in text style smoothly over time.
 class DefaultTextStyle extends InheritedWidget {
   /// Creates a default text style for the given subtree.
   ///
@@ -181,6 +188,13 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// {@tool sample}
 ///
+/// This example shows how to display text using the [Text] widget. If the text
+/// overflows, it truncates the text with an ellipsis.
+///
+/// ![A screenshot of the Text widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
+///
+/// ![A screenshot of the Text widget displaying an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
+///
 /// ```dart
 /// Text(
 ///   'Hello, $_name! How are you?',
@@ -197,6 +211,8 @@ class DefaultTextStyle extends InheritedWidget {
 /// for each word.
 ///
 /// {@tool sample}
+///
+/// ![A screenshot of the following rich text example](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///
 /// ```dart
 /// const Text.rich(

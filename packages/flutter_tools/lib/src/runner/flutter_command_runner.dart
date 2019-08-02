@@ -30,7 +30,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
 import '../vmservice.dart';
@@ -367,7 +367,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
           flutterUsage.suppressAnalytics = true;
 
         _checkFlutterCopy();
-        await FlutterVersion.instance.ensureVersionFile();
+        try {
+          await FlutterVersion.instance.ensureVersionFile();
+        } on FileSystemException catch (e) {
+          printError('Failed to write the version file to the artifact cache: "$e".');
+          printError('Please ensure you have permissions in the artifact cache directory.');
+          throwToolExit('Failed to write the version file');
+        }
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }

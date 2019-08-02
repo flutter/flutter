@@ -698,7 +698,6 @@ void main() {
           'material.border_paint_above.png',
           version: null,
         ),
-        skip: !isLinux,
       );
     }, skip: isBrowser);
 
@@ -742,7 +741,6 @@ void main() {
           'material.border_paint_below.png',
           version: null,
         ),
-        skip: !isLinux,
       );
     }, skip: isBrowser);
   });

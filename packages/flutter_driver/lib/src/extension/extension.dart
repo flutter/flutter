@@ -113,6 +113,8 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
+      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
+      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -133,6 +135,8 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
+      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
+      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
@@ -216,6 +220,12 @@ class FlutterDriverExtension {
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
+  }
+
+  // This can be used to wait for the first frame being rasterized during app launch.
+  Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
+    return null;
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
@@ -366,6 +376,31 @@ class FlutterDriverExtension {
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
+    return null;
+  }
+
+  /// Returns a future that waits until no pending frame is scheduled (frame is synced).
+  ///
+  /// Specifically, it checks:
+  /// * Whether the count of transient callbacks is zero.
+  /// * Whether there's no pending request for scheduling a new frame.
+  ///
+  /// We consider the frame is synced when both conditions are met.
+  ///
+  /// This method relies on a Flutter Driver mechanism called "frame sync",
+  /// which waits for transient animations to finish. Persistent animations will
+  /// cause this to wait forever.
+  ///
+  /// If a test needs to interact with the app while animations are running, it
+  /// should avoid this method and instead disable the frame sync using
+  /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
+  /// details on how to do this. Note, disabling frame sync will require the
+  /// test author to use some other method to avoid flakiness.
+  Future<Result> _waitUntilNoPendingFrame(Command command) async {
+    await _waitUntilFrame(() {
+      return SchedulerBinding.instance.transientCallbackCount == 0
+          && !SchedulerBinding.instance.hasScheduledFrame;
+    });
     return null;
   }
 

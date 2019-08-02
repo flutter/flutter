@@ -416,7 +416,7 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -448,7 +448,7 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -501,7 +501,6 @@ void main() {
         'text_field_opacity_test.0.png',
         version: 2,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 
@@ -742,9 +741,7 @@ void main() {
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
-    await gesture.up();
+    await tester.longPressAt(ePos, pointer: 7);
     await tester.pump();
 
     // 'def' is selected.
@@ -867,7 +864,7 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
-  testWidgets('does not paint tool bar when no options available on ios', (WidgetTester tester) async {
+  testWidgets('does not paint toolbar when no options available on ios', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -889,7 +886,7 @@ void main() {
     expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
   });
 
-  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
+  testWidgets('text field build empty toolbar when no options available android', (WidgetTester tester) async {
     await tester.pumpWidget(
         const MaterialApp(
           home: Material(
@@ -973,7 +970,7 @@ void main() {
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     // There should be no composing.
-    expect(renderEditable.isComposingText, false);
+    expect(renderEditable.text, TextSpan(text:'readonly', style: renderEditable.text.style));
   });
 
   testWidgets('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
@@ -1086,9 +1083,7 @@ void main() {
 
     // Long press the 'e' to select 'def'.
     final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
-    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
-    await gesture.up();
+    await tester.longPressAt(ePos, pointer: 7);
     await tester.pump();
 
     expect(controller.selection.isCollapsed, true);
@@ -1569,9 +1564,36 @@ void main() {
     // End the test here to ensure the animation is properly disposed of.
   });
 
-  testWidgets('An obscured TextField is not selectable by default', (WidgetTester tester) async {
+  testWidgets('An obscured TextField is selectable by default', (WidgetTester tester) async {
     // This is a regression test for
-    // https://github.com/flutter/flutter/issues/24100
+    // https://github.com/flutter/flutter/issues/32845
+
+    final TextEditingController controller = TextEditingController();
+    Widget buildFrame(bool obscureText) {
+      return overlay(
+        child: TextField(
+          controller: controller,
+          obscureText: obscureText,
+        ),
+      );
+    }
+
+    // Obscure text and don't enable or disable selection.
+    await tester.pumpWidget(buildFrame(true));
+    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press does select text.
+    final Offset ePos = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(ePos, pointer: 7);
+    await tester.pump();
+    expect(controller.selection.isCollapsed, false);
+  });
+
+  testWidgets('An obscured TextField is not selectable when disabled', (WidgetTester tester) async {
+    // This is a regression test for
+    // https://github.com/flutter/flutter/issues/32845
 
     final TextEditingController controller = TextEditingController();
     Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
@@ -1584,49 +1606,75 @@ void main() {
       );
     }
 
-    // Obscure text and don't enable or disable selection
-    await tester.pumpWidget(buildFrame(true, null));
+    // Explicitly disabled selection on obscured text.
+    await tester.pumpWidget(buildFrame(true, false));
     await tester.enterText(find.byType(TextField), 'abcdefghi');
     await skipPastScrollingAnimation(tester);
     expect(controller.selection.isCollapsed, true);
 
-    // Long press doesn't select anything
-    final Offset ePos = textOffsetToPosition(tester, 1);
-    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
-    await gesture.up();
+    // Long press doesn't select text.
+    final Offset ePos2 = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(ePos2, pointer: 7);
     await tester.pump();
     expect(controller.selection.isCollapsed, true);
   });
 
-  testWidgets('An obscured TextField is selectable when enabled', (WidgetTester tester) async {
-    // This is a regression test for
-    // https://github.com/flutter/flutter/issues/24100
-
+  testWidgets('An obscured TextField is selected as one word', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
-    Widget buildFrame(bool obscureText, bool enableInteractiveSelection) {
-      return overlay(
-        child: TextField(
-          controller: controller,
-          obscureText: obscureText,
-          enableInteractiveSelection: enableInteractiveSelection,
-        ),
-      );
-    }
 
-    // Explicitly allow selection on obscured text
-    await tester.pumpWidget(buildFrame(true, true));
-    await tester.enterText(find.byType(TextField), 'abcdefghi');
+    await tester.pumpWidget(overlay(
+      child: TextField(
+        controller: controller,
+        obscureText: true,
+      ),
+    ));
+    await tester.enterText(find.byType(TextField), 'abcde fghi');
     await skipPastScrollingAnimation(tester);
-    expect(controller.selection.isCollapsed, true);
 
-    // Long press does select text
-    final Offset ePos2 = textOffsetToPosition(tester, 1);
-    final TestGesture gesture2 = await tester.startGesture(ePos2, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
-    await gesture2.up();
+    // Long press does select text.
+    final Offset bPos = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(bPos, pointer: 7);
     await tester.pump();
-    expect(controller.selection.isCollapsed, false);
+    final TextSelection selection = controller.selection;
+    expect(selection.isCollapsed, false);
+    expect(selection.baseOffset, 0);
+    expect(selection.extentOffset, 10);
+  });
+
+  testWidgets('An obscured TextField has correct default context menu', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(overlay(
+      child: TextField(
+        controller: controller,
+        obscureText: true,
+      ),
+    ));
+    await tester.enterText(find.byType(TextField), 'abcde fghi');
+    await skipPastScrollingAnimation(tester);
+
+    // Long press to select text.
+    final Offset bPos = textOffsetToPosition(tester, 1);
+    await tester.longPressAt(bPos, pointer: 7);
+    await tester.pump();
+
+    // Should only have paste option when whole obscure text is selected.
+    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+    expect(find.text('SELECT ALL'), findsNothing);
+
+    // Long press at the end
+    final Offset iPos = textOffsetToPosition(tester, 10);
+    final Offset slightRight = iPos + const Offset(30.0, 0.0);
+    await tester.longPressAt(slightRight, pointer: 7);
+    await tester.pump();
+
+    // Should have paste and select all options when collapse.
+    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
   });
 
   testWidgets('TextField height with minLines unset', (WidgetTester tester) async {
@@ -3227,6 +3275,30 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Read only TextField identifies as read only text field in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              maxLength: 10,
+              readOnly: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField, SemanticsFlag.isReadOnly])
+    );
 
     semantics.dispose();
   });

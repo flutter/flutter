@@ -46,6 +46,28 @@ class LoggingThumbShape extends SliderComponentShape {
   }
 }
 
+class TallSliderTickMarkShape extends SliderTickMarkShape {
+  @override
+  Size getPreferredSize({SliderThemeData sliderTheme, bool isEnabled}) {
+    return const Size(10.0, 200.0);
+  }
+
+  @override
+  void paint(
+      PaintingContext context,
+      Offset offset, {
+      Offset thumbCenter,
+      RenderBox parentBox,
+      SliderThemeData sliderTheme,
+      Animation<double> enableAnimation,
+      bool isEnabled,
+      TextDirection textDirection,
+    }) {
+    final Paint paint = Paint()..color = Colors.red;
+    context.canvas.drawRect(Rect.fromLTWH(offset.dx, offset.dy, 10.0, 20.0), paint);
+  }
+}
+
 void main() {
   testWidgets('Slider can move when tapped (LTR)', (WidgetTester tester) async {
     final Key sliderKey = UniqueKey();
@@ -1484,5 +1506,45 @@ void main() {
     // Drag to the right end of the track.
     await gesture.moveBy(const Offset(600.0, 0.0));
     expect(value, 1.0);
+  });
+
+  testWidgets('Slider respects height from theme', (WidgetTester tester) async {
+    final Key sliderKey = UniqueKey();
+    double value = 0.0;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            final SliderThemeData sliderTheme = SliderTheme.of(context).copyWith(tickMarkShape: TallSliderTickMarkShape());
+            return MediaQuery(
+              data: MediaQueryData.fromWindow(window),
+              child: Material(
+                child: Center(
+                  child: IntrinsicHeight(
+                    child: SliderTheme(
+                      data: sliderTheme,
+                      child: Slider(
+                        key: sliderKey,
+                        value: value,
+                        divisions: 4,
+                        onChanged: (double newValue) {
+                          setState(() {
+                            value = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    final RenderBox renderObject = tester.renderObject<RenderBox>(find.byType(Slider));
+    expect(renderObject.size.height, 200);
   });
 }

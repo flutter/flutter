@@ -184,7 +184,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// differentiate the direction of the drag.
   double _globalDistanceMoved;
 
-  bool _isFlingGesture(VelocityEstimate estimate);
+  /// Determines if a gesture is a fling or not based on velocity.
+  ///
+  /// A fling calls its gesture end callback with a velocity, allowing the
+  /// provider of the callback to respond by carrying the gesture forward with
+  /// inertia, for example.
+  bool isFlingGesture(VelocityEstimate estimate);
+
   Offset _getDeltaForDetails(Offset delta);
   double _getPrimaryValueFromOffset(Offset value);
   bool get _hasSufficientGlobalDistanceToAccept;
@@ -395,7 +401,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     void Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
-    if (estimate != null && _isFlingGesture(estimate)) {
+    if (estimate != null && isFlingGesture(estimate)) {
       final Velocity velocity = Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
         .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
       details = DragEndDetails(
@@ -457,7 +463,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  bool _isFlingGesture(VelocityEstimate estimate) {
+  bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
     return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
@@ -496,7 +502,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  bool _isFlingGesture(VelocityEstimate estimate) {
+  bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
     return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
@@ -529,7 +535,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
-  bool _isFlingGesture(VelocityEstimate estimate) {
+  bool isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
     return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity

@@ -47,7 +47,6 @@ void main() {
         'backdrop_filter_test.cull_rect.png',
         version: 1,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 }

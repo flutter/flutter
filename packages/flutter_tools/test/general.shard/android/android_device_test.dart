@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -33,7 +34,12 @@ void main() {
   });
 
   group('getAdbDevices', () {
-    final MockProcessManager mockProcessManager = MockProcessManager();
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+    });
+
     testUsingContext('throws on missing adb path', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
       Config.instance.setValue('android-sdk', sdkDir.path);
@@ -41,10 +47,22 @@ void main() {
       final File adbExe = fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
-      ))
-      .thenAnswer(
-        (_) => throw ArgumentError(adbExe.path),
-      );
+      )).thenThrow(ArgumentError(adbExe.path));
+      expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to find "adb".*${adbExe.path}')));
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => MockAndroidSdk(),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws on failing adb', () {
+      final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+      Config.instance.setValue('android-sdk', sdkDir.path);
+
+      final File adbExe = fs.file(getAdbPath(androidSdk));
+      when(mockProcessManager.runSync(
+        <String>[adbExe.path, 'devices', '-l'],
+      )).thenThrow(ProcessException(adbExe.path, <String>['devices', '-l']));
       expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => MockAndroidSdk(),
@@ -365,7 +383,7 @@ flutter:
 
     testUsingContext('returns the generated host port from stdout', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect(await forwarder.forward(123), equals(456));
     }, overrides: <Type, Generator>{
@@ -374,7 +392,7 @@ flutter:
 
     testUsingContext('returns the supplied host port when stdout is empty', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       expect(await forwarder.forward(123, hostPort: 456), equals(456));
     }, overrides: <Type, Generator>{
@@ -383,7 +401,7 @@ flutter:
 
     testUsingContext('returns the supplied host port when stdout is the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
       expect(await forwarder.forward(123, hostPort: 456), equals(456));
     }, overrides: <Type, Generator>{
@@ -392,9 +410,31 @@ flutter:
 
     testUsingContext('throws an error when stdout is not blank nor the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
-      .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
+          .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
       expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('forwardedPorts returns empty list when forward failed', () {
+      when(mockProcessManager.runSync(argThat(contains('forward'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+
+      expect(forwarder.forwardedPorts, equals(const <ForwardedPort>[]));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('lastLogcatTimestamp', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    final AndroidDevice device = AndroidDevice('1234');
+
+    testUsingContext('returns null if shell command failed', () async {
+      when(mockProcessManager.runSync(argThat(contains('logcat'))))
+          .thenReturn(ProcessResult(0, 1, '', ''));
+      expect(device.lastLogcatTimestamp, isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -600,4 +640,11 @@ class MockUnresponsiveAndroidConsoleSocket extends Mock implements Socket {
 
   @override
   void add(List<int> data) {}
+}
+
+class AndroidPackageTest extends ApplicationPackage {
+  AndroidPackageTest() : super(id: 'app-id');
+
+  @override
+  String get name => 'app-package';
 }

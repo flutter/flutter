@@ -181,7 +181,6 @@ void main() {
         'opacity_test.offset.png',
         version: 1,
       ),
-      skip: !isLinux,
     );
   }, skip: isBrowser);
 

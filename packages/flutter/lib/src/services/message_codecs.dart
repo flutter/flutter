@@ -338,6 +338,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(_valueNull);
     } else if (value is bool) {
       buffer.putUint8(value ? _valueTrue : _valueFalse);
+    } else if (value is double) {  // Double precedes int because in JS everything is a double.
+                                   // Therefore in JS, both `is int` and `is double` always
+                                   // return `true`. If we check int first, we'll end up treating
+                                   // all numbers as ints and attempt the int32/int64 conversion,
+                                   // which is wrong. This precedence rule is irrelevant when
+                                   // decoding because we use tags to detect the type of value.
+      buffer.putUint8(_valueFloat64);
+      buffer.putFloat64(value);
     } else if (value is int) {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_valueInt32);
@@ -346,9 +354,6 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         buffer.putUint8(_valueInt64);
         buffer.putInt64(value);
       }
-    } else if (value is double) {
-      buffer.putUint8(_valueFloat64);
-      buffer.putFloat64(value);
     } else if (value is String) {
       buffer.putUint8(_valueString);
       final List<int> bytes = utf8.encoder.convert(value);

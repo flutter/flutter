@@ -23,14 +23,9 @@ void main() {
   group('drive', () {
     DriveCommand command;
     Device mockDevice;
+    Device mockUnsupportedDevice;
     MemoryFileSystem fs;
     Directory tempDir;
-
-    void withMockDevice([ Device mock ]) {
-      mockDevice = mock ?? MockDevice();
-      targetDeviceFinder = () async => mockDevice;
-      testDeviceManager.addDevice(mockDevice);
-    }
 
     setUpAll(() {
       Cache.disableLocking();
@@ -47,9 +42,6 @@ void main() {
       fs.file('pubspec.yaml')..createSync();
       fs.file('.packages').createSync();
       setExitFunctionForTests();
-      targetDeviceFinder = () {
-        throw 'Unexpected call to targetDeviceFinder';
-      };
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
@@ -67,12 +59,11 @@ void main() {
       restoreAppStarter();
       restoreAppStopper();
       restoreTestRunner();
-      restoreTargetDeviceFinder();
       tryToDelete(tempDir);
     });
 
     testUsingContext('returns 1 when test file is not found', () async {
-      withMockDevice();
+      testDeviceManager.addDevice(MockDevice());
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -94,7 +85,7 @@ void main() {
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
-      withMockDevice();
+      testDeviceManager.addDevice(MockDevice());
       appStarter = expectAsync1((DriveCommand command) async => null);
 
       final String testApp = fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
@@ -163,7 +154,7 @@ void main() {
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
-      withMockDevice();
+      testDeviceManager.addDevice(MockDevice());
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -194,7 +185,7 @@ void main() {
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
-      withMockDevice();
+      testDeviceManager.addDevice(MockDevice());
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -231,7 +222,8 @@ void main() {
     group('findTargetDevice', () {
       testUsingContext('uses specified device', () async {
         testDeviceManager.specifiedDeviceId = '123';
-        withMockDevice();
+        mockDevice = MockDevice();
+        testDeviceManager.addDevice(mockDevice);
         when(mockDevice.name).thenReturn('specified-device');
         when(mockDevice.id).thenReturn('123');
 
@@ -255,7 +247,25 @@ void main() {
       testUsingContext('uses existing Android device', () async {
         mockDevice = MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
-        withMockDevice(mockDevice);
+        testDeviceManager.addDevice(mockDevice);
+
+        final Device device = await findTargetDevice();
+        expect(device.name, 'mock-android-device');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        Platform: platform,
+      });
+
+      testUsingContext('skips unsupported device', () async {
+        mockDevice = MockAndroidDevice();
+        mockUnsupportedDevice = MockDevice();
+        when(mockUnsupportedDevice.isSupportedForProject(any))
+            .thenReturn(false);
+        when(mockDevice.isSupportedForProject(any))
+            .thenReturn(true);
+        when(mockDevice.name).thenReturn('mock-android-device');
+        testDeviceManager.addDevice(mockDevice);
+        testDeviceManager.addDevice(mockUnsupportedDevice);
 
         final Device device = await findTargetDevice();
         expect(device.name, 'mock-android-device');
@@ -279,7 +289,7 @@ void main() {
       Platform macOsPlatform() => FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('uses existing simulator', () async {
-        withMockDevice();
+        testDeviceManager.addDevice(mockDevice);
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator)
             .thenAnswer((Invocation invocation) => Future<bool>.value(true));
@@ -300,7 +310,7 @@ void main() {
       });
 
       Future<void> appStarterSetup() async {
-        withMockDevice();
+        testDeviceManager.addDevice(mockDevice);
 
         final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
         when(mockDevice.getLogReader()).thenReturn(mockDeviceLogReader);

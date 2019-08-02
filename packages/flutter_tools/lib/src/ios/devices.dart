@@ -125,14 +125,12 @@ class IOSDevice extends Device {
           ephemeral: true,
       ) {
     if (!platform.isMacOS) {
-      printError('Cannot control iOS devices or simulators. ideviceinstaller and iproxy are not available on your platform.');
-      _installerPath = null;
-      _iproxyPath = null;
+      assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
     _installerPath = artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
-      platform: TargetPlatform.ios
+      platform: TargetPlatform.ios,
     ) ?? 'ideviceinstaller'; // TODO(fujino): remove fallback once g3 updated
     _iproxyPath = artifacts.getArtifactPath(
       Artifact.iproxy,
@@ -168,6 +166,9 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static Future<List<IOSDevice>> getAttachedDevices() async {
+    if (!platform.isMacOS) {
+      throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
+    }
     if (!iMobileDevice.isInstalled)
       return <IOSDevice>[];
 

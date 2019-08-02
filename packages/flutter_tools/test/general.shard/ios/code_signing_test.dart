@@ -440,6 +440,62 @@ void main() {
       Config: () => mockConfig,
       AnsiTerminal: () => testTerminal,
     });
+
+    testUsingContext('find-identity failure', () async {
+      when(mockProcessManager.runSync(<String>['which', 'security']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(<String>['which', 'openssl']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(
+          argThat(contains('find-identity')),
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory'),
+          )).thenReturn(ProcessResult(0, 1, '', ''));
+
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      expect(signingConfigs, isNull);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
+      AnsiTerminal: () => testTerminal,
+    });
+
+    testUsingContext('find-certificate failure', () async {
+      when(mockProcessManager.runSync(<String>['which', 'security']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(<String>['which', 'openssl']))
+          .thenReturn(exitsHappy);
+      when(mockProcessManager.runSync(
+          argThat(contains('find-identity')),
+            environment: anyNamed('environment'),
+            workingDirectory: anyNamed('workingDirectory'),
+          )).thenReturn(ProcessResult(
+            1, // pid
+            0, // exitCode
+            '''
+1) 86f7e437faa5a7fce15d1ddcb9eaeaea377667b8 "iPhone Developer: Profile 1 (1111AAAA11)"
+2) da4b9237bacccdf19c0760cab7aec4a8359010b0 "iPhone Developer: Profile 2 (2222BBBB22)"
+3) 5bf1fd927dfb8679496a2e6cf00cbe50c1c87145 "iPhone Developer: Profile 3 (3333CCCC33)"
+    3 valid identities found''',
+            '',
+          ));
+      mockTerminalStdInStream =
+          Stream<String>.fromFuture(Future<String>.value('3'));
+      when(mockProcessManager.runSync(
+        <String>['security', 'find-certificate', '-c', '3333CCCC33', '-p'],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenReturn(ProcessResult(1, 1, '', '' ));
+
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      expect(signingConfigs, isNull);
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Config: () => mockConfig,
+      AnsiTerminal: () => testTerminal,
+    });
   });
 }
 

@@ -1417,7 +1417,7 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1458,5 +1458,5 @@ void main() {
         version: 0,
       ),
     );
-  }, skip: !isLinux);
+  });
 }

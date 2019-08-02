@@ -479,6 +479,7 @@ void main() {
           inMutuallyExclusiveGroup: true,
           header: true,
           obscured: true,
+          multiline: true,
           scopesRoute: true,
           namesRoute: true,
           image: true,

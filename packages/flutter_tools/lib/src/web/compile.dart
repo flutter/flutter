@@ -13,7 +13,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../reporting/usage.dart';
+import '../reporting/reporting.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();

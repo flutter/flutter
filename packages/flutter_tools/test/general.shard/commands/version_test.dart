@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/version.dart';
@@ -59,11 +60,28 @@ void main() {
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
+
+    testUsingContext('exit tool if can\'t get the tags', () async {
+      final VersionCommand command = VersionCommand();
+
+      try {
+        await command.getTags();
+        fail('ToolExit expected');
+      } catch(e) {
+        expect(e, isInstanceOf<ToolExit>());
+      }
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => MockProcessManager(failGitTag: true),
+    });
   });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {
+  MockProcessManager({ this.failGitTag = false });
+
   String version = '';
+
+  bool failGitTag;
 
   @override
   Future<ProcessResult> run(
@@ -76,6 +94,9 @@ class MockProcessManager extends Mock implements ProcessManager {
     Encoding stderrEncoding = systemEncoding,
   }) async {
     if (command[0] == 'git' && command[1] == 'tag') {
+      if (failGitTag) {
+        return ProcessResult(0, 1, '', '');
+      }
       return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {

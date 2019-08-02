@@ -14,18 +14,16 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
-import '../project.dart';
 import '../vmservice.dart';
 
 import 'watcher.dart';
 
 /// A class that's used to collect coverage data during tests.
 class CoverageCollector extends TestWatcher {
-  CoverageCollector({this.flutterProject, this.coverageDirectory});
+  CoverageCollector({this.libraryPredicate});
 
   Map<String, dynamic> _globalHitmap;
-  final Directory coverageDirectory;
-  final FlutterProject flutterProject;
+  bool Function(String) libraryPredicate;
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
@@ -50,13 +48,7 @@ class CoverageCollector extends TestWatcher {
   Future<void> collectCoverageIsolate(Uri observatoryUri) async {
     assert(observatoryUri != null);
     print('collecting coverage data from $observatoryUri...');
-    final Map<String, dynamic> data = await collect(observatoryUri, (String libraryName) {
-      // If we have a specified coverage directory or could not find the package name, then
-      // accept all libraries.
-      return (coverageDirectory != null)
-          || (flutterProject == null)
-          || libraryName.contains(flutterProject.manifest.appName);
-    });
+    final Map<String, dynamic> data = await collect(observatoryUri, libraryPredicate);
     if (data == null) {
       throw Exception('Failed to collect coverage.');
     }
@@ -84,17 +76,7 @@ class CoverageCollector extends TestWatcher {
       .then<void>((int code) {
         throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
       });
-    final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
-      // If we have a specified coverage directory or could not find the package name, then
-      // accept all libraries.
-      if (coverageDirectory != null) {
-        return true;
-      }
-      if (flutterProject == null) {
-        return true;
-      }
-      return libraryName.contains(flutterProject.manifest.appName);
-    })
+    final Future<void> collectionComplete = collect(observatoryUri, libraryPredicate)
       .then<void>((Map<String, dynamic> result) {
         if (result == null)
           throw Exception('Failed to collect coverage.');

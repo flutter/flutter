@@ -1,6 +1,6 @@
 #import "ViewController.h"
-#import "Flutter/Flutter.h"
-#import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
+#import <Flutter/Flutter.h>
+#import <FlutterPluginRegistrant/GeneratedPluginRegistrant.h>
 
 @implementation ViewController
 

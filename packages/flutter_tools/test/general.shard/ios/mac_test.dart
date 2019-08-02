@@ -5,13 +5,14 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
-import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -159,11 +160,36 @@ void main() {
 
   group('Diagnose Xcode build failure', () {
     Map<String, String> buildSettings;
+    MockUsage mockUsage;
 
     setUp(() {
       buildSettings = <String, String>{
         'PRODUCT_BUNDLE_IDENTIFIER': 'test.app',
       };
+      mockUsage = MockUsage();
+    });
+
+    testUsingContext('Sends analytics when bitcode fails', () async {
+      const List<String> buildCommands = <String>['xcrun', 'cc', 'blah'];
+      final XcodeBuildResult buildResult = XcodeBuildResult(
+        success: false,
+        stdout: 'BITCODE_ENABLED = YES',
+        xcodeBuildExecution: XcodeBuildExecution(
+          buildCommands: buildCommands,
+          appDirectory: '/blah/blah',
+          buildForPhysicalDevice: true,
+          buildSettings: buildSettings,
+        ),
+      );
+
+      await diagnoseXcodeBuildFailure(buildResult);
+      verify(mockUsage.sendEvent('build', 'xcode-bitcode-failure',
+        parameters: <String, String>{
+          cdKey(CustomDimensions.buildEventCommand): buildCommands.toString(),
+          cdKey(CustomDimensions.buildEventSettings): buildSettings.toString(),
+      })).called(1);
+    }, overrides: <Type, Generator>{
+      Usage: () => mockUsage,
     });
 
     testUsingContext('No provisioning profile shows message', () async {
@@ -379,3 +405,5 @@ Could not build the precompiled application for the device.''',
     });
   });
 }
+
+class MockUsage extends Mock implements Usage {}

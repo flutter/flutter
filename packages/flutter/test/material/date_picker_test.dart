@@ -102,7 +102,7 @@ void _tests() {
     await tester.tap(find.text('17'));
     await tester.pumpAndSettle();
     expect(_selectedDate, equals(DateTime(2016, DateTime.august, 17)));
-  }, skip: isWindows); // TODO(dnfield): these are flaky on Windows https://github.com/flutter/flutter#19696
+  });
 
   testWidgets('render picker with intrinsic dimensions', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -128,7 +128,7 @@ void _tests() {
       ),
     );
     await tester.pump(const Duration(seconds: 5));
-  }, skip: isWindows); // TODO(dnfield): these are flaky on Windows https://github.com/flutter/flutter#19696
+  });
 
   Future<void> preparePicker(WidgetTester tester, Future<void> callback(Future<DateTime> date)) async {
     BuildContext buttonContext;

@@ -2,18 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:http/http.dart' as http;
-import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
-
-import '../base/io.dart';
-import '../base/os.dart';
-import '../base/platform.dart';
-import '../globals.dart';
-
-import 'usage.dart';
+part of reporting;
 
 /// Tells crash backend that the error is from the Flutter CLI.
 const String _kProductId = 'Flutter_Tools';
@@ -85,6 +74,7 @@ class CrashReportSender {
     @required dynamic error,
     @required StackTrace stackTrace,
     @required String getFlutterVersion(),
+    @required String command,
   }) async {
     try {
       final String flutterVersion = getFlutterVersion();
@@ -112,11 +102,11 @@ class CrashReportSender {
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
+      req.fields['comments'] = command;
 
-      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
-        stackTraceWithRelativePaths,
+        stackTrace.toString(),
         filename: _kStackTraceFilename,
       ));
 

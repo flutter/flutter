@@ -476,8 +476,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
+    excludeFromSemanticsScrolling = _effectiveScrollOffset <= constraints.scrollOffset;
     final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
-    excludeFromSemanticsScrolling = overlapsContent;
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;

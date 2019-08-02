@@ -19,8 +19,8 @@
 		24E221E021A28B23008ADF09 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24E221D721A28B23008ADF09 /* Launch Screen.storyboard */; };
 		24E221E221A28B36008ADF09 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24E221E121A28B36008ADF09 /* Assets.xcassets */; };
 		24E7A1FE21A2AF26003A7FAD /* FlutterViewControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E7A1FD21A2AF26003A7FAD /* FlutterViewControllerTests.m */; };
+		4C21FEB4D629B570C74073D1 /* libPods-ios_add2appTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F90B141A9A8A680033E97924 /* libPods-ios_add2appTests.a */; };
 		8BDD73EC12DFA6CD2AC4EEDA /* EarlGrey.framework in EarlGrey Copy Files */ = {isa = PBXBuildFile; fileRef = DE1EF0F5719FBB45225A9EC3 /* EarlGrey.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		AE3B0A0EAE765C1EC16866BF /* libPods-ios_add2appTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 699900B7FF01268E98EC69ED /* libPods-ios_add2appTests.a */; };
 		DB9A200AFEB7AAE22B4E12E4 /* libPods-ios_add2app.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */; };
 /* End PBXBuildFile section */
 
@@ -73,13 +73,15 @@
 		24E7A1FD21A2AF26003A7FAD /* FlutterViewControllerTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FlutterViewControllerTests.m; sourceTree = "<group>"; };
 		36DA6BEAA5127D74EC6E3E13 /* Pods-ios_add2appUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appUITests/Pods-ios_add2appUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		52EA0B290EEBC1D28BF6E803 /* libPods-ios_add2appUITests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2appUITests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		699900B7FF01268E98EC69ED /* libPods-ios_add2appTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2appTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		74266A4D94FA1C3157B5B560 /* Pods-ios_add2appTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests.debug.xcconfig"; sourceTree = "<group>"; };
+		762E954C71D922C091619CD4 /* Pods-ios_add2app-ios_add2appTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app-ios_add2appTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app-ios_add2appTests/Pods-ios_add2app-ios_add2appTests.debug.xcconfig"; sourceTree = "<group>"; };
 		7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2app.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		83017A33946358F55BAE24E1 /* Pods-ios_add2appTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2appTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests.release.xcconfig"; sourceTree = "<group>"; };
+		98A4882F55A3E107DFCB67D8 /* Pods-ios_add2app-ios_add2appTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app-ios_add2appTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app-ios_add2appTests/Pods-ios_add2app-ios_add2appTests.release.xcconfig"; sourceTree = "<group>"; };
 		A18D4CDABD6795975FD6B49F /* Pods-ios_add2app.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app.release.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app/Pods-ios_add2app.release.xcconfig"; sourceTree = "<group>"; };
 		CCFA174387D083C931FB85D0 /* Pods-ios_add2app.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ios_add2app.debug.xcconfig"; path = "Pods/Target Support Files/Pods-ios_add2app/Pods-ios_add2app.debug.xcconfig"; sourceTree = "<group>"; };
 		DE1EF0F5719FBB45225A9EC3 /* EarlGrey.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EarlGrey.framework; path = Pods/EarlGrey/EarlGrey/EarlGrey.framework; sourceTree = SOURCE_ROOT; };
+		F90B141A9A8A680033E97924 /* libPods-ios_add2appTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ios_add2appTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,7 +90,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				09C65652A2B48A21C94FF831 /* EarlGrey.framework in Frameworks */,
-				AE3B0A0EAE765C1EC16866BF /* libPods-ios_add2appTests.a in Frameworks */,
+				4C21FEB4D629B570C74073D1 /* libPods-ios_add2appTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,7 +164,7 @@
 				7A318514E0307AE0FF0EFC76 /* libPods-ios_add2app.a */,
 				DE1EF0F5719FBB45225A9EC3 /* EarlGrey.framework */,
 				52EA0B290EEBC1D28BF6E803 /* libPods-ios_add2appUITests.a */,
-				699900B7FF01268E98EC69ED /* libPods-ios_add2appTests.a */,
+				F90B141A9A8A680033E97924 /* libPods-ios_add2appTests.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -176,6 +178,8 @@
 				16D27B9BE77DC8804292A9A9 /* Pods-ios_add2appUITests.release.xcconfig */,
 				74266A4D94FA1C3157B5B560 /* Pods-ios_add2appTests.debug.xcconfig */,
 				83017A33946358F55BAE24E1 /* Pods-ios_add2appTests.release.xcconfig */,
+				762E954C71D922C091619CD4 /* Pods-ios_add2app-ios_add2appTests.debug.xcconfig */,
+				98A4882F55A3E107DFCB67D8 /* Pods-ios_add2app-ios_add2appTests.release.xcconfig */,
 			);
 			name = Pods;
 			sourceTree = "<group>";
@@ -209,7 +213,7 @@
 			buildConfigurationList = 24E221CB21A28A0C008ADF09 /* Build configuration list for PBXNativeTarget "ios_add2app" */;
 			buildPhases = (
 				4375EE880A727341E9C9A57D /* [CP] Check Pods Manifest.lock */,
-				24E221E321A28B53008ADF09 /* ShellScript */,
+				CE6831C2A33C6C5C84521FDE /* [CP-User] Run Flutter Build Script */,
 				24E221B121A28A0B008ADF09 /* Sources */,
 				24E221B221A28A0B008ADF09 /* Frameworks */,
 				24E221B321A28A0B008ADF09 /* Resources */,
@@ -281,23 +285,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		24E221E321A28B53008ADF09 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n\"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" embed\n";
-		};
 		4375EE880A727341E9C9A57D /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -326,18 +313,32 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2app/Pods-ios_add2app-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		CE6831C2A33C6C5C84521FDE /* [CP-User] Run Flutter Build Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/flutterapp/.metadata",
+				"${SRCROOT}/flutterapp/.ios/Flutter/App.framework/App",
+				"${SRCROOT}/flutterapp/.ios/Flutter/engine/Flutter.framework/Flutter",
+				"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh",
+			);
+			name = "[CP-User] Run Flutter Build Script";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "source \"${SRCROOT}/flutterapp/.ios/Flutter/flutter_export_environment.sh\"\n\"$FLUTTER_ROOT\"/packages/flutter_tools/bin/xcode_backend.sh build";
 		};
 		DE5CDCD8B3565EAB9F38F455 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -367,22 +368,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks.sh",
-				"${PODS_ROOT}/../flutterapp/.ios/Flutter/engine/Flutter.framework",
-				"${PODS_ROOT}/EarlGrey/EarlGrey/EarlGrey.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-			);
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Flutter.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/EarlGrey.framework",
+				"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ios_add2appTests/Pods-ios_add2appTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

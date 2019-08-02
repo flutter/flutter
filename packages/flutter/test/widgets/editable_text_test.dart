@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
-final TextEditingController controller = TextEditingController();
+TextEditingController controller;
 final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Node');
 final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'EditableText Scope Node');
 const TextStyle textStyle = TextStyle();
@@ -29,6 +29,12 @@ enum HandlePositionInViewport {
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
+    controller = TextEditingController();
+  });
+
+  tearDown(() {
+    controller.dispose();
+    controller = null;
   });
 
   // Tests that the desired keyboard action button is requested.
@@ -268,6 +274,39 @@ void main() {
         equals('TextInputAction.newline'));
   });
 
+  testWidgets('visiblePassword keyboard is requested when set explicitly', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              controller: controller,
+              backgroundCursorColor: Colors.grey,
+              focusNode: focusNode,
+              keyboardType: TextInputType.visiblePassword,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType']['name'],
+        equals('TextInputType.visiblePassword'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
+  });
+
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
@@ -495,7 +534,7 @@ void main() {
         equals('TextInputAction.done'));
   });
 
-  testWidgets('can only show toolbar when there is text and a selection', (WidgetTester tester) async {
+  testWidgets('can show toolbar when there is text and a selection', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: EditableText(
@@ -512,15 +551,94 @@ void main() {
     final EditableTextState state =
         tester.state<EditableTextState>(find.byType(EditableText));
 
+    // Can't show the toolbar when there's no focus.
     expect(state.showToolbar(), false);
     await tester.pump();
     expect(find.text('PASTE'), findsNothing);
 
-    controller.text = 'blah';
+    // Can show the toolbar when focused even though there's no text.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
     await tester.pump();
-    expect(state.showToolbar(), false);
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+
+    // Hide the menu again.
+    state.hideToolbar();
     await tester.pump();
     expect(find.text('PASTE'), findsNothing);
+
+    // Can show the menu with text and a selection.
+    controller.text = 'blah';
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
+  testWidgets('can show the toolbar after clearing all text', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/35998.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+        tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Add text and an empty selection.
+    controller.text = 'blah';
+    await tester.pump();
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+
+    // Clear the text and selection.
+    expect(find.text('PASTE'), findsNothing);
+    state.updateEditingValue(const TextEditingValue(
+      text: '',
+    ));
+    await tester.pump();
+
+    // Should be able to show the toolbar.
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('PASTE'), findsOneWidget);
+  });
+
+  testWidgets('can dynamically disable options in toolbar', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          toolbarOptions: const ToolbarOptions(
+            copy: true,
+            selectAll: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
 
     // Select something. Doesn't really matter what.
     state.renderEditable.selectWordsInRange(
@@ -530,7 +648,48 @@ void main() {
     await tester.pump();
     expect(state.showToolbar(), true);
     await tester.pump();
-    expect(find.text('PASTE'), findsOneWidget);
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('cut and paste are disabled in read only mode even if explicit set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: EditableText(
+          backgroundCursorColor: Colors.grey,
+          controller: TextEditingController(text: 'blah blah'),
+          focusNode: focusNode,
+          readOnly: true,
+          toolbarOptions: const ToolbarOptions(
+            paste: true,
+            cut: true,
+            selectAll: true,
+            copy: true,
+          ),
+          style: textStyle,
+          cursorColor: cursorColor,
+          selectionControls: materialTextSelectionControls,
+        ),
+      ),
+    );
+
+    final EditableTextState state =
+    tester.state<EditableTextState>(find.byType(EditableText));
+
+    // Select something. Doesn't really matter what.
+    state.renderEditable.selectWordsInRange(
+      from: const Offset(0, 0),
+      cause: SelectionChangedCause.tap,
+    );
+    await tester.pump();
+    expect(state.showToolbar(), true);
+    await tester.pump();
+    expect(find.text('SELECT ALL'), findsOneWidget);
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
   });
 
   testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
@@ -904,6 +1063,67 @@ void main() {
       includesNodeWith(flags: <SemanticsFlag>[
         SemanticsFlag.isTextField,
         SemanticsFlag.isFocused,
+      ]),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('EditableText sets multi-line flag in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+        textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              maxLines: 1,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.isTextField]),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: EditableText(
+              backgroundCursorColor: Colors.grey,
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+              maxLines: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      semantics,
+      includesNodeWith(flags: <SemanticsFlag>[
+        SemanticsFlag.isTextField,
+        SemanticsFlag.isMultiline,
       ]),
     );
 
@@ -1567,8 +1787,14 @@ void main() {
                         SemanticsFlag.isObscured,
                         SemanticsFlag.isFocused,
                       ],
+                      actions: <SemanticsAction>[
+                        SemanticsAction.moveCursorBackwardByCharacter,
+                        SemanticsAction.setSelection,
+                        SemanticsAction.moveCursorBackwardByWord
+                      ],
                       value: expectedValue,
                       textDirection: TextDirection.ltr,
+                      textSelection: const TextSelection.collapsed(offset: 24),
                     ),
                   ],
                 ),
