@@ -725,3 +725,69 @@ class _MotionEventsDispatcher {
   bool isSinglePointerAction(PointerEvent event) =>
       !(event is PointerDownEvent) && !(event is PointerUpEvent);
 }
+
+/// A render object for embedding a platform view.
+///
+/// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer, integrates it with the gesture arenas system
+/// and adds relevant semantic nodes to the semantics tree.
+class PlatformViewRenderBox extends RenderBox {
+
+  /// Creating a render object for a [PlatformViewSurface].
+  ///
+  /// The `controller` parameter must not be null.
+  PlatformViewRenderBox({
+    @required PlatformViewController controller,
+
+  }) : assert(controller != null && controller.viewId != null && controller.viewId > -1),
+       _controller = controller;
+
+  /// Sets the [controller] for this render object.
+  ///
+  /// This value must not be null, and setting it to a new value will result in a repaint.
+  set controller(PlatformViewController controller) {
+    assert(controller != null);
+    assert(controller.viewId != null && controller.viewId > -1);
+
+    if ( _controller == controller) {
+      return;
+    }
+    final bool needsSemanticsUpdate = _controller.viewId != controller.viewId;
+     _controller = controller;
+     markNeedsPaint();
+    if (needsSemanticsUpdate) {
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  PlatformViewController _controller;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    assert(_controller.viewId != null);
+    context.addLayer(PlatformViewLayer(
+            rect: offset & size,
+            viewId: _controller.viewId));
+  }
+
+  @override
+  void describeSemanticsConfiguration (SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    assert(_controller.viewId != null);
+    config.isSemanticBoundary = true;
+    config.platformViewId = _controller.viewId;
+  }
+}

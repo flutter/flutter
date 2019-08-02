@@ -1667,4 +1667,21 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('Common PlatformView', () {
+    FakePlatformViewController controller;
+
+    setUp((){
+      controller = FakePlatformViewController(0);
+    });
+
+    testWidgets('PlatformViewSurface should create platform view layer', (WidgetTester tester) async {
+      final PlatformViewSurface surface = PlatformViewSurface(controller: controller);
+      await tester.pumpWidget(surface);
+      final PlatformViewLayer layer = tester.layers.firstWhere((Layer layer){
+        return layer is PlatformViewLayer;
+      });
+      expect(layer, isNotNull);
+    });
+  });
 }
