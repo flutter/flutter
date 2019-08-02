@@ -492,8 +492,8 @@ typedef _HandlePointerEvent = void Function(PointerEvent event);
 // it was give, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizerCaptain
 // as the team captain.
 // As long as the gesture arena is unresolved, the recognizer caches all pointer events.
-// When the team wins, the recognizer sends all the cached point events to the platform view, and
-// sets itself to a "forwarding mode" where it will forward any new pointer event to the platform view.
+// When the team wins, the recognizer sends all the cached point events to `_handlePointerEvent`, and
+// sets itself to a "forwarding mode" where it will forward any new pointer event to `_handlePointerEvent`.
 class _PlatformViewGestureRecognizerCaptain extends OneSequenceGestureRecognizer {
   _PlatformViewGestureRecognizerCaptain(
     _HandlePointerEvent handlePointerEvent,
@@ -514,12 +514,12 @@ class _PlatformViewGestureRecognizerCaptain extends OneSequenceGestureRecognizer
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
-  // the cached events are dispatched to the view, if we lose the arena we clear the cache for
+  // the cached events are dispatched to `_handlePointerEvent`, if we lose the arena we clear the cache for
   // the pointer.
   final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
 
   // Pointer for which we have already won the arena, events for pointers in this set are
-  // immediately dispatched to the Android view.
+  // immediately dispatched to the `_handlePointerEvent`.
   final Set<int> forwardedPointers = <int>{};
 
   // We use OneSequenceGestureRecognizers as they support gesture arena teams.
