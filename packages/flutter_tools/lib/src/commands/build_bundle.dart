@@ -131,6 +131,7 @@ class BuildBundleCommand extends BuildSubCommand {
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
+      shouldBuildWithAssemble: true,
     );
     return null;
   }

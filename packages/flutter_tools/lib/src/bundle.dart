@@ -12,6 +12,9 @@ import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
+import 'build_system/build_system.dart';
+import 'build_system/targets/assets.dart';
+import 'build_system/targets/dart.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
@@ -69,6 +72,7 @@ class BundleBuilder {
     List<String> extraGenSnapshotOptions = const <String>[],
     List<String> fileSystemRoots,
     String fileSystemScheme,
+    bool shouldBuildWithAssemble = false,
   }) async {
     mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
@@ -76,6 +80,17 @@ class BundleBuilder {
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
     final FlutterProject flutterProject = FlutterProject.current();
+
+    if (shouldBuildWithAssemble) {
+      await buildWithAssemble(
+        buildMode: buildMode ?? BuildMode.debug,
+        targetPlatform: platform,
+        mainPath: mainPath,
+        flutterProject: flutterProject,
+        outputDir: assetDirPath,
+      );
+      return;
+    }
 
     DevFSContent kernelContent;
     if (!precompiledSnapshot) {
@@ -119,6 +134,48 @@ class BundleBuilder {
       privateKeyPath: privateKeyPath,
       assetDirPath: assetDirPath,
     );
+  }
+}
+
+/// Build an application bundle using flutter assemble.
+///
+/// This is a temporary shim to migrate the build implementations.
+Future<void> buildWithAssemble({
+  @required FlutterProject flutterProject,
+  @required BuildMode buildMode,
+  @required TargetPlatform targetPlatform,
+  @required String mainPath,
+  @required String outputDir,
+}) async {
+  final Environment environment = Environment(
+    projectDir: flutterProject.directory,
+    buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    defines: <String, String>{
+      kTargetFile: mainPath,
+      kBuildMode: getNameForBuildMode(buildMode),
+      kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+    }
+  );
+  final BuildResult result = await buildSystem.build(const _BundleTarget(), environment);
+
+  if (!result.success) {
+    for (ExceptionMeasurement measurement in result.exceptions.values) {
+      printError(measurement.exception.toString());
+      printError(measurement.stackTrace.toString());
+    }
+    throwToolExit('Failed to build bundle.');
+  }
+  // Hack, we know where the cached version is so copy into expected output directory.
+  if (outputDir != null) {
+    final Directory outputDirectory = fs.directory(outputDir)..createSync(recursive: true);
+    final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
+    copyDirectorySync(assetInputDir, outputDirectory);
+    final File copiedDill = environment.buildDir.childFile('app.dill');
+    if (targetPlatform == TargetPlatform.ios && buildMode == BuildMode.debug) {
+      copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
+    } else {
+      copiedDill.copySync(outputDirectory.childFile('app.dill').path);
+    }
   }
 }
 
@@ -194,4 +251,27 @@ Future<void> writeBundle(
         resource.release();
       }
     }));
+}
+
+// Synthetic target to combine copy assets and dill.
+class _BundleTarget extends Target {
+  const _BundleTarget();
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async { }
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    CopyAssets(),
+    KernelSnapshot(),
+  ];
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  String get name => '_bundle_target';
+
+  @override
+  List<Source> get outputs => <Source>[];
 }

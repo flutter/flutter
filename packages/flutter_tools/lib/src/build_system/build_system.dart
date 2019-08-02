@@ -10,6 +10,7 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../cache.dart';
@@ -20,6 +21,9 @@ import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -563,15 +567,15 @@ class _BuildInstance {
       }
       if (canSkip) {
         skipped = true;
-        printStatus('Skipping target: ${target.name}');
+        printTrace('Skipping target: ${target.name}');
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         for (File output in outputs) {
           outputFiles[output.resolveSymbolicLinksSync()] = output;
         }
       } else {
-        printStatus('${target.name}: Starting');
+        printTrace('${target.name}: Starting');
         await target.build(inputs, environment);
-        printStatus('${target.name}: Complete');
+        printTrace('${target.name}: Complete');
 
         final List<File> outputs = target.resolveOutputs(environment, implicit: true);
         // Update hashes for output files.
