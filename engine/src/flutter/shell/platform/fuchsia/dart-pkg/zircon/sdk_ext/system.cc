@@ -24,7 +24,7 @@
 #if !defined(FUCHSIA_SDK)
 #include <fuchsia/device/manager/cpp/fidl.h>
 #include "lib/fsl/io/fd.h"
-#endif
+#endif  // !defined(FUCHSIA_SDK)
 
 using tonic::ToDart;
 
@@ -180,7 +180,7 @@ zx_status_t System::Reboot() {
 #if defined(FUCHSIA_SDK)
   FML_CHECK(false);
   return ZX_ERR_NOT_SUPPORTED;
-#else
+#else   // !defined(FUCHSIA_SDK)
   zx::channel local, remote;
   auto status = zx::channel::create(0, &local, &remote);
   if (status != ZX_OK) {
@@ -205,14 +205,14 @@ zx_status_t System::Reboot() {
   }
 
   return status != ZX_OK ? status : call_status;
-#endif
+#endif  // !defined(FUCHSIA_SDK)
 }
 
 Dart_Handle System::ChannelFromFile(std::string path) {
 #if defined(FUCHSIA_SDK)
   FML_CHECK(false);
   return Dart_Null();
-#else
+#else   // !defined(FUCHSIA_SDK)
   fml::UniqueFD fd = FdFromPath(path);
   if (!fd.is_valid()) {
     return ConstructDartObject(kHandleResult, ToDart(ZX_ERR_IO));
@@ -226,7 +226,7 @@ Dart_Handle System::ChannelFromFile(std::string path) {
 
   return ConstructDartObject(kHandleResult, ToDart(ZX_OK),
                              ToDart(Handle::Create(channel.release())));
-#endif
+#endif  // !defined(FUCHSIA_SDK)
 }
 
 zx_status_t System::ChannelWrite(fml::RefPtr<Handle> channel,
