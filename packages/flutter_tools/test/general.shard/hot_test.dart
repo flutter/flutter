@@ -301,7 +301,7 @@ void main() {
       expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
       expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://b.corp.google.com/issues/132325318'));
+          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       Logger: () => mockLogger,
@@ -330,7 +330,7 @@ void main() {
       expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
       expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://b.corp.google.com/issues/132325318'));
+          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Artifacts: () => mockArtifacts,
       Logger: () => mockLogger,

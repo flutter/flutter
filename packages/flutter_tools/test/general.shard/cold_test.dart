@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ void main() {
       expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
       expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://b.corp.google.com/issues/132325318'));
+          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Logger: () => mockLogger,
     });
@@ -79,7 +79,7 @@ void main() {
       expect(mockLogger.statusText, contains('If you are using an emulator running Android Q Beta, '
           'consider using an emulator running API level 29 or lower.'));
       expect(mockLogger.statusText, contains('Learn more about the status of this issue on '
-          'https://b.corp.google.com/issues/132325318'));
+          'https://issuetracker.google.com/issues/132325318'));
     }, overrides: <Type, Generator>{
       Logger: () => mockLogger,
     });
