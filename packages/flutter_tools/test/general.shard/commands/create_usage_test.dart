@@ -71,18 +71,18 @@ void main() {
       await runner.run(<String>[
         'create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateIosLanguage, 'objc'));
+             containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
 
       await runner.run(<String>[
         'create',
         '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
-        '--ios-language=swift',
+        '--ios-language=objc',
         'testy',
       ]);
       expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateIosLanguage, 'swift'));
+             containsPair(CustomDimensions.commandCreateIosLanguage, 'objc'));
 
     }));
 
@@ -92,18 +92,18 @@ void main() {
 
       await runner.run(<String>['create', '--flutter-root=flutter', '--no-pub', '--template=app', 'testy']);
       expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'java'));
+             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
 
       await runner.run(<String>[
         'create',
         '--flutter-root=flutter',
         '--no-pub',
         '--template=app',
-        '--android-language=kotlin',
+        '--android-language=java',
         'testy',
       ]);
       expect(await command.usageValues,
-             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'kotlin'));
+             containsPair(CustomDimensions.commandCreateAndroidLanguage, 'java'));
     }));
   });
 }
