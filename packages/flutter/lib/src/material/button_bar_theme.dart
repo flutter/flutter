@@ -5,7 +5,10 @@
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import 'button_theme.dart';
+import 'theme.dart';
 
 /// Defines the visual properties of [ButtonBar] widgets.
 ///
