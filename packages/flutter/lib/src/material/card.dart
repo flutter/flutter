@@ -36,19 +36,17 @@ import 'theme.dart';
 ///             title: Text('The Enchanted Nightingale'),
 ///             subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
 ///           ),
-///           ButtonTheme.bar( // make buttons use the appropriate styles for cards
-///             child: ButtonBar(
-///               children: <Widget>[
-///                 FlatButton(
-///                   child: const Text('BUY TICKETS'),
-///                   onPressed: () { /* ... */ },
-///                 ),
-///                 FlatButton(
-///                   child: const Text('LISTEN'),
-///                   onPressed: () { /* ... */ },
-///                 ),
-///               ],
-///             ),
+///           ButtonBar(
+///             children: <Widget>[
+///               FlatButton(
+///                 child: const Text('BUY TICKETS'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///               FlatButton(
+///                 child: const Text('LISTEN'),
+///                 onPressed: () { /* ... */ },
+///               ),
+///             ],
 ///           ),
 ///         ],
 ///       ),
@@ -92,8 +90,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [ListTile], to display icons and text in a card.
-///  * [ButtonBar], to display buttons at the bottom of a card. Typically these
-///    would be styled using a [ButtonTheme] created with [new ButtonTheme.bar].
+///  * [ButtonBar], to display buttons at the bottom of a card.
 ///  * [showDialog], to display a modal card.
 ///  * <https://material.io/design/components/cards.html>
 class Card extends StatelessWidget {

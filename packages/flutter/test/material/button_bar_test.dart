@@ -269,16 +269,14 @@ void main() {
       await tester.pumpWidget(
         SingleChildScrollView(
           child: ListBody(
-            children: <Widget>[
-              ButtonTheme.bar(
-                layoutBehavior: ButtonBarLayoutBehavior.padded,
-                child: const Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: ButtonBar(
-                    children: <Widget>[
-                      SizedBox(width: 10.0, height: 10.0),
-                    ],
-                  ),
+            children: const <Widget>[
+              Directionality(
+                textDirection: TextDirection.ltr,
+                child: ButtonBar(
+                  layoutBehavior: ButtonBarLayoutBehavior.padded,
+                  children: <Widget>[
+                    SizedBox(width: 10.0, height: 10.0),
+                  ],
                 ),
               ),
             ],
