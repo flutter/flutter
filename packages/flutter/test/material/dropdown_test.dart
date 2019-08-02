@@ -1322,7 +1322,7 @@ void main() {
                   });
                 },
                 validator: (String currentValue) {
-                  _validateCalled++; 
+                  _validateCalled++;
                   return currentValue == null ? 'Must select value' : null;
                 },
                 autovalidate: true,
@@ -1496,7 +1496,6 @@ void main() {
         disabledHint: const Text('disabled'),
       );
     }
-    
     await tester.pumpWidget(build(items: null));
     final RenderBox disabledHintBox = tester.renderObject<RenderBox>(
       find.byKey(buttonKey),
