@@ -27,9 +27,7 @@ class TestTextInput {
   ///
   /// The [onCleared] argument may be set to be notified of when the keyboard
   /// is dismissed.
-  TestTextInput({ this.onCleared }) {
-    binaryMessenger = ServicesBinding.instance.provideBinaryMessenger();
-  }
+  TestTextInput({ this.onCleared });
 
   /// Called when the keyboard goes away.
   ///
@@ -39,7 +37,7 @@ class TestTextInput {
   final VoidCallback onCleared;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger binaryMessenger;
+  BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
 
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
@@ -113,7 +111,7 @@ class TestTextInput {
     // test this code does not run in a package:test test zone.
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    binaryMessenger.handlePlatformMessage(
+    _binaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -145,7 +143,7 @@ class TestTextInput {
 
       final Completer<void> completer = Completer<void>();
 
-      binaryMessenger.handlePlatformMessage(
+      _binaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(

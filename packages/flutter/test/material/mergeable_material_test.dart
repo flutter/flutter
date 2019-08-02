@@ -65,6 +65,10 @@ BorderRadius getBorderRadius(WidgetTester tester, int index) {
 }
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+  });
+
   testWidgets('MergeableMaterial empty', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(

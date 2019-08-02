@@ -34,11 +34,10 @@ class BasicMessageChannel<T> {
   ///
   /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
   /// be used if [binaryMessenger] is null.
-  BasicMessageChannel(this.name, this.codec, { this.binaryMessenger }) {
-    assert(name != null);
-    assert(codec != null);
-    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
-  }
+  const BasicMessageChannel(this.name, this.codec, { BinaryMessenger binaryMessenger })
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -47,7 +46,8 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger binaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  final BinaryMessenger _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
@@ -123,11 +123,10 @@ class MethodChannel {
   ///
   /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
   /// be used if [binaryMessenger] is null.
-  MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger ]) {
-    assert(name != null);
-    assert(codec != null);
-    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
-  }
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger ])
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -135,10 +134,9 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages.
-  ///
-  /// The messenger may not be null.
-  BinaryMessenger binaryMessenger;
+  /// The messenger used by this channel to send platform messages, not null.
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  final BinaryMessenger _binaryMessenger;
 
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
@@ -420,7 +418,7 @@ class MethodChannel {
 /// instead of throwing an exception.
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
+  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
     : super(name, codec);
 
   @override
@@ -469,11 +467,10 @@ class EventChannel {
   ///
   /// Neither [name] nor [codec] may be null. A default [BinaryMessenger]
   /// instance will be used if [binaryMessenger] is null.
-  EventChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger]) {
-    assert(name != null);
-    assert(codec != null);
-    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
-  }
+  const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger])
+      : assert(name != null),
+        assert(codec != null),
+        _binaryMessenger = binaryMessenger;
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -481,10 +478,9 @@ class EventChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages.
-  ///
-  /// The messenger may not be null.
-  BinaryMessenger binaryMessenger;
+  /// The messenger used by this channel to send platform messages, not null.
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  final BinaryMessenger _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
   ///

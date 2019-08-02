@@ -8,6 +8,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
+import 'binding.dart';
+
 /// A function which takes a platform message and asynchronously returns an encoded response.
 typedef MessageHandler = Future<ByteData> Function(ByteData message);
 
@@ -55,3 +57,11 @@ abstract class BinaryMessenger {
   /// sent to platform plugins.
   void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message));
 }
+
+/// The default instance of [BinaryMessenger].
+///
+/// This is used to send messages from the application to the platform, and
+/// keeps track of which handlers have been registered on each channel so
+/// it may dispatch incoming messages to the registered handler.
+@Deprecated('Use ServicesBinding.instance.defaultBinaryMessenger instead.')
+BinaryMessenger get defaultBinaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;

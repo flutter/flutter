@@ -11,8 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 
-/// Listens for platform messages and directs them to the default
-/// [BinaryMessenger].
+/// Listens for platform messages and directs them to the [defaultBinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
 /// the licenses found in the `LICENSE` file stored at the root of the asset
@@ -23,7 +22,9 @@ mixin ServicesBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    initBinaryMessenger();
+    window
+      ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
   }
 
@@ -31,17 +32,18 @@ mixin ServicesBinding on BindingBase {
   static ServicesBinding get instance => _instance;
   static ServicesBinding _instance;
 
-  /// The default [BinaryMessenger] instance.
-  @protected
-  BinaryMessenger defaultBinaryMessenger = const _DefaultBinaryMessenger._();
-
   /// The default instance of [BinaryMessenger].
   ///
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
-  BinaryMessenger provideBinaryMessenger() {
-    return defaultBinaryMessenger;
+  BinaryMessenger defaultBinaryMessenger;
+
+  /// Initializes a default [BinaryMessenger] instance that can be used for
+  /// sending platform messages.
+  @protected
+  void initBinaryMessenger() {
+    defaultBinaryMessenger = const _DefaultBinaryMessenger._();
   }
 
   /// Adds relevant licenses to the [LicenseRegistry].
@@ -75,17 +77,15 @@ mixin ServicesBinding on BindingBase {
       rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
     });
     await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses =
-        Completer<List<LicenseEntry>>();
+    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
     Timer.run(() async {
-      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future,
-          debugLabel: 'parseLicenses'));
+      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
     });
     await parsedLicenses.future;
     yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
   }
 
-// This is run in another isolate created by _addLicenses above.
+  // This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
     final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
     final List<LicenseEntry> result = <LicenseEntry>[];

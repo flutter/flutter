@@ -6,9 +6,15 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
+
 import '../flutter_test_alternative.dart';
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+  });
+
   group('BasicMessageChannel', () {
     const MessageCodec<String> string = StringCodec();
     const BasicMessageChannel<String> channel = BasicMessageChannel<String>('ch', string);

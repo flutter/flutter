@@ -808,8 +808,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
-    final BinaryMessenger binaryMessage = provideBinaryMessenger();
-    binaryMessage.setMockMessageHandler('flutter/assets', (ByteData message) {
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
       String key = utf8.decode(message.buffer.asUint8List());
       File asset = File(path.join(assetFolderPath, key));
 

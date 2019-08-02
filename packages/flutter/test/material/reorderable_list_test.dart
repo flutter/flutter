@@ -8,6 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  setUp(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
+  });
+
   group('$ReorderableListView', () {
     const double itemHeight = 48.0;
     const List<String> originalListItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
