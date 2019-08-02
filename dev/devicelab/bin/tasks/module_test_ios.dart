@@ -276,6 +276,33 @@ Future<void> main() async {
         );
       }
 
+      section('Fail building existing iOS app if flutter script fails');
+      int xcodebuildExitCode = 0;
+      await inDirectory(hostApp, () async {
+        xcodebuildExitCode = await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'ARCHS=i386', // i386 is not supported in Debug mode.
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+          ],
+          canFail: true
+        );
+      });
+
+      if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
+        return TaskResult.failure('Host app build succeeded though flutter script failed');
+      }
+
       return TaskResult.success(null);
     } catch (e) {
       return TaskResult.failure(e.toString());
