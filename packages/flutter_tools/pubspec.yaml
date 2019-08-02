@@ -31,7 +31,7 @@ dependencies:
   stack_trace: 1.9.3
   stream_channel: 2.0.0
   usage: 3.4.1
-  vm_service_client: 0.2.6+3
+  vm_service_client: 0.2.6+2
   web_socket_channel: 1.0.14
   webkit_inspection_protocol: 0.4.2
   xml: 3.5.0
@@ -135,4 +135,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 27fe
+# PUBSPEC CHECKSUM: 17fd

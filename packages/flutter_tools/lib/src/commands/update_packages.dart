@@ -22,6 +22,7 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
+  'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {

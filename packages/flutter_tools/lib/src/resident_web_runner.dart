@@ -195,9 +195,14 @@ class ResidentWebRunner extends ResidentRunner {
     _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
       printStatus(utf8.decode(base64.decode(log.bytes)).trim());
     });
-    connectionInfoCompleter?.complete(DebugConnectionInfo(
-      wsUri: Uri.parse(_debugConnection.wsUri),
-    ));
+    final Uri websocketUri = Uri.parse(_debugConnection.wsUri);
+    final Uri httpUri = websocketUri.replace(scheme: 'http');
+    connectionInfoCompleter?.complete(
+      DebugConnectionInfo(
+        httpUri: httpUri,
+        wsUri: websocketUri,
+      )
+    );
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;
