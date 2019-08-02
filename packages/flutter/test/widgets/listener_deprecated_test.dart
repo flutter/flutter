@@ -585,9 +585,12 @@ void main() {
       );
 
       // Plug-in a mouse and move it to the center of the container.
-      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.addPointer();
-      addTearDown(gesture.removePointer);
+      addTearDown(() async {
+        if (gesture != null)
+          return gesture.removePointer();
+      });
       await gesture.moveTo(tester.getCenter(find.byType(Container)));
       await tester.pumpAndSettle();
 
@@ -601,6 +604,9 @@ void main() {
       hover.clear();
       exit.clear();
 
+      // Unplug the mouse.
+      await gesture.removePointer();
+      gesture = null;
       await tester.pumpAndSettle();
 
       expect(enter.length, 0);
