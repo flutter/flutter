@@ -69,6 +69,8 @@ class MacOSDevice extends Device {
   @override
   Future<String> get sdkNameAndVersion async => os.name;
 
+  String _cachedExecutable;
+
   @override
   Future<LaunchResult> startApp(
     covariant MacOSApp package, {
@@ -92,6 +94,7 @@ class MacOSDevice extends Device {
         targetOverride: mainPath,
       );
     }
+    _cachedExecutable = prebuiltMacOSApp.executable;
 
     // Ensure that the executable is locatable.
     if (prebuiltMacOSApp == null) {
@@ -127,8 +130,8 @@ class MacOSDevice extends Device {
   // TODO(jonahwilliams): implement using process manager.
   // currently we rely on killing the isolate taking down the application.
   @override
-  Future<bool> stopApp(covariant PrebuiltMacOSApp app) async {
-    return killProcess(app.executable);
+  Future<bool> stopApp(covariant MacOSApp app) async {
+    return killProcess(_cachedExecutable);
   }
 
   @override

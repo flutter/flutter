@@ -80,7 +80,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     precache                                                                \
     --no-android                                                            \
     --no-ios                                                                \
-    --macos                                                                 \
+    --macos
 
 # TODO(jonahwilliams): support flavors https://github.com/flutter/flutter/issues/32923
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
@@ -90,7 +90,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     assemble                                                                \
     -dTargetFile="${target_path}"                                           \
     -dTargetPlatform=darwin-x64                                             \
-    -dBuildMode="${build_mode}"                                             \
+    -dBuildMode=debug                                                       \
     --build-inputs="${build_inputs_path}"                                   \
     --build-outputs="${build_outputs_path}"                                 \
     "${build_target}"

@@ -355,6 +355,7 @@ void main() {
     ], <String>[
       '.android/build.gradle',
       '.android/Flutter/build.gradle',
+      '.android/Flutter/flutter.iml',
       '.android/Flutter/src/main/AndroidManifest.xml',
       '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
       '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
