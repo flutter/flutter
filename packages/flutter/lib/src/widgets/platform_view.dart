@@ -619,8 +619,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
   ///
-  /// For example, with the following setup vertical drags will not be dispatched to the UIKit
-  /// view as the vertical drag gesture is claimed by the parent [GestureDetector].
+  /// For example, with the following setup vertical drags will not be dispatched to the platform view
+  /// as the vertical drag gesture is claimed by the parent [GestureDetector].
   ///
   /// ```dart
   /// GestureDetector(

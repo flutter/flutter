@@ -148,7 +148,7 @@ class RenderAndroidView extends RenderBox {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _AndroidViewGestureRecognizer(_motionEventsDispatcher, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizerCaptain(_motionEventsDispatcher.handlePointerEvent, gestureRecognizers);
   }
 
   @override
@@ -162,7 +162,7 @@ class RenderAndroidView extends RenderBox {
 
   _MotionEventsDispatcher _motionEventsDispatcher;
 
-  _AndroidViewGestureRecognizer _gestureRecognizer;
+  _PlatformViewGestureRecognizerCaptain _gestureRecognizer;
 
   @override
   void performResize() {
@@ -486,15 +486,17 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
+typedef _HandlePointerEvent = void Function(PointerEvent event);
+
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
-// it was give, adds all of them to a gesture arena team with the _AndroidViewGestureRecognizer
+// it was give, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizerCaptain
 // as the team captain.
-// As long as ta gesture arena is unresolved the recognizer caches all pointer events.
-// When the team wins the recognizer sends all the cached point events to the embedded Android view, and
-// sets itself to a "forwarding mode" where it will forward any new pointer event to the Android view.
-class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
-  _AndroidViewGestureRecognizer(
-    this.dispatcher,
+// As long as the gesture arena is unresolved, the recognizer caches all pointer events.
+// When the team wins, the recognizer sends all the cached point events to the platform view, and
+// sets itself to a "forwarding mode" where it will forward any new pointer event to the platform view.
+class _PlatformViewGestureRecognizerCaptain extends OneSequenceGestureRecognizer {
+  _PlatformViewGestureRecognizerCaptain(
+    _HandlePointerEvent handlePointerEvent,
     this.gestureRecognizerFactories, {
     PointerDeviceKind kind,
   }) : super(kind: kind) {
@@ -505,9 +507,10 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
         return recognizerFactory.constructor()..team = team;
       },
     ).toSet();
+    _handlePointerEvent = handlePointerEvent;
   }
 
-  final _MotionEventsDispatcher dispatcher;
+  _HandlePointerEvent _handlePointerEvent;
 
   // Maps a pointer to a list of its cached pointer events.
   // Before the arena for a pointer is resolved all events are cached here, if we win the arena
@@ -534,7 +537,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  String get debugDescription => 'Android view';
+  String get debugDescription => 'Platform view';
 
   @override
   void didStopTrackingLastPointer(int pointer) { }
@@ -544,7 +547,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
     if (!forwardedPointers.contains(event.pointer)) {
       cacheEvent(event);
     } else {
-      dispatcher.handlePointerEvent(event);
+      _handlePointerEvent(event);
     }
     stopTrackingIfPointerNoLongerDown(event);
   }
@@ -569,7 +572,7 @@ class _AndroidViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void flushPointerCache(int pointer) {
-    cachedEvents.remove(pointer)?.forEach(dispatcher.handlePointerEvent);
+    cachedEvents.remove(pointer)?.forEach(_handlePointerEvent);
   }
 
   @override
@@ -769,18 +772,7 @@ class PlatformViewRenderBox extends RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// {@template flutter.rendering.platformView.updateGestureRecognizers}
-  /// Updates which gestures should be forwarded to the platform view.
-  ///
-  /// Gesture recognizers created by factories in this set participate in the gesture arena for each
-  /// pointer that was put down on the render box. If any of the recognizers on this list wins the
-  /// gesture arena, the [PlatformViewController.dispatchPointerEvent] will be called.
-  ///
-  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
-  ///
-  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
-  /// set has no effect, because the factories' constructors would have already been called with the previous set.
-  /// {@endtemplate}
+  /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
@@ -794,7 +786,7 @@ class PlatformViewRenderBox extends RenderBox {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizerCaptain(controller: _controller, gestureRecognizerFactories: gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizerCaptain(_controller.dispatchPointerEvent, gestureRecognizers);
   }
 
   _PlatformViewGestureRecognizerCaptain _gestureRecognizer;
@@ -854,108 +846,5 @@ class PlatformViewRenderBox extends RenderBox {
   void detach() {
     _gestureRecognizer.reset();
     super.detach();
-  }
-}
-
-// This recognizer constructs gesture recognizers from a set of gesture recognizer factories
-// it was given, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizerCaptain
-// as the team captain.
-// As long as the gesture arena is unresolved the recognizer caches all pointer events.
-// When the team wins the recognizer sends all the cached point events to the [PlatformViewController], and
-// sets itself to a "forwarding mode" where it will forward any new pointer event to the [PlatformViewController].
-class _PlatformViewGestureRecognizerCaptain extends OneSequenceGestureRecognizer {
-
-  _PlatformViewGestureRecognizerCaptain( {
-    @required this.controller,
-    this.gestureRecognizerFactories,
-    PointerDeviceKind kind,
-  }) : super(kind: kind) {
-    team = GestureArenaTeam();
-    team.captain = this;
-    _gestureRecognizers = gestureRecognizerFactories.map(
-      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
-        return recognizerFactory.constructor()..team = team;
-      },
-    ).toSet();
-  }
-
-  // Maps a pointer to a list of its cached pointer events.
-  // Before the arena for a pointer is resolved all events are cached here, if we win the arena
-  // the cached events are dispatched to the view, if we lose the arena we clear the cache for
-  // the pointer.
-  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
-
-  // Pointer for which we have already won the arena, events for pointers in this set are
-  // immediately dispatched to the `PlatformView`.
-  final Set<int> forwardedPointers = <int>{};
-
-  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
-  // TODO(amirh): get a list of GestureRecognizers here.
-  // https://github.com/flutter/flutter/issues/20953
-  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizerFactories;
-  Set<OneSequenceGestureRecognizer> _gestureRecognizers;
-
-  /// The controller handling dispatching the pointers and accept/release gestures.
-  final PlatformViewController controller;
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
-      recognizer.addPointer(event);
-    }
-  }
-
-  @override
-  String get debugDescription => 'Platform View';
-
-  @override
-  void didStopTrackingLastPointer(int pointer) { }
-
-  @override
-  void handleEvent(PointerEvent event) {
-    if (!forwardedPointers.contains(event.pointer)) {
-      cacheEvent(event);
-    } else {
-      controller.dispatchPointerEvent(event);
-    }
-    stopTrackingIfPointerNoLongerDown(event);
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    flushPointerCache(pointer);
-    forwardedPointers.add(pointer);
-  }
-
-  @override
-  void rejectGesture(int pointer) {
-    stopTrackingPointer(pointer);
-    cachedEvents.remove(pointer);
-  }
-
-  @override
-  void stopTrackingPointer(int pointer) {
-    super.stopTrackingPointer(pointer);
-    forwardedPointers.remove(pointer);
-  }
-
-  void cacheEvent(PointerEvent event) {
-    if (!cachedEvents.containsKey(event.pointer)) {
-      cachedEvents[event.pointer] = <PointerEvent> [];
-    }
-    cachedEvents[event.pointer].add(event);
-  }
-
-  void flushPointerCache(int pointer) {
-    cachedEvents.remove(pointer)?.forEach(controller.dispatchPointerEvent);
-  }
-
-  void reset() {
-    forwardedPointers.forEach(super.stopTrackingPointer);
-    forwardedPointers.clear();
-    cachedEvents.keys.forEach(super.stopTrackingPointer);
-    cachedEvents.clear();
-    resolve(GestureDisposition.rejected);
   }
 }
