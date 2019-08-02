@@ -976,6 +976,12 @@ class OffsetLayer extends ContainerLayer {
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     final ui.Scene scene = buildScene(builder);
+
+    // Because we rendered this layer outside of the main tree, the main layer
+    // tree may attempt to add this layer as retained. However, that's illegal
+    // because here we may have used the existing layer as oldLayer.
+    markNeedsAddToScene();
+
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off
       // anything.
