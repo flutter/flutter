@@ -499,7 +499,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile(
         'text_field_opacity_test.0.png',
-        version: 2,
+        version: 3,
       ),
     );
   }, skip: isBrowser);
@@ -1478,6 +1478,32 @@ void main() {
     expect(controller.text, 'abc d${testValue}ef ghi');
   });
 
+  // Show the selection menu at the given index into the text by tapping to
+  // place the cursor and then tapping on the handle.
+  Future<void> _showSelectionMenuAt(WidgetTester tester, TextEditingController controller, int index) async {
+    await tester.tapAt(tester.getCenter(find.byType(EditableText)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    expect(find.text('SELECT ALL'), findsNothing);
+
+    // Tap the selection handle to bring up the "paste / select all" menu for
+    // the last line of text.
+    await tester.tapAt(textOffsetToPosition(tester, index));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    // Tapping on the part of the handle's GestureDetector where it overlaps
+    // with the text itself does not show the menu, so add a small vertical
+    // offset to tap below the text.
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+  }
+
   testWidgets(
     'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
     (WidgetTester tester) async {
@@ -1501,23 +1527,9 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      // Tap the selection handle to bring up the "paste / select all" menu.
-      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-      RenderEditable renderEditable = findRenderEditable(tester);
-      List<TextSelectionPoint> endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
-        renderEditable,
-      );
-      // Tapping on the part of the handle's GestureDetector where it overlaps
-      // with the text itself does not show the menu, so add a small vertical
-      // offset to tap below the text.
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
-      // Verify the selection toolbar position
+      // Verify the selection toolbar position is below the text.
       Offset toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
@@ -1528,36 +1540,76 @@ void main() {
             padding: const EdgeInsets.all(150.0),
             child: TextField(
               controller: controller,
-              ),
             ),
           ),
         ),
-      );
+      ));
 
       await tester.enterText(find.byType(TextField), testValue);
       await skipPastScrollingAnimation(tester);
 
-      // Tap the selection handle to bring up the "paste / select all" menu.
-      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
-      renderEditable = findRenderEditable(tester);
-      endpoints = globalize(
-        renderEditable.getEndpointsForSelection(controller.selection),
-        renderEditable,
-      );
-      // Tapping on the part of the handle's GestureDetector where it overlaps
-      // with the text itself does not show the menu, so add a small vertical
-      // offset to tap below the text.
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('e'));
 
       // Verify the selection toolbar position
       toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
       textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
-    }
+    },
+  );
+
+  testWidgets(
+    'Toolbar appears in the right places in multiline inputs',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/36749
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: TextField(
+              controller: controller,
+              minLines: 6,
+              maxLines: 6,
+            ),
+          ),
+        ),
+      ));
+
+      expect(find.text('SELECT ALL'), findsNothing);
+      const String testValue = 'abc\ndef\nghi\njkl\nmno\npqr';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Show the selection menu on the first line and verify the selection
+      // toolbar position is below the first line.
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('c'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset firstLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset firstLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('a'));
+      expect(firstLineTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
+
+      // Show the selection menu on the second to last line and verify the
+      // selection toolbar position is above that line and above the first
+      // line's toolbar.
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('o'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset penultimateLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset penultimateLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
+      expect(penultimateLineToolbarTopLeft.dy, lessThan(penultimateLineTopLeft.dy));
+      expect(penultimateLineToolbarTopLeft.dy, lessThan(firstLineToolbarTopLeft.dy));
+
+      // Show the selection menu on the last line and verify the selection
+      // toolbar position is above that line and below the position of the
+      // second to last line's toolbar.
+      await _showSelectionMenuAt(tester, controller, testValue.indexOf('r'));
+      expect(find.text('SELECT ALL'), findsOneWidget);
+      final Offset lastLineToolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      final Offset lastLineTopLeft = textOffsetToPosition(tester, testValue.indexOf('p'));
+      expect(lastLineToolbarTopLeft.dy, lessThan(lastLineTopLeft.dy));
+      expect(lastLineToolbarTopLeft.dy, greaterThan(penultimateLineToolbarTopLeft.dy));
+    },
   );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
