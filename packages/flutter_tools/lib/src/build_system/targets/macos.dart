@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/macos/xcode.dart';
-
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
@@ -86,6 +84,7 @@ class UnpackMacOS extends Target {
   }
 }
 
+/// Compile an App.framework for a macOS target device.
 class MacOSAotAssembly extends Target {
   const MacOSAotAssembly();
 
@@ -102,11 +101,13 @@ class MacOSAotAssembly extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'macos_aot_assembly');
     }
-    final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     if (targetPlatform != TargetPlatform.darwin_x64) {
-      throw Exception('macos_aot_assembly is only supported for iOS applications');
+      throw Exception('macos_aot_assembly is only supported for iOS application.s');
+    }
+    if (buildMode == BuildMode.debug) {
+      throw Exception('macos_aot_assembly is only supported in profile or release mode.');
     }
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
@@ -115,7 +116,7 @@ class MacOSAotAssembly extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       iosArch: IOSArch.x86_64,
-      bitcode: bitcode,
+      bitcode: false,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -138,7 +139,11 @@ class MacOSAotAssembly extends Target {
   ];
 }
 
-/// Because we need to unconditionally create an App.framework
+/// Create an App.framework for debug targets.
+///
+/// This framework needs to exist for the Xcode project to link/bundle,
+/// but it isn't actually executed. To generate something valid, we compile a trivial
+/// string.
 class DummyMacOSAotAssembly extends Target {
   const DummyMacOSAotAssembly();
 
@@ -157,7 +162,6 @@ class DummyMacOSAotAssembly extends Target {
         .childDirectory('flutter_tools')
         .childDirectory('bin')
         .childFile('hack_script.sh').path,
-      outputFile,
     ], runInShell: true);
     if (processResult.exitCode != 0) {
       throw Exception('Failed to compile debug App.framework');
@@ -272,7 +276,7 @@ class DebugMacOSApplication extends Target {
   ];
 }
 
-class ReleaseMacOSApplication extends DebugMacOSApplication {
+class ReleaseMacOSApplication extends Target {
   const ReleaseMacOSApplication();
 
   @override
@@ -286,8 +290,17 @@ class ReleaseMacOSApplication extends DebugMacOSApplication {
     CopyAssets(),
     DebugMacOSPodInstall(),
   ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }
-class ProfileMacOSApplication extends DebugMacOSApplication {
+class ProfileMacOSApplication extends Target {
   const ProfileMacOSApplication();
 
   @override
@@ -301,4 +314,13 @@ class ProfileMacOSApplication extends DebugMacOSApplication {
     CopyAssets(),
     DebugMacOSPodInstall(),
   ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }
