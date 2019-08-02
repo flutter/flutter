@@ -155,6 +155,7 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset center = tester.getCenter(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -193,8 +194,6 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
 
     testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
@@ -234,6 +233,7 @@ void main() {
       final Offset center = tester.getCenter(find.byKey(key));
       final Offset topLeft = tester.getTopLeft(find.byKey(key));
       final TestGesture gesture = await tester.startGesture(center);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -273,8 +273,6 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
 
     testWidgets('rotated for touch/signal', (WidgetTester tester) async {
@@ -312,6 +310,7 @@ void main() {
       const Offset moved = Offset(20, 30);
       final Offset downPosition = tester.getCenter(find.byKey(key)) + const Offset(10, 5);
       final TestGesture gesture = await tester.startGesture(downPosition);
+      addTearDown(gesture.removePointer);
       await gesture.moveBy(moved);
       await gesture.up();
 
@@ -352,8 +351,6 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
-
-      await gesture.removePointer();
     });
   });
 }

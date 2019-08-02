@@ -109,13 +109,13 @@ void main() {
     // Test hover for tooltip.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
-    await gesture.removePointer();
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -143,17 +143,14 @@ void main() {
 
     // Test hover for tooltip.
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    try {
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-      await tester.pumpAndSettle();
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
 
-      await gesture.moveTo(Offset.zero);
-    } finally {
-      await gesture.removePointer();
-    }
+    await gesture.moveTo(Offset.zero);
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);

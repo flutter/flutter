@@ -334,8 +334,12 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: pointerValue,
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -343,16 +347,18 @@ void main() {
     expect(tapCount, 1);
     expect(singleTapUpCount, 1);
     expect(singleLongTapStartCount, 0);
-
-    await gesture.removePointer();
   });
 
   testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: pointerValue,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -364,16 +370,17 @@ void main() {
     expect(dragStartCount, 0);
     expect(dragUpdateCount, 0);
     expect(dragEndCount, 0);
-
-    await gesture.removePointer();
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: pointerValue,
+      kind: PointerDeviceKind.mouse,
+    );
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -385,16 +392,18 @@ void main() {
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
-
-    await gesture.removePointer();
   });
 
   testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.mouse);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: pointerValue,
+      kind: PointerDeviceKind.mouse,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -404,8 +413,6 @@ void main() {
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
-
-    await gesture.removePointer();
   });
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press', (WidgetTester tester) async {
