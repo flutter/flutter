@@ -229,6 +229,10 @@ class DrawerController extends StatefulWidget {
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
 
+  /// The horizontal width from the edge of the screen that will respond to a
+  /// drag gesture to open the drawer.
+  ///
+  /// By default, the value used is 20.0.
   final double edgeDragWidth;
 
   @override

@@ -1141,6 +1141,10 @@ class Scaffold extends StatefulWidget {
   /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
+  /// The horizontal width from the edge of the screen that will respond to a
+  /// drag gesture to open the drawer.
+  ///
+  /// By default, the value used is 20.0.
   final double drawerEdgeDragWidth;
 
   /// The state from the closest instance of this class that encloses the given context.

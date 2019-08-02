@@ -1418,14 +1418,11 @@ void main() {
           ),
         ),
       );
-
       ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.pumpWidget(
@@ -1443,14 +1440,11 @@ void main() {
           ),
         ),
       );
-
       scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, true);
     });
 
