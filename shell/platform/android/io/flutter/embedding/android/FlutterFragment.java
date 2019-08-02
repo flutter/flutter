@@ -178,7 +178,7 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
 
     /**
      * The path to the app bundle which contains the Dart app to execute, defaults
-     * to {@link FlutterMain#findAppBundlePath(Context)}
+     * to {@link FlutterMain#findAppBundlePath()}
      */
     @NonNull
     public Builder appBundlePath(@NonNull String appBundlePath) {
@@ -511,14 +511,14 @@ public class FlutterFragment extends Fragment implements FlutterActivityAndFragm
   /**
    * Returns the file path to the desired Flutter app's bundle of code.
    * <p>
-   * Defaults to {@link FlutterMain#findAppBundlePath(Context)}.
+   * Defaults to {@link FlutterMain#findAppBundlePath()}.
    * <p>
    * Used by this {@code FlutterFragment}'s {@link FlutterActivityAndFragmentDelegate.Host}
    */
   @Override
   @NonNull
   public String getAppBundlePath() {
-    return getArguments().getString(ARG_APP_BUNDLE_PATH, FlutterMain.findAppBundlePath(getContextCompat()));
+    return getArguments().getString(ARG_APP_BUNDLE_PATH, FlutterMain.findAppBundlePath());
   }
 
   /**

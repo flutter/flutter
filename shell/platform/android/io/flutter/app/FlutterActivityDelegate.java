@@ -160,7 +160,7 @@ public final class FlutterActivityDelegate
             return;
         }
 
-        String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
+        String appBundlePath = FlutterMain.findAppBundlePath();
         if (appBundlePath != null) {
             runBundle(appBundlePath);
         }
@@ -340,7 +340,7 @@ public final class FlutterActivityDelegate
             String appBundlePath = intent.getDataString();
             if (appBundlePath == null) {
                 // Fall back to the installation path if no bundle path was specified.
-                appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
+                appBundlePath = FlutterMain.findAppBundlePath();
             }
             if (route != null) {
                 flutterView.setInitialRoute(route);

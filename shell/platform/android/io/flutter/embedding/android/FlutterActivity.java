@@ -345,6 +345,7 @@ public class FlutterActivity extends Activity
    * manifest file.
    */
   @Nullable
+  @SuppressWarnings("deprecation")
   private Drawable getSplashScreenFromManifest() {
     try {
       ActivityInfo activityInfo = getPackageManager().getActivityInfo(
@@ -599,7 +600,7 @@ public class FlutterActivity extends Activity
    * When this {@code FlutterActivity} is run by Flutter tooling and a data String is included
    * in the launching {@code Intent}, that data String is interpreted as an app bundle path.
    * <p>
-   * By default, the app bundle path is obtained from {@link FlutterMain#findAppBundlePath(Context)}.
+   * By default, the app bundle path is obtained from {@link FlutterMain#findAppBundlePath()}.
    * <p>
    * Subclasses may override this method to return a custom app bundle path.
    */
@@ -617,7 +618,7 @@ public class FlutterActivity extends Activity
 
     // Return the default app bundle path.
     // TODO(mattcarroll): move app bundle resolution into an appropriately named class.
-    return FlutterMain.findAppBundlePath(getApplicationContext());
+    return FlutterMain.findAppBundlePath();
   }
 
   /**
