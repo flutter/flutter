@@ -64,7 +64,7 @@ void main() {
   });
 
   // Regression test for https://github.com/flutter/flutter/issues/14452
-  testWidgets('Animation interrupted by gesture does not crash from errant idle notification', (WidgetTester tester) async {
+  testWidgets('Gesture interrupted by animation does not crash from errant idle notification', (WidgetTester tester) async {
     // This crash is more easily triggered using BouncingScrollPhysics
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final ScrollController controller = ScrollController();

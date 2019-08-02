@@ -114,9 +114,6 @@ abstract class ScrollActivity {
   bool get shouldIgnorePointer;
 
   /// Whether performing this activity constitutes scrolling.
-  ///
-  /// Used, for example, to determine whether the user scroll direction is
-  /// [ScrollDirection.idle].
   bool get isScrolling;
 
   /// If applicable, the velocity at which the scroll offset is currently
