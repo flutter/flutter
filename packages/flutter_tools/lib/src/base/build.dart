@@ -54,7 +54,7 @@ class GenSnapshot {
       ...additionalArgs,
     ];
 
-    final String snapshotterPath = getSnapshotterPath(snapshotType);
+    String snapshotterPath = getSnapshotterPath(snapshotType);
 
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
