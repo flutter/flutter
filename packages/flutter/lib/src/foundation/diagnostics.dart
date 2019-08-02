@@ -2224,6 +2224,28 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
     if (value.isEmpty)
       return ifEmpty ?? '[]';
 
+    // Use debugFormatDouble to format Iterable<double>.
+    if (T == double) {
+      final StringBuffer sb = StringBuffer();
+      if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+        for (dynamic item in value) {
+          if (sb.isNotEmpty) {
+            sb.write(', ');
+          }
+          sb.write(debugFormatDouble(item));
+        }
+        return '[${sb.toString()}]';
+      } else {
+        final bool isSingleLine = _isSingleLine(style);
+        for (dynamic item in value) {
+          if (sb.isNotEmpty)
+            sb.write(isSingleLine ? ', ' : '\n');
+          sb.write(debugFormatDouble(item));
+        }
+        return sb.toString();
+      }
+    }
+
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Always display the value as a single line and enclose the iterable
       // value in brackets to avoid ambiguity.
