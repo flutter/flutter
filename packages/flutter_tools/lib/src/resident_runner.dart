@@ -518,6 +518,17 @@ class FlutterDevice {
 //    HttpException: , uri = *
 final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
 
+/// Returns `true` if any of the devices is running Android Q.
+Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
+  for (FlutterDevice flutterDevice in flutterDevices) {
+    final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
+    if (sdkNameAndVersion.startsWith('Android 10')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
