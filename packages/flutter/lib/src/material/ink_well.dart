@@ -685,8 +685,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   bool get enabled => _isWidgetEnabled(widget);
 
-  void _handlePointerEnter(PointerEnterEvent event) => _handleHoverChange(true);
-  void _handlePointerExit(PointerExitEvent event) => _handleHoverChange(false);
+  void _handleMouseEnter(PointerEnterEvent event) => _handleHoverChange(true);
+  void _handleMouseExit(PointerExitEvent event) => _handleHoverChange(false);
   void _handleHoverChange(bool hovering) {
     if (_hovering != hovering) {
       _hovering = hovering;
@@ -702,10 +702,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
-    return Listener(
-      onPointerEnter: enabled ? _handlePointerEnter : null,
-      onPointerExit: enabled ? _handlePointerExit : null,
-      behavior: HitTestBehavior.translucent,
+    return MouseRegion(
+      onEnter: enabled ? _handleMouseEnter : null,
+      onExit: enabled ? _handleMouseExit : null,
       child: GestureDetector(
         onTapDown: enabled ? _handleTapDown : null,
         onTap: enabled ? () => _handleTap(context) : null,

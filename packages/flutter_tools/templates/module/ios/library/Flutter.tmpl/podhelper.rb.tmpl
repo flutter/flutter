@@ -8,13 +8,11 @@
 # @param [String] flutter_application_path Path of the root directory of the Flutter module.
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
-# @param [String] flutter_application_name Name of the Flutter module. Optional, defaults to module directory name.
-def install_all_flutter_pods(flutter_application_path = nil, flutter_application_name = nil)
-  flutter_application_name ||= File.basename(File.expand_path(flutter_application_path))
+def install_all_flutter_pods(flutter_application_path = nil)
   flutter_application_path ||= File.join('..', '..')
   install_flutter_engine_pod
   install_flutter_plugin_pods(flutter_application_path)
-  install_flutter_application_pod(flutter_application_path, flutter_application_name)
+  install_flutter_application_pod(flutter_application_path)
 end
 
 # Install Flutter engine pod.
@@ -65,12 +63,12 @@ end
 #
 # @example
 #   target 'MyApp' do
-#     install_flutter_application_pod '../flutter_settings_repository', 'settings_module'
+#     install_flutter_application_pod '../flutter_settings_repository'
 #   end
 # @param [String] flutter_application_path Path of the root directory of the Flutter module.
 #                                          Optional, defaults to two levels up from the directory of this script.
 #                                          MyApp/my_flutter/.ios/Flutter/../..
-def install_flutter_application_pod(flutter_application_path, flutter_application_name)
+def install_flutter_application_pod(flutter_application_path)
   app_framework_dir = File.join(__dir__, 'App.framework')
   app_framework_dylib = File.join(app_framework_dir, 'App')
   if !File.exist?(app_framework_dylib)
@@ -81,7 +79,7 @@ def install_flutter_application_pod(flutter_application_path, flutter_applicatio
     `echo "static const int Moo = 88;" | xcrun clang -x c -dynamiclib -o "#{app_framework_dylib}" -`
   end
 
-  pod flutter_application_name, :path => __dir__, :inhibit_warnings => true
+  pod '{{projectName}}', :path => __dir__, :inhibit_warnings => true
 
   # Use relative paths for script phase paths since these strings will likely be checked into source controls.
   # Process will be run from project directory.

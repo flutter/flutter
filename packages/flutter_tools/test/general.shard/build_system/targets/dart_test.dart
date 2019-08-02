@@ -251,6 +251,16 @@ flutter_tools:lib/''');
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
   }));
+
+  test('list dart sources handles packages without lib directories', () => testbed.run(() {
+    fs.file('.packages')
+      ..createSync()
+      ..writeAsStringSync('''
+# Generated
+example:fiz/lib/''');
+    fs.directory('fiz').createSync();
+    expect(listDartSources(androidEnvironment), <File>[]);
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

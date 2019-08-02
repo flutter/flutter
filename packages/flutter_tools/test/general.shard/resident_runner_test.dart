@@ -68,6 +68,7 @@ void main() {
       fullRestart: anyNamed('fullRestart'),
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenAnswer((Invocation invocation) async {
       return UpdateFSReport(
         success: true,
@@ -175,6 +176,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenThrow(RpcException(666, 'something bad happened'));
 
     final OperationResult result = await residentRunner.restart(fullRestart: false);
@@ -279,6 +281,7 @@ void main() {
       projectRootPath: anyNamed('projectRootPath'),
       pathToReload: anyNamed('pathToReload'),
       invalidatedFiles: anyNamed('invalidatedFiles'),
+      dillOutputPath: anyNamed('dillOutputPath'),
     )).thenThrow(RpcException(666, 'something bad happened'));
 
     final OperationResult result = await residentRunner.restart(fullRestart: true);
