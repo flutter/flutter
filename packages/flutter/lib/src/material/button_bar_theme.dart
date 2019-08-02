@@ -184,11 +184,22 @@ class ButtonBarThemeData extends Diagnosticable {
   }
 }
 
-/// An inherited widget that defines the configuration for
-/// [ButtonBar]s in this widget's subtree.
+/// Applies a button bar theme to descendant [ButtonBar] widgets.
 ///
-/// Values specified here are used for [ButtonBar] properties that are not
-/// given an explicit non-null value.
+/// A button bar theme describes the layout and properties for the buttons
+/// contained in a [ButtonBar].
+///
+/// Descendant widgets obtain the current theme's [ButtonBarTheme] object using
+/// [ButtonBarTheme.of]. When a widget uses [ButtonBarTheme.of], it is automatically
+/// rebuilt if the theme later changes.
+///
+/// A button bar theme can be specified as part of the overall Material theme
+/// using [ThemeData.buttonBarTheme].
+///
+/// See also:
+///
+///  * [ButtonBarThemeData], which describes the actual configuration of a button
+///    bar theme.
 class ButtonBarTheme extends InheritedWidget {
   /// Constructs a button bar theme that configures all descendent [ButtonBar]
   /// widgets.
