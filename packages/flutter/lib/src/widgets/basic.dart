@@ -37,6 +37,7 @@ export 'package:flutter/rendering.dart' show
   FlowPaintingContext,
   FractionalOffsetTween,
   HitTestBehavior,
+  LayerHitTestBehavior,
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
@@ -5775,8 +5776,10 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.behavior = LayerHitTestBehavior.opaque,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(behavior != null),
+       super(key: key, child: child);
 
   /// Called when a mouse pointer (with or without buttons pressed) enters the
   /// region defined by this widget, or when the widget appears under the
@@ -5792,6 +5795,9 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
+  /// TODOC
+  final LayerHitTestBehavior behavior;
+
   @override
   _ListenerElement createElement() => _ListenerElement(this);
 
@@ -5801,6 +5807,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
+      behavior: behavior,
     );
   }
 
@@ -5809,7 +5816,8 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     renderObject
       ..onEnter = onEnter
       ..onHover = onHover
-      ..onExit = onExit;
+      ..onExit = onExit
+      ..behavior = behavior;
   }
 
   @override

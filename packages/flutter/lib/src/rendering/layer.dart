@@ -2057,10 +2057,10 @@ class AnnotatedRegionLayer<T> extends ContainerLayer implements LayerHitTestTarg
     this.size,
     Offset offset,
     this.behavior = LayerHitTestBehavior.translucent,
-  })
-      : assert(value != null),
-        _value = value,
-        offset = offset ?? Offset.zero;
+  }) : assert(value != null),
+       assert(behavior != null),
+       _value = value,
+       offset = offset ?? Offset.zero;
 
   /// The value returned by [find] if the offset is contained within this layer.
   @override

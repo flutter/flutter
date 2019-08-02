@@ -2549,7 +2549,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// Calls callbacks in response to pointer events that are exclusive to mice.
 ///
 /// Simply put, it responds to events that are related to hovering,
-/// i.e. when the mouse enters, exits or hovers a region without pressing.
+/// i.e. when the mouse enters, exits or moves over a region (with or without
+/// pressing buttons).
 ///
 /// It does not respond to common events that construct gestures, such as when
 /// the pointer is pressed, moved, then released or canceled. For these events,
@@ -2558,14 +2559,21 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 /// If it has a child, it defers to the child for sizing behavior.
 ///
 /// If it does not have a child, it grows to fit the parent-provided constraints.
+///
+/// See also:
+///
+///  * [MouseRegion], a widget that listens to hover events using
+///    [RenderMouseRegion].
 class RenderMouseRegion extends RenderProxyBox {
   /// Creates a render object that forwards pointer events to callbacks.
   RenderMouseRegion({
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
+    this.behavior = LayerHitTestBehavior.opaque,
     RenderBox child,
-  }) : _onEnter = onEnter,
+  }) : assert(behavior != null),
+       _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
        super(child) {
@@ -2578,6 +2586,9 @@ class RenderMouseRegion extends RenderProxyBox {
     }
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
+
+  /// TODOC
+  LayerHitTestBehavior behavior;
 
   /// Called when a hovering pointer enters the region for this widget.
   ///
@@ -2725,10 +2736,12 @@ class RenderMouseRegion extends RenderProxyBox {
         _hoverAnnotation,
         size: size,
         offset: offset,
+        behavior: behavior,
       );
       context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
     }
-    super.paint(context, offset);
   }
 
   @override
