@@ -1428,7 +1428,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   void initState() {
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
-    _updateState(MaterialState.disabled, !widget.isEnabled ?? false);
+    _updateState(MaterialState.disabled, !widget.isEnabled);
     _updateState(MaterialState.selected, widget.selected ?? false);
     selectController = AnimationController(
       duration: _kSelectDuration,
@@ -1568,7 +1568,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
-        _updateState(MaterialState.disabled, !widget.isEnabled ?? false);
+        _updateState(MaterialState.disabled, !widget.isEnabled);
         if (widget.isEnabled) {
           enableController.forward();
         } else {
