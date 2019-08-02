@@ -580,3 +580,45 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
+
+/// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
+///
+/// See also:
+/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+// TODO(amirh): Link to the embedder's system compositor documentation once available.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`.
+  ///
+  /// The [controller] must not be null.
+  const PlatformViewSurface({
+    @required this.controller,
+  }) : assert(controller != null);
+
+  /// The controller for the platform view integrated by this [PlatformViewSurface].
+  ///
+  /// [PlatformViewController] is used for dispatching touch events to the platform view.
+  /// [PlatformViewController.viewId] identifies the platform view whose contents are painted by this widget.
+  final PlatformViewController controller;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return PlatformViewRenderBox(controller: controller);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+    renderObject
+      ..controller = controller;
+  }
+}
