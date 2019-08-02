@@ -804,6 +804,7 @@ class ThemeData extends Diagnosticable {
   /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
+  /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
