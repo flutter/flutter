@@ -7,16 +7,31 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Defines the visual properties of [ButtonBar] widgets.
+///
+/// Used by [ButtonBarTheme] to control the visual properties of [ButtonBar]
+/// instances in a  widget subtree.
+///
+/// To obtain this configuration, use [ButtonBarTheme.of] to access the closest
+/// ancestor [ButtonBarTheme] of the current [BuildContext].
+///
+/// See also:
+///
+///   * [ButtonBarTheme], an [InheritedWidget] that propagates the theme down
+///     its subtree.
+///   * [ButtonBar], which uses this to configure itself and its children
+///     button widgets.
 class ButtonBarThemeData extends Diagnosticable {
+  /// Constructs the set of properties used to configure [ButtonBar]s.
   const ButtonBarThemeData({
-    this.alignment = MainAxisAlignment.end,
-    this.mainAxisSize = MainAxisSize.max,
-    this.buttonTextTheme = ButtonTextTheme.primary,
-    this.buttonMinWidth = 64.0,
-    this.buttonHeight = 36.0,
-    this.buttonPadding = const EdgeInsets.symmetric(horizontal: 8.0),
-    this.buttonAlignedDropdown = false,
-    this.layoutBehavior = ButtonBarLayoutBehavior.padded,
+    this.alignment,
+    this.mainAxisSize,
+    this.buttonTextTheme,
+    this.buttonMinWidth,
+    this.buttonHeight,
+    this.buttonPadding,
+    this.buttonAlignedDropdown,
+    this.layoutBehavior,
   });
 
   /// How the children should be placed along the horizontal axis.
@@ -25,13 +40,58 @@ class ButtonBarThemeData extends Diagnosticable {
   /// How much horizontal space is available. See [Row.mainAxisSize].
   final MainAxisSize mainAxisSize;
 
+  /// Defines a [ButtonBar] button's base colors, and the defaults for
+  /// the button's minimum size, internal padding, and shape.
+  ///
+  /// This will override the surrounding [ButtonTheme.textTheme] setting
+  /// for buttons contained in the [ButtonBar].
+  ///
+  /// Despite the name, this property is not a [TextTheme], its value is not a
+  /// collection of [TextStyle]s.
   final ButtonTextTheme buttonTextTheme;
+
+  /// The minimum width for [ButtonBar] buttons.
+  ///
+  /// This will override the surrounding [ButtonTheme.minWidth] setting
+  /// for buttons contained in the [ButtonBar].
+  ///
+  /// The actual horizontal space allocated for a button's child is
+  /// at least this value less the theme's horizontal [padding].
   final double buttonMinWidth;
+
+  /// The minimum height for [ButtonBar] buttons.
+  ///
+  /// This will override the surrounding [ButtonTheme.height] setting
+  /// for buttons contained in the [ButtonBar].
   final double buttonHeight;
+
+  /// Padding for a [ButtonBar] button's child (typically the button's label).
+  ///
+  /// This will override the surrounding [ButtonTheme.padding] setting
+  /// for buttons contained in the [ButtonBar].
   final EdgeInsetsGeometry buttonPadding;
+
+  /// If `true`, then a [DropdownButton] menu's width will match the [ButtonBar]
+  /// button's width.
+  ///
+  /// If `false`, then the dropdown's menu will be wider than
+  /// its button. In either case the dropdown button will line up the leading
+  /// edge of the menu's value with the leading edge of the values
+  /// displayed by the menu items.
+  ///
+  /// This will override the surrounding [ButtonTheme.alignedDropdown] setting
+  /// for buttons contained in the [ButtonBar].
+  ///
+  /// This property only affects [DropdownButton] contained in a [ButtonBar]
+  /// and its menu.
   final bool buttonAlignedDropdown;
+
+  /// Defines whether a [ButtonBar] should size itself with a minimum size
+  /// constraint or with padding.
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
   ButtonBarThemeData copyWith({
     MainAxisAlignment alignment,
     MainAxisSize mainAxisSize,
@@ -54,6 +114,11 @@ class ButtonBarThemeData extends Diagnosticable {
     );
   }
 
+  /// Linearly interpolate between two tooltip themes.
+  ///
+  /// If both arguments are null, then null is returned.
+  ///
+  /// {@macro dart.ui.shadow.lerp}
   static ButtonBarThemeData lerp(ButtonBarThemeData a, ButtonBarThemeData b, double t) {
     assert(t != null);
     if (a == null && b == null)
@@ -115,15 +180,32 @@ class ButtonBarThemeData extends Diagnosticable {
   }
 }
 
+/// An inherited widget that defines the configuration for
+/// [ButtonBar]s in this widget's subtree.
+///
+/// Values specified here are used for [ButtonBar] properties that are not
+/// given an explicit non-null value.
 class ButtonBarTheme extends InheritedWidget {
+  /// Constructs a button bar theme that configures all descendent [ButtonBar]
+  /// widgets.
   const ButtonBarTheme({
     Key key,
     @required this.data,
     Widget child,
   }) : assert(data != null), super(key: key, child: child);
 
+  /// The properties used for all descendant [ButtonBar] widgets.
   final ButtonBarThemeData data;
 
+  /// Returns the configuration [data] from the closest [ButtonBarTheme]
+  /// ancestor. If there is no ancestor, it returns [ThemeData.buttonBarTheme].
+  /// Applications can assume that the returned value will not be null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ButtonBarThemeData theme = ButtonBarTheme.of(context);
+  /// ```
   static ButtonBarThemeData of(BuildContext context) {
     final ButtonBarTheme buttonBarTheme = context.inheritFromWidgetOfExactType(ButtonBarTheme);
     return buttonBarTheme?.data ?? Theme.of(context).buttonBarTheme;
