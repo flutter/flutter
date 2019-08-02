@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart' show Diagnosticable;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/cupertino/interface_level.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -331,18 +329,35 @@ class _CupertinoSystemColor extends InheritedWidget {
   bool updateShouldNotify(_CupertinoSystemColor oldWidget) => oldWidget.data != data;
 }
 
+/// A set of system colors provided in iOS 13+.
+///
+/// Each individual color has the ability to adapt to vibrancy and changes in
+/// accessibility settings like Increase Contrast and Reduce Transparency.
+///
+/// See also:
+///
+/// * https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
 class CupertinoSystemColor {
   const CupertinoSystemColor._();
+
+  /// Get the iOS system colors from the given [BuildContext].
+  ///
+  /// Falls back to [fromSystem] and then [fallbackValues], if such information
+  /// is not available in the given [BuildContext].
   static CupertinoSystemColorData of(BuildContext context) {
     final _CupertinoSystemColor widget = context.inheritFromWidgetOfExactType(_CupertinoSystemColor);
     return widget?.data ?? fromSystem ?? fallbackValues;
   }
 
+  /// System Colors fetched from the OS.
+  ///
+  /// On iOS 13 and above all the colors will be fetched from the operating system.
+  /// On Android and lower versions of iOS this will return null.
   static CupertinoSystemColorData get fromSystem => null;
 
   /// Fallback System Colors, extracted from:
   /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
-  /// iOS 13 beta.
+  /// and iOS 13 beta.
   static CupertinoSystemColorData get fallbackValues {
     return CupertinoSystemColorData(
       label: CupertinoDynamicColor(
