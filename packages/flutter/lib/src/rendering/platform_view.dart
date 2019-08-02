@@ -89,14 +89,8 @@ class RenderAndroidView extends RenderBox with PlatformViewGestureMixin {
     _motionEventsDispatcher = _MotionEventsDispatcher(globalToLocal, viewController);
     updateGestureRecognizers(gestureRecognizers);
     _viewController.addOnPlatformViewCreatedListener(_onPlatformViewCreated);
-    _hitTestBehavior = hitTestBehavior;
+    this.hitTestBehavior = hitTestBehavior;
   }
-
-  /// How to behave during hit testing.
-  PlatformViewHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-
-  /// Updates the hitTestBehavior.
-  set hitTestBehavior(PlatformViewHitTestBehavior hitTestBehavior) => _hitTestBehavior = hitTestBehavior;
 
   _PlatformViewState _state = _PlatformViewState.uninitialized;
 
@@ -689,8 +683,8 @@ class _MotionEventsDispatcher {
 
 /// A render object for embedding a platform view.
 ///
-/// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer, integrates it with the gesture arenas system
-/// and adds relevant semantic nodes to the semantics tree.
+/// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer,
+/// integrates it with the gesture arenas system and adds relevant semantic nodes to the semantics tree.
 class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
 
   /// Creating a render object for a [PlatformViewSurface].
@@ -704,15 +698,9 @@ class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
         assert(hitTestBehavior != null),
         assert(gestureRecognizers != null),
         _controller = controller {
-          _hitTestBehavior = hitTestBehavior;
+          this.hitTestBehavior = hitTestBehavior;
           updateGestureRecognizers(gestureRecognizers);
         }
-
-  /// How to behave during hit testing.
-  PlatformViewHitTestBehavior get hitTestBehavior => _hitTestBehavior;
-
-  /// Updates the hitTestBehavior.
-  set hitTestBehavior(PlatformViewHitTestBehavior hitTestBehavior) => _hitTestBehavior = hitTestBehavior;
 
   /// Sets the [controller] for this render object.
   ///
@@ -769,9 +757,13 @@ class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
   }
 }
 
+/// The Mixin handling the pointer events and gestures of a platform view render box.
 mixin PlatformViewGestureMixin on RenderBox {
 
-  PlatformViewHitTestBehavior _hitTestBehavior;
+  /// How to behave during hit testing.
+  // The implicit setter is enough here as changing this value will just affect
+  // any newly arriving events there's nothing we need to invalidate.
+  PlatformViewHitTestBehavior hitTestBehavior;
 
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
@@ -794,15 +786,15 @@ mixin PlatformViewGestureMixin on RenderBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    if (_hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
       return false;
     }
     result.add(BoxHitTestEntry(this, position));
-    return _hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
   }
 
   @override
-  bool hitTestSelf(Offset position) => _hitTestBehavior != PlatformViewHitTestBehavior.transparent;
+  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
 
   @override
   bool get sizedByParent => true;
