@@ -1,4 +1,4 @@
-Signature: fffb89a2885ece405a735fcb88a077f4
+Signature: f18a4c267a1c73332a65244b1d76d684
 
 UNUSED LICENSES:
 
@@ -1350,6 +1350,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSIO
 FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/mesa-driver-builder/Dockerfile
 FILE: ../../../third_party/skia/infra/bots/assets/mips64el_toolchain_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/moltenvk/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/mskp/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/node/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/opencl_headers/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/opencl_intel_neo_linux/VERSION
@@ -1437,6 +1438,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/env/examples/full.expe
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-AndroidOne-GPU-Mali400MP2-arm-Release-All-Android_SkottieTracing.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-GalaxyS7_G930FD-GPU-MaliT880-arm64-Debug-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Debug-All-Android.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_Skpbench_Mskp.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-ChromeOS-Clang-SamsungChromebookPlus-GPU-MaliT860-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-MSAN.json
@@ -1542,6 +1544,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housek
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/Housekeeper-Weekly-RecreateSKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipes/recreate_skps.expected/failed_upload.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_CCPR_Skpbench.json
+FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Android-Clang-Pixel-GPU-Adreno530-arm64-Release-All-Android_Skpbench_Mskp.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench_DDLRecord_9x9.json
 FILE: ../../../third_party/skia/infra/bots/recipes/skpbench.expected/Perf-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-Vulkan_Skpbench_DDLTotal_9x9.json
@@ -2781,8 +2784,6 @@ FILE: ../../../third_party/skia/src/core/SkBigPicture.cpp
 FILE: ../../../third_party/skia/src/core/SkBigPicture.h
 FILE: ../../../third_party/skia/src/core/SkBitmapController.cpp
 FILE: ../../../third_party/skia/src/core/SkBitmapController.h
-FILE: ../../../third_party/skia/src/core/SkBitmapProvider.cpp
-FILE: ../../../third_party/skia/src/core/SkBitmapProvider.h
 FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.h
@@ -4841,6 +4842,7 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleWebGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLTypesPriv.cpp
+FILE: ../../../third_party/skia/src/gpu/mock/GrMockCaps.cpp
 FILE: ../../../third_party/skia/src/gpu/mock/GrMockTypes.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTransferFromOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrTransferFromOp.h
@@ -4958,6 +4960,7 @@ FILE: ../../../third_party/skia/src/core/SkDescriptor.cpp
 FILE: ../../../third_party/skia/src/core/SkEffectPriv.h
 FILE: ../../../third_party/skia/src/core/SkStrikeInterface.h
 FILE: ../../../third_party/skia/src/core/SkStrikeSpec.h
+FILE: ../../../third_party/skia/src/core/SkVMBlitter.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVMath.h
 FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferUtils.cpp
@@ -4991,6 +4994,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpu.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.cpp
