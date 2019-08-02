@@ -431,18 +431,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
 
-    Widget result;
-
-    if (child != null) {
-      result = IconTheme.merge(
-        data: IconThemeData(
-          color: foregroundColor,
-        ),
-        child: child,
-      );
-    }
-
-    result = RawMaterialButton(
+    Widget result = RawMaterialButton(
       onPressed: onPressed,
       elevation: elevation,
       focusElevation: focusElevation,
@@ -458,7 +447,7 @@ class FloatingActionButton extends StatelessWidget {
       shape: shape,
       clipBehavior: clipBehavior ?? Clip.none,
       focusNode: focusNode,
-      child: result,
+      child: child,
     );
 
     if (tooltip != null) {

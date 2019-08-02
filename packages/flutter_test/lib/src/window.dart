@@ -373,4 +373,12 @@ class TestWindow implements Window {
     clearTextScaleFactorTestValue();
     clearViewInsetsTestValue();
   }
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// Window, and makes things easier when we do rolls to give us time to
+  /// catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
+  }
 }
