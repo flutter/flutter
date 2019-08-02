@@ -795,6 +795,46 @@ void main() {
     expect(handle.opacity.value, equals(1.0));
   });
 
+  testWidgets('Entering text hides selection handle caret', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
+    );
+
+    const String testValue = 'abcdefghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    // Handle not shown.
+    expect(controller.selection.isCollapsed, true);
+    final Finder fadeFinder = find.byType(FadeTransition);
+    expect(fadeFinder, findsNothing);
+
+    // Tap on the text field to show the handle.
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+    expect(controller.selection.isCollapsed, true);
+    expect(fadeFinder, findsNWidgets(1));
+    final FadeTransition handle = tester.widget(fadeFinder.at(0));
+    expect(handle.opacity.value, equals(1.0));
+
+    // Enter more text.
+    const String testValueAddition = 'jklmni';
+    await tester.enterText(find.byType(TextField), testValueAddition);
+    expect(controller.value.text, testValueAddition);
+    await skipPastScrollingAnimation(tester);
+
+    // Handle not shown.
+    expect(controller.selection.isCollapsed, true);
+    expect(fadeFinder, findsNothing);
+  });
+
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 

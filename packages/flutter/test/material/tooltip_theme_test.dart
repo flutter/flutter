@@ -159,10 +159,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: TooltipTheme(
-          height: 100.0,
-          padding: const EdgeInsets.all(0.0),
-          verticalOffset: 100.0,
-          preferBelow: false,
+          data: const TooltipThemeData(
+            height: 100.0,
+            padding: EdgeInsets.all(0.0),
+            verticalOffset: 100.0,
+            preferBelow: false,
+          ),
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
@@ -286,10 +288,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: TooltipTheme(
-          height: 190.0,
-          padding: const EdgeInsets.all(0.0),
-          verticalOffset: 100.0,
-          preferBelow: false,
+          data: const TooltipThemeData(
+            height: 190.0,
+            padding: EdgeInsets.all(0.0),
+            verticalOffset: 100.0,
+            preferBelow: false,
+          ),
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
@@ -412,10 +416,12 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: TooltipTheme(
-          height: 190.0,
-          padding: const EdgeInsets.all(0.0),
-          verticalOffset: 100.0,
-          preferBelow: true,
+          data: const TooltipThemeData(
+            height: 190.0,
+            padding: EdgeInsets.all(0.0),
+            verticalOffset: 100.0,
+            preferBelow: true,
+          ),
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
@@ -529,8 +535,10 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 return TooltipTheme(
-                  padding: const EdgeInsets.all(0.0),
-                  margin: const EdgeInsets.all(_customPaddingValue),
+                  data: const TooltipThemeData(
+                    padding: EdgeInsets.all(0.0),
+                    margin: EdgeInsets.all(_customPaddingValue),
+                  ),
                   child: Tooltip(
                     key: key,
                     message: tooltipText,
@@ -607,6 +615,7 @@ void main() {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
       home: TooltipTheme(
+        data: const TooltipThemeData(),
         child: Tooltip(
           textStyle: const TextStyle(
             color: Colors.orange,
@@ -687,7 +696,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: TooltipTheme(
-          decoration: customDecoration,
+          data: const TooltipThemeData(decoration: customDecoration),
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
@@ -769,14 +778,16 @@ void main() {
   testWidgets('Tooltip height and padding - TooltipTheme', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     const double customTooltipHeight = 100.0;
-    const double customPaddingVal = 20.0;
+    const double customPaddingValue = 20.0;
 
     await tester.pumpWidget(
       Directionality(
         textDirection: TextDirection.ltr,
         child: TooltipTheme(
-          height: customTooltipHeight,
-          padding: const EdgeInsets.all(customPaddingVal),
+          data: const TooltipThemeData(
+            height: customTooltipHeight,
+            padding: EdgeInsets.all(customPaddingValue),
+          ),
           child: Overlay(
             initialEntries: <OverlayEntry>[
               OverlayEntry(
@@ -805,8 +816,8 @@ void main() {
     ));
 
     expect(tip.size.height, equals(customTooltipHeight));
-    expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingVal));
-    expect(content.size.width, equals(tip.size.width - 2 * customPaddingVal));
+    expect(content.size.height, equals(customTooltipHeight - 2 * customPaddingValue));
+    expect(content.size.width, equals(tip.size.width - 2 * customPaddingValue));
   }, skip: isBrowser);
 
   testWidgets('Tooltip waitDuration - ThemeData.tooltipTheme', (WidgetTester tester) async {
@@ -868,7 +879,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipTheme(
-          waitDuration: customWaitDuration,
+          data: const TooltipThemeData(waitDuration: customWaitDuration),
           child: Center(
             child: Tooltip(
               message: tooltipText,
@@ -943,7 +954,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipTheme(
-          showDuration: customShowDuration,
+          data: const TooltipThemeData(showDuration: customShowDuration),
           child: Center(
             child: Tooltip(
               message: tooltipText,
@@ -1011,9 +1022,10 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: TooltipTheme(
-          child: const Center(
+          data: TooltipThemeData(),
+          child: Center(
             child: Tooltip(
               message: 'Foo',
               child: Text('Bar'),
@@ -1088,10 +1100,10 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: TooltipTheme(
-          excludeFromSemantics: true,
-          child: const Center(
+          data: TooltipThemeData(excludeFromSemantics: true),
+          child: Center(
             child: Tooltip(
               message: 'Foo',
               child: Text('Bar'),
@@ -1175,6 +1187,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: TooltipTheme(
+          data: const TooltipThemeData(),
           child: Center(
             child: Tooltip(
               message: 'Foo',
