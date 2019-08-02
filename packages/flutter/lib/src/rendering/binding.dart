@@ -247,13 +247,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // Layer hit testing is done using device pixels, so we have to convert
       // the logical coordinates of the event location back to device pixels
       // here.
-      final AnnotationTestResult<MouseTrackerAnnotation> result =
-        AnnotationTestResult<MouseTrackerAnnotation>();
-      renderView.layer.findAnnotations<MouseTrackerAnnotation>(
-        result, regionOffset: offset * window.devicePixelRatio);
-      return result.path.map((AnnotationTestEntry<MouseTrackerAnnotation> entry) {
-        return entry.target.value;
-      });
+      return renderView.layer.findAll(offset * window.devicePixelRatio);
     });
   }
 
