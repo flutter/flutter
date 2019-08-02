@@ -1,4 +1,4 @@
-Signature: f18a4c267a1c73332a65244b1d76d684
+Signature: 5538b45c80a534ef7ac09eff3d913557
 
 UNUSED LICENSES:
 
@@ -4807,6 +4807,7 @@ FILE: ../../../third_party/skia/gm/crbug_946965.cpp
 FILE: ../../../third_party/skia/gm/patharcto.cpp
 FILE: ../../../third_party/skia/gm/runtimecolorfilter.cpp
 FILE: ../../../third_party/skia/gm/runtimeshader.cpp
+FILE: ../../../third_party/skia/include/effects/SkImageFilters.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLAssembleHelpers.h
 FILE: ../../../third_party/skia/include/private/GrGLTypesPriv.h
 FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
@@ -4827,6 +4828,7 @@ FILE: ../../../third_party/skia/samplecode/SampleImageFilterDAG.cpp
 FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.cpp
@@ -4994,6 +4996,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpu.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpu.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnGpuCommandBuffer.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramBuilder.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramBuilder.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
