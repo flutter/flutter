@@ -233,6 +233,11 @@ class DrawerController extends StatefulWidget {
   /// drag gesture to open the drawer.
   ///
   /// By default, the value used is 20.0.
+  ///
+  /// If `MediaQuery.of(context).padding` is larger than the default drawer
+  /// edge width of 20.0 or the custom passed in drawerEdgeDragWidth value,
+  /// `MediaQuery.of(context).padding` will be used instead to properly
+  /// accommodate the drag widths of notched devices.
   final double edgeDragWidth;
 
   @override
