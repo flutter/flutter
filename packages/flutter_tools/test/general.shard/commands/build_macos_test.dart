@@ -7,15 +7,14 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/macos/application_package.dart';
+import 'package:flutter_tools/src/macos/build_macos.dart';
 import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +22,6 @@ import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
 void main() {
-  MockProcessManager mockProcessManager;
   MemoryFileSystem memoryFilesystem;
   MockProcess mockProcess;
   MockPlatform macosPlatform;
@@ -34,7 +32,6 @@ void main() {
   });
 
   setUp(() {
-    mockProcessManager = MockProcessManager();
     memoryFilesystem = MemoryFileSystem();
     mockProcess = MockProcess();
     macosPlatform = MockPlatform();
@@ -79,46 +76,38 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
-  testUsingContext('macOS build invokes xcode build', () async {
+  testUsingContext('macOS build copies to output directory', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.directory('macos').createSync();
+    when(macOSBuilder.buildMacOS(
+      flutterProject: anyNamed('flutterProject'),
+      buildInfo: anyNamed('buildInfo'),
+      targetOverride: anyNamed('targetOverride'),
+    )).thenAnswer((Invocation invocation) async {
+      final Directory appDir = fs.directory(fs.path.join('foo', 'bar', 'Flutter.app'));
+      final File executable = fs.file(fs.path.join('foo', 'bar', 'Flutter.app', 'Contents', 'MacOS', 'App'));
+      executable.createSync(recursive: true);
+      return PrebuiltMacOSApp(
+        bundleDir: appDir,
+        bundleName: 'Flutter.app',
+        executableAndId: ExecutableAndId(executable.path,  '2'),
+      );
+    });
+    fs.directory('macos').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
-    final Environment environment = Environment(
-      projectDir: flutterProject.directory,
-      buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
-      defines: <String, String>{
-        kBuildMode: 'debug',
-        kTargetFile: 'lib/main.dart',
-        kTargetPlatform: 'darwin-x64',
-      }
-    );
-    when(mockProcessManager.start(<String>[
-      '/usr/bin/env',
-      'xcrun',
-      'xcodebuild',
-      '-workspace', flutterProject.macos.xcodeWorkspace.path,
-      '-configuration', 'Release',
-      '-scheme', 'Runner',
-      '-derivedDataPath', environment.buildDir.path,
-      'OBJROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${fs.path.join(environment.buildDir.path, 'Build', 'Products')}',
-    ])).thenAnswer((Invocation invocation) async {
-      fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
-        ..createSync(recursive: true)
-        ..writeAsStringSync('example.app');
-      return mockProcess;
-    });
 
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'macos', '--release']
-    ), throwsA(isInstanceOf<AssertionError>()));
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'macos', '--release', '-ofoo']
+    );
+
+    verify(os.chmod(any, 'x')).called(1);
+    expect(fs.directory(fs.path.join('foo', 'Flutter.app')).existsSync(), true);
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
-    ProcessManager: () => mockProcessManager,
+    OperatingSystemUtils: () => MockOperatingSystemUtils(),
+    FileSystem: () => MemoryFileSystem(),
+    MacOSBuilder: () => MockMacOSBuilder(),
     Platform: () => macosPlatform,
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
@@ -133,7 +122,6 @@ void main() {
   });
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockPlatform extends Mock implements Platform {
   @override
@@ -141,3 +129,5 @@ class MockPlatform extends Mock implements Platform {
     'FLUTTER_ROOT': '/',
   };
 }
+class MockMacOSBuilder extends Mock implements MacOSBuilder {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

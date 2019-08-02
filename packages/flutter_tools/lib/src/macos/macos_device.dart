@@ -88,7 +88,7 @@ class MacOSDevice extends Device {
     if (prebuiltApplication) {
       prebuiltMacOSApp = package;
     } else {
-      prebuiltMacOSApp = await buildMacOS(
+      prebuiltMacOSApp = await macOSBuilder.buildMacOS(
         flutterProject: FlutterProject.current(),
         buildInfo: debuggingOptions?.buildInfo,
         targetOverride: mainPath,

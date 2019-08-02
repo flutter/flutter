@@ -85,7 +85,7 @@ class PrebuiltMacOSApp extends MacOSApp {
     @required this.bundleDir,
     @required this.bundleName,
     @required this.executableAndId,
-  });
+  }) : super(projectBundleId: executableAndId.id);
 
   final Directory bundleDir;
   final String bundleName;
