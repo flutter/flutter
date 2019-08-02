@@ -251,6 +251,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   void initInstances() {
     super.initInstances();
     _instance = this;
+    _buildOwner = BuildOwner();
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     window.onLocaleChanged = handleLocaleChanged;
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
@@ -371,7 +372,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   /// The [BuildOwner] in charge of executing the build pipeline for the
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
-  final BuildOwner _buildOwner = BuildOwner();
+  BuildOwner _buildOwner;
 
   /// The object in charge of the focus tree.
   ///

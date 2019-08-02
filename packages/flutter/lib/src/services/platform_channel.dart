@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import 'binary_messenger.dart';
+import 'binding.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
 
@@ -31,11 +32,13 @@ import 'message_codecs.dart';
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
-  /// None of [name], [codec], or [binaryMessenger] may be null.
-  const BasicMessageChannel(this.name, this.codec, { this.binaryMessenger = defaultBinaryMessenger })
-    : assert(name != null),
-      assert(codec != null),
-      assert(binaryMessenger != null);
+  /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
+  /// be used if [binaryMessenger] is null.
+  BasicMessageChannel(this.name, this.codec, { this.binaryMessenger }) {
+    assert(name != null);
+    assert(codec != null);
+    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
+  }
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -44,7 +47,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  final BinaryMessenger binaryMessenger;
+  BinaryMessenger binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
@@ -118,11 +121,13 @@ class MethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// None of [name], [binaryMessenger], or [codec] may be null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger = defaultBinaryMessenger ])
-    : assert(name != null),
-      assert(binaryMessenger != null),
-      assert(codec != null);
+  /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
+  /// be used if [binaryMessenger] is null.
+  MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger ]) {
+    assert(name != null);
+    assert(codec != null);
+    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
+  }
 
   /// The logical channel on which communication happens, not null.
   final String name;
@@ -133,7 +138,7 @@ class MethodChannel {
   /// The messenger used by this channel to send platform messages.
   ///
   /// The messenger may not be null.
-  final BinaryMessenger binaryMessenger;
+  BinaryMessenger binaryMessenger;
 
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
@@ -415,7 +420,7 @@ class MethodChannel {
 /// instead of throwing an exception.
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
+  OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
     : super(name, codec);
 
   @override
@@ -462,14 +467,24 @@ class EventChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be null.
-  const EventChannel(this.name, [this.codec = const StandardMethodCodec()]);
+  /// Neither [name] nor [codec] may be null. A default [BinaryMessenger]
+  /// instance will be used if [binaryMessenger] is null.
+  EventChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger]) {
+    assert(name != null);
+    assert(codec != null);
+    binaryMessenger ??= ServicesBinding.instance.provideBinaryMessenger();
+  }
 
   /// The logical channel on which communication happens, not null.
   final String name;
 
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
+
+  /// The messenger used by this channel to send platform messages.
+  ///
+  /// The messenger may not be null.
+  BinaryMessenger binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
   ///
@@ -488,7 +503,7 @@ class EventChannel {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
-      defaultBinaryMessenger.setMessageHandler(name, (ByteData reply) async {
+    binaryMessenger.setMessageHandler(name, (ByteData reply) async {
         if (reply == null) {
           controller.close();
         } else {
@@ -511,7 +526,7 @@ class EventChannel {
         ));
       }
     }, onCancel: () async {
-      defaultBinaryMessenger.setMessageHandler(name, null);
+    binaryMessenger.setMessageHandler(name, null);
       try {
         await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {

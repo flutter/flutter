@@ -3,13 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
 import 'asset_bundle.dart';
 import 'binary_messenger.dart';
 
-/// Listens for platform messages and directs them to the [defaultBinaryMessenger].
+/// Listens for platform messages and directs them to the default
+/// [BinaryMessenger].
 ///
 /// The [ServicesBinding] also registers a [LicenseEntryCollector] that exposes
 /// the licenses found in the `LICENSE` file stored at the root of the asset
@@ -20,14 +23,26 @@ mixin ServicesBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    window
-      ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
+    window..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
   }
 
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding get instance => _instance;
   static ServicesBinding _instance;
+
+  /// The default [BinaryMessenger] instance.
+  @protected
+  BinaryMessenger defaultBinaryMessenger = const _DefaultBinaryMessenger._();
+
+  /// The default instance of [BinaryMessenger].
+  ///
+  /// This is used to send messages from the application to the platform, and
+  /// keeps track of which handlers have been registered on each channel so
+  /// it may dispatch incoming messages to the registered handler.
+  BinaryMessenger provideBinaryMessenger() {
+    return defaultBinaryMessenger;
+  }
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///
@@ -60,15 +75,17 @@ mixin ServicesBinding on BindingBase {
       rawLicenses.complete(rootBundle.loadString('LICENSE', cache: false));
     });
     await rawLicenses.future;
-    final Completer<List<LicenseEntry>> parsedLicenses = Completer<List<LicenseEntry>>();
+    final Completer<List<LicenseEntry>> parsedLicenses =
+        Completer<List<LicenseEntry>>();
     Timer.run(() async {
-      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future, debugLabel: 'parseLicenses'));
+      parsedLicenses.complete(compute(_parseLicenses, await rawLicenses.future,
+          debugLabel: 'parseLicenses'));
     });
     await parsedLicenses.future;
     yield* Stream<LicenseEntry>.fromIterable(await parsedLicenses.future);
   }
 
-  // This is run in another isolate created by _addLicenses above.
+// This is run in another isolate created by _addLicenses above.
   static List<LicenseEntry> _parseLicenses(String rawLicenses) {
     final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
     final List<LicenseEntry> result = <LicenseEntry>[];
@@ -115,5 +132,93 @@ mixin ServicesBinding on BindingBase {
   @mustCallSuper
   void evict(String asset) {
     rootBundle.evict(asset);
+  }
+}
+
+/// The default implementation of [BinaryMessenger].
+///
+/// This messenger sends messages from the app-side to the platform-side and
+/// dispatches incoming messages from the platform-side to the appropriate
+/// handler.
+class _DefaultBinaryMessenger extends BinaryMessenger {
+  const _DefaultBinaryMessenger._();
+
+  // Handlers for incoming messages from platform plugins.
+  // This is static so that this class can have a const constructor.
+  static final Map<String, MessageHandler> _handlers =
+      <String, MessageHandler>{};
+
+  // Mock handlers that intercept and respond to outgoing messages.
+  // This is static so that this class can have a const constructor.
+  static final Map<String, MessageHandler> _mockHandlers =
+      <String, MessageHandler>{};
+
+  Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
+    final Completer<ByteData> completer = Completer<ByteData>();
+    // ui.window is accessed directly instead of using ServicesBinding.instance.window
+    // because this method might be invoked before any binding is initialized.
+    // This issue was reported in #27541. It is not ideal to statically access
+    // ui.window because the Window may be dependency injected elsewhere with
+    // a different instance. However, static access at this location seems to be
+    // the least bad option.
+    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
+      try {
+        completer.complete(reply);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context:
+              ErrorDescription('during a platform message response callback'),
+        ));
+      }
+    });
+    return completer.future;
+  }
+
+  @override
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) async {
+    ByteData response;
+    try {
+      final MessageHandler handler = _handlers[channel];
+      if (handler != null) response = await handler(data);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during a platform message callback'),
+      ));
+    } finally {
+      callback(response);
+    }
+  }
+
+  @override
+  Future<ByteData> send(String channel, ByteData message) {
+    final MessageHandler handler = _mockHandlers[channel];
+    if (handler != null) return handler(message);
+    return _sendPlatformMessage(channel, message);
+  }
+
+  @override
+  void setMessageHandler(String channel, MessageHandler handler) {
+    if (handler == null)
+      _handlers.remove(channel);
+    else
+      _handlers[channel] = handler;
+  }
+
+  @override
+  void setMockMessageHandler(String channel, MessageHandler handler) {
+    if (handler == null)
+      _mockHandlers.remove(channel);
+    else
+      _mockHandlers[channel] = handler;
   }
 }
