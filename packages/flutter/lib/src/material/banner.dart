@@ -27,11 +27,14 @@ import 'theme.dart';
 /// The [actions] and [content] must be provided. An optional leading widget
 /// (typically an [Image]) can also be provided. The [contentTextStyle] and
 /// [backgroundColor] can be provided to customize the banner.
+///
+/// This widget is unrelated to the widgets library [Banner] widget.
 class MaterialBanner extends StatelessWidget {
   /// Creates a [MaterialBanner].
   ///
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
-  const MaterialBanner({
+  /// The [actions.length] must be greater than 0.
+  MaterialBanner({
     Key key,
     @required this.content,
     this.contentTextStyle,
@@ -42,7 +45,7 @@ class MaterialBanner extends StatelessWidget {
     this.leadingPadding,
     this.forceActionsBelow = false,
   }) : assert(content != null),
-       assert(actions != null),
+       assert(actions != null && actions.isNotEmpty),
        assert(forceActionsBelow != null),
        super(key: key);
 
@@ -53,7 +56,8 @@ class MaterialBanner extends StatelessWidget {
 
   /// Style for the text in the [content] of the [MaterialBanner].
   ///
-  /// If null, defaults to [ThemeData.textTheme.body1].
+  /// If `null`, [MaterialBannerThemeData.contentTextStyle] is used. If that is
+  /// also `null`, [ThemeData.textTheme.body1] is used.
   final TextStyle contentTextStyle;
 
   /// The set of actions that are displayed at the bottom or trailing side of
@@ -72,12 +76,11 @@ class MaterialBanner extends StatelessWidget {
 
   /// The color of the surface of this [MaterialBanner].
   ///
-  /// This sets the [Material.color] on this [MaterialBanner]'s [Container].
-  ///
-  /// If `null`, [ThemeData.canvasColor] is used.
+  /// If `null`, [MaterialBannerThemeData.backgroundColor] is used. If that is
+  /// also `null`, [ThemeData.colorScheme.surface] is used.
   final Color backgroundColor;
 
-  /// The amount of space by which to inset the [content]'s parent [Row].
+  /// The amount of space by which to inset the [content].
   ///
   /// If the [actions] are below the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0)`.
@@ -85,7 +88,6 @@ class MaterialBanner extends StatelessWidget {
   /// If the [actions] are trailing the [content], this defaults to
   /// `EdgeInsetsDirectional.only(start: 16.0, top: 2.0)`.
   final EdgeInsetsGeometry padding;
-
 
   /// The amount of space by which to inset the [leading] widget.
   ///
@@ -96,7 +98,7 @@ class MaterialBanner extends StatelessWidget {
   /// how many there are.
   ///
   /// If this is `true`, the [actions] will be placed below the [content]. If
-  /// this is `false`, the [actions] will be placed to the trailing side of the
+  /// this is `false`, the [actions] will be placed on the trailing side of the
   /// [content] if [actions.length] is `1` and below the [content] if greater
   /// than `1`.
   final bool forceActionsBelow;
@@ -107,9 +109,12 @@ class MaterialBanner extends StatelessWidget {
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
     final bool isSingleRow = actions.length == 1 && !forceActionsBelow;
-    final EdgeInsetsGeometry padding = this.padding ?? (isSingleRow
+    final EdgeInsetsGeometry padding = this.padding ?? bannerTheme.padding ?? (isSingleRow
         ? const EdgeInsetsDirectional.only(start: 16.0, top: 2.0)
         : const EdgeInsetsDirectional.only(start: 16.0, top: 24.0, end: 16.0, bottom: 4.0));
+    final EdgeInsetsGeometry leadingPadding = this.leadingPadding
+        ?? bannerTheme.padding
+        ?? const EdgeInsetsDirectional.only(end: 16.0);
 
     final Widget buttonBar = ButtonTheme.bar(
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
@@ -120,8 +125,7 @@ class MaterialBanner extends StatelessWidget {
 
     final Color backgroundColor = this.backgroundColor
         ?? bannerTheme.backgroundColor
-        ?? theme.colorScheme.surface
-        ?? theme.canvasColor;
+        ?? theme.colorScheme.surface;
     final TextStyle textStyle = contentTextStyle
         ?? bannerTheme.contentTextStyle
         ?? theme.textTheme.body1;
@@ -136,13 +140,11 @@ class MaterialBanner extends StatelessWidget {
               children: <Widget>[
                 if (leading != null)
                   Padding(
-                    padding: leadingPadding ?? const EdgeInsetsDirectional.only(end: 16.0),
+                    padding: leadingPadding,
                     child: leading,
                   ),
                 Flexible(
                   child: DefaultTextStyle(
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
                     style: textStyle,
                     child: content,
                   ),

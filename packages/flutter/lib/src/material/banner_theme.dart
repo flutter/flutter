@@ -25,10 +25,13 @@ import 'theme.dart';
 ///    application.
 class MaterialBannerThemeData extends Diagnosticable {
 
-  /// Creates a theme that can be used for [ThemeData.bannerTheme].
+  /// Creates a theme that can be used for [MaterialBannerTheme] or
+  /// [ThemeData.bannerTheme].
   const MaterialBannerThemeData({
     this.backgroundColor,
     this.contentTextStyle,
+    this.padding,
+    this.leadingPadding,
   });
 
   /// The background color of a [MaterialBanner].
@@ -38,19 +41,29 @@ class MaterialBannerThemeData extends Diagnosticable {
   /// widget.
   final TextStyle contentTextStyle;
 
+  /// The amount of space by which to inset [MaterialBanner.content].
+  final EdgeInsetsGeometry padding;
+
+  /// The amount of space by which to inset [MaterialBanner.leading].
+  final EdgeInsetsGeometry leadingPadding;
+
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   MaterialBannerThemeData copyWith({
     Color backgroundColor,
     TextStyle contentTextStyle,
+    EdgeInsetsGeometry padding,
+    EdgeInsetsGeometry leadingPadding,
   }) {
     return MaterialBannerThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       contentTextStyle: contentTextStyle ?? this.contentTextStyle,
+      padding: padding ?? this.padding,
+      leadingPadding: leadingPadding ?? this.leadingPadding,
     );
   }
 
-  /// Linearly interpolate between two Card themes.
+  /// Linearly interpolate between two Banner themes.
   ///
   /// The argument `t` must not be null.
   ///
@@ -60,6 +73,8 @@ class MaterialBannerThemeData extends Diagnosticable {
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
+      padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
+      leadingPadding: EdgeInsets.lerp(a?.leadingPadding, b?.leadingPadding, t),
     );
   }
 
@@ -68,6 +83,8 @@ class MaterialBannerThemeData extends Diagnosticable {
     return hashValues(
       backgroundColor,
       contentTextStyle,
+      padding,
+      leadingPadding,
     );
   }
 
@@ -79,7 +96,9 @@ class MaterialBannerThemeData extends Diagnosticable {
       return false;
     final MaterialBannerThemeData typedOther = other;
     return typedOther.backgroundColor == backgroundColor
-        && typedOther.contentTextStyle == contentTextStyle;
+        && typedOther.contentTextStyle == contentTextStyle
+        && typedOther.padding == padding
+        && typedOther.leadingPadding == leadingPadding;
   }
 
   @override
@@ -87,6 +106,8 @@ class MaterialBannerThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('leadingPadding', leadingPadding, defaultValue: null));
   }
 }
 
@@ -107,7 +128,7 @@ class MaterialBannerTheme extends InheritedWidget {
   /// The properties for descendant [MaterialBanner] widgets.
   final MaterialBannerThemeData data;
 
-  /// The closest instance of this class' [data] value that encloses the given
+  /// The closest instance of this class's [data] value that encloses the given
   /// context.
   ///
   /// If there is no ancestor, it returns [ThemeData.bannerTheme]. Applications

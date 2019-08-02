@@ -77,6 +77,7 @@ void main() {
       theme: ThemeData(bannerTheme: bannerTheme),
       home: Scaffold(
         body: MaterialBanner(
+          leading: const Icon(Icons.ac_unit),
           content: const Text(contentText),
           actions: <Widget>[
             FlatButton(
@@ -92,6 +93,14 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.decoration, BoxDecoration(color: bannerTheme.backgroundColor));
     expect(content.text.style, bannerTheme.contentTextStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - containerTopLeft.dy, 24);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 39);
+    expect(leadingTopLeft.dy - containerTopLeft.dy, 19);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 10);
   });
 
   testWidgets('MaterialBanner widget properties take priority over theme', (WidgetTester tester) async {
@@ -104,8 +113,11 @@ void main() {
       home: Scaffold(
         body: MaterialBanner(
           backgroundColor: backgroundColor,
+          leading: const Icon(Icons.ac_unit),
           contentTextStyle: textStyle,
           content: const Text(contentText),
+          padding: const EdgeInsets.all(10),
+          leadingPadding: const EdgeInsets.all(10),
           actions: <Widget>[
             FlatButton(
               child: const Text('Action'),
@@ -120,6 +132,14 @@ void main() {
     final RenderParagraph content = _getTextRenderObjectFromDialog(tester, contentText);
     expect(container.decoration, const BoxDecoration(color: backgroundColor));
     expect(content.text.style, textStyle);
+
+    final Offset contentTopLeft = tester.getTopLeft(_textFinder(contentText));
+    final Offset containerTopLeft = tester.getTopLeft(_containerFinder());
+    final Offset leadingTopLeft = tester.getTopLeft(find.byIcon(Icons.ac_unit));
+    expect(contentTopLeft.dy - containerTopLeft.dy, 29);
+    expect(contentTopLeft.dx - containerTopLeft.dx, 54);
+    expect(leadingTopLeft.dy - containerTopLeft.dy, 24);
+    expect(leadingTopLeft.dx - containerTopLeft.dx, 20);
   });
 
   testWidgets('MaterialBanner uses color scheme when necessary', (WidgetTester tester) async {
@@ -148,13 +168,23 @@ MaterialBannerThemeData _bannerTheme() {
   return const MaterialBannerThemeData(
     backgroundColor: Colors.orange,
     contentTextStyle: TextStyle(color: Colors.pink),
+    padding: EdgeInsets.all(5),
+    leadingPadding: EdgeInsets.all(5),
   );
 }
 
 Container _getContainerFromBanner(WidgetTester tester) {
-  return tester.widget<Container>(find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first);
+  return tester.widget<Container>(_containerFinder());
+}
+
+Finder _containerFinder() {
+  return find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first;
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(MaterialBanner), matching: find.text(text))).renderObject;
+  return tester.element<StatelessElement>(_textFinder(text)).renderObject;
+}
+
+Finder _textFinder(String text) {
+  return find.descendant(of: find.byType(MaterialBanner), matching: find.text(text));
 }
