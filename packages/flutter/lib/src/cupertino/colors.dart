@@ -405,6 +405,7 @@ class CupertinoSystemColorData extends Diagnosticable {
        assert(systemGray5 != null),
        assert(systemGray6 != null),
        super();
+
   // Label Colors
   /// The color for text labels containing primary content.
   final CupertinoDynamicColor label;
@@ -513,6 +514,44 @@ class CupertinoSystemColorData extends Diagnosticable {
 
   /// A sixth-level shade of grey.
   final CupertinoDynamicColor systemGray6;
+
+  CupertinoSystemColorData resolveColors(BuildContext context) {
+    return CupertinoSystemColorData(
+      label: CupertinoDynamicColor.resolve(context, label),
+      secondaryLabel: CupertinoDynamicColor.resolve(context, secondaryLabel),
+      tertiaryLabel: CupertinoDynamicColor.resolve(context, tertiaryLabel),
+      quaternaryLabel: CupertinoDynamicColor.resolve(context, quaternaryLabel),
+      systemFill: CupertinoDynamicColor.resolve(context, systemFill),
+      secondarySystemFill: CupertinoDynamicColor.resolve(context, secondarySystemFill),
+      tertiarySystemFill: CupertinoDynamicColor.resolve(context, tertiarySystemFill),
+      quaternarySystemFill: CupertinoDynamicColor.resolve(context, quaternarySystemFill),
+      placeholderText: CupertinoDynamicColor.resolve(context, placeholderText),
+      systemBackground: CupertinoDynamicColor.resolve(context, systemBackground),
+      secondarySystemBackground: CupertinoDynamicColor.resolve(context, secondarySystemBackground),
+      tertiarySystemBackground: CupertinoDynamicColor.resolve(context, tertiarySystemBackground),
+      systemGroupedBackground: CupertinoDynamicColor.resolve(context, systemGroupedBackground),
+      secondarySystemGroupedBackground: CupertinoDynamicColor.resolve(context, secondarySystemGroupedBackground),
+      tertiarySystemGroupedBackground: CupertinoDynamicColor.resolve(context, tertiarySystemGroupedBackground),
+      separator: CupertinoDynamicColor.resolve(context, separator),
+      opaqueSeparator: CupertinoDynamicColor.resolve(context, opaqueSeparator),
+      link: CupertinoDynamicColor.resolve(context, link),
+      systemBlue: CupertinoDynamicColor.resolve(context, systemBlue),
+      systemGreen: CupertinoDynamicColor.resolve(context, systemGreen),
+      systemIndigo: CupertinoDynamicColor.resolve(context, systemIndigo),
+      systemOrange: CupertinoDynamicColor.resolve(context, systemOrange),
+      systemPink: CupertinoDynamicColor.resolve(context, systemPink),
+      systemPurple: CupertinoDynamicColor.resolve(context, systemPurple),
+      systemRed: CupertinoDynamicColor.resolve(context, systemRed),
+      systemTeal: CupertinoDynamicColor.resolve(context, systemTeal),
+      systemYellow: CupertinoDynamicColor.resolve(context, systemYellow),
+      systemGray: CupertinoDynamicColor.resolve(context, systemGray),
+      systemGray2: CupertinoDynamicColor.resolve(context, systemGray2),
+      systemGray3: CupertinoDynamicColor.resolve(context, systemGray3),
+      systemGray4: CupertinoDynamicColor.resolve(context, systemGray4),
+      systemGray5: CupertinoDynamicColor.resolve(context, systemGray5),
+      systemGray6: CupertinoDynamicColor.resolve(context, systemGray6),
+    )
+  }
 
   @override
   bool operator ==(dynamic other) {

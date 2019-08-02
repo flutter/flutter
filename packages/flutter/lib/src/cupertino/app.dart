@@ -335,31 +335,14 @@ class CupertinoSystemColor {
   const CupertinoSystemColor._();
   static CupertinoSystemColorData of(BuildContext context) {
     final _CupertinoSystemColor widget = context.inheritFromWidgetOfExactType(_CupertinoSystemColor);
-    assert(() {
-        if (widget == null) {
-          final Element element = context;
-          throw FlutterError(
-            'No _CupertinoSystemColor widget found.\n'
-            '${context.widget.runtimeType} widgets require a _CupertinoSystemColor widget ancestor.\n'
-            'The specific widget that could not find a _CupertinoSystemColor ancestor was:\n'
-            '  ${context.widget}\n'
-            'The ownership chain for the affected widget is:\n'
-            '  ${element.debugGetCreatorChain(10)}'
-          );
-        }
-        return true;
-      }());
-
-    return widget.data;
+    return widget?.data ?? fromSystem ?? fallbackValues;
   }
 
-  static CupertinoSystemColorData get fromSystem {
-
-  }
+  static CupertinoSystemColorData get fromSystem => null;
 
   /// Fallback System Colors, extracted from:
   /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
-  /// https://developer.apple.com/design/resources/
+  /// iOS 13 beta.
   static CupertinoSystemColorData get fallbackValues {
     return CupertinoSystemColorData(
       label: CupertinoDynamicColor(
