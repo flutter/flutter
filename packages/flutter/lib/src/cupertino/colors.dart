@@ -108,8 +108,8 @@ class CupertinoDynamicColor extends Color {
     Color darkHighContrastColor,
     Color elevatedColor,
     Color darkElevatedColor,
-    Color elevatedHighContrastColor,
-    Color darkElevatedHighContrastColor,
+    Color highContrastElevatedColor,
+    Color darkHighContrastElevatedColor,
   }) : this._(
          defaultColor,
          <Color>[
@@ -119,8 +119,8 @@ class CupertinoDynamicColor extends Color {
            darkHighContrastColor,
            elevatedColor,
            darkElevatedColor,
-           elevatedHighContrastColor,
-           darkElevatedHighContrastColor,
+           highContrastElevatedColor,
+           darkHighContrastElevatedColor,
          ]
        );
 
@@ -138,8 +138,8 @@ class CupertinoDynamicColor extends Color {
     darkHighContrastColor: darkHighContrastColor,
     elevatedColor: normalColor,
     darkElevatedColor: darkColor,
-    elevatedHighContrastColor: highContrastColor,
-    darkElevatedHighContrastColor: darkHighContrastColor,
+    highContrastElevatedColor: highContrastColor,
+    darkHighContrastElevatedColor: darkHighContrastColor,
   );
 
   CupertinoDynamicColor.withVibrancy({
@@ -154,8 +154,8 @@ class CupertinoDynamicColor extends Color {
     darkHighContrastColor: darkColor,
     elevatedColor: normalColor,
     darkElevatedColor: darkColor,
-    elevatedHighContrastColor: normalColor,
-    darkElevatedHighContrastColor: darkColor,
+    highContrastElevatedColor: normalColor,
+    darkHighContrastElevatedColor: darkColor,
   );
 
   CupertinoDynamicColor._(
@@ -210,13 +210,13 @@ class CupertinoDynamicColor extends Color {
   /// high contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  Color get elevatedHighContrastColor => _colorMap[6];
+  Color get highContrastElevatedColor => _colorMap[6];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
   ///
   /// Defaults to [defaultColor] when unspecified.
-  Color get darkElevatedHighContrastColor => _colorMap[7];
+  Color get darkHighContrastElevatedColor => _colorMap[7];
 
   final List<Color> _colorMap;
 
@@ -233,7 +233,7 @@ class CupertinoDynamicColor extends Color {
   /// For example, if the given [BuildContext] indicates the widgets in the subtree
   /// should be displayed in dark mode, high contrast, and elevated interface
   /// elevation, the resolved [CupertinoDynamicColor] will be the same as this
-  /// [CupertinoDynamicColor], except that its [defaultColor] will be `darkElevatedHighContrastColor`
+  /// [CupertinoDynamicColor], except that its [defaultColor] will be `darkHighContrastElevatedColor`
   /// from this [CupertinoDynamicColor].
   ///
   /// Calling this function may create dependencies on the closest instance of some
@@ -310,8 +310,8 @@ class CupertinoDynamicColor extends Color {
           darkHighContrastColor: darkHighContrastColor,
           elevatedColor: elevatedColor,
           darkElevatedColor: darkElevatedColor,
-          elevatedHighContrastColor: elevatedHighContrastColor,
-          darkElevatedHighContrastColor: darkElevatedHighContrastColor,
+          highContrastElevatedColor: highContrastElevatedColor,
+          darkHighContrastElevatedColor: darkHighContrastElevatedColor,
         );
   }
 
