@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/desktop.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -72,6 +73,8 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       final MockFileSystem mockFileSystem = MockFileSystem();
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockFile mockFile = MockFile();
+      const String flutterToolCommand = 'flutter --someoption somevalue';
+
       when(macOSApp.executable(any)).thenReturn('test');
       when(mockFileSystem.file('test')).thenReturn(mockFile);
       when(mockFile.existsSync()).thenReturn(true);
@@ -87,6 +90,15 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
         return ProcessResult(0, 1, '', '');
       });
+      when(mockProcessManager.run(<String>[
+          'ps', 'aux',
+        ])).thenAnswer((Invocation invocation) async {
+          // The flutter tool process is returned as output to the ps aux command
+          return ProcessResult(0, 0, 'username  $pid  $flutterToolCommand', '');
+        });
+        when(mockProcessManager.run(<String>[
+          'kill', '$pid',
+        ])).thenThrow(Exception('Flutter tool process has been killed'));
 
       testUsingContext('Can run from prebuilt application', () async {
         final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
@@ -94,6 +106,14 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
         expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
       }, overrides: <Type, Generator>{
         FileSystem: () => mockFileSystem,
+        ProcessManager: () => mockProcessManager,
+      });
+
+      testUsingContext('The current running process is not killed when stopping the app', () async {
+        // The name of the executable is the same as a command line argument to the flutter tool
+        when(macOSApp.executable).thenReturn('somevalue');
+        expect(await killProcess(macOSApp.executable), true);
+      }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
       });
     });
