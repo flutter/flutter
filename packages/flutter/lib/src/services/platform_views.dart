@@ -713,3 +713,16 @@ class UiKitViewController {
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
 }
+
+/// An interface for a controlling a single platform view.
+///
+/// Used by [PlatformViewSurface] to interface with the platform view it embeds.
+abstract class PlatformViewController {
+
+  /// The viewId associated with this controller.
+  ///
+  /// The viewId should always be unique and non-negative. And it must not be null.
+  ///
+  /// See also [PlatformViewRegistry] which is a helper for managing platform view ids.
+  int get viewId;
+}
