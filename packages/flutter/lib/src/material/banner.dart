@@ -34,7 +34,7 @@ class MaterialBanner extends StatelessWidget {
   ///
   /// The [actions], [content], and [forceActionsBelow] must be non-null.
   /// The [actions.length] must be greater than 0.
-  MaterialBanner({
+  const MaterialBanner({
     Key key,
     @required this.content,
     this.contentTextStyle,
@@ -45,7 +45,7 @@ class MaterialBanner extends StatelessWidget {
     this.leadingPadding,
     this.forceActionsBelow = false,
   }) : assert(content != null),
-       assert(actions != null && actions.isNotEmpty),
+       assert(actions != null),
        assert(forceActionsBelow != null),
        super(key: key);
 
@@ -105,6 +105,8 @@ class MaterialBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(actions.isNotEmpty);
+
     final ThemeData theme = Theme.of(context);
     final MaterialBannerThemeData bannerTheme = MaterialBannerTheme.of(context);
 
