@@ -27,6 +27,8 @@ const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   'test_core': '0.2.5',    //  |
   'build_runner': '1.6.1', // TODO(jonahwilliams): allow newer versions
   'build_modules': '2.3.0',
+
+  // Switch to vm_service. https://github.com/flutter/flutter/issues/37499
   'vm_service_client': '0.2.6+2', // Final version before being marked deprecated.
 };
 
