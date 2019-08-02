@@ -968,6 +968,7 @@ class Scaffold extends StatefulWidget {
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
     this.drawerScrimColor,
+    this.drawerEdgeDragWidth,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
@@ -1139,6 +1140,8 @@ class Scaffold extends StatefulWidget {
 
   /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
+
+  final double drawerEdgeDragWidth;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1983,6 +1986,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2006,6 +2010,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching

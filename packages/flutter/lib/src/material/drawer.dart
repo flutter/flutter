@@ -182,6 +182,7 @@ class DrawerController extends StatefulWidget {
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
     this.scrimColor,
+    this.edgeDragWidth,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -227,6 +228,8 @@ class DrawerController extends StatefulWidget {
   ///
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
+
+  final double edgeDragWidth;
 
   @override
   DrawerControllerState createState() => DrawerControllerState();
@@ -432,7 +435,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (Directionality.of(context) == TextDirection.rtl)
       dragAreaWidth = drawerIsStart ? padding.right : padding.left;
 
-    dragAreaWidth = max(dragAreaWidth, _kEdgeDragWidth);
+    dragAreaWidth = max(dragAreaWidth, widget.edgeDragWidth ?? _kEdgeDragWidth);
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
         alignment: _drawerOuterAlignment,
