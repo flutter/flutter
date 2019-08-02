@@ -1687,7 +1687,7 @@ void main() {
       expect(layer, isNotNull);
     });
 
-    testWidgets('PlatformViewSurface view can lose gesture arenas', (WidgetTester tester) async {
+    testWidgets('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
       bool verticalDragAcceptedByParent = false;
       await tester.pumpWidget(
         Align(
