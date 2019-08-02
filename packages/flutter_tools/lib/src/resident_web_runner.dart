@@ -34,79 +34,6 @@ import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'web/server.dart';
 
-Future<BuildDaemonClient> connectClient(
-  String workingDirectory,
-  Function(ServerLog) logHandler,
-) {
-  final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-  final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
-  final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-  return BuildDaemonClient.connect(
-    workingDirectory,
-    // On Windows we need to call the snapshot directly otherwise
-    // the process will start in a disjoint cmd without access to
-    // STDIO.
-    <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
-      '--packages=$flutterToolsPackages',
-      buildScript,
-      'daemon',
-      '--skip-build-script-check',
-      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
-      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-    ],
-    logHandler: logHandler,
-    buildMode: daemon.BuildMode.Manual,
-  );
-}
-
-Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
-  try {
-    return await connectClient(
-      workingDirectory,
-      (ServerLog serverLog) {
-        switch (serverLog.level) {
-          case Level.CONFIG:
-          case Level.FINE:
-          case Level.FINER:
-          case Level.FINEST:
-          case Level.INFO:
-             printTrace(serverLog.message);
-             break;
-          case Level.SEVERE:
-          case Level.SHOUT:
-            printError(
-              serverLog?.error ?? '',
-              stackTrace: serverLog.stackTrace != null
-                  ? StackTrace.fromString(serverLog?.stackTrace)
-                  : null,
-            );
-        }
-      },
-    );
-  } on OptionsSkew {
-    throwToolExit(
-      'Incompatible options with current running build daemon.\n\n'
-      'Please stop other flutter_tool instances running in this directory '
-      'before starting a new instance with these options.');
-  }
-  return null;
-}
-
-void _registerBuildTargets(
-  BuildDaemonClient client,
-) {
-  final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
-    ..output = ''
-    ..useSymlinks = true
-    ..hoist = false);
-  client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-    ..target = 'web'
-    ..outputLocation = outputLocation?.toBuilder()));
-}
-
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(this.device, {
@@ -217,23 +144,32 @@ class ResidentWebRunner extends ResidentRunner {
           printTrace(data.results.toString());
       }
     });
-    _client.startBuild();
-    final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
-      .readAsStringSync());
+    Status buildStatus;
+    try {
+      buildStatus = logger.startProgress('Building application for the web', timeout: null);
+      _client.startBuild();
+      final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
+        .readAsStringSync());
 
-    // Initialize the asset bundle.
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    await assetBundle.build();
-    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-    _flutterWebServer = await FlutterWebServer.start(
-      daemonAssetPort: daemonAssetPort,
-      buildResults: _client.buildResults,
-      target: target,
-      flutterProject: flutterProject,
-    );
-    final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
-    appConnection.runMain();
-    _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
+      // Initialize the asset bundle.
+      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+      await assetBundle.build();
+      await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+      _flutterWebServer = await FlutterWebServer.start(
+        daemonAssetPort: daemonAssetPort,
+        buildResults: _client.buildResults,
+        target: target,
+        flutterProject: flutterProject,
+      );
+      final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
+      appConnection.runMain();
+      _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
+    } catch (err) {
+      printError(err.toString());
+      throwToolExit('Failed to build application for the web.');
+    } finally {
+      buildStatus.stop();
+    }
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -245,19 +181,19 @@ class ResidentWebRunner extends ResidentRunner {
   Future<int> attach(
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
-    // When a tab is closed we exit an app.
-    // unawaited(_flutterWebServer.chrome.chromeConnection.onTabClose.first.then((dynamic _) {
-    //   appFinished();
-    // }));
     // Cleanup old subscriptions
     try {
       await _debugConnection.vmService.streamCancel('Stdout');
-    } catch (_) {}
+    } catch (err) {
+      // Ignore errors here
+    }
     try {
       await _debugConnection.vmService.streamListen('Stdout');
-    } catch (_) {}
+    } catch (err) {
+      // Ignore errors here
+    }
     _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
-      printStatus(utf8.decode(base64.decode(log.bytes)));
+      printStatus(utf8.decode(base64.decode(log.bytes)).trim());
     });
     connectionInfoCompleter?.complete(DebugConnectionInfo(
       wsUri: Uri.parse(_debugConnection.wsUri),
@@ -394,4 +330,77 @@ class ResidentWebRunner extends ResidentRunner {
 
 String assetServerPortFilePath(String workingDirectory) {
   return fs.path.join(daemonWorkspace(workingDirectory), '.asset_server_port');
+}
+
+Future<BuildDaemonClient> connectClient(
+  String workingDirectory,
+  Function(ServerLog) logHandler,
+) {
+  final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
+  final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
+  final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+  return BuildDaemonClient.connect(
+    workingDirectory,
+    // On Windows we need to call the snapshot directly otherwise
+    // the process will start in a disjoint cmd without access to
+    // STDIO.
+    <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--packages=$flutterToolsPackages',
+      buildScript,
+      'daemon',
+      '--skip-build-script-check',
+      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
+      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+    ],
+    logHandler: logHandler,
+    buildMode: daemon.BuildMode.Manual,
+  );
+}
+
+Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
+  try {
+    return await connectClient(
+      workingDirectory,
+      (ServerLog serverLog) {
+        switch (serverLog.level) {
+          case Level.CONFIG:
+          case Level.FINE:
+          case Level.FINER:
+          case Level.FINEST:
+          case Level.INFO:
+             printTrace(serverLog.message);
+             break;
+          case Level.SEVERE:
+          case Level.SHOUT:
+            printError(
+              serverLog?.error ?? '',
+              stackTrace: serverLog.stackTrace != null
+                  ? StackTrace.fromString(serverLog?.stackTrace)
+                  : null,
+            );
+        }
+      },
+    );
+  } on OptionsSkew {
+    throwToolExit(
+      'Incompatible options with current running build daemon.\n\n'
+      'Please stop other flutter_tool instances running in this directory '
+      'before starting a new instance with these options.');
+  }
+  return null;
+}
+
+void _registerBuildTargets(
+  BuildDaemonClient client,
+) {
+  final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+    ..output = ''
+    ..useSymlinks = true
+    ..hoist = false);
+  client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+    ..target = 'web'
+    ..outputLocation = outputLocation?.toBuilder()));
 }

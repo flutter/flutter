@@ -110,7 +110,6 @@ class FlutterWebServer {
         // Redirect the main.dart.js to the target file we decided to serve.
         if (mappedUrls.containsKey(request.url.path)) {
           final String newPath = mappedUrls[request.url.path];
-          print('mapping ${request.url.path} to $newPath');
           return innerHandler(
             Request(
               request.method,
@@ -122,7 +121,6 @@ class FlutterWebServer {
             ),
           );
         } else {
-          print('skipping: ${request.url.path}');
           return innerHandler(request);
         }
       };
