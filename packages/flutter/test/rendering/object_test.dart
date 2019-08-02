@@ -100,7 +100,7 @@ void main() {
   });
 }
 
-class TestParentData extends ContainerBoxParentData<RenderBox> { }
+class TestParentData extends ParentData with ContainerParentDataMixin<RenderBox> { }
 
 class TestRenderObject extends RenderObject {
   @override

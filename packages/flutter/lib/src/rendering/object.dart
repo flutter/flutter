@@ -2834,8 +2834,7 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
   /// Clear the sibling pointers.
   @override
   void detach() {
-    const String assertMessage =
-        'Pointers to siblings must be nulled before detaching ParentData.';
+    const String assertMessage = 'Pointers to siblings must be nulled before detaching ParentData.';
     assert(previousSibling == null, assertMessage);
     assert(nextSibling == null, assertMessage);
     super.detach();
