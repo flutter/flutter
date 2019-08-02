@@ -35,19 +35,6 @@ class FakePlatformViewController extends PlatformViewController {
   }
 }
 
-/// Used in internal testing.
-class FakePlatformViewController extends PlatformViewController {
-
-  FakePlatformViewController(int id) {
-    _id = id;
-  }
-
-  int _id;
-
-  @override
-  int get viewId => _id;
-}
-
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
     SystemChannels.platform_views.setMockMethodCallHandler(_onMethodCall);

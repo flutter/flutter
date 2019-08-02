@@ -667,6 +667,8 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
     renderObject
-      ..controller = controller;
+      ..controller = controller
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
   }
 }
