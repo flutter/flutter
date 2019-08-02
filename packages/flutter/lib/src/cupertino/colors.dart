@@ -6,7 +6,7 @@ import 'dart:ui' show Color;
 import 'package:collection/collection.dart';
 import 'package:flutter/src/widgets/basic.dart';
 
-import '../../foundation.dart' show immutable;
+import '../../foundation.dart';
 import '../widgets/framework.dart' show BuildContext;
 import '../widgets/media_query.dart';
 import 'interface_level.dart';
@@ -124,13 +124,13 @@ class CupertinoDynamicColor extends Color {
          ]
        );
 
-  CupertinoDynamicColor.withVibrancyAndContrast(
+  CupertinoDynamicColor.withVibrancyAndContrast({
     Color defaultColor,
     Color normalColor,
     Color darkColor,
     Color highContrastColor,
     Color darkHighContrastColor,
-  ) : this(
+  }) : this(
     defaultColor: defaultColor,
     normalColor: normalColor,
     darkColor: darkColor,
@@ -142,11 +142,11 @@ class CupertinoDynamicColor extends Color {
     darkElevatedHighContrastColor: darkHighContrastColor,
   );
 
-  CupertinoDynamicColor.withVibrancy(
+  CupertinoDynamicColor.withVibrancy({
     Color defaultColor,
     Color normalColor,
     Color darkColor,
-  ) : this(
+  }) : this(
     defaultColor: defaultColor,
     normalColor: normalColor,
     darkColor: darkColor,
@@ -333,4 +333,259 @@ class _ColorMapElementEquality<E> extends DefaultEquality<E> {
   @override
   bool equals(Object e1, Object e2) => super.equals(e1, e2)
                                     || super.equals(e1 ?? nullFallbackValue, e2 ?? nullFallbackValue);
+}
+
+@immutable
+class CupertinoSystemColorData extends Diagnosticable {
+  const CupertinoSystemColorData({
+    @required this.label,
+    @required this.secondaryLabel,
+    @required this.tertiaryLabel,
+    @required this.quaternaryLabel,
+    @required this.systemFill,
+    @required this.secondarySystemFill,
+    @required this.tertiarySystemFill,
+    @required this.quaternarySystemFill,
+    @required this.placeholderText,
+    @required this.systemBackground,
+    @required this.secondarySystemBackground,
+    @required this.tertiarySystemBackground,
+    @required this.systemGroupedBackground,
+    @required this.secondarySystemGroupedBackground,
+    @required this.tertiarySystemGroupedBackground,
+    @required this.separator,
+    @required this.opaqueSeparator,
+    @required this.link,
+    @required this.systemBlue,
+    @required this.systemGreen,
+    @required this.systemIndigo,
+    @required this.systemOrange,
+    @required this.systemPink,
+    @required this.systemPurple,
+    @required this.systemRed,
+    @required this.systemTeal,
+    @required this.systemYellow,
+    @required this.systemGray,
+    @required this.systemGray2,
+    @required this.systemGray3,
+    @required this.systemGray4,
+    @required this.systemGray5,
+    @required this.systemGray6,
+  }) : assert(label != null),
+       assert(secondaryLabel != null),
+       assert(tertiaryLabel != null),
+       assert(quaternaryLabel != null),
+       assert(systemFill != null),
+       assert(secondarySystemFill != null),
+       assert(tertiarySystemFill != null),
+       assert(quaternarySystemFill != null),
+       assert(placeholderText != null),
+       assert(systemBackground != null),
+       assert(secondarySystemBackground != null),
+       assert(tertiarySystemBackground != null),
+       assert(systemGroupedBackground != null),
+       assert(secondarySystemGroupedBackground != null),
+       assert(tertiarySystemGroupedBackground != null),
+       assert(separator != null),
+       assert(opaqueSeparator != null),
+       assert(link != null),
+       assert(systemBlue != null),
+       assert(systemGreen != null),
+       assert(systemIndigo != null),
+       assert(systemOrange != null),
+       assert(systemPink != null),
+       assert(systemPurple != null),
+       assert(systemRed != null),
+       assert(systemTeal != null),
+       assert(systemYellow != null),
+       assert(systemGray != null),
+       assert(systemGray2 != null),
+       assert(systemGray3 != null),
+       assert(systemGray4 != null),
+       assert(systemGray5 != null),
+       assert(systemGray6 != null),
+       super();
+  // Label Colors
+  /// The color for text labels containing primary content.
+  final CupertinoDynamicColor label;
+
+  /// The color for text labels containing secondary content.
+  final CupertinoDynamicColor secondaryLabel;
+
+  /// The color for text labels containing tertiary content.
+  final CupertinoDynamicColor tertiaryLabel;
+
+  /// The color for text labels containing quaternary content.
+  final CupertinoDynamicColor quaternaryLabel;
+
+  // FIll Colors
+  /// An overlay fill color for thin and small shapes.
+  final CupertinoDynamicColor systemFill;
+
+  /// An overlay fill color for medium-size shapes.
+  final CupertinoDynamicColor secondarySystemFill;
+
+  /// An overlay fill color for large shapes.
+  final CupertinoDynamicColor tertiarySystemFill;
+
+  /// An overlay fill color for large areas containing complex content.
+  final CupertinoDynamicColor quaternarySystemFill;
+
+  // Text Colors
+  /// The color for placeholder text in controls or text views.
+  final CupertinoDynamicColor placeholderText;
+
+  // Standard Content Background Colors
+  // Use these colors for designs that have a white primary background in a light environment.
+
+  /// The color for the main background of your interface.
+  final CupertinoDynamicColor systemBackground;
+
+  /// The color for content layered on top of the main background.
+  final CupertinoDynamicColor secondarySystemBackground;
+
+  /// The color for content layered on top of secondary backgrounds.
+  final CupertinoDynamicColor tertiarySystemBackground;
+
+  // Grouped Content Background Colors
+  // Use these colors for grouped content, including table views and platter-based designs.
+
+  /// The color for the main background of your grouped interface.
+  final CupertinoDynamicColor systemGroupedBackground;
+
+  /// The color for content layered on top of the main background of your grouped interface.
+  final CupertinoDynamicColor secondarySystemGroupedBackground;
+
+  /// The color for content layered on top of secondary backgrounds of your grouped interface.
+  final CupertinoDynamicColor tertiarySystemGroupedBackground;
+
+  // Separator Colors
+  /// The color for thin borders or divider lines that allows some underlying content to be visible.
+  final CupertinoDynamicColor separator;
+
+  /// The color for borders or divider lines that hide any underlying content.
+  final CupertinoDynamicColor opaqueSeparator;
+
+  /// The color for links.
+  final CupertinoDynamicColor link;
+
+  /// A blue color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemBlue;
+
+  /// A green color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemGreen;
+
+  /// An indigo color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemIndigo;
+
+  /// An orange color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemOrange;
+
+  /// A pink color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemPink;
+
+  /// A purple color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemPurple;
+
+  /// A red color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemRed;
+
+  /// A teal color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemTeal;
+
+  /// A yellow color that can adapt to the given [BuildContext].
+  final CupertinoDynamicColor systemYellow;
+
+  /// The base gray color.
+  final CupertinoDynamicColor systemGray;
+
+  /// A second-level shade of grey.
+  final CupertinoDynamicColor systemGray2;
+
+  /// A third-level shade of grey.
+  final CupertinoDynamicColor systemGray3;
+
+  /// A fourth-level shade of grey.
+  final CupertinoDynamicColor systemGray4;
+
+  /// A fifth-level shade of grey.
+  final CupertinoDynamicColor systemGray5;
+
+  /// A sixth-level shade of grey.
+  final CupertinoDynamicColor systemGray6;
+
+  @override
+  bool operator ==(dynamic other) {
+    return other.runtimeType == runtimeType
+        && label == label
+        && secondaryLabel == secondaryLabel
+        && tertiaryLabel == tertiaryLabel
+        && quaternaryLabel == quaternaryLabel
+        && systemFill == systemFill
+        && secondarySystemFill == secondarySystemFill
+        && tertiarySystemFill == tertiarySystemFill
+        && quaternarySystemFill == quaternarySystemFill
+        && placeholderText == placeholderText
+        && systemBackground == systemBackground
+        && secondarySystemBackground == secondarySystemBackground
+        && tertiarySystemBackground == tertiarySystemBackground
+        && systemGroupedBackground == systemGroupedBackground
+        && secondarySystemGroupedBackground == secondarySystemGroupedBackground
+        && tertiarySystemGroupedBackground == tertiarySystemGroupedBackground
+        && separator == separator
+        && opaqueSeparator== opaqueSeparator
+        && link == link
+        && systemBlue == systemBlue
+        && systemGreen == systemGreen
+        && systemIndigo == systemIndigo
+        && systemOrange == systemOrange
+        && systemPink == systemPink
+        && systemPurple == systemPurple
+        && systemRed == systemRed
+        && systemTeal == systemTeal
+        && systemYellow == systemYellow
+        && systemGray == systemGray
+        && systemGray2 == systemGray2
+        && systemGray3 == systemGray3
+        && systemGray4 == systemGray4
+        && systemGray5 == systemGray5
+        && systemGray6 == systemGray6;
+  }
+
+  @override
+  int get hashCode => hashList(<Color>[label,
+                                secondaryLabel,
+                                tertiaryLabel,
+                                quaternaryLabel,
+                                systemFill,
+                                secondarySystemFill,
+                                tertiarySystemFill,
+                                quaternarySystemFill,
+                                placeholderText,
+                                systemBackground,
+                                secondarySystemBackground,
+                                tertiarySystemBackground,
+                                systemGroupedBackground,
+                                secondarySystemGroupedBackground,
+                                tertiarySystemGroupedBackground,
+                                separator,
+                                opaqueSeparator,
+                                link,
+                                systemBlue,
+                                systemGreen,
+                                systemIndigo,
+                                systemOrange,
+                                systemPink,
+                                systemPurple,
+                                systemRed,
+                                systemTeal,
+                                systemYellow,
+                                systemGray,
+                                systemGray2,
+                                systemGray3,
+                                systemGray4,
+                                systemGray5,
+                                systemGray6,
+                            ]);
+
 }

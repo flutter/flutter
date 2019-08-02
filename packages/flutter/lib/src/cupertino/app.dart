@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart' show Diagnosticable;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/cupertino/interface_level.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -271,43 +272,46 @@ class _CupertinoAppState extends State<CupertinoApp> {
       behavior: _AlwaysCupertinoScrollBehavior(),
       child: CupertinoTheme(
         data: effectiveThemeData,
-        child: WidgetsApp(
-          key: GlobalObjectKey(this),
-          navigatorKey: widget.navigatorKey,
-          navigatorObservers: _navigatorObservers,
-          pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-            CupertinoPageRoute<T>(settings: settings, builder: builder),
-          home: widget.home,
-          routes: widget.routes,
-          initialRoute: widget.initialRoute,
-          onGenerateRoute: widget.onGenerateRoute,
-          onUnknownRoute: widget.onUnknownRoute,
-          builder: widget.builder,
-          title: widget.title,
-          onGenerateTitle: widget.onGenerateTitle,
-          textStyle: effectiveThemeData.textTheme.textStyle,
-          color: widget.color ?? CupertinoColors.activeBlue,
-          locale: widget.locale,
-          localizationsDelegates: _localizationsDelegates,
-          localeResolutionCallback: widget.localeResolutionCallback,
-          localeListResolutionCallback: widget.localeListResolutionCallback,
-          supportedLocales: widget.supportedLocales,
-          showPerformanceOverlay: widget.showPerformanceOverlay,
-          checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
-          checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
-          showSemanticsDebugger: widget.showSemanticsDebugger,
-          debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
-          inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
-            return CupertinoButton.filled(
-              child: const Icon(
-                CupertinoIcons.search,
-                size: 28.0,
-                color: CupertinoColors.white,
-              ),
-              padding: EdgeInsets.zero,
-              onPressed: onPressed,
-            );
-          },
+        child: _CupertinoSystemColor(
+          data: CupertinoSystemColor.fromSystem ?? CupertinoSystemColor.fallbackValues,
+          child: WidgetsApp(
+            key: GlobalObjectKey(this),
+            navigatorKey: widget.navigatorKey,
+            navigatorObservers: _navigatorObservers,
+            pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
+              CupertinoPageRoute<T>(settings: settings, builder: builder),
+            home: widget.home,
+            routes: widget.routes,
+            initialRoute: widget.initialRoute,
+            onGenerateRoute: widget.onGenerateRoute,
+            onUnknownRoute: widget.onUnknownRoute,
+            builder: widget.builder,
+            title: widget.title,
+            onGenerateTitle: widget.onGenerateTitle,
+            textStyle: effectiveThemeData.textTheme.textStyle,
+            color: widget.color ?? CupertinoColors.activeBlue,
+            locale: widget.locale,
+            localizationsDelegates: _localizationsDelegates,
+            localeResolutionCallback: widget.localeResolutionCallback,
+            localeListResolutionCallback: widget.localeListResolutionCallback,
+            supportedLocales: widget.supportedLocales,
+            showPerformanceOverlay: widget.showPerformanceOverlay,
+            checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+            checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
+            showSemanticsDebugger: widget.showSemanticsDebugger,
+            debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner,
+            inspectorSelectButtonBuilder: (BuildContext context, VoidCallback onPressed) {
+              return CupertinoButton.filled(
+                child: const Icon(
+                  CupertinoIcons.search,
+                  size: 28.0,
+                  color: CupertinoColors.white,
+                ),
+                padding: EdgeInsets.zero,
+                onPressed: onPressed,
+              );
+            },
+          ),
         ),
       ),
     );
@@ -329,262 +333,145 @@ class _CupertinoSystemColor extends InheritedWidget {
 
 class CupertinoSystemColor {
   const CupertinoSystemColor._();
-  //static CupertinoSystemColorData of(BuildContext context) {}
-}
+  static CupertinoSystemColorData of(BuildContext context) {
+    final _CupertinoSystemColor widget = context.inheritFromWidgetOfExactType(_CupertinoSystemColor);
+    assert(() {
+        if (widget == null) {
+          final Element element = context;
+          throw FlutterError(
+            'No _CupertinoSystemColor widget found.\n'
+            '${context.widget.runtimeType} widgets require a _CupertinoSystemColor widget ancestor.\n'
+            'The specific widget that could not find a _CupertinoSystemColor ancestor was:\n'
+            '  ${context.widget}\n'
+            'The ownership chain for the affected widget is:\n'
+            '  ${element.debugGetCreatorChain(10)}'
+          );
+        }
+        return true;
+      }());
 
-@immutable
-class CupertinoSystemColorData extends Diagnosticable {
-  const CupertinoSystemColorData({
-    @required this.label,
-    @required this.secondaryLabel,
-    @required this.tertiaryLabel,
-    @required this.quaternaryLabel,
-    @required this.systemFill,
-    @required this.secondarySystemFill,
-    @required this.tertiarySystemFill,
-    @required this.quaternarySystemFill,
-    @required this.placeholderText,
-    @required this.systemBackground,
-    @required this.secondarySystemBackground,
-    @required this.tertiarySystemBackground,
-    @required this.systemGroupedBackground,
-    @required this.secondarySystemGroupedBackground,
-    @required this.tertiarySystemGroupedBackground,
-    @required this.separator,
-    @required this.opaqueSeparator,
-    @required this.link,
-    @required this.systemBlue,
-    @required this.systemGreen,
-    @required this.systemIndigo,
-    @required this.systemOrange,
-    @required this.systemPink,
-    @required this.systemPurple,
-    @required this.systemRed,
-    @required this.systemTeal,
-    @required this.systemYellow,
-    @required this.systemGray,
-    @required this.systemGray2,
-    @required this.systemGray3,
-    @required this.systemGray4,
-    @required this.systemGray5,
-    @required this.systemGray6,
-  }) : assert(label != null),
-       assert(secondaryLabel != null),
-       assert(tertiaryLabel != null),
-       assert(quaternaryLabel != null),
-       assert(systemFill != null),
-       assert(secondarySystemFill != null),
-       assert(tertiarySystemFill != null),
-       assert(quaternarySystemFill != null),
-       assert(placeholderText != null),
-       assert(systemBackground != null),
-       assert(secondarySystemBackground != null),
-       assert(tertiarySystemBackground != null),
-       assert(systemGroupedBackground != null),
-       assert(secondarySystemGroupedBackground != null),
-       assert(tertiarySystemGroupedBackground != null),
-       assert(separator != null),
-       assert(opaqueSeparator != null),
-       assert(link != null),
-       assert(systemBlue != null),
-       assert(systemGreen != null),
-       assert(systemIndigo != null),
-       assert(systemOrange != null),
-       assert(systemPink != null),
-       assert(systemPurple != null),
-       assert(systemRed != null),
-       assert(systemTeal != null),
-       assert(systemYellow != null),
-       assert(systemGray != null),
-       assert(systemGray2 != null),
-       assert(systemGray3 != null),
-       assert(systemGray4 != null),
-       assert(systemGray5 != null),
-       assert(systemGray6 != null),
-       super();
-  // Label Colors
-  /// The color for text labels containing primary content.
-  final CupertinoDynamicColor label;
-
-  /// The color for text labels containing secondary content.
-  final CupertinoDynamicColor secondaryLabel;
-
-  /// The color for text labels containing tertiary content.
-  final CupertinoDynamicColor tertiaryLabel;
-
-  /// The color for text labels containing quaternary content.
-  final CupertinoDynamicColor quaternaryLabel;
-
-  // FIll Colors
-  /// An overlay fill color for thin and small shapes.
-  final CupertinoDynamicColor systemFill;
-
-  /// An overlay fill color for medium-size shapes.
-  final CupertinoDynamicColor secondarySystemFill;
-
-  /// An overlay fill color for large shapes.
-  final CupertinoDynamicColor tertiarySystemFill;
-
-  /// An overlay fill color for large areas containing complex content.
-  final CupertinoDynamicColor quaternarySystemFill;
-
-  // Text Colors
-  /// The color for placeholder text in controls or text views.
-  final CupertinoDynamicColor placeholderText;
-
-  // Standard Content Background Colors
-  // Use these colors for standard table views and designs that have a white primary background in a light environment.
-
-  /// The color for the main background of your interface.
-  final CupertinoDynamicColor systemBackground;
-
-  /// The color for content layered on top of the main background.
-  final CupertinoDynamicColor secondarySystemBackground;
-
-  /// The color for content layered on top of secondary backgrounds.
-  final CupertinoDynamicColor tertiarySystemBackground;
-
-  // Grouped Content Background Colors
-  // Use these colors for grouped content, including table views and platter-based designs.
-
-  /// The color for the main background of your grouped interface.
-  final CupertinoDynamicColor systemGroupedBackground;
-
-  /// The color for content layered on top of the main background of your grouped interface.
-  final CupertinoDynamicColor secondarySystemGroupedBackground;
-
-  /// The color for content layered on top of secondary backgrounds of your grouped interface.
-  final CupertinoDynamicColor tertiarySystemGroupedBackground;
-
-  // Separator Colors
-  /// The color for thin borders or divider lines that allows some underlying content to be visible.
-  final CupertinoDynamicColor separator;
-
-  /// The color for borders or divider lines that hide any underlying content.
-  final CupertinoDynamicColor opaqueSeparator;
-
-  /// The color for links.
-  final CupertinoDynamicColor link;
-
-  /// A blue color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemBlue;
-
-  /// A green color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemGreen;
-
-  /// An indigo color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemIndigo;
-
-  /// An orange color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemOrange;
-
-  /// A pink color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemPink;
-
-  /// A purple color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemPurple;
-
-  /// A red color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemRed;
-
-  /// A teal color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemTeal;
-
-  /// A yellow color that can adapt to the given [BuildContext].
-  final CupertinoDynamicColor systemYellow;
-
-  /// The base gray color.
-  final CupertinoDynamicColor systemGray;
-
-  /// A second-level shade of grey.
-  final CupertinoDynamicColor systemGray2;
-
-  /// A third-level shade of grey.
-  final CupertinoDynamicColor systemGray3;
-
-  /// A fourth-level shade of grey.
-  final CupertinoDynamicColor systemGray4;
-
-  /// A fifth-level shade of grey.
-  final CupertinoDynamicColor systemGray5;
-
-  /// A sixth-level shade of grey.
-  final CupertinoDynamicColor systemGray6;
-
-  @override
-  bool operator ==(dynamic other) {
-    return other.runtimeType == runtimeType
-        && label == label
-        && secondaryLabel == secondaryLabel
-        && tertiaryLabel == tertiaryLabel
-        && quaternaryLabel == quaternaryLabel
-        && systemFill == systemFill
-        && secondarySystemFill == secondarySystemFill
-        && tertiarySystemFill == tertiarySystemFill
-        && quaternarySystemFill == quaternarySystemFill
-        && placeholderText == placeholderText
-        && systemBackground == systemBackground
-        && secondarySystemBackground == secondarySystemBackground
-        && tertiarySystemBackground == tertiarySystemBackground
-        && systemGroupedBackground == systemGroupedBackground
-        && secondarySystemGroupedBackground == secondarySystemGroupedBackground
-        && tertiarySystemGroupedBackground == tertiarySystemGroupedBackground
-        && separator == separator
-        && opaqueSeparator== opaqueSeparator
-        && link == link
-        && systemBlue == systemBlue
-        && systemGreen == systemGreen
-        && systemIndigo == systemIndigo
-        && systemOrange == systemOrange
-        && systemPink == systemPink
-        && systemPurple == systemPurple
-        && systemRed == systemRed
-        && systemTeal == systemTeal
-        && systemYellow == systemYellow
-        && systemGray == systemGray
-        && systemGray2 == systemGray2
-        && systemGray3 == systemGray3
-        && systemGray4 == systemGray4
-        && systemGray5 == systemGray5
-        && systemGray6 == systemGray6;
+    return widget.data;
   }
 
-  @override
-  int get hashCode => hashList(<Color>[label,
-                                secondaryLabel,
-                                tertiaryLabel,
-                                quaternaryLabel,
-                                systemFill,
-                                secondarySystemFill,
-                                tertiarySystemFill,
-                                quaternarySystemFill,
-                                placeholderText,
-                                systemBackground,
-                                secondarySystemBackground,
-                                tertiarySystemBackground,
-                                systemGroupedBackground,
-                                secondarySystemGroupedBackground,
-                                tertiarySystemGroupedBackground,
-                                separator,
-                                opaqueSeparator,
-                                link,
-                                systemBlue,
-                                systemGreen,
-                                systemIndigo,
-                                systemOrange,
-                                systemPink,
-                                systemPurple,
-                                systemRed,
-                                systemTeal,
-                                systemYellow,
-                                systemGray,
-                                systemGray2,
-                                systemGray3,
-                                systemGray4,
-                                systemGray5,
-                                systemGray6,
-                            ]);
+  static CupertinoSystemColorData get fromSystem {
 
-  //static final CupertinoSystemColorData defaultSystemColor = CupertinoSystemColorData(
-  //);
+  }
+
+  /// Fallback System Colors, extracted from:
+  /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
+  /// https://developer.apple.com/design/resources/
+  static CupertinoSystemColorData get fallbackValues {
+    return CupertinoSystemColorData(
+      /*
+      label,
+      secondaryLabel,
+      tertiaryLabel,
+      quaternaryLabel,
+      systemFill,
+      secondarySystemFill,
+      tertiarySystemFill,
+      quaternarySystemFill,
+      placeholderText,
+      systemBackground,
+      secondarySystemBackground,
+      tertiarySystemBackground,
+      systemGroupedBackground,
+      secondarySystemGroupedBackground,
+      tertiarySystemGroupedBackground,
+      separator,
+      opaqueSeparator,
+      link,
+      */
+      systemBlue: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 0, 122, 255),
+        darkColor: const Color.fromARGB(255, 10, 132, 255),
+        highContrastColor: const Color.fromARGB(255, 0, 64, 221),
+        darkHighContrastColor: const Color.fromARGB(255, 64, 156, 255),
+      ),
+      systemGreen: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 52, 199, 89),
+        darkColor: const Color.fromARGB(255, 48, 209, 88),
+        highContrastColor: const Color.fromARGB(255, 36, 138, 61),
+        darkHighContrastColor: const Color.fromARGB(255, 48, 219, 91),
+      ),
+      systemIndigo: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 88, 86, 214),
+        darkColor: const Color.fromARGB(255, 94, 92, 230),
+        highContrastColor: const Color.fromARGB(255, 54, 52, 163),
+        darkHighContrastColor: const Color.fromARGB(255, 125, 122, 255),
+      ),
+      systemOrange: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 255, 149, 0),
+        darkColor: const Color.fromARGB(255, 255, 159, 10),
+        highContrastColor: const Color.fromARGB(255, 201, 52, 0),
+        darkHighContrastColor: const Color.fromARGB(255, 255, 179, 64),
+      ),
+      systemPink: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 255, 45, 85),
+        darkColor: const Color.fromARGB(255, 255, 55, 95),
+        highContrastColor: const Color.fromARGB(255, 211, 15, 69),
+        darkHighContrastColor: const Color.fromARGB(255, 255, 100, 130),
+      ),
+      systemPurple: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 175, 82, 222),
+        darkColor: const Color.fromARGB(255, 191, 90, 242),
+        highContrastColor: const Color.fromARGB(255, 137, 68, 171),
+        darkHighContrastColor: const Color.fromARGB(255, 218, 143, 255),
+      ),
+      systemRed: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 255, 59, 48),
+        darkColor: const Color.fromARGB(255, 255, 69, 58),
+        highContrastColor: const Color.fromARGB(255, 215, 0, 21),
+        darkHighContrastColor: const Color.fromARGB(255, 255, 105, 97),
+      ),
+      systemTeal: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 90, 200, 250),
+        darkColor: const Color.fromARGB(255, 100, 210, 255),
+        highContrastColor: const Color.fromARGB(255, 0, 113, 164),
+        darkHighContrastColor: const Color.fromARGB(255, 112, 215, 255),
+      ),
+      systemYellow: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 255, 204, 0),
+        darkColor: const Color.fromARGB(255, 255, 214, 10),
+        highContrastColor: const Color.fromARGB(255, 160, 90, 0),
+        darkHighContrastColor: const Color.fromARGB(255, 255, 212, 38),
+      ),
+      systemGray: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 142, 142, 147),
+        darkColor: const Color.fromARGB(255, 142, 142, 147),
+        highContrastColor: const Color.fromARGB(255, 108, 108, 112),
+        darkHighContrastColor: const Color.fromARGB(255, 174, 174, 178),
+      ),
+      systemGray2: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 174, 174, 178),
+        darkColor: const Color.fromARGB(255, 99, 99, 102),
+        highContrastColor: const Color.fromARGB(255, 142, 142, 147),
+        darkHighContrastColor: const Color.fromARGB(255, 124, 124, 128),
+      ),
+      systemGray3: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 199, 199, 204),
+        darkColor: const Color.fromARGB(255, 72, 72, 74),
+        highContrastColor: const Color.fromARGB(255, 174, 174, 178),
+        darkHighContrastColor: const Color.fromARGB(255, 84, 84, 86),
+      ),
+      systemGray4: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 209, 209, 214),
+        darkColor: const Color.fromARGB(255, 58, 58, 60),
+        highContrastColor: const Color.fromARGB(255, 188, 188, 192),
+        darkHighContrastColor: const Color.fromARGB(255, 68, 68, 70),
+      ),
+      systemGray5: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 229, 229, 234),
+        darkColor: const Color.fromARGB(255, 44, 44, 46),
+        highContrastColor: const Color.fromARGB(255, 216, 216, 220),
+        darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
+      ),
+      systemGray6: CupertinoDynamicColor.withVibrancyAndContrast(
+        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        darkColor: const Color.fromARGB(255, 28, 28, 30),
+        highContrastColor: const Color.fromARGB(255, 235, 235, 240),
+        darkHighContrastColor: const Color.fromARGB(255, 36, 36, 38),
+      ),
+    );
+  }
 }
