@@ -599,7 +599,7 @@ void main() {
       await gesture.addPointer();
       addTearDown(() async {
         if (gesture != null)
-          return gesture.removePointer()
+          return gesture.removePointer();
       });
       await gesture.moveTo(tester.getCenter(find.byType(Container)));
       await tester.pumpAndSettle();
