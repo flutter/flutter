@@ -34,6 +34,7 @@ void main() {
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
       when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
+      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
 
       final List<FlutterDevice> devices = <FlutterDevice>[
         TestFlutterDevice(
@@ -61,6 +62,7 @@ void main() {
       when(mockDevice.supportsHotReload).thenReturn(true);
       when(mockDevice.supportsHotRestart).thenReturn(false);
       when(mockDevice.targetPlatform).thenAnswer((Invocation _) async => TargetPlatform.tester);
+      when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation _) async => 'Android 10');
 
       final List<FlutterDevice> devices = <FlutterDevice>[
         TestFlutterDevice(
