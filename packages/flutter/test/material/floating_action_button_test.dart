@@ -781,6 +781,23 @@ void main() {
       ),
     );
   }, semanticsEnabled: true);
+
+  testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xcafefeed);
+
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(
+        onPressed: () {},
+        foregroundColor: foregroundColor,
+        child: const Icon(Icons.access_alarm),
+      ),
+    ));
+
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(Icons.access_alarm), matching: find.byType(RichText)),
+    );
+    expect(iconRichText.text.style.color, foregroundColor);
+  });
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {
