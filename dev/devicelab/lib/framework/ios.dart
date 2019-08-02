@@ -9,8 +9,6 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as io;
 import 'package:path/path.dart' as path;
 
-import 'utils.dart';
-
 const String _kProvisioningConfigFileEnvironmentVariable = 'FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG';
 const String _kTestXcconfigFileName = 'TestConfig.xcconfig';
 const FileSystem _fs = io.LocalFileSystem();
@@ -28,12 +26,7 @@ Future<void> prepareProvisioningCertificates(String flutterProjectPath) async {
 
   await _patchXcconfigFilesIfNotPatched(flutterProjectPath);
   final File testXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/$_kTestXcconfigFileName'));
-  await testXcconfig.writeAsString(certificateConfig);
-}
-
-Future<void> runPodInstallForCustomPodfile(String flutterProjectPath) async {
-  final String iosPath = path.join(flutterProjectPath, 'ios');
-  exec('pod', <String>['install', '--project-directory=$iosPath']);
+  await testXcconfig.writeAsString(certificateConfig, flush: true);
 }
 
 Future<void> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
@@ -55,6 +48,7 @@ Future<void> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
         final IOSink patchOut = file.openWrite(mode: FileMode.append);
         patchOut.writeln(); // in case EOF is not preceded by line break
         patchOut.writeln(include);
+        patchOut.flush();
         await patchOut.close();
       }
     }

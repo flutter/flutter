@@ -161,10 +161,34 @@ Future<void> main() async {
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
         await flutter(
-          'packages',
+          'pub',
           options: <String>['get'],
         );
       });
+
+      final bool ephemeralFramework = exists(Directory(path.join(
+        projectDir.path,
+        '.ios',
+        'Flutter',
+        'engine',
+        'Flutter.framework',
+      )));
+
+      if (!ephemeralFramework) {
+        return TaskResult.failure('Failed to copy framework after regeneration from template');
+      }
+
+      final bool ephemeralPodspec = exists(Directory(path.join(
+        projectDir.path,
+        '.ios',
+        'Flutter',
+        'engine',
+        'Flutter.podspec',
+      )));
+
+      if (!ephemeralPodspec) {
+        return TaskResult.failure('Failed to copy podspec after regeneration from template');
+      }
 
       section('Build ephemeral host app with CocoaPods');
 
