@@ -522,7 +522,7 @@ final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, ur
 Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
   for (FlutterDevice flutterDevice in flutterDevices) {
     final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
-    if (sdkNameAndVersion.startsWith('Android 10')) {
+    if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
       return true;
     }
   }
