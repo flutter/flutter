@@ -441,15 +441,15 @@ void main() {
         home: MediaQuery(
           data: MediaQueryData(
             padding: EdgeInsets.zero,
-            viewPadding: EdgeInsets.only(bottom: 20),
+            viewPadding: const EdgeInsets.only(bottom: 20),
             viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
           ),
           child: CupertinoPageScaffold(
             resizeToAvoidBottomInset: true,
-            navigationBar: showNavigationBar ? CupertinoNavigationBar(
+            navigationBar: showNavigationBar ? const CupertinoNavigationBar(
               middle: Text('Title'),
             ) : null,
-            child: Center(
+            child: const Center(
               child: CupertinoTextField(),
             ),
           ),
