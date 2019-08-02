@@ -270,7 +270,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
       behavior: _AlwaysCupertinoScrollBehavior(),
       child: CupertinoTheme(
         data: effectiveThemeData,
-        child: _CupertinoSystemColor(
+        child: CupertinoSystemColors._(
           data: CupertinoSystemColor.fromSystem ?? CupertinoSystemColor.fallbackValues,
           child: WidgetsApp(
             key: GlobalObjectKey(this),
@@ -316,23 +316,25 @@ class _CupertinoAppState extends State<CupertinoApp> {
   }
 }
 
-class _CupertinoSystemColor extends InheritedWidget {
-  const _CupertinoSystemColor({
+class CupertinoSystemColors extends InheritedWidget {
+  const CupertinoSystemColors._({
     Key key,
-    this.data,
+    @required CupertinoSystemColorData data,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : _data = data,
+       assert(data != null),
+       super(key: key, child: child);
 
-  _CupertinoSystemColor.fromCurrentContext({
+  CupertinoSystemColors.fromCurrentContext({
     Key key,
     BuildContext context,
     Widget child,
-  }) : this(key: key, data: CupertinoSystemColor.of(context).resolveColors(context), child: child);
+  }) : this._(key: key, data: CupertinoSystemColor.of(context).resolveColors(context), child: child);
 
-  final CupertinoSystemColorData data;
+  final CupertinoSystemColorData _data;
 
   @override
-  bool updateShouldNotify(_CupertinoSystemColor oldWidget) => oldWidget.data != data;
+  bool updateShouldNotify(CupertinoSystemColors oldWidget) => oldWidget._data != _data;
 }
 
 /// A set of system colors provided in iOS 13+.
@@ -351,8 +353,8 @@ class CupertinoSystemColor {
   /// Falls back to [fromSystem] and then [fallbackValues], if such information
   /// is not available in the given [BuildContext].
   static CupertinoSystemColorData of(BuildContext context) {
-    final _CupertinoSystemColor widget = context.inheritFromWidgetOfExactType(_CupertinoSystemColor);
-    return widget?.data ?? fromSystem ?? fallbackValues;
+    final CupertinoSystemColors widget = context.inheritFromWidgetOfExactType(CupertinoSystemColors);
+    return widget?._data ?? fromSystem ?? fallbackValues;
   }
 
   /// System Colors fetched from the OS.
