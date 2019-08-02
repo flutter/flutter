@@ -737,9 +737,14 @@ class PlatformViewRenderBox extends RenderBox {
   /// The `controller` parameter must not be null.
   PlatformViewRenderBox({
     @required PlatformViewController controller,
-
-  }) : assert(controller != null && controller.viewId != null && controller.viewId > -1),
-       _controller = controller;
+    @required this.hitTestBehavior,
+    @required Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers,
+  }) :  assert(controller != null && controller.viewId != null && controller.viewId > -1),
+        assert(hitTestBehavior != null),
+        assert(gestureRecognizers != null),
+        _controller = controller {
+          updateGestureRecognizers(gestureRecognizers);
+        }
 
   /// Sets the [controller] for this render object.
   ///
@@ -759,7 +764,53 @@ class PlatformViewRenderBox extends RenderBox {
     }
   }
 
+  /// How to behave during hit testing.
+  // The implicit setter is enough here as changing this value will just affect
+  // any newly arriving events there's nothing we need to invalidate.
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  /// {@template flutter.rendering.platformView.updateGestureRecognizers}
+  /// Updates which gestures should be forwarded to the platform view.
+  ///
+  /// Gesture recognizers created by factories in this set participate in the gesture arena for each
+  /// pointer that was put down on the render box. If any of the recognizers on this list wins the
+  /// gesture arena, the [PlatformViewController.dispatchPointerEvent] will be called.
+  ///
+  /// The `gestureRecognizers` property must not contain more than one factory with the same [Factory.type].
+  ///
+  /// Setting a new set of gesture recognizer factories with the same [Factory.type]s as the current
+  /// set has no effect, because the factories' constructors would have already been called with the previous set.
+  /// {@endtemplate}
+  ///
+  /// Any active gesture arena the `PlatformView` participates in is rejected when the
+  /// set of gesture recognizers is changed.
+  void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
+    assert(gestureRecognizers != null);
+    assert(
+    _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
+    'There were multiple gesture recognizer factories for the same type, there must only be a single '
+        'gesture recognizer factory for each gesture recognizer type.',);
+    if (_factoryTypesSetEquals(gestureRecognizers, _gestureRecognizer?.gestureRecognizerFactories)) {
+      return;
+    }
+    _gestureRecognizer?.dispose();
+    _gestureRecognizer = _PlatformViewGestureRecognizerCaptain(controller: _controller, gestureRecognizerFactories: gestureRecognizers);
+  }
+
+  _PlatformViewGestureRecognizerCaptain _gestureRecognizer;
+
   PlatformViewController _controller;
+
+  @override
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
+    if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
+      return false;
+    result.add(BoxHitTestEntry(this, position));
+    return hitTestBehavior == PlatformViewHitTestBehavior.opaque;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
 
   @override
   bool get sizedByParent => true;
@@ -776,6 +827,14 @@ class PlatformViewRenderBox extends RenderBox {
   }
 
   @override
+  void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is !PointerDownEvent) {
+      return;
+    }
+    _gestureRecognizer.addPointer(event);
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
@@ -789,5 +848,114 @@ class PlatformViewRenderBox extends RenderBox {
     assert(_controller.viewId != null);
     config.isSemanticBoundary = true;
     config.platformViewId = _controller.viewId;
+  }
+
+  @override
+  void detach() {
+    _gestureRecognizer.reset();
+    super.detach();
+  }
+}
+
+// This recognizer constructs gesture recognizers from a set of gesture recognizer factories
+// it was given, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizerCaptain
+// as the team captain.
+// As long as the gesture arena is unresolved the recognizer caches all pointer events.
+// When the team wins the recognizer sends all the cached point events to the [PlatformViewController], and
+// sets itself to a "forwarding mode" where it will forward any new pointer event to the [PlatformViewController].
+class _PlatformViewGestureRecognizerCaptain extends OneSequenceGestureRecognizer {
+
+  _PlatformViewGestureRecognizerCaptain( {
+    @required this.controller,
+    this.gestureRecognizerFactories,
+    PointerDeviceKind kind,
+  }) : super(kind: kind) {
+    team = GestureArenaTeam();
+    team.captain = this;
+    _gestureRecognizers = gestureRecognizerFactories.map(
+      (Factory<OneSequenceGestureRecognizer> recognizerFactory) {
+        return recognizerFactory.constructor()..team = team;
+      },
+    ).toSet();
+  }
+
+  // Maps a pointer to a list of its cached pointer events.
+  // Before the arena for a pointer is resolved all events are cached here, if we win the arena
+  // the cached events are dispatched to the view, if we lose the arena we clear the cache for
+  // the pointer.
+  final Map<int, List<PointerEvent>> cachedEvents = <int, List<PointerEvent>>{};
+
+  // Pointer for which we have already won the arena, events for pointers in this set are
+  // immediately dispatched to the `PlatformView`.
+  final Set<int> forwardedPointers = <int>{};
+
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizerFactories;
+  Set<OneSequenceGestureRecognizer> _gestureRecognizers;
+
+  /// The controller handling dispatching the pointers and accept/release gestures.
+  final PlatformViewController controller;
+
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    startTrackingPointer(event.pointer, event.transform);
+    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+      recognizer.addPointer(event);
+    }
+  }
+
+  @override
+  String get debugDescription => 'Platform View';
+
+  @override
+  void didStopTrackingLastPointer(int pointer) { }
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (!forwardedPointers.contains(event.pointer)) {
+      cacheEvent(event);
+    } else {
+      controller.dispatchPointerEvent(event);
+    }
+    stopTrackingIfPointerNoLongerDown(event);
+  }
+
+  @override
+  void acceptGesture(int pointer) {
+    flushPointerCache(pointer);
+    forwardedPointers.add(pointer);
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    stopTrackingPointer(pointer);
+    cachedEvents.remove(pointer);
+  }
+
+  @override
+  void stopTrackingPointer(int pointer) {
+    super.stopTrackingPointer(pointer);
+    forwardedPointers.remove(pointer);
+  }
+
+  void cacheEvent(PointerEvent event) {
+    if (!cachedEvents.containsKey(event.pointer)) {
+      cachedEvents[event.pointer] = <PointerEvent> [];
+    }
+    cachedEvents[event.pointer].add(event);
+  }
+
+  void flushPointerCache(int pointer) {
+    cachedEvents.remove(pointer)?.forEach(controller.dispatchPointerEvent);
+  }
+
+  void reset() {
+    forwardedPointers.forEach(super.stopTrackingPointer);
+    forwardedPointers.clear();
+    cachedEvents.keys.forEach(super.stopTrackingPointer);
+    cachedEvents.clear();
+    resolve(GestureDisposition.rejected);
   }
 }
