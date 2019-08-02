@@ -186,7 +186,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
     ByteData response;
     try {
       final MessageHandler handler = _handlers[channel];
-      if (handler != null) response = await handler(data);
+      if (handler != null)
+        response = await handler(data);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
@@ -202,7 +203,8 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   @override
   Future<ByteData> send(String channel, ByteData message) {
     final MessageHandler handler = _mockHandlers[channel];
-    if (handler != null) return handler(message);
+    if (handler != null)
+      return handler(message);
     return _sendPlatformMessage(channel, message);
   }
 

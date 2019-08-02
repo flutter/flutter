@@ -499,7 +499,7 @@ class EventChannel {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
-    binaryMessenger.setMessageHandler(name, (ByteData reply) async {
+      binaryMessenger.setMessageHandler(name, (ByteData reply) async {
         if (reply == null) {
           controller.close();
         } else {
@@ -522,7 +522,7 @@ class EventChannel {
         ));
       }
     }, onCancel: () async {
-    binaryMessenger.setMessageHandler(name, null);
+      binaryMessenger.setMessageHandler(name, null);
       try {
         await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {
