@@ -323,6 +323,12 @@ class _CupertinoSystemColor extends InheritedWidget {
     Widget child,
   }) : super(key: key, child: child);
 
+  _CupertinoSystemColor.fromCurrentContext({
+    Key key,
+    BuildContext context,
+    Widget child,
+  }) : this(key: key, data: CupertinoSystemColor.of(context).resolveColors(context), child: child);
+
   final CupertinoSystemColorData data;
 
   @override
