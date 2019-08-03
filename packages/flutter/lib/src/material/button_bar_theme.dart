@@ -25,7 +25,10 @@ import 'theme.dart';
 ///   * [ButtonBar], which uses this to configure itself and its children
 ///     button widgets.
 class ButtonBarThemeData extends Diagnosticable {
-  /// Constructs the set of properties used to configure [ButtonBar]s.
+  /// Constructs the set of properties used to configure [ButtonBar] widgets.
+  ///
+  /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
+  /// are not `null`.
   const ButtonBarThemeData({
     this.alignment,
     this.mainAxisSize,
@@ -35,7 +38,8 @@ class ButtonBarThemeData extends Diagnosticable {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
-  });
+  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+       assert(buttonHeight == null || buttonHeight >= 0.0);
 
   /// How the children should be placed along the horizontal axis.
   final MainAxisAlignment alignment;

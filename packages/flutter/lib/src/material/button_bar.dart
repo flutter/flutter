@@ -36,6 +36,9 @@ import 'raised_button.dart';
 ///  * [ButtonBarTheme], which configures the [ButtonBar].
 class ButtonBar extends StatelessWidget {
   /// Creates a button bar.
+  ///
+  /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
+  /// are not `null`.
   const ButtonBar({
     Key key,
     this.alignment,
@@ -47,7 +50,9 @@ class ButtonBar extends StatelessWidget {
     this.buttonAlignedDropdown,
     this.layoutBehavior,
     this.children = const <Widget>[],
-  }) : super(key: key);
+  }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
+       assert(buttonHeight == null || buttonHeight >= 0.0),
+       super(key: key);
 
   /// How the children should be placed along the horizontal axis.
   ///
