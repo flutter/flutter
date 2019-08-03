@@ -124,6 +124,11 @@ class CupertinoDynamicColor extends Color {
          ]
        );
 
+  /// Creates a Color that can be resolved to different [Color]s, based on the given
+  /// [BuildContext]'s color vibrancy and accessibility contrast.
+  ///
+  /// [defaultColor] will be used in other colors' absence, and it must not be null,
+  /// unless all the other colors are not null.
   CupertinoDynamicColor.withVibrancyAndContrast({
     Color defaultColor,
     Color normalColor,
@@ -142,6 +147,11 @@ class CupertinoDynamicColor extends Color {
     darkHighContrastElevatedColor: darkHighContrastColor,
   );
 
+  /// Creates a Color that can be resolved to different [Color]s, based on the given
+  /// [BuildContext]'s color vibrancy.
+  ///
+  /// [defaultColor] will be used in other colors' absence, and it must not be null,
+  /// unless all the other colors are not null.
   CupertinoDynamicColor.withVibrancy({
     Color defaultColor,
     Color normalColor,
@@ -300,19 +310,7 @@ class CupertinoDynamicColor extends Color {
     }
 
     final Color resolved = _colorMap[configBitMask] ?? defaultColor;
-    return resolved == defaultColor
-      ? this
-      : CupertinoDynamicColor(
-          defaultColor: resolved,
-          normalColor: normalColor,
-          darkColor: darkColor,
-          highContrastColor: highContrastColor,
-          darkHighContrastColor: darkHighContrastColor,
-          elevatedColor: elevatedColor,
-          darkElevatedColor: darkElevatedColor,
-          highContrastElevatedColor: highContrastElevatedColor,
-          darkHighContrastElevatedColor: darkHighContrastElevatedColor,
-        );
+    return resolved == defaultColor ? this : CupertinoDynamicColor._(resolved, _colorMap);
   }
 
   @override
@@ -335,8 +333,15 @@ class _ColorMapElementEquality<E> extends DefaultEquality<E> {
                                     || super.equals(e1 ?? nullFallbackValue, e2 ?? nullFallbackValue);
 }
 
+/// A color palette that typically matches iOS 13+ system colors.
+///
+/// Generally you shouldn't not create a [CupertinoSystemColorData] yourself.
+/// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorData] from the
+/// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
+/// if the current [BuildContext] is not available (e.g., in [CupertinoApp]'s constructor).
 @immutable
 class CupertinoSystemColorData extends Diagnosticable {
+  /// Creates a color palette.
   const CupertinoSystemColorData({
     @required this.label,
     @required this.secondaryLabel,
@@ -515,6 +520,9 @@ class CupertinoSystemColorData extends Diagnosticable {
   /// A sixth-level shade of grey.
   final CupertinoDynamicColor systemGray6;
 
+  /// Resolve every color in the palette using the given [BuildContext], by calling
+  /// [CupertinoDynamicColor.resolve], and return a new [CupertinoSystemColorData]
+  /// with all the resolved colors.
   CupertinoSystemColorData resolveColors(BuildContext context) {
     return CupertinoSystemColorData(
       label: CupertinoDynamicColor.resolve(label, context),

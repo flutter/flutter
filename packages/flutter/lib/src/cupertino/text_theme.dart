@@ -229,7 +229,7 @@ class CupertinoTextThemeData extends Diagnosticable {
     return copyWith(
       primaryColor: convertColor(_primaryColor),
       textStyle: resolveTextStyle(_textStyle),
-      actionTextStyle: resolveTextStyle(actionTextStyle),
+      actionTextStyle: resolveTextStyle(_actionTextStyle),
       tabLabelTextStyle: resolveTextStyle(_tabLabelTextStyle),
       navTitleTextStyle : resolveTextStyle(_navTitleTextStyle),
       navLargeTitleTextStyle: resolveTextStyle(_navLargeTitleTextStyle),
