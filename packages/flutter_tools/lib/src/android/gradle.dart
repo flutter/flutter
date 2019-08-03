@@ -285,16 +285,16 @@ Future<String> _ensureGradle(FlutterProject project) async {
 
 @visibleForTesting
 Future<RunResult> runGradleCheckedAsync(
-	List<String> cmd, {
-	void Function(Exception) check,
-	Map<String, String> environment,
+  List<String> cmd, {
+ 	void Function(Exception) check,
+ 	Map<String, String> environment,
 }) async {
   try {
     return await runCheckedAsync(cmd, environment: environment);
   } catch (e) {
-		if (check != null) {
-			check(e);
-		}
+    if (check != null) {
+      check(e);
+    }
     rethrow;
   }
 }

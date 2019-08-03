@@ -869,18 +869,18 @@ flutter:
   group('runGradleCheckedAsync', () {
     MemoryFileSystem fs;
     MockProcessManager processManager;
-		Exception shouldBeToolExit;
+    Exception shouldBeToolExit;
 
     setUp(() {
       fs = MemoryFileSystem();
       processManager = MockProcessManager();
-			shouldBeToolExit = null;
+      shouldBeToolExit = null;
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
-			const cmd = <String>['gradlew', '-v'];
+      const cmd = <String>['gradlew', '-v'];
       when(processManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
-          .thenThrow(ToolExit('''
+        .thenThrow(ToolExit('''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
 	at sun.net.www.protocol.http.HttpURLConnection.getInputStream0(HttpURLConnection.java:1872)
 	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(HttpURLConnection.java:1474)
@@ -893,7 +893,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
 	at org.gradle.wrapper.Install.createDist(Install.java:48)
 	at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 	at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-                  ''', exitCode: 1));
+        ''', exitCode: 1));
       try {
         await runGradleCheckedAsync(cmd, environment: <String, String>{});
       } catch (e) {
@@ -907,9 +907,9 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
     });
 
     testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
-			const cmd = <String>['gradlew', '-v'];
+      const cmd = <String>['gradlew', '-v'];
       when(processManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
-          .thenThrow(ToolExit('''
+        .thenThrow(ToolExit('''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
 at sun.net.www.protocol.http.HttpURLConnection.doTunneling(HttpURLConnection.java:2124)
 at sun.net.www.protocol.https.AbstractDelegateHttpsURLConnection.connect(AbstractDelegateHttpsURLConnection.java:183)
@@ -924,7 +924,7 @@ at org.gradle.wrapper.ExclusiveFileAccessManager.access(ExclusiveFileAccessManag
 at org.gradle.wrapper.Install.createDist(Install.java:48)
 at org.gradle.wrapper.WrapperExecutor.execute(WrapperExecutor.java:128)
 at org.gradle.wrapper.GradleWrapperMain.main(GradleWrapperMain.java:61)
-          ''', exitCode: 1));
+        ''', exitCode: 1));
       try {
         await runGradleCheckedAsync(cmd, environment: <String, String>{});
       } catch (e) {
