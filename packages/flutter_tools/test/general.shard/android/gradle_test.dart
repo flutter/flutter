@@ -878,7 +878,7 @@ flutter:
     });
 
     testUsingContext('throws toolExit if gradle fails while downloading', () async {
-      const cmd = <String>['gradlew', '-v'];
+      const List<String> cmd = <String>['gradlew', '-v'];
       when(processManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
         .thenThrow(ToolExit('''
 Exception in thread "main" java.io.FileNotFoundException: https://downloads.gradle.org/distributions/gradle-4.1.1-all.zip
@@ -907,7 +907,7 @@ Exception in thread "main" java.io.FileNotFoundException: https://downloads.grad
     });
 
     testUsingContext('throw toolExit if gradle fails downloading with proxy error', () async {
-      const cmd = <String>['gradlew', '-v'];
+      const List<String> cmd = <String>['gradlew', '-v'];
       when(processManager.run(cmd, environment: anyNamed('environment'), workingDirectory: null))
         .thenThrow(ToolExit('''
 Exception in thread "main" java.io.IOException: Unable to tunnel through proxy. Proxy returns "HTTP/1.1 400 Bad Request"
