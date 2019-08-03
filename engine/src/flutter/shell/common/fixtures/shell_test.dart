@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show utf8;
 import 'dart:isolate';
+import 'dart:typed_data';
 import 'dart:ui';
 
 void main() {}
@@ -56,4 +58,20 @@ void secondaryIsolateMain(String message) {
 void testCanLaunchSecondaryIsolate() {
   Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.');
   notifyNative();
+}
+
+@pragma('vm:entry-point')
+void testSkiaResourceCacheSendsResponse() {
+  final PlatformMessageResponseCallback callback = (ByteData data) {
+    notifyNative();
+  };
+  const String json = '''{
+                            "method": "Skia.setResourceCacheMaxBytes",
+                            "args": 10000
+                          }''';
+  window.sendPlatformMessage(
+    'flutter/skia',
+    Uint8List.fromList(utf8.encode(json)).buffer.asByteData(),
+    callback,
+  );
 }

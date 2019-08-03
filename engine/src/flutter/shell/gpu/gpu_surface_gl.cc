@@ -28,7 +28,10 @@ static const int kGrCacheMaxCount = 8192;
 
 // Default maximum number of bytes of GPU memory of budgeted resources in the
 // cache.
-static const size_t kGrCacheMaxByteSize = 512 * (1 << 20);
+// The shell will dynamically increase or decrease this cache based on the
+// viewport size, unless a user has specifically requested a size on the Skia
+// system channel.
+static const size_t kGrCacheMaxByteSize = 24 * (1 << 20);
 
 GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {
