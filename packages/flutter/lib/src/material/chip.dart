@@ -1284,8 +1284,8 @@ class RawChip extends StatefulWidget
   /// The [onPressed] and [onSelected] callbacks must not both be specified at
   /// the same time.
   ///
-  /// The [label], [isEnabled], and [clipBehavior] arguments must not be null.
-  /// The [pressElevation] and [elevation] must be null or non-negative.
+  /// The [label], [isEnabled], [selected], and [clipBehavior] arguments must
+  /// not be null. The [pressElevation] and [elevation] must be null or non-negative.
   /// Typically, [pressElevation] is greater than [elevation].
   const RawChip({
     Key key,
@@ -1302,7 +1302,7 @@ class RawChip extends StatefulWidget
     this.onSelected,
     this.pressElevation,
     this.tapEnabled = true,
-    this.selected,
+    this.selected = false,
     this.showCheckmark = true,
     this.isEnabled = true,
     this.disabledColor,
@@ -1318,6 +1318,7 @@ class RawChip extends StatefulWidget
     this.avatarBorder = const CircleBorder(),
   }) : assert(label != null),
        assert(isEnabled != null),
+       assert(selected != null),
        assert(clipBehavior != null),
        assert(pressElevation == null || pressElevation >= 0.0),
        assert(elevation == null || elevation >= 0.0),
@@ -1429,7 +1430,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     assert(widget.onSelected == null || widget.onPressed == null);
     super.initState();
     _updateState(MaterialState.disabled, !widget.isEnabled);
-    _updateState(MaterialState.selected, widget.selected ?? false);
+    _updateState(MaterialState.selected, widget.selected);
     selectController = AnimationController(
       duration: _kSelectDuration,
       value: widget.selected == true ? 1.0 : 0.0,
@@ -1587,7 +1588,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     if (oldWidget.selected != widget.selected) {
       setState(() {
-        _updateState(MaterialState.selected, widget.selected ?? false);
+        _updateState(MaterialState.selected, widget.selected);
         if (widget.selected == true) {
           selectController.forward();
         } else {
@@ -1654,7 +1655,6 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final double pressElevation = widget.pressElevation ?? chipTheme.pressElevation ?? _defaultPressElevation;
     final Color shadowColor = widget.shadowColor ?? chipTheme.shadowColor ?? _defaultShadowColor;
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
-    final bool selected = widget.selected ?? false;
 
     final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
     final Color resolvedLabelColor =  MaterialStateProperty.resolveAs<Color>(effectiveLabelStyle?.color, _states);
@@ -1664,7 +1664,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       onFocusChange: _handleFocus,
       child: Material(
         elevation: isTapping ? pressElevation : elevation,
-        shadowColor: selected ? selectedShadowColor : shadowColor,
+        shadowColor: widget.selected ? selectedShadowColor : shadowColor,
         animationDuration: pressedAnimationDuration,
         shape: shape,
         clipBehavior: widget.clipBehavior,

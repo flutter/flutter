@@ -1168,7 +1168,7 @@ void main() {
                 deleteIcon: deleteIcon,
                 isEnabled: isSelectable || isPressable,
                 shape: chipTheme.shape,
-                selected: isSelectable ? value : null,
+                selected: isSelectable && value,
                 label: Text('$value'),
                 onSelected: isSelectable
                     ? (bool newValue) {
@@ -1736,6 +1736,20 @@ void main() {
       ),
     );
     expect(find.byType(InkWell), findsOneWidget);
+  });
+
+  testWidgets('RawChip.selected can not be null', (WidgetTester tester) async {
+    expect(() async {
+      MaterialApp(
+        home: Material(
+          child: RawChip(
+            onPressed: () { },
+            selected: null,
+            label: const Text('Chip'),
+          ),
+        ),
+      );
+    }, throwsAssertionError);
   });
 
   testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
