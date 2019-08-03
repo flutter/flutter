@@ -43,7 +43,19 @@ void main() {
     PlatformMessageCallback originalOnPlatformMessage;
     VoidCallback originalOnTextScaleFactorChanged;
 
+    double oldDPR;
+    Size oldSize;
+    double oldDepth;
+    WindowPadding oldPadding;
+    WindowPadding oldInsets;
+
     setUp(() {
+      oldDPR = window.devicePixelRatio;
+      oldSize = window.physicalSize;
+      oldDepth = window.physicalDepth;
+      oldPadding = window.viewPadding;
+      oldInsets = window.viewInsets;
+
       originalOnMetricsChanged = window.onMetricsChanged;
       originalOnLocaleChanged = window.onLocaleChanged;
       originalOnBeginFrame = window.onBeginFrame;
@@ -57,6 +69,20 @@ void main() {
     });
 
     tearDown(() {
+      _updateWindowMetrics(
+        oldDPR,             // DPR
+        oldSize.width,      // width
+        oldSize.height,     // height
+        oldDepth,           // depth
+        oldPadding.top,     // padding top
+        oldPadding.right,   // padding right
+        oldPadding.bottom,  // padding bottom
+        oldPadding.left,    // padding left
+        oldInsets.top,      // inset top
+        oldInsets.right,    // inset right
+        oldInsets.bottom,   // inset bottom
+        oldInsets.left,     // inset left
+      );
       window.onMetricsChanged = originalOnMetricsChanged;
       window.onLocaleChanged = originalOnLocaleChanged;
       window.onBeginFrame = originalOnBeginFrame;
@@ -89,7 +115,7 @@ void main() {
       });
 
       window.onMetricsChanged();
-      _updateWindowMetrics(0.1234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      _updateWindowMetrics(0.1234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
       expect(devicePixelRatio, equals(0.1234));
@@ -290,15 +316,11 @@ void main() {
 
 
     test('Window padding/insets/viewPadding', () {
-      final double oldDPR = window.devicePixelRatio;
-      final Size oldSize = window.physicalSize;
-      final WindowPadding oldPadding = window.viewPadding;
-      final WindowPadding oldInsets = window.viewInsets;
-
       _updateWindowMetrics(
         1.0,   // DPR
         800.0, // width
         600.0, // height
+        100.0, // depth
         50.0,  // padding top
         0.0,   // padding right
         40.0,  // padding bottom
@@ -312,11 +334,13 @@ void main() {
       expect(window.viewInsets.bottom, 0.0);
       expect(window.viewPadding.bottom, 40.0);
       expect(window.padding.bottom, 40.0);
+      expect(window.physicalDepth, 100.0);
 
       _updateWindowMetrics(
         1.0,   // DPR
         800.0, // width
         600.0, // height
+        100.0, // depth
         50.0,  // padding top
         0.0,   // padding right
         40.0,  // padding bottom
@@ -330,20 +354,7 @@ void main() {
       expect(window.viewInsets.bottom, 400.0);
       expect(window.viewPadding.bottom, 40.0);
       expect(window.padding.bottom, 0.0);
-
-       _updateWindowMetrics(
-        oldDPR,             // DPR
-        oldSize.width,      // width
-        oldSize.height,     // height
-        oldPadding.top,     // padding top
-        oldPadding.right,   // padding right
-        oldPadding.bottom,  // padding bottom
-        oldPadding.left,    // padding left
-        oldInsets.top,      // inset top
-        oldInsets.right,    // inset right
-        oldInsets.bottom,   // inset bottom
-        oldInsets.left,     // inset left
-      );
+      expect(window.physicalDepth, 100.0);
     });
   });
 }

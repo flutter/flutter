@@ -9,7 +9,11 @@
 
 namespace flutter {
 
-static const double kUnsetDepth = -1;
+// This is the value of double.maxFinite from dart:core.
+// Platforms that do not explicitly set a depth will use this value, which
+// avoids the need to special case logic that wants to check the max depth on
+// the Dart side.
+static const double kUnsetDepth = 1.7976931348623157e+308;
 
 struct ViewportMetrics {
   ViewportMetrics();
