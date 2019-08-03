@@ -44,8 +44,8 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test_api: 0.2.6
-  test_core: 0.2.6
+  test_api: 0.2.5
+  test_core: 0.2.5
 
   # Code generation dependencies
   build_runner_core: 3.0.7
@@ -122,7 +122,7 @@ dev_dependencies:
   collection: 1.14.11
   mockito: 4.1.0
   file_testing: 2.1.0
-  test: 1.6.4
+  test: 1.6.3
   build_runner: 1.6.5
   build_vm_compilers: 1.0.2
   build_test: 0.10.8
@@ -135,4 +135,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: 17fd
+# PUBSPEC CHECKSUM: a0fa
