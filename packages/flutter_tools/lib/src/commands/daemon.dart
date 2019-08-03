@@ -25,7 +25,6 @@ import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
-import '../vmservice.dart';
 
 const String protocolVersion = '0.5.3';
 
@@ -419,9 +418,10 @@ class AppDomain extends Domain {
         flutterDevice.device,
         debuggingOptions: options,
         flutterProject: flutterProject,
-        ipv6: ipv6
+        ipv6: ipv6,
+        target: target,
       );
-    } if (enableHotReload) {
+    } else if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         target: target,
@@ -493,7 +493,8 @@ class AppDomain extends Domain {
       unawaited(connectionInfoCompleter.future.then<void>(
         (DebugConnectionInfo info) {
           final Map<String, dynamic> params = <String, dynamic>{
-            'port': info.httpUri.port,
+            // The web vmservice proxy does not have an http address.
+            'port': info.httpUri?.port ?? info.wsUri.port,
             'wsUri': info.wsUri.toString(),
           };
           if (info.baseUri != null)
@@ -573,8 +574,8 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    final Isolate isolate = app.runner.flutterDevices.first.views.first.uiIsolate;
-    final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
+    final Map<String, dynamic> result = await app.runner
+        .invokeFlutterExtensionRpcRawOnFirstIsolate(methodName, params: params);
     if (result == null)
       throw 'method not available: $methodName';
 

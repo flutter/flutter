@@ -64,6 +64,7 @@ class FlutterWebServer {
   Future<void> stop() async {
     await dwds.stop();
     await _server.close(force: true);
+    await chrome.close();
   }
 
   static Future<FlutterWebServer> start({
@@ -94,6 +95,7 @@ class FlutterWebServer {
       reloadConfiguration: ReloadConfiguration.none,
       serveDevTools: true,
       verbose: false,
+      enableDebugExtension: true,
     );
     // Map the bootstrap files to the correct package directory.
     final String targetBaseName = fs.path.withoutExtension(target).replaceFirst('lib/', '');

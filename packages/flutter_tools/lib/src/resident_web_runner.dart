@@ -31,7 +31,6 @@ import 'device.dart';
 import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
-import 'run_hot.dart';
 import 'web/server.dart';
 
 /// A hot-runner which handles browser specific delegation.
@@ -51,7 +50,6 @@ class ResidentWebRunner extends ResidentRunner {
         );
 
   final Device device;
-  ProjectFileInvalidator projectFileInvalidator;
   final FlutterProject flutterProject;
 
   StreamSubscription<BuildResults> _buildResults;
@@ -63,6 +61,15 @@ class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<vmservice.Event> _stdOutSub;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
+
+  @override
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
+    String method, {
+    Map<String, dynamic> params,
+  }) async {
+    final vmservice.Response response = await _vmService.callServiceExtension(method, args: params);
+    return response.toJson();
+  }
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -118,7 +125,8 @@ class ResidentWebRunner extends ResidentRunner {
       applicationBinary: null,
     );
     if (package == null) {
-      printError('No application found for TargetPlatform.web_javascript');
+      printError('No application found for TargetPlatform.web_javascript.');
+      printError('To add web support to a project, run `flutter create --web .`.');
       return 1;
     }
     if (!fs.isFileSync(mainPath)) {
@@ -146,7 +154,7 @@ class ResidentWebRunner extends ResidentRunner {
     });
     Status buildStatus;
     try {
-      buildStatus = logger.startProgress('Building application for the web', timeout: null);
+      buildStatus = logger.startProgress('Building application for the web...', timeout: null);
       _client.startBuild();
       final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
         .readAsStringSync());
@@ -164,7 +172,8 @@ class ResidentWebRunner extends ResidentRunner {
       final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
       appConnection.runMain();
       _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
-    } catch (err) {
+    } catch (err, stackTrace) {
+      printError(stackTrace.toString());
       printError(err.toString());
       throwToolExit('Failed to build application for the web.');
     } finally {
@@ -178,9 +187,10 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<int> attach(
-      {Completer<DebugConnectionInfo> connectionInfoCompleter,
-      Completer<void> appStartedCompleter}) async {
+  Future<int> attach({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<void> appStartedCompleter,
+  }) async {
     // Cleanup old subscriptions
     try {
       await _debugConnection.vmService.streamCancel('Stdout');
@@ -196,12 +206,8 @@ class ResidentWebRunner extends ResidentRunner {
       printStatus(utf8.decode(base64.decode(log.bytes)).trim());
     });
     final Uri websocketUri = Uri.parse(_debugConnection.wsUri);
-    final Uri httpUri = websocketUri.replace(scheme: 'http');
     connectionInfoCompleter?.complete(
-      DebugConnectionInfo(
-        httpUri: httpUri,
-        wsUri: websocketUri,
-      )
+      DebugConnectionInfo(wsUri: websocketUri)
     );
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
@@ -216,7 +222,7 @@ class ResidentWebRunner extends ResidentRunner {
     bool benchmarkMode = false,
   }) async {
     if (!fullRestart) {
-      return OperationResult(1, 'hotReload not supported');
+      return OperationResult(1, 'hot reload not supported on the web.');
     }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
@@ -245,69 +251,101 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> debugDumpApp() async {
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugDumpApp',
-    );
+    try {
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugDumpApp',
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugDumpRenderTree() async {
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugDumpRenderTree',
-    );
+    try {
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugDumpRenderTree',
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugDumpLayerTree() async {
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugDumpLayerTree',
-    );
+    try {
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugDumpLayerTree',
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    await _vmService.callServiceExtension(
-        'ext.flutter.debugDumpSemanticsTreeInTraversalOrder');
+    try {
+      await _vmService.callServiceExtension(
+          'ext.flutter.debugDumpSemanticsTreeInTraversalOrder');
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    await _vmService.callServiceExtension(
-        'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder');
+    try {
+      await _vmService.callServiceExtension(
+          'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder');
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
 
   @override
   Future<void> debugToggleDebugPaintSizeEnabled() async {
-    final vmservice.Response response = await _vmService.callServiceExtension(
-      'ext.flutter.debugPaint',
-    );
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugPaint',
-      args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
-    );
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+        'ext.flutter.debugPaint',
+      );
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugPaint',
+        args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugToggleDebugCheckElevationsEnabled() async {
-    final vmservice.Response response = await _vmService.callServiceExtension(
-      'ext.flutter.debugCheckElevationsEnabled',
-    );
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugCheckElevationsEnabled',
-      args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
-    );
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+        'ext.flutter.debugCheckElevationsEnabled',
+      );
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugCheckElevationsEnabled',
+        args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugTogglePerformanceOverlayOverride() async {
-    final vmservice.Response response = await _vmService.callServiceExtension(
-      'ext.flutter.showPerformanceOverlay'
-    );
-    await _vmService.callServiceExtension(
-      'ext.flutter.showPerformanceOverlay',
-      args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
-    );
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+        'ext.flutter.showPerformanceOverlay'
+      );
+      await _vmService.callServiceExtension(
+        'ext.flutter.showPerformanceOverlay',
+        args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
