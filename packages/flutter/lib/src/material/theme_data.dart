@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'app_bar_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
+import 'button_bar_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
 import 'chip_theme.dart';
@@ -176,6 +177,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    ButtonBarThemeData buttonBarTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -279,6 +281,7 @@ class ThemeData extends Diagnosticable {
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
+    buttonBarTheme ??= const ButtonBarThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -340,6 +343,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       popupMenuTheme: popupMenuTheme,
+      buttonBarTheme: buttonBarTheme,
     );
   }
 
@@ -413,6 +417,7 @@ class ThemeData extends Diagnosticable {
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
     @required this.popupMenuTheme,
+    @required this.buttonBarTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -468,11 +473,8 @@ class ThemeData extends Diagnosticable {
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
-       assert(popupMenuTheme != null);
-
-  // Warning: make sure these properties are in the exact same order as in
-  // hashValues() and in the raw constructor and in the order of fields in
-  // the class and in the lerp() method.
+       assert(popupMenuTheme != null),
+       assert(buttonBarTheme != null);
 
   /// A default light blue theme.
   ///
@@ -496,6 +498,10 @@ class ThemeData extends Diagnosticable {
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
   factory ThemeData.fallback() => ThemeData.light();
+
+  // Warning: make sure these properties are in the exact same order as in
+  // hashValues() and in the raw constructor and in the order of fields in
+  // the class and in the lerp() method.
 
   /// The brightness of the overall theme of the application. Used by widgets
   /// like buttons to determine what color to pick when not using the primary or
@@ -798,6 +804,9 @@ class ThemeData extends Diagnosticable {
   /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
+  /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
+  final ButtonBarThemeData buttonBarTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -859,6 +868,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    ButtonBarThemeData buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -921,6 +931,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
+      buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
     );
   }
 
@@ -1061,6 +1072,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
+      buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
     );
   }
 
@@ -1128,7 +1140,8 @@ class ThemeData extends Diagnosticable {
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
-           (otherData.popupMenuTheme == popupMenuTheme);
+           (otherData.popupMenuTheme == popupMenuTheme) &&
+           (otherData.buttonBarTheme == buttonBarTheme);
   }
 
   @override
@@ -1196,6 +1209,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme,
       bottomSheetTheme,
       popupMenuTheme,
+      buttonBarTheme,
     ];
     return hashList(values);
   }
@@ -1260,6 +1274,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
+    properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonRowTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme));
   }
 }
 
