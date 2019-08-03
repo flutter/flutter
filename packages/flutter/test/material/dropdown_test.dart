@@ -1337,7 +1337,7 @@ void main() {
     expect(value, equals('one'));
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('three'));
+    await tester.tap(find.text('three').last);
     await tester.pump();
     expect(_validateCalled, 2);
     await tester.pumpAndSettle();
