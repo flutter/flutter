@@ -6,6 +6,7 @@
 #define SHELL_COMMON_RASTERIZER_H_
 
 #include <memory>
+#include <optional>
 
 #include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
@@ -374,8 +375,25 @@ class Rasterizer final {
   ///
   /// @param[in]  max_bytes  The maximum byte size of resource that may be
   ///                        cached for GPU rendering.
+  /// @param[in]  from_user  Whether this request was from user code, e.g. via
+  ///                        the flutter/skia message channel, in which case
+  ///                        it should not be overridden by the platform.
   ///
-  void SetResourceCacheMaxBytes(int max_bytes);
+  void SetResourceCacheMaxBytes(size_t max_bytes, bool from_user);
+
+  //----------------------------------------------------------------------------
+  /// @brief      The current value of Skia's resource cache size, if a surface
+  ///             is present.
+  ///
+  /// @attention  This cache does not describe the entirety of GPU resources
+  ///             that may be cached. The `RasterCache` also holds very large
+  ///             GPU resources.
+  ///
+  /// @see        `RasterCache`
+  ///
+  /// @return     The size of Skia's resource cache, if available.
+  ///
+  std::optional<size_t> GetResourceCacheMaxBytes() const;
 
  private:
   Delegate& delegate_;
@@ -384,6 +402,8 @@ class Rasterizer final {
   std::unique_ptr<flutter::CompositorContext> compositor_context_;
   std::unique_ptr<flutter::LayerTree> last_layer_tree_;
   fml::closure next_frame_callback_;
+  bool user_override_resource_cache_bytes_;
+  std::optional<size_t> max_cache_bytes_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
 
   void DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);

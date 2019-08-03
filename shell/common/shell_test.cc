@@ -22,6 +22,21 @@ ShellTest::ShellTest()
 
 ShellTest::~ShellTest() = default;
 
+void ShellTest::SendEnginePlatformMessage(
+    Shell* shell,
+    fml::RefPtr<PlatformMessage> message) {
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell->GetTaskRunners().GetPlatformTaskRunner(),
+      [shell, &latch, message = std::move(message)]() {
+        if (auto engine = shell->weak_engine_) {
+          engine->HandlePlatformMessage(std::move(message));
+        }
+        latch.Signal();
+      });
+  latch.Wait();
+}
+
 void ShellTest::SetSnapshotsAndAssets(Settings& settings) {
   if (!assets_dir_.is_valid()) {
     return;
