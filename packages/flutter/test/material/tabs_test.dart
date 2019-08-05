@@ -2404,7 +2404,7 @@ void main() {
                             ),
                             IconButton(
                               key: const Key('Del tab'),
-                              icon: Icon(Icons.delete),
+                              icon: const Icon(Icons.delete),
                               onPressed: () {
                                 setState(() {
                                   noOfTabs--;
