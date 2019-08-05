@@ -223,6 +223,9 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.start_paused =
       command_line.HasOption(FlagForSwitch(Switch::StartPaused));
 
+  settings.enable_checked_mode =
+      command_line.HasOption(FlagForSwitch(Switch::EnableCheckedMode));
+
   settings.enable_dart_profiling =
       command_line.HasOption(FlagForSwitch(Switch::EnableDartProfiling));
 

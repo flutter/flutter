@@ -456,6 +456,8 @@ FILE: ../../../flutter/runtime/dart_vm_unittests.cc
 FILE: ../../../flutter/runtime/embedder_resources.cc
 FILE: ../../../flutter/runtime/embedder_resources.h
 FILE: ../../../flutter/runtime/fixtures/runtime_test.dart
+FILE: ../../../flutter/runtime/ptrace_ios.cc
+FILE: ../../../flutter/runtime/ptrace_ios.h
 FILE: ../../../flutter/runtime/runtime_controller.cc
 FILE: ../../../flutter/runtime/runtime_controller.h
 FILE: ../../../flutter/runtime/runtime_delegate.cc
