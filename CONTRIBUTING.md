@@ -23,6 +23,23 @@ and submitting pull requests for the Flutter framework. For
 information on contributing in other ways, see [the community page
 on flutter.dev](https://flutter.dev/community).
 
+Helping out in the issue database
+---------------------------------
+
+If you want to help us triage, you are very welcome to do so!
+
+1. Join the Gitter channel.
+
+2. Help out as described in our wiki: https://github.com/flutter/flutter/wiki/Triage
+   You won't be able to add labels at first, so instead start by trying to
+   do the other steps, e.g. trying to reproduce the problem and asking for people to
+   provide enough details that you can reproduce the problem, pointing out duplicates,
+   and so on. Chat on the gitter channel to let us know what you're up to!
+ 
+3. Once you've been doing this for a while, someone will invite you to the flutter-hackers
+   team on GitHub and you'll be able to add labels too.
+
+
 Developing for Flutter
 ----------------------
 
