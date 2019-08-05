@@ -208,25 +208,36 @@ zx_status_t System::Reboot() {
 #endif  // !defined(FUCHSIA_SDK)
 }
 
+zx::channel System::CloneChannelFromFileDescriptor(int fd) {
+  zx::handle handle;
+  zx_status_t status = fdio_fd_clone(fd, handle.reset_and_get_address());
+  if (status != ZX_OK)
+    return zx::channel();
+
+  zx_info_handle_basic_t info = {};
+  status =
+      handle.get_info(ZX_INFO_HANDLE_BASIC, &info, sizeof(info), NULL, NULL);
+
+  if (status != ZX_OK || info.type != ZX_OBJ_TYPE_CHANNEL)
+    return zx::channel();
+
+  return zx::channel(handle.release());
+}
+
 Dart_Handle System::ChannelFromFile(std::string path) {
-#if defined(FUCHSIA_SDK)
-  FML_CHECK(false);
-  return Dart_Null();
-#else   // !defined(FUCHSIA_SDK)
   fml::UniqueFD fd = FdFromPath(path);
   if (!fd.is_valid()) {
     return ConstructDartObject(kHandleResult, ToDart(ZX_ERR_IO));
   }
 
   // Get channel from fd.
-  zx::channel channel = fsl::CloneChannelFromFileDescriptor(fd.get());
+  zx::channel channel = CloneChannelFromFileDescriptor(fd.get());
   if (!channel) {
     return ConstructDartObject(kHandleResult, ToDart(ZX_ERR_IO));
   }
 
   return ConstructDartObject(kHandleResult, ToDart(ZX_OK),
                              ToDart(Handle::Create(channel.release())));
-#endif  // !defined(FUCHSIA_SDK)
 }
 
 zx_status_t System::ChannelWrite(fml::RefPtr<Handle> channel,
