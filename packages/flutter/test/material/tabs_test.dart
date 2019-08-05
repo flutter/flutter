@@ -2350,4 +2350,94 @@ void main() {
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
   });
+  
+    testWidgets('DefaultTabController with zero tabs',
+          (WidgetTester tester) async {
+        // Regression test for https://github.com/flutter/flutter/issues/32428
+        int noOfTabs = 0;
+        List<Widget> tabList;
+        List<Widget> tabViewList;
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+                return DefaultTabController(
+                    length: noOfTabs,
+                    child: Scaffold(
+                      appBar: AppBar(
+                        title: const Text('Default TabBar Preview'),
+                        bottom: (noOfTabs > 0)
+                            ? TabBar(isScrollable: true, tabs: tabList)
+                            : null,
+                      ),
+                      body: (noOfTabs > 0)
+                          ? TabBarView(children: tabViewList)
+                          : const Center(
+                        child: Text('No tabs'),
+                      ),
+                      bottomNavigationBar: BottomAppBar(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            IconButton(
+                              key: const Key('Add tab'),
+                              icon: const Icon(Icons.add),
+                              onPressed: () {
+                                setState(() {
+                                  noOfTabs++;
+                                });
+
+                                tabList = <Widget>[];
+                                tabViewList = <Widget>[];
+
+                                for (int i = 0; i < noOfTabs; i++) {
+                                  tabList
+                                      .add(
+                                      Tab(text: 'Tab ' + (i + 1).toString()));
+                                  tabViewList.add(Center(
+                                      child: Text(
+                                          'Tab ' + (i + 1).toString())));
+                                }
+                              },
+                            ),
+                            IconButton(
+                              key: const Key('Del tab'),
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                setState(() {
+                                  noOfTabs--;
+                                });
+
+                                tabList = <Widget>[];
+                                tabViewList = <Widget>[];
+
+                                for (int i = 0; i < noOfTabs; i++) {
+                                  tabList
+                                      .add(
+                                      Tab(text: 'Tab ' + (i + 1).toString()));
+                                  tabViewList.add(Center(
+                                      child: Text(
+                                          'Tab ' + (i + 1).toString())));
+                                }
+                              },
+                            )
+                          ],
+                        ),
+                      ),
+                    ));
+              },
+            ),
+          ),
+        );
+        expect(find.text('No tabs'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('Add tab')));
+        await tester.pumpAndSettle();
+        expect(find.text('Tab 1'), findsNWidgets(2));
+        await tester.tap(find.byKey(const Key('Del tab')));
+        await tester.pumpAndSettle();
+        expect(find.text('Tab 1'), findsNothing);
+        expect(find.text('No tabs'), findsOneWidget);
+      });
 }
