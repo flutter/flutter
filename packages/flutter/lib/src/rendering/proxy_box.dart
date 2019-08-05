@@ -2649,50 +2649,51 @@ class RenderMouseRegion extends RenderProxyBox {
     if (annotationWasActive != annotationWillBeActive) {
       markNeedsPaint();
       markNeedsCompositingBitsUpdate();
-      _annotationIsActive = annotationWillBeActive;
-      if (_annotationIsActive) {
+      if (annotationWillBeActive) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
       } else {
         RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       }
+      _annotationIsActive = annotationWillBeActive;
     }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _updateAnnotations();
     // Add a listener to listen for changes in mouseIsConnected.
     RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
-    postActivate();
+    _updateAnnotations();
   }
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach any new annotations.
-  ///
-  /// This is also called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
   /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
   /// the widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void postActivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
   }
 
   /// Detaches the annotation for this render object, if any.
   ///
-  /// This is called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
   /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
   /// widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void preDeactivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
   }
 
   @override
   void detach() {
-    if (_annotationIsActive)
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
@@ -2711,8 +2712,9 @@ class RenderMouseRegion extends RenderProxyBox {
         offset: offset,
       );
       context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
     }
-    super.paint(context, offset);
   }
 
   @override
