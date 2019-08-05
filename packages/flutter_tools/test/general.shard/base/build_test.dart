@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
@@ -14,9 +15,11 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -25,6 +28,8 @@ class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockAndroidSdk extends Mock implements AndroidSdk {}
 class MockArtifacts extends Mock implements Artifacts {}
 class MockXcode extends Mock implements Xcode {}
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
 
 class _FakeGenSnapshot implements GenSnapshot {
   _FakeGenSnapshot({
@@ -78,6 +83,130 @@ void main() {
     test('does not throw, if target platform is null', () {
       expect(SnapshotType(null, BuildMode.release), isNotNull);
     });
+  });
+
+  group('GenSnapshot', () {
+    GenSnapshot genSnapshot;
+    BufferLogger mockLogger;
+    MockArtifacts mockArtifacts;
+    MockProcessManager mockProcessManager;
+    MockProcess mockProcess;
+
+    setUp(() async {
+      genSnapshot = GenSnapshot();
+      mockLogger = BufferLogger();
+      mockArtifacts = MockArtifacts();
+      mockProcessManager = MockProcessManager();
+      mockProcess = MockProcess();
+    });
+
+    final Map<Type, Generator> contextOverrides = <Type, Generator>{
+      Logger: () => mockLogger,
+      Artifacts: () => mockArtifacts,
+      ProcessManager: () => mockProcessManager,
+    };
+
+    testUsingContext('android_x64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot,
+              platform: TargetPlatform.android_x64, mode: BuildMode.release))
+          .thenReturn('gen_snapshot');
+      when(mockProcessManager.start(any,
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .thenAnswer((_) => Future<Process>.value(mockProcess));
+      when(mockProcess.stdout).thenAnswer((_) => Stream<List<int>>.empty());
+      when(mockProcess.stderr).thenAnswer((_) => Stream<List<int>>.empty());
+      genSnapshot.run(
+          snapshotType:
+              SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+          iosArch: null,
+          additionalArgs: ['--additional_arg']);
+      verify(mockProcessManager.start(
+              ['gen_snapshot', '--causal_async_stacks', '--additional_arg'],
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .called(1);
+    }, overrides: contextOverrides);
+
+    testUsingContext('iOS armv7', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot,
+              platform: TargetPlatform.ios, mode: BuildMode.release))
+          .thenReturn('gen_snapshot');
+      when(mockProcessManager.start(any,
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .thenAnswer((_) => Future<Process>.value(mockProcess));
+      when(mockProcess.stdout).thenAnswer((_) => Stream<List<int>>.empty());
+      when(mockProcess.stderr).thenAnswer((_) => Stream<List<int>>.empty());
+      genSnapshot.run(
+          snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
+          iosArch: IOSArch.armv7,
+          additionalArgs: ['--additional_arg']);
+      verify(mockProcessManager.start([
+        'gen_snapshot_armv7',
+        '--causal_async_stacks',
+        '--additional_arg'
+      ],
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .called(1);
+    }, overrides: contextOverrides);
+
+    testUsingContext('iOS arm64', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot,
+              platform: TargetPlatform.ios, mode: BuildMode.release))
+          .thenReturn('gen_snapshot');
+      when(mockProcessManager.start(any,
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .thenAnswer((_) => Future<Process>.value(mockProcess));
+      when(mockProcess.stdout).thenAnswer((_) => Stream<List<int>>.empty());
+      when(mockProcess.stderr).thenAnswer((_) => Stream<List<int>>.empty());
+      genSnapshot.run(
+          snapshotType: SnapshotType(TargetPlatform.ios, BuildMode.release),
+          iosArch: IOSArch.arm64,
+          additionalArgs: ['--additional_arg']);
+      verify(mockProcessManager.start([
+        'gen_snapshot_arm64',
+        '--causal_async_stacks',
+        '--additional_arg'
+      ],
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .called(1);
+    }, overrides: contextOverrides);
+
+    testUsingContext('--strip filters outputs', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.genSnapshot,
+              platform: TargetPlatform.android_x64, mode: BuildMode.release))
+          .thenReturn('gen_snapshot');
+      when(mockProcessManager.start(
+              ['gen_snapshot', '--causal_async_stacks', '--strip'],
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .thenAnswer((_) => Future<Process>.value(mockProcess));
+      when(mockProcess.stdout).thenAnswer((_) => Stream<List<int>>.empty());
+      when(mockProcess.stderr)
+          .thenAnswer((_) => Stream<String>.fromIterable([
+                '--ABC\n',
+                'Warning: Generating ELF library without DWARF debugging information.\n',
+                '--XYZ\n'
+              ]).transform<List<int>>(utf8.encoder));
+      genSnapshot.run(
+          snapshotType:
+              SnapshotType(TargetPlatform.android_x64, BuildMode.release),
+          iosArch: null,
+          additionalArgs: ['--strip']).then((_) {
+            expect(mockLogger.errorText, contains('ABC'));
+            expect(mockLogger.errorText, isNot(contains('ELF library')));
+            expect(mockLogger.errorText, contains('XYZ'));
+          });
+      verify(mockProcessManager.start(
+              ['gen_snapshot', '--causal_async_stacks', '--strip'],
+              workingDirectory: anyNamed('workingDirectory'),
+              environment: anyNamed('environment')))
+          .called(1);
+    }, overrides: contextOverrides);
   });
 
   group('Snapshotter - AOT', () {
