@@ -313,16 +313,16 @@ void VulkanSurfacePool::TraceStats() {
   const size_t skia_cache_purgeable =
       context_->getResourceCachePurgeableBytes();
 
-  FML_TRACE_COUNTER("flutter", "SurfacePool", 0u,                     //
-                    "CachedCount", cached_surfaces,                   //
-                    "CachedBytes", cached_surfaces_bytes,             //
-                    "Created", trace_surfaces_created_,               //
-                    "Reused", trace_surfaces_reused_,                 //
-                    "PendingInCompositor", pending_surfaces_.size(),  //
-                    "Retained", retained_surfaces_.size(),            //
-                    "SkiaCacheResources", skia_resources,             //
-                    "SkiaCacheBytes", skia_bytes,                     //
-                    "SkiaCachePurgeable", skia_cache_purgeable        //
+  TRACE_COUNTER("flutter", "SurfacePool", 0u,                     //
+                "CachedCount", cached_surfaces,                   //
+                "CachedBytes", cached_surfaces_bytes,             //
+                "Created", trace_surfaces_created_,               //
+                "Reused", trace_surfaces_reused_,                 //
+                "PendingInCompositor", pending_surfaces_.size(),  //
+                "Retained", retained_surfaces_.size(),            //
+                "SkiaCacheResources", skia_resources,             //
+                "SkiaCacheBytes", skia_bytes,                     //
+                "SkiaCachePurgeable", skia_cache_purgeable        //
   );
 
   // Reset per present/frame stats.

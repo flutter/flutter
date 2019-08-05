@@ -32,7 +32,7 @@ class FlutterEventTracer : public SkEventTracer {
                                       const uint8_t* p_arg_types,
                                       const uint64_t* p_arg_values,
                                       uint8_t flags) override {
-#if defined(OS_FUCHSIA) && !defined(FUCHSIA_SDK)
+#if defined(OS_FUCHSIA)
     // In a manner analogous to "fml/trace_event.h", use Fuchsia's system
     // tracing macros when running on Fuchsia.
     switch (phase) {
