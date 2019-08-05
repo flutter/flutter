@@ -9,7 +9,6 @@
             "deprecated-ambient-replace-as-executable"
         ],
         "services": [
-            "fuchsia.device.manager.Administrator",
             "fuchsia.crash.Analyzer",
             "fuchsia.fonts.Provider",
             "fuchsia.posix.socket.Provider",

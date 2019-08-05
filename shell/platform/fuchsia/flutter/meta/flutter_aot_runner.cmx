@@ -10,7 +10,6 @@
         ],
         "services": [
             "fuchsia.crash.Analyzer",
-            "fuchsia.device.manager.Administrator",
             "fuchsia.fonts.Provider",
             "fuchsia.posix.socket.Provider",
             "fuchsia.net.NameLookup",

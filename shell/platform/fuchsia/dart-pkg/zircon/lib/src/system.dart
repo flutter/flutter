@@ -125,8 +125,8 @@ class System extends NativeFieldWrapperClass2 {
       native 'System_ChannelCreate';
   static HandleResult channelFromFile(String path)
       native 'System_ChannelFromFile';
-  static int reboot()
-      native 'System_Reboot';
+  static int connectToService(String path, Handle channel)
+    native 'System_ConnectToService';
   static int channelWrite(Handle channel, ByteData data, List<Handle> handles)
       native 'System_ChannelWrite';
   static ReadResult channelQueryAndRead(Handle channel)
@@ -158,4 +158,7 @@ class System extends NativeFieldWrapperClass2 {
 
   // Time operations.
   static int clockGet(int clockId) native 'System_ClockGet';
+
+  // TODO(edcoyne): Remove this, it is required to safely do an API transition across repos.
+  static int reboot() { return -2; /*ZX_ERR_NOT_SUPPORTED*/ }
 }
