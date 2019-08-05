@@ -141,7 +141,7 @@ def build():
     'android_debug_unopt',
     'android_profile',
     'android_release',
-    'fuchsia_debug_unopt',
+    'fuchsia_debug_unopt_x64',
   ]
 
   build_dir = 'out'
