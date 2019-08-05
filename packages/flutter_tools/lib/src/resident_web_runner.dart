@@ -2,36 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: implementation_imports
 import 'dart:async';
 
-import 'package:build_daemon/client.dart';
-import 'package:build_daemon/constants.dart' hide BuildMode;
-import 'package:build_daemon/constants.dart' as daemon show BuildMode;
-import 'package:build_daemon/data/build_status.dart';
-import 'package:build_daemon/data/build_target.dart';
-import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
 import 'application_package.dart';
-import 'artifacts.dart';
-import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'bundle.dart';
-import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
-import 'web/server.dart';
+import 'web/web_fs.dart';
+
+// The web engine is currently spamming this message on certain pages. Filter it out
+// until we remove it entirely.
+const String _kBadError = 'WARNING: 3D transformation matrix was passed to BitmapCanvas.';
 
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
@@ -52,15 +45,16 @@ class ResidentWebRunner extends ResidentRunner {
   final Device device;
   final FlutterProject flutterProject;
 
-  StreamSubscription<BuildResults> _buildResults;
-  BuildDaemonClient _client;
-  FlutterWebServer _flutterWebServer;
+  WebFs _webFs;
   DebugConnection _debugConnection;
-
-  StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
 
   vmservice.VmService get _vmService => _debugConnection.vmService;
+
+  @override
+  bool get canHotRestart {
+    return true;
+  }
 
   @override
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
@@ -82,16 +76,13 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   Future<void> _cleanup() async {
-    await _buildResults?.cancel();
-    await _client?.close();
     await _debugConnection?.close();
-    await _resultSub?.cancel();
     await _stdOutSub?.cancel();
-    await _flutterWebServer?.stop();
+    await _webFs?.stop();
   }
 
   @override
-  void printHelp({bool details}) {
+  void printHelp({bool details = true}) {
     if (details) {
       return printHelpDetails();
     }
@@ -138,43 +129,20 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    /// Start the build daemon and run an initial build.
-    final String workingDirectory = fs.currentDirectory.path;
-    _client = await _startBuildDaemon(workingDirectory);
-    // Register the current build targets.
-    _registerBuildTargets(_client);
-
-    // Listen to build results to log error messages.
-    _buildResults = _client.buildResults.listen((BuildResults data) {
-      if (data.results.any((BuildResult result) =>
-          result.status == BuildStatus.failed ||
-          result.status == BuildStatus.succeeded)) {
-          printTrace(data.results.toString());
-      }
-    });
     Status buildStatus;
     try {
       buildStatus = logger.startProgress('Building application for the web...', timeout: null);
-      _client.startBuild();
-      final int daemonAssetPort = int.parse(fs.file(assetServerPortFilePath(fs.currentDirectory.path))
-        .readAsStringSync());
-
-      // Initialize the asset bundle.
-      final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-      await assetBundle.build();
-      await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-      _flutterWebServer = await FlutterWebServer.start(
-        daemonAssetPort: daemonAssetPort,
-        buildResults: _client.buildResults,
+      _webFs = await webFsFactory(
         target: target,
         flutterProject: flutterProject,
+        buildInfo: debuggingOptions.buildInfo,
       );
-      final AppConnection appConnection = await _flutterWebServer.dwds.connectedApps.first;
-      appConnection.runMain();
-      _debugConnection = await _flutterWebServer.dwds.debugConnection(appConnection);
+      if (supportsServiceProtocol) {
+        _debugConnection = await _webFs.runAndDebug();
+      }
     } catch (err, stackTrace) {
-      printError(stackTrace.toString());
       printError(err.toString());
+      printError(stackTrace.toString());
       throwToolExit('Failed to build application for the web.');
     } finally {
       buildStatus.stop();
@@ -193,19 +161,26 @@ class ResidentWebRunner extends ResidentRunner {
   }) async {
     // Cleanup old subscriptions
     try {
-      await _debugConnection.vmService.streamCancel('Stdout');
-    } catch (err) {
+      await _debugConnection?.vmService?.streamCancel('Stdout');
+    } on vmservice.RPCError {
       // Ignore errors here
     }
     try {
-      await _debugConnection.vmService.streamListen('Stdout');
-    } catch (err) {
+      await _debugConnection?.vmService?.streamListen('Stdout');
+    } on vmservice.RPCError  {
       // Ignore errors here
     }
-    _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
-      printStatus(utf8.decode(base64.decode(log.bytes)).trim());
-    });
-    final Uri websocketUri = Uri.parse(_debugConnection.wsUri);
+    Uri websocketUri;
+    if (supportsServiceProtocol) {
+      _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
+        final String message = utf8.decode(base64.decode(log.bytes)).trim();
+        // TODO(jonahwilliams): remove this error once it is gone from the engine.
+        if (!message.contains(_kBadError)) {
+          printStatus(message);
+        }
+      });
+      websocketUri = Uri.parse(_debugConnection.wsUri);
+    }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)
     );
@@ -227,26 +202,28 @@ class ResidentWebRunner extends ResidentRunner {
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
-      timeout: timeoutConfiguration.fastOperation,
+      timeout: supportsServiceProtocol
+          ? timeoutConfiguration.fastOperation
+          : timeoutConfiguration.slowOperation,
       progressId: 'hot.restart',
     );
-    _client.startBuild();
-    await for (BuildResults results in _client.buildResults) {
-      final BuildResult result = results.results.firstWhere((BuildResult result) {
-        return result.target == 'web';
-      });
-      if (result.status == BuildStatus.failed) {
-        status.stop();
-        return OperationResult(1, result.error);
-      }
-      break;
+    final bool success = await _webFs.recompile();
+    if (!success) {
+      status.stop();
+      return OperationResult(1, 'Failed to recompile application.');
     }
-    final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
+    if (supportsServiceProtocol) {
+      final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
+      status.stop();
+      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      return reloadResponse.type == 'Success'
+          ? OperationResult.ok
+          : OperationResult(1, reloadResponse.toString());
+    }
+    // If we're not in hot mode, the only way to restart is to reload the tab.
+    await _webFs.hardRefresh();
     status.stop();
-    printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-    return reloadResponse.type == 'Success'
-        ? OperationResult.ok
-        : OperationResult(1, reloadResponse.toString());
+    return OperationResult.ok;
   }
 
   @override
@@ -350,100 +327,31 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> debugToggleWidgetInspector() async {
-    final vmservice.Response response = await _vmService.callServiceExtension(
-      'ext.flutter.debugToggleWidgetInspector'
-    );
-    await _vmService.callServiceExtension(
-      'ext.flutter.debugToggleWidgetInspector',
-      args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
-    );
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+        'ext.flutter.debugToggleWidgetInspector'
+      );
+      await _vmService.callServiceExtension(
+        'ext.flutter.debugToggleWidgetInspector',
+        args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
 
   @override
   Future<void> debugToggleProfileWidgetBuilds() async {
-    final vmservice.Response response = await _vmService.callServiceExtension(
-      'ext.flutter.profileWidgetBuilds'
-    );
-    await _vmService.callServiceExtension(
-      'ext.flutter.profileWidgetBuilds',
-      args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
-    );
+    try {
+      final vmservice.Response response = await _vmService.callServiceExtension(
+        'ext.flutter.profileWidgetBuilds'
+      );
+      await _vmService.callServiceExtension(
+        'ext.flutter.profileWidgetBuilds',
+        args: <dynamic, dynamic>{'enabled': !(response.json['enabled'] == 'true')},
+      );
+    } on vmservice.RPCError {
+      return;
+    }
   }
-}
-
-String assetServerPortFilePath(String workingDirectory) {
-  return fs.path.join(daemonWorkspace(workingDirectory), '.asset_server_port');
-}
-
-Future<BuildDaemonClient> connectClient(
-  String workingDirectory,
-  Function(ServerLog) logHandler,
-) {
-  final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-  final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
-  final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-  return BuildDaemonClient.connect(
-    workingDirectory,
-    // On Windows we need to call the snapshot directly otherwise
-    // the process will start in a disjoint cmd without access to
-    // STDIO.
-    <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
-      '--packages=$flutterToolsPackages',
-      buildScript,
-      'daemon',
-      '--skip-build-script-check',
-      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
-      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-    ],
-    logHandler: logHandler,
-    buildMode: daemon.BuildMode.Manual,
-  );
-}
-
-Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
-  try {
-    return await connectClient(
-      workingDirectory,
-      (ServerLog serverLog) {
-        switch (serverLog.level) {
-          case Level.CONFIG:
-          case Level.FINE:
-          case Level.FINER:
-          case Level.FINEST:
-          case Level.INFO:
-             printTrace(serverLog.message);
-             break;
-          case Level.SEVERE:
-          case Level.SHOUT:
-            printError(
-              serverLog?.error ?? '',
-              stackTrace: serverLog.stackTrace != null
-                  ? StackTrace.fromString(serverLog?.stackTrace)
-                  : null,
-            );
-        }
-      },
-    );
-  } on OptionsSkew {
-    throwToolExit(
-      'Incompatible options with current running build daemon.\n\n'
-      'Please stop other flutter_tool instances running in this directory '
-      'before starting a new instance with these options.');
-  }
-  return null;
-}
-
-void _registerBuildTargets(
-  BuildDaemonClient client,
-) {
-  final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
-    ..output = ''
-    ..useSymlinks = true
-    ..hoist = false);
-  client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-    ..target = 'web'
-    ..outputLocation = outputLocation?.toBuilder()));
 }
