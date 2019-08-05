@@ -184,6 +184,13 @@ def clean_and_update_repo(local_repo):
   local_repo.git.checkout('master')
   local_repo.git.pull()
 
+def clean_build_outputs():
+  print_status('Cleaning build directory...')
+  args = ['rm', '-rf',
+          os.path.join(ENGINE_HOME, 'out')]
+  CURRENT_SUBPROCESS = subprocess.Popen(args)
+  CURRENT_SUBPROCESS.wait()
+  CURRENT_SUBPROCESS = None
 
 def delete_local_branch(local_repo, branch):
   print_status('Deleting local branch {} in: {}'.format(
@@ -385,6 +392,7 @@ def main():
 
   if not args.no_update_repos:
     print_status('Cleaning and updating local trees...')
+    clean_build_outputs()
     clean_and_update_repo(local_dart_sdk_repo)
     clean_and_update_repo(local_flutter_repo)
     clean_and_update_repo(local_engine_flutter_repo)
