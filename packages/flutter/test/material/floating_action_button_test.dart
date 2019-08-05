@@ -154,13 +154,13 @@ void main() {
         return gesture.removePointer();
     });
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-    await gesture.removePointer();
-    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsOneWidget);
 
     await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
