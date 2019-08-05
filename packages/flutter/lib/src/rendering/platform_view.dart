@@ -75,7 +75,7 @@ Set<Type> _factoriesTypeSet<T>(Set<Factory<T>> factories) {
 ///
 ///  * [AndroidView] which is a widget that is used to show an Android view.
 ///  * [PlatformViewsService] which is a service for controlling platform views.
-class RenderAndroidView extends RenderBox with PlatformViewGestureMixin {
+class RenderAndroidView extends RenderBox with _PlatformViewGestureMixin {
 
   /// Creates a render object for an Android view.
   RenderAndroidView({
@@ -135,8 +135,17 @@ class RenderAndroidView extends RenderBox with PlatformViewGestureMixin {
   /// Any active gesture arena the Android view participates in is rejected when the
   /// set of gesture recognizers is changed.
   void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-    updateGestureRecognizersWithCallBack(gestureRecognizers, _motionEventsDispatcher.handlePointerEvent);
+    _updateGestureRecognizersWithCallBack(gestureRecognizers, _motionEventsDispatcher.handlePointerEvent);
   }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
 
   _MotionEventsDispatcher _motionEventsDispatcher;
 
@@ -685,7 +694,7 @@ class _MotionEventsDispatcher {
 ///
 /// [PlatformViewRenderBox] presents a platform view by adding a [PlatformViewLayer] layer,
 /// integrates it with the gesture arenas system and adds relevant semantic nodes to the semantics tree.
-class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
+class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
 
   /// Creating a render object for a [PlatformViewSurface].
   ///
@@ -730,10 +739,19 @@ class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
    void updateGestureRecognizers(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers) {
-     updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
+     _updateGestureRecognizersWithCallBack(gestureRecognizers, _controller.dispatchPointerEvent);
   }
 
   PlatformViewController _controller;
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
 
   @override
   void performResize() {
@@ -758,7 +776,7 @@ class PlatformViewRenderBox extends RenderBox with PlatformViewGestureMixin {
 }
 
 /// The Mixin handling the pointer events and gestures of a platform view render box.
-mixin PlatformViewGestureMixin on RenderBox {
+mixin _PlatformViewGestureMixin on RenderBox {
 
   /// How to behave during hit testing.
   // The implicit setter is enough here as changing this value will just affect
@@ -769,7 +787,7 @@ mixin PlatformViewGestureMixin on RenderBox {
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-  void updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent _handlePointerEvent) {
+  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent _handlePointerEvent) {
     assert(gestureRecognizers != null);
     assert(
     _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
@@ -795,15 +813,6 @@ mixin PlatformViewGestureMixin on RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => hitTestBehavior != PlatformViewHitTestBehavior.transparent;
-
-  @override
-  bool get sizedByParent => true;
-
-  @override
-  bool get alwaysNeedsCompositing => true;
-
-  @override
-  bool get isRepaintBoundary => true;
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
