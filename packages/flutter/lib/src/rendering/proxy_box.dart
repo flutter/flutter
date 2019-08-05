@@ -2650,6 +2650,11 @@ class RenderMouseRegion extends RenderProxyBox {
       markNeedsPaint();
       markNeedsCompositingBitsUpdate();
       _annotationIsActive = annotationWillBeActive;
+      if (_annotationIsActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      }
     }
   }
 
@@ -2672,7 +2677,6 @@ class RenderMouseRegion extends RenderProxyBox {
   /// the widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void postActivate() {
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
   }
 
   /// Detaches the annotation for this render object, if any.
@@ -2683,11 +2687,12 @@ class RenderMouseRegion extends RenderProxyBox {
   /// widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void preDeactivate() {
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
   }
 
   @override
   void detach() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
