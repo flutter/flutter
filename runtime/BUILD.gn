@@ -58,6 +58,8 @@ source_set("runtime") {
     "dart_vm_lifecycle.h",
     "embedder_resources.cc",
     "embedder_resources.h",
+    "ptrace_ios.cc",
+    "ptrace_ios.h",
     "runtime_controller.cc",
     "runtime_controller.h",
     "runtime_delegate.cc",

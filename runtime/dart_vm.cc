@@ -24,6 +24,7 @@
 #include "flutter/lib/ui/dart_ui.h"
 #include "flutter/runtime/dart_isolate.h"
 #include "flutter/runtime/dart_service_isolate.h"
+#include "flutter/runtime/ptrace_ios.h"
 #include "flutter/runtime/start_up.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
 #include "third_party/tonic/converter/dart_converter.h"
@@ -307,11 +308,15 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   }
 #endif  // !OS_FUCHSIA
 
-#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+#if (FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG)
+#if !OS_IOS || TARGET_OS_SIMULATOR
   // Debug mode uses the JIT, disable code page write protection to avoid
   // memory page protection changes before and after every compilation.
   PushBackAll(&args, kDartWriteProtectCodeArgs,
               fml::size(kDartWriteProtectCodeArgs));
+#else
+  EnsureDebuggedIOS(settings_);
+#endif
 #endif
 
   if (enable_asserts) {

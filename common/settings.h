@@ -88,6 +88,7 @@ struct Settings {
   std::vector<std::string> dart_entrypoint_args;
 
   // Isolate settings
+  bool enable_checked_mode = false;
   bool start_paused = false;
   bool trace_skia = false;
   bool trace_startup = false;

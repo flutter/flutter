@@ -115,6 +115,7 @@ DEF_SWITCH(DisableServiceAuthCodes,
 DEF_SWITCH(StartPaused,
            "start-paused",
            "Start the application paused in the Dart debugger.")
+DEF_SWITCH(EnableCheckedMode, "enable-checked-mode", "Enable checked mode.")
 DEF_SWITCH(TraceStartup,
            "trace-startup",
            "Trace early application lifecycle. Automatically switches to an "
