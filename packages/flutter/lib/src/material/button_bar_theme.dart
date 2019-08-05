@@ -13,7 +13,7 @@ import 'theme.dart';
 /// Defines the visual properties of [ButtonBar] widgets.
 ///
 /// Used by [ButtonBarTheme] to control the visual properties of [ButtonBar]
-/// instances in a  widget subtree.
+/// instances in a widget subtree.
 ///
 /// To obtain this configuration, use [ButtonBarTheme.of] to access the closest
 /// ancestor [ButtonBarTheme] of the current [BuildContext].
@@ -28,7 +28,7 @@ class ButtonBarThemeData extends Diagnosticable {
   /// Constructs the set of properties used to configure [ButtonBar] widgets.
   ///
   /// Both [buttonMinWidth] and [buttonHeight] must be non-negative if they
-  /// are not `null`.
+  /// are not null.
   const ButtonBarThemeData({
     this.alignment,
     this.mainAxisSize,
@@ -78,10 +78,10 @@ class ButtonBarThemeData extends Diagnosticable {
   /// for buttons contained in the [ButtonBar].
   final EdgeInsetsGeometry buttonPadding;
 
-  /// If `true`, then a [DropdownButton] menu's width will match the [ButtonBar]
+  /// If true, then a [DropdownButton] menu's width will match the [ButtonBar]
   /// button's width.
   ///
-  /// If `false`, then the dropdown's menu will be wider than
+  /// If false, then the dropdown's menu will be wider than
   /// its button. In either case the dropdown button will line up the leading
   /// edge of the menu's value with the leading edge of the values
   /// displayed by the menu items.
@@ -210,6 +210,8 @@ class ButtonBarThemeData extends Diagnosticable {
 class ButtonBarTheme extends InheritedWidget {
   /// Constructs a button bar theme that configures all descendent [ButtonBar]
   /// widgets.
+  ///
+  /// The [data] must not be null.
   const ButtonBarTheme({
     Key key,
     @required this.data,

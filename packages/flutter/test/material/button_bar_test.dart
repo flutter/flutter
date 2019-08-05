@@ -29,8 +29,9 @@ void main() {
       );
 
       final Finder child = find.byType(SizedBox);
-      expect(tester.getRect(child).left, 782.0);
-      expect(tester.getRect(child).right, 792.0);
+      // Should be positioned to the right of the bar,
+      expect(tester.getRect(child).left, 782.0);  // bar width - default padding - 10
+      expect(tester.getRect(child).right, 792.0); // bar width - default padding
     });
 
     testWidgets('ButtonBarTheme.alignment overrides default', (WidgetTester tester) async {
@@ -50,8 +51,9 @@ void main() {
       );
 
       final Finder child = find.byType(SizedBox);
-      expect(tester.getRect(child).left, 395.0);
-      expect(tester.getRect(child).right, 405.0);
+      // Should be positioned in the center
+      expect(tester.getRect(child).left, 395.0);  // (bar width - padding) / 2 - 10 / 2
+      expect(tester.getRect(child).right, 405.0); // (bar width - padding) / 2 - 10 / 2 + 10
     });
 
     testWidgets('ButtonBar.alignment overrides ButtonBarTheme.alignment and default', (WidgetTester tester) async {
@@ -72,8 +74,9 @@ void main() {
       );
 
       final Finder child = find.byType(SizedBox);
-      expect(tester.getRect(child).left, 8.0);
-      expect(tester.getRect(child).right, 18.0);
+      // Should be positioned on the left
+      expect(tester.getRect(child).left, 8.0);   // padding
+      expect(tester.getRect(child).right, 18.0); // padding + 10
     });
 
   });
