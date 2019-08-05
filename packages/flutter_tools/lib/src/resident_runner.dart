@@ -584,7 +584,7 @@ abstract class ResidentRunner {
     });
   }
 
-  /// Invoke an RPC extension method on the first attached ui Isolate.
+  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
   // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
   // runner to support a single flutter device.
   Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(

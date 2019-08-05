@@ -22,8 +22,9 @@ import 'project.dart';
 import 'resident_runner.dart';
 import 'web/web_fs.dart';
 
+// TODO(jonahwilliams): remove this constant when the error message is removed.
 // The web engine is currently spamming this message on certain pages. Filter it out
-// until we remove it entirely.
+// until we remove it entirely. See flutter/flutter##37625.
 const String _kBadError = 'WARNING: 3D transformation matrix was passed to BitmapCanvas.';
 
 /// A hot-runner which handles browser specific delegation.
@@ -159,22 +160,23 @@ class ResidentWebRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    // Cleanup old subscriptions
+    // Cleanup old subscriptions. These will throw if there isn't anything
+    // listening, which is fine because that is what we want to ensure.
     try {
       await _debugConnection?.vmService?.streamCancel('Stdout');
     } on vmservice.RPCError {
-      // Ignore errors here
+      // Ignore this specific error.
     }
     try {
       await _debugConnection?.vmService?.streamListen('Stdout');
     } on vmservice.RPCError  {
-      // Ignore errors here
+      // Ignore this specific error.
     }
     Uri websocketUri;
     if (supportsServiceProtocol) {
       _stdOutSub = _debugConnection.vmService.onStdoutEvent.listen((vmservice.Event log) {
         final String message = utf8.decode(base64.decode(log.bytes)).trim();
-        // TODO(jonahwilliams): remove this error once it is gone from the engine.
+        // TODO(jonahwilliams): remove this error once it is gone from the engine #37625.
         if (!message.contains(_kBadError)) {
           printStatus(message);
         }
