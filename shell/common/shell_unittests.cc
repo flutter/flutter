@@ -600,8 +600,21 @@ TEST_F(ShellTest, WaitForFirstFrameInlined) {
   ASSERT_FALSE(event.WaitWithTimeout(fml::TimeDelta::FromMilliseconds(1000)));
 }
 
+static size_t GetRasterizerResourceCacheBytesSync(Shell& shell) {
+  size_t bytes = 0;
+  fml::AutoResetWaitableEvent latch;
+  fml::TaskRunner::RunNowOrPostTask(
+      shell.GetTaskRunners().GetGPUTaskRunner(), [&]() {
+        if (auto rasterizer = shell.GetRasterizer()) {
+          bytes = rasterizer->GetResourceCacheMaxBytes().value_or(0U);
+        }
+        latch.Signal();
+      });
+  latch.Wait();
+  return bytes;
+}
+
 TEST_F(ShellTest, SetResourceCacheSize) {
-  GTEST_SKIP() << "These tests are flaky, need to investigate why";
   Settings settings = CreateSettingsForFixture();
   auto task_runner = GetThreadTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -618,7 +631,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0U),
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(24 * (1 << 20)));
 
   fml::TaskRunner::RunNowOrPostTask(
@@ -628,8 +641,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
       });
   PumpOneFrame(shell.get());
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0U),
-            3840000U);
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell), 3840000U);
 
   std::string request_json = R"json({
                                 "method": "Skia.setResourceCacheMaxBytes",
@@ -640,8 +652,7 @@ TEST_F(ShellTest, SetResourceCacheSize) {
       "flutter/skia", std::move(data), nullptr);
   SendEnginePlatformMessage(shell.get(), std::move(platform_message));
   PumpOneFrame(shell.get());
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0U),
-            10000U);
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell), 10000U);
 
   fml::TaskRunner::RunNowOrPostTask(
       shell->GetTaskRunners().GetPlatformTaskRunner(), [&shell]() {
@@ -650,12 +661,10 @@ TEST_F(ShellTest, SetResourceCacheSize) {
       });
   PumpOneFrame(shell.get());
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0U),
-            10000U);
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell), 10000U);
 }
 
 TEST_F(ShellTest, SetResourceCacheSizeEarly) {
-  GTEST_SKIP() << "These tests are flaky, need to investigate why";
   Settings settings = CreateSettingsForFixture();
   auto task_runner = GetThreadTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -679,12 +688,11 @@ TEST_F(ShellTest, SetResourceCacheSizeEarly) {
   RunEngine(shell.get(), std::move(configuration));
   PumpOneFrame(shell.get());
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0),
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(3840000U));
 }
 
 TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
-  GTEST_SKIP() << "These tests are flaky, need to investigate why";
   Settings settings = CreateSettingsForFixture();
   auto task_runner = GetThreadTaskRunner();
   TaskRunners task_runners("test", task_runner, task_runner, task_runner,
@@ -705,7 +713,7 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("testSkiaResourceCacheSendsResponse");
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0),
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(3840000U));
 
   fml::AutoResetWaitableEvent latch;
@@ -718,7 +726,7 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
 
   latch.Wait();
 
-  EXPECT_EQ(shell->GetRasterizer()->GetResourceCacheMaxBytes().value_or(0),
+  EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(10000U));
 }
 
