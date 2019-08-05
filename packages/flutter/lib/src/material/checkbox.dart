@@ -104,7 +104,7 @@ class Checkbox extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
-  /// The color to use for the check icon when this checkbox is checked
+  /// The color to use for the check icon when this checkbox is checked.
   ///
   /// Defaults to Color(0xFFFFFFFF)
   final Color checkColor;
