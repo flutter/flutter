@@ -12,6 +12,11 @@ import '../widgets/media_query.dart';
 import 'interface_level.dart';
 import 'theme.dart';
 
+// Examples can assume:
+// Widget child;
+// Color lightModeColor;
+// Color darkModeColor;
+
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
 class CupertinoColors {
@@ -92,11 +97,53 @@ class CupertinoColors {
 /// A color that can be resolved to different [Color]s, based on the [BuildContext]
 /// provided.
 ///
-/// A [CupertinoDynamicColor] itself can be used as a concrete [Color] for painting,
-/// as it is a subclass of [Color], but it is rarely desirable.
+/// `CupertinoDynamicColor` is a subtype of [Color]. When used as a regular color,
+/// it is equivalent to [defaultColor], or [normalColor] if [defaultColor] is not
+/// specified.
+///
+// TODO(LongCatIsLooong): publicize once all Cupertino components have adopted this.
+// This class is typically used in Cupertino components to represent colors that
+// may change in different [BuildContext].
+//
+// {@tool sample}
+//
+// The following snippet will create a [CupertinoButton] whose background color
+// is _lightModeColor_ in light mode but _darkModeColor_ in dark mode.
+//
+//
+// ```dart
+// CupertinoButton(
+//   child: child,
+//   color: CupertinoDynamicColor.withVibrancy(
+//     normalColor: lightModeColor,
+//     darkColor: darkModeColor,
+//   ),
+//   onTap: () => null,
+// )
+// ```
+// {@end-tool}
+//
+// When a Cupertino component is provided with a `CupertinoDynamicColor`, either
+// directly in its constructor, or from an [InheritedWidget] it depends on (for example,
+// [DefaultTextStyle]), the component will automatically resolve the color by calling
+// [CupertinoDynamicColor.resolve], using their own [BuildContext].
+//
+// When used outside of a Cupertino component, such color resolution will not happen
+// automatically. It's essential to call [CupertinoDynamicColor.resolve] with the
+// correct [BuildContext] before using the color to paint, in order to get the
+// desired effect.
+///
+/// See also:
+///
+/// * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
+/// resolution of a `CupertinoDynamicColor`.
+/// * [CupertinoSystemColors], an [InheritedWidget] that exposes system colors
+/// of iOS 13+.
+/// * https://developer.apple.com/documentation/uikit/uicolor/3238042-resolvedcolor.
 @immutable
 class CupertinoDynamicColor extends Color {
-  /// Creates a Color that can be resolved to different [Color]s in different [BuildContext].
+  /// Creates a [Color] that can be resolved to different [Color]s in different
+  /// [BuildContext], using [CupertinoDynamicColor.resolve].
   ///
   /// [defaultColor] will be used in other colors' absence, and it must not be null,
   /// unless all the other colors are not null.
@@ -237,20 +284,26 @@ class CupertinoDynamicColor extends Color {
       ? resolvable.resolveFrom(context, nullOk: nullOk)
       : resolvable;
 
-  /// Resolves this [CupertinoDynamicColor] so that the resulting [CupertinoDynamicColor]'s
-  /// default color is one of the colors that matches the given [BuildContext]'s traits.
+  /// Resolves this `CupertinoDynamicColor` using the provided [BuildContext].
+  ///
+  /// Calling this method will create a new `CupertinoDynamicColor` that is almost
+  /// identical to the orignal `CupertinoDynamicColor` except with a different
+  /// [defaultColor], such that when the new `CupertinoDynamicColor` is used as
+  /// a regular [Color], it is equivalent to one of the specified colors that
+  /// matches the given [BuildContext]'s traits.
   ///
   /// For example, if the given [BuildContext] indicates the widgets in the subtree
-  /// should be displayed in dark mode, high contrast, and elevated interface
-  /// elevation, the resolved [CupertinoDynamicColor] will be the same as this
-  /// [CupertinoDynamicColor], except that its [defaultColor] will be `darkHighContrastElevatedColor`
-  /// from this [CupertinoDynamicColor].
+  /// should be displayed in dark mode, with high accessibility contrast and an
+  /// elevated interface elevation, the resolved `CupertinoDynamicColor` will be
+  /// the same as this [CupertinoDynamicColor], except that its [defaultColor]
+  /// is `darkHighContrastElevatedColor` from the orignal `CupertinoDynamicColor`.
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
   /// is different from [normalColor], this function will call [CupertinoTheme.of],
   /// and then [MediaQuery.of] if brightness wasn't specified in the theme data
-  /// retrived from the previous [CupertinoTheme.of] call.
+  /// retrived from the previous [CupertinoTheme.of] call, in an effort to determine
+  /// the brightness value.
   ///
   /// If any of the required dependecies is missing from the given context, an exception
   /// will be thrown unless [nullOk] is set to `true`.
@@ -338,10 +391,17 @@ class _ColorMapElementEquality<E> extends DefaultEquality<E> {
 /// Generally you shouldn't not create a [CupertinoSystemColorData] yourself.
 /// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorData] from the
 /// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
-/// if the current [BuildContext] is not available (e.g., in [CupertinoApp]'s constructor).
+/// when the current [BuildContext] is not available (e.g., in [CupertinoApp]'s
+/// constructor).
 @immutable
 class CupertinoSystemColorData extends Diagnosticable {
   /// Creates a color palette.
+  ///
+  /// Generally you should not create your own `CupertinoSystemColorData`.
+  /// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorData] from the
+  /// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
+  /// when the current [BuildContext] is not available (e.g., in [CupertinoApp]'s
+  /// constructor).
   const CupertinoSystemColorData({
     @required this.label,
     @required this.secondaryLabel,
@@ -411,7 +471,6 @@ class CupertinoSystemColorData extends Diagnosticable {
        assert(systemGray6 != null),
        super();
 
-  // Label Colors
   /// The color for text labels containing primary content.
   final CupertinoDynamicColor label;
 
@@ -424,7 +483,6 @@ class CupertinoSystemColorData extends Diagnosticable {
   /// The color for text labels containing quaternary content.
   final CupertinoDynamicColor quaternaryLabel;
 
-  // FIll Colors
   /// An overlay fill color for thin and small shapes.
   final CupertinoDynamicColor systemFill;
 
@@ -437,35 +495,39 @@ class CupertinoSystemColorData extends Diagnosticable {
   /// An overlay fill color for large areas containing complex content.
   final CupertinoDynamicColor quaternarySystemFill;
 
-  // Text Colors
   /// The color for placeholder text in controls or text views.
   final CupertinoDynamicColor placeholderText;
 
-  // Standard Content Background Colors
-  // Use these colors for designs that have a white primary background in a light environment.
-
   /// The color for the main background of your interface.
+  ///
+  /// Typically used for designs that have a white primary background in a light environment.
   final CupertinoDynamicColor systemBackground;
 
   /// The color for content layered on top of the main background.
+  ///
+  /// Typically used for designs that have a white primary background in a light environment.
   final CupertinoDynamicColor secondarySystemBackground;
 
   /// The color for content layered on top of secondary backgrounds.
+  ///
+  /// Typically used for designs that have a white primary background in a light environment.
   final CupertinoDynamicColor tertiarySystemBackground;
 
-  // Grouped Content Background Colors
-  // Use these colors for grouped content, including table views and platter-based designs.
-
   /// The color for the main background of your grouped interface.
+  ///
+  /// Typically used for grouped content, including table views and platter-based designs.
   final CupertinoDynamicColor systemGroupedBackground;
 
   /// The color for content layered on top of the main background of your grouped interface.
+  ///
+  /// Typically used for grouped content, including table views and platter-based designs.
   final CupertinoDynamicColor secondarySystemGroupedBackground;
 
   /// The color for content layered on top of secondary backgrounds of your grouped interface.
+  ///
+  /// Typically used for grouped content, including table views and platter-based designs.
   final CupertinoDynamicColor tertiarySystemGroupedBackground;
 
-  // Separator Colors
   /// The color for thin borders or divider lines that allows some underlying content to be visible.
   final CupertinoDynamicColor separator;
 
