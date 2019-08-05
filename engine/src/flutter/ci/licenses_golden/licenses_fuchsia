@@ -1,4 +1,4 @@
-Signature: fd303474f33ac0b9a2f59f6b5200c5a9
+Signature: 191751ac1f2448ed36a4775802ccbfb8
 
 UNUSED LICENSES:
 
@@ -524,7 +524,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
@@ -534,6 +533,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
@@ -1198,7 +1198,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
@@ -1208,6 +1207,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
@@ -2014,14 +2014,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/include/lib/fidl-service/cpp/service.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/include/lib/fidl-service/cpp/service_directory.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/include/lib/fidl-service/cpp/service_handler.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/include/lib/fidl-service/cpp/service_watcher.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/service.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/service_directory.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/service_watcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/barrier.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/barrier.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/constructors_internal.h
@@ -2054,6 +2046,14 @@ FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/termination_reason.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/component_context_provider.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/service_directory_provider.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_directory.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_handler.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/include/lib/sys/service/cpp/service_watcher.h
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_directory.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/service_watcher.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
@@ -2652,7 +2652,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/meta.json
@@ -2662,6 +2661,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/svc/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sys_cpp_testing/meta.json
+FILE: ../../../fuchsia/sdk/linux/pkg/sys_service_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/syslog/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/sysroot/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/trace-engine/meta.json
