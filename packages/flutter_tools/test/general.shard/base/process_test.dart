@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' as io; // ignore: dart_io_import
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -90,6 +92,42 @@ void main() {
       Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
     });
   });
+  group('sanitizeCmd', () {
+    MockPlatform mockPlatform;
+
+    setUp(() {
+      mockPlatform = MockPlatform();
+    });
+
+    testUsingContext('Adds quotes command on Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+
+      expect(sanitizeCmd(<String>['C:\Program Files\cmd.exe', 'test']),
+          equals(<String>['"C:\Program Files\cmd.exe"', 'test']));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform
+    });
+
+    testUsingContext('Does not add quotes command on platforms other than Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+
+      expect(sanitizeCmd(<String>['/usr/local/bin/cmd', 'test']),
+          equals(<String>['"/usr/local/bin/cmd', 'test']));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform
+    });
+
+    testUsingContext('Does not add quotes command on platforms other than Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+
+      expect(sanitizeCmd(<String>['/usr/local/bin/cmd', 'test']),
+          equals(<String>['"/usr/local/bin/cmd', 'test']));
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform
+    }, skip: io.Platform.isWindows);
+  });
 }
 
 class PlainMockProcessManager extends Mock implements ProcessManager {}
+
+class MockPlatform extends Mock implements Platform {}

@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
+import '../base/platform.dart';
 import '../convert.dart';
 import '../globals.dart';
 import 'common.dart';
@@ -11,6 +14,27 @@ import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
+
+
+/// Sanatizes the executable on Windows.
+@visibleForTesting
+List<String> sanitizeCmd(List<String> cmd) {
+  final List<String> out = <String>[...cmd];
+  if (out.isEmpty) {
+    return out;
+  }
+  if (!platform.isWindows) {
+    return out;
+  }
+  if (out.first.contains(' ') && !out.first.startsWith('"')) {
+    // Use quoted strings to indicate where the file name ends and the arguments begin;
+    // otherwise, the file name is ambiguous.
+    // https://github.com/dart-lang/sdk/issues/37751
+    out[0] = '"${out[0]}"';
+    return out;
+  }
+  return out;
+}
 
 typedef StringConverter = String Function(String string);
 
@@ -115,7 +139,7 @@ Future<Process> runCommand(
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
-    cmd,
+    sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
@@ -213,15 +237,6 @@ Future<int> runInteractively(
   return await process.exitCode;
 }
 
-Future<Process> runDetached(List<String> cmd) {
-  _traceCommand(cmd);
-  final Future<Process> proc = processManager.start(
-    cmd,
-    mode: ProcessStartMode.detached,
-  );
-  return proc;
-}
-
 Future<RunResult> runAsync(
   List<String> cmd, {
   String workingDirectory,
@@ -230,7 +245,7 @@ Future<RunResult> runAsync(
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = await processManager.run(
-    cmd,
+    sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
@@ -249,7 +264,7 @@ Future<RunResult> runCheckedAsync(
   RunResultChecker whiteListFailures,
 }) async {
   final RunResult result = await runAsync(
-    cmd,
+    sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
@@ -269,7 +284,11 @@ bool exitsHappy(
 }) {
   _traceCommand(cli);
   try {
-    return processManager.runSync(cli, environment: environment).exitCode == 0;
+    final ProcessResult result = processManager.runSync(
+      sanitizeCmd(cli),
+      environment: environment,
+    );
+    return result.exitCode == 0;
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;
@@ -282,7 +301,11 @@ Future<bool> exitsHappyAsync(
 }) async {
   _traceCommand(cli);
   try {
-    return (await processManager.run(cli, environment: environment)).exitCode == 0;
+    final ProcessResult result = await processManager.run(
+      sanitizeCmd(cli),
+      environment: environment,
+    );
+    return result.exitCode == 0;
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;
@@ -347,7 +370,7 @@ String _runWithLoggingSync(
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = processManager.runSync(
-    cmd,
+    sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
