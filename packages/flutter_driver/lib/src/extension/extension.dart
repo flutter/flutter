@@ -243,7 +243,6 @@ class FlutterDriverExtension {
 
   /// Runs `finder` repeatedly until it finds one or more [Element]s.
   Future<Finder> _waitForElement(Finder finder) async {
-    await Future<void>.value(null);
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 
