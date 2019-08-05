@@ -252,7 +252,14 @@ class PageController extends ScrollController {
   void attach(ScrollPosition position) {
     super.attach(position);
     final _PagePosition pagePosition = position;
-    pagePosition.viewportFraction = viewportFraction;
+
+    if (pagePosition.viewportFraction == viewportFraction)
+      return;
+    final double oldPage = pagePosition.page;
+    pagePosition._viewportFraction = viewportFraction;
+    if (oldPage != null) {
+      pagePosition.correctPixels(pagePosition.getPixelsFromPage(oldPage));
+    }
   }
 }
 
@@ -359,16 +366,6 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-
-  set viewportFraction(double value) {
-    if (_viewportFraction == value)
-      return;
-    final double oldPage = page;
-    _viewportFraction = value;
-    if (oldPage != null) {
-      correctPixels(getPixelsFromPage(oldPage));
-    }
-  }
 
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
 
