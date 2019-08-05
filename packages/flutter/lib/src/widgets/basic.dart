@@ -5981,7 +5981,6 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
-    print('ignoring = $ignoring');
     renderObject
       ..ignoring = ignoring
       ..ignoringSemantics = ignoringSemantics;

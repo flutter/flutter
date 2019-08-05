@@ -967,11 +967,13 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cursorColor ??= themeData.cursorColor;
         break;
     }
+    final bool enabled = widget.enabled ?? widget.decoration?.enabled ?? true;
 
     Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,
-        readOnly: widget.readOnly || !(widget.enabled ?? true),
+        readOnly: widget.readOnly,
+        enabled: enabled,
         toolbarOptions: widget.toolbarOptions,
         showCursor: widget.showCursor,
         showSelectionHandles: _showSelectionHandles,
@@ -1035,28 +1037,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       );
     }
 
-    final bool enabled = widget.enabled ?? widget.decoration?.enabled ?? true;
     return Semantics(
-<<<<<<< HEAD
-      onTap: () {
-        if (!_effectiveController.selection.isValid)
-          _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-        _requestKeyboard();
-      },
+    onTap: enabled ?
+      () {
+      if (!_effectiveController.selection.isValid)
+        _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
+      _requestKeyboard();
+    } : null,
       child: MouseRegion(
         onEnter: _handleMouseEnter,
         onExit: _handleMouseExit,
-=======
-      onTap: enabled ?
-        () {
-          if (!_effectiveController.selection.isValid)
-            _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
-          _requestKeyboard();
-        } : null,
-      child: Listener(
-        onPointerEnter: _handlePointerEnter,
-        onPointerExit: _handlePointerExit,
->>>>>>> prototype ignore semantics actions
         child: IgnorePointer(
           ignoring: !enabled,
           child: _selectionGestureDetectorBuilder.buildGestureDetector(

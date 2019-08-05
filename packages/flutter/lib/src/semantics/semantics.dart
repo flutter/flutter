@@ -1509,7 +1509,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         _scrollPosition != config._scrollPosition ||
         _scrollExtentMax != config._scrollExtentMax ||
         _scrollExtentMin != config._scrollExtentMin ||
-        _actionsAsBits != config._actionsAsBits ||
+        _actionsAsBits != config._actionsAsBitsMuted ||
         indexInParent != config.indexInParent ||
         platformViewId != config.platformViewId ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
@@ -1766,9 +1766,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _flags = config._flags;
     _textDirection = config.textDirection;
     _sortKey = config.sortKey;
-    _actions = Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
+    _actions = Map<SemanticsAction, _SemanticsActionHandler>.from(config._actionsMuted);
     _customSemanticsActions = Map<CustomSemanticsAction, VoidCallback>.from(config._customSemanticsActions);
-    _actionsAsBits = config._actionsAsBits;
+    _actionsAsBits = config._actionsAsBitsMuted;
     _textSelection = config._textSelection;
     _isMultiline = config.isMultiline;
     _scrollPosition = config._scrollPosition;
@@ -2684,8 +2684,12 @@ class SemanticsConfiguration {
   /// create semantic boundaries that are either writable or not for children.
   bool explicitChildNodes = false;
 
-  /// Actions that will not be propagate to semantics action handler
-  Set<SemanticsAction> mutedActions = <SemanticsAction>{};
+  /// Actions that will need to be muted when calling semantics action related
+  /// api.
+  ///
+  /// This property will be used in calculating [inheritedMutedActions] and
+  /// should not be directly used for filtering semantics action.
+  Set<SemanticsAction> mutedActions;
 
   /// Whether the owning [RenderObject] makes other [RenderObject]s previously
   /// painted within the same semantic boundary unreachable for accessibility
@@ -2721,7 +2725,26 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [addAction] to add an action.
-  final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
+  Map<SemanticsAction, _SemanticsActionHandler> get _actionsMuted {
+    if (inheritedMutedActions == null)
+      return _actions;
+    return Map<SemanticsAction, _SemanticsActionHandler>.from(_actions)
+      ..removeWhere((SemanticsAction action, _SemanticsActionHandler _) {
+        return inheritedMutedActions.contains(action);
+      });
+  }
+  final Map<SemanticsAction, _SemanticsActionHandler> _actions =
+    <SemanticsAction, _SemanticsActionHandler>{};
+
+  int get _actionsAsBitsMuted {
+    if (inheritedMutedActions == null)
+      return _actionsAsBits;
+    int result = _actionsAsBits;
+    for (SemanticsAction action in inheritedMutedActions) {
+      result &= ~action.index;
+    }
+    return result;
+  }
 
   int _actionsAsBits = 0;
 
@@ -2730,7 +2753,6 @@ class SemanticsConfiguration {
   /// The provided `handler` is called to respond to the user triggered
   /// `action`.
   void _addAction(SemanticsAction action, _SemanticsActionHandler handler) {
-    assert(!mutedActions.contains(action));
     assert(handler != null);
     _actions[action] = handler;
     _actionsAsBits |= action.index;
@@ -2750,6 +2772,21 @@ class SemanticsConfiguration {
     });
   }
 
+  /// Aggregated muted actions from ancestors.
+  ///
+  /// This set is used for post filtering of semantics action related api.
+  Set<SemanticsAction> inheritedMutedActions;
+
+  Function _getActionCallbacks(SemanticsAction action) {
+    return inheritedMutedActions != null && inheritedMutedActions.contains(action) ?
+      null : _actionCallbacks[action];
+  }
+
+  final Map<SemanticsAction, Function> _actionCallbacks = <SemanticsAction, Function>{};
+
+  void _setActionCallbacks(SemanticsAction action, Function callback) {
+    _actionCallbacks[action] = callback;
+  }
   /// The handler for [SemanticsAction.tap].
   ///
   /// This is the semantic equivalent of a user briefly tapping the screen with
@@ -2770,13 +2807,10 @@ class SemanticsConfiguration {
   /// onTap handler should always be wrapping an element that defines a
   /// semantic [onTap] handler. By default a [GestureDetector] will register its
   /// own semantic [onTap] handler that follows this principle.
-  VoidCallback get onTap => _onTap;
-  VoidCallback _onTap;
+  VoidCallback get onTap => _getActionCallbacks(SemanticsAction.tap);
   set onTap(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.tap))
-      return;
     _addArgumentlessAction(SemanticsAction.tap, value);
-    _onTap = value;
+    _setActionCallbacks(SemanticsAction.tap, value);
   }
 
   /// The handler for [SemanticsAction.longPress].
@@ -2787,13 +2821,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  VoidCallback get onLongPress => _onLongPress;
-  VoidCallback _onLongPress;
+  VoidCallback get onLongPress => _getActionCallbacks(SemanticsAction.longPress);
   set onLongPress(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.longPress))
-      return;
     _addArgumentlessAction(SemanticsAction.longPress, value);
-    _onLongPress = value;
+    _setActionCallbacks(SemanticsAction.longPress, value);
   }
 
   /// The handler for [SemanticsAction.scrollLeft].
@@ -2807,13 +2838,10 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollLeft => _onScrollLeft;
-  VoidCallback _onScrollLeft;
+  VoidCallback get onScrollLeft => _getActionCallbacks(SemanticsAction.scrollLeft);
   set onScrollLeft(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.scrollLeft))
-      return;
     _addArgumentlessAction(SemanticsAction.scrollLeft, value);
-    _onScrollLeft = value;
+    _setActionCallbacks(SemanticsAction.scrollLeft, value);
   }
 
   /// The handler for [SemanticsAction.dismiss].
@@ -2823,13 +2851,10 @@ class SemanticsConfiguration {
   /// TalkBack users on Android can trigger this action in the local context
   /// menu, and VoiceOver users on iOS can trigger this action with a standard
   /// gesture or menu option.
-  VoidCallback get onDismiss => _onDismiss;
-  VoidCallback _onDismiss;
+  VoidCallback get onDismiss => _getActionCallbacks(SemanticsAction.dismiss);
   set onDismiss(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.dismiss))
-      return;
     _addArgumentlessAction(SemanticsAction.dismiss, value);
-    _onDismiss = value;
+    _setActionCallbacks(SemanticsAction.dismiss, value);
   }
 
   /// The handler for [SemanticsAction.scrollRight].
@@ -2843,13 +2868,10 @@ class SemanticsConfiguration {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollRight => _onScrollRight;
-  VoidCallback _onScrollRight;
+  VoidCallback get onScrollRight => _getActionCallbacks(SemanticsAction.scrollRight);
   set onScrollRight(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.scrollRight))
-      return;
     _addArgumentlessAction(SemanticsAction.scrollRight, value);
-    _onScrollRight = value;
+    _setActionCallbacks(SemanticsAction.scrollRight, value);
   }
 
   /// The handler for [SemanticsAction.scrollUp].
@@ -2863,13 +2885,10 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollUp => _onScrollUp;
-  VoidCallback _onScrollUp;
+  VoidCallback get onScrollUp => _getActionCallbacks(SemanticsAction.scrollUp);
   set onScrollUp(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.scrollUp))
-      return;
     _addArgumentlessAction(SemanticsAction.scrollUp, value);
-    _onScrollUp = value;
+    _setActionCallbacks(SemanticsAction.scrollUp, value);
   }
 
   /// The handler for [SemanticsAction.scrollDown].
@@ -2883,13 +2902,10 @@ class SemanticsConfiguration {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  VoidCallback get onScrollDown => _onScrollDown;
-  VoidCallback _onScrollDown;
+  VoidCallback get onScrollDown => _getActionCallbacks(SemanticsAction.scrollDown);
   set onScrollDown(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.scrollDown))
-      return;
     _addArgumentlessAction(SemanticsAction.scrollDown, value);
-    _onScrollDown = value;
+    _setActionCallbacks(SemanticsAction.scrollDown, value);
   }
 
   /// The handler for [SemanticsAction.increase].
@@ -2903,13 +2919,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  VoidCallback get onIncrease => _onIncrease;
-  VoidCallback _onIncrease;
+  VoidCallback get onIncrease => _getActionCallbacks(SemanticsAction.increase);
   set onIncrease(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.increase))
-      return;
     _addArgumentlessAction(SemanticsAction.increase, value);
-    _onIncrease = value;
+    _setActionCallbacks(SemanticsAction.increase, value);
   }
 
   /// The handler for [SemanticsAction.decrease].
@@ -2923,13 +2936,10 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  VoidCallback get onDecrease => _onDecrease;
-  VoidCallback _onDecrease;
+  VoidCallback get onDecrease => _getActionCallbacks(SemanticsAction.decrease);
   set onDecrease(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.decrease))
-      return;
     _addArgumentlessAction(SemanticsAction.decrease, value);
-    _onDecrease = value;
+    _setActionCallbacks(SemanticsAction.decrease, value);
   }
 
   /// The handler for [SemanticsAction.copy].
@@ -2938,13 +2948,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCopy => _onCopy;
-  VoidCallback _onCopy;
+  VoidCallback get onCopy => _getActionCallbacks(SemanticsAction.copy);
   set onCopy(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.copy))
-      return;
     _addArgumentlessAction(SemanticsAction.copy, value);
-    _onCopy = value;
+    _setActionCallbacks(SemanticsAction.copy, value);
   }
 
   /// The handler for [SemanticsAction.cut].
@@ -2954,13 +2961,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onCut => _onCut;
-  VoidCallback _onCut;
+  VoidCallback get onCut => _getActionCallbacks(SemanticsAction.cut);
   set onCut(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.cut))
-      return;
     _addArgumentlessAction(SemanticsAction.cut, value);
-    _onCut = value;
+    _setActionCallbacks(SemanticsAction.cut, value);
   }
 
   /// The handler for [SemanticsAction.paste].
@@ -2969,13 +2973,10 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users on Android can trigger this action from the local context
   /// menu of a text field, for example.
-  VoidCallback get onPaste => _onPaste;
-  VoidCallback _onPaste;
+  VoidCallback get onPaste => _getActionCallbacks(SemanticsAction.paste);
   set onPaste(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.paste))
-      return;
     _addArgumentlessAction(SemanticsAction.paste, value);
-    _onPaste = value;
+    _setActionCallbacks(SemanticsAction.paste, value);
   }
 
   /// The handler for [SemanticsAction.showOnScreen].
@@ -2987,13 +2988,10 @@ class SemanticsConfiguration {
   /// For elements in a scrollable list the framework provides a default
   /// implementation for this action and it is not advised to provide a
   /// custom one via this setter.
-  VoidCallback get onShowOnScreen => _onShowOnScreen;
-  VoidCallback _onShowOnScreen;
+  VoidCallback get onShowOnScreen => _getActionCallbacks(SemanticsAction.showOnScreen);
   set onShowOnScreen(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.showOnScreen))
-      return;
     _addArgumentlessAction(SemanticsAction.showOnScreen, value);
-    _onShowOnScreen = value;
+    _setActionCallbacks(SemanticsAction.showOnScreen, value);
   }
 
   /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
@@ -3003,18 +3001,15 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
-  MoveCursorHandler _onMoveCursorForwardByCharacter;
+  MoveCursorHandler get onMoveCursorForwardByCharacter => _getActionCallbacks(SemanticsAction.moveCursorForwardByCharacter);
   set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
-    if (mutedActions.contains(SemanticsAction.moveCursorForwardByCharacter))
-      return;
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);
     });
-    _onMoveCursorForwardByCharacter = value;
+    _setActionCallbacks(SemanticsAction.moveCursorForwardByCharacter, value);
   }
 
   /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
@@ -3024,18 +3019,15 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
-  MoveCursorHandler _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler get onMoveCursorBackwardByCharacter => _getActionCallbacks(SemanticsAction.moveCursorBackwardByCharacter);
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
-    if (mutedActions.contains(SemanticsAction.moveCursorBackwardByCharacter))
-      return;
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);
     });
-    _onMoveCursorBackwardByCharacter = value;
+    _setActionCallbacks(SemanticsAction.moveCursorBackwardByCharacter, value);
   }
 
   /// The handler for [SemanticsAction.onMoveCursorForwardByWord].
@@ -3045,18 +3037,15 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorForwardByWord => _onMoveCursorForwardByWord;
-  MoveCursorHandler _onMoveCursorForwardByWord;
+  MoveCursorHandler get onMoveCursorForwardByWord => _getActionCallbacks(SemanticsAction.moveCursorForwardByWord);
   set onMoveCursorForwardByWord(MoveCursorHandler value) {
-    if (mutedActions.contains(SemanticsAction.moveCursorForwardByWord))
-      return;
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);
     });
-    _onMoveCursorForwardByCharacter = value;
+    _setActionCallbacks(SemanticsAction.moveCursorForwardByWord, value);
   }
 
   /// The handler for [SemanticsAction.onMoveCursorBackwardByWord].
@@ -3066,18 +3055,15 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  MoveCursorHandler get onMoveCursorBackwardByWord => _onMoveCursorBackwardByWord;
-  MoveCursorHandler _onMoveCursorBackwardByWord;
+  MoveCursorHandler get onMoveCursorBackwardByWord => _getActionCallbacks(SemanticsAction.moveCursorBackwardByWord);
   set onMoveCursorBackwardByWord(MoveCursorHandler value) {
-    if (mutedActions.contains(SemanticsAction.moveCursorBackwardByWord))
-      return;
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
       value(extentSelection);
     });
-    _onMoveCursorBackwardByCharacter = value;
+    _setActionCallbacks(SemanticsAction.moveCursorBackwardByWord, value);
   }
 
   /// The handler for [SemanticsAction.setSelection].
@@ -3087,11 +3073,8 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this handler by selecting "Move cursor to
   /// beginning/end" or "Select all" from the local context menu.
-  SetSelectionHandler get onSetSelection => _onSetSelection;
-  SetSelectionHandler _onSetSelection;
+  SetSelectionHandler get onSetSelection => _getActionCallbacks(SemanticsAction.setSelection);
   set onSetSelection(SetSelectionHandler value) {
-    if (mutedActions.contains(SemanticsAction.setSelection))
-      return;
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
       assert(args != null && args is Map);
@@ -3102,7 +3085,7 @@ class SemanticsConfiguration {
         extentOffset: selection['extent'],
       ));
     });
-    _onSetSelection = value;
+    _setActionCallbacks(SemanticsAction.setSelection, value);
   }
 
   /// The handler for [SemanticsAction.didGainAccessibilityFocus].
@@ -3122,13 +3105,10 @@ class SemanticsConfiguration {
   ///  * [onDidLoseAccessibilityFocus], which is invoked when the accessibility
   ///    focus is removed from the node.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidGainAccessibilityFocus => _onDidGainAccessibilityFocus;
-  VoidCallback _onDidGainAccessibilityFocus;
+  VoidCallback get onDidGainAccessibilityFocus => _getActionCallbacks(SemanticsAction.didGainAccessibilityFocus);
   set onDidGainAccessibilityFocus(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.didGainAccessibilityFocus))
-      return;
     _addArgumentlessAction(SemanticsAction.didGainAccessibilityFocus, value);
-    _onDidGainAccessibilityFocus = value;
+    _setActionCallbacks(SemanticsAction.didGainAccessibilityFocus, value);
   }
 
   /// The handler for [SemanticsAction.didLoseAccessibilityFocus].
@@ -3148,13 +3128,10 @@ class SemanticsConfiguration {
   ///  * [onDidGainAccessibilityFocus], which is invoked when the node gains
   ///    accessibility focus.
   ///  * [FocusNode], [FocusScope], [FocusManager], which manage the input focus.
-  VoidCallback get onDidLoseAccessibilityFocus => _onDidLoseAccessibilityFocus;
-  VoidCallback _onDidLoseAccessibilityFocus;
+  VoidCallback get onDidLoseAccessibilityFocus => _getActionCallbacks(SemanticsAction.didLoseAccessibilityFocus);
   set onDidLoseAccessibilityFocus(VoidCallback value) {
-    if (mutedActions.contains(SemanticsAction.didLoseAccessibilityFocus))
-      return;
     _addArgumentlessAction(SemanticsAction.didLoseAccessibilityFocus, value);
-    _onDidLoseAccessibilityFocus = value;
+    _setActionCallbacks(SemanticsAction.didLoseAccessibilityFocus, value);
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -3163,7 +3140,11 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [addAction] to add an action.
-  _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
+  _SemanticsActionHandler getActionHandler(SemanticsAction action) {
+    if (inheritedMutedActions != null && inheritedMutedActions.contains(action))
+      return null;
+    return _actions[action];
+  }
 
   /// Determines the position of this node among its siblings in the traversal
   /// sort order.
@@ -3727,7 +3708,7 @@ class SemanticsConfiguration {
   bool isCompatibleWith(SemanticsConfiguration other) {
     if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
       return true;
-    if (_actionsAsBits & other._actionsAsBits != 0)
+    if (_actionsAsBitsMuted & other._actionsAsBitsMuted != 0)
       return false;
     if ((_flags & other._flags) != 0)
       return false;
@@ -3756,9 +3737,9 @@ class SemanticsConfiguration {
     if (!child.hasBeenAnnotated)
       return;
 
-    _actions.addAll(child._actions);
+    _actions.addAll(child._actionsMuted);
     _customSemanticsActions.addAll(child._customSemanticsActions);
-    _actionsAsBits |= child._actionsAsBits;
+    _actionsAsBits |= child._actionsAsBitsMuted;
     _flags |= child._flags;
     _textSelection ??= child._textSelection;
     _scrollPosition ??= child._scrollPosition;
@@ -3826,7 +3807,9 @@ class SemanticsConfiguration {
       .._scrollChildCount = _scrollChildCount
       .._platformViewId = _platformViewId
       .._actions.addAll(_actions)
-      .._customSemanticsActions.addAll(_customSemanticsActions);
+      .._customSemanticsActions.addAll(_customSemanticsActions)
+      ..inheritedMutedActions = inheritedMutedActions
+      ..mutedActions = mutedActions;
   }
 }
 

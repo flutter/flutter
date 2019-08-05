@@ -825,7 +825,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         child: EditableText(
           key: editableTextKey,
           controller: controller,
-          readOnly: widget.readOnly || !(widget.enabled ?? true),
+          readOnly: widget.readOnly,
+          enabled: enabled,
           toolbarOptions: widget.toolbarOptions,
           showCursor: widget.showCursor,
           showSelectionHandles: _showSelectionHandles,

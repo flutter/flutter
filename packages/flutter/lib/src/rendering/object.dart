@@ -2387,50 +2387,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  Set<SemanticsAction> _mutedSemanticsActions = <SemanticsAction>{};
-
-  /// Update the set of [SemanticsAction] that will be ignore when constructing
-  /// semantics action handlers.
-  ///
-  /// The muted [SemanticsAction] will apply to all the children in subtree.
-  void updateMutedSemanticsActions(Set<SemanticsAction> actions) {
-    assert(actions != null);
-    if (_mutedSemanticsActions.length == actions.length &&
-        _mutedSemanticsActions.every(actions.contains))
-      return;
-    _mutedSemanticsActions = actions;
-    markNeedsSemanticsUpdate();
-    bool markRenderObjectNeedsSemanticsUpdate(RenderObject renderChild) {
-      renderChild.markNeedsSemanticsUpdate();
-      renderChild.visitChildrenForSemantics(markRenderObjectNeedsSemanticsUpdate);
-    }
-    visitChildrenForSemantics(markRenderObjectNeedsSemanticsUpdate);
-  }
-
-  // Use [_inheritedMutedSemanticsActions] to access
-  Set<SemanticsAction> _cachedMutedSemanticsActions;
-
-  /// The muted [SemanticsAction] that aggregated from parent and current render
-  /// object.
-  Set<SemanticsAction> get _inheritedMutedSemanticsActions {
-    if (_cachedMutedSemanticsActions == null) {
-      _cachedMutedSemanticsActions = <SemanticsAction>{};
-      if (parent is RenderObject) {
-        final RenderObject renderParent = parent;
-        _cachedMutedSemanticsActions.addAll(renderParent._inheritedMutedSemanticsActions);
-      }
-      _cachedMutedSemanticsActions.addAll(_mutedSemanticsActions);
-    }
-    return _cachedMutedSemanticsActions;
-  }
-
   // Use [_semanticsConfiguration] to access.
   SemanticsConfiguration _cachedSemanticsConfiguration;
 
   SemanticsConfiguration get _semanticsConfiguration {
     if (_cachedSemanticsConfiguration == null) {
       _cachedSemanticsConfiguration = SemanticsConfiguration();
-      _cachedSemanticsConfiguration.mutedActions = _inheritedMutedSemanticsActions;
       describeSemanticsConfiguration(_cachedSemanticsConfiguration);
     }
     return _cachedSemanticsConfiguration;
@@ -2482,7 +2444,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    _cachedMutedSemanticsActions = null;
     if (!attached || owner._semanticsOwner == null) {
       _cachedSemanticsConfiguration = null;
       return;
@@ -2532,6 +2493,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
+  Set<SemanticsAction> _getParentMutedAction() {
+    Set<SemanticsAction> result;
+    RenderObject node = this;
+    while (result == null && node.parent is RenderObject) {
+      node = node.parent;
+      final RenderObject renderObject = node;
+      result = renderObject._semanticsConfiguration.inheritedMutedActions;
+    }
+    return result != null ? Set<SemanticsAction>.from(result) : <SemanticsAction>{};
+
+  }
+
   /// Updates the semantic information of the render object.
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
@@ -2540,8 +2513,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // The subtree is probably being kept alive by a viewport but not laid out.
       return;
     }
+    final Set<SemanticsAction> mutedActions = _getParentMutedAction();
     final _SemanticsFragment fragment = _getSemanticsForParent(
       mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
+      mutedActions: mutedActions,
     );
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment;
@@ -2557,11 +2532,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Returns the semantics that this node would like to add to its parent.
   _SemanticsFragment _getSemanticsForParent({
     @required bool mergeIntoParent,
+    @required Set<SemanticsAction> mutedActions,
   }) {
     assert(mergeIntoParent != null);
     assert(!_needsLayout, 'Updated layout information required for $this to calculate semantics.');
 
     final SemanticsConfiguration config = _semanticsConfiguration;
+    config.inheritedMutedActions = Set<SemanticsAction>.from(mutedActions);
+    if (_semanticsConfiguration.mutedActions != null) {
+      config.inheritedMutedActions.addAll(_semanticsConfiguration.mutedActions);
+    }
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
@@ -2583,6 +2563,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       final _SemanticsFragment parentFragment = renderChild._getSemanticsForParent(
         mergeIntoParent: childrenMergeIntoParent,
+        mutedActions: mutedActions,
       );
       if (parentFragment.abortsWalk) {
         abortWalk = true;

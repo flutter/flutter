@@ -158,6 +158,7 @@ class RenderEditable extends RenderBox {
     this.onCaretChanged,
     this.ignorePointer = false,
     bool readOnly = false,
+    bool enabled = true,
     bool forceLine = true,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
     bool obscureText = false,
@@ -194,6 +195,7 @@ class RenderEditable extends RenderBox {
        assert(textSelectionDelegate != null),
        assert(cursorWidth != null && cursorWidth >= 0.0),
        assert(readOnly != null),
+       assert(enabled != null),
        assert(forceLine != null),
        assert(devicePixelRatio != null),
        _textPainter = TextPainter(
@@ -225,6 +227,7 @@ class RenderEditable extends RenderBox {
        _endHandleLayerLink = endHandleLayerLink,
        _obscureText = obscureText,
        _readOnly = readOnly,
+       _enabled = enabled,
        _forceLine = forceLine {
     assert(_showCursor != null);
     assert(!_showCursor.value || cursorColor != null);
@@ -792,6 +795,17 @@ class RenderEditable extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// Whether this rendering object is enabled.
+  bool get enabled => _enabled;
+  bool _enabled = false;
+  set enabled(bool value) {
+    assert(value != null);
+    if (_enabled == value)
+      return;
+    _enabled = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will extend
@@ -1040,7 +1054,7 @@ class RenderEditable extends RenderBox {
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true
-      ..isReadOnly = readOnly;
+      ..isReadOnly = readOnly || !enabled;
 
     if (hasFocus && selectionEnabled)
       config.onSetSelection = _handleSetSelection;

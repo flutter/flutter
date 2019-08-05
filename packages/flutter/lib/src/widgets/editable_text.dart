@@ -350,6 +350,7 @@ class EditableText extends StatefulWidget {
     @required this.controller,
     @required this.focusNode,
     this.readOnly = false,
+    this.enabled = true,
     this.obscureText = false,
     this.autocorrect = true,
     @required this.style,
@@ -404,6 +405,7 @@ class EditableText extends StatefulWidget {
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
        assert(readOnly != null),
+       assert(enabled != null),
        assert(forceLine != null),
        assert(style != null),
        assert(cursorColor != null),
@@ -466,6 +468,14 @@ class EditableText extends StatefulWidget {
   /// Defaults to false. Must not be null.
   /// {@endtemplate}
   final bool readOnly;
+
+  /// Whether the text is enabled.
+  ///
+  /// When this is set to true, the semantics of this widget will be treated as
+  /// Text.
+  ///
+  /// Defaults to true. Must not be null.
+  final bool enabled;
 
   /// Whether the text will take the full width regardless of the text width.
   ///
@@ -1733,6 +1743,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
                   : _cursorVisibilityNotifier,
               forceLine: widget.forceLine,
               readOnly: widget.readOnly,
+              enabled: widget.enabled,
               hasFocus: _hasFocus,
               maxLines: widget.maxLines,
               minLines: widget.minLines,
@@ -1798,6 +1809,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.showCursor,
     this.forceLine,
     this.readOnly,
+    this.enabled,
     this.textWidthBasis,
     this.hasFocus,
     this.maxLines,
@@ -1835,6 +1847,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ValueNotifier<bool> showCursor;
   final bool forceLine;
   final bool readOnly;
+  final bool enabled;
   final bool hasFocus;
   final int maxLines;
   final int minLines;
@@ -1871,6 +1884,7 @@ class _Editable extends LeafRenderObjectWidget {
       showCursor: showCursor,
       forceLine: forceLine,
       readOnly: readOnly,
+      enabled: enabled,
       hasFocus: hasFocus,
       maxLines: maxLines,
       minLines: minLines,
@@ -1908,6 +1922,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..showCursor = showCursor
       ..forceLine = forceLine
       ..readOnly = readOnly
+      ..enabled = enabled
       ..hasFocus = hasFocus
       ..maxLines = maxLines
       ..minLines = minLines

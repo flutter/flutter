@@ -2998,14 +2998,6 @@ class RenderIgnorePointer extends RenderProxyBox {
        super(child) {
     assert(_ignoring != null);
     assert(_ignoringSemantics != null);
-    if (ignoring && !_ignoringSemantics) {
-      updateMutedSemanticsActions(
-        <SemanticsAction>{
-          SemanticsAction.tap,
-          SemanticsAction.longPress,
-        }
-      );
-    }
   }
 
   /// Whether this render object is ignored during hit testing.
@@ -3021,16 +3013,7 @@ class RenderIgnorePointer extends RenderProxyBox {
     _ignoring = value;
     if (_ignoringSemantics)
       return;
-    if (ignoring) {
-      updateMutedSemanticsActions(
-        <SemanticsAction>{
-        SemanticsAction.tap,
-        SemanticsAction.longPress,
-        }
-      );
-    } else {
-      updateMutedSemanticsActions(<SemanticsAction>{});
-    }
+    markNeedsSemanticsUpdate();
   }
 
   bool _wasIgnoring;
@@ -3045,7 +3028,7 @@ class RenderIgnorePointer extends RenderProxyBox {
     assert(ignoringSemantics != null);
     if (value == _ignoringSemantics)
       return;
-    bool wasIgnoringSemantics = _ignoringSemantics;
+    final bool wasIgnoringSemantics = _ignoringSemantics;
     _ignoringSemantics = value;
     if (ignoring != _wasIgnoring && !wasIgnoringSemantics) {
       // Previous update of ignoring does not actually updating muted semantics
@@ -3057,6 +3040,19 @@ class RenderIgnorePointer extends RenderProxyBox {
     }
     _wasIgnoring = _ignoring;
     markNeedsSemanticsUpdate();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    if (ignoring && !_ignoringSemantics) {
+      config.mutedActions = <SemanticsAction>{
+        SemanticsAction.tap,
+        SemanticsAction.longPress,
+      };
+    } else {
+      config.mutedActions = <SemanticsAction>{};
+    }
   }
 
   @override
