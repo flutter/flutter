@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
+import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_bar_theme.dart';
@@ -177,6 +178,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    MaterialBannerThemeData bannerTheme,
     ButtonBarThemeData buttonBarTheme,
   }) {
     brightness ??= Brightness.light;
@@ -281,6 +283,7 @@ class ThemeData extends Diagnosticable {
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
     buttonBarTheme ??= const ButtonBarThemeData();
 
     return ThemeData.raw(
@@ -343,6 +346,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       popupMenuTheme: popupMenuTheme,
+      bannerTheme: bannerTheme,
       buttonBarTheme: buttonBarTheme,
     );
   }
@@ -417,6 +421,7 @@ class ThemeData extends Diagnosticable {
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
     @required this.popupMenuTheme,
+    @required this.bannerTheme,
     @required this.buttonBarTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
@@ -474,6 +479,7 @@ class ThemeData extends Diagnosticable {
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
        assert(popupMenuTheme != null),
+       assert(bannerTheme != null),
        assert(buttonBarTheme != null);
 
   /// A default light blue theme.
@@ -804,6 +810,9 @@ class ThemeData extends Diagnosticable {
   /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
+  /// A theme for customizing the color and text style of a [MaterialBanner].
+  final MaterialBannerThemeData bannerTheme;
+
   /// A theme for customizing the appearance and layout of [ButtonBar] widgets.
   final ButtonBarThemeData buttonBarTheme;
 
@@ -868,6 +877,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    MaterialBannerThemeData bannerTheme,
     ButtonBarThemeData buttonBarTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
@@ -931,6 +941,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
+      bannerTheme: bannerTheme ?? this.bannerTheme,
       buttonBarTheme: buttonBarTheme ?? this.buttonBarTheme,
     );
   }
@@ -1072,6 +1083,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
+      bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
       buttonBarTheme: ButtonBarThemeData.lerp(a.buttonBarTheme, b.buttonBarTheme, t),
     );
   }
@@ -1141,6 +1153,7 @@ class ThemeData extends Diagnosticable {
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
            (otherData.popupMenuTheme == popupMenuTheme) &&
+           (otherData.bannerTheme == bannerTheme) &&
            (otherData.buttonBarTheme == buttonBarTheme);
   }
 
@@ -1209,6 +1222,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme,
       bottomSheetTheme,
       popupMenuTheme,
+      bannerTheme,
       buttonBarTheme,
     ];
     return hashList(values);
@@ -1274,6 +1288,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
+    properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
     properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonRowTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme));
   }
 }
