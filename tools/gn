@@ -175,20 +175,10 @@ def to_gn_args(args):
         # Building host artifacts
         gn_args['target_cpu'] = 'x64'
 
-    # On iOS Devices, use the Dart bytecode interpreter so we don't incur
-    # snapshotting and linking costs of the precompiler during development.
-    # We can still use the JIT on the simulator though.
-    can_use_dbc = runtime_mode in ['debug', 'dynamic_profile', 'dynamic_release']
-    use_dbc = args.target_os == 'ios' and not args.simulator and can_use_dbc
-    # Use dbc if it is requested on the command line and supported by the
-    # requested runtime mode.
-    if args.interpreter and not can_use_dbc:
-      raise Exception('--interpreter not supported with --runtime-mode=' + runtime_mode)
-    use_dbc = use_dbc or (args.interpreter and can_use_dbc)
-    if use_dbc:
-      gn_args['dart_target_arch'] = 'dbc'
-    else:
-      gn_args['dart_target_arch'] = gn_args['target_cpu']
+    # DBC is not supported anymore.
+    if args.interpreter:
+      raise Exception('--interpreter is no longer needed on any supported platform.')
+    gn_args['dart_target_arch'] = gn_args['target_cpu']
 
     if sys.platform.startswith(('cygwin', 'win')):
       if 'target_cpu' in gn_args:
