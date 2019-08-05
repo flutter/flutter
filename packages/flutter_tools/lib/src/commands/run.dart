@@ -431,7 +431,7 @@ class RunCommand extends RunCommandBase {
       );
     } else if (webMode) {
       runner = ResidentWebRunner(
-        devices.single,
+        flutterDevices,
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,

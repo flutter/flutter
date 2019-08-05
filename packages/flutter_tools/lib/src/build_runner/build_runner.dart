@@ -27,8 +27,8 @@ import '../project.dart';
 import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.6.5';
-const String kSupportedBuildDaemonVersion = '2.0.0';
+const String kMinimumBuildRunnerVersion = '1.4.0';
+const String kSupportedBuildDaemonVersion = '1.0.0';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -168,9 +168,7 @@ class BuildRunner extends CodeGenerator {
         flutterProject.directory.path,
         command,
         logHandler: (ServerLog log) {
-          if (log.message != null) {
-            printTrace(log.message);
-          }
+          printTrace(log.toString());
         }
       );
     } finally {
