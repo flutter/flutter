@@ -17,12 +17,59 @@
 namespace flutter {
 namespace testing {
 
+//------------------------------------------------------------------------------
+/// @brief      A fixture that creates threads with running message loops that
+///             are terminated when the test is done (the threads are joined
+///             then as well). While this fixture may be used on it's own, it is
+///             often sub-classed but other fixtures whose functioning requires
+///             threads to be created as necessary.
+///
 class ThreadTest : public ::testing::Test {
  public:
+  //----------------------------------------------------------------------------
+  /// @brief      Get the task runner for the thread that the current unit-test
+  ///             is running on. The creates a message loop is necessary.
+  ///
+  /// @attention  Unlike all other threads and task runners, this task runner is
+  ///             shared by all tests running in the process. Tests must ensure
+  ///             that all tasks posted to this task runner are executed before
+  ///             the test ends to prevent the task from one test being executed
+  ///             while another test is running. When in doubt, just create a
+  ///             bespoke thread and task running. These cannot be seen by other
+  ///             tests in the process.
+  ///
+  /// @see        `GetThreadTaskRunner`, `CreateNewThread`.
+  ///
+  /// @return     The task runner for the thread the test is running on.
+  ///
   fml::RefPtr<fml::TaskRunner> GetCurrentTaskRunner();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Get the task runner for a dedicated thread created for this
+  ///             test instance by this fixture. This threads message loop will
+  ///             be terminated and the thread joined when the test is done.
+  ///
+  /// @attention  Prefer using the `CreateNewThread` call.
+  ///
+  /// @bug        This is an older call that should probably be deprecated and
+  ///             eventually removed from use. It is redundant now that the
+  ///             `CreateNewThread` call allows tests to create new threads (and
+  ///             name them to boot) as necessary.
+  ///
+  /// @return     The task runner for a dedicated thread created for the test.
+  ///
   fml::RefPtr<fml::TaskRunner> GetThreadTaskRunner();
 
+  //----------------------------------------------------------------------------
+  /// @brief      Creates a new thread, initializes a message loop on it, and,
+  ///             returns its task runner to the unit-test. The message loop is
+  ///             terminated (and its thread joined) when the test ends. This
+  ///             allows tests to create multiple named threads as necessary.
+  ///
+  /// @param[in]  name  The name of the OS thread created.
+  ///
+  /// @return     The task runner for the newly created thread.
+  ///
   fml::RefPtr<fml::TaskRunner> CreateNewThread(std::string name = "");
 
  protected:
