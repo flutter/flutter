@@ -121,7 +121,7 @@ class ButtonBarThemeData extends Diagnosticable {
     );
   }
 
-  /// Linearly interpolate between two tooltip themes.
+  /// Linearly interpolate between two button bar themes.
   ///
   /// If both arguments are null, then null is returned.
   ///

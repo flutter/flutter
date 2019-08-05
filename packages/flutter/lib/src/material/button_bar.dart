@@ -21,7 +21,7 @@ import 'raised_button.dart';
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any property
 /// not set on the [ButtonBar] directly it will look for a surrounding
-/// [ButtonBarTheme] and use its properties. The button values in in
+/// [ButtonBarTheme] and use its properties. The button values in
 /// [ButtonBarTheme] will be used to override properties in the surrounding
 /// [ButtonTheme] for buttons contained in the [ButtonBar].
 ///
@@ -57,20 +57,20 @@ class ButtonBar extends StatelessWidget {
   /// How the children should be placed along the horizontal axis.
   ///
   /// If `null` then it will use [ButtonBarTheme.alignment]. If that is `null`,
-  /// it will default to [MainAxisAlignment.end]
+  /// it will default to [MainAxisAlignment.end].
   final MainAxisAlignment alignment;
 
   /// How much horizontal space is available. See [Row.mainAxisSize].
   ///
   /// If `null` then it will use the surrounding [ButtonBarTheme.mainAxisSize].
-  /// If that is `null`, it will default to [MainAxisSize.max]
+  /// If that is `null`, it will default to [MainAxisSize.max].
   final MainAxisSize mainAxisSize;
 
   /// Overrides the surrounding [ButtonTheme.textTheme] to define a button's
   /// base colors, size, internal padding and shape.
   ///
   /// If `null` then it will use the surrounding [ButtonBarTheme.buttonTextTheme].
-  /// If that is `null`, it will default to [ButtonTextTheme.primary]
+  /// If that is `null`, it will default to [ButtonTextTheme.primary].
   final ButtonTextTheme buttonTextTheme;
 
   /// Overrides the surrounding [ButtonThemeData.minWidth] to define a button's
