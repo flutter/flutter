@@ -160,7 +160,9 @@ source_set("fml") {
   if (is_fuchsia) {
     sources += [ "platform/fuchsia/paths_fuchsia.cc" ]
 
-    if (!using_fuchsia_sdk) {
+    if (using_fuchsia_sdk) {
+      public_deps += [ "$fuchsia_sdk_root/pkg:trace" ]
+    } else {
       public_deps += [ "//zircon/public/lib/trace" ]
     }
   }
