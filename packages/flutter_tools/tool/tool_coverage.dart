@@ -16,7 +16,7 @@ import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:vm_service_client/vm_service_client.dart'; // ignore: deprecated_member_use
+import 'package:vm_service_client/vm_service_client.dart';
 import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports

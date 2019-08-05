@@ -562,8 +562,6 @@ abstract class ResidentRunner {
     }
   }
 
-  @protected
-  @visibleForTesting
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -599,17 +597,6 @@ abstract class ResidentRunner {
     return flutterDevices.every((FlutterDevice device) {
       return device.device.supportsHotRestart;
     });
-  }
-
-  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
-  // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
-  // runner to support a single flutter device.
-  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
-    String method, {
-    Map<String, dynamic> params,
-  }) {
-    return flutterDevices.first.views.first.uiIsolate
-        .invokeFlutterExtensionRpcRaw(method, params: params);
   }
 
   /// Whether this runner can hot reload.
