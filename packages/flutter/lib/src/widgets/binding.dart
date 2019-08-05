@@ -746,6 +746,24 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+
+          // TODO(liyuqian): figure out a more elegant fix with rmacnak.
+          //
+          // The hack here is to flush the timeline events so the host that
+          // waits for the 'Rasterized first useful frame' event won't hang.
+          // Previously 'Widgets built first useful frame' didn't cause this
+          // trouble because the GPU thread will naturally add more events later
+          // and cause a fresh. The `Rasterized...` event, however, is likely
+          // to be the last (or nearly the last) event during the app start up.
+          //
+          // rmacnak and I will figure out a better way to fix it next week.
+          // We're having this quick hack now to fix our device lab performance
+          // tests so we won't miss the data points.
+          {
+            for (int i = 0; i < 100; i += 1) {
+              developer.Timeline.instantSync('Flush');
+            }
+          }
         }
         if (oldCallback != null) {
           oldCallback(timings);
