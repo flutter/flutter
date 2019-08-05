@@ -39,7 +39,7 @@ class ViewConfiguration {
   }
 
   @override
-  String toString() => '$size at ${devicePixelRatio}x';
+  String toString() => '$size at ${debugFormatDouble(devicePixelRatio)}x';
 }
 
 /// The root of the render tree.

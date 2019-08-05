@@ -477,11 +477,11 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('hoverElevation', hoverElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));
+    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: null));
+    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));
