@@ -99,8 +99,6 @@ enum ThemeMode {
 /// This example shows how to create a [MaterialApp] that uses the [routes]
 /// `Map` to define the "home" route and an "about" route.
 ///
-/// ![A screenshot of the MaterialApp class with two routes: home and about](https://flutter.github.io/assets-for-api-docs/assets/material/routes_material_app.png)
-///
 /// ```dart
 /// MaterialApp(
 ///   routes: <String, WidgetBuilder>{

@@ -130,8 +130,6 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// Since the `fontSize` is set to 10, the final height of the line is
 /// 50 pixels.
 ///
-/// ![An example using TextStyle to change the line height](https://flutter.github.io/assets-for-api-docs/assets/painting/text_style_line_height.png)
-///
 /// ```dart
 /// Text(
 ///   'Ladies and gentlemen, you coulda been anywhere in the world tonight, but you’re here with us in New York City.',

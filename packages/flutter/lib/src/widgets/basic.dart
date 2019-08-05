@@ -4388,7 +4388,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///        child: Column(
 ///         children: <Widget>[
 ///           Container(
-///             color: Colors.red,
+///             color: Colors.amber,
 ///             height: 100,
 ///             width: 100,
 ///           ),
@@ -4396,10 +4396,11 @@ class Flexible extends ParentDataWidget<Flex> {
 ///             child: Container(
 ///               color: Colors.blue,
 ///               width: 100,
+///               child: const Center(child: Text('Expanded')),
 ///             ),
 ///           ),
 ///           Container(
-///             color: Colors.red,
+///             color: Colors.amber,
 ///             height: 100,
 ///             width: 100,
 ///           ),
@@ -4429,8 +4430,9 @@ class Flexible extends ParentDataWidget<Flex> {
 ///           Expanded(
 ///             flex: 2,
 ///             child: Container(
-///               color: Colors.red,
+///               color: Colors.amber,
 ///               height: 100,
+///               child: const Center(child: Text('flex: 2')),
 ///             ),
 ///           ),
 ///           Container(
@@ -4441,8 +4443,9 @@ class Flexible extends ParentDataWidget<Flex> {
 ///           Expanded(
 ///             flex: 1,
 ///             child: Container(
-///               color: Colors.red,
+///               color: Colors.amber,
 ///               height: 100,
+///               child: const Center(child: Text('flex: 1')),
 ///             ),
 ///           ),
 ///         ],

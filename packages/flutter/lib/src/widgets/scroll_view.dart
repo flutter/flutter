@@ -344,7 +344,7 @@ abstract class ScrollView extends StatelessWidget {
 /// This sample code shows a scroll view that contains a flexible pinned app
 /// bar, a grid, and an infinite list.
 ///
-/// ![A screenshot of the custom scroll view](https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_scroll_view.png)
+/// {@animation 400 376 https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_scroll_view.mp4}
 ///
 /// ```dart
 /// CustomScrollView(
@@ -1297,14 +1297,15 @@ class ListView extends BoxScrollView {
 ///   primary: false,
 ///   padding: const EdgeInsets.all(20.0),
 ///   crossAxisSpacing: 10.0,
+///   mainAxisSpacing: 10.0,
 ///   crossAxisCount: 2,
 ///   children: <Widget>[
-///     const Text('He\'d have you all unravel at the'),
-///     const Text('Heed not the rabble'),
-///     const Text('Sound of screams but the'),
-///     const Text('Who scream'),
-///     const Text('Revolution is coming...'),
-///     const Text('Revolution, they...'),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('He\'d have you all unravel at the')), color: Colors.teal[100]),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Heed not the rabble')), color: Colors.teal[200]),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Sound of screams but the')), color: Colors.teal[300]),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Who scream')), color: Colors.teal[400]),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Revolution is coming...')), color: Colors.teal[500]),
+///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Revolution, they...')), color: Colors.teal[600]),
 ///   ],
 /// )
 /// ```
@@ -1320,14 +1321,15 @@ class ListView extends BoxScrollView {
 ///       padding: const EdgeInsets.all(20.0),
 ///       sliver: SliverGrid.count(
 ///         crossAxisSpacing: 10.0,
+///         mainAxisSpacing: 10.0,
 ///         crossAxisCount: 2,
 ///         children: <Widget>[
-///           const Text('He\'d have you all unravel at the'),
-///           const Text('Heed not the rabble'),
-///           const Text('Sound of screams but the'),
-///           const Text('Who scream'),
-///           const Text('Revolution is coming...'),
-///           const Text('Revolution, they...'),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('He\'d have you all unravel at the')), color: Colors.teal[100]),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Heed not the rabble')), color: Colors.teal[200]),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Sound of screams but the')), color: Colors.teal[300]),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Who scream')), color: Colors.teal[400]),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Revolution is coming...')), color: Colors.teal[500]),
+///           Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Revolution, they...')), color: Colors.teal[600]),
 ///         ],
 ///       ),
 ///     ),
