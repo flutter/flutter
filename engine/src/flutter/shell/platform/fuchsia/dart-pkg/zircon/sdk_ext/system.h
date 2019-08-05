@@ -13,6 +13,15 @@
 #include "third_party/tonic/dart_wrappable.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
 
+// TODO (kaushikiska): Once fuchsia adds fs to their sdk,
+// use the rights macros from "fs/vfs.h"
+
+// Rights
+// The file may be read.
+#define ZX_FS_RIGHT_READABLE 0x00000001
+// The file may be written.
+#define ZX_FS_RIGHT_WRITABLE 0x00000002
+
 namespace zircon {
 namespace dart {
 
@@ -56,7 +65,8 @@ class System : public fml::RefCountedThreadSafe<System>,
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
-  static zx_status_t Reboot();
+  static zx_status_t ConnectToService(std::string path,
+                                      fml::RefPtr<Handle> channel);
 
  private:
   static void VmoMapFinalizer(void* isolate_callback_data,
