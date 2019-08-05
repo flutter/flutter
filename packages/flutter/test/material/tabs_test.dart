@@ -2350,7 +2350,7 @@ void main() {
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
   });
-  
+
     testWidgets('DefaultTabController with zero tabs',
           (WidgetTester tester) async {
         // Regression test for https://github.com/flutter/flutter/issues/32428
