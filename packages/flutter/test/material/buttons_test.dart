@@ -514,10 +514,7 @@ void main() {
     // Hover elevation overrides focus
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
-    });
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);

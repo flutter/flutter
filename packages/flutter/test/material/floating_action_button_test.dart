@@ -109,10 +109,7 @@ void main() {
     // Test hover for tooltip.
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
-    });
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
@@ -149,10 +146,7 @@ void main() {
     // Test hover for tooltip.
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
-    addTearDown(() async {
-      if (gesture != null)
-        return gesture.removePointer();
-    });
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
