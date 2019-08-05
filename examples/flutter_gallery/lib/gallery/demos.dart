@@ -162,10 +162,10 @@ List<GalleryDemo> _buildGalleryDemos() {
     GalleryDemo(
       title: 'Banner',
       subtitle: 'Displaying a banner within a list',
-      icon: GalleryIcons.backdrop, // TODO: Replace icon
+      icon: GalleryIcons.lists_leave_behind,
       category: _kMaterialComponents,
       routeName: BannerDemo.routeName,
-      documentationUrl: 'https://docs.flutter.io/flutter/material/MaterialBanner-class.html', // TODO: Is this correct?
+      documentationUrl: 'https://docs.flutter.io/flutter/material/MaterialBanner-class.html',
       buildRoute: (BuildContext context) => const BannerDemo(),
     ),
     GalleryDemo(
