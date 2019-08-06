@@ -747,11 +747,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 ///
 /// The `label` argument, if present, will be printed before the stack.
 void debugPrintStack({ String label, int maxFrames }) {
-  const bool isBrowser = identical(0, 0.0);
   if (label != null)
     debugPrint(label);
   Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
-  if (isBrowser) {
+  if (kIsWeb) {
     // Remove extra call to StackTrace.current for web platform.
     // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
     // is addressed.
