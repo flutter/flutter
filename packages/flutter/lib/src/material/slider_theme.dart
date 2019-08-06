@@ -1677,18 +1677,46 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
 
     // The arc rects create a semi-circle with radius equal to track height.
-    final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-    if (!leftTrackArcRect.isEmpty)
-      context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
-    final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height / 2, trackRect.top, trackRect.height, trackRect.height);
-    if (!rightTrackArcRect.isEmpty)
-      context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
+    final Rect leftTrackArcRect = Rect.fromLTWH(
+      trackRect.left - trackRect.height / 2,
+      trackRect.top,
+      trackRect.height,
+      trackRect.height,
+    );
 
-    final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
+    final Rect rightTrackArcRect = Rect.fromLTWH(
+      trackRect.right - trackRect.height / 2,
+      trackRect.top,
+      trackRect.height,
+      trackRect.height,
+    );
+
+    final Rect leftTrackSegment = Rect.fromLTRB(
+      trackRect.left,
+      trackRect.top,
+      thumbCenter.dx,
+      trackRect.bottom,
+    );
+
+    final Rect rightTrackSegment = Rect.fromLTRB(
+      thumbCenter.dx,
+      trackRect.top,
+      trackRect.right,
+      trackRect.bottom,
+    );
+
+    // all drawing
+    if (!leftTrackArcRect.isEmpty)
+      context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false,
+          leftTrackSegment.isEmpty ? rightTrackPaint : leftTrackPaint);
+
+    if (!rightTrackArcRect.isEmpty)
+      context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false,
+          rightTrackSegment.isEmpty ? leftTrackPaint : rightTrackPaint);
+
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
+
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
   }
