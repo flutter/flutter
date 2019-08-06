@@ -411,7 +411,7 @@ class FlutterErrorDetails extends Diagnosticable {
         String message = exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        properties.add(ErrorDescription('$message'));
+        properties.add(ErrorSummary('$message'));
       }
     }
 

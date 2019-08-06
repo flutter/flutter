@@ -496,6 +496,14 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
 
+  system_debug_ios:
+    description: >
+      Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    timeout_in_minutes: 10
+    flaky: true
+
   ios_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and iOS screenshots
