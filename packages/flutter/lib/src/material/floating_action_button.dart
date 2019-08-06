@@ -67,10 +67,10 @@ class _DefaultHeroTag {
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button'),
+///       title: const Text('Floating Action Button'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the button below!')
+///       child: const Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
@@ -98,7 +98,7 @@ class _DefaultHeroTag {
 ///       title: const Text('Floating Action Button Label'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the button with a label below!'),
+///       child: const Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {

@@ -22,10 +22,10 @@ import 'package:flutter/widgets.dart';
 /// ```
 ///
 /// {@tool sample}
-/// This example shows how to use [Icons] to create a heart icon, in the
-/// color purple, and 32 x 32 pixels in size.
+/// This example shows how to use [Icons] to create [Row] of icons in different
+/// colors and sizes.
 ///
-/// ![A purple favorite icon](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+/// ![A row of icons representing a pink heart, green music notes, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
 /// Row(
