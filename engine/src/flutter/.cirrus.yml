@@ -14,8 +14,8 @@ task:
     ENGINE_PATH: "/tmp/clean_engine"
     DEPOT_TOOLS: "/tmp/depot_tools"
     FLUTTER_ENGINE: "/tmp/clean_engine/src"
-    FRAMEWORK_PATH: "/tmp/master_framework"
     PATH: "$FLUTTER_ENGINE/third_party/dart/tools/sdks/dart-sdk/bin:$DEPOT_TOOLS:$PATH"
+    # Used to setup the gclient solution.
     USE_ANDROID: "False"
   setup_script: |
     git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
@@ -35,61 +35,31 @@ task:
       test_host_script: |
         cd $ENGINE_PATH/src
         ./flutter/testing/run_tests.sh host_debug_unopt
-      fetch_framework_script: |
-        mkdir -p $FRAMEWORK_PATH
-        cd $FRAMEWORK_PATH
-        git clone https://github.com/flutter/flutter.git
-      test_web_script: |
-        cd $FRAMEWORK_PATH/flutter/dev/integration_tests/web
-        ../../../bin/flutter config --local-engine=host_debug_unopt --no-analytics --enable-web
-        ../../../bin/flutter --local-engine=host_debug_unopt build web -v
-      test_framework_script: |
-        cd $FRAMEWORK_PATH/flutter/packages/flutter
-        ../../bin/flutter test --local-engine=host_debug_unopt
-    - name: build_and_test_linux_opt_profile
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode profile --no-lto
-        ninja -C out/host_profile
-      test_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/testing/run_tests.sh host_profile
-    - name: build_and_test_linux_opt_release
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode release --no-lto
-        ninja -C out/host_release
-      test_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/testing/run_tests.sh host_release
-    - name: build_and_test_android_unopt_debug
+    - name: build_and_test_android_profile_app
       env:
+        # Used to setup the gclient solution.
         USE_ANDROID: "True"
         ANDROID_HOME: $ENGINE_PATH/src/third_party/android_tools/sdk
+        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[3be31b3547bea4e70cff1d46f9a11ad8c6b42c1982a3964d81e437dee2035f674f12e130bde231352421d8de2029c55f]
       lint_host_script: |
         cd $ENGINE_PATH/src/flutter/tools/android_lint
         $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/pub get
         $ENGINE_PATH/src/third_party/dart/tools/sdks/dart-sdk/bin/dart bin/main.dart
       compile_host_script: |
         cd $ENGINE_PATH/src
-        ./flutter/tools/gn --android --unoptimized
-        ninja -C out/android_debug_unopt
-        mkdir javadoc_tmp
-        ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
-      test_android_script: cd $ENGINE_PATH/src && python ./flutter/testing/run_tests.py --type=java
-    - name: build_and_test_android_profile_app
-      env:
-        USE_ANDROID: "True"
-        ANDROID_HOME: $ENGINE_PATH/src/third_party/android_tools/sdk
-        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[3be31b3547bea4e70cff1d46f9a11ad8c6b42c1982a3964d81e437dee2035f674f12e130bde231352421d8de2029c55f]
-      compile_host_script: |
-        cd $ENGINE_PATH/src
         ./flutter/tools/gn --runtime-mode=profile --no-lto
         autoninja -C out/host_profile
+      test_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/testing/run_tests.sh host_profile
+        mkdir javadoc_tmp
+        ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
       compile_android_script: |
         cd $ENGINE_PATH/src
         ./flutter/tools/gn --android --runtime-mode=profile --no-lto --android-cpu=arm64
         ninja -C out/android_profile_arm64
+      test_android_script: |
+        cd $ENGINE_PATH/src && python ./flutter/testing/run_tests.py --type=java --variant=android_profile_arm64
       compile_app_script: |
         cd $ENGINE_PATH/src/flutter/testing/scenario_app
         ./compile_android_aot.sh "$ENGINE_PATH/src/out/host_profile" "$ENGINE_PATH/src/out/android_profile_arm64/clang_x64"
@@ -105,10 +75,9 @@ task:
       build_script: |
         cd $ENGINE_PATH/src/flutter
         ./ci/build.sh
-    - name: build_fuchsia_artifacts
+    - name: build_fuchsia_debug_artifacts
       compile_host_script: |
         cd $ENGINE_PATH/src
-        rm -rf out
         ./flutter/tools/fuchsia/build_fuchsia_artifacts.py --engine-version HEAD --runtime-mode debug
 
 # WINDOWS
