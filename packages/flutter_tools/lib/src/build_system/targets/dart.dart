@@ -55,6 +55,37 @@ List<File> listDartSources(Environment environment) {
   return dartFiles;
 }
 
+/// Copies the precompiled runtime for Android targets.
+class CopyPrecompiledRuntime extends Target {
+  const CopyPrecompiledRuntime();
+
+  @override
+  String get name => 'copy_precompiled_runtime';
+
+  @override
+  List<Source> get inputs => const <Source>[
+    Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
+    Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
+  ];
+
+  @override
+  List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/vm_snapshot_data'),
+    Source.pattern('{BUILD_DIR}/isolate_snapshot_data'),
+  ];
+
+  @override
+  Future<void> build(List<File> inputFiles, Environment environment) async {
+    final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+    final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+    fs.file(vmSnapshotData).copySync(environment.buildDir.childFile('vm_snapshot_data').path);
+    fs.file(isolateSnapshotData).copySync(environment.buildDir.childFile('isolate_snapshot_data').path);
+  }
+
+  @override
+  List<Target> get dependencies => const <Target>[];
+}
+
 /// Generate a snapshot of the dart code used in the program.
 class KernelSnapshot extends Target {
   const KernelSnapshot();

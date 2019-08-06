@@ -171,9 +171,11 @@ Future<void> buildWithAssemble({
     final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
     copyDirectorySync(assetInputDir, outputDirectory);
     final File copiedDill = environment.buildDir.childFile('app.dill');
-    if (buildMode == BuildMode.debug) {
-      copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
-    }
+    final File isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data');
+    final File vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data');
+    copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
+    isolateSnapshotData.copySync(outputDirectory.childFile('isolate_snapshot_data').path);
+    vmSnapshotData.copySync(outputDirectory.childFile('vm_snapshot_data').path);
   }
 }
 
@@ -262,6 +264,7 @@ class _BundleTarget extends Target {
   List<Target> get dependencies => const <Target>[
     CopyAssets(),
     KernelSnapshot(),
+    CopyPrecompiledRuntime(),
   ];
 
   @override

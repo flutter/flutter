@@ -100,7 +100,9 @@ Future<void> main() async {
 
       final Iterable<String> demoDebugFiles = await getFilesInApk(demoDebugApk);
       checkItContains<String>(<String>[
+        'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
+        'assets/flutter_assets/vm_snapshot_data',
       ], demoDebugFiles);
 
       section('Clean');
@@ -147,7 +149,9 @@ Future<void> main() async {
 
       final Iterable<String> demoStagingFiles = await getFilesInApk(demoStagingApk);
       checkItContains<String>(<String>[
+        'assets/flutter_assets/isolate_snapshot_data',
         'assets/flutter_assets/kernel_blob.bin',
+        'assets/flutter_assets/vm_snapshot_data',
       ], demoStagingFiles);
 
       section('Clean');
