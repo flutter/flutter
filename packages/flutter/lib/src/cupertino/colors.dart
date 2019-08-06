@@ -327,10 +327,7 @@ class CupertinoDynamicColor extends Color {
 
     // If this CupertinoDynamicColor cares about color vibrancy.
     if (dependencyBitMask & 1 != 0) {
-      final CupertinoThemeData themeData = CupertinoTheme.of(context).noDefault();
-      final Brightness brightness = themeData.brightness
-        ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness
-        ?? Brightness.light;
+      final Brightness brightness = CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light;
 
       switch (brightness) {
         case Brightness.light:
