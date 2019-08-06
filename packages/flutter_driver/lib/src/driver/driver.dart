@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
+import 'package:flutter_driver/src/common/wait.dart';
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -491,12 +492,17 @@ class FlutterDriver {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
 
+  /// Waits until the given [waitCondition] is satisfied.
+  Future<void> waitForCondition(WaitCondition waitCondition, {Duration timeout}) async {
+    await _sendCommand(WaitForCondition(waitCondition, timeout: timeout));
+  }
+
   /// Waits until there are no more transient callbacks in the queue.
   ///
   /// Use this method when you need to wait for the moment when the application
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
-    await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+    await _sendCommand(WaitForCondition(const NoTransientCallbacksCondition(), timeout: timeout));
   }
 
   /// Waits until the next [Window.onReportTimings] is called.

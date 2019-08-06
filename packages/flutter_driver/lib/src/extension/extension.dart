@@ -112,6 +112,7 @@ class FlutterDriverExtension {
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
+      'waitForCondition': _waitForCondition,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'waitUntilNoPendingFrame': _waitUntilNoPendingFrame,
       'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized,
@@ -134,6 +135,7 @@ class FlutterDriverExtension {
       'tap': (Map<String, String> params) => Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
+      'waitForCondition': (Map<String, String> params) => WaitForCondition.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params),
       'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params),
@@ -373,6 +375,13 @@ class FlutterDriverExtension {
     return const WaitForAbsentResult();
   }
 
+  Future<Result> _waitForCondition(Command command) async {
+    final WaitForCondition waitForConditionCommand = command;
+    await waitForConditionCommand.condition.wait();
+    return null;
+  }
+
+  @Deprecated('Use _waitForCondition instead.')
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -396,6 +405,7 @@ class FlutterDriverExtension {
   /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
   /// details on how to do this. Note, disabling frame sync will require the
   /// test author to use some other method to avoid flakiness.
+  @Deprecated('Use _waitForCondition instead.')
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0
