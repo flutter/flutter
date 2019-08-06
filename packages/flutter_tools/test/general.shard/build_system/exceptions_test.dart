@@ -12,9 +12,9 @@ void main() {
   test('Exceptions', () {
     final MissingInputException missingInputException = MissingInputException(
         <File>[fs.file('foo'), fs.file('bar')], 'example');
-    final CycleException cycleException = CycleException(<Target>{
-      TestTarget()..name = 'foo',
-      TestTarget()..name = 'bar',
+    final CycleException cycleException = CycleException(<String>{
+      'foo',
+      'bar',
     });
     final InvalidPatternException invalidPatternException = InvalidPatternException(
       'ABC'

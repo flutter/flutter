@@ -6,41 +6,11 @@ import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
-import '../../build_info.dart';
 import '../../globals.dart';
-import '../../macos/cocoapods.dart';
-import '../../project.dart';
 import '../build_system.dart';
-import '../exceptions.dart';
-import '../phases.dart';
-import 'assets.dart';
 import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
-
-/// The macOS plugin phase conditionally inserts a pod install target.
-class MacOSPluginPhase extends BuildPhase {
-  const MacOSPluginPhase();
-
-  @override
-  List<String> get dependencies => const <String>[];
-
-  @override
-  String get name => 'plugins';
-
-  @override
-  Future<List<Target>> plan(Environment environment) async {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
-    if (flutterProject.macos.podfile.existsSync()) {
-      return const <Target>[
-        DebugMacOSPodInstall(),
-      ];
-    }
-    return const <Target>[
-      FlutterPlugins(),
-    ];
-  }
-}
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
 ///
@@ -105,54 +75,6 @@ class UnpackMacOS extends Target {
         '${result.stdout}\n---\n${result.stderr}',
       );
     }
-  }
-}
-
-/// Tell cocoapods to re-fetch dependencies.
-class DebugMacOSPodInstall extends Target {
-  const DebugMacOSPodInstall();
-
-  @override
-  String get name => 'debug_macos_pod_install';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.flutterMacOSPodspec,
-      platform: TargetPlatform.darwin_x64,
-      mode: BuildMode.debug
-    ),
-    Source.pattern('{PROJECT_DIR}/macos/Podfile', optional: true),
-    Source.pattern('{PROJECT_DIR}/macos/Runner.xcodeproj/project.pbxproj'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
-  ];
-
-  @override
-  List<Source> get outputs => const <Source>[
-    Source.pattern('{PROJECT_DIR}/macos/Podfile.lock'),
-  ];
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    UnpackMacOS(),
-    FlutterPlugins(),
-  ];
-
-  @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'debug_macos_pod_install');
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
-    final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
-        mode: buildMode, platform: TargetPlatform.darwin_x64);
-
-    await cocoaPods.processPods(
-      xcodeProject: project.macos,
-      engineDir: enginePath,
-      isSwift: true,
-      dependenciesChanged: true,
-    );
   }
 }
 

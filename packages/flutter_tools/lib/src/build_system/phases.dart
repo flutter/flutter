@@ -162,19 +162,19 @@ class _StaticBuildPhase implements BuildPhase {
 ///
 /// Throws a [CycleException] if one is encountered.
 void checkCycles(Target initial) {
-  void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
-    if (stack.contains(target)) {
-      throw CycleException(stack..add(target));
+  void checkInternal(Target target, Set<String> visited, Set<String> stack) {
+    if (stack.contains(target.name)) {
+      throw CycleException(stack..add(target.name));
     }
-    if (visited.contains(target)) {
+    if (visited.contains(target.name)) {
       return;
     }
-    visited.add(target);
-    stack.add(target);
+    visited.add(target.name);
+    stack.add(target.name);
     for (Target dependency in target.dependencies) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
   }
-  checkInternal(initial, <Target>{}, <Target>{});
+  checkInternal(initial, <String>{}, <String>{});
 }

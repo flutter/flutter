@@ -18,7 +18,6 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
   name: 'debug_macos_application',
   phases: <BuildPhase>[
     AssetsBuildPhase(),
-    MacOSPluginPhase(),
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
@@ -28,11 +27,6 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[]
-    ),
-    BuildPhase.static(
-      name: 'plugins',
-      target: FlutterPlugins(),
-      dependencies: <String>[],
     ),
   ],
 );
@@ -42,7 +36,6 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
   name: 'profile_macos_application',
   phases: <BuildPhase>[
     AssetsBuildPhase(),
-    MacOSPluginPhase(),
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
@@ -52,11 +45,6 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[]
-    ),
-    BuildPhase.static(
-      name: 'plugins',
-      target: FlutterPlugins(),
-      dependencies: <String>[],
     ),
   ],
 );
@@ -66,7 +54,6 @@ const BuildDefinition releaseMacOSApplication = BuildDefinition(
   name: 'release_macos_application',
   phases: <BuildPhase>[
     AssetsBuildPhase(),
-    MacOSPluginPhase(),
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
@@ -76,11 +63,6 @@ const BuildDefinition releaseMacOSApplication = BuildDefinition(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[]
-    ),
-    BuildPhase.static(
-      name: 'plugins',
-      target: FlutterPlugins(),
-      dependencies: <String>[],
     ),
   ],
 );

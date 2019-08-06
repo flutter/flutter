@@ -10,7 +10,6 @@ import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
 void main() {
-  const BuildSystem buildSystem = BuildSystem();
   Environment environment;
   Testbed testbed;
 
@@ -39,7 +38,7 @@ flutter:
   });
 
   test('Copies files to correct asset directory', () => testbed.run(() async {
-    await buildSystem.build(const CopyAssets(), environment);
+    await const CopyAssets().build(<File>[], environment);
 
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'AssetManifest.json')).existsSync(), true);
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'FontManifest.json')).existsSync(), true);
@@ -49,7 +48,7 @@ flutter:
   }));
 
   test('Does not leave stale files in build directory', () => testbed.run(() async {
-    await buildSystem.build(const CopyAssets(), environment);
+    await const CopyAssets().build(<File>[], environment);
 
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
     // Modify manifest to remove asset.
@@ -60,7 +59,7 @@ name: example
 
 flutter:
 ''');
-    await buildSystem.build(const CopyAssets(), environment);
+    await const CopyAssets().build(<File>[], environment);
 
     // See https://github.com/flutter/flutter/issues/35293
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), false);

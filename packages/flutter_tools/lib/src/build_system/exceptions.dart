@@ -29,11 +29,11 @@ class MissingInputException implements Exception {
 class CycleException implements Exception {
   CycleException(this.targets);
 
-  final Set<Target> targets;
+  final Set<String> targets;
 
   @override
   String toString() => 'Dependency cycle detected in build: '
-      '${targets.map((Target target) => target.name).join(' -> ')}';
+      '${targets.join(' -> ')}';
 }
 
 /// An exception thrown when a pattern is invalid.

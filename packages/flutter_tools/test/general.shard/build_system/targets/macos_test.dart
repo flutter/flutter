@@ -7,8 +7,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
@@ -109,51 +107,6 @@ void main() {
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
   }));
-
-  test('DebugMacOSPodInstall throws if missing build mode', () => testbed.run(() async {
-    expect(() => const DebugMacOSPodInstall().build(<File>[], environment),
-        throwsA(isInstanceOf<MissingDefineException>()));
-  }));
-
-  test('DebugMacOSPodInstall skips if podfile does not exist', () => testbed.run(() async {
-    await const DebugMacOSPodInstall().build(<File>[], Environment(
-      projectDir: fs.currentDirectory,
-      defines: <String, String>{
-        kBuildMode: 'debug'
-      }
-    ));
-
-    verifyNever(cocoaPods.processPods(
-      xcodeProject: anyNamed('xcodeProject'),
-      engineDir: anyNamed('engineDir'),
-      isSwift: true,
-      dependenciesChanged: true));
-  }, overrides: <Type, Generator>{
-    CocoaPods: () => MockCocoaPods(),
-  }));
-
-  test('DebugMacOSPodInstall invokes processPods with podfile', () => testbed.run(() async {
-    fs.file(fs.path.join('macos', 'Podfile')).createSync(recursive: true);
-    await const DebugMacOSPodInstall().build(<File>[], Environment(
-        projectDir: fs.currentDirectory,
-        defines: <String, String>{
-          kBuildMode: 'debug'
-        }
-    ));
-
-    verify(cocoaPods.processPods(
-      xcodeProject: anyNamed('xcodeProject'),
-      engineDir: anyNamed('engineDir'),
-      isSwift: true,
-      dependenciesChanged: true)).called(1);
-  }, overrides: <Type, Generator>{
-    CocoaPods: () => MockCocoaPods(),
-  }));
-
-  test('b', () => testbed.run(() async {
-
-  }));
-
 }
 
 class MockPlatform extends Mock implements Platform {}
