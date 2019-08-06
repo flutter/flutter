@@ -161,6 +161,7 @@ void main() {
   testWidgets('a very quick swipe is ignored', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 20));
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
@@ -182,6 +183,7 @@ void main() {
   testWidgets('a slower swipe has a tap down and a canceled tap', (WidgetTester tester) async {
     await pumpGestureDetector(tester);
     final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 120));
     await gesture.moveBy(const Offset(100, 100));
     await tester.pump();
@@ -319,8 +321,12 @@ void main() {
     await pumpGestureDetector(tester);
 
     const int pointerValue = 1;
-    final TestGesture gesture =
-        await tester.startGesture(const Offset(200.0, 200.0), pointer: pointerValue, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: pointerValue,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -381,6 +387,7 @@ void main() {
       pointer: pointerValue,
       kind: PointerDeviceKind.mouse,
     );
+    addTearDown(gesture.removePointer);
     await tester.pump();
     await gesture.moveBy(const Offset(210.0, 200.0));
     await tester.pump();
@@ -417,8 +424,12 @@ void main() {
 
   testWidgets('test TextSelectionGestureDetectorBuilder long press', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
-    final TestGesture gesture =
-      await tester.startGesture(const Offset(200.0, 200.0), pointer: 0, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -431,8 +442,12 @@ void main() {
 
   testWidgets('test TextSelectionGestureDetectorBuilder tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
-    final TestGesture gesture =
-      await tester.startGesture(const Offset(200.0, 200.0), pointer: 0, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await gesture.up();
     await tester.pumpAndSettle();
 
@@ -444,8 +459,12 @@ void main() {
 
   testWidgets('test TextSelectionGestureDetectorBuilder double tap', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
-    final TestGesture gesture =
-      await tester.startGesture(const Offset(200.0, 200.0), pointer: 0, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(milliseconds: 50));
     await gesture.up();
     await gesture.down(const Offset(200.0, 200.0));
@@ -462,6 +481,7 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress enabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester);
     final TestGesture gesture = await tester.createGesture();
+    addTearDown(gesture.removePointer);
     await gesture.downWithCustomEvent(
       const Offset(200.0, 200.0),
       const PointerDownEvent(
@@ -491,8 +511,12 @@ void main() {
 
   testWidgets('test TextSelectionGestureDetectorBuilder selection disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, selectionEnabled: false);
-    final TestGesture gesture =
-      await tester.startGesture(const Offset(200.0, 200.0), pointer: 0, kind: PointerDeviceKind.touch);
+    final TestGesture gesture = await tester.startGesture(
+      const Offset(200.0, 200.0),
+      pointer: 0,
+      kind: PointerDeviceKind.touch,
+    );
+    addTearDown(gesture.removePointer);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
     await tester.pumpAndSettle();
@@ -506,6 +530,7 @@ void main() {
   testWidgets('test TextSelectionGestureDetectorBuilder forcePress disabled', (WidgetTester tester) async {
     await pumpTextSelectionGestureDetectorBuilder(tester, forcePressEnabled: false);
     final TestGesture gesture = await tester.createGesture();
+    addTearDown(gesture.removePointer);
     await gesture.downWithCustomEvent(
       const Offset(200.0, 200.0),
       const PointerDownEvent(
