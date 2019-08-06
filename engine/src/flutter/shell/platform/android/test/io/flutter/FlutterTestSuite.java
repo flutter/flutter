@@ -4,19 +4,24 @@
 
 package io.flutter;
 
-import io.flutter.SmokeTest;
-import io.flutter.util.PreconditionsTest;
-import io.flutter.embedding.android.FlutterActivityAndFragmentDelegateTest;
-
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+
+import io.flutter.embedding.android.FlutterActivityAndFragmentDelegateTest;
+import io.flutter.embedding.android.FlutterActivityTest;
+import io.flutter.embedding.android.FlutterFragmentTest;
+import io.flutter.embedding.engine.FlutterEngineCacheTest;
+import io.flutter.util.PreconditionsTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
     PreconditionsTest.class,
     SmokeTest.class,
+    FlutterActivityTest.class,
+    FlutterFragmentTest.class,
     FlutterActivityAndFragmentDelegateTest.class,
+    FlutterEngineCacheTest.class
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */
 public class FlutterTestSuite {}

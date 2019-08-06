@@ -5,7 +5,6 @@ import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,6 +16,7 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -27,17 +27,16 @@ import io.flutter.embedding.engine.systemchannels.LocalizationChannel;
 import io.flutter.embedding.engine.systemchannels.NavigationChannel;
 import io.flutter.embedding.engine.systemchannels.SettingsChannel;
 import io.flutter.embedding.engine.systemchannels.SystemChannel;
-import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.plugin.platform.PlatformViewsController;
 import io.flutter.view.FlutterMain;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -46,8 +45,7 @@ import static org.mockito.Mockito.when;
 @RunWith(RobolectricTestRunner.class)
 public class FlutterActivityAndFragmentDelegateTest {
   private FlutterEngine mockFlutterEngine;
-  private FakeHost fakeHost;
-  private FakeHost spyHost;
+  private FlutterActivityAndFragmentDelegate.Host mockHost;
 
   @Before
   public void setup() {
@@ -59,12 +57,20 @@ public class FlutterActivityAndFragmentDelegateTest {
     // being tested.
     mockFlutterEngine = mockFlutterEngine();
 
-    // Create a fake Host, which is required by the delegate being tested.
-    fakeHost = new FakeHost();
-    fakeHost.flutterEngine = mockFlutterEngine;
-
-    // Create a spy around the FakeHost so that we can verify method invocations.
-    spyHost = spy(fakeHost);
+    // Create a mocked Host, which is required by the delegate being tested.
+    mockHost = mock(FlutterActivityAndFragmentDelegate.Host.class);
+    when(mockHost.getContext()).thenReturn(RuntimeEnvironment.application);
+    when(mockHost.getActivity()).thenReturn(Robolectric.setupActivity(Activity.class));
+    when(mockHost.getLifecycle()).thenReturn(mock(Lifecycle.class));
+    when(mockHost.getFlutterShellArgs()).thenReturn(new FlutterShellArgs(new String[]{}));
+    when(mockHost.getDartEntrypointFunctionName()).thenReturn("main");
+    when(mockHost.getAppBundlePath()).thenReturn("/fake/path");
+    when(mockHost.getInitialRoute()).thenReturn("/");
+    when(mockHost.getRenderMode()).thenReturn(FlutterView.RenderMode.surface);
+    when(mockHost.getTransparencyMode()).thenReturn(FlutterView.TransparencyMode.transparent);
+    when(mockHost.provideFlutterEngine(any(Context.class))).thenReturn(mockFlutterEngine);
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(true);
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
   }
 
   @After
@@ -77,7 +83,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itSendsLifecycleEventsToFlutter() {
     // ---- Test setup ----
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(fakeHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // We're testing lifecycle behaviors, which require/expect that certain methods have already
     // been executed by the time they run. Therefore, we run those expected methods first.
@@ -117,41 +123,88 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itDefersToTheHostToProvideFlutterEngine() {
     // ---- Test setup ----
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is created in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Verify that the host was asked to provide a FlutterEngine.
-    verify(spyHost, times(1)).provideFlutterEngine(any(Context.class));
+    verify(mockHost, times(1)).provideFlutterEngine(any(Context.class));
 
     // Verify that the delegate's FlutterEngine is our mock FlutterEngine.
     assertEquals("The delegate failed to use the host's FlutterEngine.", mockFlutterEngine, delegate.getFlutterEngine());
   }
 
   @Test
+  public void itUsesCachedEngineWhenProvided() {
+    // ---- Test setup ----
+    // Place a FlutterEngine in the static cache.
+    FlutterEngine cachedEngine = mockFlutterEngine();
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+
+    // Adjust fake host to request cached engine.
+    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine is obtained in onAttach().
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+
+    // --- Verify that the cached engine was used ---
+    // Verify that the non-cached engine was not used.
+    verify(mockFlutterEngine.getDartExecutor(), never()).executeDartEntrypoint(any(DartExecutor.DartEntrypoint.class));
+
+    // We should never instruct a cached engine to execute Dart code - it should already be executing it.
+    verify(cachedEngine.getDartExecutor(), never()).executeDartEntrypoint(any(DartExecutor.DartEntrypoint.class));
+
+    // If the cached engine is being used, it should have sent a resumed lifecycle event.
+    verify(cachedEngine.getLifecycleChannel(), times(1)).appIsResumed();
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void itThrowsExceptionIfCachedEngineDoesNotExist() {
+    // ---- Test setup ----
+    // Adjust fake host to request cached engine that does not exist.
+    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // The FlutterEngine existence is verified in onAttach()
+    delegate.onAttach(RuntimeEnvironment.application);
+
+    // Expect IllegalStateException.
+  }
+
+  @Test
   public void itGivesHostAnOpportunityToConfigureFlutterEngine() {
     // ---- Test setup ----
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is created in onAttach().
     delegate.onAttach(RuntimeEnvironment.application);
 
     // Verify that the host was asked to configure our FlutterEngine.
-    verify(spyHost, times(1)).configureFlutterEngine(mockFlutterEngine);
+    verify(mockHost, times(1)).configureFlutterEngine(mockFlutterEngine);
   }
 
   @Test
   public void itSendsInitialRouteToFlutter() {
     // ---- Test setup ----
     // Set initial route on our fake Host.
-    spyHost.initialRoute = "/my/route";
+    when(mockHost.getInitialRoute()).thenReturn("/my/route");
 
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The initial route is sent in onStart().
@@ -167,8 +220,8 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itExecutesDartEntrypointProvidedByHost() {
     // ---- Test setup ----
     // Set Dart entrypoint parameters on fake host.
-    spyHost.appBundlePath = "/my/bundle/path";
-    spyHost.dartEntrypointFunctionName = "myEntrypoint";
+    when(mockHost.getAppBundlePath()).thenReturn("/my/bundle/path");
+    when(mockHost.getDartEntrypointFunctionName()).thenReturn("myEntrypoint");
 
     // Create the DartEntrypoint that we expect to be executed.
     DartExecutor.DartEntrypoint dartEntrypoint = new DartExecutor.DartEntrypoint(
@@ -177,7 +230,7 @@ public class FlutterActivityAndFragmentDelegateTest {
     );
 
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // Dart is executed in onStart().
@@ -196,10 +249,10 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itAttachesFlutterToTheActivityIfDesired() {
     // ---- Test setup ----
     // Declare that the host wants Flutter to attach to the surrounding Activity.
-    spyHost.shouldAttachToActivity = true;
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(true);
 
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // Flutter is attached to the surrounding Activity in onAttach.
@@ -222,10 +275,10 @@ public class FlutterActivityAndFragmentDelegateTest {
   public void itDoesNotAttachFlutterToTheActivityIfNotDesired() {
     // ---- Test setup ----
     // Declare that the host does NOT want Flutter to attach to the surrounding Activity.
-    spyHost.shouldAttachToActivity = false;
+    when(mockHost.shouldAttachEngineToActivity()).thenReturn(false);
 
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // Flutter is attached to the surrounding Activity in onAttach.
@@ -244,7 +297,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itSendsPopRouteMessageToFlutterWhenHardwareBackButtonIsPressed() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -260,7 +313,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itForwardsOnRequestPermissionsResultToFlutterEngine() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -276,7 +329,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itForwardsOnNewIntentToFlutterEngine() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -292,7 +345,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itForwardsOnActivityResultToFlutterEngine() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -308,7 +361,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itForwardsOnUserLeaveHintToFlutterEngine() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -324,7 +377,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itSendsMessageOverSystemChannelWhenToldToTrimMemory() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -340,7 +393,7 @@ public class FlutterActivityAndFragmentDelegateTest {
   @Test
   public void itSendsMessageOverSystemChannelWhenInformedOfLowMemory() {
     // Create the real object that we're testing.
-    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(spyHost);
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
 
     // --- Execute the behavior under test ---
     // The FlutterEngine is setup in onAttach().
@@ -351,6 +404,117 @@ public class FlutterActivityAndFragmentDelegateTest {
 
     // Verify that the call was forwarded to the engine.
     verify(mockFlutterEngine.getSystemChannel(), times(1)).sendMemoryPressureWarning();
+  }
+
+  @Test
+  public void itDestroysItsOwnEngineIfHostRequestsIt() {
+    // ---- Test setup ----
+    // Adjust fake host to request engine destruction.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // Push the delegate through all lifecycle methods all the way to destruction.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
+    delegate.onDetach();
+
+    // --- Verify that the cached engine was destroyed ---
+    verify(mockFlutterEngine, times(1)).destroy();
+  }
+
+  @Test
+  public void itDoesNotDestroyItsOwnEngineWhenHostSaysNotTo() {
+    // ---- Test setup ----
+    // Adjust fake host to request engine destruction.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(false);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // Push the delegate through all lifecycle methods all the way to destruction.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
+    delegate.onDetach();
+
+    // --- Verify that the cached engine was destroyed ---
+    verify(mockFlutterEngine, never()).destroy();
+  }
+
+  @Test
+  public void itDestroysCachedEngineWhenHostRequestsIt() {
+    // ---- Test setup ----
+    // Place a FlutterEngine in the static cache.
+    FlutterEngine cachedEngine = mockFlutterEngine();
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+
+    // Adjust fake host to request cached engine.
+    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Adjust fake host to request engine destruction.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(true);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // Push the delegate through all lifecycle methods all the way to destruction.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
+    delegate.onDetach();
+
+    // --- Verify that the cached engine was destroyed ---
+    verify(cachedEngine, times(1)).destroy();
+    assertNull(FlutterEngineCache.getInstance().get("my_flutter_engine"));
+  }
+
+  @Test
+  public void itDoesNotDestroyCachedEngineWhenHostSaysNotTo() {
+    // ---- Test setup ----
+    // Place a FlutterEngine in the static cache.
+    FlutterEngine cachedEngine = mockFlutterEngine();
+    FlutterEngineCache.getInstance().put("my_flutter_engine", cachedEngine);
+
+    // Adjust fake host to request cached engine.
+    when(mockHost.getCachedEngineId()).thenReturn("my_flutter_engine");
+
+    // Adjust fake host to request engine retention.
+    when(mockHost.shouldDestroyEngineWithHost()).thenReturn(false);
+
+    // Create the real object that we're testing.
+    FlutterActivityAndFragmentDelegate delegate = new FlutterActivityAndFragmentDelegate(mockHost);
+
+    // --- Execute the behavior under test ---
+    // Push the delegate through all lifecycle methods all the way to destruction.
+    delegate.onAttach(RuntimeEnvironment.application);
+    delegate.onCreateView(null, null, null);
+    delegate.onStart();
+    delegate.onResume();
+    delegate.onPause();
+    delegate.onStop();
+    delegate.onDestroyView();
+    delegate.onDetach();
+
+    // --- Verify that the cached engine was NOT destroyed ---
+    verify(cachedEngine, never()).destroy();
   }
 
   /**
@@ -386,116 +550,5 @@ public class FlutterActivityAndFragmentDelegateTest {
     when(engine.getActivityControlSurface()).thenReturn(mock(ActivityControlSurface.class));
 
     return engine;
-  }
-
-  /**
-   * A {@link FlutterActivityAndFragmentDelegate.Host} that returns values desired by this
-   * test suite.
-   * <p>
-   * Sane defaults are set for all properties. Tests in this suite can alter {@code FakeHost}
-   * properties as needed for each test.
-   */
-  private static class FakeHost implements FlutterActivityAndFragmentDelegate.Host {
-    private FlutterEngine flutterEngine;
-    private String initialRoute = null;
-    private String appBundlePath = "fake/path/";
-    private String dartEntrypointFunctionName = "main";
-    private Activity activity;
-    private boolean shouldAttachToActivity = false;
-    private boolean retainFlutterEngine = false;
-
-    @NonNull
-    @Override
-    public Context getContext() {
-      return RuntimeEnvironment.application;
-    }
-
-    @Nullable
-    @Override
-    public Activity getActivity() {
-      if (activity == null) {
-        // We must provide a real (or close to real) Activity because it is passed to
-        // the FlutterView that the delegate instantiates.
-        activity = Robolectric.setupActivity(Activity.class);
-      }
-
-      return activity;
-    }
-
-    @NonNull
-    @Override
-    public Lifecycle getLifecycle() {
-      return mock(Lifecycle.class);
-    }
-
-    @NonNull
-    @Override
-    public FlutterShellArgs getFlutterShellArgs() {
-      return new FlutterShellArgs(new String[]{});
-    }
-
-    @NonNull
-    @Override
-    public String getDartEntrypointFunctionName() {
-      return dartEntrypointFunctionName;
-    }
-
-    @NonNull
-    @Override
-    public String getAppBundlePath() {
-      return appBundlePath;
-    }
-
-    @Nullable
-    @Override
-    public String getInitialRoute() {
-      return initialRoute;
-    }
-
-    @NonNull
-    @Override
-    public FlutterView.RenderMode getRenderMode() {
-      return FlutterView.RenderMode.surface;
-    }
-
-    @NonNull
-    @Override
-    public FlutterView.TransparencyMode getTransparencyMode() {
-      return FlutterView.TransparencyMode.opaque;
-    }
-
-    @Nullable
-    @Override
-    public SplashScreen provideSplashScreen() {
-      return null;
-    }
-
-    @Nullable
-    @Override
-    public FlutterEngine provideFlutterEngine(@NonNull Context context) {
-      return flutterEngine;
-    }
-
-    @Nullable
-    @Override
-    public PlatformPlugin providePlatformPlugin(@Nullable Activity activity, @NonNull FlutterEngine flutterEngine) {
-      return null;
-    }
-
-    @Override
-    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {}
-
-    @Override
-    public boolean shouldAttachEngineToActivity() {
-      return shouldAttachToActivity;
-    }
-
-    @Override
-    public boolean retainFlutterEngineAfterHostDestruction() {
-      return retainFlutterEngine;
-    }
-
-    @Override
-    public void onFirstFrameRendered() {}
   }
 }

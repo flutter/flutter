@@ -139,6 +139,7 @@ action("flutter_shell_java") {
     "io/flutter/embedding/android/SplashScreenProvider.java",
     "io/flutter/embedding/engine/FlutterEngine.java",
     "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
+    "io/flutter/embedding/engine/FlutterEngineCache.java",
     "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
     "io/flutter/embedding/engine/FlutterJNI.java",
     "io/flutter/embedding/engine/FlutterShellArgs.java",
@@ -330,6 +331,9 @@ action("robolectric_tests") {
     "test/io/flutter/FlutterTestSuite.java",
     "test/io/flutter/SmokeTest.java",
     "test/io/flutter/embedding/android/FlutterActivityAndFragmentDelegateTest.java",
+    "test/io/flutter/embedding/android/FlutterActivityTest.java",
+    "test/io/flutter/embedding/android/FlutterFragmentTest.java",
+    "test/io/flutter/embedding/engine/FlutterEngineCacheTest.java",
     "test/io/flutter/util/PreconditionsTest.java",
   ]
 
@@ -351,6 +355,7 @@ action("robolectric_tests") {
     "//third_party/robolectric/lib/common-1.1.1.jar",
     "//third_party/robolectric/lib/common-java8-1.1.1.jar",
     "//third_party/robolectric/lib/support-annotations-28.0.0.jar",
+    "//third_party/robolectric/lib/support-fragment-25.2.0.jar",
     "//third_party/robolectric/lib/mockito-all-1.10.19.jar",
   ]
 
