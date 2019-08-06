@@ -22,6 +22,7 @@ import java.util.Arrays;
 import io.flutter.Log;
 import io.flutter.app.FlutterActivity;
 import io.flutter.embedding.engine.FlutterEngine;
+import io.flutter.embedding.engine.FlutterEngineCache;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
@@ -182,7 +183,11 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   /**
    * Obtains a reference to a FlutterEngine to back this delegate and its {@code host}.
    * <p>
-   * First, the {@code host} is given an opportunity to provide a {@link FlutterEngine} via
+   * <p>
+   * First, the {@code host} is asked if it would like to use a cached {@link FlutterEngine}, and
+   * if so, the cached {@link FlutterEngine} is retrieved.
+   * <p>
+   * Second, the {@code host} is given an opportunity to provide a {@link FlutterEngine} via
    * {@link Host#provideFlutterEngine(Context)}.
    * <p>
    * If the {@code host} does not provide a {@link FlutterEngine}, then a new {@link FlutterEngine}
@@ -191,9 +196,21 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
   private void setupFlutterEngine() {
     Log.d(TAG, "Setting up FlutterEngine.");
 
-    // First, defer to subclasses for a custom FlutterEngine.
+    // First, check if the host wants to use a cached FlutterEngine.
+    String cachedEngineId = host.getCachedEngineId();
+    if (cachedEngineId != null) {
+      flutterEngine = FlutterEngineCache.getInstance().get(cachedEngineId);
+      isFlutterEngineFromHost = true;
+      if (flutterEngine == null) {
+        throw new IllegalStateException("The requested cached FlutterEngine did not exist in the FlutterEngineCache: '" + cachedEngineId + "'");
+      }
+      return;
+    }
+
+    // Second, defer to subclasses for a custom FlutterEngine.
     flutterEngine = host.provideFlutterEngine(host.getContext());
     if (flutterEngine != null) {
+      isFlutterEngineFromHost = true;
       return;
     }
 
@@ -275,6 +292,11 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    * {@code flutterEngine} must be non-null when invoking this method.
    */
   private void doInitialFlutterViewRun() {
+    // Don't attempt to start a FlutterEngine if we're using a cached FlutterEngine.
+    if (host.getCachedEngineId() != null) {
+      return;
+    }
+
     if (flutterEngine.getDartExecutor().isExecutingDart()) {
       // No warning is logged because this situation will happen on every config
       // change if the developer does not choose to retain the Fragment instance.
@@ -387,7 +409,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
    *   if it was previously attached.</li>
    *   <li>Destroys this delegate's {@link PlatformPlugin}.</li>
    *   <li>Destroys this delegate's {@link FlutterEngine} if
-   *   {@link Host#retainFlutterEngineAfterHostDestruction()} returns false.</li>
+   *   {@link Host#shouldDestroyEngineWithHost()} ()} returns true.</li>
    * </ol>
    */
   void onDetach() {
@@ -412,8 +434,13 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     }
 
     // Destroy our FlutterEngine if we're not set to retain it.
-    if (!host.retainFlutterEngineAfterHostDestruction() && !isFlutterEngineFromHost) {
+    if (host.shouldDestroyEngineWithHost()) {
       flutterEngine.destroy();
+
+      if (host.getCachedEngineId() != null) {
+        FlutterEngineCache.getInstance().remove(host.getCachedEngineId());
+      }
+
       flutterEngine = null;
     }
   }
@@ -588,6 +615,24 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
     FlutterShellArgs getFlutterShellArgs();
 
     /**
+     * Returns the ID of a statically cached {@link FlutterEngine} to use within this
+     * delegate's host, or {@code null} if this delegate's host does not want to
+     * use a cached {@link FlutterEngine}.
+     */
+    @Nullable
+    String getCachedEngineId();
+
+    /**
+     * Returns true if the {@link FlutterEngine} used in this delegate should be destroyed
+     * when the host/delegate are destroyed.
+     * <p>
+     * The default value is {@code true} in cases where {@code FlutterFragment} created its own
+     * {@link FlutterEngine}, and {@code false} in cases where a cached {@link FlutterEngine} was
+     * provided.
+     */
+    boolean shouldDestroyEngineWithHost();
+
+    /**
      * Returns the Dart entrypoint that should run when a new {@link FlutterEngine} is
      * created.
      */
@@ -648,15 +693,6 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
      * host {@link Activity}, allowing plugins to interact with it.
      */
     boolean shouldAttachEngineToActivity();
-
-    /**
-     * Returns true if the {@link FlutterEngine} used in this delegate should outlive the
-     * delegate.
-     * <p>
-     * If {@code false} is returned, the {@link FlutterEngine} used in this delegate will be
-     * destroyed when the delegate is destroyed.
-     */
-    boolean retainFlutterEngineAfterHostDestruction();
 
     /**
      * Invoked by this delegate when its {@link FlutterView} has rendered its first Flutter
