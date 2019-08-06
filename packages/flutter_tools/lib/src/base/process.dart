@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
 import '../base/platform.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -14,27 +12,6 @@ import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
-
-
-/// Sanatizes the executable on Windows.
-@visibleForTesting
-List<String> sanitizeCmd(List<String> cmd) {
-  final List<String> out = <String>[...cmd];
-  if (out.isEmpty) {
-    return out;
-  }
-  if (!platform.isWindows) {
-    return out;
-  }
-  if (out.first.contains(' ') && !out.first.startsWith('"')) {
-    // Use quoted strings to indicate where the file name ends and the arguments begin;
-    // otherwise, the file name is ambiguous.
-    // https://github.com/dart-lang/sdk/issues/37751
-    out[0] = '"${out[0]}"';
-    return out;
-  }
-  return out;
-}
 
 typedef StringConverter = String Function(String string);
 
@@ -139,7 +116,7 @@ Future<Process> runCommand(
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   return processManager.start(
-    sanitizeCmd(cmd),
+    _sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
@@ -245,7 +222,7 @@ Future<RunResult> runAsync(
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = await processManager.run(
-    sanitizeCmd(cmd),
+    _sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
@@ -264,7 +241,7 @@ Future<RunResult> runCheckedAsync(
   RunResultChecker whiteListFailures,
 }) async {
   final RunResult result = await runAsync(
-    sanitizeCmd(cmd),
+    _sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment,
@@ -285,7 +262,7 @@ bool exitsHappy(
   _traceCommand(cli);
   try {
     final ProcessResult result = processManager.runSync(
-      sanitizeCmd(cli),
+      _sanitizeCmd(cli),
       environment: environment,
     );
     return result.exitCode == 0;
@@ -302,7 +279,7 @@ Future<bool> exitsHappyAsync(
   _traceCommand(cli);
   try {
     final ProcessResult result = await processManager.run(
-      sanitizeCmd(cli),
+      _sanitizeCmd(cli),
       environment: environment,
     );
     return result.exitCode == 0;
@@ -370,7 +347,7 @@ String _runWithLoggingSync(
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = processManager.runSync(
-    sanitizeCmd(cmd),
+    _sanitizeCmd(cmd),
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment),
   );
@@ -451,4 +428,23 @@ class RunResult {
       exitCode,
     );
   }
+}
+
+/// Sanatizes the executable on Windows.
+/// https://github.com/dart-lang/sdk/issues/37751
+List<String> _sanitizeCmd(List<String> cmd) {
+  final List<String> out = <String>[...cmd];
+  if (out.isEmpty) {
+    return out;
+  }
+  if (!platform.isWindows) {
+    return out;
+  }
+  if (out.first.contains(' ') && !out.first.startsWith('"')) {
+    // Use quoted strings to indicate where the file name ends and the arguments begin;
+    // otherwise, the file name is ambiguous.
+    out[0] = '"${out[0]}"';
+    return out;
+  }
+  return out;
 }

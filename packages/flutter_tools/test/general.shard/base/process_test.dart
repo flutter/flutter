@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io; // ignore: dart_io_import
-
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -14,7 +12,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart' show MockProcess, MockProcessManager;
+import '../../src/mocks.dart' show FakeProcessResult, MockProcess, MockProcessManager;
 
 void main() {
   group('process exceptions', () {
@@ -92,39 +90,182 @@ void main() {
       Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
     });
   });
-  group('sanitizeCmd', () {
+  group('runCommand', () {
     MockPlatform mockPlatform;
+    PlainMockProcessManager mockProcessManager;
 
     setUp(() {
       mockPlatform = MockPlatform();
+      mockProcessManager = PlainMockProcessManager();
     });
 
-    testUsingContext('Adds quotes command on Windows', () async {
+    testUsingContext('adds quotes to command on Windows', () async {
       when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.start(<String>['"C:\\Program Files\\cmd.exe"', 'test']))
+          .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
 
-      expect(sanitizeCmd(<String>['C:\Program Files\cmd.exe', 'test']),
-          equals(<String>['"C:\Program Files\cmd.exe"', 'test']));
+      await runCommand(<String>['C:\\Program Files\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.start(
+        <String>['"C:\\Program Files\\cmd.exe"', 'test'],
+      ));
+      verifyProcessStart.called(1);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('Does not add quotes command on platforms other than Windows', () async {
+    testUsingContext('does not add quotes to command without spaces on Windows', () async {
       when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.start(<String>['C:\\ProgramFiles\\cmd.exe', 'test']))
+          .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
 
-      expect(sanitizeCmd(<String>['/usr/local/bin/cmd', 'test']),
-          equals(<String>['"/usr/local/bin/cmd', 'test']));
+      await runCommand(<String>['C:\\ProgramFiles\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.start(
+        <String>['C:\\ProgramFiles\\cmd.exe', 'test'],
+      ));
+      verifyProcessStart.called(1);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('Does not add quotes command on platforms other than Windows', () async {
-      when(mockPlatform.isWindows).thenReturn(true);
+    testUsingContext('does not add quotes to command on platforms other than Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(false);
+      when(mockProcessManager.start(<String>['/usr/local/bin/foo\ bar', 'test']))
+          .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
 
-      expect(sanitizeCmd(<String>['/usr/local/bin/cmd', 'test']),
-          equals(<String>['"/usr/local/bin/cmd', 'test']));
+      await runCommand(<String>['/usr/local/bin/foo\ bar', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.start(
+        <String>['/usr/local/bin/foo\ bar', 'test'],
+      ));
+      verifyProcessStart.called(1);
     }, overrides: <Type, Generator>{
-      Platform: () => mockPlatform
-    }, skip: io.Platform.isWindows);
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('runAsync', () {
+    MockPlatform mockPlatform;
+    PlainMockProcessManager mockProcessManager;
+    FakeProcessResult fakeProcessResult;
+
+    setUp(() {
+      mockPlatform = MockPlatform();
+      mockProcessManager = PlainMockProcessManager();
+      fakeProcessResult = FakeProcessResult(stdout: '', stderr: '');
+    });
+
+    testUsingContext('adds quotes to command on Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.run(<String>['"C:\\Program Files\\cmd.exe"', 'test']))
+          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(fakeProcessResult));
+
+      await runAsync(<String>['C:\\Program Files\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.run(
+        <String>['"C:\\Program Files\\cmd.exe"', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not add quotes to command without spaces on Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.run(<String>['C:\\ProgramFiles\\cmd.exe', 'test']))
+          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(fakeProcessResult));
+
+      await runAsync(<String>['C:\\ProgramFiles\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.run(
+        <String>['C:\\ProgramFiles\\cmd.exe', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not add quotes to command on platforms other than Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(false);
+      when(mockProcessManager.run(<String>['/usr/local/bin/foo\ bar', 'test']))
+          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(fakeProcessResult));
+
+      await runAsync(<String>['/usr/local/bin/foo\ bar', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.run(
+        <String>['/usr/local/bin/foo\ bar', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('runCheckedSync', () {
+    final FakeProcessResult fakeProcessResult = FakeProcessResult(stdout: '', stderr: '');
+
+    MockPlatform mockPlatform;
+    PlainMockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockPlatform = MockPlatform();
+      mockProcessManager = PlainMockProcessManager();
+    });
+
+    testUsingContext('adds quotes to command on Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.runSync(<String>['"C:\\Program Files\\cmd.exe"', 'test']))
+          .thenAnswer((Invocation invocation) => fakeProcessResult);
+
+      runCheckedSync(<String>['C:\\Program Files\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.runSync(
+        <String>['"C:\\Program Files\\cmd.exe"', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not add quotes to command without spaces on Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(true);
+      when(mockProcessManager.runSync(<String>['C:\\ProgramFiles\\cmd.exe', 'test']))
+          .thenAnswer((Invocation invocation) => fakeProcessResult);
+
+       runCheckedSync(<String>['C:\\ProgramFiles\\cmd.exe', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.runSync(
+        <String>['C:\\ProgramFiles\\cmd.exe', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('does not add quotes to command on platforms other than Windows', () async {
+      when(mockPlatform.isWindows).thenReturn(false);
+      when(mockProcessManager.runSync(<String>['/usr/local/bin/foo\ bar', 'test']))
+          .thenAnswer((Invocation invocation) => fakeProcessResult);
+
+      runCheckedSync(<String>['/usr/local/bin/foo\ bar', 'test']);
+
+      final VerificationResult verifyProcessStart = verify(mockProcessManager.runSync(
+        <String>['/usr/local/bin/foo\ bar', 'test'],
+      ));
+      verifyProcessStart.called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatform,
+      ProcessManager: () => mockProcessManager,
+    });
   });
 }
 
