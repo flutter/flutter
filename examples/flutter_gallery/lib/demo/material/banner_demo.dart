@@ -22,20 +22,15 @@ class BannerDemo extends StatefulWidget {
 }
 
 class _BannerDemoState extends State<BannerDemo> {
-  bool displayBanner = true;
-  bool showMultipleActions = true;
-  bool showLeading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    initBanner();
-  }
+  static const int _numItems = 20;
+  bool _displayBanner = true;
+  bool _showMultipleActions = true;
+  bool _showLeading = true;
 
   void initBanner() {
-    displayBanner = true;
-    showMultipleActions = true;
-    showLeading = true;
+    _displayBanner = true;
+    _showMultipleActions = true;
+    _showLeading = true;
   }
 
   void handleDemoAction(BannerDemoAction action) {
@@ -45,10 +40,10 @@ class _BannerDemoState extends State<BannerDemo> {
           initBanner();
           break;
         case BannerDemoAction.showMultipleActions:
-          showMultipleActions = !showMultipleActions;
+          _showMultipleActions = !_showMultipleActions;
           break;
         case BannerDemoAction.showLeading:
-          showLeading = !showLeading;
+          _showLeading = !_showLeading;
           break;
       }
     });
@@ -56,27 +51,29 @@ class _BannerDemoState extends State<BannerDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget banner = MaterialBannerTheme(child: MaterialBanner(
+    final Widget banner = MaterialBanner(
       content: const Text('Your password was updated on your other device. Please sign in again.'),
-      leading: showLeading ? CircleAvatar(child: Icon(Icons.access_alarm)) : null,
+      leading: _showLeading ? CircleAvatar(child: Icon(Icons.access_alarm)) : null,
       actions: <Widget>[
         FlatButton(
           child: const Text('SIGN IN'),
-          onPressed: () =>
+          onPressed: () {
             setState(() {
-              displayBanner = false;
-            })
+              _displayBanner = false;
+            });
+          }
         ),
-        if (showMultipleActions)
+        if (_showMultipleActions)
           FlatButton(
             child: const Text('DISMISS'),
-            onPressed: () =>
+            onPressed: () {
               setState(() {
-                displayBanner = false;
-              })
+                _displayBanner = false;
+              });
+            }
           ),
       ],
-    ));
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -93,23 +90,23 @@ class _BannerDemoState extends State<BannerDemo> {
               const PopupMenuDivider(),
               CheckedPopupMenuItem<BannerDemoAction>(
                 value: BannerDemoAction.showMultipleActions,
-                checked: showMultipleActions,
+                checked: _showMultipleActions,
                 child: const Text('Multiple actions'),
               ),
               CheckedPopupMenuItem<BannerDemoAction>(
                 value: BannerDemoAction.showLeading,
-                checked: showLeading,
+                checked: _showLeading,
                 child: const Text('Leading icon'),
               ),
             ],
           ),
         ],
       ),
-      body: ListView.builder(itemCount: displayBanner ? 21 : 20, itemBuilder: (BuildContext context, int index) {
-        if (index == 0 && displayBanner) {
+      body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
+        if (index == 0 && _displayBanner) {
           return banner;
         } else {
-          return ListTile(title: Text('Item ${displayBanner ? index : index + 1}'),);
+          return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
         }
       }),
     );
