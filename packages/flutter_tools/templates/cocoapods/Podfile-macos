@@ -1,4 +1,4 @@
-# CocoaPods 1.7.2 brings with it the final version of CDN support for the trunk specs repo.
+# Using a CDN with CocoaPods 1.7.2 or later can save a lot of time on pod installation, but it's experimental rather than the default.
 # source 'https://cdn.cocoapods.org/'
 
 platform :osx, '10.13'
