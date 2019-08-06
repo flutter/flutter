@@ -997,8 +997,7 @@ void main() {
     });
 
     test('localToGlobal with ancestor', () {
-      final RenderConstrainedBox innerConstrained =
-      RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
+      final RenderConstrainedBox innerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 50, height: 50));
       final RenderPositionedBox innerCenter = RenderPositionedBox(alignment: Alignment.center, child: innerConstrained);
       final RenderConstrainedBox outerConstrained = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100, height: 100), child: innerCenter);
       final RenderPositionedBox outerCentered = RenderPositionedBox(alignment: Alignment.center, child: outerConstrained);
