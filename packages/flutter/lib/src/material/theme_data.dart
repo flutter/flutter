@@ -1293,39 +1293,49 @@ class ThemeData extends Diagnosticable {
 // is from the superclass and based on the primaryColor but the primaryColor
 // comes from the Material theme unless overridden.
 class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
+
   /// Create a [MaterialBasedCupertinoThemeData] based on a Material [ThemeData]
   /// and its `cupertinoOverrideTheme`.
   ///
   /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
-    @required ThemeData materialTheme,
-  }) : assert(materialTheme != null),
-       _materialTheme = materialTheme,
-       // Pass all values to the superclass so Material-agnostic properties
-       // like barBackgroundColor can still behave like a normal
-       // CupertinoThemeData.
-       super.raw(
-         materialTheme.cupertinoOverrideTheme?.brightness,
-         materialTheme.cupertinoOverrideTheme?.primaryColor,
-         materialTheme.cupertinoOverrideTheme?.primaryContrastingColor,
-         materialTheme.cupertinoOverrideTheme?.textTheme,
-         materialTheme.cupertinoOverrideTheme?.barBackgroundColor,
-         materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor,
-       );
+      @required ThemeData materialTheme,
+  }) : this._(
+    materialTheme,
+    (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),
+  );
+
+  MaterialBasedCupertinoThemeData._(
+    this._materialTheme,
+    this._cupertinoOverrideTheme,
+  ) : assert(_materialTheme != null),
+      assert(_cupertinoOverrideTheme != null),
+      // Pass all values to the superclass so Material-agnostic properties
+      // like barBackgroundColor can still behave like a normal
+      // CupertinoThemeData.
+      super.raw(
+        _cupertinoOverrideTheme.brightness,
+        _cupertinoOverrideTheme.primaryColor,
+        _cupertinoOverrideTheme.primaryContrastingColor,
+        _cupertinoOverrideTheme.textTheme,
+        _cupertinoOverrideTheme.barBackgroundColor,
+        _cupertinoOverrideTheme.scaffoldBackgroundColor,
+      );
 
   final ThemeData _materialTheme;
+  final CupertinoThemeData _cupertinoOverrideTheme;
 
   @override
-  Brightness get brightness => _materialTheme.cupertinoOverrideTheme?.brightness ?? _materialTheme.brightness;
+  Brightness get brightness => _cupertinoOverrideTheme.brightness ?? _materialTheme.brightness;
 
   @override
-  Color get primaryColor => _materialTheme.cupertinoOverrideTheme?.primaryColor ?? _materialTheme.colorScheme.primary;
+  Color get primaryColor => _cupertinoOverrideTheme.primaryColor ?? _materialTheme.colorScheme.primary;
 
   @override
-  Color get primaryContrastingColor => _materialTheme.cupertinoOverrideTheme?.primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
+  Color get primaryContrastingColor => _cupertinoOverrideTheme.primaryContrastingColor ?? _materialTheme.colorScheme.onPrimary;
 
   @override
-  Color get scaffoldBackgroundColor => _materialTheme.cupertinoOverrideTheme?.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
+  Color get scaffoldBackgroundColor => _cupertinoOverrideTheme.scaffoldBackgroundColor ?? _materialTheme.scaffoldBackgroundColor;
 
   /// Copies the [ThemeData]'s `cupertinoOverrideTheme`.
   ///
@@ -1339,7 +1349,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// new Material [Theme] and use `copyWith` on the Material [ThemeData]
   /// instead.
   @override
-  CupertinoThemeData copyWith({
+  MaterialBasedCupertinoThemeData copyWith({
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -1347,20 +1357,24 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
   }) {
-    return _materialTheme.cupertinoOverrideTheme?.copyWith(
-      brightness: brightness,
-      primaryColor: primaryColor,
-      primaryContrastingColor: primaryContrastingColor,
-      textTheme: textTheme,
-      barBackgroundColor: barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor,
-    ) ?? CupertinoThemeData(
-      brightness: brightness,
-      primaryColor: primaryColor,
-      primaryContrastingColor: primaryContrastingColor,
-      textTheme: textTheme,
-      barBackgroundColor: barBackgroundColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor,
+    return MaterialBasedCupertinoThemeData._(
+      _materialTheme,
+      _cupertinoOverrideTheme.copyWith(
+        brightness: brightness,
+        primaryColor: primaryColor,
+        primaryContrastingColor: primaryContrastingColor,
+        textTheme: textTheme,
+        barBackgroundColor: barBackgroundColor,
+        scaffoldBackgroundColor: scaffoldBackgroundColor,
+      ),
+    );
+  }
+
+  @override
+  CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    return MaterialBasedCupertinoThemeData._(
+      _materialTheme,
+      _cupertinoOverrideTheme.resolveFrom(context, nullOk: nullOk),
     );
   }
 }

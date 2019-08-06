@@ -46,8 +46,8 @@ final Color notSoDynamicColor5 = CupertinoDynamicColor(
   highContrastColor: color0,
   darkHighContrastColor: color0,
   darkElevatedColor: color0,
-  elevatedHighContrastColor: color0,
-  darkElevatedHighContrastColor: color0,
+  highContrastElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
   elevatedColor: color0,
 );
 
@@ -56,23 +56,23 @@ final Color vibrancyDependentColor1 = CupertinoDynamicColor(
   darkColor: color0,
   darkHighContrastColor: color0,
   darkElevatedColor: color0,
-  darkElevatedHighContrastColor: color0,
+  darkHighContrastElevatedColor: color0,
 );
 
 final Color contrastDependentColor1 = CupertinoDynamicColor(
   defaultColor: color1,
   highContrastColor: color0,
   darkHighContrastColor: color0,
-  elevatedHighContrastColor: color0,
-  darkElevatedHighContrastColor: color0,
+  highContrastElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
 );
 
 final Color elevationDependentColor1 = CupertinoDynamicColor(
   defaultColor: color1,
   elevatedColor: color0,
   darkElevatedColor: color0,
-  elevatedHighContrastColor: color0,
-  darkElevatedHighContrastColor: color0,
+  highContrastElevatedColor: color0,
+  darkHighContrastElevatedColor: color0,
 );
 
 void main() {
@@ -200,8 +200,8 @@ void main() {
       highContrastColor: color2,
       darkHighContrastColor: color3,
       darkElevatedColor: color4,
-      elevatedHighContrastColor: color5,
-      darkElevatedHighContrastColor: color6,
+      highContrastElevatedColor: color5,
+      darkHighContrastElevatedColor: color6,
       elevatedColor: color7,
     );
 
@@ -292,5 +292,22 @@ void main() {
       ),
     );
     expect(find.byType(DependentWidget), paints..rect(color: color7));
+  });
+
+  group('CupertinoDynamicColors widget', () {
+    CupertinoSystemColorData colors;
+    Widget systemColorGetter(BuildContext context) {
+      colors = CupertinoSystemColor.of(context);
+      return const Placeholder();
+    }
+
+    testWidgets('exists in CupertinoApp', (WidgetTester tester) async {
+      await tester.pumpWidget(CupertinoApp(home: Builder(builder: systemColorGetter)));
+      expect(colors.systemBackground, CupertinoSystemColor.fallbackValues.systemBackground);
+      colors = null;
+    });
+
+    testWidgets('', (WidgetTester tester) async {
+    });
   });
 }
