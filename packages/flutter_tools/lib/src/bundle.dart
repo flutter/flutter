@@ -170,11 +170,11 @@ Future<void> buildWithAssemble({
     final Directory outputDirectory = fs.directory(outputDir)..createSync(recursive: true);
     final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
     copyDirectorySync(assetInputDir, outputDirectory);
-    final File copiedDill = environment.buildDir.childFile('app.dill');
-    copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
     if (buildMode == BuildMode.debug) {
+      final File copiedDill = environment.buildDir.childFile('app.dill');
       final File isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data');
       final File vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data');
+      copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
       isolateSnapshotData.copySync(outputDirectory.childFile('isolate_snapshot_data').path);
       vmSnapshotData.copySync(outputDirectory.childFile('vm_snapshot_data').path);
     }
