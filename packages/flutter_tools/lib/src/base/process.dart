@@ -433,18 +433,18 @@ class RunResult {
 /// Sanatizes the executable on Windows.
 /// https://github.com/dart-lang/sdk/issues/37751
 List<String> _sanitizeCmd(List<String> cmd) {
-  final List<String> out = <String>[...cmd];
-  if (out.isEmpty) {
-    return out;
+  if (cmd.isEmpty) {
+    return cmd;
   }
   if (!platform.isWindows) {
-    return out;
+    return cmd;
   }
-  if (out.first.contains(' ') && !out.first.startsWith('"')) {
+  if (cmd.first.contains(' ') && !cmd.first.startsWith('"')) {
+    final List<String> newCmd = <String>[...cmd];
     // Use quoted strings to indicate where the file name ends and the arguments begin;
     // otherwise, the file name is ambiguous.
-    out[0] = '"${out[0]}"';
-    return out;
+    newCmd[0] = '"${newCmd[0]}"';
+    return newCmd;
   }
-  return out;
+  return cmd;
 }

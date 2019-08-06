@@ -149,14 +149,13 @@ void main() {
   });
 
   group('runAsync', () {
+    final FakeProcessResult fakeProcessResult = FakeProcessResult(stdout: '', stderr: '');
     MockPlatform mockPlatform;
     PlainMockProcessManager mockProcessManager;
-    FakeProcessResult fakeProcessResult;
 
     setUp(() {
       mockPlatform = MockPlatform();
       mockProcessManager = PlainMockProcessManager();
-      fakeProcessResult = FakeProcessResult(stdout: '', stderr: '');
     });
 
     testUsingContext('adds quotes to command on Windows', () async {
@@ -210,7 +209,6 @@ void main() {
 
   group('runCheckedSync', () {
     final FakeProcessResult fakeProcessResult = FakeProcessResult(stdout: '', stderr: '');
-
     MockPlatform mockPlatform;
     PlainMockProcessManager mockProcessManager;
 
