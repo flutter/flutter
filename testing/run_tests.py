@@ -216,11 +216,8 @@ def EnsureJavaTestsAreBuilt(android_out_dir):
   subprocess.check_call(gn_command, cwd=buildroot_dir)
   subprocess.check_call(ninja_command, cwd=buildroot_dir)
 
-def RunJavaTests(filter):
-  # There's no real reason why other Android build types couldn't be supported
-  # here. Could default to this but use any other variant of android_ if it
-  # exists, but it seems like overkill to add that logic in right now.
-  android_out_dir = os.path.join(out_dir, 'android_debug_unopt')
+def RunJavaTests(filter, android_build_variant):
+  android_out_dir = os.path.join(out_dir, android_build_variant)
   EnsureJavaTestsAreBuilt(android_out_dir)
 
   robolectric_dir = os.path.join(buildroot_dir, 'third_party', 'robolectric', 'lib')
@@ -277,7 +274,9 @@ def main():
   args = parser.parse_args()
 
   if args.type == 'all':
-    types = ['engine', 'dart', 'benchmarks', 'java']
+    types = ['engine', 'dart', 'benchmarks']
+    if 'android' in variant:
+      types.append('java')
   else:
     types = args.type.split(',')
 
@@ -300,7 +299,7 @@ def main():
     if ',' in java_filter or '*' in java_filter:
       print('Can only filter JUnit4 tests by single entire class name, eg "io.flutter.SmokeTest". Ignoring filter=' + java_filter)
       java_filter = None
-    RunJavaTests(java_filter)
+    RunJavaTests(java_filter, args.variant)
 
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not IsWindows():
