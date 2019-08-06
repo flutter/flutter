@@ -10,6 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
 void main() {
+  test('TestWindow can handle new methods without breaking', () {
+    final dynamic testWindow = TestWindow(window: ui.window);
+    expect(testWindow.someNewProperty, null);
+  });
+
   testWidgets('TestWindow can fake device pixel ratio', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<double>(
       tester: tester,
@@ -164,7 +169,7 @@ void main() {
     );
   });
 
-  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) {
+  testWidgets('TestWindow can clear out fake properties all at once', (WidgetTester tester) async {
     final double originalDevicePixelRatio = ui.window.devicePixelRatio;
     final double originalTextScaleFactor = ui.window.textScaleFactor;
     final TestWindow testWindow = retrieveTestBinding(tester).window;

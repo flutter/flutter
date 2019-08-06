@@ -91,7 +91,7 @@ void main() {
     expect(
       table.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderTable#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        'RenderTable#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
         ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
         ' │ size: Size(130.0, 230.0)\n'
@@ -216,5 +216,31 @@ void main() {
                                           RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox() ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
+  });
+
+  test('Table flex sizing', () {
+    const BoxConstraints cellConstraints =
+        BoxConstraints.tightFor(width: 100, height: 100);
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.rtl,
+      children: <List<RenderBox>>[
+        List<RenderBox>.generate(
+          7,
+          (int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
+        ),
+      ],
+      columnWidths: const <int, TableColumnWidth>{
+        0: FlexColumnWidth(1.0),
+        1: FlexColumnWidth(0.123),
+        2: FlexColumnWidth(0.123),
+        3: FlexColumnWidth(0.123),
+        4: FlexColumnWidth(0.123),
+        5: FlexColumnWidth(0.123),
+        6: FlexColumnWidth(0.123),
+      },
+    );
+
+    layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
+    expect(table.hasSize, true);
   });
 }

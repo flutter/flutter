@@ -113,19 +113,26 @@ class RaisedButton extends MaterialButton {
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
     double elevation,
+    double focusElevation,
+    double hoverElevation,
     double highlightElevation,
     double disabledElevation,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
-    Clip clipBehavior = Clip.none,
+    Clip clipBehavior,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     Widget child,
   }) : assert(elevation == null || elevation >= 0.0),
+       assert(focusElevation == null || focusElevation >= 0.0),
+       assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        super(
@@ -137,15 +144,20 @@ class RaisedButton extends MaterialButton {
          disabledTextColor: disabledTextColor,
          color: color,
          disabledColor: disabledColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          colorBrightness: colorBrightness,
          elevation: elevation,
+         focusElevation: focusElevation,
+         hoverElevation: hoverElevation,
          highlightElevation: highlightElevation,
          disabledElevation: disabledElevation,
          padding: padding,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: child,
@@ -168,6 +180,8 @@ class RaisedButton extends MaterialButton {
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
@@ -176,6 +190,7 @@ class RaisedButton extends MaterialButton {
     double disabledElevation,
     ShapeBorder shape,
     Clip clipBehavior,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -192,14 +207,19 @@ class RaisedButton extends MaterialButton {
       clipBehavior: clipBehavior ?? Clip.none,
       fillColor: buttonTheme.getFillColor(this),
       textStyle: theme.textTheme.button.copyWith(color: buttonTheme.getTextColor(this)),
+      focusColor: buttonTheme.getFocusColor(this),
+      hoverColor: buttonTheme.getHoverColor(this),
       highlightColor: buttonTheme.getHighlightColor(this),
       splashColor: buttonTheme.getSplashColor(this),
       elevation: buttonTheme.getElevation(this),
+      focusElevation: buttonTheme.getFocusElevation(this),
+      hoverElevation: buttonTheme.getHoverElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
+      focusNode: focusNode,
       animationDuration: buttonTheme.getAnimationDuration(this),
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       child: child,
@@ -209,19 +229,11 @@ class RaisedButton extends MaterialButton {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: null));
+    properties.add(DiagnosticsProperty<double>('hoverElevation', hoverElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }
 
@@ -239,6 +251,8 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     Color disabledTextColor,
     Color color,
     Color disabledColor,
+    Color focusColor,
+    Color hoverColor,
     Color highlightColor,
     Color splashColor,
     Brightness colorBrightness,
@@ -247,6 +261,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     double disabledElevation,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
+    FocusNode focusNode,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -265,6 +280,8 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          disabledTextColor: disabledTextColor,
          color: color,
          disabledColor: disabledColor,
+         focusColor: focusColor,
+         hoverColor: hoverColor,
          highlightColor: highlightColor,
          splashColor: splashColor,
          colorBrightness: colorBrightness,
@@ -273,6 +290,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          disabledElevation: disabledElevation,
          shape: shape,
          clipBehavior: clipBehavior,
+         focusNode: focusNode,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: Row(

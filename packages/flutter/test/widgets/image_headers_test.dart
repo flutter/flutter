@@ -41,7 +41,7 @@ void main() {
       });
       return client;
     });
-  });
+  }, skip: isBrowser);
 }
 
 class MockHttpClient extends Mock implements HttpClient {}

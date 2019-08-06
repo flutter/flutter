@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
@@ -111,10 +110,12 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('physical_model_overflow.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'physical_model_overflow.png',
+        version: null,
+      ),
     );
-  });
+  }, skip: isBrowser);
 
   group('PhysicalModelLayer checks elevation', () {
     Future<void> _testStackChildren(
@@ -279,7 +280,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, skip: isBrowser);
 
     // Tests:
     //
@@ -486,7 +487,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, skip: isBrowser);
 
     // Tests:
     //

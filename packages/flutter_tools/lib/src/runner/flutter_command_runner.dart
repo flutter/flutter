@@ -30,8 +30,8 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
-import '../usage.dart';
 import '../version.dart';
 import '../vmservice.dart';
 
@@ -367,7 +367,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
           flutterUsage.suppressAnalytics = true;
 
         _checkFlutterCopy();
-        await FlutterVersion.instance.ensureVersionFile();
+        try {
+          await FlutterVersion.instance.ensureVersionFile();
+        } on FileSystemException catch (e) {
+          printError('Failed to write the version file to the artifact cache: "$e".');
+          printError('Please ensure you have permissions in the artifact cache directory.');
+          throwToolExit('Failed to write the version file');
+        }
         if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
@@ -543,7 +549,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
       final PackageMap packageMap = PackageMap(kPackagesFileName);
-      final Uri flutterUri = packageMap.map['flutter'];
+      Uri flutterUri;
+      try {
+        flutterUri = packageMap.map['flutter'];
+      } on FormatException {
+        // We're not quite sure why this can happen, perhaps the user
+        // accidentally edited the .packages file. Re-running pub should
+        // fix the issue, and we definitely shouldn't crash here.
+        printTrace('Failed to parse .packages file to check flutter dependency.');
+        return;
+      }
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib

@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -12,9 +14,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'desktop.dart';
 import 'fuchsia/fuchsia_device.dart';
-
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -26,6 +26,38 @@ import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
+
+/// A description of the kind of workflow the device supports.
+class Category {
+  const Category._(this.value);
+
+  static const Category web = Category._('web');
+  static const Category desktop = Category._('desktop');
+  static const Category mobile = Category._('mobile');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
+
+/// The platform sub-folder that a device type supports.
+class PlatformType {
+  const PlatformType._(this.value);
+
+  static const PlatformType web = PlatformType._('web');
+  static const PlatformType android = PlatformType._('android');
+  static const PlatformType ios = PlatformType._('ios');
+  static const PlatformType linux = PlatformType._('linux');
+  static const PlatformType macos = PlatformType._('macos');
+  static const PlatformType windows = PlatformType._('windows');
+  static const PlatformType fuchsia = PlatformType._('fuchsia');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -39,23 +71,11 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices + _conditionalWebDevices);
-
-  /// Only add desktop devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalDesktopDevices {
-    return flutterDesktopEnabled ? <DeviceDiscovery>[
-      MacOSDevices(),
-      LinuxDevices(),
-      WindowsDevices(),
-    ] : <DeviceDiscovery>[];
-  }
-
-  /// Only add web devices if the flag is enabled.
-  static List<DeviceDiscovery> get _conditionalWebDevices {
-    return flutterWebEnabled ? <DeviceDiscovery>[
-      WebDevices(),
-    ] : <DeviceDiscovery>[];
-  }
+    MacOSDevices(),
+    LinuxDevices(),
+    WindowsDevices(),
+    WebDevices(),
+  ]);
 
   String _specifiedDeviceId;
 
@@ -126,11 +146,73 @@ class DeviceManager {
 
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
-    final List<String> diagnostics = <String>[];
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      diagnostics.addAll(await discoverer.getDiagnostics());
+    return <String>[
+      for (DeviceDiscovery discoverer in _platformDiscoverers)
+        ...await discoverer.getDiagnostics(),
+    ];
+  }
+
+  /// Find and return a list of devices based on the current project and environment.
+  ///
+  /// Returns a list of deviecs specified by the user.
+  ///
+  /// * If the user specified '-d all', then return all connected devices which
+  /// support the current project, except for fuchsia and web.
+  ///
+  /// * If the user specified a device id, then do nothing as the list is already
+  /// filtered by [getDevices].
+  ///
+  /// * If the user did not specify a device id and there is more than one
+  /// device connected, then filter out unsupported devices and prioritize
+  /// ephemeral devices.
+  Future<List<Device>> findTargetDevices(FlutterProject flutterProject) async {
+    List<Device> devices = await getDevices().toList();
+
+    // Always remove web and fuchsia devices from `--all`. This setting
+    // currently requires devices to share a frontend_server and resident
+    // runnner instance. Both web and fuchsia require differently configured
+    // compilers, and web requires an entirely different resident runner.
+    if (hasSpecifiedAllDevices) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (await device.targetPlatform != TargetPlatform.fuchsia &&
+              await device.targetPlatform != TargetPlatform.web_javascript)
+            device
+      ];
     }
-    return diagnostics;
+
+    // If there is no specified device, the remove all devices which are not
+    // supported by the current application. For example, if there was no
+    // 'android' folder then don't attempt to launch with an Android device.
+    if (devices.length > 1 && !hasSpecifiedDeviceId) {
+      devices = <Device>[
+        for (Device device in devices)
+          if (isDeviceSupportedForProject(device, flutterProject))
+            device
+      ];
+    }
+
+    // If there are still multiple devices and the user did not specify to run
+    // all, then attempt to prioritize ephemeral devices. For example, if the
+    // use only typed 'flutter run' and both an Android device and desktop
+    // device are availible, choose the Android device.
+    if (devices.length > 1 && !hasSpecifiedAllDevices) {
+      // Note: ephemeral is nullable for device types where this is not well
+      // defined.
+      if (devices.any((Device device) => device.ephemeral == true)) {
+        devices = devices
+            .where((Device device) => device.ephemeral == true)
+            .toList();
+      }
+    }
+    return devices;
+  }
+
+  /// Returns whether the device is supported for the project.
+  ///
+  /// This exists to allow the check to be overriden for google3 clients.
+  bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
+    return device.isSupportedForProject(flutterProject);
   }
 }
 
@@ -207,9 +289,18 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
 abstract class Device {
 
-  Device(this.id);
+  Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
+
+  /// The [Category] for this device type.
+  final Category category;
+
+  /// The [PlatformType] for this device.
+  final PlatformType platformType;
+
+  /// Whether this is an ephemeral device.
+  final bool ephemeral;
 
   String get name;
 
@@ -217,6 +308,14 @@ abstract class Device {
 
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
+
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
+  Future<String> get emulatorId;
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
   Future<bool> get supportsHardwareRendering async {
@@ -294,8 +393,8 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool usesTerminalUi = true,
     bool ipv6 = false,
+    bool usesTerminalUi = true,
   });
 
   /// Whether this device implements support for hot reload.
@@ -306,7 +405,7 @@ abstract class Device {
 
   /// Whether flutter applications running on this device can be terminated
   /// from the vmservice.
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   /// Whether the device supports taking screenshots of a running flutter
   /// application.
@@ -376,6 +475,7 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
+    this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
@@ -390,6 +490,7 @@ class DebuggingOptions {
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
+      dartFlags = '',
       disableServiceAuthCodes = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
@@ -403,6 +504,7 @@ class DebuggingOptions {
 
   final BuildInfo buildInfo;
   final bool startPaused;
+  final String dartFlags;
   final bool disableServiceAuthCodes;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;

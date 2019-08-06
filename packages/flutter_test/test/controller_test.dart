@@ -264,4 +264,154 @@ void main() {
       }
     },
   );
+
+  testWidgets(
+    'WidgetTester.tap must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.press must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.press(find.text('test'), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      expect(logs, equals(<String>['down $b']));
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.longPress must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.drag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.fling must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
 }

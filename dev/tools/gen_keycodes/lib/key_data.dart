@@ -206,7 +206,7 @@ class KeyData {
         result[key] = value;
       }
     });
-        return result;
+    return result;
   }
 
   /// Parses entries from Chromium's HID code mapping header file.
@@ -293,6 +293,8 @@ class Key {
       xKbScanCode: map['scanCodes']['xkb'],
       windowsScanCode: map['scanCodes']['windows'],
       macOsScanCode: map['scanCodes']['macos'],
+      glfwKeyNames: map['names']['glfw']?.cast<String>(),
+      glfwKeyCodes: map['keyCodes']['glfw']?.cast<int>(),
     );
   }
 
@@ -371,15 +373,17 @@ class Key {
     return hidPlane | (usbHidCode & valueMask);
   }
 
+  static String getCommentName(String constantName) {
+    String upperCamel = lowerCamelToUpperCamel(constantName);
+    upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
+    return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match.group(1)}').trim();
+  }
+
   /// Gets the name of the key suitable for placing in comments.
   ///
   /// Takes the [constantName] and converts it from lower camel case to capitalized
   /// separate words (e.g. "wakeUp" converts to "Wake Up").
-  String get commentName {
-    String upperCamel = lowerCamelToUpperCamel(constantName);
-    upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
-    return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match.group(1)}').trim();
-  }
+  String get commentName => getCommentName(constantName);
 
   /// Gets the named used for the key constant in the definitions in
   /// keyboard_keys.dart.
@@ -428,6 +432,21 @@ class Key {
   }
   static Map<String, String> _printable;
 
+  /// Returns the static map of synonym representations.
+  ///
+  /// These include synonyms for keys which don't have printable
+  /// representations, and appear in more than one place on the keyboard (e.g.
+  /// SHIFT, ALT, etc.).
+  static Map<String, List<dynamic>> get synonyms {
+    if (_synonym == null) {
+      final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
+      final Map<String, dynamic> synonym = json.decode(synonymKeys);
+      _synonym = synonym.cast<String, List<dynamic>>();
+    }
+    return _synonym;
+  }
+  static Map<String, List<dynamic>> _synonym;
+
   /// Mask for the 32-bit value portion of the code.
   static const int valueMask = 0x000FFFFFFFF;
 
@@ -437,4 +456,7 @@ class Key {
   /// The code prefix for keys which do not have a Unicode representation, but
   /// do have a USB HID ID.
   static const int hidPlane = 0x00100000000;
+
+  /// The code prefix for pseudo-keys which represent collections of key synonyms.
+  static const int synonymPlane = 0x20000000000;
 }

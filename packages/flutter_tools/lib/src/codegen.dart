@@ -13,7 +13,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// Arbitrarily chosen multi-root file scheme. This is used to configure the
 // frontend_server to resolve a package uri to multiple filesystem directories.
 // In this case, the source directory and a generated directory.
 const String kMultiRootScheme = 'org-dartlang-app';
@@ -99,7 +99,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     bool aot = false,
     bool trackWidgetCreation,
     List<String> extraFrontEndOptions,
-    String incrementalCompilerByteStorePath,
     bool targetProductVm = false,
     // These arguments are currently unused.
     String sdkRoot,
@@ -109,6 +108,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     String depFilePath,
     TargetModel targetModel = TargetModel.flutter,
     String initializeFromDill,
+    String platformDill,
   }) async {
     if (fileSystemRoots != null || fileSystemScheme != null || depFilePath != null || targetModel != null || sdkRoot != null || packagesPath != null) {
       printTrace('fileSystemRoots, fileSystemScheme, depFilePath, targetModel,'
@@ -135,7 +135,6 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
       aot: aot,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
-      incrementalCompilerByteStorePath: incrementalCompilerByteStorePath,
       targetProductVm: targetProductVm,
       sdkRoot: sdkRoot,
       packagesPath: PackageMap.globalGeneratedPackagesPath,

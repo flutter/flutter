@@ -28,11 +28,12 @@ Future<TaskResult> analyzerBenchmarkTask() async {
     await dart(<String>['dev/tools/mega_gallery.dart', '--out=${_megaGalleryDirectory.path}']);
   });
 
-  final Map<String, dynamic> data = <String, dynamic>{};
-  data.addAll((await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'));
-  data.addAll((await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'));
-  data.addAll((await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'));
-  data.addAll((await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'));
+  final Map<String, dynamic> data = <String, dynamic>{
+    ...(await _run(_FlutterRepoBenchmark())).asMap('flutter_repo', 'batch'),
+    ...(await _run(_FlutterRepoBenchmark(watch: true))).asMap('flutter_repo', 'watch'),
+    ...(await _run(_MegaGalleryBenchmark())).asMap('mega_gallery', 'batch'),
+    ...(await _run(_MegaGalleryBenchmark(watch: true))).asMap('mega_gallery', 'watch'),
+  };
 
   return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
 }

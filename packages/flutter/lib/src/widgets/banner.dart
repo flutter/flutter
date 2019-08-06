@@ -322,7 +322,7 @@ class Banner extends StatelessWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<BannerLocation>('location', location));
     properties.add(EnumProperty<TextDirection>('layoutDirection', layoutDirection, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, showName: false));
+    properties.add(ColorProperty('color', color, showName: false));
     textStyle?.debugFillProperties(properties, prefix: 'text ');
   }
 }

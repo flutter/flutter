@@ -50,5 +50,15 @@ void main() {
       expect(key1, equals(key1));
       expect(key1, equals(key2));
     });
+    test('Basic synonyms can be looked up.', () async {
+      expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altLeft.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaLeft.synonyms.first, equals(LogicalKeyboardKey.meta));
+      expect(LogicalKeyboardKey.shiftRight.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlRight.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.meta));
+    });
   });
 }

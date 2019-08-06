@@ -23,7 +23,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   });
 
   /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
-  /// where the langauge is 2 characters, script is 4 characters with the first uppercase,
+  /// where the language is 2 characters, script is 4 characters with the first uppercase,
   /// and country is 2-3 characters and all uppercase.
   ///
   /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.
@@ -299,7 +299,7 @@ Future<void> precacheLanguageAndRegionTags() async {
   final HttpClient client = HttpClient();
   final HttpClientRequest request = await client.getUrl(Uri.parse(registry));
   final HttpClientResponse response = await request.close();
-  final String body = (await response.transform<String>(utf8.decoder).toList()).join('');
+  final String body = (await response.cast<List<int>>().transform<String>(utf8.decoder).toList()).join('');
   client.close(force: true);
   final List<Map<String, List<String>>> sections = body.split('%%').skip(1).map<Map<String, List<String>>>(_parseSection).toList();
   for (Map<String, List<String>> section in sections) {
@@ -400,4 +400,15 @@ String generateString(String s) {
   if (started)
     output.write("'");
   return output.toString();
+}
+
+/// Only used to generate localization strings for the Kannada locale ('kn') because
+/// some of the localized strings contain characters that can crash Emacs on Linux.
+/// See packages/flutter_localizations/lib/src/l10n/README for more information.
+String generateEncodedString(String s) {
+  if (s.runes.every((int code) => code <= 0xFF))
+    return generateString(s);
+
+  final String unicodeEscapes = s.runes.map((int code) => '\\u{${code.toRadixString(16)}}').join();
+  return "'$unicodeEscapes'";
 }

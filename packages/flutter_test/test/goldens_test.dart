@@ -182,5 +182,18 @@ void main() {
         expect(fs.file(fix('/foo.png')).readAsBytesSync(), newBytes);
       });
     });
+
+    group('getTestUri', () {
+      test('updates file name with version number', () {
+        final Uri key = Uri.parse('foo.png');
+        final Uri key1 = comparator.getTestUri(key, 1);
+        expect(key1, Uri.parse('foo.1.png'));
+      });
+      test('does nothing for null version number', () {
+        final Uri key = Uri.parse('foo.png');
+        final Uri keyNull = comparator.getTestUri(key, null);
+        expect(keyNull, Uri.parse('foo.png'));
+      });
+    });
   });
 }

@@ -1,23 +1,15 @@
 platform :ios, '12.0'
 
 flutter_application_path = 'flutterapp/'
-framework_dir = File.join(flutter_application_path, '.ios', 'Flutter')
 
-engine_dir = File.join(framework_dir, 'engine')
-if !File.exist?(engine_dir)
-  # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
-  debug_framework_dir = File.join(flutter_root(flutter_application_path), 'bin', 'cache', 'artifacts', 'engine', 'ios')
-  FileUtils.mkdir_p(engine_dir)
-  FileUtils.cp_r(File.join(debug_framework_dir, 'Flutter.framework'), engine_dir)
-  FileUtils.cp(File.join(debug_framework_dir, 'Flutter.podspec'), engine_dir)
-end
+load File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')
 
 target 'ios_add2app' do
-  eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  install_all_flutter_pods(flutter_application_path)
 end
 
 target 'ios_add2appTests' do
-  pod 'Flutter', :path => engine_dir
   inherit! :search_paths
+  install_flutter_engine_pod
   pod 'EarlGrey'
 end

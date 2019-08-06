@@ -782,7 +782,7 @@ class ListTile extends StatelessWidget {
   }
 
   bool _isDenseLayout(ListTileTheme tileTheme) {
-    return dense != null ? dense : (tileTheme?.dense ?? false);
+    return dense ?? tileTheme?.dense ?? false;
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme tileTheme) {

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -285,7 +284,7 @@ void main() {
         );
 
         // Drag the minute picker to the next slot (03 -> 06).
-        // The `initialDateTime` and the `minuteInterval` values are specifically choosen
+        // The `initialDateTime` and the `minuteInterval` values are specifically chosen
         // so that `find.text` finds exactly one widget.
         await tester.drag(find.text('03'), _kRowOffset);
         await tester.pump();
@@ -816,7 +815,7 @@ void main() {
       );
 
       final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
+      expect(exception, isFlutterError);
       expect(
         exception.toString(),
         contains('Insufficient horizontal space to render the CupertinoDatePicker'),
@@ -844,8 +843,10 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
-        skip: !Platform.isLinux
+        matchesGoldenFile(
+          'date_picker_test.datetime.initial.png',
+          version: 1,
+        ),
       );
 
       // Slightly drag the hour component to make the current hour off-center.
@@ -854,8 +855,10 @@ void main() {
 
       await expectLater(
         find.byType(CupertinoDatePicker),
-        matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
-        skip: !Platform.isLinux
+        matchesGoldenFile(
+          'date_picker_test.datetime.drag.png',
+          version: 1,
+        ),
       );
     });
   });

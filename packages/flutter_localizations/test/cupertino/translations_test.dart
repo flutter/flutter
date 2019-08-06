@@ -90,16 +90,32 @@ void main() {
   }
 
   testWidgets('Spot check French', (WidgetTester tester) async {
-    const Locale locale = Locale.fromSubtags(languageCode: 'fr', scriptCode: null, countryCode: null);
+    const Locale locale = Locale('fr');
     expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
     final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
     expect(localizations is CupertinoLocalizationFr, true);
     expect(localizations.alertDialogLabel, 'Alerte');
-    expect(localizations.datePickerHourSemanticsLabel(1), 'une heure');
+    expect(localizations.datePickerHourSemanticsLabel(1), '1 heure');
+    expect(localizations.datePickerHourSemanticsLabel(12), '12 heures');
     expect(localizations.pasteButtonLabel, 'Coller');
     expect(localizations.datePickerDateOrder, DatePickerDateOrder.dmy);
     expect(localizations.timerPickerSecondLabel(20), 's');
     expect(localizations.selectAllButtonLabel, 'Tout sélect.');
+    expect(localizations.timerPickerMinute(10), '10');
+  });
+
+  testWidgets('Spot check Chinese', (WidgetTester tester) async {
+    const Locale locale = Locale('zh');
+    expect(GlobalCupertinoLocalizations.delegate.isSupported(locale), isTrue);
+    final CupertinoLocalizations localizations = await GlobalCupertinoLocalizations.delegate.load(locale);
+    expect(localizations is CupertinoLocalizationZh, true);
+    expect(localizations.alertDialogLabel, '提醒');
+    expect(localizations.datePickerHourSemanticsLabel(1), '1 点');
+    expect(localizations.datePickerHourSemanticsLabel(12), '12 点');
+    expect(localizations.pasteButtonLabel, '粘贴');
+    expect(localizations.datePickerDateOrder, DatePickerDateOrder.ymd);
+    expect(localizations.timerPickerSecondLabel(20), '秒');
+    expect(localizations.selectAllButtonLabel, '全选');
     expect(localizations.timerPickerMinute(10), '10');
   });
 }

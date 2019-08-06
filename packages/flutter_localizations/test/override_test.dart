@@ -37,7 +37,7 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
   @override
   bool isSupported(Locale locale) {
-    return supportedLanguage == 'allLanguages' ? true : locale.languageCode == supportedLanguage;
+    return supportedLanguage == 'allLanguages' || locale.languageCode == supportedLanguage;
   }
 
   @override

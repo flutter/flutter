@@ -262,17 +262,17 @@ class AndroidDevice implements Device {
 
   /// Executes [command] on `adb shell` and returns its exit code.
   Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    await adb(<String>['shell', command]..addAll(arguments), environment: environment);
+    await adb(<String>['shell', command, ...arguments], environment: environment);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
   Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) {
-    return adb(<String>['shell', command]..addAll(arguments), environment: environment);
+    return adb(<String>['shell', command, ...arguments], environment: environment);
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
   Future<String> adb(List<String> arguments, { Map<String, String> environment }) {
-    return eval(adbPath, <String>['-s', deviceId]..addAll(arguments), environment: environment, canFail: false);
+    return eval(adbPath, <String>['-s', deviceId, ...arguments], environment: environment, canFail: false);
   }
 
   @override
@@ -392,9 +392,34 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
+  // Returns the path to cached binaries relative to devicelab directory
+  String get _artifactDirPath {
+    return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+  }
+
+  // Returns a colon-separated environment variable that contains the paths
+  // of linked libraries for idevice_id
+  Map<String, String> get _ideviceIdEnvironment {
+    final String libPath = const <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'ios-deploy',
+    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
+    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
+  }
+
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();
@@ -470,10 +495,7 @@ class IosDevice implements Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  final String androidHome =
-      Platform.environment['ANDROID_HOME'] != null
-          ? Platform.environment['ANDROID_HOME']
-          : Platform.environment['ANDROID_SDK_ROOT'];
+  final String androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
 
   if (androidHome == null)
     throw 'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are '

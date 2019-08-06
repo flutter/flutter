@@ -719,6 +719,8 @@ class _TextStyleProxy implements TextStyle {
   double get wordSpacing => _delegate.wordSpacing;
   @override
   List<Shadow> get shadows => _delegate.shadows;
+  @override
+  List<ui.FontFeature> get fontFeatures => _delegate.fontFeatures;
 
   @override
   String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) =>
@@ -781,6 +783,7 @@ class _TextStyleProxy implements TextStyle {
     ui.Paint foreground,
     ui.Paint background,
     List<Shadow> shadows,
+    List<ui.FontFeature> fontFeatures,
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,

@@ -1,7 +1,7 @@
 {
-  "datePickerHourSemanticsLabelOne": "bir saat",
-  "datePickerHourSemanticsLabelOther": "$hour saat",
-  "datePickerMinuteSemanticsLabelOne": "bir dakika",
+  "datePickerHourSemanticsLabelOne": "Saat $hour",
+  "datePickerHourSemanticsLabelOther": "Saat $hour",
+  "datePickerMinuteSemanticsLabelOne": "1 dakika",
   "datePickerMinuteSemanticsLabelOther": "$minute dakika",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",

@@ -5,11 +5,15 @@
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
+import 'constants.dart';
 import 'diagnostics.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
+
+/// Signature for [DiagnosticPropertiesBuilder] transformer.
+typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Iterable<DiagnosticsNode> properties);
 
 /// Signature for [FlutterErrorDetails.informationCollector] callback
 /// and other callbacks that collect information describing an error.
@@ -175,6 +179,19 @@ class ErrorHint extends _ErrorDiagnostic {
   ErrorHint._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level:DiagnosticLevel.hint);
 }
 
+/// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
+/// tune the spacing between other [DiagnosticsNode] objects.
+class ErrorSpacer extends DiagnosticsProperty<void> {
+  /// Creates an empty space to insert into a list of [DiagnosticNode] objects
+  /// typically within a [FlutterError] object.
+  ErrorSpacer() : super(
+    '',
+    null,
+    description: '',
+    showName: false,
+  );
+}
+
 /// Class for information provided to [FlutterExceptionHandler] callbacks.
 ///
 /// See [FlutterError.onError].
@@ -197,6 +214,20 @@ class FlutterErrorDetails extends Diagnosticable {
     this.informationCollector,
     this.silent = false,
   });
+
+  /// Transformers to transform [DiagnosticsNode] in [DiagnosticPropertiesBuilder]
+  /// into a more descriptive form.
+  ///
+  /// There are layers that attach certain [DiagnosticsNode] into
+  /// [FlutterErrorDetails] that require knowledge from other layers to parse.
+  /// To correctly interpret those [DiagnosticsNode], register transformers in
+  /// the layers that possess the knowledge.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBinding.initInstances], which registers its transformer.
+  static final List<DiagnosticPropertiesTransformer> propertiesTransformers =
+    <DiagnosticPropertiesTransformer>[];
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.
@@ -282,7 +313,7 @@ class FlutterErrorDetails extends Diagnosticable {
       // Regular _AssertionErrors thrown by assert() put the message last, after
       // some code snippets. This leads to ugly messages. To avoid this, we move
       // the assertion message up to before the code snippets, separated by a
-      // newline, if we recognise that format is being used.
+      // newline, if we recognize that format is being used.
       final Object message = exception.message;
       final String fullMessage = exception.toString();
       if (message is String && message != fullMessage) {
@@ -331,7 +362,14 @@ class FlutterErrorDetails extends Diagnosticable {
   /// If the exception contains an [ErrorSummary] that summary is used,
   /// otherwise the summary is inferred from the string representation of the
   /// exception.
+  ///
+  /// In release mode, this always returns a [DiagnosticsNode.message] with a
+  /// formatted version of the exception.
   DiagnosticsNode get summary {
+    String formatException() => exceptionAsString().split('\n')[0].trimLeft();
+    if (kReleaseMode) {
+      return DiagnosticsNode.message(formatException());
+    }
     final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
     if (diagnosticable != null) {
@@ -339,7 +377,7 @@ class FlutterErrorDetails extends Diagnosticable {
       debugFillProperties(builder);
       summary = builder.properties.firstWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.summary, orElse: () => null);
     }
-    return summary ?? ErrorSummary('${exceptionAsString().split("\n")[0].trimLeft()}');
+    return summary ?? ErrorSummary('${formatException()}');
   }
 
   @override
@@ -373,7 +411,7 @@ class FlutterErrorDetails extends Diagnosticable {
         String message = exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        properties.add(ErrorDescription('$message'));
+        properties.add(ErrorSummary('$message'));
       }
     }
 
@@ -399,7 +437,7 @@ class FlutterErrorDetails extends Diagnosticable {
         }
       }
       if (ourFault) {
-        properties.add(DiagnosticsNode.message(''));
+        properties.add(ErrorSpacer());
         properties.add(ErrorHint(
           'Either the assertion indicates an error in the framework itself, or we should '
           'provide substantially more information in this error message to help you determine '
@@ -410,23 +448,32 @@ class FlutterErrorDetails extends Diagnosticable {
       }
     }
     if (stack != null) {
-      properties.add(DiagnosticsNode.message(''));
+      properties.add(ErrorSpacer());
       properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
     }
     if (informationCollector != null) {
-      properties.add(DiagnosticsNode.message(''));
+      properties.add(ErrorSpacer());
       informationCollector().forEach(properties.add);
     }
   }
 
   @override
   String toStringShort() {
-    return library != null ? 'Exception Caught By $library' : 'Exception Caught';
+    return library != null ? 'Exception caught by $library' : 'Exception caught';
   }
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.debug}) {
     return toDiagnosticsNode(style: DiagnosticsTreeStyle.error).toStringDeep(minLevel: minLevel);
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return _FlutterErrorDetailsNode(
+      name: name,
+      value: this,
+      style: style,
+    );
   }
 }
 
@@ -456,12 +503,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// using [ErrorHint]s or other [DiagnosticsNode]s.
   factory FlutterError(String message) {
     final List<String> lines = message.split('\n');
-    final List<DiagnosticsNode> parts = <DiagnosticsNode>[];
-    parts.add(ErrorSummary(lines.first));
-    if (lines.length > 1)  {
-      parts.addAll(lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)));
-    }
-    return FlutterError.fromParts(parts);
+    return FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary(lines.first),
+      ...lines.skip(1).map<DiagnosticsNode>((String line) => ErrorDescription(line)),
+    ]);
   }
 
   /// Create an error message from a list of [DiagnosticsNode]s.
@@ -705,6 +750,12 @@ void debugPrintStack({ String label, int maxFrames }) {
   if (label != null)
     debugPrint(label);
   Iterable<String> lines = StackTrace.current.toString().trimRight().split('\n');
+  if (kIsWeb) {
+    // Remove extra call to StackTrace.current for web platform.
+    // TODO(ferhat): remove when https://github.com/flutter/flutter/issues/37635
+    // is addressed.
+    lines = lines.skip(1);
+  }
   if (maxFrames != null)
     lines = lines.take(maxFrames);
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
@@ -756,5 +807,30 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
 
   static DiagnosticsNode _createStackFrame(String frame) {
     return DiagnosticsNode.message(frame, allowWrap: false);
+  }
+}
+
+class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
+  _FlutterErrorDetailsNode({
+    String name,
+    @required FlutterErrorDetails value,
+    @required DiagnosticsTreeStyle style,
+  }) : super(
+    name: name,
+    value: value,
+    style: style,
+  );
+
+  @override
+  DiagnosticPropertiesBuilder get builder {
+    final DiagnosticPropertiesBuilder builder = super.builder;
+    if (builder == null){
+      return null;
+    }
+    Iterable<DiagnosticsNode> properties = builder.properties;
+    for (DiagnosticPropertiesTransformer transformer in FlutterErrorDetails.propertiesTransformers) {
+      properties = transformer(properties);
+    }
+    return DiagnosticPropertiesBuilder.fromProperties(properties.toList());
   }
 }

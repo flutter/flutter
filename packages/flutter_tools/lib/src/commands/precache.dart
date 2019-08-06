@@ -12,25 +12,27 @@ import '../version.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms', abbr: 'a', negatable: false,
-        help: 'Precache artifacts for all platforms.');
+        help: 'Precache artifacts for all host platforms.');
     argParser.addFlag('force', abbr: 'f', negatable: false,
         help: 'Force downloading of artifacts.');
     argParser.addFlag('android', negatable: true, defaultsTo: true,
-        help: 'Precache artifacts for Android development');
+        help: 'Precache artifacts for Android development.');
     argParser.addFlag('ios', negatable: true, defaultsTo: true,
-        help: 'Precache artifacts for iOS developemnt');
+        help: 'Precache artifacts for iOS development.');
     argParser.addFlag('web', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for web development');
+        help: 'Precache artifacts for web development.');
     argParser.addFlag('linux', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for linux desktop development');
+        help: 'Precache artifacts for Linux desktop development.');
     argParser.addFlag('windows', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for windows desktop development');
+        help: 'Precache artifacts for Windows desktop development.');
     argParser.addFlag('macos', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for macOS desktop development');
+        help: 'Precache artifacts for macOS desktop development.');
     argParser.addFlag('fuchsia', negatable: true, defaultsTo: false,
-        help: 'Precache artifacts for Fuchsia development');
+        help: 'Precache artifacts for Fuchsia development.');
     argParser.addFlag('universal', negatable: true, defaultsTo: true,
-        help: 'Precache artifacts required for all developments');
+        help: 'Precache artifacts required for any development platform.');
+    argParser.addFlag('flutter_runner', negatable: true, defaultsTo: false,
+        help: 'Precache the flutter runner artifacts.', hide: true);
   }
 
   @override
@@ -50,7 +52,7 @@ class PrecacheCommand extends FlutterCommand {
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
     for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
-      if (FlutterVersion.instance.isStable && artifact.unstable) {
+      if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
       }
       if (argResults[artifact.name]) {

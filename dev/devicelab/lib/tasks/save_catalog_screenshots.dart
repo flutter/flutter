@@ -65,7 +65,7 @@ class Upload {
       } else {
         // TODO(hansmuller): only retry on 5xx and 429 responses
         logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
-        logMessage(await response.transform<String>(utf8.decoder).join());
+        logMessage(await response.cast<List<int>>().transform<String>(utf8.decoder).join());
       }
       return response.statusCode == HttpStatus.ok;
     } on TimeoutException catch (_) {
@@ -80,7 +80,7 @@ class Upload {
       throw UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
 
     largeImage ??= await File(fromPath).readAsBytes();
-    smallImage ??= encodePng(copyResize(decodePng(largeImage), 300));
+    smallImage ??= encodePng(copyResize(decodePng(largeImage), width: 300));
 
     if (!largeImageSaved)
       largeImageSaved = await save(client, largeName, largeImage);

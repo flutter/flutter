@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import '../flutter_test_alternative.dart';
 
@@ -66,5 +67,23 @@ void main() {
     // Nothing should have changed for the previous event's listeners.
     expect(first.callbackRan, isTrue);
     expect(second.callbackRan, isFalse);
+  });
+
+  test('works with transformed events', () {
+    final PointerSignalResolver resolver = PointerSignalResolver();
+    const PointerSignalEvent originalEvent = PointerScrollEvent();
+    final PointerSignalEvent transformedEvent = originalEvent
+        .transformed(Matrix4.translationValues(10.0, 20.0, 0.0));
+
+    expect(originalEvent, isNot(same(transformedEvent)));
+    expect(transformedEvent.original, same(originalEvent));
+
+    final List<PointerSignalEvent> events = <PointerSignalEvent>[];
+    resolver.register(transformedEvent, (PointerSignalEvent event) {
+      events.add(event);
+    });
+    resolver.resolve(originalEvent);
+
+    expect(events.single, same(transformedEvent));
   });
 }

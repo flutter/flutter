@@ -171,13 +171,13 @@ class _TimePickerHeaderPiece {
 /// positioned in the center of the header, with all other pieces positioned
 /// to the left or right of it.
 class _TimePickerHeaderFormat {
-  const _TimePickerHeaderFormat(this.centrepieceIndex, this.pieces)
-    : assert(centrepieceIndex != null),
+  const _TimePickerHeaderFormat(this.centerpieceIndex, this.pieces)
+    : assert(centerpieceIndex != null),
       assert(pieces != null);
 
   /// Index into the [pieces] list pointing at the piece that contains the
   /// pivot fragment.
-  final int centrepieceIndex;
+  final int centerpieceIndex;
 
   /// Pieces that constitute a time picker header.
   final List<_TimePickerHeaderPiece> pieces;
@@ -514,14 +514,14 @@ _TimePickerHeaderFormat _buildHeaderFormat(
         pieces.add(piece1);
         break;
     }
-    int centrepieceIndex;
+    int centerpieceIndex;
     for (int i = 0; i < pieces.length; i += 1) {
       if (pieces[i].pivotIndex >= 0) {
-        centrepieceIndex = i;
+        centerpieceIndex = i;
       }
     }
-    assert(centrepieceIndex != null);
-    return _TimePickerHeaderFormat(centrepieceIndex, pieces);
+    assert(centerpieceIndex != null);
+    return _TimePickerHeaderFormat(centerpieceIndex, pieces);
   }
 
   // Convenience function for creating a time header piece with up to three fragments.
@@ -632,9 +632,9 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
         fragmentsFlattened.add(fragment);
       }
 
-      if (pieceIndex == format.centrepieceIndex)
-        pivotIndex += format.pieces[format.centrepieceIndex].pivotIndex;
-      else if (pieceIndex < format.centrepieceIndex)
+      if (pieceIndex == format.centerpieceIndex)
+        pivotIndex += format.pieces[format.centerpieceIndex].pivotIndex;
+      else if (pieceIndex < format.centerpieceIndex)
         pivotIndex += piece.fragments.length;
     }
 
@@ -659,14 +659,14 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
       margin = piece.bottomMargin;
     }
 
-    final _TimePickerHeaderPiece centrepiece = format.pieces[format.centrepieceIndex];
+    final _TimePickerHeaderPiece centerpiece = format.pieces[format.centerpieceIndex];
     double y = (size.height - height) / 2.0;
     for (int pieceIndex = 0; pieceIndex < format.pieces.length; pieceIndex += 1) {
       final double pieceVerticalCenter = y + pieceHeights[pieceIndex] / 2.0;
-      if (pieceIndex != format.centrepieceIndex)
+      if (pieceIndex != format.centerpieceIndex)
         _positionPiece(size.width, pieceVerticalCenter, childSizes, format.pieces[pieceIndex].fragments);
       else
-        _positionPivoted(size.width, pieceVerticalCenter, childSizes, centrepiece.fragments, centrepiece.pivotIndex);
+        _positionPivoted(size.width, pieceVerticalCenter, childSizes, centerpiece.fragments, centerpiece.pivotIndex);
 
       y += pieceHeights[pieceIndex] + format.pieces[pieceIndex].bottomMargin;
     }
@@ -993,6 +993,7 @@ class _DialPainter extends CustomPainter {
         final double width = labelPainter.width * _semanticNodeSizeScale;
         final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + Offset(-width / 2.0, -height / 2.0);
+        final TextSpan textSpan = labelPainter.text;
         final CustomPainterSemantics node = CustomPainterSemantics(
           rect: Rect.fromLTRB(
             nodeOffset.dx - 24.0 + width / 2,
@@ -1003,7 +1004,7 @@ class _DialPainter extends CustomPainter {
           properties: SemanticsProperties(
             sortKey: OrdinalSortKey(i.toDouble() + ordinalOffset),
             selected: label.value == selectedValue,
-            value: labelPainter.text.text,
+            value: textSpan?.text,
             textDirection: textDirection,
             onTap: label.onTap,
           ),

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:flutter_driver/src/common/find.dart';
 import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
@@ -102,7 +103,7 @@ void main() {
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws state error multiple matches are found', (WidgetTester tester) async {
       final SemanticsHandle semantics = RendererBinding.instance.pipelineOwner.ensureSemantics();
@@ -266,5 +267,147 @@ void main() {
     result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
     await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
+  });
+
+  testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0, bool properties = true }) async {
+      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
+      final DiagnosticsTreeResult result = DiagnosticsTreeResult((await extension.call(arguments))['response']);
+      return result.json;
+    }
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+            child: const Text('Hello World', key: ValueKey<String>('Text'))
+        ),
+      ),
+    );
+
+    // Widget
+    Map<String, Object> result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0);
+    expect(result['children'], isNull); // depth: 0
+    expect(result['widgetRuntimeType'], 'Text');
+
+    List<Map<String, Object>> properties = result['properties'];
+    Map<String, Object> stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'data');
+    expect(stringProperty['description'], '"Hello World"');
+    expect(stringProperty['propertyType'], 'String');
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['widgetRuntimeType'], 'Text');
+    expect(result['properties'], isNull); // properties: false
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 1);
+    List<Map<String, Object>> children = result['children'];
+    expect(children.single['children'], isNull);
+
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 100);
+    children = result['children'];
+    expect(children.single['children'], isEmpty);
+
+    // RenderObject
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0);
+    expect(result['children'], isNull); // depth: 0
+    expect(result['properties'], isNotNull);
+    expect(result['description'], startsWith('RenderParagraph'));
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['properties'], isNull); // properties: false
+    expect(result['description'], startsWith('RenderParagraph'));
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 1);
+    children = result['children'];
+    final Map<String, Object> textSpan = children.single;
+    expect(textSpan['description'], 'TextSpan');
+    properties = textSpan['properties'];
+    stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'text');
+    expect(stringProperty['description'], '"Hello World"');
+    expect(stringProperty['propertyType'], 'String');
+    expect(children.single['children'], isNull);
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
+    children = result['children'];
+    expect(children.single['children'], isEmpty);
+  });
+
+  group('waitUntilFrameSync', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+
+    setUp(() {
+      extension = FlutterDriverExtension((String arg) async => '', true);
+      result = null;
+    });
+
+    testWidgets('returns immediately when frame is synced', (
+        WidgetTester tester) async {
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+
+      extension.call(const WaitUntilNoPendingFrame().serialize())
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
   });
 }

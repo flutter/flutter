@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' show Random, max;
 
-import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
 import '../convert.dart';
@@ -22,8 +21,19 @@ class BotDetector {
   const BotDetector();
 
   bool get isRunningOnBot {
-    return platform.environment['BOT'] != 'false'
-       && (platform.environment['BOT'] == 'true'
+    if (
+        // Explicitly stated to not be a bot.
+        platform.environment['BOT'] == 'false'
+
+        // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
+        || platform.environment.containsKey('FLUTTER_HOST')
+        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
+        || platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
+    ) {
+      return false;
+    }
+
+    return platform.environment['BOT'] == 'true'
 
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
@@ -37,31 +47,22 @@ class BotDetector {
         || platform.environment.containsKey('CIRRUS_CI')
 
         // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
+        || (platform.environment.containsKey('AWS_REGION') &&
+            platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
         // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
         || platform.environment.containsKey('JENKINS_URL')
 
         // Properties on Flutter's Chrome Infra bots.
         || platform.environment['CHROME_HEADLESS'] == '1'
-        || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME')
+        || platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 
 bool get isRunningOnBot {
   final BotDetector botDetector = context.get<BotDetector>() ?? _kBotDetector;
   return botDetector.isRunningOnBot;
-}
-
-String hex(List<int> bytes) {
-  final StringBuffer result = StringBuffer();
-  for (int part in bytes)
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
-  return result.toString();
-}
-
-String calculateSha(File file) {
-  return hex(sha1.convert(file.readAsBytesSync()).bytes);
 }
 
 /// Convert `foo_bar` to `fooBar`.
@@ -265,11 +266,11 @@ class Poller {
   final Duration initialDelay;
   final Duration pollingInterval;
 
-  bool _cancelled = false;
+  bool _canceled = false;
   Timer _timer;
 
   Future<void> _handleCallback() async {
-    if (_cancelled)
+    if (_canceled)
       return;
 
     try {
@@ -278,13 +279,13 @@ class Poller {
       printTrace('Error from poller: $error');
     }
 
-    if (!_cancelled)
+    if (!_canceled)
       _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.
   void cancel() {
-    _cancelled = true;
+    _canceled = true;
     _timer?.cancel();
     _timer = null;
   }

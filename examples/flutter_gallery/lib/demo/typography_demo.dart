@@ -73,7 +73,7 @@ class TypographyDemo extends StatelessWidget {
       body: SafeArea(
         top: false,
         bottom: false,
-        child: ListView(children: styleItems),
+        child: Scrollbar(child: ListView(children: styleItems)),
       ),
     );
   }

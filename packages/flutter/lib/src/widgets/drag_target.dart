@@ -87,6 +87,8 @@ enum DragAnchor {
 /// [childWhenDragging] when one or more drags are underway. Otherwise, this
 /// widget always displays [child].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=QzA4c4QHZCY}
+///
 /// See also:
 ///
 ///  * [DragTarget]
@@ -661,7 +663,7 @@ class _DragAvatar<T> extends Drag {
     _activeTarget = newTarget;
   }
 
-  Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
+  Iterable<_DragTargetState<T>> _getDragTargets(Iterable<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     for (HitTestEntry entry in path) {

@@ -6,10 +6,14 @@ import 'dart:async';
 
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../convert.dart';
+import '../features.dart';
 import '../globals.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
-import '../usage.dart';
+import '../version.dart';
 
 class ConfigCommand extends FlutterCommand {
   ConfigCommand({ bool verboseHelp = false }) {
@@ -22,10 +26,27 @@ class ConfigCommand extends FlutterCommand {
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
     argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('build-dir', help: 'The relative path to override a projects build directory',
+        valueHelp: 'out/');
     argParser.addFlag('machine',
       negatable: false,
       hide: !verboseHelp,
       help: 'Print config values as json.');
+    for (Feature feature in allFeatures) {
+      if (feature.configSetting == null) {
+        continue;
+      }
+      argParser.addFlag(
+        feature.configSetting,
+        help: feature.generateHelpMessage(),
+        negatable: true,
+      );
+    }
+    argParser.addFlag(
+      'clear-features',
+      help: 'Remove all configured features and restore them to the default values.',
+      negatable: false,
+    );
   }
 
   @override
@@ -45,14 +66,27 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
-
-  @override
   String get usageFooter {
-    // List all config settings.
-    String values = config.keys.map<String>((String key) {
-      return '  $key: ${config.getValue(key)}';
-    }).join('\n');
+    // List all config settings. for feature flags, include whether they
+    // are available.
+    final Map<String, Feature> featuresByName = <String, Feature>{};
+    final String channel = FlutterVersion.instance.channel;
+    for (Feature feature in allFeatures) {
+      if (feature.configSetting != null) {
+        featuresByName[feature.configSetting] = feature;
+      }
+    }
+    String values = config.keys
+        .map<String>((String key) {
+          String configFooter = '';
+          if (featuresByName.containsKey(key)) {
+            final FeatureChannelSetting setting = featuresByName[key].getSettingForChannel(channel);
+            if (!setting.available) {
+              configFooter = '(Unavailable)';
+            }
+          }
+          return '  $key: ${config.getValue(key)} $configFooter';
+        }).join('\n');
     if (values.isEmpty)
       values = '  No settings have been configured.';
     return
@@ -68,6 +102,15 @@ class ConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['machine']) {
       await handleMachine();
+      return null;
+    }
+
+    if (argResults['clear-features']) {
+      for (Feature feature in allFeatures) {
+        if (feature.configSetting != null) {
+          config.removeValue(feature.configSetting);
+        }
+      }
       return null;
     }
 
@@ -88,6 +131,25 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
+
+    if (argResults.wasParsed('build-dir')) {
+      final String buildDir = argResults['build-dir'];
+      if (fs.path.isAbsolute(buildDir)) {
+        throwToolExit('build-dir should be a relative path');
+      }
+      _updateConfig('build-dir', buildDir);
+    }
+
+    for (Feature feature in allFeatures) {
+      if (feature.configSetting == null) {
+        continue;
+      }
+      if (argResults.wasParsed(feature.configSetting)) {
+        final bool keyValue = argResults[feature.configSetting];
+        config.setValue(feature.configSetting, keyValue);
+        printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
+      }
+    }
 
     if (argResults.arguments.isEmpty)
       printStatus(usage);

@@ -217,7 +217,9 @@ class DrawerController extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
+  ///    the different behaviors.
+  ///
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
@@ -344,7 +346,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
         break;
     }
 
-    final bool opened = _controller.value > 0.5 ? true : false;
+    final bool opened = _controller.value > 0.5;
     if (opened != _previouslyOpened && widget.drawerCallback != null)
       widget.drawerCallback(opened);
     _previouslyOpened = opened;

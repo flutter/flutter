@@ -21,6 +21,8 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
 /// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
@@ -64,7 +66,13 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return Center(child: Text(tab.text));
+///           final String label = tab.text.toLowerCase();
+///           return Center(
+///             child: Text(
+///               'This is the $label tab',
+///               style: const TextStyle(fontSize: 36),
+///             ),
+///           );
 ///         }).toList(),
 ///       ),
 ///     );
@@ -76,7 +84,7 @@ class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
   ///
-  /// The [length] must not be null or negative. Typically its a value greater
+  /// The [length] must not be null or negative. Typically it's a value greater
   /// than one, i.e. typically there are two or more tabs. The [length] must
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
@@ -107,11 +115,10 @@ class TabController extends ChangeNotifier {
   /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
   /// if they are non-null.
   ///
-  /// This will reuse the existing [_animationController].
+  /// This method is used by [DefaultTabController].
   ///
-  /// This is useful for [DefaultTabController], for example when
-  /// [DefaultTabController.length] is updated, this method is called so that a
-  /// new [TabController] is created without having to create a new [AnimationController].
+  /// When [DefaultTabController.length] is updated, this method is called to
+  /// create a new [TabController] without creating a new [AnimationController].
   TabController _copyWith({ int index, int length, int previousIndex }) {
     return TabController._(
       index: index ?? _index,
@@ -130,18 +137,20 @@ class TabController extends ChangeNotifier {
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
   ///
-  /// If the TabController was disposed then return null.
+  /// If this [TabController] was disposed, then return null.
   Animation<double> get animation => _animationController?.view;
   AnimationController _animationController;
 
-  /// The total number of tabs. Typically greater than one. Must match
-  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
     assert(value != null);
     assert(value >= 0 && (value < length || length == 0));
-    assert(duration == null ? curve == null : true);
+    assert(duration != null || curve == null);
     assert(_indexIsChangingCount >= 0);
     if (value == _index || length < 2)
       return;
@@ -164,9 +173,10 @@ class TabController extends ChangeNotifier {
     }
   }
 
-  /// The index of the currently selected tab. Changing the index also updates
-  /// [previousIndex], sets the [animation]'s value to index, resets
-  /// [indexIsChanging] to false, and notifies listeners.
+  /// The index of the currently selected tab.
+  ///
+  /// Changing the index also updates [previousIndex], sets the [animation]'s
+  /// value to index, resets [indexIsChanging] to false, and notifies listeners.
   ///
   /// To change the currently selected tab and play the [animation] use [animateTo].
   ///
@@ -178,7 +188,9 @@ class TabController extends ChangeNotifier {
     _changeIndex(value);
   }
 
-  /// The index of the previously selected tab. Initially the same as [index].
+  /// The index of the previously selected tab.
+  ///
+  /// Initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
@@ -200,8 +212,9 @@ class TabController extends ChangeNotifier {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
-  /// The difference between the [animation]'s value and [index]. The offset
-  /// value must be between -1.0 and 1.0.
+  /// The difference between the [animation]'s value and [index].
+  ///
+  /// The offset value must be between -1.0 and 1.0.
   ///
   /// This property is typically set by the [TabBarView] when the user
   /// drags left or right. A value between -1.0 and 0.0 implies that the
@@ -251,6 +264,8 @@ class _TabControllerScope extends InheritedWidget {
 /// widgets are created by a stateless parent widget or by different parent
 /// widgets.
 ///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
@@ -270,7 +285,13 @@ class _TabControllerScope extends InheritedWidget {
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return Center(child: Text(tab.text));
+///             final String label = tab.text.toLowerCase();
+///             return Center(
+///               child: Text(
+///                 'This is the $label tab',
+///                 style: const TextStyle(fontSize: 36),
+///               ),
+///             );
 ///           }).toList(),
 ///         ),
 ///       ),
@@ -295,8 +316,10 @@ class DefaultTabController extends StatefulWidget {
        assert(initialIndex >= 0 && initialIndex < length),
        super(key: key);
 
-  /// The total number of tabs. Typically greater than one. Must match
-  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   /// The initial index of the selected tab.

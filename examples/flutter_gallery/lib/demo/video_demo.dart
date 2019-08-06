@@ -405,19 +405,21 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
-            child: ListView(
-              children: <Widget>[
-                VideoCard(
-                  title: 'Butterfly',
-                  subtitle: '… flutters by',
-                  controller: butterflyController,
-                ),
-                VideoCard(
-                  title: 'Bee',
-                  subtitle: '… gently buzzing',
-                  controller: beeController,
-                ),
-              ],
+            child: Scrollbar(
+              child: ListView(
+                children: <Widget>[
+                  VideoCard(
+                    title: 'Butterfly',
+                    subtitle: '… flutters by',
+                    controller: butterflyController,
+                  ),
+                  VideoCard(
+                    title: 'Bee',
+                    subtitle: '… gently buzzing',
+                    controller: beeController,
+                  ),
+                ],
+              ),
             ),
             connectedCompleter: connectedCompleter,
             scaffoldKey: scaffoldKey,

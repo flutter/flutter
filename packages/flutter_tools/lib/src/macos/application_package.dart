@@ -6,8 +6,6 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
@@ -123,21 +121,25 @@ class BuildableMacOSApp extends MacOSApp {
 
   @override
   String applicationBundle(BuildMode buildMode) {
-    final ProcessResult result = processManager.runSync(<String>[
-      project.nameScript.path,
-      buildMode == BuildMode.debug ? 'debug' : 'release'
-    ], runInShell: true);
-    final String directory = result.stdout.toString().trim();
-    return directory;
+    final File appBundleNameFile = project.nameFile;
+    if (!appBundleNameFile.existsSync()) {
+      printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      return null;
+    }
+    return fs.path.join(
+        getMacOSBuildDirectory(),
+        'Build',
+        'Products',
+        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        appBundleNameFile.readAsStringSync().trim());
   }
 
   @override
   String executable(BuildMode buildMode) {
-    final ProcessResult result = processManager.runSync(<String>[
-      project.nameScript.path,
-      buildMode == BuildMode.debug ? 'debug' : 'release'
-    ], runInShell: true);
-    final String directory = result.stdout.toString().trim();
+    final String directory = applicationBundle(buildMode);
+    if (directory == null) {
+      return null;
+    }
     final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
     return executableAndId.executable;
   }

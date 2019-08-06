@@ -17,12 +17,11 @@ import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
-import 'src/crash_reporting.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
+import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/usage.dart';
 import 'src/version.dart';
 
 /// Runs the Flutter tool with support for the specified list of [commands].
@@ -56,14 +55,27 @@ Future<int> run(
       onFailure: (String _) => 'en_US',
     );
 
-    try {
-      await runner.run(args);
-      await _exit(0);
-    } catch (error, stackTrace) {
-      String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString();
-      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
-    }
-    return 0;
+    String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    Object firstError;
+    StackTrace firstStackTrace;
+    return await runZoned<Future<int>>(() async {
+      try {
+        await runner.run(args);
+        return await _exit(0);
+      } catch (error, stackTrace) {
+        firstError = error;
+        firstStackTrace = stackTrace;
+        return await _handleToolError(
+            error, stackTrace, verbose, args, reportCrashes, getVersion);
+      }
+    }, onError: (Object error, StackTrace stackTrace) async {
+      // If sending a crash report throws an error into the zone, we don't want
+      // to re-try sending the crash report with *that* error. Rather, we want
+      // to send the original error that triggered the crash report.
+      final Object e = firstError ?? error;
+      final StackTrace s = firstStackTrace ?? stackTrace;
+      await _handleToolError(e, s, verbose, args, reportCrashes, getVersion);
+    });
   }, overrides: overrides);
 }
 
@@ -104,18 +116,20 @@ Future<int> _handleToolError(
       stderr.writeln(stackTrace.toString());
       return _exit(1);
     } else {
-      flutterUsage.sendException(error, stackTrace);
+      // Report to both [Usage] and [CrashReportSender].
+      flutterUsage.sendException(error);
+      await CrashReportSender.instance.sendReport(
+        error: error,
+        stackTrace: stackTrace,
+        getFlutterVersion: getFlutterVersion,
+        command: args.join(' '),
+      );
 
       if (error is String)
         stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
       else
         stderr.writeln('Oops; flutter has exited unexpectedly.');
 
-      await CrashReportSender.instance.sendReport(
-        error: error,
-        stackTrace: stackTrace,
-        getFlutterVersion: getFlutterVersion,
-      );
       try {
         final File file = await _createLocalCrashReport(args, error, stackTrace);
         stderr.writeln(

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../base/version.dart';
@@ -34,10 +35,19 @@ class VersionCommand extends FlutterCommand {
   Version minSupportedVersion = Version.parse('1.2.1');
 
   Future<List<String>> getTags() async {
-    final RunResult runResult = await runCheckedAsync(
-      <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
-      workingDirectory: Cache.flutterRoot,
-    );
+    RunResult runResult;
+    try {
+      runResult = await runCheckedAsync(
+        <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
+        workingDirectory: Cache.flutterRoot,
+      );
+    } on ProcessException catch (error) {
+      throwToolExit(
+        'Unable to get the tags. '
+        'This might be due to git not being installed or an internal error'
+        '\nError: $error.'
+      );
+    }
     return runResult.toString().split('\n');
   }
 

@@ -326,6 +326,7 @@ void main() {
     });
 
     group('matches', () {
+
       testWidgets('if comparator succeeds', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
@@ -501,7 +502,9 @@ void main() {
       for (int index in SemanticsAction.values.keys)
         actions |= index;
       for (int index in SemanticsFlag.values.keys)
-        flags |= index;
+        // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
+        if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
+          flags |= index;
       final SemanticsData data = SemanticsData(
         flags: flags,
         actions: actions,
@@ -538,12 +541,15 @@ void main() {
          isSelected: true,
          isButton: true,
          isTextField: true,
+         isReadOnly: true,
          hasEnabledState: true,
          isFocused: true,
          isEnabled: true,
          isInMutuallyExclusiveGroup: true,
          isHeader: true,
          isObscured: true,
+         // TODO(mdebbar): Uncomment after https://github.com/flutter/engine/pull/9894
+         //isMultiline: true,
          namesRoute: true,
          scopesRoute: true,
          isHidden: true,
@@ -647,6 +653,11 @@ class _FakeComparator implements GoldenFileComparator {
     this.golden = golden;
     this.imageBytes = imageBytes;
     return Future<void>.value();
+  }
+
+  @override
+  Uri getTestUri(Uri key, int version) {
+    return key;
   }
 }
 

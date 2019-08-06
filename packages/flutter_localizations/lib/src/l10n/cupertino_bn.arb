@@ -1,0 +1,22 @@
+{
+  "datePickerHourSemanticsLabelOne": "$hourটা বাজে",
+  "datePickerHourSemanticsLabelOther": "$hourটা বাজে",
+  "datePickerMinuteSemanticsLabelOne": "১ মিনিট",
+  "datePickerMinuteSemanticsLabelOther": "$minute মিনিট",
+  "datePickerDateOrder": "mdy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+  "todayLabel": "আজ",
+  "alertDialogLabel": "সতর্কতা",
+  "timerPickerHourLabelOne": "ঘণ্টা",
+  "timerPickerHourLabelOther": "ঘণ্টা",
+  "timerPickerMinuteLabelOne": "মিনিট।",
+  "timerPickerMinuteLabelOther": "মিনিট।",
+  "timerPickerSecondLabelOne": "সেকেন্ড।",
+  "timerPickerSecondLabelOther": "সেকেন্ড।",
+  "cutButtonLabel": "কাট করুন",
+  "copyButtonLabel": "কপি করুন",
+  "pasteButtonLabel": "পেস্ট করুন",
+  "selectAllButtonLabel": "সব বেছে নিন"
+}

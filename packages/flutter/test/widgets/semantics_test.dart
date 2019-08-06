@@ -62,7 +62,7 @@ void main() {
       ignoreId: true,
     ));
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Detach and reattach assert', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -443,7 +443,7 @@ void main() {
           semanticsOwner.performAction(expectedId, action, true);
           break;
         case SemanticsAction.setSelection:
-          semanticsOwner.performAction(expectedId, action, <String, int>{
+          semanticsOwner.performAction(expectedId, action, <dynamic, dynamic>{
             'base': 4,
             'extent': 5,
           });
@@ -474,10 +474,12 @@ void main() {
           selected: true,
           button: true,
           textField: true,
+          readOnly: true,
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,
           obscured: true,
+          multiline: true,
           scopesRoute: true,
           namesRoute: true,
           image: true,
@@ -536,7 +538,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

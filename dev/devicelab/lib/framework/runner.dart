@@ -11,10 +11,6 @@ import 'package:vm_service_client/vm_service_client.dart';
 
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// Slightly longer than task timeout that gives the task runner a chance to
-/// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
-
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
 ///
@@ -23,7 +19,12 @@ const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) async {
+Future<Map<String, dynamic>> runTask(
+  String taskName, {
+  bool silent = false,
+  String localEngine,
+  String localEngineSrcPath,
+}) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
@@ -32,6 +33,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
+    if (localEngine != null) '-DlocalEngine=$localEngine',
+    if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
     taskExecutable,
   ]);
 
@@ -64,21 +67,11 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     stderr.writeln('[$taskName] [STDERR] $line');
   });
 
-  String waitingFor = 'connection';
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    waitingFor = 'task completion';
-    final Map<String, dynamic> taskResult =
-        await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
-    waitingFor = 'task process to exit';
-    await runner.exitCode.timeout(const Duration(seconds: 60));
+    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask');
+    await runner.exitCode;
     return taskResult;
-  } on TimeoutException catch (timeout) {
-    runner.kill(ProcessSignal.sigint);
-    return <String, dynamic>{
-      'success': false,
-      'reason': 'Timeout in runner.dart waiting for $waitingFor: ${timeout.message}',
-    };
   } finally {
     if (!runnerFinished)
       runner.kill(ProcessSignal.sigkill);
@@ -97,14 +90,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
   pathSegments.add('ws');
   final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
       pathSegments).toString();
-  final DateTime started = DateTime.now();
-
-  // TODO(yjbanov): due to lack of imagination at the moment the handshake with
-  //                the task process is very rudimentary and requires this small
-  //                delay to let the task process open up the VM service port.
-  //                Otherwise we almost always hit the non-ready case first and
-  //                wait a whole 1 second, which is annoying.
-  await Future<void>.delayed(const Duration(milliseconds: 100));
+  final Stopwatch stopwatch = Stopwatch()..start();
 
   while (true) {
     try {
@@ -120,17 +106,9 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
         throw 'not ready yet';
       return isolate;
     } catch (error) {
-      const Duration connectionTimeout = Duration(seconds: 10);
-      if (DateTime.now().difference(started) > connectionTimeout) {
-        throw TimeoutException(
-          'Failed to connect to the task runner process',
-          connectionTimeout,
-        );
-      }
-      print('VM service not ready yet: $error');
-      const Duration pauseBetweenRetries = Duration(milliseconds: 200);
-      print('Will retry in $pauseBetweenRetries.');
-      await Future<void>.delayed(pauseBetweenRetries);
+      if (stopwatch.elapsed > const Duration(seconds: 10))
+        print('VM service still not ready after ${stopwatch.elapsed}: $error\nContinuing to retry...');
+      await Future<void>.delayed(const Duration(milliseconds: 50));
     }
   }
 }

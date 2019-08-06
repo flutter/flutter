@@ -196,7 +196,8 @@ void main() {
                       title: Text('App Bar'),
                     ),
                   ),
-                ]..addAll(slivers),
+                  ...slivers,
+                ],
               );
             },
           ),
@@ -259,7 +260,7 @@ void main() {
     ));
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('correct scrollProgress for unbound', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
@@ -405,7 +406,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true, ignoreRect: true, ignoreTransform: true));
 
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   group('showOnScreen', () {
 

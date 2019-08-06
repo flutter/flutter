@@ -33,6 +33,8 @@ import 'framework.dart';
 /// ```
 /// {@end-tool}
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7FJgd7QN1zI}
+///
 /// See also:
 ///
 ///  * [Row] and [Column], which are the most common containers to use a Spacer

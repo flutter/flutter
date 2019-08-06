@@ -250,8 +250,17 @@ void main() {
     });
   });
 
+  test('mutating ColorFilterLayer fields triggers needsAddToScene', () {
+    final ColorFilterLayer layer = ColorFilterLayer(
+      colorFilter: const ColorFilter.mode(Color(0xFFFF0000), BlendMode.color),
+    );
+    checkNeedsAddToScene(layer, () {
+      layer.colorFilter = const ColorFilter.mode(Color(0xFF00FF00), BlendMode.color);
+    });
+  });
+
   test('mutating ShaderMaskLayer fields triggers needsAddToScene', () {
-    const Gradient gradient = RadialGradient(colors: <Color>[Color(0), Color(1)]);
+    const Gradient gradient = RadialGradient(colors: <Color>[Color(0x00000000), Color(0x00000001)]);
     final Shader shader = gradient.createShader(Rect.zero);
     final ShaderMaskLayer layer = ShaderMaskLayer(shader: shader, maskRect: Rect.zero, blendMode: BlendMode.clear);
     checkNeedsAddToScene(layer, () {
@@ -274,7 +283,7 @@ void main() {
 
   test('mutating PhysicalModelLayer fields triggers needsAddToScene', () {
     final PhysicalModelLayer layer = PhysicalModelLayer(
-        clipPath: Path(), elevation: 0, color: const Color(0), shadowColor: const Color(0));
+        clipPath: Path(), elevation: 0, color: const Color(0x00000000), shadowColor: const Color(0x00000000));
     checkNeedsAddToScene(layer, () {
       final Path newPath = Path();
       newPath.addRect(unitRect);
@@ -284,10 +293,10 @@ void main() {
       layer.elevation = 1;
     });
     checkNeedsAddToScene(layer, () {
-      layer.color = const Color(1);
+      layer.color = const Color(0x00000001);
     });
     checkNeedsAddToScene(layer, () {
-      layer.shadowColor = const Color(1);
+      layer.shadowColor = const Color(0x00000001);
     });
   });
 
@@ -330,14 +339,14 @@ void main() {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
@@ -354,14 +363,14 @@ void main() {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0, enableCheck: false);
     });
@@ -376,14 +385,14 @@ void main() {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
     });
@@ -400,22 +409,22 @@ void main() {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
 
       layerA.append(PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(2, 2, 10, 10)),
         elevation: 1.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       ));
 
       final PhysicalModelLayer layerB =PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
       _testConflicts(layerA, layerB, expectedErrorCount: 0);
     });
@@ -435,25 +444,25 @@ void main() {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
 
       layerA.append(PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(15, 15, 25, 25)),
         elevation: 2.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       ));
 
       final PhysicalModelLayer layerB =PhysicalModelLayer(
         clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 4.0,
-        color: const Color(0),
-        shadowColor: const Color(0),
+        color: const Color(0x00000000),
+        shadowColor: const Color(0x00000000),
       );
 
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
-  });
+  }, skip: isBrowser);
 }

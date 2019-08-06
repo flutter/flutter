@@ -631,8 +631,8 @@ void main() {
 
       FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
@@ -777,8 +777,8 @@ void main() {
 
       FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
       final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
+      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
@@ -986,18 +986,38 @@ void main() {
       expect(keyB.currentState.focusNode.hasFocus, isFalse);
       expect(find.text('b'), findsOneWidget);
     });
+    testWidgets('Can focus root node.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      await tester.pumpWidget(
+        Focus(
+          key: key1,
+          child: Container(),
+        ),
+      );
+
+      final Element firstElement = tester.element(find.byKey(key1));
+      final FocusScopeNode rootNode = FocusScope.of(firstElement);
+      rootNode.requestFocus();
+
+      await tester.pump();
+
+      expect(rootNode.hasFocus, isTrue);
+      expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
+    });
   });
   group(Focus, () {
-    testWidgets('Focus.of stops at the nearest FocusScope.', (WidgetTester tester) async {
+    testWidgets('Focus.of stops at the nearest Focus widget.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
       final GlobalKey key3 = GlobalKey(debugLabel: '3');
       final GlobalKey key4 = GlobalKey(debugLabel: '4');
       final GlobalKey key5 = GlobalKey(debugLabel: '5');
       final GlobalKey key6 = GlobalKey(debugLabel: '6');
+      final FocusScopeNode scopeNode = FocusScopeNode();
       await tester.pumpWidget(
-        Focus(
+        FocusScope(
           key: key1,
+          node: scopeNode,
           debugLabel: 'Key 1',
           child: Container(
             key: key2,
@@ -1026,9 +1046,9 @@ void main() {
       final Element element6 = tester.element(find.byKey(key6));
       final FocusNode root = element1.owner.focusManager.rootScope;
 
-      expect(Focus.of(element1), equals(root));
-      expect(Focus.of(element2).parent, equals(root));
-      expect(Focus.of(element3).parent, equals(root));
+      expect(Focus.of(element1, nullOk: true), isNull);
+      expect(Focus.of(element2, nullOk: true), isNull);
+      expect(Focus.of(element3, nullOk: true), isNull);
       expect(Focus.of(element4).parent.parent, equals(root));
       expect(Focus.of(element5).parent.parent, equals(root));
       expect(Focus.of(element6).parent.parent.parent, equals(root));
@@ -1128,24 +1148,6 @@ void main() {
 
       expect(gotFocus, isTrue);
       expect(node.hasFocus, isTrue);
-    });
-    testWidgets('Can focus root node.', (WidgetTester tester) async {
-      final GlobalKey key1 = GlobalKey(debugLabel: '1');
-      await tester.pumpWidget(
-        Focus(
-          key: key1,
-          child: Container(),
-        ),
-      );
-
-      final Element firstElement = tester.element(find.byKey(key1));
-      final FocusNode rootNode = Focus.of(firstElement);
-      rootNode.requestFocus();
-
-      await tester.pump();
-
-      expect(rootNode.hasFocus, isTrue);
-      expect(rootNode, equals(firstElement.owner.focusManager.rootScope));
     });
   });
   testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {

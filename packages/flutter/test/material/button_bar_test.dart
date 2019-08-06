@@ -70,7 +70,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        theme: ThemeData(accentColor: const Color(1)),
+        theme: ThemeData(accentColor: const Color(0x00000001)),
         home: Builder(
           builder: (BuildContext context) {
             return Center(
@@ -104,7 +104,7 @@ void main() {
       ),
     );
 
-    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).textStyle.color, const Color(1));
+    expect(tester.widget<RawMaterialButton>(find.byType(RawMaterialButton)).textStyle.color, const Color(0x00000001));
 
     // Show the dialog
     await tester.tap(find.text('button'));
@@ -114,6 +114,6 @@ void main() {
       of: find.text('enabled'),
       matching: find.byType(RawMaterialButton),
     );
-    expect(tester.widget<RawMaterialButton>(dialogButton).textStyle.color, const Color(1));
+    expect(tester.widget<RawMaterialButton>(dialogButton).textStyle.color, const Color(0x00000001));
   });
 }

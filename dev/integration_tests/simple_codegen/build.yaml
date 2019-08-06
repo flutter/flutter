@@ -1,4 +1,4 @@
-# Read about `build.yaml` at https://pub.dartlang.org/packages/build_config
+# Read about `build.yaml` at https://pub.dev/packages/build_config
 builders:
   simple:
     import: "package:simple_codegen/builders.dart"

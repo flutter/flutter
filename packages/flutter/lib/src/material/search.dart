@@ -89,6 +89,40 @@ Future<T> showSearch<T>({
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
 
+  /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
+  /// [textInputAction].
+  ///
+  /// {@tool sample}
+  /// ```dart
+  /// class CustomSearchHintDelegate extends SearchDelegate {
+  ///   CustomSearchHintDelegate({
+  ///     String hintText,
+  ///   }) : super(
+  ///     searchFieldLabel: hintText,
+  ///     keyboardType: TextInputType.text,
+  ///     textInputAction: TextInputAction.search,
+  ///   );
+  ///
+  ///   @override
+  ///   Widget buildLeading(BuildContext context) => Text("leading");
+  ///
+  ///   @override
+  ///   Widget buildSuggestions(BuildContext context) => Text("suggestions");
+  ///
+  ///   @override
+  ///   Widget buildResults(BuildContext context) => Text('results');
+  ///
+  ///   @override
+  ///   List<Widget> buildActions(BuildContext context) => [];
+  /// }
+  /// ```
+  /// {@end-tool}
+  SearchDelegate({
+    this.searchFieldLabel,
+    this.keyboardType,
+    this.textInputAction = TextInputAction.search,
+  });
+
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
   ///
@@ -225,6 +259,22 @@ abstract class SearchDelegate<T> {
       ..pop(result);
   }
 
+  /// The hint text that is shown in the search field when it is empty.
+  ///
+  /// If this value is set to null, the value of MaterialLocalizations.of(context).searchFieldLabel will be used instead.
+  final String searchFieldLabel;
+
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to the default value specified in [TextField].
+  final TextInputType keyboardType;
+
+  /// The text input action configuring the soft keyboard to a particular action
+  /// button.
+  ///
+  /// Defaults to [TextInputAction.search].
+  final TextInputAction textInputAction;
+
   /// [Animation] triggered when the search pages fades in or out.
   ///
   /// This animation is commonly used to animate [AnimatedIcon]s of
@@ -355,7 +405,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   void initState() {
     super.initState();
-    queryTextController.addListener(_onQueryChanged);
+    widget.delegate._queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
     focusNode.addListener(_onFocusChanged);
@@ -365,7 +415,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   @override
   void dispose() {
     super.dispose();
-    queryTextController.removeListener(_onQueryChanged);
+    widget.delegate._queryTextController.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
     widget.delegate._focusNode = null;
@@ -379,6 +429,19 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate._currentBody == _SearchBody.suggestions) {
       focusNode.requestFocus();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_SearchPage<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.delegate != oldWidget.delegate) {
+      oldWidget.delegate._queryTextController.removeListener(_onQueryChanged);
+      widget.delegate._queryTextController.addListener(_onQueryChanged);
+      oldWidget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
+      widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
+      oldWidget.delegate._focusNode = null;
+      widget.delegate._focusNode = focusNode;
     }
   }
 
@@ -404,7 +467,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.searchFieldLabel
+      ?? MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -443,16 +507,18 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           brightness: theme.primaryColorBrightness,
           leading: widget.delegate.buildLeading(context),
           title: TextField(
-            controller: queryTextController,
+            controller: widget.delegate._queryTextController,
             focusNode: focusNode,
             style: theme.textTheme.title,
-            textInputAction: TextInputAction.search,
+            textInputAction: widget.delegate.textInputAction,
+            keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
             decoration: InputDecoration(
               border: InputBorder.none,
               hintText: searchFieldLabel,
+              hintStyle: theme.inputDecorationTheme.hintStyle,
             ),
           ),
           actions: widget.delegate.buildActions(context),
@@ -464,6 +530,4 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
       ),
     );
   }
-
-  TextEditingController get queryTextController => widget.delegate._queryTextController;
 }

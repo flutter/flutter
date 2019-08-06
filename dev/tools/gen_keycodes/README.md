@@ -27,6 +27,9 @@ used to generate the source files.
    generated data will be inserted.
  - `data/printable.json`: contains a mapping between Flutter key name and its
    printable character. This character is used as the key label.
+ - `data/synonyms.json`: contains a mapping between pseudo-keys that represent
+   other keys, and the sets of keys they represent. For example, this contains
+   the "shift" key that represents either a "shiftLeft" or "shiftRight" key.
  
  ## Running the tool
  
@@ -133,6 +136,13 @@ define. It has values in the following ranges.
     only meant to provide a fallback ability for apps to handle esoteric codes
     that their version of Flutter doesn’t support yet. The prefix for this code
     is the platform prefix from the previous sections, plus 0x100.
+
+  - **0x200 0000 0000 - 0x2FF FFFF FFFF**: For pseudo-keys which represent
+    combinations of other keys, and conceptual keys which don't have a physical
+    representation. This is where things like key synonyms are defined (e.g. 
+    "shiftLeft" is a synonym for "shift": the "shift" key is a pseudo-key
+    representing either the left or right shift key).
+
 
 **This is intended to get us out of the business of defining key codes where
 possible.** We still have to have mapping tables, but at least the actual minting

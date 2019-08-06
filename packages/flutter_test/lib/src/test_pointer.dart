@@ -26,8 +26,12 @@ class TestPointer {
     this.pointer = 1,
     this.kind = PointerDeviceKind.touch,
     this._device,
-  ])  : assert(kind != null),
-        assert(pointer != null) {
+    int buttons = kPrimaryButton,
+  ])
+      : assert(kind != null),
+        assert(pointer != null),
+        assert(buttons != null),
+        _buttons = buttons {
     switch (kind) {
       case PointerDeviceKind.mouse:
         _device ??= 1;
@@ -57,6 +61,11 @@ class TestPointer {
   /// [PointerDeviceKind.touch].
   final PointerDeviceKind kind;
 
+  /// The kind of buttons to simulate on Down and Move events. Defaults to
+  /// [kPrimaryButton].
+  int get buttons => _buttons;
+  int _buttons;
+
   /// Whether the pointer simulated by this object is currently down.
   ///
   /// A pointer is released (goes up) by calling [up] or [cancel].
@@ -73,8 +82,14 @@ class TestPointer {
 
   /// If a custom event is created outside of this class, this function is used
   /// to set the [isDown].
-  bool setDownInfo(PointerEvent event, Offset newLocation) {
+  bool setDownInfo(
+    PointerEvent event,
+    Offset newLocation, {
+    int buttons,
+  }) {
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     switch (event.runtimeType) {
       case PointerDownEvent:
         assert(!isDown);
@@ -95,15 +110,26 @@ class TestPointer {
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  ///
+  /// By default, the set of buttons in the last down or move event is used.
+  /// You can give a specific set of buttons by passing the `buttons` argument.
+  PointerDownEvent down(
+    Offset newLocation, {
+    Duration timeStamp = Duration.zero,
+    int buttons,
+  }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     return PointerDownEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
+      buttons: _buttons,
     );
   }
 
@@ -114,7 +140,14 @@ class TestPointer {
   ///
   /// [isDown] must be true when this is called, since move events can only
   /// be generated when the pointer is down.
-  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  ///
+  /// By default, the set of buttons in the last down or move event is used.
+  /// You can give a specific set of buttons by passing the `buttons` argument.
+  PointerMoveEvent move(
+    Offset newLocation, {
+    Duration timeStamp = Duration.zero,
+    int buttons,
+  }) {
     assert(
         isDown,
         'Move events can only be generated when the pointer is down. To '
@@ -122,12 +155,16 @@ class TestPointer {
         'up, use hover() instead.');
     final Offset delta = newLocation - location;
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     return PointerMoveEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: newLocation,
       delta: delta,
+      buttons: _buttons,
     );
   }
 
@@ -143,6 +180,7 @@ class TestPointer {
     return PointerUpEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
     );
@@ -160,6 +198,7 @@ class TestPointer {
     return PointerCancelEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
     );
@@ -170,35 +209,36 @@ class TestPointer {
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
   PointerAddedEvent addPointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
+    _location = location ?? _location;
     return PointerAddedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: _location ?? Offset.zero,
     );
   }
 
-  /// Create a [PointerRemovedEvent] with the kind the pointer was created with.
+  /// Create a [PointerRemovedEvent] with the [PointerDeviceKind] the pointer
+  /// was created with.
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
   PointerRemovedEvent removePointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
+    _location = location ?? _location;
     return PointerRemovedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: _location ?? Offset.zero,
     );
   }
 
@@ -225,8 +265,8 @@ class TestPointer {
     return PointerHoverEvent(
       timeStamp: timeStamp,
       kind: kind,
-      position: newLocation,
       device: _device,
+      position: newLocation,
       delta: delta,
     );
   }
@@ -246,6 +286,7 @@ class TestPointer {
     return PointerScrollEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       position: location,
       scrollDelta: scrollDelta,
     );
@@ -286,13 +327,16 @@ class TestGesture {
     @required HitTester hitTester,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device,
+    int buttons = kPrimaryButton,
   }) : assert(dispatcher != null),
        assert(hitTester != null),
        assert(pointer != null),
        assert(kind != null),
+       assert(buttons != null),
        _dispatcher = dispatcher,
        _hitTester = hitTester,
-       _pointer = TestPointer(pointer, kind),
+       _pointer = TestPointer(pointer, kind, device, buttons),
        _result = null;
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
@@ -331,14 +375,14 @@ class TestGesture {
   /// In a test, send a pointer add event for this pointer.
   Future<void> addPointer({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: _pointer.location), null);
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  Future<void> removePointer({ Duration timeStamp = Duration.zero }) {
+  Future<void> removePointer({ Duration timeStamp = Duration.zero}) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: _pointer.location), null);
     });
   }
 
@@ -360,7 +404,7 @@ class TestGesture {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         assert(_result != null,
-            'Move events with the pointer down must be preceeded by a down '
+            'Move events with the pointer down must be preceded by a down '
             'event that captures a hit test result.');
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
       } else {

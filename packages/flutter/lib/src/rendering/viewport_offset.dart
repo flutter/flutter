@@ -123,8 +123,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// Called when the viewport's content extents are established.
   ///
   /// The arguments are the minimum and maximum scroll extents respectively. The
-  /// minimum will be equal to or less than zero, the maximum will be equal to
-  /// or greater than zero.
+  /// minimum will be equal to or less than the maximum. In the case of slivers,
+  /// the minimum will be equal to or less than zero, the maximum will be equal
+  /// to or greater than zero.
   ///
   /// The maximum scroll extent has the viewport dimension subtracted from it.
   /// For instance, if there is 100.0 pixels of scrollable content, and the

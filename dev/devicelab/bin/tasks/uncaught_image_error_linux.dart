@@ -29,8 +29,9 @@ Future<void> main() async {
         deviceId,
       ];
       final Process process = await startProcess(
-          path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['run']..addAll(options));
+        path.join(flutterDirectory.path, 'bin', 'flutter'),
+        <String>['run', ...options],
+      );
 
       final Stream<String> lines = process.stdout
         .transform(utf8.decoder)

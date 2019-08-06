@@ -58,6 +58,9 @@ class TestTextInput {
   bool get isRegistered => _isRegistered;
   bool _isRegistered = false;
 
+  /// Whether there are any active clients listening to text input.
+  bool get hasAnyClients => _client > 0;
+
   int _client = 0;
 
   /// Arguments supplied to the TextInput.setClient method call.
@@ -105,7 +108,7 @@ class TestTextInput {
     // test this code does not run in a package:test test zone.
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    BinaryMessages.handlePlatformMessage(
+    defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -137,7 +140,7 @@ class TestTextInput {
 
       final Completer<void> completer = Completer<void>();
 
-      BinaryMessages.handlePlatformMessage(
+      defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(

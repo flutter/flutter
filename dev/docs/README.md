@@ -58,4 +58,4 @@ import 'package:file/local.dart';
 
 Flutter has a rich community of packages that have been contributed by the
 open-source community. You can browse those packages at
-[pub.dartlang.org](http://pub.dartlang.org/flutter)
+[pub.dev/flutter](https://pub.dev/flutter)

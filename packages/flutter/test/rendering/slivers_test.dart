@@ -21,6 +21,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        '   needs compositing\n'
         '   parentData: MISSING\n'
         '   constraints: MISSING\n'
         '   size: MISSING\n'
@@ -37,6 +38,7 @@ void main() {
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderViewport#00000 NEEDS-LAYOUT NEEDS-PAINT\n'
+        '   needs compositing\n'
         '   parentData: <none>\n'
         '   constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   size: Size(800.0, 600.0)\n'
@@ -73,7 +75,8 @@ void main() {
     expect(
       root.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderViewport#00000 NEEDS-PAINT\n'
+        'RenderViewport#00000 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
+        ' │ needs compositing\n'
         ' │ parentData: <none>\n'
         ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ size: Size(800.0, 600.0)\n'
@@ -82,7 +85,7 @@ void main() {
         ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
         ' │ anchor: 0.0\n'
         ' │\n'
-        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─center child: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -98,7 +101,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 1: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 400.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -115,7 +118,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 2: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 800.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -132,7 +135,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' ├─child 3: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         ' │ │ parentData: paintOffset=Offset(0.0, 1200.0) (can use size)\n'
         ' │ │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │ │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -148,7 +151,7 @@ void main() {
         ' │     constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │     size: Size(800.0, 400.0)\n'
         ' │\n'
-        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT\n'
+        ' └─child 4: RenderSliverToBoxAdapter#00000 relayoutBoundary=up1 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE\n'
         '   │ parentData: paintOffset=Offset(0.0, 1600.0) (can use size)\n'
         '   │ constraints: SliverConstraints(AxisDirection.down,\n'
         '   │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -831,10 +834,13 @@ void main() {
       final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
       final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
+      final Matrix4 transform = Matrix4.translationValues(40.0, 150.0, 0.0);
 
-      final HitTestResult wrapped = HitTestResult();
+      final HitTestResult wrapped = MyHitTestResult()
+        ..publicPushTransform(transform);
       wrapped.add(entry1);
       expect(wrapped.path, equals(<HitTestEntry>[entry1]));
+      expect(entry1.transform, transform);
 
       final SliverHitTestResult wrapping = SliverHitTestResult.wrap(wrapped);
       expect(wrapping.path, equals(<HitTestEntry>[entry1]));
@@ -843,10 +849,12 @@ void main() {
       wrapping.add(entry2);
       expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2]));
       expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2]));
+      expect(entry2.transform, transform);
 
       wrapped.add(entry3);
       expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
       expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+      expect(entry3.transform, transform);
     });
 
     test('addWithAxisOffset', () {
@@ -920,4 +928,8 @@ class _DummyHitTestTarget implements HitTestTarget {
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     // Nothing to do.
   }
+}
+
+class MyHitTestResult extends HitTestResult {
+  void publicPushTransform(Matrix4 transform) => pushTransform(transform);
 }

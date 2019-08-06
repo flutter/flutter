@@ -46,11 +46,15 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
     this.title,
     this.demos,
     this.actions,
+    this.isScrollable = true,
+    this.showExampleCodeAction = true,
   });
 
   final List<ComponentDemoTabData> demos;
   final String title;
   final List<Widget> actions;
+  final bool isScrollable;
+  final bool showExampleCodeAction;
 
   void _showExampleCode(BuildContext context) {
     final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
@@ -93,16 +97,17 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(title),
-          actions: (actions ?? <Widget>[])..addAll(
-            <Widget>[
-              Builder(
-                builder: (BuildContext context) {
-                  return IconButton(
-                    icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
-                    onPressed: () => _showApiDocumentation(context),
-                  );
-                },
-              ),
+          actions: <Widget>[
+            ...?actions,
+            Builder(
+              builder: (BuildContext context) {
+                return IconButton(
+                  icon: const Icon(Icons.library_books, semanticLabel: 'Show documentation'),
+                  onPressed: () => _showApiDocumentation(context),
+                );
+              },
+            ),
+            if (showExampleCodeAction)
               Builder(
                 builder: (BuildContext context) {
                   return IconButton(
@@ -112,10 +117,9 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                   );
                 },
               ),
-            ],
-          ),
+          ],
           bottom: TabBar(
-            isScrollable: true,
+            isScrollable: isScrollable,
             tabs: demos.map<Widget>((ComponentDemoTabData data) => Tab(text: data.tabName)).toList(),
           ),
         ),

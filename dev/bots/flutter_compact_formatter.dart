@@ -11,7 +11,7 @@ final Stopwatch _stopwatch = Stopwatch();
 
 /// A wrapper around package:test's JSON reporter.
 ///
-/// This class behaves similarly to the compact reporter, but supresses all
+/// This class behaves similarly to the compact reporter, but suppresses all
 /// output except for progress until the end of testing. In other words, errors,
 /// [print] calls, and skipped test messages will not be printed during the run
 /// of the suite.

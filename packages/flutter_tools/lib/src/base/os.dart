@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+
+import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -25,7 +27,15 @@ abstract class OperatingSystemUtils {
   OperatingSystemUtils._private();
 
   /// Make the given file executable. This may be a no-op on some platforms.
-  ProcessResult makeExecutable(File file);
+  void makeExecutable(File file);
+
+  /// Updates the specified file system [entity] to have the file mode
+  /// bits set to the value defined by [mode], which can be specified in octal
+  /// (e.g. `644`) or symbolically (e.g. `u+x`).
+  ///
+  /// On operating systems that do not support file mode bits, this will be a
+  /// no-op.
+  void chmod(FileSystemEntity entity, String mode);
 
   /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
@@ -72,14 +82,61 @@ abstract class OperatingSystemUtils {
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
+
+  /// Returns an unused network port.
+  ///
+  /// Returns 0 if an unused port cannot be found.
+  ///
+  /// The port returned by this function may become used before it is bound by
+  /// its intended user.
+  Future<int> findFreePort({bool ipv6 = false}) async {
+    int port = 0;
+    ServerSocket serverSocket;
+    final InternetAddress loopback =
+        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    try {
+      serverSocket = await ServerSocket.bind(loopback, 0);
+      port = serverSocket.port;
+    } on SocketException catch (e) {
+      // If ipv4 loopback bind fails, try ipv6.
+      if (!ipv6) {
+        return findFreePort(ipv6: true);
+      }
+      printTrace('findFreePort failed: $e');
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('findFreePort failed: $e');
+    } finally {
+      if (serverSocket != null) {
+        await serverSocket.close();
+      }
+    }
+    return port;
+  }
 }
 
 class _PosixUtils extends OperatingSystemUtils {
   _PosixUtils() : super._private();
 
   @override
-  ProcessResult makeExecutable(File file) {
-    return processManager.runSync(<String>['chmod', 'a+x', file.path]);
+  void makeExecutable(File file) {
+    chmod(file, 'a+x');
+  }
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) {
+    try {
+      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      if (result.exitCode != 0) {
+        printTrace(
+          'Error trying to run chmod on ${entity.absolute.path}'
+          '\nstdout: ${result.stdout}'
+          '\nstderr: ${result.stderr}',
+        );
+      }
+    } on ProcessException catch (error) {
+      printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
+    }
   }
 
   @override
@@ -152,11 +209,11 @@ class _PosixUtils extends OperatingSystemUtils {
 class _WindowsUtils extends OperatingSystemUtils {
   _WindowsUtils() : super._private();
 
-  // This is a no-op.
   @override
-  ProcessResult makeExecutable(File file) {
-    return ProcessResult(0, 0, null, null);
-  }
+  void makeExecutable(File file) {}
+
+  @override
+  void chmod(FileSystemEntity entity, String mode) {}
 
   @override
   List<File> _which(String execName, { bool all = false }) {

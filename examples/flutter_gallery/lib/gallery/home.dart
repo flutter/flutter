@@ -60,6 +60,7 @@ class _CategoryItem extends StatelessWidget {
     return RepaintBoundary(
       child: RawMaterialButton(
         padding: EdgeInsets.zero,
+        hoverColor: theme.primaryColor.withOpacity(0.05),
         splashColor: theme.primaryColor.withOpacity(0.12),
         highlightColor: Colors.transparent,
         onPressed: onTap,

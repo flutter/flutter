@@ -18,7 +18,7 @@ The Material and Cupertino libraries use
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
 files, which have a `.arb` extension, to store localized translations
 of messages, format strings, and other values. This format is also
-used by the Dart [intl](https://pub.dartlang.org/packages/intl)
+used by the Dart [intl](https://pub.dev/packages/intl)
 package and it is supported by the
 [Google Translators Toolkit](https://translate.google.com/toolkit).
 
@@ -186,6 +186,19 @@ dart dev/tools/localizations/gen_localizations.dart --overwrite
 ```
 
 
+### Special handling for the Kannada (kn) translations
+
+Originally, the cupertino_kn.arb and material_kn.arb files contained unicode
+characters that can cause current versions of Emacs on Linux to crash. There is
+more information here: https://github.com/flutter/flutter/issues/36704.
+
+Rather than risking developers' editor sessions, the strings in these arb files
+(and the code generated for them) have been encoded using the appropriate
+escapes for JSON and Dart. The JSON format arb files were rewritten with
+dev/tools/localization/encode_kn_arb_files.dart. The localizations code
+generator uses generateEncodedString() from dev/tools/localization/localizations_utils.
+
+
 ### Translations Status, Reporting Errors
 
 The translations (the `.arb` files) in this directory are based on the
@@ -207,5 +220,5 @@ ordinary Flutter app.
 covers the `.arb` file format used to store localized translations
 of messages, format strings, and other values.
 
-The Dart [intl](https://pub.dartlang.org/packages/intl)
+The Dart [intl](https://pub.dev/packages/intl)
 package supports internationalization.

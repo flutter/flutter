@@ -124,6 +124,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.alignment = Alignment.topCenter,
     @required this.crossFadeState,
     @required this.duration,
+    this.reverseDuration,
     this.layoutBuilder = defaultLayoutBuilder,
   }) : assert(firstChild != null),
        assert(secondChild != null),
@@ -153,6 +154,11 @@ class AnimatedCrossFade extends StatefulWidget {
 
   /// The duration of the whole orchestrated animation.
   final Duration duration;
+
+  /// The duration of the whole orchestrated animation when running in reverse.
+  ///
+  /// If not supplied, this defaults to [duration].
+  final Duration reverseDuration;
 
   /// The fade curve of the first child.
   ///
@@ -232,6 +238,8 @@ class AnimatedCrossFade extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }
 
@@ -243,7 +251,11 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(duration: widget.duration, vsync: this);
+    _controller = AnimationController(
+      duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
+      vsync: this,
+    );
     if (widget.crossFadeState == CrossFadeState.showSecond)
       _controller.value = 1.0;
     _firstAnimation = _initAnimation(widget.firstCurve, true);
@@ -274,6 +286,8 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     super.didUpdateWidget(oldWidget);
     if (widget.duration != oldWidget.duration)
       _controller.duration = widget.duration;
+    if (widget.reverseDuration != oldWidget.reverseDuration)
+      _controller.reverseDuration = widget.reverseDuration;
     if (widget.firstCurve != oldWidget.firstCurve)
       _firstAnimation = _initAnimation(widget.firstCurve, true);
     if (widget.secondCurve != oldWidget.secondCurve)
@@ -347,6 +361,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       child: AnimatedSize(
         alignment: widget.alignment,
         duration: widget.duration,
+        reverseDuration: widget.reverseDuration,
         curve: widget.sizeCurve,
         vsync: this,
         child: widget.layoutBuilder(topChild, topKey, bottomChild, bottomKey),

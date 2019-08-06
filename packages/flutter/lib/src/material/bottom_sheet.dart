@@ -281,43 +281,36 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final String routeLabel = _getRouteLabel(localizations);
 
-    return GestureDetector(
-      excludeFromSemantics: true,
-      onTap: () {
-        if (widget.route.isCurrent)
-          Navigator.pop(context);
-      },
-      child: AnimatedBuilder(
-        animation: widget.route.animation,
-        builder: (BuildContext context, Widget child) {
-          // Disable the initial animation when accessible navigation is on so
-          // that the semantics are added to the tree at the correct time.
-          final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
-          return Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            label: routeLabel,
-            explicitChildNodes: true,
-            child: ClipRect(
-              child: CustomSingleChildLayout(
-                delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
-                child: BottomSheet(
-                  animationController: widget.route._animationController,
-                  onClosing: () {
-                    if (widget.route.isCurrent) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  builder: widget.route.builder,
-                  backgroundColor: widget.backgroundColor,
-                  elevation: widget.elevation,
-                  shape: widget.shape,
-                ),
+    return AnimatedBuilder(
+      animation: widget.route.animation,
+      builder: (BuildContext context, Widget child) {
+        // Disable the initial animation when accessible navigation is on so
+        // that the semantics are added to the tree at the correct time.
+        final double animationValue = mediaQuery.accessibleNavigation ? 1.0 : widget.route.animation.value;
+        return Semantics(
+          scopesRoute: true,
+          namesRoute: true,
+          label: routeLabel,
+          explicitChildNodes: true,
+          child: ClipRect(
+            child: CustomSingleChildLayout(
+              delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
+              child: BottomSheet(
+                animationController: widget.route._animationController,
+                onClosing: () {
+                  if (widget.route.isCurrent) {
+                    Navigator.pop(context);
+                  }
+                },
+                builder: widget.route.builder,
+                backgroundColor: widget.backgroundColor,
+                elevation: widget.elevation,
+                shape: widget.shape,
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -407,6 +400,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// a [GridView] and have the bottom sheet be draggable, you should set this
 /// parameter to true.
 ///
+/// The `useRootNavigator` parameter ensures that the root navigator is used to
+/// display the [BottomSheet] when set to `true`. This is useful in the case
+/// that a modal [BottomSheet] needs to be displayed above all other content
+/// but the caller is inside another [Navigator].
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
@@ -424,14 +422,16 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   bool isScrollControlled = false,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.push(context, _ModalBottomSheetRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,

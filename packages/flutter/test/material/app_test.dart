@@ -447,7 +447,99 @@ void main() {
     expect(find.text('Select All'), findsOneWidget);
   });
 
-  testWidgets('MaterialApp uses regular theme when platformBrightness is light', (WidgetTester tester) async {
+  testWidgets('MaterialApp uses regular theme when themeMode is light', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a light platformBrightness.
+    tester.binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData appliedTheme;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.light,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(appliedTheme.brightness, Brightness.light);
+
+    // Mock the Window to explicitly report a dark platformBrightness.
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.light,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses darkTheme when themeMode is dark', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a light platformBrightness.
+    tester.binding.window.platformBrightnessTestValue = Brightness.light;
+
+    ThemeData appliedTheme;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.dark,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(appliedTheme.brightness, Brightness.dark);
+
+    // Mock the Window to explicitly report a dark platformBrightness.
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.dark,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(appliedTheme.brightness, Brightness.dark);
+  });
+
+  testWidgets('MaterialApp uses regular theme when themeMode is system and platformBrightness is light', (WidgetTester tester) async {
     // Mock the Window to explicitly report a light platformBrightness.
     final TestWidgetsFlutterBinding binding = tester.binding;
     binding.window.platformBrightnessTestValue = Brightness.light;
@@ -462,6 +554,7 @@ void main() {
         darkTheme: ThemeData(
           brightness: Brightness.dark,
         ),
+        themeMode: ThemeMode.system,
         home: Builder(
           builder: (BuildContext context) {
             appliedTheme = Theme.of(context);
@@ -472,6 +565,31 @@ void main() {
     );
 
     expect(appliedTheme.brightness, Brightness.light);
+  });
+
+  testWidgets('MaterialApp uses darkTheme when themeMode is system and platformBrightness is dark', (WidgetTester tester) async {
+    // Mock the Window to explicitly report a dark platformBrightness.
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+
+    ThemeData appliedTheme;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+            brightness: Brightness.light
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+        ),
+        themeMode: ThemeMode.system,
+        home: Builder(
+          builder: (BuildContext context) {
+            appliedTheme = Theme.of(context);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    expect(appliedTheme.brightness, Brightness.dark);
   });
 
   testWidgets('MaterialApp uses light theme when platformBrightness is dark but no dark theme is provided', (WidgetTester tester) async {

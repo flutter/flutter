@@ -111,6 +111,45 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getSize(find.byType(Container)).height, 600.0);
   });
 
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+    const Widget child = CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Opaque'),
+        backgroundColor: Color(0xFFF8F8F8),
+      ),
+      child: Placeholder(),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
+          child: child
+        ),
+      )
+    );
+
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      )
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
     const Center page1Center = Center();
 

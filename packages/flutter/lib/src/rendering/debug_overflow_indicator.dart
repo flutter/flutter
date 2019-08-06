@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/foundation.dart';
 
 import 'object.dart';
 import 'stack.dart';
@@ -248,6 +249,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         context: ErrorDescription('during layout'),
         renderObject: this,
         informationCollector: () sync* {
+          if (debugCreator != null)
+            yield DiagnosticsDebugCreator(debugCreator);
           yield* overflowHints;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
@@ -284,8 +287,8 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
     for (_OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-
-      if (_indicatorLabel[region.side.index].text?.text != region.label) {
+      final TextSpan textSpan = _indicatorLabel[region.side.index].text;
+      if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
           style: _indicatorTextStyle,

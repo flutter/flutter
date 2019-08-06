@@ -54,6 +54,49 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
   }
 }
 
+class ExpansionPanelListSemanticsTest extends StatefulWidget {
+  const ExpansionPanelListSemanticsTest({this.headerKey});
+
+  final Key headerKey;
+
+  @override
+  ExpansionPanelListSemanticsTestState createState() => ExpansionPanelListSemanticsTestState();
+}
+
+class ExpansionPanelListSemanticsTestState extends State<ExpansionPanelListSemanticsTest> {
+  bool headerTapped = false;
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      children: <Widget>[
+        ExpansionPanelList(
+          children: <ExpansionPanel>[
+            ExpansionPanel(
+              canTapOnHeader: false,
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                return MergeSemantics(
+                  key: widget.headerKey,
+                  child: GestureDetector(
+                    onTap: () => headerTapped = true,
+                    child: const Text.rich(
+                      TextSpan(
+                        text:'head1',
+                      ),
+                    ),
+                  ),
+                );
+              },
+              body: Container(
+                child: const Placeholder(),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
 void main() {
   testWidgets('ExpansionPanelList test', (WidgetTester tester) async {
     int index;
@@ -91,7 +134,7 @@ void main() {
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height, equals(oldHeight));
 
-    // now expand the child panel
+    // Now, expand the child panel.
     await tester.pumpWidget(
       MaterialApp(
         home: SingleChildScrollView(
@@ -119,6 +162,52 @@ void main() {
     expect(find.text('B'), findsOneWidget);
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
+  });
+
+  testWidgets('ExpansionPanelList does not merge header when canTapOnHeader is false', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final Key headerKey = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExpansionPanelListSemanticsTest(headerKey: headerKey),
+      ),
+    );
+
+    // Make sure custom gesture detector widget is clickable.
+    await tester.tap(find.text('head1'));
+    await tester.pump();
+
+    final ExpansionPanelListSemanticsTestState state =
+      tester.state(find.byType(ExpansionPanelListSemanticsTest));
+    expect(state.headerTapped, true);
+
+    // Check the expansion icon semantics does not merged with header widget.
+    final Finder expansionIcon = find.descendant(
+      of: find.ancestor(
+        of: find.byKey(headerKey),
+        matching: find.byType(Row),
+      ),
+      matching: find.byType(ExpandIcon),
+    );
+    expect(tester.getSemantics(expansionIcon), matchesSemantics(
+      label: 'Expand',
+      isButton: true,
+      hasEnabledState: true,
+      isEnabled: true,
+      hasTapAction: true,
+    ));
+
+    // Check custom header widget semantics is preserved.
+    final Finder headerWidget = find.descendant(
+      of: find.byKey(headerKey),
+      matching: find.byType(RichText),
+    );
+    expect(tester.getSemantics(headerWidget), matchesSemantics(
+      label: 'head1',
+      hasTapAction: true,
+    ));
+
+    handle.dispose();
   });
 
   testWidgets('Multiple Panel List test', (WidgetTester tester) async {
@@ -798,7 +887,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Panel header has semantics', (WidgetTester tester) async {
+  testWidgets('Panel header has semantics, canTapOnHeader = false ', (WidgetTester tester) async {
     const Key expandedKey = Key('expanded');
     const Key collapsedKey = Key('collapsed');
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
@@ -832,8 +921,16 @@ void main() {
       ),
     );
 
-    expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
-      label: 'Expanded',
+    // Check the semantics of [ExpanIcon] for expanded panel.
+    final Finder expandedIcon = find.descendant(
+      of: find.ancestor(
+        of: find.byKey(expandedKey),
+        matching: find.byType(Row),
+      ),
+      matching: find.byType(ExpandIcon),
+    );
+    expect(tester.getSemantics(expandedIcon), matchesSemantics(
+      label: 'Collapse',
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
@@ -841,13 +938,85 @@ void main() {
       onTapHint: localizations.expandedIconTapHint,
     ));
 
-    expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
-      label: 'Collapsed',
+    // Check the semantics of the header widget for expanded panel.
+    final Finder expandedHeader = find.byKey(expandedKey);
+    expect(tester.getSemantics(expandedHeader), matchesSemantics(
+      label: 'Expanded',
+    ));
+
+    // Check the semantics of [ExpanIcon] for collapsed panel.
+    final Finder collapsedIcon = find.descendant(
+      of: find.ancestor(
+        of: find.byKey(collapsedKey),
+        matching: find.byType(Row),
+      ),
+      matching: find.byType(ExpandIcon),
+    );
+    expect(tester.getSemantics(collapsedIcon), matchesSemantics(
+      label: 'Expand',
       isButton: true,
       hasEnabledState: true,
       isEnabled: true,
       hasTapAction: true,
       onTapHint: localizations.collapsedIconTapHint,
+    ));
+
+    // Check the semantics of the header widget for expanded panel.
+    final Finder collapsedHeader = find.byKey(collapsedKey);
+    expect(tester.getSemantics(collapsedHeader), matchesSemantics(
+      label: 'Collapsed',
+    ));
+
+    handle.dispose();
+  });
+
+  testWidgets('Panel header has semantics, canTapOnHeader = true', (WidgetTester tester) async {
+    const Key expandedKey = Key('expanded');
+    const Key collapsedKey = Key('collapsed');
+    final SemanticsHandle handle = tester.ensureSemantics();
+    final List<ExpansionPanel> _demoItems = <ExpansionPanel>[
+      ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Expanded', key: expandedKey);
+        },
+        canTapOnHeader: true,
+        body: const SizedBox(height: 100.0),
+        isExpanded: true,
+      ),
+      ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return const Text('Collapsed', key: collapsedKey);
+        },
+        canTapOnHeader: true,
+        body: const SizedBox(height: 100.0),
+        isExpanded: false,
+      ),
+    ];
+
+    final ExpansionPanelList _expansionList = ExpansionPanelList(
+      children: _demoItems,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: _expansionList,
+        ),
+      ),
+    );
+
+    expect(tester.getSemantics(find.byKey(expandedKey)), matchesSemantics(
+      label: 'Expanded',
+      isButton: true,
+      hasEnabledState: true,
+      hasTapAction: true,
+    ));
+
+    expect(tester.getSemantics(find.byKey(collapsedKey)), matchesSemantics(
+      label: 'Collapsed',
+      isButton: true,
+      hasEnabledState: true,
+      hasTapAction: true,
     ));
 
     handle.dispose();

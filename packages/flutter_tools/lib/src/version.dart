@@ -32,9 +32,10 @@ class FlutterVersion {
     return _repositoryUrl;
   }
 
-  /// Whether we are currently on the stable branch.
-  bool get isStable {
-    return getBranchName() == 'stable';
+  /// Whether we are currently on the master branch.
+  bool get isMaster {
+    final String branchName = getBranchName();
+    return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
   static const Set<String> officialChannels = <String>{
@@ -98,14 +99,14 @@ class FlutterVersion {
   String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  Future<void> ensureVersionFile() {
-    return fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsString(_frameworkVersion);
+  Future<void> ensureVersionFile() async {
+    fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsStringSync(_frameworkVersion);
   }
 
   @override
   String toString() {
     final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
-    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
@@ -132,12 +133,15 @@ class FlutterVersion {
   String get frameworkCommitDate => _latestGitCommitDate();
 
   static String _latestGitCommitDate([ String branch ]) {
-    final List<String> args = <String>['git', 'log'];
-
-    if (branch != null)
-      args.add(branch);
-
-    args.addAll(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']);
+    final List<String> args = <String>[
+      'git',
+      'log',
+      if (branch != null) branch,
+      '-n',
+      '1',
+      '--pretty=format:%ad',
+      '--date=iso',
+    ];
     return _runSync(args, lenient: false);
   }
 
