@@ -1,21 +1,30 @@
-import 'package:flutter/services.dart';
+import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
-import 'package:flutter/material.dart' show Colors;
-import 'colors.dart';
+import 'route.dart';
 
+/// A full-screen menu that can be activated for the given child.
+///
+/// Long pressing or 3d touching on the child will open in up in a full-screen
+/// overlay menu.
+// TODO(justinmc): Set up type param here for return value.
 class ContextMenu extends StatefulWidget {
-  ContextMenu({
+  /// Create a context menu.
+  const ContextMenu({
     Key key,
     this.child,
   }) : super(key: key);
 
+  /// The widget that can be opened in a ContextMenu.
+  ///
+  /// This widget will be displayed at its normal position in the widget tree,
+  /// but long pressing or 3d touching on it will cause the ContextMenu to open.
   final Widget child;
 
   @override
-  ContextMenuState createState() => ContextMenuState();
+  _ContextMenuState createState() => _ContextMenuState();
 }
 
-class ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
+class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin {
   // TODO(justinmc): Replace with real system colors when dark mode is
   // supported for iOS.
   //static const Color _darkModeMaskColor = Color(0xAAFFFFFF);
@@ -33,6 +42,14 @@ class ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin 
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
+    _controller.addStatusListener(_onAnimationChangeStatus);
+    super.initState();
+  }
+
+  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
+    if (animationStatus == AnimationStatus.completed) {
+      _openContextMenu();
+    }
   }
 
   void _onTapDown(TapDownDetails details) {
@@ -52,11 +69,25 @@ class ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin 
     _controller.reverse();
   }
 
+  void _openContextMenu() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      filter: ui.ImageFilter.blur(
+        sigmaX: 5.0,
+        sigmaY: 5.0,
+      ),
+      builder: (BuildContext context) {
+        return const Text('TODO render context menu items and animate in correctly');
+      },
+    );
+  }
+
   @override
-  void _dispose(AnimationStatus status) {
+  void dispose() {
     _controller.stop();
     _controller.reset();
     _scale = null;
+    super.dispose();
   }
 
   @override
@@ -72,7 +103,7 @@ class ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin 
   }
 
   Widget _buildAnimation(BuildContext context, Widget child) {
-    final maskColor = _isMasked ? _lightModeMaskColor : Color(0xFFFFFFFF);
+    final Color maskColor = _isMasked ? _lightModeMaskColor : const Color(0xFFFFFFFF);
 
     return Transform(
       alignment: FractionalOffset.center,

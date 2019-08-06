@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui' show lerpDouble;
+import 'dart:ui' show lerpDouble, ImageFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -786,10 +786,14 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
 
 class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
   _CupertinoModalPopupRoute({
-    this.builder,
     this.barrierLabel,
+    this.builder,
+    ImageFilter filter,
     RouteSettings settings,
-  }) : super(settings: settings);
+  }) : super(
+         filter: filter,
+         settings: settings,
+       );
 
   final WidgetBuilder builder;
 
@@ -874,11 +878,13 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  ImageFilter filter,
 }) {
   return Navigator.of(context, rootNavigator: true).push(
     _CupertinoModalPopupRoute<T>(
-      builder: builder,
       barrierLabel: 'Dismiss',
+      builder: builder,
+      filter: filter,
     ),
   );
 }
