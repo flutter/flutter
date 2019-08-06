@@ -1,4 +1,4 @@
-Signature: 91907a2f838fb5ca018107c354659f0e
+Signature: 2384f9d6f56bfc0a42feb759dfa47d78
 
 UNUSED LICENSES:
 
@@ -4685,6 +4685,7 @@ FILE: ../../../third_party/skia/experimental/editor/run_handler.cpp
 FILE: ../../../third_party/skia/experimental/editor/run_handler.h
 FILE: ../../../third_party/skia/experimental/editor/stringslice.cpp
 FILE: ../../../third_party/skia/experimental/editor/stringslice.h
+FILE: ../../../third_party/skia/experimental/editor/stringview.h
 FILE: ../../../third_party/skia/experimental/editor/word_boundaries.cpp
 FILE: ../../../third_party/skia/experimental/editor/word_boundaries.h
 FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
