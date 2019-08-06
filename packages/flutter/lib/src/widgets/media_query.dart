@@ -74,6 +74,7 @@ enum Orientation {
 /// widgets that reduce those properties by the same amount.
 /// The [removePadding], [removeViewPadding], and [removeInsets] methods are
 /// useful for this.
+///
 /// See also:
 ///
 /// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
@@ -274,7 +275,8 @@ class MediaQueryData {
   ///  * [Window.AccessibilityFeatures], where the setting originates.
   final bool boldText;
 
-  /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
+  /// The orientation of the media (e.g., whether the device is in landscape or
+  /// portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
@@ -322,7 +324,7 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [new MediaQuery.removePadding], which uses this method to remove padding
+  ///  * [MediaQuery.removePadding], which uses this method to remove [padding]
   ///    from the ambient [MediaQuery].
   ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
   ///    adds a [Padding] widget.
@@ -371,8 +373,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [new MediaQuery.removeViewInsets], which uses this method to remove
-  ///    padding from the ambient [MediaQuery].
+  ///  * [MediaQuery.removeViewInsets], which uses this method to remove
+  ///    [viewInsets] from the ambient [MediaQuery].
   ///  * [removePadding], the same thing but for [padding].
   ///  * [removeViewPadding], the same thing but for [viewPadding].
   MediaQueryData removeViewInsets({
@@ -418,8 +420,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  ///  * [new MediaQuery.removeViewPadding], which uses this method to remove
-  ///    padding from the ambient [MediaQuery].
+  ///  * [MediaQuery.removeViewPadding], which uses this method to remove
+  ///    [viewPadding] from the ambient [MediaQuery].
   ///  * [removePadding], the same thing but for [padding].
   ///  * [removeViewInsets], the same thing but for [viewInsets].
   MediaQueryData removeViewPadding({
@@ -549,8 +551,8 @@ class MediaQuery extends InheritedWidget {
        assert(data != null),
        super(key: key, child: child);
 
-  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
-  /// the given context, but removes the specified paddings.
+  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
+  /// from the given context, but removes the specified padding.
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] padding
   /// is consumed by a widget in such a way that the padding is no longer
@@ -570,9 +572,11 @@ class MediaQuery extends InheritedWidget {
   ///
   ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
   ///    adds a [Padding] widget.
-  ///  * [MediaQueryData.padding], the affected property of the [MediaQueryData].
-  ///  * [new removeViewInsets], the same thing but for removing view insets.
-  ///  * [new removeViewPadding], the same thing but for removing view insets.
+  ///  * [MediaQueryData.padding], the affected property of the
+  ///    [MediaQueryData].
+  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
+  ///  * [removeViewPadding], the same thing but for
+  ///    [MediaQueryData.viewPadding].
   factory MediaQuery.removePadding({
     Key key,
     @required BuildContext context,
@@ -594,8 +598,8 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
-  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
-  /// the given context, but removes the specified view insets.
+  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
+  /// from the given context, but removes the specified view insets.
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// insets are consumed by a widget in such a way that the view insets are no
@@ -613,9 +617,11 @@ class MediaQuery extends InheritedWidget {
   ///
   /// See also:
   ///
-  ///  * [MediaQueryData.viewInsets], the affected property of the [MediaQueryData].
-  ///  * [new removePadding], the same thing but for removing paddings.
-  ///  * [new removeViewPadding], the same thing but for removing view insets.
+  ///  * [MediaQueryData.viewInsets], the affected property of the
+  ///    [MediaQueryData].
+  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [removeViewPadding], the same thing but for
+  ///    [MediaQueryData.viewPadding].
   factory MediaQuery.removeViewInsets({
     Key key,
     @required BuildContext context,
@@ -637,8 +643,8 @@ class MediaQuery extends InheritedWidget {
     );
   }
 
-  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
-  /// the given context, but removes the specified view padding.
+  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery]
+  /// from the given context, but removes the specified view padding.
   ///
   /// This should be inserted into the widget tree when the [MediaQuery] view
   /// padding is consumed by a widget in such a way that the view padding is no
@@ -658,8 +664,8 @@ class MediaQuery extends InheritedWidget {
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
   ///  [MediaQueryData].
-  ///  * [new removePadding], the same thing but for removing paddings.
-  ///  * [new removeViewInsets], the same thing but for removing view insets.
+  ///  * [removePadding], the same thing but for [MediaQueryData.padding].
+  ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({
     Key key,
     @required BuildContext context,
@@ -691,8 +697,8 @@ class MediaQuery extends InheritedWidget {
   /// context.
   ///
   /// You can use this function to query the size an orientation of the screen.
-  /// When that information changes, your widget will be scheduled to be rebuilt,
-  /// keeping your widget up-to-date.
+  /// When that information changes, your widget will be scheduled to be
+  /// rebuilt, keeping your widget up-to-date.
   ///
   /// Typical usage is as follows:
   ///
