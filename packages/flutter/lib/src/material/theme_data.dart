@@ -470,15 +470,13 @@ class ThemeData extends Diagnosticable {
        assert(bottomSheetTheme != null),
        assert(popupMenuTheme != null);
 
-  /// Create a [ThemeData] based on the colors in the given [colorScheme].
+  /// Create a [ThemeData] based on the colors in the given [colorScheme] and
+  /// text styles of the optional [textTheme].
   ///
-  /// It will derive appropriate values for all the [ThemeData] properties
-  /// based on [colorScheme] and [textTheme].
-  ///
-  /// [colorScheme] can not be [null].
+  /// The [colorScheme] can not be null.
   ///
   /// If [colorScheme.brightness] is [Brightness.dark] then
-  /// [ThemeData.applyElevationOverlayColor] will be set to [true] to support
+  /// [ThemeData.applyElevationOverlayColor] will be set to true to support
   /// the Material dark theme method for indicating elevation by overlaying
   /// a semi-transparent white color on top of the surface color.
   ///
@@ -516,8 +514,6 @@ class ThemeData extends Diagnosticable {
       brightness: colorScheme.brightness,
       primaryColor: primarySurfaceColor,
       primaryColorBrightness: ThemeData.estimateBrightnessForColor(primarySurfaceColor),
-      primaryColorLight: colorScheme.primaryVariant,
-      primaryColorDark: colorScheme.primaryVariant,
       canvasColor: colorScheme.background,
       accentColor: colorScheme.secondary,
       accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
