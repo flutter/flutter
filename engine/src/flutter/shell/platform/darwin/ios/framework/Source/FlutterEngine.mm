@@ -173,6 +173,7 @@
   [self resetChannels];
   _shell.reset();
   _threadHost.Reset();
+  _platformViewsController.reset();
 }
 
 - (FlutterViewController*)viewController {
