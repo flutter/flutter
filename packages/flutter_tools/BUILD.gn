@@ -24,6 +24,7 @@ dart_library("flutter_tools") {
     "//third_party/dart-pkg/pub/completion",
     "//third_party/dart-pkg/pub/coverage",
     "//third_party/dart-pkg/pub/crypto",
+    "//third_party/dart-pkg/pub/dwds",
     "//third_party/dart-pkg/pub/file",
     # The HTTP dependency is removed because http doesn't work on Fuchsia
     # because it uses mirrors which Fuchsia's Dart VM doesn't support.
