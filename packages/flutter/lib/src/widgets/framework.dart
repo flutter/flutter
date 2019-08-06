@@ -1751,7 +1751,7 @@ class _InactiveElements {
     }
   }
 
-  void _deactivateRecursively(Element element) {
+  static void _deactivateRecursively(Element element) {
     assert(element._debugLifecycleState == _ElementLifecycle.active);
     element.deactivate();
     assert(element._debugLifecycleState == _ElementLifecycle.inactive);
