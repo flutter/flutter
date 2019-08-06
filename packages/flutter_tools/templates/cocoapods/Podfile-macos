@@ -1,4 +1,5 @@
-source 'https://cdn.cocoapods.org/'
+# CocoaPods 1.7.2 brings with it the final version of CDN support for the trunk specs repo.
+# source 'https://cdn.cocoapods.org/'
 
 platform :osx, '10.13'
 
