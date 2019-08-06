@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
@@ -150,14 +152,11 @@ class FuchsiaDeviceDiscoveryResult {
 
 /// Discovers names of attached Fuchsia devices over mDNS.
 class FuchsiaDeviceDiscovery {
-  FuchsiaDeviceDiscovery({MDnsClient client})
-    : client = client ?? MDnsClient();
-
-  final MDnsClient client;
   static const String kFuchsiaService = '_fuchsia._udp.local';
 
   /// Discover connected fuchsia devices.
   Stream<FuchsiaDeviceDiscoveryResult> discover() async* {
+    final MDnsClient client = MDnsClient();
     try {
       await client.start(
         mDnsAddress: InternetAddress('224.0.0.250'),
@@ -166,7 +165,7 @@ class FuchsiaDeviceDiscovery {
       final Stream<PtrResourceRecord> pointerRecords = client
           .lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(kFuchsiaService));
       await for (PtrResourceRecord pointerRecord in pointerRecords) {
-        final String deviceName = pointerRecord.domainName.split(kFuchsiaService).first;
+        final String deviceName = pointerRecord.domainName.split('.').first;
         final SrvResourceRecord serviceRecord = await client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(
           pointerRecord.domainName,
           isMulticast: true,
@@ -182,32 +181,6 @@ class FuchsiaDeviceDiscovery {
       // We don't exit on exceptions here. This code generally runs during
       // device discovery and may not have been specifically requested by a
       // user.
-    } finally {
-      client.stop();
-    }
-  }
-
-  /// Resolve the address of a given hostname.
-  ///
-  /// Returns null if no record is found.
-  Future<InternetAddress> resolve(String name) async {
-    try {
-      await client.start(
-        mDnsAddress: InternetAddress('224.0.0.250'),
-        mDnsPort: 5356,
-      );
-      final SrvResourceRecord serviceRecord = await client.lookup<SrvResourceRecord>(ResourceRecordQuery.service(
-        '$name$kFuchsiaService',
-        isMulticast: true,
-      )).first;
-      final IPAddressResourceRecord addressRecord = await client
-          .lookup<IPAddressResourceRecord>(ResourceRecordQuery.addressIPv4(
-        serviceRecord.target,
-        isMulticast: true,
-      )).first;
-      return addressRecord.address;
-    } on Exception {
-      return null;
     } finally {
       client.stop();
     }

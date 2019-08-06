@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
+
+import 'package:multicast_dns/multicast_dns.dart';
 
 import '../application_package.dart';
 import '../artifacts.dart';
@@ -217,12 +220,6 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    // Find out who the device thinks we are.
-    final InternetAddress host = await fuchsiaDeviceDiscovery.resolve(name);
-    if (host == null) {
-      printError('Failed to resolve host for Fuchsia device');
-      return LaunchResult.failed();
-    }
     final int port = await os.findFreePort();
     if (port == 0) {
       printError('Failed to find a free port');
@@ -254,47 +251,59 @@ class FuchsiaDevice extends Device {
       }
 
       // Start up a package server.
+      final Iterable<NetworkInterface> networkInterfaces = await MDnsClient
+          .allInterfacesFactory(InternetAddressType.IPv4);
       const String packageServerName = 'flutter_tool';
-      fuchsiaPackageServer = FuchsiaPackageServer(
-          packageRepo.path, packageServerName, host.address, port);
-      if (!await fuchsiaPackageServer.start()) {
-        printError('Failed to start the Fuchsia package server');
-        return LaunchResult.failed();
-      }
-      final File farArchive = package.farArchive(
-          debuggingOptions.buildInfo.mode);
-      if (!await fuchsiaPackageServer.addPackage(farArchive)) {
-        printError('Failed to add package to the package server');
-        return LaunchResult.failed();
+
+      for (NetworkInterface networkInterface in networkInterfaces) {
+        fuchsiaPackageServer = FuchsiaPackageServer(
+            packageRepo.path, packageServerName, networkInterface.addresses[0].address, port);
+        if (!await fuchsiaPackageServer.start()) {
+          continue;
+        }
+
+        final File farArchive = package.farArchive(
+            debuggingOptions.buildInfo.mode);
+        if (!await fuchsiaPackageServer.addPackage(farArchive)) {
+          fuchsiaPackageServer.stop();
+          continue;
+        }
+
+        // Teach the package controller about the package server.
+        if (!await fuchsiaDeviceTools.amberCtl.addRepoCfg(
+            this, fuchsiaPackageServer)) {
+          fuchsiaPackageServer.stop();
+          continue;
+        }
+        serverRegistered = true;
+
+        // Tell the package controller to prefetch the app.
+        if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
+            this, fuchsiaPackageServer, appName)) {
+          serverRegistered = false;
+          fuchsiaPackageServer.stop();
+          continue;
+        }
+
+        // Ensure tiles_ctl is started, and start the app.
+        if (!await FuchsiaTilesCtl.ensureStarted(this)) {
+          serverRegistered = false;
+          fuchsiaPackageServer.stop();
+          continue;
+        }
+
+        // Instruct tiles_ctl to start the app.
+        final String fuchsiaUrl =
+            'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
+        if (!await fuchsiaDeviceTools.tilesCtl.add(
+            this, fuchsiaUrl, <String>[])) {
+          serverRegistered = false;
+          fuchsiaPackageServer.stop();
+          continue;
+        }
+        break;
       }
 
-      // Teach the package controller about the package server.
-      if (!await fuchsiaDeviceTools.amberCtl.addRepoCfg(this, fuchsiaPackageServer)) {
-        printError('Failed to teach amber about the package server');
-        return LaunchResult.failed();
-      }
-      serverRegistered = true;
-
-      // Tell the package controller to prefetch the app.
-      if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
-          this, fuchsiaPackageServer, appName)) {
-        printError('Failed to get pkgctl to prefetch the package');
-        return LaunchResult.failed();
-      }
-
-      // Ensure tiles_ctl is started, and start the app.
-      if (!await FuchsiaTilesCtl.ensureStarted(this)) {
-        printError('Failed to ensure that tiles is started on the device');
-        return LaunchResult.failed();
-      }
-
-      // Instruct tiles_ctl to start the app.
-      final String fuchsiaUrl =
-          'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
-      if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
-        printError('Failed to add the app to tiles');
-        return LaunchResult.failed();
-      }
     } finally {
       // Try to un-teach the package controller about the package server if
       // needed.
