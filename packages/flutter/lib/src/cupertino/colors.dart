@@ -369,21 +369,24 @@ class CupertinoDynamicColor extends Color {
   @override
   bool operator ==(dynamic other) {
     return other.runtimeType == runtimeType
-        && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor))
+        && value == other.value
+        && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor, other.defaultColor))
             .equals(_colorMap, other._colorMap);
   }
 
   @override
   int get hashCode => _colorMap.map((Color color) => color ?? defaultColor).hashCode;
+
+  @override
+  String toString() => '$runtimeType { $defaultColor & $_colorMap }';
 }
 
 class _ColorMapElementEquality<E> extends DefaultEquality<E> {
-  const _ColorMapElementEquality(this.nullFallbackValue) : super();
-  final E nullFallbackValue;
+  const _ColorMapElementEquality(this.nullFallbackValue1, this.nullFallbackValue2) : super();
+  final E nullFallbackValue1, nullFallbackValue2;
 
   @override
-  bool equals(Object e1, Object e2) => super.equals(e1, e2)
-                                    || super.equals(e1 ?? nullFallbackValue, e2 ?? nullFallbackValue);
+  bool equals(Object e1, Object e2) => (e1 ?? nullFallbackValue1) == (e2 ?? nullFallbackValue2);
 }
 
 /// A color palette that typically matches iOS 13+ system colors.

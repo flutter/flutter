@@ -43,11 +43,11 @@ final Color notSoDynamicColor4 = CupertinoDynamicColor(defaultColor: color0, ele
 final Color notSoDynamicColor5 = CupertinoDynamicColor(
   normalColor: color0,
   darkColor: color0,
-  highContrastColor: color0,
   darkHighContrastColor: color0,
   darkElevatedColor: color0,
-  highContrastElevatedColor: color0,
   darkHighContrastElevatedColor: color0,
+  highContrastColor: color0,
+  highContrastElevatedColor: color0,
   elevatedColor: color0,
 );
 
@@ -76,6 +76,30 @@ final Color elevationDependentColor1 = CupertinoDynamicColor(
 );
 
 void main() {
+  test('== works as expected', () {
+    expect(notSoDynamicColor1, notSoDynamicColor2);
+    expect(notSoDynamicColor1, notSoDynamicColor3);
+    expect(notSoDynamicColor1, notSoDynamicColor4);
+    expect(notSoDynamicColor1, notSoDynamicColor5);
+
+    expect(notSoDynamicColor2, notSoDynamicColor5);
+
+
+    expect(notSoDynamicColor1, isNot(vibrancyDependentColor1));
+    expect(notSoDynamicColor5, isNot(vibrancyDependentColor1));
+
+    expect(notSoDynamicColor1, isNot(contrastDependentColor1));
+    expect(notSoDynamicColor5, isNot(contrastDependentColor1));
+
+    expect(vibrancyDependentColor1, isNot(CupertinoDynamicColor(
+      defaultColor: color0,
+      darkColor: color0,
+      darkHighContrastColor: color0,
+      darkElevatedColor: color0,
+      darkHighContrastElevatedColor: color0,
+    )));
+  });
+
   testWidgets('Dynamic colors that are not actually dynamic should not claim dependencies',
     (WidgetTester tester) async {
       for (Color color in <Color>[notSoDynamicColor1, notSoDynamicColor2, notSoDynamicColor3, notSoDynamicColor4, notSoDynamicColor5]) {
