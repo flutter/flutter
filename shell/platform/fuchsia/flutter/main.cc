@@ -3,11 +3,8 @@
 // found in the LICENSE file.
 
 #include <lib/async-loop/cpp/loop.h>
-
-#if !defined(FUCHSIA_SDK)
-#include <trace-provider/provider.h>
-#include <trace/event.h>
-#endif
+#include <lib/trace-provider/provider.h>
+#include <lib/trace/event.h>
 
 #include <cstdlib>
 
@@ -18,7 +15,6 @@
 int main(int argc, char const* argv[]) {
   std::unique_ptr<async::Loop> loop(flutter_runner::MakeObservableLoop(true));
 
-#if !defined(FUCHSIA_SDK)
   std::unique_ptr<trace::TraceProviderWithFdio> provider;
   {
     TRACE_DURATION("flutter", "CreateTraceProvider");
@@ -27,7 +23,6 @@ int main(int argc, char const* argv[]) {
     trace::TraceProviderWithFdio::CreateSynchronously(
         loop->dispatcher(), "flutter_runner", &provider, &already_started);
   }
-#endif
 
   // Set up the process-wide /tmp memfs.
   dart_utils::SetupRunnerTemp();

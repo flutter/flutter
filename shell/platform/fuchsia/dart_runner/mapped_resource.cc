@@ -5,13 +5,10 @@
 #include "mapped_resource.h"
 
 #include <fcntl.h>
+#include <lib/trace/event.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <zircon/status.h>
-
-#if !defined(FUCHSIA_SDK)
-#include <trace/event.h>
-#endif  //  !defined(FUCHSIA_SDK)
 
 #include "flutter/fml/logging.h"
 #include "logging.h"
@@ -24,9 +21,7 @@ bool MappedResource::LoadFromNamespace(fdio_ns_t* namespc,
                                        const std::string& path,
                                        MappedResource& resource,
                                        bool executable) {
-#if !defined(FUCHSIA_SDK)
   TRACE_DURATION("dart", "LoadFromNamespace", "path", path);
-#endif  //  !defined(FUCHSIA_SDK)
 
   // openat of a path with a leading '/' ignores the namespace fd.
   dart_utils::Check(path[0] != '/', LOG_TAG);

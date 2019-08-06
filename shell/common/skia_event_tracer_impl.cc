@@ -85,7 +85,7 @@ class FlutterEventTracer : public SkEventTracer {
                                 SkEventTracer::Handle handle) override {
     // This is only ever called from a scoped trace event so we will just end
     // the section.
-#if defined(OS_FUCHSIA) && !defined(FUCHSIA_SDK)
+#if defined(OS_FUCHSIA)
     TRACE_DURATION_END(kSkiaTag, name);
 #else
     fml::tracing::TraceEventEnd(name);
