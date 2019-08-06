@@ -4388,7 +4388,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///        child: Column(
 ///         children: <Widget>[
 ///           Container(
-///             color: Colors.amber,
+///             color: Colors.blue,
 ///             height: 100,
 ///             width: 100,
 ///           ),
