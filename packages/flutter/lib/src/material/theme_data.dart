@@ -1372,6 +1372,8 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
 
   @override
   CupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
+    // Only the cupertino override theme part will be resolved.
+    // If the color comes from the material theme it's not resolved.
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
       _cupertinoOverrideTheme.resolveFrom(context, nullOk: nullOk),
