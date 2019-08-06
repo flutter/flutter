@@ -118,10 +118,7 @@ class TestWindow implements Window {
     onMetricsChanged();
   }
 
-  // TODO(dnfield): Remove this ignore once custom embedders have had time to
-  //  catch up and make this property actually wrap _window.viewPadding.
-  // @override
-  // ignore: annotate_overrides, public_member_api_docs
+  @override
   WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
   WindowPadding _viewPaddingTestValue;
   /// Hides the real view padding and reports the given [paddingTestValue]
