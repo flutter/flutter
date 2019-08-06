@@ -43,6 +43,9 @@ List<File> listDartSources(Environment environment) {
   final List<File> dartFiles = <File>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
+    if (!libDirectory.existsSync()) {
+      continue;
+    }
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         dartFiles.add(entity);
@@ -93,7 +96,7 @@ class KernelSnapshot extends Target {
     final CompilerOutput output = await compiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       aot: buildMode != BuildMode.debug,
-      trackWidgetCreation: false,
+      trackWidgetCreation: buildMode == BuildMode.debug,
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,

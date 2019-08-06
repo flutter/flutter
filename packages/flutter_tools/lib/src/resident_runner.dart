@@ -512,6 +512,23 @@ class FlutterDevice {
   }
 }
 
+// Issue: https://github.com/flutter/flutter/issues/33050
+// Matches the following patterns:
+//    HttpException: Connection closed before full header was received, uri = *
+//    HttpException: , uri = *
+final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, uri \=.+$');
+
+/// Returns `true` if any of the devices is running Android Q.
+Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
+  for (FlutterDevice flutterDevice in flutterDevices) {
+    final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
+    if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Shared code between different resident application runners.
 abstract class ResidentRunner {
   ResidentRunner(
@@ -545,6 +562,8 @@ abstract class ResidentRunner {
     }
   }
 
+  @protected
+  @visibleForTesting
   final List<FlutterDevice> flutterDevices;
   final String target;
   final DebuggingOptions debuggingOptions;
@@ -580,6 +599,17 @@ abstract class ResidentRunner {
     return flutterDevices.every((FlutterDevice device) {
       return device.device.supportsHotRestart;
     });
+  }
+
+  /// Invoke an RPC extension method on the first attached ui isolate of the first device.
+  // TODO(jonahwilliams): Update/Remove this method when refactoring the resident
+  // runner to support a single flutter device.
+  Future<Map<String, dynamic>> invokeFlutterExtensionRpcRawOnFirstIsolate(
+    String method, {
+    Map<String, dynamic> params,
+  }) {
+    return flutterDevices.first.views.first.uiIsolate
+        .invokeFlutterExtensionRpcRaw(method, params: params);
   }
 
   /// Whether this runner can hot reload.

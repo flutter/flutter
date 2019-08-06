@@ -656,7 +656,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
     Widget menu = _PopupMenu<T>(route: this, semanticLabel: semanticLabel);
     if (popupMenuTheme != null)
-      menu = PopupMenuTheme(textStyle: popupMenuTheme.textStyle, child: menu);
+      menu = PopupMenuTheme(data: PopupMenuThemeData(textStyle: popupMenuTheme.textStyle), child: menu);
     if (theme != null)
       menu = Theme(data: theme, child: menu);
 

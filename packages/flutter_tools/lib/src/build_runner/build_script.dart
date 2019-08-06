@@ -123,6 +123,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               outputExtension: ddcKernelExtension,
               platform: flutterWebPlatform,
               librariesPath: 'libraries.json',
+              kernelTargetName: 'ddc',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
               useIncrementalCompiler: false,

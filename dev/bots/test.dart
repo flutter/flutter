@@ -906,7 +906,8 @@ Future<void> _runIntegrationTests() async {
         await _runDevicelabTest('flutter_create_offline_test_windows');
       } else if (Platform.isMacOS) {
         await _runDevicelabTest('flutter_create_offline_test_mac');
-        await _runDevicelabTest('module_test_ios');
+// TODO(jmagman): Re-enable once flakiness is resolved.
+//        await _runDevicelabTest('module_test_ios');
       }
       // This does less work if the subshard isn't Android.
       await _androidPluginTest();

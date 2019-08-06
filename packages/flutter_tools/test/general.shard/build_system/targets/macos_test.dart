@@ -86,9 +86,6 @@ void main() {
 
     expect(fs.directory('macos/Flutter/ephemeral/FlutterMacOS.framework').existsSync(), true);
     expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/FlutterMacOS').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEReshapeListener.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEView.h').existsSync(), true);
     expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEViewController.h').existsSync(), true);
     expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h').existsSync(), true);
     expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterChannels.h').existsSync(), true);

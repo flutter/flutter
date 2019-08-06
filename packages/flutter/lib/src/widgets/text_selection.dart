@@ -871,7 +871,7 @@ class TextSelectionGestureDetectorBuilder {
   @protected
   final TextSelectionGestureDetectorBuilderDelegate delegate;
 
-  /// Whether to show the selection tool bar.
+  /// Whether to show the selection toolbar.
   ///
   /// It is based on the signal source when a [onTapDown] is called. This getter
   /// will return true if current [onTapDown] event is triggered by a touch or
@@ -936,7 +936,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Handler for [TextSelectionGestureDetector.onForcePressEnd].
   ///
   /// By default, it selects words in the range specified in [details] and shows
-  /// tool bar if it is necessary.
+  /// toolbar if it is necessary.
   ///
   /// This callback is only applicable when force press is enabled.
   ///
@@ -1021,7 +1021,7 @@ class TextSelectionGestureDetectorBuilder {
 
   /// Handler for [TextSelectionGestureDetector.onSingleLongTapEnd].
   ///
-  /// By default, it shows tool bar if necessary.
+  /// By default, it shows toolbar if necessary.
   ///
   /// See also:
   ///
@@ -1036,7 +1036,7 @@ class TextSelectionGestureDetectorBuilder {
   /// Handler for [TextSelectionGestureDetector.onDoubleTapDown].
   ///
   /// By default, it selects a word through [renderEditable.selectWord] if
-  /// selectionEnabled and shows tool bar if necessary.
+  /// selectionEnabled and shows toolbar if necessary.
   ///
   /// See also:
   ///

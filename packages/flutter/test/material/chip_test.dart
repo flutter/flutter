@@ -4,6 +4,8 @@
 
 import 'dart:ui' show window;
 
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -47,12 +49,10 @@ IconThemeData getIconData(WidgetTester tester) {
 
 DefaultTextStyle getLabelStyle(WidgetTester tester) {
   return tester.widget(
-    find
-        .descendant(
+    find.descendant(
       of: find.byType(RawChip),
       matching: find.byType(DefaultTextStyle),
-    )
-        .last,
+    ).last,
   );
 }
 
@@ -1736,5 +1736,91 @@ void main() {
       ),
     );
     expect(find.byType(InkWell), findsOneWidget);
+  });
+
+  testWidgets('Chip uses stateful color for text color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
+    const Color selectedColor = Color(0x00000005);
+    const Color disabledColor = Color(0x00000006);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return disabledColor;
+
+      if (states.contains(MaterialState.pressed))
+        return pressedColor;
+
+      if (states.contains(MaterialState.hovered))
+        return hoverColor;
+
+      if (states.contains(MaterialState.focused))
+        return focusedColor;
+
+      if (states.contains(MaterialState.selected))
+        return selectedColor;
+
+      return defaultColor;
+    }
+
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              label: const Text('Chip'),
+              selected: selected,
+              onSelected: enabled ? (_) {} : null,
+              labelStyle: TextStyle(color: MaterialStateColor.resolveWith(getTextColor)),
+            ),
+          ),
+        ),
+      );
+    }
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style.color;
+    }
+
+    // Default, not disabled.
+    await tester.pumpWidget(chipWidget());
+    expect(textColor(), equals(defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(textColor(), selectedColor);
+
+    // Focused.
+    final FocusNode chipFocusNode = focusNode.children.first;
+    chipFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(textColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(ChoiceChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(textColor(), hoverColor);
+
+    // Pressed.
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(textColor(), pressedColor);
+
+    // Disabled.
+    await tester.pumpWidget(chipWidget(enabled: false));
+    await tester.pumpAndSettle();
+    expect(textColor(), disabledColor);
+
+    // Teardown.
+    await gesture.removePointer();
   });
 }
