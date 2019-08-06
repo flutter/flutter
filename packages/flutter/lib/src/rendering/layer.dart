@@ -48,6 +48,21 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   // Initialized to true as a new layer has never called [addToScene].
   bool _needsAddToScene = true;
 
+  /// Whether the parent layer is required to call this layer's [addToScene]
+  /// method to render it.
+  ///
+  /// If false, the parent layer may pass this layer's engine layer to
+  /// [SceneBuilder.addRetained]. If true, [SceneBuilder.addRetained] may not
+  /// be used.
+  bool get debugNeedsAddToScene {
+    bool result;
+    assert(() {
+      result = _needsAddToScene;
+      return true;
+    }());
+    return result;
+  }
+
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
   @visibleForTesting
@@ -57,7 +72,16 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       '$runtimeType called markNeedsAddToScene.\n'
       'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
     );
+
+    // Already marked. Short-circuit.
+    if (_needsAddToScene) {
+      return;
+    }
+
     _needsAddToScene = true;
+    if (parent != null && !parent.alwaysNeedsAddToScene) {
+      parent.markNeedsAddToScene();
+    }
   }
 
   /// Mark that this layer is in sync with engine.
@@ -111,6 +135,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   set engineLayer(ui.EngineLayer newLayer) {
     _engineLayer = newLayer;
+    if (!alwaysNeedsAddToScene) {
+      // We created a new engine layer for this layer. Therefore this layer no
+      // longer requires that its [addToScene] is called (e.g. it is now safe
+      // to add this layer as retained or use it as `oldLayer`). However, the
+      // parent must construct a new engine layer to add this layer to, and so
+      // we mark it as needing its [addToScene] called next frame.
+      if (parent != null && !parent.alwaysNeedsAddToScene) {
+        parent.markNeedsAddToScene();
+      }
+      _needsAddToScene = false;
+    }
   }
   ui.EngineLayer _engineLayer;
 
@@ -203,7 +238,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       builder.addRetained(_engineLayer);
       return;
     }
-    _engineLayer = addToScene(builder);
+    engineLayer = addToScene(builder);
     _needsAddToScene = false;
   }
 
@@ -522,7 +557,7 @@ class ContainerLayer extends Layer {
       return true;
     }());
     updateSubtreeNeedsAddToScene();
-    _engineLayer = addToScene(builder);
+    engineLayer = addToScene(builder);
     final ui.Scene scene = builder.build();
     assert(() {
       // We should remove any layers that got added to highlight the incorrect
@@ -801,7 +836,7 @@ class ContainerLayer extends Layer {
       if (childOffset == Offset.zero) {
         child._addToSceneWithRetainedRendering(builder);
       } else {
-        child._engineLayer = child.addToScene(builder, childOffset);
+        child.engineLayer = child.addToScene(builder, childOffset);
       }
       child = child.nextSibling;
     }
@@ -976,11 +1011,6 @@ class OffsetLayer extends ContainerLayer {
     transform.scale(pixelRatio, pixelRatio);
     builder.pushTransform(transform.storage);
     final ui.Scene scene = buildScene(builder);
-
-    // Because we rendered this layer outside of the main tree, the main layer
-    // tree may attempt to add this layer as retained. However, that's illegal
-    // because here we may have used the existing layer as oldLayer.
-    markNeedsAddToScene();
 
     try {
       // Size is rounded up to the next pixel to make sure we don't clip off

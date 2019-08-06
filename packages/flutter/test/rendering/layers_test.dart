@@ -44,7 +44,7 @@ void main() {
     expect(boundary.layer.attached, isTrue); // this time it did again!
   });
 
-  test('layer subtree dirtiness is correctly computed', () {
+  test('layer _subtreeNeedsAddToScene is correctly computed', () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
@@ -99,6 +99,62 @@ void main() {
     expect(f.debugSubtreeNeedsAddToScene, false);
     expect(h.debugSubtreeNeedsAddToScene, false);
     expect(i.debugSubtreeNeedsAddToScene, false);
+  });
+
+  test('layer _needsAddToScene is correctly computed', () {
+    final ContainerLayer a = ContainerLayer();
+    final ContainerLayer b = ContainerLayer();
+    final ContainerLayer c = ContainerLayer();
+    final ContainerLayer d = ContainerLayer();
+    final ContainerLayer e = ContainerLayer();
+    final ContainerLayer f = ContainerLayer();
+    final ContainerLayer g = ContainerLayer();
+    final List<ContainerLayer> allLayers = <ContainerLayer>[a, b, c, d, e, f, g];
+
+    // The tree is like the following where b and j are dirty:
+    //        a____
+    //       /     \
+    //   (x)b___    c
+    //     / \  \   |
+    //    d   e  f  g(x)
+    a.append(b);
+    a.append(c);
+    b.append(d);
+    b.append(e);
+    b.append(f);
+    c.append(g);
+
+    for (ContainerLayer layer in allLayers) {
+      expect(layer.debugNeedsAddToScene, true);
+    }
+
+    for (ContainerLayer layer in allLayers) {
+      layer.debugMarkClean();
+    }
+
+    for (ContainerLayer layer in allLayers) {
+      expect(layer.debugNeedsAddToScene, false);
+    }
+
+    b.markNeedsAddToScene();
+
+    expect(a.debugNeedsAddToScene, true);
+    expect(b.debugNeedsAddToScene, true);
+    expect(c.debugNeedsAddToScene, false);
+    expect(d.debugNeedsAddToScene, false);
+    expect(e.debugNeedsAddToScene, false);
+    expect(f.debugNeedsAddToScene, false);
+    expect(g.debugNeedsAddToScene, false);
+
+    g.markNeedsAddToScene();
+
+    expect(a.debugNeedsAddToScene, true);
+    expect(b.debugNeedsAddToScene, true);
+    expect(c.debugNeedsAddToScene, true);
+    expect(d.debugNeedsAddToScene, false);
+    expect(e.debugNeedsAddToScene, false);
+    expect(f.debugNeedsAddToScene, false);
+    expect(g.debugNeedsAddToScene, true);
   });
 
   test('leader and follower layers are always dirty', () {
