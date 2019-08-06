@@ -16,8 +16,8 @@ if (is_android) {
 
   if (!defined(default_android_sdk_root)) {
     default_android_sdk_root = "//third_party/android_tools/sdk"
-    default_android_sdk_version = "28"
-    default_android_sdk_build_tools_version = "28.0.3"
+    default_android_sdk_version = "29"
+    default_android_sdk_build_tools_version = "29.0.1"
   }
 
   declare_args() {
