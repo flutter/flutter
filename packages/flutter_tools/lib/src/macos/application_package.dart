@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/file_system.dart';
+import '../build_info.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart' as plist;
 import '../project.dart';
@@ -30,17 +31,18 @@ abstract class MacOSApp extends ApplicationPackage {
   /// which is expected to start the application and send the observatory
   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final ExecutableAndId executableAndId = executableFromBundle(applicationBinary);
+    final _ExecutableAndId executableAndId = _executableFromBundle(applicationBinary);
     final Directory applicationBundle = fs.directory(applicationBinary);
     return PrebuiltMacOSApp(
       bundleDir: applicationBundle,
       bundleName: applicationBundle.path,
-      executableAndId: executableAndId,
+      projectBundleId: executableAndId.id,
+      executable: executableAndId.executable,
     );
   }
 
   /// Look up the executable name for a macOS application bundle.
-  static ExecutableAndId executableFromBundle(Directory applicationBundle) {
+  static _ExecutableAndId _executableFromBundle(Directory applicationBundle) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError('File "${applicationBundle.path}" does not exist.');
@@ -73,28 +75,40 @@ abstract class MacOSApp extends ApplicationPackage {
     if (!fs.file(executable).existsSync()) {
       printError('Could not find macOS binary at $executable');
     }
-    return ExecutableAndId(executable, id);
+    return _ExecutableAndId(executable, id);
   }
 
   @override
   String get displayName => id;
+
+  String applicationBundle(BuildMode buildMode);
+
+  String executable(BuildMode buildMode);
 }
 
 class PrebuiltMacOSApp extends MacOSApp {
   PrebuiltMacOSApp({
     @required this.bundleDir,
     @required this.bundleName,
-    @required this.executableAndId,
-  });
+    @required this.projectBundleId,
+    @required String executable,
+  }) : _executable = executable,
+       super(projectBundleId: projectBundleId);
 
   final Directory bundleDir;
   final String bundleName;
-  final ExecutableAndId executableAndId;
+  final String projectBundleId;
+
+  final String _executable;
 
   @override
   String get name => bundleName;
 
-  String get executable => executableAndId.executable;
+  @override
+  String applicationBundle(BuildMode buildMode) => bundleDir.path;
+
+  @override
+  String executable(BuildMode buildMode) => _executable;
 }
 
 class BuildableMacOSApp extends MacOSApp {
@@ -104,10 +118,35 @@ class BuildableMacOSApp extends MacOSApp {
 
   @override
   String get name => 'macOS';
+
+  @override
+  String applicationBundle(BuildMode buildMode) {
+    final File appBundleNameFile = project.nameFile;
+    if (!appBundleNameFile.existsSync()) {
+      printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      return null;
+    }
+    return fs.path.join(
+        getMacOSBuildDirectory(),
+        'Build',
+        'Products',
+        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        appBundleNameFile.readAsStringSync().trim());
+  }
+
+  @override
+  String executable(BuildMode buildMode) {
+    final String directory = applicationBundle(buildMode);
+    if (directory == null) {
+      return null;
+    }
+    final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
+    return executableAndId.executable;
+  }
 }
 
-class ExecutableAndId {
-  ExecutableAndId(this.executable, this.id);
+class _ExecutableAndId {
+  _ExecutableAndId(this.executable, this.id);
 
   final String executable;
   final String id;
