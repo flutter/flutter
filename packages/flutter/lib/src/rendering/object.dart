@@ -2173,8 +2173,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Matrix4 getTransformTo(RenderObject ancestor) {
     final bool ancestorSpecified = ancestor != null;
     assert(attached);
-    final AbstractNode rootNode = owner.rootNode;
     if (ancestor == null) {
+      final AbstractNode rootNode = owner.rootNode;
       if (rootNode is RenderObject)
         ancestor = rootNode;
     }
