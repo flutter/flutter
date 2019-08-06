@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/trace-provider/provider.h>
+#include <lib/trace/event.h>
 
 #include "dart_runner.h"
 #include "flutter/fml/logging.h"
@@ -14,8 +16,6 @@
 
 #if !defined(FUCHSIA_SDK)
 #include <lib/syslog/cpp/logger.h>
-#include <trace-provider/provider.h>
-#include <trace/event.h>
 #endif  //  !defined(FUCHSIA_SDK)
 
 #if !defined(DART_PRODUCT)

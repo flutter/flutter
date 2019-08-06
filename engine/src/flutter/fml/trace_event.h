@@ -15,7 +15,9 @@
 
 // TODO(DNO-448): This is disabled because the Fuchsia counter id json parsing
 // only handles ints whereas this can produce ints or strings.
-#define FML_TRACE_COUNTER(a, b, c, args...)
+#define FML_TRACE_COUNTER(a, b, c, arg1, ...) \
+  ::fml::tracing::TraceCounterNopHACK((a), (b), (c), (arg1), __VA_ARGS__);
+
 #define FML_TRACE_EVENT(a, b, args...) TRACE_DURATION(a, b)
 
 #define TRACE_EVENT0(a, b) TRACE_DURATION(a, b)
@@ -49,7 +51,7 @@
                                                        __LINE__)(name);
 
 // This macro has the FML_ prefix so that it does not collide with the macros
-// from trace/event.h on Fuchsia.
+// from lib/trace/event.h on Fuchsia.
 //
 // TODO(chinmaygarde): All macros here should have the FML prefix.
 #define FML_TRACE_COUNTER(category_group, name, counter_id, arg1, ...)         \
@@ -173,6 +175,14 @@ void TraceCounter(TraceArg category,
   TraceTimelineEvent(category, name, identifier, Dart_Timeline_Event_Counter,
                      split.first, split.second);
 }
+
+// HACK: Used to NOP FML_TRACE_COUNTER macro without triggering unused var
+// warnings at usage sites.
+template <typename... Args>
+void TraceCounterNopHACK(TraceArg category,
+                         TraceArg name,
+                         TraceIDArg identifier,
+                         Args... args) {}
 
 template <typename... Args>
 void TraceEvent(TraceArg category, TraceArg name, Args... args) {

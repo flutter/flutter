@@ -58,6 +58,8 @@ template("runner") {
              "$fuchsia_sdk_root/pkg:async-loop-cpp",
              "$fuchsia_sdk_root/pkg:fidl_cpp",
              "$fuchsia_sdk_root/pkg:syslog",
+             "$fuchsia_sdk_root/pkg:trace",
+             "$fuchsia_sdk_root/pkg:trace-provider-so",
              "$fuchsia_sdk_root/pkg/lib/sys/cpp",
              "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
              "//third_party/tonic",

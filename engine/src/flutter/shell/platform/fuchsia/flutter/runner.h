@@ -11,11 +11,8 @@
 #include <fuchsia/sys/cpp/fidl.h>
 #include <lib/async-loop/cpp/loop.h>
 #include <lib/sys/cpp/component_context.h>
-
-#if !defined(FUCHSIA_SDK)
-#include <trace-engine/instrumentation.h>
-#include <trace/observer.h>
-#endif  //  !defined(FUCHSIA_SDK)
+#include <lib/trace-engine/instrumentation.h>
+#include <lib/trace/observer.h>
 
 #include "component.h"
 #include "flutter/fml/macros.h"
@@ -57,10 +54,8 @@ class Runner final : public fuchsia::sys::Runner {
   // The connection between the Dart VM service and The Hub.
   std::unique_ptr<dart_utils::VMServiceObject> vmservice_object_;
 
-#if !defined(FUCHSIA_SDK)
   std::unique_ptr<trace::TraceObserver> trace_observer_;
   trace_prolonged_context_t* prolonged_context_;
-#endif  //  !defined(FUCHSIA_SDK)
 #endif  // !defined(DART_PRODUCT)
 
   // |fuchsia::sys::Runner|
