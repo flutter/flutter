@@ -1,4 +1,4 @@
-Signature: 71543bf6d6516325052cb25754f04bda
+Signature: b8e9987a62e509cab3c211c6b58ca613
 
 UNUSED LICENSES:
 
@@ -4605,6 +4605,7 @@ ORIGIN: ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/.gitconfig
 FILE: ../../../third_party/dart/.mailmap
+FILE: ../../../third_party/dart/.style.yapf
 FILE: ../../../third_party/dart/.vpython
 FILE: ../../../third_party/dart/client/idea/.idea/.name
 FILE: ../../../third_party/dart/client/idea/.idea/inspectionProfiles/Project_Default.xml
