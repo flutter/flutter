@@ -14,7 +14,7 @@ dependencies:
   dwds: 0.4.0
   completion: 0.2.1+1
   coverage: 0.12.4
-  crypto: 2.0.6
+  crypto: 2.1.1
   file: 5.0.8+1
   http: 0.12.0+2
   intl: 0.15.8
@@ -26,7 +26,7 @@ dependencies:
   package_config: 1.0.5
   platform: 2.2.1
   plugin: 0.2.0+3
-  process: 3.0.9
+  process: 3.0.10
   quiver: 2.0.4
   stack_trace: 1.9.3
   stream_channel: 2.0.0
@@ -135,4 +135,4 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
-# PUBSPEC CHECKSUM: a0fa
+# PUBSPEC CHECKSUM: f91f

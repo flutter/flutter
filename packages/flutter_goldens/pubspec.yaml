@@ -11,7 +11,7 @@ dependencies:
   file: 5.0.8+1
   meta: 1.1.7
   platform: 2.2.1
-  process: 3.0.9
+  process: 3.0.10
   flutter_goldens_client:
     path: ../flutter_goldens_client
 
@@ -35,4 +35,4 @@ dependencies:
 dev_dependencies:
   mockito: 4.1.0
 
-# PUBSPEC CHECKSUM: 492d
+# PUBSPEC CHECKSUM: 9d55
