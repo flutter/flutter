@@ -1300,7 +1300,13 @@ class ListView extends BoxScrollView {
 ///   mainAxisSpacing: 10.0,
 ///   crossAxisCount: 2,
 ///   children: <Widget>[
-///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('He\'d have you all unravel at the')), color: Colors.teal[100]),
+///     Container(
+///       child: const Padding(
+///         padding: EdgeInsets.all(8.0), 
+///         child: Text('He\'d have you all unravel at the'),
+///        ), 
+///        color: Colors.teal[100],
+///      ),
 ///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Heed not the rabble')), color: Colors.teal[200]),
 ///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Sound of screams but the')), color: Colors.teal[300]),
 ///     Container(child: const Padding(padding: EdgeInsets.all(8.0), child: Text('Who scream')), color: Colors.teal[400]),
