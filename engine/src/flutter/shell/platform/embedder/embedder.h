@@ -695,6 +695,25 @@ typedef struct {
   // optional argument allows for the specification of task runner interfaces to
   // event loops managed by the embedder on threads it creates.
   const FlutterCustomTaskRunners* custom_task_runners;
+
+  // All `FlutterEngine` instances in the process share the same Dart VM. When
+  // the first engine is launched, it starts the Dart VM as well. It used to be
+  // the case that it was not possible to shutdown the Dart VM cleanly and start
+  // it back up in the process in a safe manner. This issue has since been
+  // patched. Unfortunately, applications already began to make use of the fact
+  // that shutting down the Flutter engine instance left a running VM in the
+  // process. Since a Flutter engine could be launched on any thread,
+  // applications would "warm up" the VM on another thread by launching
+  // an engine with no isolates and then shutting it down immediately. The main
+  // Flutter application could then be started on the main thread without having
+  // to incur the Dart VM startup costs at that time. With the new behavior,
+  // this "optimization" immediately becomes massive performance pessimization
+  // as the VM would be started up in the "warm up" phase, shut down there and
+  // then started again on the main thread. Changing this behavior was deemed to
+  // be an unacceptable breaking change. Embedders that wish to shutdown the
+  // Dart VM when the last engine is terminated in the process should opt into
+  // this behavior by setting this flag to true.
+  bool shutdown_dart_vm_when_done;
 } FlutterProjectArgs;
 
 FLUTTER_EXPORT

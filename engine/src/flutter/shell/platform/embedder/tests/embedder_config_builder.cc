@@ -12,6 +12,7 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     InitializationPreference preference)
     : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
+  project_args_.shutdown_dart_vm_when_done = true;
   project_args_.platform_message_callback =
       [](const FlutterPlatformMessage* message, void* context) {
         reinterpret_cast<EmbedderContext*>(context)->PlatformMessageCallback(
