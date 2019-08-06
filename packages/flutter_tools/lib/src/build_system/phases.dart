@@ -174,7 +174,7 @@ void checkCycles(Target initial) {
     for (Target dependency in target.dependencies) {
       checkInternal(dependency, visited, stack);
     }
-    stack.remove(target);
+    stack.remove(target.name);
   }
   checkInternal(initial, <String>{}, <String>{});
 }
