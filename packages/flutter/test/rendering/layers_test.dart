@@ -155,6 +155,11 @@ void main() {
     expect(e.debugNeedsAddToScene, false);
     expect(f.debugNeedsAddToScene, false);
     expect(g.debugNeedsAddToScene, true);
+
+    a.buildScene(SceneBuilder());
+    for (ContainerLayer layer in allLayers) {
+      expect(layer.debugNeedsAddToScene, false);
+    }
   });
 
   test('leader and follower layers are always dirty', () {
@@ -522,19 +527,12 @@ void main() {
     });
   }, skip: isBrowser);
 
-  // Because `toImage` treats an internal layer as a root layer, it may cause
-  // an `EngineLayer` to be used as `oldLayer`, thus making it ineligible for
-  // future reuse in `addRetained` or `oldLayer`. However, the layer's parent
-  // layer in the original tree does not know that this happens and it may
-  // mistakenly attempt to pass the layer to `addRetained`. Therefore,
-  // `toImage` must explicitly call `markNeedsAddToScene`.
-  test('ContainerLayer.toImage marks layer as needsAddToScene', () {
+  test('ContainerLayer.toImage can render interior layer', () {
     final OffsetLayer parent = OffsetLayer();
     final OffsetLayer child = OffsetLayer();
     final OffsetLayer grandChild = OffsetLayer();
     child.append(grandChild);
     parent.append(child);
-    parent.updateSubtreeNeedsAddToScene();
 
     // This renders the layers and generates engine layers.
     parent.buildScene(SceneBuilder());
@@ -542,8 +540,8 @@ void main() {
     // Causes grandChild to pass its engine layer as `oldLayer`
     grandChild.toImage(const Rect.fromLTRB(0, 0, 10, 10));
 
-    // If toImage doesn't mark its layer as "needs addToScene", the parent
-    // will attempt to addRetained and this call will fail.
+    // Ensure we can render the same scene again after rendering an interior
+    // layer.
     parent.buildScene(SceneBuilder());
   });
 }
