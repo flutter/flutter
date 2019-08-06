@@ -18,3 +18,5 @@ declare_args() {
   # GCS.
   use_prebuilt_instrumented_libraries = false
 }
+
+use_fuzzing_engine = false
