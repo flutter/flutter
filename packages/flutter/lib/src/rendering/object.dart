@@ -2172,8 +2172,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [RenderView] to further transform the coordinate.
   Matrix4 getTransformTo(RenderObject ancestor) {
     assert(attached);
+    final AbstractNode rootNode = owner.rootNode;
     if (ancestor == null) {
-      final AbstractNode rootNode = owner.rootNode;
       if (rootNode is RenderObject)
         ancestor = rootNode;
     }
@@ -2182,6 +2182,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(renderer != null); // Failed to find ancestor in parent chain.
       renderers.add(renderer);
     }
+    if (ancestor != owner.rootNode)
+      renderers.add(ancestor);
     final Matrix4 transform = Matrix4.identity();
     for (int index = renderers.length - 1; index > 0; index -= 1) {
       renderers[index].applyPaintTransform(renderers[index - 1], transform);
