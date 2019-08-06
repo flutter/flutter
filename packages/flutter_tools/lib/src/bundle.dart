@@ -171,10 +171,8 @@ Future<void> buildWithAssemble({
     final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
     copyDirectorySync(assetInputDir, outputDirectory);
     final File copiedDill = environment.buildDir.childFile('app.dill');
-    if (targetPlatform == TargetPlatform.ios && buildMode == BuildMode.debug) {
+    if (buildMode == BuildMode.debug) {
       copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
-    } else {
-      copiedDill.copySync(outputDirectory.childFile('app.dill').path);
     }
   }
 }
