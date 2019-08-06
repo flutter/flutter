@@ -172,7 +172,7 @@ Future<void> buildWithAssemble({
     copyDirectorySync(assetInputDir, outputDirectory);
     final File copiedDill = environment.buildDir.childFile('app.dill');
     copiedDill.copySync(outputDirectory.childFile('kernel_blob.bin').path);
-    if (buildMode = BuildMode.debug) {
+    if (buildMode == BuildMode.debug) {
       final File isolateSnapshotData = environment.buildDir.childFile('isolate_snapshot_data');
       final File vmSnapshotData = environment.buildDir.childFile('vm_snapshot_data');
       isolateSnapshotData.copySync(outputDirectory.childFile('isolate_snapshot_data').path);
