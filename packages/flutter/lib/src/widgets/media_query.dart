@@ -93,6 +93,7 @@ class MediaQueryData {
     this.padding = EdgeInsets.zero,
     this.viewInsets = EdgeInsets.zero,
     this.viewPadding = EdgeInsets.zero,
+    this.physicalDepth = double.maxFinite,
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
@@ -114,6 +115,7 @@ class MediaQueryData {
       padding = EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
       viewPadding = EdgeInsets.fromWindowPadding(window.viewPadding, window.devicePixelRatio),
       viewInsets = EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
+      physicalDepth = window.physicalDepth,
       accessibleNavigation = window.accessibilityFeatures.accessibleNavigation,
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
@@ -210,6 +212,19 @@ class MediaQueryData {
   ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
+  /// The physical depth is the maximum elevation that the Window allows.
+  ///
+  /// Physical layers drawn at or above this elevation will have their elevation
+  /// clamped to this value. This can happen if the physical layer itself has
+  /// an elevation larger than available depth, or if some ancestor of the layer
+  /// causes it to have a cumulative elevation that is larger than the available
+  /// depth.
+  ///
+  /// The default value is [double.maxFinite], which is used for platforms that
+  /// do not specify a maximum elevation. This property is currently on expected
+  /// to be set to a non-default value on Fuchsia.
+  final double physicalDepth;
+
   /// Whether to use 24-hour format when formatting time.
   ///
   /// The behavior of this flag is different across platforms:
@@ -274,6 +289,7 @@ class MediaQueryData {
     EdgeInsets padding,
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
+    double physicalDepth,
     bool alwaysUse24HourFormat,
     bool disableAnimations,
     bool invertColors,
@@ -288,6 +304,7 @@ class MediaQueryData {
       padding: padding ?? this.padding,
       viewPadding: viewPadding ?? this.viewPadding,
       viewInsets: viewInsets ?? this.viewInsets,
+      physicalDepth: physicalDepth ?? this.physicalDepth,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
       disableAnimations: disableAnimations ?? this.disableAnimations,
@@ -451,6 +468,7 @@ class MediaQueryData {
         && typedOther.padding == padding
         && typedOther.viewPadding == viewPadding
         && typedOther.viewInsets == viewInsets
+        && typedOther.physicalDepth == physicalDepth
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
@@ -468,6 +486,7 @@ class MediaQueryData {
       padding,
       viewPadding,
       viewInsets,
+      physicalDepth,
       alwaysUse24HourFormat,
       disableAnimations,
       invertColors,
@@ -486,6 +505,7 @@ class MediaQueryData {
              'padding: $padding, '
              'viewPadding: $viewPadding, '
              'viewInsets: $viewInsets, '
+             'physicalDepth: $physicalDepth, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
              'accessibleNavigation: $accessibleNavigation, '
              'disableAnimations: $disableAnimations, '
