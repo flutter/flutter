@@ -217,13 +217,13 @@ class MediaQueryData {
   ///
   /// Physical layers drawn at or above this elevation will have their elevation
   /// clamped to this value. This can happen if the physical layer itself has
-  /// an elevation larger than available depth, or if some ancestor of the layer
-  /// causes it to have a cumulative elevation that is larger than the available
-  /// depth.
+  /// an elevation larger than the available depth, or if some ancestor of the
+  /// layer causes it to have a cumulative elevation that is larger than the
+  /// available depth.
   ///
   /// The default value is [double.maxFinite], which is used for platforms that
-  /// do not specify a maximum elevation. This property is currently on expected
-  /// to be set to a non-default value on Fuchsia.
+  /// do not specify a maximum elevation. This property is currently only
+  /// expected to be set to a non-default value on Fuchsia.
   final double physicalDepth;
 
   /// Whether to use 24-hour format when formatting time.
