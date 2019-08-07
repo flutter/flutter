@@ -1959,10 +1959,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
         rightThumbOffset = startThumbCenter;
         break;
     }
-    final Size thumbSize = sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete);
-    final double thumbRadius = thumbSize.width / 2;
-    assert(thumbRadius > 0);
-
+    
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,
@@ -1972,23 +1969,55 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
     );
     final double trackRadius = trackRect.height / 2;
 
-    final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
-    if (!leftTrackArcRect.isEmpty)
-      context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, inactivePaint);
+    final Rect leftTrackArcRect = Rect.fromLTWH(
+      trackRect.left - trackRadius,
+      trackRect.top,
+      trackRect.height,
+      trackRect.height,
+    );
 
-    final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRadius, trackRect.top, leftThumbOffset.dx - thumbRadius, trackRect.bottom);
+    final Rect leftTrackSegment = Rect.fromLTRB(
+      trackRect.left,
+      trackRect.top,
+      leftThumbOffset.dx,
+      trackRect.bottom,
+    );
+    final Rect middleTrackSegment = Rect.fromLTRB(
+      leftThumbOffset.dx,
+      trackRect.top,
+      rightThumbOffset.dx,
+      trackRect.bottom,
+    );
+    final Rect rightTrackSegment = Rect.fromLTRB(
+      rightThumbOffset.dx,
+      trackRect.top,
+      trackRect.right,
+      trackRect.bottom,
+    );
+
+    final Rect rightTrackArcRect = Rect.fromLTWH(
+      trackRect.right - trackRadius,
+      trackRect.top,
+      trackRect.height,
+      trackRect.height,
+    );
+
+    if (!leftTrackArcRect.isEmpty)
+      context.canvas.drawArc(
+          leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackSegment.isEmpty ? activePaint : inactivePaint);
+
     if (!leftTrackSegment.isEmpty)
       context.canvas.drawRect(leftTrackSegment, inactivePaint);
-    final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx + thumbRadius, trackRect.top, rightThumbOffset.dx - thumbRadius, trackRect.bottom);
+
     if (!middleTrackSegment.isEmpty)
       context.canvas.drawRect(middleTrackSegment, activePaint);
-    final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx + thumbRadius, trackRect.top, trackRect.right - trackRadius, trackRect.bottom);
+
     if (!rightTrackSegment.isEmpty)
       context.canvas.drawRect(rightTrackSegment, inactivePaint);
 
-    final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height, trackRect.top, trackRect.height, trackRect.height);
     if (!rightTrackArcRect.isEmpty)
-      context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, inactivePaint);
+      context.canvas.drawArc(
+          rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackSegment.isEmpty ? activePaint : inactivePaint);
   }
 }
 
