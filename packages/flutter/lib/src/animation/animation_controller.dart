@@ -658,7 +658,8 @@ class AnimationController extends Animation<double>
     }
     final Simulation simulation = SpringSimulation(_kFlingSpringDescription, value, target, velocity * scale)
       ..tolerance = _kFlingTolerance;
-    return animateWith(simulation);
+    stop();
+    return _startSimulation(simulation);
   }
 
   /// Drives the animation according to the given simulation.
