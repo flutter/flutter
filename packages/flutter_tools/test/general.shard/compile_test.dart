@@ -277,22 +277,21 @@ example:org-dartlang-app:/
       );
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
-       // No accept or reject commands should be issued until we
+      // No accept or reject commands should be issued until we
       // send recompile request.
       await _accept(streamController, generator, mockFrontendServerStdIn, '');
       await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
 
       await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-
-      await _reject(streamController, generator, mockFrontendServerStdIn, 'result 0\n',
+      // No sources returned from reject command.
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
         '^reject\\n\$');
-
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
@@ -543,30 +542,6 @@ Future<void> _recompile(
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-class MockProcessManager extends Mock implements ProcessManager {}
-class MockProcess extends Mock implements Process {}
-class MockStream extends Mock implements Stream<List<int>> {}
-class MockStdIn extends Mock implements IOSink {
-  final StringBuffer _stdInWrites = StringBuffer();
-
-  String getAndClear() {
-    final String result = _stdInWrites.toString();
-    _stdInWrites.clear();
-    return result;
-  }
-
-  @override
-  void write([ Object o = '' ]) {
-    _stdInWrites.write(o);
-  }
-
-  @override
-  void writeln([ Object o = '' ]) {
-    _stdInWrites.writeln(o);
-  }
-}
-class MockFileSystem extends Mock implements FileSystem {}
-class MockFile extends Mock implements File {}
 Future<void> _accept(
   StreamController<List<int>> streamController,
   ResidentCompiler generator,
@@ -601,3 +576,27 @@ Future<void> _reject(
   expect(commands, matches(re));
   mockFrontendServerStdIn._stdInWrites.clear();
 }
+class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
+class MockStream extends Mock implements Stream<List<int>> {}
+class MockStdIn extends Mock implements IOSink {
+  final StringBuffer _stdInWrites = StringBuffer();
+
+  String getAndClear() {
+    final String result = _stdInWrites.toString();
+    _stdInWrites.clear();
+    return result;
+  }
+
+  @override
+  void write([ Object o = '' ]) {
+    _stdInWrites.write(o);
+  }
+
+  @override
+  void writeln([ Object o = '' ]) {
+    _stdInWrites.writeln(o);
+  }
+}
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFile extends Mock implements File {}
