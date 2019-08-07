@@ -591,8 +591,9 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   NSUInteger selectionBase = ((FlutterTextPosition*)_selectedTextRange.start).index;
   NSUInteger selectionExtent = ((FlutterTextPosition*)_selectedTextRange.end).index;
 
-  NSUInteger composingBase = 0;
-  NSUInteger composingExtent = 0;
+  // Empty compositing range is represented by the framework's TextRange.empty.
+  NSInteger composingBase = -1;
+  NSInteger composingExtent = -1;
   if (self.markedTextRange != nil) {
     composingBase = ((FlutterTextPosition*)self.markedTextRange.start).index;
     composingExtent = ((FlutterTextPosition*)self.markedTextRange.end).index;
