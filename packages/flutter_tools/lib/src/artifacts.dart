@@ -258,7 +258,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
+        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
       case Artifact.platformKernelDill:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
