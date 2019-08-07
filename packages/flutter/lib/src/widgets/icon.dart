@@ -26,7 +26,7 @@ import 'icon_theme_data.dart';
 ///
 /// {@tool sample}
 ///
-/// This example shows how to use the [Icon] widget to create [Row] of icons in
+/// This example shows how to create a [Row] of [Icon]s in
 /// different colors and sizes.
 ///
 /// ![A row of icons representing a pink heart, green music notes, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
