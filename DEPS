@@ -417,7 +417,7 @@ deps = {
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'v1.1.91',
 
    'src/third_party/swiftshader':
-   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '95b1db9619fb0f5f232c09995bc00729273f74ee',
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + 'd70129a3d3409dac58e14f819b62620393afb652',
 
   'src/third_party/pkg/when':
    Var('dart_git') + '/when.git' + '@' + '0.2.0',
