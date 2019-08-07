@@ -97,8 +97,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      if (headless)
-        ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
+      // if (headless)
+      //   ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
     ];
 
