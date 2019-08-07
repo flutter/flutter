@@ -5776,9 +5776,9 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
-    this.behavior = LayerHitTestBehavior.opaque,
+    this.opaque = true,
     Widget child,
-  }) : assert(behavior != null),
+  }) : assert(opaque != null),
        super(key: key, child: child);
 
   /// Called when a mouse pointer (with or without buttons pressed) enters the
@@ -5795,8 +5795,19 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
-  /// TODOC
-  final LayerHitTestBehavior behavior;
+  /// Whether this object should prevent [MouseRegion]s visually behind it
+  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
+  /// and [onExit] behave.
+  ///
+  /// If [opaque] is true, this object will "absorb" the mouse pointer so that
+  /// [MouseRegion]s visually behind it will not consider themselves being
+  /// hovered even when the pointer is within their areas.
+  ///
+  /// If [opaque] is false, whether the pointer is contained by this mouse
+  /// region will not affect how [MouseRegion]s behind it behaves.
+  ///
+  /// This defaults to true.
+  final bool opaque;
 
   @override
   _ListenerElement createElement() => _ListenerElement(this);
@@ -5807,7 +5818,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       onEnter: onEnter,
       onHover: onHover,
       onExit: onExit,
-      behavior: behavior,
+      opaque: opaque,
     );
   }
 
@@ -5817,7 +5828,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       ..onEnter = onEnter
       ..onHover = onHover
       ..onExit = onExit
-      ..behavior = behavior;
+      ..opaque = opaque;
   }
 
   @override

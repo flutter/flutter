@@ -13,14 +13,45 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'layer_hit_test.dart';
 
-/// TODOC
-enum LayerHitTestBehavior {
-  /// TODOC
-  opaque,
-  /// TODOC
-  translucent,
+/// Data collected during a layer hit test.
+class LayerHitTestEntry<T> {
+  /// Creates a hit test entry.
+  LayerHitTestEntry(this.value);
+
+  /// The [HitTestTarget] encountered during the hit test.
+  final T value;
+
+  @override
+  String toString() => '$value';
+}
+
+/// The result of performing a hit test on layers.
+class LayerHitTestResult<T> {
+  /// Creates an empty layer hit test result.
+  LayerHitTestResult()
+     : _path = <LayerHitTestEntry<T>>[];
+
+  /// An unmodifiable list of [LayerHitTestEntry] objects recorded during the
+  /// hit test.
+  ///
+  /// The path starts with the most specific and visually front-most entry,
+  /// typically the one at the leaf of tree being hit tested, and proceeds onto
+  /// the visually behind entries and less specific entries.
+  Iterable<LayerHitTestEntry<T>> get path => _path;
+  final List<LayerHitTestEntry<T>> _path;
+
+  /// Add a [LayerHitTestEntry] to the path.
+  ///
+  /// The new entry is added at the end of the path, which means entries should
+  /// be added in order from visually front to behind, and most specific to
+  /// least specific, typically during an upward walk of the layer tree.
+  void add(LayerHitTestEntry<T> entry) {
+    _path.add(entry);
+  }
+
+  @override
+  String toString() => 'LayerHitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
 }
 
 /// A composited layer.
@@ -163,7 +194,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     final LayerHitTestResult<S> result = LayerHitTestResult<S>();
     hitTest<S>(result, regionOffset: regionOffset);
     return result.path.map((LayerHitTestEntry<S> entry) {
-      return entry.target.value;
+      return entry.value;
     });
   }
 
@@ -2047,25 +2078,22 @@ class FollowerLayer extends ContainerLayer {
 /// These values can be retrieved using [Layer.find] with a given [Offset]. If
 /// a [Size] is provided to this layer, then find will check if the provided
 /// offset is within the bounds of the layer.
-class AnnotatedRegionLayer<T> extends ContainerLayer implements LayerHitTestTarget<T> {
+class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Creates a new layer annotated with [value] that clips to rectangle defined
   /// by the [size] and [offset] if provided.
   ///
   /// The [value] provided cannot be null.
   AnnotatedRegionLayer(
-    T value, {
+    this.value, {
     this.size,
     Offset offset,
-    this.behavior = LayerHitTestBehavior.translucent,
+    this.opaque = false,
   }) : assert(value != null),
-       assert(behavior != null),
-       _value = value,
+       assert(opaque != null),
        offset = offset ?? Offset.zero;
 
   /// The value returned by [find] if the offset is contained within this layer.
-  @override
-  T get value => _value;
-  final T _value;
+  final T value;
 
   /// The [size] is optionally used to clip the hit-testing of [find].
   ///
@@ -2084,7 +2112,20 @@ class AnnotatedRegionLayer<T> extends ContainerLayer implements LayerHitTestTarg
   /// Ignored if [size] is not set.
   final Offset offset;
 
-  final LayerHitTestBehavior behavior;
+  /// Whether this layer should prevent layers visually behind it from receiving
+  /// the hit testing.
+  ///
+  /// If [opaque] is true, it will "absorb" the hit test if any of its children
+  /// absorb it, or if this layer contains the target position and has the
+  /// requested annotation. Absorbing the hit test prevents layers visually
+  /// behind it from also receiving the test.
+  ///
+  /// If [opaque] is false, the layer will always allow layers visually behind
+  /// it to receive the test no matter whether the layer or its children would
+  /// absorb the test otherwise.
+  ///
+  /// This defaults to false.
+  final bool opaque;
 
   @override
   S find<S>(Offset regionOffset) {
@@ -2101,19 +2142,23 @@ class AnnotatedRegionLayer<T> extends ContainerLayer implements LayerHitTestTarg
     return null;
   }
 
-  @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool _hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
     bool isAbsorbed = super.hitTest(result, regionOffset: regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
-      return isAbsorbed && (behavior != LayerHitTestBehavior.translucent);
+      return isAbsorbed;
     }
     if (T == S) {
       isAbsorbed = true;
-      final Object untypedTarget = this;
-      final LayerHitTestTarget<S> typedTarget = untypedTarget;
-      result.add(LayerHitTestEntry<S>(typedTarget));
+      final Object untypedValue = value;
+      final LayerHitTestEntry<S> typedEntry = LayerHitTestEntry<S>(untypedValue);
+      result.add(typedEntry);
     }
-    return isAbsorbed && (behavior != LayerHitTestBehavior.translucent);
+    return isAbsorbed;
+  }
+
+  @override
+  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+    return _hitTest(result, regionOffset: regionOffset) && opaque;
   }
 
   @override

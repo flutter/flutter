@@ -2570,9 +2570,9 @@ class RenderMouseRegion extends RenderProxyBox {
     PointerEnterEventListener onEnter,
     PointerHoverEventListener onHover,
     PointerExitEventListener onExit,
-    this.behavior = LayerHitTestBehavior.opaque,
+    this.opaque = true,
     RenderBox child,
-  }) : assert(behavior != null),
+  }) : assert(opaque != null),
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
@@ -2587,8 +2587,19 @@ class RenderMouseRegion extends RenderProxyBox {
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
 
-  /// TODOC
-  LayerHitTestBehavior behavior;
+  /// Whether this object should prevent [RenderMouseRegion]s visually behind it
+  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
+  /// and [onExit] behave.
+  ///
+  /// If [opaque] is true, this object will "absorb" the mouse pointer so that
+  /// [RenderMouseRegion]s visually behind it will not consider themselves being
+  /// hovered even when the pointer is within their areas.
+  ///
+  /// If [opaque] is false, whether the pointer is contained by this mouse
+  /// region will not affect how [RenderMouseRegion]s behind it behaves.
+  ///
+  /// This defaults to true.
+  bool opaque;
 
   /// Called when a hovering pointer enters the region for this widget.
   ///
@@ -2736,7 +2747,7 @@ class RenderMouseRegion extends RenderProxyBox {
         _hoverAnnotation,
         size: size,
         offset: offset,
-        behavior: behavior,
+        opaque: opaque,
       );
       context.pushLayer(layer, super.paint, offset);
     } else {
