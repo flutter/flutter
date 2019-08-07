@@ -54,6 +54,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// If false, the parent layer may pass this layer's engine layer to
   /// [SceneBuilder.addRetained]. If true, [SceneBuilder.addRetained] may not
   /// be used.
+  ///
+  /// This getter is intended for debugging purposes only. In release builds, it
+  /// always returns null.
   bool get debugNeedsAddToScene {
     bool result;
     assert(() {
@@ -69,7 +72,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   void markNeedsAddToScene() {
     assert(
       !alwaysNeedsAddToScene,
-      '$runtimeType called markNeedsAddToScene.\n'
+      '$runtimeType with alwaysNeedsAddToScene set called markNeedsAddToScene.\n'
       'The layer\'s alwaysNeedsAddToScene is set to true, and therefore it should not call markNeedsAddToScene.',
     );
 
@@ -118,9 +121,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Stores the engine layer created for this layer in order to reuse engine
   /// resources across frames for better app performance.
   ///
-  /// Set this field to the value returned by one of [ui.SceneBuilder]'s "push"
-  /// methods, e.g. [ui.SceneBuilder.pushOpacity].
-  ///
   /// This value may be passed to [ui.SceneBuilder.addRetained] to communicate
   /// to the engine that nothing in this layer or any of its descendants
   /// changed. The native engine could, for example, reuse the texture rendered
@@ -131,10 +131,17 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// communicate to the engine that a layer is updating a previously rendered
   /// layer. The web engine could, for example, update the properties of
   /// previously rendered HTML DOM nodes rather than creating new nodes.
-  ui.EngineLayer get engineLayer => _engineLayer;
   @protected
-  set engineLayer(ui.EngineLayer newLayer) {
-    _engineLayer = newLayer;
+  ui.EngineLayer get engineLayer => _engineLayer;
+
+  /// Sets the engine layer used to render this layer.
+  ///
+  /// Typically this field is set to the value returned by [addToScene], which
+  /// in turn returns the engine layer produced by one of [ui.SceneBuilder]'s
+  /// "push" methods, such as [ui.SceneBuilder.pushOpacity].
+  @protected
+  set engineLayer(ui.EngineLayer value) {
+    _engineLayer = value;
     if (!alwaysNeedsAddToScene) {
       // We created a new engine layer for this layer. Therefore this layer no
       // longer requires that its [addToScene] is called (e.g. it is now safe
@@ -971,10 +978,10 @@ class OffsetLayer extends ContainerLayer {
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    final ui.EngineLayer newLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
+    final ui.EngineLayer newEngineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1093,15 +1100,15 @@ class ClipRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      newLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1175,15 +1182,15 @@ class ClipRRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      newLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1257,15 +1264,15 @@ class ClipPathLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      newLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: _engineLayer);
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 }
 
@@ -1295,10 +1302,10 @@ class ColorFilterLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final ui.EngineLayer newLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
+    final ui.EngineLayer newEngineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1354,10 +1361,10 @@ class TransformLayer extends OffsetLayer {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-    final ui.EngineLayer newLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
+    final ui.EngineLayer newEngineLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   Offset _transformOffset(Offset regionOffset) {
@@ -1468,13 +1475,13 @@ class OpacityLayer extends ContainerLayer {
       return true;
     }());
 
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (enabled)
-      newLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     if (enabled)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1541,10 +1548,10 @@ class ShaderMaskLayer extends ContainerLayer {
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    final ui.EngineLayer newLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
+    final ui.EngineLayer newEngineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1579,10 +1586,10 @@ class BackdropFilterLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final ui.EngineLayer newLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
+    final ui.EngineLayer newEngineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 }
 
@@ -1714,9 +1721,9 @@ class PhysicalModelLayer extends ContainerLayer {
       enabled = !debugDisablePhysicalShapeLayers;
       return true;
     }());
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (enabled) {
-      newLayer = builder.pushPhysicalShape(
+      newEngineLayer = builder.pushPhysicalShape(
         path: layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
@@ -1728,7 +1735,7 @@ class PhysicalModelLayer extends ContainerLayer {
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
@@ -1764,7 +1771,7 @@ class LayerLink {
 ///
 /// This layer collapses the accumulated offset into a transform and passes
 /// [Offset.zero] to its child layers in the [addToScene]/[addChildrenToScene]
-/// methods, so that [applyTransform] works reliably.
+/// methods, so that [applyTransform] will work reliably.
 class LeaderLayer extends ContainerLayer {
   /// Creates a leader layer.
   ///
@@ -1833,13 +1840,13 @@ class LeaderLayer extends ContainerLayer {
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (_lastOffset != Offset.zero)
-      newLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
-    return newLayer;
+    return newEngineLayer;
   }
 
   /// Applies the transform that would be applied when compositing the given
@@ -2058,13 +2065,13 @@ class FollowerLayer extends ContainerLayer {
   }
 
   /// {@template flutter.leaderFollower.alwaysNeedsAddToScene}
-  /// This disables retained rendering for Leader/FollowerLayer.
+  /// This disables retained rendering.
   ///
-  /// A FollowerLayer copies changes from a LeaderLayer that could be anywhere
-  /// in the Layer tree, and that LeaderLayer could change without notifying the
-  /// FollowerLayer. Therefore we have to always call a FollowerLayer's
-  /// [addToScene]. In order to call FollowerLayer's [addToScene], LeaderLayer's
-  /// [addToScene] must be called first so LeaderLayer must also be considered
+  /// A [FollowerLayer] copies changes from a [LeaderLayer] that could be anywhere
+  /// in the Layer tree, and that leader layer could change without notifying the
+  /// follower layer. Therefore we have to always call a follower layer's
+  /// [addToScene]. In order to call follower layer's [addToScene], leader layer's
+  /// [addToScene] must be called first so leader layer must also be considered
   /// as [alwaysNeedsAddToScene].
   /// {@endtemplate}
   @override
@@ -2081,21 +2088,21 @@ class FollowerLayer extends ContainerLayer {
       return null; // this does not have an engine layer.
     }
     _establishTransform();
-    ui.EngineLayer newLayer;
+    ui.EngineLayer newEngineLayer;
     if (_lastTransform != null) {
-      newLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
-      newLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
+      newEngineLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
     }
     _inverseDirty = true;
-    return newLayer;
+    return newEngineLayer;
   }
 
   @override
