@@ -99,6 +99,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       _currentDrag.updateDelegate(this);
       typedOther._currentDrag = null;
     }
+    assert(_currentHold == null);
+    if(typedOther._currentHold != null) {
+      _currentHold = typedOther._currentHold;
+      _currentHold.updateDelegate(this);
+      typedOther._currentHold = null;
+    }
   }
 
   @override
@@ -188,6 +194,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       curve: curve,
       vsync: context.vsync,
     );
+    // If an invocation of [hold] is being interrupted by [animateTo], whereby
+    // the [ScrollableState] has not yet received the handle to the
+    // [HoldActivity], it will not be properly disposed of in [beginActivity].
+    // Therefore, we dispose of any active hold here.
+    if (_currentHold != null) {
+      _currentHold.dispose();
+      _currentHold = null;
+    }
     beginActivity(activity);
     return activity.done;
   }
@@ -220,6 +234,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
+  HoldScrollActivity _currentHold;
+
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
     final double previousVelocity = activity.velocity;
@@ -227,9 +243,10 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       delegate: this,
       onHoldCanceled: holdCancelCallback,
     );
+    _currentHold = holdActivity;
     beginActivity(holdActivity);
     _heldPreviousVelocity = previousVelocity;
-    return holdActivity;
+    return _currentHold;
   }
 
   ScrollDragController _currentDrag;
@@ -253,6 +270,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   void dispose() {
     _currentDrag?.dispose();
     _currentDrag = null;
+    _currentHold?.dispose();
+    _currentHold = null;
     super.dispose();
   }
 
