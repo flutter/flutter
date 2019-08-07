@@ -538,7 +538,8 @@ class TextField extends StatefulWidget {
 
   /// The color to use when painting the cursor.
   ///
-  /// Defaults to the theme's `cursorColor` when null.
+  /// Defaults to [ThemeData.cursorColor] or [CupertinoTheme.primaryColor]
+  /// when null based on the platform.
   final Color cursorColor;
 
   /// The appearance of the keyboard.
