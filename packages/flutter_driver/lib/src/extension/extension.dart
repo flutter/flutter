@@ -381,7 +381,6 @@ class FlutterDriverExtension {
     return null;
   }
 
-  @Deprecated('Use _waitForCondition instead.')
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -405,7 +404,6 @@ class FlutterDriverExtension {
   /// `set_frame_sync` method. See [FlutterDriver.runUnsynchronized] for more
   /// details on how to do this. Note, disabling frame sync will require the
   /// test author to use some other method to avoid flakiness.
-  @Deprecated('Use _waitForCondition instead.')
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0

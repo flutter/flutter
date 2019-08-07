@@ -129,7 +129,6 @@ class WaitForCondition extends Command {
 }
 
 /// A Flutter Driver command that waits until there are no more transient callbacks in the queue.
-@Deprecated('Use WaitForCondition instead.')
 class WaitUntilNoTransientCallbacks extends Command {
   /// Creates a command that waits for there to be no transient callbacks.
   const WaitUntilNoTransientCallbacks({ Duration timeout }) : super(timeout: timeout);
@@ -143,7 +142,6 @@ class WaitUntilNoTransientCallbacks extends Command {
 }
 
 /// A Flutter Driver command that waits until the frame is synced.
-@Deprecated('Use WaitForCondition instead.')
 class WaitUntilNoPendingFrame extends Command {
   /// Creates a command that waits until there's no pending frame scheduled.
   const WaitUntilNoPendingFrame({ Duration timeout }) : super(timeout: timeout);
