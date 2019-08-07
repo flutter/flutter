@@ -500,41 +500,6 @@ Future<void> _recompile(
   mockFrontendServerStdIn._stdInWrites.clear();
 }
 
-Future<void> _accept(
-  StreamController<List<int>> streamController,
-  ResidentCompiler generator,
-  MockStdIn mockFrontendServerStdIn,
-  String expected,
-) async {
-  // Put content into the output stream after generator.recompile gets
-  // going few lines below, resets completer.
-  generator.accept();
-  final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = RegExp(expected);
-  expect(commands, matches(re));
-  mockFrontendServerStdIn._stdInWrites.clear();
-}
-
-Future<void> _reject(
-  StreamController<List<int>> streamController,
-  ResidentCompiler generator,
-  MockStdIn mockFrontendServerStdIn,
-  String mockCompilerOutput,
-  String expected,
-) async {
-  // Put content into the output stream after generator.recompile gets
-  // going few lines below, resets completer.
-  scheduleMicrotask(() {
-    streamController.add(utf8.encode(mockCompilerOutput));
-  });
-  final CompilerOutput output = await generator.reject();
-  expect(output, isNull);
-  final String commands = mockFrontendServerStdIn.getAndClear();
-  final RegExp re = RegExp(expected);
-  expect(commands, matches(re));
-  mockFrontendServerStdIn._stdInWrites.clear();
-}
-
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
