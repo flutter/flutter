@@ -274,6 +274,7 @@ void main() {
 
       await tester.pumpWidget(Container());
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
       await gesture.moveTo(const Offset(400.0, 0.0));
       addTearDown(gesture.removePointer);
       await tester.pump();
@@ -426,6 +427,7 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.addPointer();
+      addTearDown(gesture.removePointer);
       await gesture.moveTo(topLeft - const Offset(1, 1));
       await tester.pump();
       expect(events, isEmpty);
@@ -454,6 +456,7 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.addPointer();
+      addTearDown(gesture.removePointer);
 
       await tester.pumpWidget(
         Transform.scale(
@@ -499,6 +502,7 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.addPointer();
+      addTearDown(gesture.removePointer);
 
       int numEntries = 0;
       int numExits = 0;
@@ -539,6 +543,7 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.addPointer();
+      addTearDown(gesture.removePointer);
 
       int numEntries = 0;
       int numExits = 0;
@@ -596,11 +601,8 @@ void main() {
 
       // Plug-in a mouse and move it to the center of the container.
       TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      addTearDown(() async {
-        if (gesture != null)
-          await gesture.removePointer();
-      });
       await gesture.addPointer();
+      addTearDown(() => gesture?.removePointer());
       await gesture.moveTo(tester.getCenter(find.byType(Container)));
       await tester.pumpAndSettle();
 

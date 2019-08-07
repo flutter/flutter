@@ -173,7 +173,8 @@ class WebFs {
       logWriter: (dynamic level, String message) => printTrace(message),
     );
     // Map the bootstrap files to the correct package directory.
-    final String targetBaseName = fs.path.withoutExtension(target).replaceFirst('lib/', '');
+    final String targetBaseName = fs.path
+      .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
     final Map<String, String> mappedUrls = <String, String>{
       'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
         '${targetBaseName}_web_entrypoint.dart.js',

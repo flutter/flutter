@@ -257,13 +257,12 @@ void main() {
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     expect(box, isNot(paints..rect(color: hoverColor)));
 
     await gesture.moveTo(tester.getCenter(find.byType(RawMaterialButton)));
     await tester.pumpAndSettle(const Duration(seconds: 1));
 
     expect(box, paints..rect(color: hoverColor));
-
-    await gesture.removePointer();
   });
 }

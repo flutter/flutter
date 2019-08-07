@@ -79,7 +79,7 @@ const String fixWithDevelopmentTeamInstruction = '''
 
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
+    RegExp(r'^\s*\d+\).+"(.+Develop(ment|er).+)"$');
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 

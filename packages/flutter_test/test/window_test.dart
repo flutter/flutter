@@ -43,6 +43,20 @@ void main() {
     );
   });
 
+  testWidgets('TestWindow can fake physical depth', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<double>(
+      tester: tester,
+      realValue: ui.window.physicalDepth,
+      fakeValue: 120.0,
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.physicalDepth;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
+        binding.window.physicalDepthTestValue = fakeValue;
+      },
+    );
+  });
+
   testWidgets('TestWindow can fake view insets', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<WindowPadding>(
       tester: tester,
