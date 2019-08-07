@@ -350,7 +350,6 @@ class FlutterDevice {
   Future<int> runHot({
     HotRunner hotRunner,
     String route,
-    bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
@@ -406,7 +405,6 @@ class FlutterDevice {
   Future<int> runCold({
     ColdRunner coldRunner,
     String route,
-    bool shouldBuild = true,
   }) async {
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -623,7 +621,6 @@ abstract class ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   });
 
   Future<int> attach({
