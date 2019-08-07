@@ -47,6 +47,8 @@ def _find_package_pid(adb_path, package):
 def _get_device_abi(adb_path):
     abi_output = subprocess.check_output(
         [adb_path, 'shell', 'getprop', 'ro.product.cpu.abi']).strip()
+    if abi_output.startswith('arm64'):
+        return 'arm64'
     if abi_output.startswith('arm'):
         return 'arm'
     return abi_output
@@ -58,6 +60,8 @@ def _default_local_engine(abi):
         return 'android_debug_unopt_x86'
     elif abi == 'x86_64':
         return 'android_debug_unopt_x64'
+    elif abi == 'arm64':
+        return 'android_debug_unopt_arm64'
     else:
         return 'android_debug_unopt'
 
@@ -140,7 +144,7 @@ class GdbClient(object):
 
         debug_out_path = os.path.join(flutter_root, 'out/%s' % local_engine)
         if not os.path.exists(os.path.join(debug_out_path, 'libflutter.so')):
-            print 'Unable to find libflutter.so. Make sure you have completed a %s build' % args.local_engine
+            print 'Unable to find libflutter.so. Make sure you have completed a %s build' % local_engine
             return 1
 
         eval_commands = []
@@ -186,9 +190,13 @@ class GdbServer(object):
                                os.path.join(flutter_root, gdb_server_local_path),
                                GdbServer.GDB_SERVER_DEVICE_TMP_PATH])
         gdb_server_device_path = '/data/data/%s/gdbserver' % args.package
-        subprocess.check_call([adb_path, 'shell', 'run-as', args.package, 'cp',
+        subprocess.check_call([adb_path, 'shell', 'run-as', args.package, 'cp', '-F',
                                GdbServer.GDB_SERVER_DEVICE_TMP_PATH,
                                gdb_server_device_path])
+
+
+        subprocess.call([adb_path, 'shell', 'run-as', args.package,
+                         'killall', 'gdbserver'])
 
         # Run gdbserver.
         try:
