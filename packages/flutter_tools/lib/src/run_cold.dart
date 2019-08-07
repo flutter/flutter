@@ -49,7 +49,6 @@ class ColdRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -66,7 +65,6 @@ class ColdRunner extends ResidentRunner {
       final int result = await device.runCold(
         coldRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0)
         return result;

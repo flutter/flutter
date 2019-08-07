@@ -67,6 +67,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -76,7 +77,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     semanticsEnabled: true,
     skip: isBrowser,
@@ -132,6 +132,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
@@ -141,7 +142,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
   },
     skip: isBrowser,
     semanticsEnabled: true,
@@ -201,6 +201,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(textColor(), hoverColor);
@@ -210,7 +211,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(textColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton uses stateful color for icon color in different states', (WidgetTester tester) async {
@@ -267,6 +267,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(iconColor(), hoverColor);
@@ -276,7 +277,6 @@ void main() {
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     expect(iconColor(), pressedColor);
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
@@ -370,6 +370,7 @@ void main() {
       kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: hoverColor));
@@ -378,7 +379,6 @@ void main() {
     await gesture.down(center);
     await tester.pumpAndSettle();
     expect(outlineButton, paints..path(color: pressedColor));
-    await gesture.removePointer();
   });
 
   testWidgets('OutlineButton ignores highlightBorderColor if border color is stateful', (WidgetTester tester) async {
