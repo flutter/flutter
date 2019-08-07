@@ -13,20 +13,20 @@ void main() {
         'conditionName': 'NoTransientCallbacksCondition',
       };
       final NoTransientCallbacksCondition condition =
-          NoTransientCallbacksCondition.fromJson(jsonMap);
+          NoTransientCallbacksCondition.deserialize(jsonMap);
       expect(condition, equals(const NoTransientCallbacksCondition()));
       expect(condition.serialize(), equals(jsonMap));
     });
 
     test('NoTransientCallbacksCondition fromJson error', () {
       expect(
-          () => NoTransientCallbacksCondition.fromJson(<String, String>{
+          () => NoTransientCallbacksCondition.deserialize(<String, String>{
                 'conditionName': 'Unknown',
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
                   e.message ==
-                  'Not a NoTransientCallbacksCondition json string.')));
+                  'Error occurred when deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
@@ -36,19 +36,19 @@ void main() {
         'conditionName': 'NoPendingFrameCondition',
       };
       final NoPendingFrameCondition condition =
-          NoPendingFrameCondition.fromJson(jsonMap);
+          NoPendingFrameCondition.deserialize(jsonMap);
       expect(condition, equals(const NoPendingFrameCondition()));
       expect(condition.serialize(), equals(jsonMap));
     });
 
     test('NoPendingFrameCondition fromJson error', () {
       expect(
-          () => NoPendingFrameCondition.fromJson(<String, String>{
+          () => NoPendingFrameCondition.deserialize(<String, String>{
                 'conditionName': 'Unknown',
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
-                  e.message == 'Not a NoPendingFrameCondition json string.')));
+                  e.message == 'Error occurred when deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
@@ -58,7 +58,7 @@ void main() {
         'conditionName': 'CombinedCondition',
         'conditions': '[]',
       };
-      final CombinedCondition condition = CombinedCondition.fromJson(jsonMap);
+      final CombinedCondition condition = CombinedCondition.deserialize(jsonMap);
       expect(condition.conditions, equals(<WaitCondition>[]));
       expect(condition.serialize(), equals(jsonMap));
     });
@@ -69,7 +69,7 @@ void main() {
         'conditions':
             '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
       };
-      final CombinedCondition condition = CombinedCondition.fromJson(jsonMap);
+      final CombinedCondition condition = CombinedCondition.deserialize(jsonMap);
       expect(
           condition.conditions,
           equals(<WaitCondition>[
@@ -81,7 +81,7 @@ void main() {
 
     test('CombinedCondition fromJson - no condition list', () {
       final CombinedCondition condition =
-          CombinedCondition.fromJson(<String, String>{
+          CombinedCondition.deserialize(<String, String>{
         'conditionName': 'CombinedCondition',
       });
       expect(condition.conditions, equals(<WaitCondition>[]));
@@ -93,24 +93,24 @@ void main() {
 
     test('CombinedCondition fromJson error', () {
       expect(
-          () => CombinedCondition.fromJson(<String, String>{
+          () => CombinedCondition.deserialize(<String, String>{
                 'conditionName': 'Unknown',
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
-                  e.message == 'Not a CombinedCondition json string.')));
+                  e.message == 'Error occurred when deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
     });
 
     test('CombinedCondition fromJson error - Unknown condition type', () {
       expect(
-          () => CombinedCondition.fromJson(<String, String>{
+          () => CombinedCondition.deserialize(<String, String>{
                 'conditionName': 'CombinedCondition',
                 'conditions':
                     '[{"conditionName":"UnknownCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
-                  e.message == 'Unsupported wait condition UnknownCondition')));
+                  e.message == 'Unsupported wait condition UnknownCondition in the JSON string {conditionName: UnknownCondition}')));
     });
   });
 }

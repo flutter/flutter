@@ -27,27 +27,30 @@ class SerializationException implements Exception {
 
 /// Base class for a condition that can be waited upon.
 abstract class WaitCondition extends Jsonable {
-  /// Retrieves the condition that is waited upon.
+  /// Gets the current status of the [condition], executed in the context of the
+  /// Flutter app:
   ///
-  /// The future returned by [wait] should be finished if this condition turns
-  /// true.
+  /// - True, if the condition is satisfied.
+  /// - False otherwise.
+  ///
+  /// The future returned by [wait] will complete when this [condition] is
+  /// fulfilled.
   bool get condition;
 
-  /// Returns a future that will be completed until [condition] turns true.
+  /// Returns a future that completes when [condition] turns true.
   Future<void> wait();
 }
 
-/// A condition that waits until no transient callbacks scheduled.
+/// A condition that waits until no transient callbacks are scheduled.
 class NoTransientCallbacksCondition implements WaitCondition {
   /// Creates a [NoTransientCallbacksCondition] instance.
   const NoTransientCallbacksCondition();
 
   /// Factory constructor to parse a [NoTransientCallbacksCondition] instance
   /// from the given JSON map.
-  factory NoTransientCallbacksCondition.fromJson(Map<String, dynamic> json) {
+  factory NoTransientCallbacksCondition.deserialize(Map<String, dynamic> json) {
     if (json['conditionName'] != 'NoTransientCallbacksCondition')
-      throw SerializationException(
-          'Not a NoTransientCallbacksCondition json string.');
+      throw SerializationException('Error occurred when deserializing the NoTransientCallbacksCondition JSON string: $json');
     return const NoTransientCallbacksCondition();
   }
 
@@ -56,20 +59,18 @@ class NoTransientCallbacksCondition implements WaitCondition {
 
   @override
   Future<void> wait() async {
-    if (condition) {
-      return;
-    } else {
-      do {
-        await SchedulerBinding.instance.endOfFrame;
-      } while (!condition);
+    while (!condition) {
+      await SchedulerBinding.instance.endOfFrame;
     }
     assert(condition);
   }
 
   @override
-  Map<String, String> serialize() => <String, String>{
-        'conditionName': 'NoTransientCallbacksCondition',
-      };
+  Map<String, String> serialize() {
+    return <String, String>{
+      'conditionName': 'NoTransientCallbacksCondition',
+    };
+  }
 }
 
 /// A condition that waits until no pending frame is scheduled.
@@ -79,10 +80,9 @@ class NoPendingFrameCondition implements WaitCondition {
 
   /// Factory constructor to parse a [NoPendingFrameCondition] instance from the
   /// given JSON map.
-  factory NoPendingFrameCondition.fromJson(Map<String, dynamic> json) {
+  factory NoPendingFrameCondition.deserialize(Map<String, dynamic> json) {
     if (json['conditionName'] != 'NoPendingFrameCondition')
-      throw SerializationException(
-          'Not a NoPendingFrameCondition json string.');
+      throw SerializationException('Error occurred when deserializing the NoPendingFrameCondition JSON string: $json');
     return const NoPendingFrameCondition();
   }
 
@@ -91,20 +91,18 @@ class NoPendingFrameCondition implements WaitCondition {
 
   @override
   Future<void> wait() async {
-    if (condition) {
-      return;
-    } else {
-      do {
+    while (!condition) {
         await SchedulerBinding.instance.endOfFrame;
-      } while (!condition);
     }
     assert(condition);
   }
 
   @override
-  Map<String, String> serialize() => <String, String>{
-        'conditionName': 'NoPendingFrameCondition',
-      };
+  Map<String, String> serialize() {
+    return <String, String>{
+      'conditionName': 'NoPendingFrameCondition',
+    };
+  }
 }
 
 /// A combined condition that waits until all the given [conditions] are met.
@@ -115,17 +113,16 @@ class CombinedCondition implements WaitCondition {
 
   /// Factory constructor to parse a [CombinedCondition] instance from the given
   /// JSON map.
-  factory CombinedCondition.fromJson(Map<String, dynamic> jsonMap) {
+  factory CombinedCondition.deserialize(Map<String, dynamic> jsonMap) {
     if (jsonMap['conditionName'] != 'CombinedCondition')
-      throw SerializationException('Not a CombinedCondition json string.');
+      throw SerializationException('Error occurred when deserializing the CombinedCondition JSON string: $jsonMap');
     CombinedCondition combinedCondition;
     if (jsonMap['conditions'] == null) {
       combinedCondition = const CombinedCondition(<WaitCondition>[]);
     } else {
       final List<WaitCondition> conditions = <WaitCondition>[];
-      for (Map<String, dynamic> condition
-          in json.decode(jsonMap['conditions'])) {
-        conditions.add(WaitConditionDecoder.fromJson(condition));
+      for (Map<String, dynamic> condition in json.decode(jsonMap['conditions'])) {
+        conditions.add(WaitConditionDecoder.deserialize(condition));
       }
       combinedCondition = CombinedCondition(conditions);
     }
@@ -136,18 +133,18 @@ class CombinedCondition implements WaitCondition {
   final List<WaitCondition> conditions;
 
   @override
-  bool get condition =>
-      conditions.every((WaitCondition condition) => condition.condition);
+  bool get condition {
+    return conditions.every((WaitCondition condition) => condition.condition);
+  }
 
   @override
   Future<void> wait() async {
-    do {
+    while (!condition) {
       for (WaitCondition condition in conditions) {
-        if (condition != null) {
-          await condition.wait();
-        }
+        assert (condition != null);
+        await condition.wait();
       }
-    } while (!condition);
+    }
     assert(condition);
   }
 
@@ -158,11 +155,10 @@ class CombinedCondition implements WaitCondition {
     };
     final List<Map<String, String>> jsonConditions = <Map<String, String>>[];
     for (WaitCondition condition in conditions) {
-      if (condition != null) {
-        jsonConditions.add(condition.serialize());
-      }
+      assert (condition != null);
+      jsonConditions.add(condition.serialize());
     }
-    jsonMap.putIfAbsent('conditions', () => json.encode(jsonConditions));
+    jsonMap['conditions'] = json.encode(jsonConditions);
     return jsonMap;
   }
 }
@@ -170,16 +166,16 @@ class CombinedCondition implements WaitCondition {
 /// A JSON decoder that parses JSON map to a [WaitCondition] or its subclass.
 class WaitConditionDecoder {
   /// Parses a [WaitCondition] or its subclass from the given [json] map.
-  static WaitCondition fromJson(Map<String, dynamic> json) {
+  static WaitCondition deserialize(Map<String, dynamic> json) {
     final String conditionName = json['conditionName'];
     switch (conditionName) {
       case 'NoTransientCallbacksCondition':
-        return NoTransientCallbacksCondition.fromJson(json);
+        return NoTransientCallbacksCondition.deserialize(json);
       case 'NoPendingFrameCondition':
-        return NoPendingFrameCondition.fromJson(json);
+        return NoPendingFrameCondition.deserialize(json);
       case 'CombinedCondition':
-        return CombinedCondition.fromJson(json);
+        return CombinedCondition.deserialize(json);
     }
-    throw SerializationException('Unsupported wait condition $conditionName');
+    throw SerializationException('Unsupported wait condition $conditionName in the JSON string $json');
   }
 }
