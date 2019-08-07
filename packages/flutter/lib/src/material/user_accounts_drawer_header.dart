@@ -301,7 +301,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 ///
 ///  * [DrawerHeader], for a drawer header that doesn't show user accounts.
 ///  * <https://material.io/design/components/navigation-drawer.html#anatomy>
-class UserAccountsDrawerHeader extends StatefulWidget {
+class UserAccountsDrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
@@ -314,6 +314,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     @required this.accountName,
     @required this.accountEmail,
     this.onDetailsPressed,
+    this.isDetailsOpen = false,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -344,19 +345,8 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// [accountName] and [accountEmail] is tapped.
   final VoidCallback onDetailsPressed;
 
-  @override
-  _UserAccountsDrawerHeaderState createState() => _UserAccountsDrawerHeaderState();
-}
-
-class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
-  bool _isOpen = false;
-
-  void _handleDetailsPressed() {
-    setState(() {
-      _isOpen = !_isOpen;
-    });
-    widget.onDetailsPressed();
-  }
+  /// Whether the details section is open.
+  final bool isDetailsOpen;
 
   @override
   Widget build(BuildContext context) {
@@ -366,10 +356,10 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       container: true,
       label: MaterialLocalizations.of(context).signedInLabel,
       child: DrawerHeader(
-        decoration: widget.decoration ?? BoxDecoration(
+        decoration: decoration ?? BoxDecoration(
           color: Theme.of(context).primaryColor,
         ),
-        margin: widget.margin,
+        margin: margin,
         padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: SafeArea(
           bottom: false,
@@ -380,16 +370,16 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                 child: Padding(
                   padding: const EdgeInsetsDirectional.only(end: 16.0),
                   child: _AccountPictures(
-                    currentAccountPicture: widget.currentAccountPicture,
-                    otherAccountsPictures: widget.otherAccountsPictures,
+                    currentAccountPicture: currentAccountPicture,
+                    otherAccountsPictures: otherAccountsPictures,
                   ),
                 ),
               ),
               _AccountDetails(
-                accountName: widget.accountName,
-                accountEmail: widget.accountEmail,
-                isOpen: _isOpen,
-                onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
+                accountName: accountName,
+                accountEmail: accountEmail,
+                isOpen: isDetailsOpen,
+                onTap: onDetailsPressed,
               ),
             ],
           ),
