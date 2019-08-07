@@ -502,7 +502,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 10
-    flaky: true
 
   ios_sample_catalog_generator:
     description: >
