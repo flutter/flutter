@@ -533,7 +533,7 @@ class Image extends StatefulWidget {
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
   ///
-  /// This only accepts compressed image formats (e.g., PNG). Uncompressed
+  /// This only accepts compressed image formats (e.g. PNG). Uncompressed
   /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
   /// lead to exceptions.
   ///
