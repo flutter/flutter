@@ -214,7 +214,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
 
-  /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
 
   @override
