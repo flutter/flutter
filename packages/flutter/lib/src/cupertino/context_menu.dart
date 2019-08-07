@@ -1,8 +1,11 @@
 import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/painting.dart' show MatrixUtils;
-import 'package:flutter/rendering.dart' show RenderRepaintBoundary;
+import 'package:vector_math/vector_math_64.dart';
 import 'route.dart';
+
+// The scale of the child at the time that the ContextMenu opens.
+const double _kOpenScale = 1.2;
 
 /// A full-screen menu that can be activated for the given child.
 ///
@@ -61,7 +64,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
       // TODO(justinmc): Make end centered instead of using alignment.
-      end: Matrix4.identity()..scale(1.2),//..translate(-100.0),
+      end: Matrix4.identity()..scale(_kOpenScale),//..translate(-100.0),
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -82,14 +85,18 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
     // Get the current position of the child
     assert(_childGlobalKey.currentContext != null);
-    final RenderRepaintBoundary renderBox = _childGlobalKey.currentContext.findRenderObject();
-    ui.Image image = await renderBox.toImage();
-
+    final RenderBox renderBox = _childGlobalKey.currentContext.findRenderObject();
+    final Container container = _childGlobalKey.currentContext.widget;
     final Offset offset = renderBox.localToGlobal(renderBox.paintBounds.topLeft);
     final Rect originalRect = offset & renderBox.paintBounds.size;
-    final Rect rect = MatrixUtils.transformRect(_transform.value, originalRect);
-    // TODO(justinmc): Ignoring transform, rect is significantly off. Not sure
-    // why.
+    //final Rect rect = MatrixUtils.transformRect(_transform.value, originalRect);
+    Vector4 sizeVector = _transform.value.transform(Vector4(originalRect.width, originalRect.height, 0, 0));
+    final Rect rect = Rect.fromLTWH(
+      originalRect.left,
+      originalRect.top,
+      sizeVector.x,
+      sizeVector.y,
+    );
 
     await Navigator.of(context, rootNavigator: true).push(
       _ContextMenuRoute<void>(
@@ -100,15 +107,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         ),
         rect: rect,
         builder: (BuildContext context) {
-          // TODO(justinmc): Can't duplicate widget like this because can't have
-          // two of the same global key. Screenshotting it works, but when
-          // enlarging, is blurry.
-          //return _childGlobalKey.currentWidget;
-          return CustomPaint(
-            painter: _ContextMenuChildPainter(
-              image: image,
-            ),
-          );
+          return container.child;
         },
       ),
     );
@@ -155,20 +154,11 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           ).createShader(bounds);
         },
         child: Opacity(
-          // TODO(justinmc): Hardcoding this just for debugging the position.
-          // Restore the ternary later.
-          opacity: 1.0,//_isOpen ? 0.0 : 1.0,
-          child: RepaintBoundary(
+          opacity: _isOpen ? 0.0 : 1.0,
+          // TODO(justinmc): Maybe get rid of Container and put key on Opacity.
+          child: Container(
             key: _childGlobalKey,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Color(0xff0000ff),
-                  width: 1.0,
-                ),
-              ),
-              child: widget.child,
-            ),
+            child: widget.child,
           ),
         ),
       ),
@@ -232,8 +222,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
     _matrix4Tween = Tween<Matrix4>(
       // TODO(justinmc): Reuse constant scale values or something from above.
-      begin: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(1.2),
-      end: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(1.8),
+      begin: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(_kOpenScale),
+      end: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(_kOpenScale),
     );
 
     return _animation;
@@ -241,32 +231,12 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
-    /*
-    // TODO(justinmc): Positioning using the animation above, so shouldn't need
-    // all of this.
+    //return builder(context);
     return Stack(
       children: <Widget>[
-        Positioned(
-          left: _rect.left,
-          top: _rect.top,
-          child: SizedBox(
-            width: _rect.width,
-            height: _rect.height,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Color(0xffff0000),
-                  width: 1.0,
-                ),
-              ),
-              child: builder(context),
-            ),
-          ),
-        ),
+        builder(context),
       ],
     );
-    */
   }
 
   @override
@@ -276,21 +246,4 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       child: child,
     );
   }
-}
-
-// Paint the given image.
-class _ContextMenuChildPainter extends CustomPainter {
-  const _ContextMenuChildPainter({
-    ui.Image image,
-  }) : _image = image;
-
-  final ui.Image _image;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawImage(_image, Offset.zero, Paint());
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
