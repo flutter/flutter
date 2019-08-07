@@ -93,4 +93,18 @@ void main() {
     expect(tween.lerp(0.5), 100.0);
     expect(tween.lerp(1.0), 100.0);
   });
+
+  test('Tween equals', () {
+    final Tween<double> doubleTween1 = Tween<double>(begin: 10, end: 22);
+    final Tween<double> doubleTween2 = Tween<double>(begin: 10, end: 22);
+    final Tween<double> doubleTween3 = Tween<double>(begin: 33, end: 44);
+    final Tween<int> intTween = Tween<int>(begin: 33, end: 44);
+    final Tween<double> constantTween = ConstantTween<double>(10);
+
+    expect(doubleTween1 == doubleTween1, isTrue);
+    expect(doubleTween1 == doubleTween2, isTrue);
+    expect(doubleTween2 == doubleTween3, isFalse);
+    expect(doubleTween2 == intTween, isFalse);
+    expect(doubleTween1 == constantTween, isFalse);
+  });
 }
