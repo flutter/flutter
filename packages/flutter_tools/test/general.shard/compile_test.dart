@@ -264,6 +264,49 @@ example:org-dartlang-app:/
       Platform: _kNoColorTerminalPlatform,
     });
 
+    testUsingContext('compile and recompile', () async {
+      final BufferLogger logger = context.get<Logger>();
+      final StreamController<List<int>> streamController = StreamController<List<int>>();
+      when(mockFrontendServer.stdout)
+          .thenAnswer((Invocation invocation) => streamController.stream);
+      streamController.add(utf8.encode('result abc\nline0\nline1\nabc\nabc /path/to/main.dart.dill 0\n'));
+      await generator.recompile(
+        '/path/to/main.dart',
+        null, /* invalidatedFiles */
+        outputPath: '/build/',
+      );
+      expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
+
+       // No accept or reject commands should be issued until we
+      // send recompile request.
+      await _accept(streamController, generator, mockFrontendServerStdIn, '');
+      await _reject(streamController, generator, mockFrontendServerStdIn, '', '');
+
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+      'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+
+      await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
+
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result 0\n',
+        '^reject\\n\$');
+
+      verifyNoMoreInteractions(mockFrontendServerStdIn);
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
+      expect(logger.errorText, equals(
+        '\nCompiler message:\nline0\nline1\n'
+        '\nCompiler message:\nline1\nline2\n'
+        '\nCompiler message:\nline1\nline2\n'
+      ));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      OutputPreferences: () => OutputPreferences(showColor: false),
+      Logger: () => BufferLogger(),
+      Platform: _kNoColorTerminalPlatform,
+    });
+
     testUsingContext('compile and recompile twice', () async {
       final BufferLogger logger = context.get<Logger>();
 
@@ -524,3 +567,37 @@ class MockStdIn extends Mock implements IOSink {
 }
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
+Future<void> _accept(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String expected,
+) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  generator.accept();
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
+  mockFrontendServerStdIn._stdInWrites.clear();
+}
+
+Future<void> _reject(
+  StreamController<List<int>> streamController,
+  ResidentCompiler generator,
+  MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput,
+  String expected,
+) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  scheduleMicrotask(() {
+    streamController.add(utf8.encode(mockCompilerOutput));
+  });
+  final CompilerOutput output = await generator.reject();
+  expect(output, isNull);
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = RegExp(expected);
+  expect(commands, matches(re));
+  mockFrontendServerStdIn._stdInWrites.clear();
+}

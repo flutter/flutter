@@ -656,7 +656,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw Exception('Application isolate not found');
+          return OperationResult(2, 'Application isolate not found', fatal: true);
         }
       }
     }
