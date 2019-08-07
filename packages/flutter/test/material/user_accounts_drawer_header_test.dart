@@ -129,11 +129,13 @@ void main() {
     // Icon is right side up.
     expect(transformWidget.transform.getRotation()[0], 1.0);
     expect(transformWidget.transform.getRotation()[4], 1.0);
+    expect(isDetailsOpen, isFalse);
 
     await tester.tap(find.byType(Icon));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isTrue);
+    expect(isDetailsOpen, isTrue);
 
     await tester.pumpAndSettle();
     await tester.pump();
@@ -147,6 +149,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isTrue);
+    expect(isDetailsOpen, isFalse);
 
     await tester.pumpAndSettle();
     await tester.pump();
