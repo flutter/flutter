@@ -11,10 +11,6 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
-
   testWidgets('materialTapTargetSize.padded expands hit test area', (WidgetTester tester) async {
     int pressed = 0;
 

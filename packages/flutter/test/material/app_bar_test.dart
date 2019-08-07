@@ -64,7 +64,6 @@ double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, s
 void main() {
   setUp(() {
     debugResetSemanticsIdCounter();
-    TestWidgetsFlutterBinding.ensureInitialized();
   });
 
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {

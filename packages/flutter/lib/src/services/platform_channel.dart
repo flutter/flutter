@@ -32,8 +32,8 @@ import 'message_codecs.dart';
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
-  /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
-  /// be used if [binaryMessenger] is null.
+  /// [name], [codec] cannot be null. The default [ServicesBinding.instance.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
   const BasicMessageChannel(this.name, this.codec, { BinaryMessenger binaryMessenger })
       : assert(name != null),
         assert(codec != null),
@@ -121,8 +121,8 @@ class MethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// [name], [codec] cannot be null. A default [BinaryMessenger] instance will
-  /// be used if [binaryMessenger] is null.
+  /// [name], [codec] cannot be null. The default [ServicesBinding.instance.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger ])
       : assert(name != null),
         assert(codec != null),
@@ -465,8 +465,8 @@ class EventChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be null. A default [BinaryMessenger]
-  /// instance will be used if [binaryMessenger] is null.
+  /// Neither [name] nor [codec] may be null. The default [ServicesBinding.instance.defaultBinaryMessenger]
+  /// instance is used if [binaryMessenger] is null.
   const EventChannel(this.name, [this.codec = const StandardMethodCodec(), BinaryMessenger binaryMessenger])
       : assert(name != null),
         assert(codec != null),
