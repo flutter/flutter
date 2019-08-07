@@ -29,7 +29,7 @@ import 'icon_theme_data.dart';
 /// This example shows how to create a [Row] of [Icon]s in
 /// different colors and sizes.
 ///
-/// ![A row of icons representing a pink heart, green music notes, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
+/// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
 /// Row(
