@@ -153,7 +153,7 @@ class CombinedCondition implements WaitCondition {
 
   @override
   Map<String, String> serialize() {
-    final Map<String, String> jsonMap = {
+    final Map<String, String> jsonMap = <String, String>{
       'conditionName': 'CombinedCondition'
     };
     final List<Map<String, String>> jsonConditions = <Map<String, String>>[];
