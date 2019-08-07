@@ -131,7 +131,7 @@ class KernelSnapshot extends Target {
       targetModel: TargetModel.flutter,
       targetProductVm: buildMode == BuildMode.release,
       outputFilePath: environment.buildDir.childFile('app.dill').path,
-      depFilePath: null,
+      depFilePath: environment.buildDir.childFile('snapshot_blob.bin.d').path,
       packagesPath: packagesPath,
       mainPath: packageUriMapper.map(targetFile)?.toString() ?? targetFile,
     );

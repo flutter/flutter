@@ -169,6 +169,8 @@ Future<void> buildWithAssemble({
   if (outputDir != null) {
     final Directory outputDirectory = fs.directory(outputDir)..createSync(recursive: true);
     final Directory assetInputDir = environment.buildDir.childDirectory('flutter_assets');
+    final File snapshotDepfile = environment.buildDir.childFile('snapshot_blob.bin.d');
+    snapshotDepfile.copySync(outputDirectory.childFile('snapshot_blob.bin.d').path);
     copyDirectorySync(assetInputDir, outputDirectory);
     if (buildMode == BuildMode.debug) {
       final File copiedDill = environment.buildDir.childFile('app.dill');

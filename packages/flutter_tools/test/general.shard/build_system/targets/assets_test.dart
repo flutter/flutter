@@ -16,9 +16,7 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      environment = Environment(
-        projectDir: fs.currentDirectory,
-      );
+      environment = Environment(projectDir: fs.currentDirectory);
       fs.file(fs.path.join('packages', 'flutter_tools', 'lib', 'src',
           'build_system', 'targets', 'assets.dart'))
         ..createSync(recursive: true);
