@@ -52,7 +52,11 @@ class AssembleCommand extends FlutterCommand {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    return kAllBuildDefinitions.firstWhere((BuildDefinition definition) => definition.name == name);
+    final BuildDefinition definition = kAllBuildDefinitions[name];
+    if (definition == null) {
+      throwToolExit('no assemble definition for $name');
+    }
+    return definition;
   }
 
   /// The environmental configuration for a build invocation.

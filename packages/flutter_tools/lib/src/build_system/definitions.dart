@@ -7,11 +7,11 @@ import 'targets/assets.dart';
 import 'targets/macos.dart';
 
 /// All currently available build definitions.
-const List<BuildDefinition> kAllBuildDefinitions = <BuildDefinition>[
-  debugMacOSApplication,
-  profileMacOSApplication,
-  releaseMacOSApplication,
-];
+final Map<String, BuildDefinition> kAllBuildDefinitions = <String, BuildDefinition>{
+  debugMacOSApplication.name: debugMacOSApplication,
+  profileMacOSApplication.name: profileMacOSApplication,
+  releaseMacOSApplication.name: releaseMacOSApplication,
+};
 
 /// The build definition for a debug macOS application.
 const BuildDefinition debugMacOSApplication = BuildDefinition(
