@@ -27,6 +27,8 @@ void main() {
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
       final Environment environment = invocation.positionalArguments[1];
       environment.buildDir.childFile('app.dill').createSync(recursive: true);
+      environment.buildDir.childFile('isolate_snapshot_data').createSync();
+      environment.buildDir.childFile('vm_snapshot_data').createSync();
       environment.buildDir.childDirectory('flutter_assets')
           .childFile('LICENSE').createSync(recursive: true);
       return BuildResult(success: true);
