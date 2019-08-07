@@ -846,6 +846,40 @@ void main() {
     expect(() => controller.stop(), throwsAssertionError);
     expect(() => controller.forward(), throwsAssertionError);
     expect(() => controller.reverse(), throwsAssertionError);
+  });
 
+  test('Simulations always run forward (prev animation was reverse)', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 1),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+    controller.reverse(from: 1.0);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
+    statuses.clear();
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+  });
+
+  test('Simulations always run forward (precious animation was forward)', () {
+    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    final AnimationController controller = AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(seconds: 1),
+    )..addStatusListener((AnimationStatus status) {
+      statuses.add(status);
+    });
+
+    controller.repeat(reverse: true);
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(seconds: 2));
+    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
   });
 }

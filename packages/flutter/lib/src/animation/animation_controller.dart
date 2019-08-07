@@ -597,7 +597,9 @@ class AnimationController extends Animation<double>
   /// [AnimationController] when no explicit value is set for [min] and [max].
   ///
   /// With [reverse] set to true, instead of always starting over at [min]
-  /// the value will alternate between [min] and [max] values on each repeat.
+  /// the starting value will alternate between [min] and [max] values on each
+  /// repeat. Regardless of the current starting value, the [status] will
+  /// always be reported at [AnimationStatus.forward].
   ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
@@ -666,6 +668,9 @@ class AnimationController extends Animation<double>
   /// The most recently returned [TickerFuture], if any, is marked as having been
   /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
   /// derivative future completes with a [TickerCanceled] error.
+  ///
+  /// The [status] is always [AnimationStatus.forward] for the entire duration
+  /// of the simulation.
   TickerFuture animateWith(Simulation simulation) {
     assert(
       _ticker != null,
@@ -673,6 +678,7 @@ class AnimationController extends Animation<double>
       'AnimationController methods should not be used after calling dispose.'
     );
     stop();
+    _direction = _AnimationDirection.forward;
     return _startSimulation(simulation);
   }
 
