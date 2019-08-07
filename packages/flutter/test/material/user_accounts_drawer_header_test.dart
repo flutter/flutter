@@ -105,7 +105,25 @@ void main() {
   });
 
   testWidgets('UserAccountsDrawerHeader icon rotation test', (WidgetTester tester) async {
-    await pumpTestWidget(tester);
+    bool isDetailsOpen = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return UserAccountsDrawerHeader(
+              onDetailsPressed: () {
+                setState(() {
+                  isDetailsOpen = !isDetailsOpen;
+                });
+              },
+              accountName: const Text('name'),
+              accountEmail: const Text('email'),
+              isDetailsOpen: isDetailsOpen,
+            );
+          },
+        ),
+      ),
+    ));
     Transform transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon is right side up.
