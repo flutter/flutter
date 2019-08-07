@@ -63,7 +63,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void _onTapDown(TapDownDetails details) {
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
-      // TODO(justinmc): Make end centered instead of using alignment.
+      // todo(justinmc): make end centered instead of using alignment.
       end: Matrix4.identity()..scale(_kOpenScale),//..translate(-100.0),
     ).animate(
       CurvedAnimation(
@@ -143,7 +143,6 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     final Color maskColor = _isMasked ? _lightModeMaskColor : const Color(0xFFFFFFFF);
 
     return Transform(
-      //alignment: FractionalOffset.center,
       transform: _transform?.value ?? Matrix4.identity(),
       child: ShaderMask(
         shaderCallback: (Rect bounds) {
@@ -166,18 +165,22 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   }
 }
 
+// The open context menu.
 class _ContextMenuRoute<T> extends PopupRoute<T> {
   _ContextMenuRoute({
     this.barrierLabel,
     this.builder,
     ui.ImageFilter filter,
-    Rect rect,
     RouteSettings settings,
+    Rect rect,
   }) : _rect = rect,
        super(
          filter: filter,
          settings: settings,
        );
+
+  // The rect containing the widget that should show in the ContextMenu.
+  final Rect _rect;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
@@ -185,9 +188,6 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 1335);
 
   final WidgetBuilder builder;
-
-  // The rect containing the widget that should show in the ContextMenu.
-  final Rect _rect;
 
   @override
   final String barrierLabel;
@@ -206,7 +206,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   Animation<double> _animation;
 
-  Tween<Matrix4> _matrix4Tween;
+  Tween<Offset> _offsetTween;
+  Tween<double> _scaleTween;
 
   @override
   Animation<double> createAnimation() {
@@ -219,19 +220,23 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       curve: Curves.linearToEaseOut,
       reverseCurve: Curves.linearToEaseOut.flipped,
     );
-
-    _matrix4Tween = Tween<Matrix4>(
-      // TODO(justinmc): Reuse constant scale values or something from above.
-      begin: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(_kOpenScale),
-      end: Matrix4.identity()..translate(_rect.left, _rect.top)..scale(_kOpenScale),
+    _offsetTween = Tween<Offset>(
+      begin: _rect.topLeft,
+      // TODO(justinmc): Should end such that bottom of child is at center of
+      // screen vertically.
+      end: _rect.topLeft + const Offset(-100.0, -100.0),
     );
-
+    _scaleTween = Tween<double>(
+      begin: _kOpenScale,
+      // TODO(justinmc): Should end so that it fits inside top of screen with
+      // padding. Maybe add this padding to Stack.
+      end: _kOpenScale + 1.5,
+    );
     return _animation;
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    //return builder(context);
     return Stack(
       children: <Widget>[
         builder(context),
@@ -241,8 +246,9 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    final Offset offset = _offsetTween.evaluate(_animation);
     return Transform(
-      transform: _matrix4Tween.evaluate(_animation),
+      transform: Matrix4.identity()..translate(offset.dx, offset.dy)..scale(_scaleTween.evaluate(_animation)),
       child: child,
     );
   }
