@@ -587,7 +587,7 @@ source_set("main") {
 
 shared_library("egl") {
   if (is_win) {
-    output_name = "libEGL64_translator"
+    output_name = "lib64EGL_translator"
   } else {
     output_name = "EGL"
   }
