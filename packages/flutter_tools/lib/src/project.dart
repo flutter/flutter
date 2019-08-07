@@ -679,7 +679,7 @@ class MacOSProject implements XcodeBasedProject {
   File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 
   @override
-  File get generatedEnvironmentVariableExportScript => managedDirectory.childFile('flutter_export_environment.sh');
+  File get generatedEnvironmentVariableExportScript => ephemeralDirectory.childFile('flutter_export_environment.sh');
 
   @override
   File get podfile => _macOSDirectory.childFile('Podfile');

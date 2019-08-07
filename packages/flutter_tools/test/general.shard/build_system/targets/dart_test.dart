@@ -114,6 +114,59 @@ flutter_tools:lib/''');
     expect(result.exceptions.values.single.exception, isInstanceOf<MissingDefineException>());
   }));
 
+  test('kernel_snapshot does not use track widget creation on profile builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      trackWidgetCreation: false,
+      targetModel: anyNamed('targetModel'),
+      targetProductVm: anyNamed('targetProductVm'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath')
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(<File>[], androidEnvironment);
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
+  test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      trackWidgetCreation: true,
+      targetModel: anyNamed('targetModel'),
+      targetProductVm: anyNamed('targetProductVm'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath')
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(<File>[], Environment(
+        projectDir: fs.currentDirectory,
+        defines: <String, String>{
+      kBuildMode: 'debug',
+      kTargetPlatform: getNameForTargetPlatform(TargetPlatform.android_arm),
+    }));
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
   test('aot_elf_profile Produces correct output directory', () => testbed.run(() async {
     await buildSystem.build(const AotElfProfile(), androidEnvironment);
 
@@ -321,3 +374,6 @@ class FakeKernelCompiler implements KernelCompiler {
       return CompilerOutput(outputFilePath, 0, null);
   }
 }
+
+class MockKernelCompilerFactory extends Mock implements KernelCompilerFactory {}
+class MockKernelCompiler extends Mock implements KernelCompiler {}

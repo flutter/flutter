@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
+import 'banner_theme.dart';
 import 'bottom_app_bar_theme.dart';
 import 'bottom_sheet_theme.dart';
 import 'button_theme.dart';
@@ -176,6 +177,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    MaterialBannerThemeData bannerTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -219,7 +221,7 @@ class ThemeData extends Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
+    hintColor ??= isDark ? const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
@@ -279,6 +281,7 @@ class ThemeData extends Diagnosticable {
     snackBarTheme ??= const SnackBarThemeData();
     bottomSheetTheme ??= const BottomSheetThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
+    bannerTheme ??= const MaterialBannerThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -340,6 +343,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme,
       bottomSheetTheme: bottomSheetTheme,
       popupMenuTheme: popupMenuTheme,
+      bannerTheme: bannerTheme,
     );
   }
 
@@ -413,6 +417,7 @@ class ThemeData extends Diagnosticable {
     @required this.snackBarTheme,
     @required this.bottomSheetTheme,
     @required this.popupMenuTheme,
+    @required this.bannerTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -468,11 +473,68 @@ class ThemeData extends Diagnosticable {
        assert(typography != null),
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
-       assert(popupMenuTheme != null);
+       assert(popupMenuTheme != null),
+       assert(bannerTheme != null);
 
-  // Warning: make sure these properties are in the exact same order as in
-  // hashValues() and in the raw constructor and in the order of fields in
-  // the class and in the lerp() method.
+  /// Create a [ThemeData] based on the colors in the given [colorScheme] and
+  /// text styles of the optional [textTheme].
+  ///
+  /// The [colorScheme] can not be null.
+  ///
+  /// If [colorScheme.brightness] is [Brightness.dark] then
+  /// [ThemeData.applyElevationOverlayColor] will be set to true to support
+  /// the Material dark theme method for indicating elevation by overlaying
+  /// a semi-transparent white color on top of the surface color.
+  ///
+  /// This is the recommended method to theme your application. As we move
+  /// forward we will be converting all the widget implementations to only use
+  /// colors or colors derived from those in [ColorScheme].
+  ///
+  /// {@tool sample}
+  /// This example will set up an application to use the baseline Material
+  /// Design light and dark themes.
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.from(colorScheme: ColorScheme.light()),
+  ///   darkTheme: ThemeData.from(colorScheme: ColorScheme.dark()),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See <https://material.io/design/color/> for
+  /// more discussion on how to pick the right colors.
+  factory ThemeData.from({
+    @required ColorScheme colorScheme,
+    TextTheme textTheme,
+  }) {
+    assert(colorScheme != null);
+
+    final bool isDark = colorScheme.brightness == Brightness.dark;
+
+    // For surfaces that use primary color in light themes and surface color in dark
+    final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+    final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+
+    return ThemeData(
+      brightness: colorScheme.brightness,
+      primaryColor: primarySurfaceColor,
+      primaryColorBrightness: ThemeData.estimateBrightnessForColor(primarySurfaceColor),
+      canvasColor: colorScheme.background,
+      accentColor: colorScheme.secondary,
+      accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
+      scaffoldBackgroundColor: colorScheme.background,
+      cardColor: colorScheme.surface,
+      dividerColor: colorScheme.onSurface.withOpacity(0.12),
+      backgroundColor: colorScheme.background,
+      dialogBackgroundColor: colorScheme.background,
+      errorColor: colorScheme.error,
+      textTheme: textTheme,
+      indicatorColor: onPrimarySurfaceColor,
+      applyElevationOverlayColor: isDark,
+      colorScheme: colorScheme,
+    );
+  }
 
   /// A default light blue theme.
   ///
@@ -496,6 +558,10 @@ class ThemeData extends Diagnosticable {
   /// Most applications would use [Theme.of], which provides correct localized
   /// text geometry.
   factory ThemeData.fallback() => ThemeData.light();
+
+  // Warning: make sure these properties are in the exact same order as in
+  // hashValues() and in the raw constructor and in the order of fields in
+  // the class and in the lerp() method.
 
   /// The brightness of the overall theme of the application. Used by widgets
   /// like buttons to determine what color to pick when not using the primary or
@@ -798,6 +864,9 @@ class ThemeData extends Diagnosticable {
   /// popup menus.
   final PopupMenuThemeData popupMenuTheme;
 
+  /// A theme for customizing the color and text style of a [MaterialBanner].
+  final MaterialBannerThemeData bannerTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -859,6 +928,7 @@ class ThemeData extends Diagnosticable {
     SnackBarThemeData snackBarTheme,
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
+    MaterialBannerThemeData bannerTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -921,6 +991,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: snackBarTheme ?? this.snackBarTheme,
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
+      bannerTheme: bannerTheme ?? this.bannerTheme,
     );
   }
 
@@ -1061,6 +1132,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
+      bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
     );
   }
 
@@ -1128,7 +1200,8 @@ class ThemeData extends Diagnosticable {
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
-           (otherData.popupMenuTheme == popupMenuTheme);
+           (otherData.popupMenuTheme == popupMenuTheme) &&
+           (otherData.bannerTheme == bannerTheme);
   }
 
   @override
@@ -1196,6 +1269,7 @@ class ThemeData extends Diagnosticable {
       snackBarTheme,
       bottomSheetTheme,
       popupMenuTheme,
+      bannerTheme,
     ];
     return hashList(values);
   }
@@ -1260,6 +1334,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
+    properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
   }
 }
 
