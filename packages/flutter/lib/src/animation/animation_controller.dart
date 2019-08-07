@@ -598,8 +598,8 @@ class AnimationController extends Animation<double>
   ///
   /// With [reverse] set to true, instead of always starting over at [min]
   /// the starting value will alternate between [min] and [max] values on each
-  /// repeat. Regardless of the current starting value, the [status] will
-  /// always be reported at [AnimationStatus.forward].
+  /// repeat. The [status] will be reported as [AnimationStatus.reverse] when
+  /// the animation runs from [max] to [min].
   ///
   /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
@@ -625,7 +625,16 @@ class AnimationController extends Animation<double>
     assert(max >= min);
     assert(max <= upperBound && min >= lowerBound);
     assert(reverse != null);
-    return animateWith(_RepeatingSimulation(_value, min, max, reverse, period));
+    stop();
+    return _startSimulation(_RepeatingSimulation(_value, min, max, reverse, period, _directionSetter));
+  }
+
+  void _directionSetter(_AnimationDirection direction) {
+    _direction = direction;
+    _status = (_direction == _AnimationDirection.forward) ?
+      AnimationStatus.forward :
+      AnimationStatus.reverse;
+    _checkStatusChanged();
   }
 
   /// Drives the animation with a critically damped spring (within [lowerBound]
@@ -819,8 +828,10 @@ class _InterpolationSimulation extends Simulation {
   bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
+typedef _DirectionSetter = Function(_AnimationDirection direction);
+
 class _RepeatingSimulation extends Simulation {
-  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period)
+  _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period, this.directionSetter)
       : _periodInSeconds = period.inMicroseconds / Duration.microsecondsPerSecond,
         _initialT = (max == min) ? 0.0 : (initialValue / (max - min)) * (period.inMicroseconds / Duration.microsecondsPerSecond) {
     assert(_periodInSeconds > 0.0);
@@ -830,6 +841,7 @@ class _RepeatingSimulation extends Simulation {
   final double min;
   final double max;
   final bool reverse;
+  final _DirectionSetter directionSetter;
 
   final double _periodInSeconds;
   final double _initialT;
@@ -843,8 +855,10 @@ class _RepeatingSimulation extends Simulation {
     final bool _isPlayingReverse = (totalTimeInSeconds ~/ _periodInSeconds) % 2 == 1;
 
     if (reverse && _isPlayingReverse) {
+      directionSetter(_AnimationDirection.reverse);
       return ui.lerpDouble(max, min, t);
     } else {
+      directionSetter(_AnimationDirection.forward);
       return ui.lerpDouble(min, max, t);
     }
   }
