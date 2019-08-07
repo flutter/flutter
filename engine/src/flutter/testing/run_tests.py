@@ -222,7 +222,7 @@ def RunJavaTests(filter, android_build_variant):
 
   robolectric_dir = os.path.join(buildroot_dir, 'third_party', 'robolectric', 'lib')
   classpath = map(str, [
-    os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-28', 'android.jar'),
+    os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-29', 'android.jar'),
     os.path.join(robolectric_dir, '*'), # Wildcard for all jars in the directory
     os.path.join(android_out_dir, 'flutter_java.jar'),
     os.path.join(android_out_dir, 'robolectric_tests.jar')
