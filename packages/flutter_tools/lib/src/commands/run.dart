@@ -19,7 +19,6 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
-import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
@@ -428,14 +427,6 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         stayResident: stayResident,
         ipv6: ipv6,
-      );
-    } else if (webMode) {
-      runner = ResidentWebRunner(
-        devices.single,
-        target: targetFile,
-        flutterProject: flutterProject,
-        ipv6: ipv6,
-        debuggingOptions: _createDebuggingOptions(),
       );
     } else {
       runner = ColdRunner(

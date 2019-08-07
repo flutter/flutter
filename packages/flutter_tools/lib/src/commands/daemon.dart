@@ -21,7 +21,6 @@ import '../emulator.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../resident_runner.dart';
-import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
@@ -413,15 +412,7 @@ class AppDomain extends Domain {
 
     ResidentRunner runner;
 
-    if (await device.targetPlatform == TargetPlatform.web_javascript) {
-      runner = ResidentWebRunner(
-        flutterDevice.device,
-        debuggingOptions: options,
-        flutterProject: flutterProject,
-        ipv6: ipv6,
-        target: target,
-      );
-    } else if (enableHotReload) {
+    if (enableHotReload) {
       runner = HotRunner(
         <FlutterDevice>[flutterDevice],
         target: target,
