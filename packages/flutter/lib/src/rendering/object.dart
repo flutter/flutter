@@ -2834,21 +2834,9 @@ mixin ContainerParentDataMixin<ChildType extends RenderObject> on ParentData {
   /// Clear the sibling pointers.
   @override
   void detach() {
+    assert(previousSibling == null, 'Pointers to siblings must be nulled before detaching ParentData.');
+    assert(nextSibling == null, 'Pointers to siblings must be nulled before detaching ParentData.');
     super.detach();
-    if (previousSibling != null) {
-      final ContainerParentDataMixin<ChildType> previousSiblingParentData = previousSibling.parentData;
-      assert(previousSibling != this);
-      assert(previousSiblingParentData.nextSibling == this);
-      previousSiblingParentData.nextSibling = nextSibling;
-    }
-    if (nextSibling != null) {
-      final ContainerParentDataMixin<ChildType> nextSiblingParentData = nextSibling.parentData;
-      assert(nextSibling != this);
-      assert(nextSiblingParentData.previousSibling == this);
-      nextSiblingParentData.previousSibling = previousSibling;
-    }
-    previousSibling = null;
-    nextSibling = null;
   }
 }
 
