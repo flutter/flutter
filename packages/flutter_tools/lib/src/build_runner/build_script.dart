@@ -351,16 +351,21 @@ class FlutterWebShellBuilder implements Builder {
     if (!isAppEntrypoint) {
       return;
     }
+    print('generating the entrypoint');
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
     await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
+
+import 'package:flutter_web_shell/flutter_web_shell.dart';
+
+import 'generated_registrant.dart';
 import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
 
 Future<void> main() async {
+  registerPlugins(shellPluginRegistry);
   await ui.webOnlyInitializePlatform();
   entrypoint.main();
 }
-
 ''');
   }
 

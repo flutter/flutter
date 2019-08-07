@@ -7,11 +7,13 @@ import 'dart:async';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart';
 import 'macos/cocoapods.dart';
+import 'platform_plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
@@ -26,7 +28,15 @@ class Plugin {
   Plugin({
     this.name,
     this.path,
+<<<<<<< HEAD
     this.platforms,
+=======
+    this.androidPackage,
+    this.iosPrefix,
+    this.macosPrefix,
+    this.webFilename,
+    this.pluginClass,
+>>>>>>> WIP on web plugin registry
   });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
@@ -51,6 +61,7 @@ class Plugin {
   ///      macos:
   ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
+<<<<<<< HEAD
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
@@ -116,11 +127,34 @@ class Plugin {
             classPrefix: iosPrefix,
             pluginClass: pluginClass,
           );
+=======
+    String androidPackage;
+    String iosPrefix;
+    String webFilename;
+    String macosPrefix;
+    String pluginClass;
+    if (pluginYaml != null) {
+      androidPackage = pluginYaml['androidPackage'];
+      iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      webFilename = pluginYaml['webFilename'];
+      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
+      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
+      macosPrefix = pluginYaml['macosPrefix'];
+      pluginClass = pluginYaml['pluginClass'];
+>>>>>>> WIP on web plugin registry
     }
     return Plugin(
       name: name,
       path: path,
+<<<<<<< HEAD
       platforms: platforms,
+=======
+      androidPackage: androidPackage,
+      iosPrefix: iosPrefix,
+      macosPrefix: macosPrefix,
+      webFilename: webFilename,
+      pluginClass: pluginClass,
+>>>>>>> WIP on web plugin registry
     );
   }
 
@@ -175,9 +209,17 @@ class Plugin {
 
   final String name;
   final String path;
+<<<<<<< HEAD
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
+=======
+  final String androidPackage;
+  final String iosPrefix;
+  final String webFilename;
+  final String macosPrefix;
+  final String pluginClass;
+>>>>>>> WIP on web plugin registry
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
