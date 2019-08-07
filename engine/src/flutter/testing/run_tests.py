@@ -15,7 +15,9 @@ import subprocess
 
 buildroot_dir = os.path.abspath(os.path.join(os.path.realpath(__file__), '..', '..', '..'))
 out_dir = os.path.join(buildroot_dir, 'out')
+golden_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'resources')
 fonts_dir = os.path.join(buildroot_dir, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
+roboto_font_path = os.path.join(fonts_dir, 'Roboto-Regular.ttf')
 dart_tests_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'dart',)
 
 fonts_dir_flag = '--font-directory=%s' % fonts_dir
@@ -76,7 +78,13 @@ def RunCCTests(build_dir, filter):
   if not IsWindows():
     RunEngineExecutable(build_dir, 'embedder_unittests', filter)
 
-  RunEngineExecutable(build_dir, 'flow_unittests', filter)
+  flow_flags = ['--gtest_filter=-PerformanceOverlayLayer.Gold']
+  if IsLinux():
+    flow_flags = [
+      '--golden-dir=%s' % golden_dir,
+      '--font-file=%s' % roboto_font_path,
+    ]
+  RunEngineExecutable(build_dir, 'flow_unittests', filter, flow_flags)
 
   RunEngineExecutable(build_dir, 'fml_unittests', filter, [ time_sensitve_test_flag ])
 
