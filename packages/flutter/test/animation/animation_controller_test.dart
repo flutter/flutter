@@ -883,7 +883,7 @@ void main() {
     expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
   });
 
-  test('Repating animation with reverse: true report as forward and reverse', () {
+  test('Repeating animation with reverse: true report as forward and reverse', () {
     final List<AnimationStatus> statuses = <AnimationStatus>[];
     final AnimationController controller = AnimationController(
       vsync: const TestVSync(),
