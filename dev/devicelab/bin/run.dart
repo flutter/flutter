@@ -36,13 +36,18 @@ Future<void> main(List<String> rawArgs) async {
       final String stageName = args['stage'];
       final List<ManifestTask> tasks = loadTaskManifest().tasks;
       for (ManifestTask task in tasks) {
-        if (task.stage == stageName)
+        if (!args['match-host-platform'] ||
+            task.isSupportedByHost() &&
+            task.stage == stageName) {
           _taskNames.add(task.name);
+        }
       }
     } else if (args.wasParsed('all')) {
       final List<ManifestTask> tasks = loadTaskManifest().tasks;
       for (ManifestTask task in tasks) {
-        _taskNames.add(task.name);
+        if (!args['match-host-platform'] || task.isSupportedByHost()) {
+          _taskNames.add(task.name);
+        }
       }
     }
   }
@@ -66,12 +71,16 @@ Future<void> main(List<String> rawArgs) async {
       localEngineSrcPath: localEngineSrcPath,
     );
 
-    if (!result['success'])
-      exitCode = 1;
-
     print('Task result:');
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
+
+    if (!result['success']) {
+      exitCode = 1;
+      if (args['exit']) {
+        return;
+      }
+    }
   }
 }
 
@@ -103,16 +112,47 @@ final ArgParser _argParser = ArgParser()
       }
     },
   )
-  ..addOption(
-    'stage',
-    abbr: 's',
-    help: 'Name of the stage. Runs all tasks for that stage. '
-          'The tasks and their stages are read from manifest.yaml.',
-  )
   ..addFlag(
     'all',
     abbr: 'a',
     help: 'Runs all tasks defined in manifest.yaml.',
+  )
+  ..addFlag(
+    'exit',
+    defaultsTo: true,
+    help: 'Exit on the first test failure.',
+  )
+  ..addOption(
+    'local-engine',
+    help: 'Name of a build output within the engine out directory, if you\n'
+          'are building Flutter locally. Use this to select a specific\n'
+          'version of the engine if you have built multiple engine targets.\n'
+          'This path is relative to --local-engine-src-path/out.',
+  )
+  ..addOption(
+    'local-engine-src-path',
+    help: 'Path to your engine src directory, if you are building Flutter\n'
+          'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at\n'
+          'the location based on the value of the --flutter-root option.',
+  )
+  ..addFlag(
+    'match-host-platform',
+    defaultsTo: true,
+    help: 'Only run tests that match the host platform (e.g. do not run a\n'
+          'test with a `required_agent_capabilities` value of "mac/android"\n'
+          'on a windows host). Each test publishes its'
+          '`required_agent_capabilities`\nin the `manifest.yaml` file.',
+  )
+  ..addOption(
+    'stage',
+    abbr: 's',
+    help: 'Name of the stage. Runs all tasks for that stage. The tasks and\n'
+          'their stages are read from manifest.yaml.',
+  )
+  ..addFlag(
+    'silent',
+    negatable: true,
+    defaultsTo: false,
   )
   ..addMultiOption(
     'test',
@@ -125,24 +165,6 @@ final ArgParser _argParser = ArgParser()
         );
       }
     },
-  )
-  ..addFlag(
-    'silent',
-    negatable: true,
-    defaultsTo: false,
-  )
-  ..addOption(
-    'local-engine',
-    help: 'Name of a build output within the engine out directory, if you are '
-          'building Flutter locally. Use this to select a specific version of '
-          'the engine if you have built multiple engine targets. This path is '
-          'relative to --local-engine-src-path/out.',
-  )
-  ..addOption(
-    'local-engine-src-path',
-    help: 'Path to your engine src directory, if you are building Flutter '
-          'locally. Defaults to \$FLUTTER_ENGINE if set, or tries to guess at '
-          'the location based on the value of the --flutter-root option.',
   );
 
 bool _listsEqual(List<dynamic> a, List<dynamic> b) {
