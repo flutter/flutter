@@ -24,7 +24,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../version.dart';
-
+import '../web/web_runner.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -427,6 +427,14 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         stayResident: stayResident,
         ipv6: ipv6,
+      );
+    } else if (webMode) {
+      runner = webRunnerFactory.createWebRunner(
+        devices.single,
+        target: targetFile,
+        flutterProject: flutterProject,
+        ipv6: ipv6,
+        debuggingOptions: _createDebuggingOptions(),
       );
     } else {
       runner = ColdRunner(
