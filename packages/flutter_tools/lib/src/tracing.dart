@@ -12,15 +12,15 @@ import 'globals.dart';
 import 'vmservice.dart';
 
 // Names of some of the Timeline events we care about.
-const String _kFlutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
-const String _kFrameworkInitEventName = 'Framework initialization';
-const String _kFirstFrameBuiltEventName = 'Widgets built first useful frame';
-const String _kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
+const String kFlutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
+const String kFrameworkInitEventName = 'Framework initialization';
+const String kFirstFrameBuiltEventName = 'Widgets built first useful frame';
+const String kFirstFrameRasterizedEventName = 'Rasterized first useful frame';
 
 class Tracing {
   Tracing(this.vmService);
 
-  static const String firstUsefulFrameEventName = _kFirstFrameRasterizedEventName;
+  static const String firstUsefulFrameEventName = kFirstFrameRasterizedEventName;
 
   static Future<Tracing> connect(Uri uri) async {
     final VMService observatory = await VMService.connect(uri);
@@ -104,8 +104,8 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
 
   String message = 'No useful metrics were gathered.';
 
-  final int engineEnterTimestampMicros = extractInstantEventTimestamp(_kFlutterEngineMainEnterEventName);
-  final int frameworkInitTimestampMicros = extractInstantEventTimestamp(_kFrameworkInitEventName);
+  final int engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
+  final int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
     printTrace('Engine start event is missing in the timeline: $timeline');
@@ -123,8 +123,8 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
   }
 
   if (awaitFirstFrame) {
-    final int firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(_kFirstFrameBuiltEventName);
-    final int firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(_kFirstFrameRasterizedEventName);
+    final int firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(kFirstFrameBuiltEventName);
+    final int firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
     if (firstFrameBuiltTimestampMicros == null || firstFrameRasterizedTimestampMicros == null) {
       printTrace('First frame events are missing in the timeline: $timeline');
       throw 'First frame events are missing in the timeline. Cannot compute startup time.';
