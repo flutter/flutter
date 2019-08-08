@@ -346,17 +346,17 @@ void main() {
   });
 
   group('CupertinoSystemColors widget', () {
-    CupertinoSystemColorData colors;
+    CupertinoSystemColorsData colors;
     setUp(() { colors = null; });
 
     Widget systemColorGetter(BuildContext context) {
-      colors = CupertinoSystemColor.of(context);
+      colors = CupertinoSystemColors.of(context);
       return const Placeholder();
     }
 
     testWidgets('exists in CupertinoApp', (WidgetTester tester) async {
       await tester.pumpWidget(CupertinoApp(home: Builder(builder: systemColorGetter)));
-      expect(colors.systemBackground, CupertinoSystemColor.fallbackValues.systemBackground);
+      expect(colors.systemBackground, CupertinoSystemColors.fallbackValues.systemBackground);
     });
 
     testWidgets('resolves against its own BuildContext', (WidgetTester tester) async {
@@ -378,8 +378,8 @@ void main() {
       );
 
       // In widget tests the OS colors should fallback to `fallbackValues`.
-      expect(colors.systemBackground, isNot(CupertinoSystemColor.fallbackValues.systemBackground));
-      expect(colors.systemBackground.defaultColor, CupertinoSystemColor.fallbackValues.systemBackground.darkElevatedColor);
+      expect(colors.systemBackground, isNot(CupertinoSystemColors.fallbackValues.systemBackground));
+      expect(colors.systemBackground.defaultColor, CupertinoSystemColors.fallbackValues.systemBackground.darkElevatedColor);
 
       colors = null;
       // Changing dependencies works.
@@ -400,7 +400,7 @@ void main() {
         ),
       );
 
-      expect(colors.systemBackground.defaultColor, CupertinoSystemColor.fallbackValues.systemBackground.elevatedColor);
+      expect(colors.systemBackground.defaultColor, CupertinoSystemColors.fallbackValues.systemBackground.elevatedColor);
     });
   });
 

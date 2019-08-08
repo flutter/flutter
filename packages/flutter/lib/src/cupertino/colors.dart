@@ -388,21 +388,21 @@ class _ColorMapElementEquality<E> extends DefaultEquality<E> {
 
 /// A color palette that typically matches iOS 13+ system colors.
 ///
-/// Generally you shouldn't not create a [CupertinoSystemColorData] yourself.
-/// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorData] from the
+/// Generally you shouldn't not create a [CupertinoSystemColorsData] yourself.
+/// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorsData] from the
 /// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
 /// when the current [BuildContext] is not available (e.g., in [CupertinoApp]'s
 /// constructor).
 @immutable
-class CupertinoSystemColorData extends Diagnosticable {
+class CupertinoSystemColorsData extends Diagnosticable {
   /// Creates a color palette.
   ///
-  /// Generally you should not create your own `CupertinoSystemColorData`.
-  /// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorData] from the
+  /// Generally you should not create your own `CupertinoSystemColorsData`.
+  /// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorsData] from the
   /// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
   /// when the current [BuildContext] is not available (e.g., in [CupertinoApp]'s
   /// constructor).
-  const CupertinoSystemColorData({
+  const CupertinoSystemColorsData({
     @required this.label,
     @required this.secondaryLabel,
     @required this.tertiaryLabel,
@@ -583,10 +583,10 @@ class CupertinoSystemColorData extends Diagnosticable {
   final CupertinoDynamicColor systemGray6;
 
   /// Resolve every color in the palette using the given [BuildContext], by calling
-  /// [CupertinoDynamicColor.resolve], and return a new [CupertinoSystemColorData]
+  /// [CupertinoDynamicColor.resolve], and return a new [CupertinoSystemColorsData]
   /// with all the resolved colors.
-  CupertinoSystemColorData resolveColors(BuildContext context) {
-    return CupertinoSystemColorData(
+  CupertinoSystemColorsData resolveColors(BuildContext context) {
+    return CupertinoSystemColorsData(
       label: CupertinoDynamicColor.resolve(label, context),
       secondaryLabel: CupertinoDynamicColor.resolve(secondaryLabel, context),
       tertiaryLabel: CupertinoDynamicColor.resolve(tertiaryLabel, context),

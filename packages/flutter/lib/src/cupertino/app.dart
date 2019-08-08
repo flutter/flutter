@@ -274,7 +274,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         child: CupertinoTheme(
           data: effectiveThemeData,
           child: CupertinoSystemColors._(
-            data: CupertinoSystemColor.fromSystem ?? CupertinoSystemColor.fallbackValues,
+            data: CupertinoSystemColors.fromSystem ?? CupertinoSystemColors.fallbackValues,
             child: WidgetsApp(
               key: GlobalObjectKey(this),
               navigatorKey: widget.navigatorKey,
@@ -322,18 +322,18 @@ class _CupertinoAppState extends State<CupertinoApp> {
 
 /// Establishes a subtree where iOS system colors resolve to the given data.
 ///
-/// Typically the given [CupertinoSystemColorData] is resolved against its own
-/// [BuildContext] using [CupertinoSystemColorData.resolveColors].
+/// Typically the given [CupertinoSystemColorsData] is resolved against its own
+/// [BuildContext] using [CupertinoSystemColorsData.resolveColors].
 class CupertinoSystemColors extends InheritedWidget {
   const CupertinoSystemColors._({
     Key key,
-    @required CupertinoSystemColorData data,
+    @required CupertinoSystemColorsData data,
     Widget child,
   }) : _data = data,
        assert(data != null),
        super(key: key, child: child);
 
-  /// Creates a widget that provides a [CupertinoSystemColorData] which is extracted
+  /// Creates a widget that provides a [CupertinoSystemColorsData] which is extracted
   /// from the given [BuildContext] to its descendants.
   ///
   /// The [context] and [child] arguments must not be null.
@@ -341,30 +341,19 @@ class CupertinoSystemColors extends InheritedWidget {
     Key key,
     BuildContext context,
     Widget child,
-  }) : this._(key: key, data: CupertinoSystemColor.of(context).resolveColors(context), child: child);
+  }) : this._(key: key, data: CupertinoSystemColors.of(context).resolveColors(context), child: child);
 
-  final CupertinoSystemColorData _data;
+  final CupertinoSystemColorsData _data;
 
   @override
   bool updateShouldNotify(CupertinoSystemColors oldWidget) => oldWidget._data != _data;
-}
 
-/// A set of system colors provided in iOS 13+.
-///
-/// Each individual color has the ability to adapt to system color vibrancy and
-/// changes in accessibility settings like Increase Contrast and Reduce Transparency.
-///
-/// See also:
-///
-/// * https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#system-colors
-class CupertinoSystemColor {
-  const CupertinoSystemColor._();
 
   /// Retrieves the iOS system colors from the given [BuildContext].
   ///
   /// Falls back to [fromSystem] and then [fallbackValues], if such information
   /// is not available in the given [BuildContext].
-  static CupertinoSystemColorData of(BuildContext context) {
+  static CupertinoSystemColorsData of(BuildContext context) {
     final CupertinoSystemColors widget = context.inheritFromWidgetOfExactType(CupertinoSystemColors);
     return widget?._data ?? fromSystem ?? fallbackValues;
   }
@@ -373,13 +362,13 @@ class CupertinoSystemColor {
   ///
   /// On iOS 13 and above all the colors will be fetched from the operating system.
   /// On Android and lower versions of iOS this will return null.
-  static CupertinoSystemColorData get fromSystem => null;
+  static CupertinoSystemColorsData get fromSystem => null;
 
   /// Fallback System Colors, extracted from:
   /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
   /// and iOS 13 beta.
-  static CupertinoSystemColorData get fallbackValues {
-    return CupertinoSystemColorData(
+  static CupertinoSystemColorsData get fallbackValues {
+    return CupertinoSystemColorsData(
       label: CupertinoDynamicColor(
         normalColor: const Color.fromARGB(255, 0, 0, 0),
         darkColor: const Color.fromARGB(255, 255, 255, 255),
