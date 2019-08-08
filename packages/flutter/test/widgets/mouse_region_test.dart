@@ -623,4 +623,92 @@ void main() {
       expect(exit.single.delta, const Offset(0.0, 0.0));
     });
   });
+
+  group('MouseRegion paints child once and only once', () {
+    testWidgets('When MouseRegion is inactive', (WidgetTester tester) async {
+      int paintCount = 0;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            onEnter: (PointerEnterEvent e) {},
+            child: _PaintDelegateWidget(
+              onPaint: _VoidDelegate(() => paintCount++),
+              child: const Text('123'),
+            ),
+          ),
+        ),
+      );
+
+      expect(paintCount, 1);
+    });
+
+    testWidgets('When MouseRegion is active', (WidgetTester tester) async {
+      int paintCount = 0;
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: MouseRegion(
+            onEnter: (PointerEnterEvent e) {},
+            child: _PaintDelegateWidget(
+              onPaint: _VoidDelegate(() => paintCount++),
+              child: const Text('123'),
+            ),
+          ),
+        ),
+      );
+
+      expect(paintCount, 1);
+      await gesture.removePointer();
+    });
+  });
+}
+
+// This widget allows you to send a callback that is called during `onPaint.
+@immutable
+class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
+  const _PaintDelegateWidget({
+    Key key,
+    Widget child,
+    this.onPaint,
+  }) : super(key: key, child: child);
+
+  final _VoidDelegate onPaint;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _PaintCallbackObject(onPaint: onPaint?.callback);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _PaintCallbackObject renderObject) {
+    renderObject
+      ..onPaint = onPaint?.callback;
+  }
+}
+
+class _VoidDelegate {
+  _VoidDelegate(this.callback);
+
+  void Function() callback;
+}
+
+class _PaintCallbackObject extends RenderProxyBox {
+  _PaintCallbackObject({
+    RenderObject child,
+    this.onPaint,
+  }) : super(child);
+
+  void Function() onPaint;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (onPaint != null)
+      onPaint();
+    super.paint(context, offset);
+  }
 }
