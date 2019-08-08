@@ -236,6 +236,10 @@ def main(argv):
       '--classes-dir',
       help='Directory for compiled .class files.')
   parser.add_option('--jar-path', help='Jar output path.')
+  parser.add_option('--jar-source-path', help='Source jar output path.')
+  parser.add_option(
+      '--jar-source-base-dir',
+      help='Base directory for the source files included in the output source jar.')
   parser.add_option(
       '--main-class',
       help='The class containing the main method.')
@@ -313,6 +317,9 @@ def main(argv):
                        options.jar_path,
                        manifest_file=manifest_file)
 
+      if options.jar_source_path:
+        jar.Jar(java_files, options.jar_source_base_dir, options.jar_source_path)
+
     if options.classes_dir:
       # Delete the old classes directory. This ensures that all .class files in
       # the output are actually from the input .java files. For example, if a
@@ -333,5 +340,3 @@ def main(argv):
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv[1:]))
-
-

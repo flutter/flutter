@@ -18,6 +18,7 @@ def main(args):
   parser = optparse.OptionParser()
   build_utils.AddDepfileOption(parser)
   parser.add_option('--output', help='Path to output jar.')
+  parser.add_option('--output_native_jar', help='Path to output native library jar.')
   parser.add_option('--dist_jar', help='Flutter shell Java code jar.')
   parser.add_option('--native_lib', action='append', help='Native code library.')
   parser.add_option('--android_abi', help='Native code ABI.')
@@ -46,6 +47,12 @@ def main(args):
         input_deps.append(asset_file)
         out_zip.write(os.path.join(options.asset_dir, asset_file),
                       'assets/flutter_shared/%s' % asset_file)
+
+  if options.output_native_jar:
+    with zipfile.ZipFile(options.output_native_jar, 'w', zipfile.ZIP_DEFLATED) as out_zip:
+      for native_lib in options.native_lib:
+        out_zip.write(native_lib,
+                      'lib/%s/%s' % (options.android_abi, os.path.basename(native_lib)))
 
   if options.depfile:
     build_utils.WriteDepfile(
