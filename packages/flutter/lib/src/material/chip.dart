@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'chip_theme.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -1731,7 +1732,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     BoxConstraints constraints;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minHeight: 48.0);
+        constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
