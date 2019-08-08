@@ -398,7 +398,15 @@ abstract class CachedArtifact {
       return;
     }
     if (!location.existsSync()) {
-      location.createSync(recursive: true);
+      try {
+        location.createSync(recursive: true);
+      } on FileSystemException catch (err) {
+        printError(err.toString());
+        throwToolExit(
+          'Failed to create directory for flutter cache. Flutter may be missing '
+          'permissions in its cache directory.'
+        );
+      }
     }
     await updateInner();
     cache.setStampFor(stampName, version);

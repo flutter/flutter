@@ -243,6 +243,27 @@ void main() {
       Platform: () => fakePlatform,
     });
   });
+
+  testUsingContext('throws tool exit on fs exception', () async {
+    final FakeCachedArtifact fakeCachedArtifact = FakeCachedArtifact(
+      cache: MockCache(),
+      requiredArtifacts: <DevelopmentArtifact>{
+        DevelopmentArtifact.android,
+      }
+    );
+    final Directory mockDirectory = MockDirectory();
+    when(fakeCachedArtifact.cache.getArtifactDirectory(any))
+        .thenReturn(mockDirectory);
+    when(mockDirectory.existsSync()).thenReturn(false);
+    when(mockDirectory.createSync(recursive: true))
+        .thenThrow(const FileSystemException());
+
+    expect(() => fakeCachedArtifact.update(<DevelopmentArtifact>{
+        DevelopmentArtifact.android,
+    }), throwsA(isInstanceOf<ToolExit>()));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
 }
 
 class FakeCachedArtifact extends EngineCachedArtifact {
@@ -271,6 +292,7 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 
 class MockFileSystem extends Mock implements FileSystem {}
 class MockFile extends Mock implements File {}
+class MockDirectory extends Mock implements Directory {}
 
 class MockRandomAccessFile extends Mock implements RandomAccessFile {}
 class MockCachedArtifact extends Mock implements CachedArtifact {}
