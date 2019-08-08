@@ -250,6 +250,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -294,6 +295,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           canFail: true
         );

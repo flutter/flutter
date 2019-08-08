@@ -223,7 +223,7 @@ class ThemeData extends Diagnosticable {
     backgroundColor ??= isDark ? Colors.grey[700] : primarySwatch[200];
     dialogBackgroundColor ??= isDark ? Colors.grey[800] : Colors.white;
     indicatorColor ??= accentColor == primaryColor ? Colors.white : accentColor;
-    hintColor ??= isDark ?  const Color(0x80FFFFFF) : const Color(0x8A000000);
+    hintColor ??= isDark ? const Color(0x80FFFFFF) : const Color(0x8A000000);
     errorColor ??= Colors.red[700];
     inputDecorationTheme ??= const InputDecorationTheme();
     pageTransitionsTheme ??= const PageTransitionsTheme();
@@ -481,6 +481,66 @@ class ThemeData extends Diagnosticable {
        assert(popupMenuTheme != null),
        assert(bannerTheme != null),
        assert(buttonBarTheme != null);
+
+  /// Create a [ThemeData] based on the colors in the given [colorScheme] and
+  /// text styles of the optional [textTheme].
+  ///
+  /// The [colorScheme] can not be null.
+  ///
+  /// If [colorScheme.brightness] is [Brightness.dark] then
+  /// [ThemeData.applyElevationOverlayColor] will be set to true to support
+  /// the Material dark theme method for indicating elevation by overlaying
+  /// a semi-transparent white color on top of the surface color.
+  ///
+  /// This is the recommended method to theme your application. As we move
+  /// forward we will be converting all the widget implementations to only use
+  /// colors or colors derived from those in [ColorScheme].
+  ///
+  /// {@tool sample}
+  /// This example will set up an application to use the baseline Material
+  /// Design light and dark themes.
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   theme: ThemeData.from(colorScheme: ColorScheme.light()),
+  ///   darkTheme: ThemeData.from(colorScheme: ColorScheme.dark()),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See <https://material.io/design/color/> for
+  /// more discussion on how to pick the right colors.
+  factory ThemeData.from({
+    @required ColorScheme colorScheme,
+    TextTheme textTheme,
+  }) {
+    assert(colorScheme != null);
+
+    final bool isDark = colorScheme.brightness == Brightness.dark;
+
+    // For surfaces that use primary color in light themes and surface color in dark
+    final Color primarySurfaceColor = isDark ? colorScheme.surface : colorScheme.primary;
+    final Color onPrimarySurfaceColor = isDark ? colorScheme.onSurface : colorScheme.onPrimary;
+
+    return ThemeData(
+      brightness: colorScheme.brightness,
+      primaryColor: primarySurfaceColor,
+      primaryColorBrightness: ThemeData.estimateBrightnessForColor(primarySurfaceColor),
+      canvasColor: colorScheme.background,
+      accentColor: colorScheme.secondary,
+      accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
+      scaffoldBackgroundColor: colorScheme.background,
+      cardColor: colorScheme.surface,
+      dividerColor: colorScheme.onSurface.withOpacity(0.12),
+      backgroundColor: colorScheme.background,
+      dialogBackgroundColor: colorScheme.background,
+      errorColor: colorScheme.error,
+      textTheme: textTheme,
+      indicatorColor: onPrimarySurfaceColor,
+      applyElevationOverlayColor: isDark,
+      colorScheme: colorScheme,
+    );
+  }
 
   /// A default light blue theme.
   ///

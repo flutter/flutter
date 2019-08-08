@@ -514,6 +514,7 @@ void main() {
     // Hover elevation overrides focus
     TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);
@@ -521,15 +522,17 @@ void main() {
     expect(inkFeatures, paints..rect(color: focusColor)..rect(color: hoverColor));
     expect(material.elevation, equals(hoverElevation));
     await gesture.removePointer();
+    gesture = null;
 
     // Highlight elevation overrides hover
-    gesture = await tester.startGesture(tester.getCenter(find.byType(MaterialButton)));
+    final TestGesture gesture2 = await tester.startGesture(tester.getCenter(find.byType(MaterialButton)));
+    addTearDown(gesture2.removePointer);
     await tester.pumpAndSettle();
     material = tester.widget<Material>(rawButtonMaterial);
     inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
     expect(material.elevation, equals(highlightElevation));
-    await gesture.up();
+    await gesture2.up();
   });
 
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {

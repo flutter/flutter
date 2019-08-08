@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +17,16 @@ void main() {
     PlatformViewRenderBox platformViewRenderBox;
     setUp((){
       fakePlatformViewController = FakePlatformViewController(0);
-      platformViewRenderBox = PlatformViewRenderBox(controller: fakePlatformViewController);
+      platformViewRenderBox = PlatformViewRenderBox(
+        controller: fakePlatformViewController,
+        hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                  Factory<VerticalDragGestureRecognizer>(
+                    () {
+                      return VerticalDragGestureRecognizer();
+                    },
+                  ),
+                },);
     });
 
     test('layout should size to max constraint', () {

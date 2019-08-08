@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 /// Used in internal testing.
 class FakePlatformViewController extends PlatformViewController {
@@ -16,10 +17,22 @@ class FakePlatformViewController extends PlatformViewController {
     _id = id;
   }
 
+  /// Events that are dispatched;
+  List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
+
   int _id;
 
   @override
   int get viewId => _id;
+
+  @override
+  void dispatchPointerEvent(PointerEvent event) {
+    dispatchedPointerEvents.add(event);
+  }
+
+  void clearTestingVariables() {
+    dispatchedPointerEvents.clear();
+  }
 }
 
 class FakeAndroidPlatformViewsController {

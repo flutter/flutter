@@ -431,7 +431,7 @@ class RunCommand extends RunCommandBase {
       );
     } else if (webMode) {
       runner = ResidentWebRunner(
-        flutterDevices,
+        devices.single,
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
@@ -473,7 +473,6 @@ class RunCommand extends RunCommandBase {
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
       route: route,
-      shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
     if (result != 0) {
       throwToolExit(null, exitCode: result);
