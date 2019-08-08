@@ -5,14 +5,12 @@
 // Examples can assume:
 // class Cat { }
 
-/// A category with which to annotate a class, for documentation
-/// purposes.
+/// A category with which to annotate a class, for documentation purposes.
 ///
-/// A category is usually represented as a section and a subsection, each
-/// of which is a string. The engineering team that owns the library to which
-/// the class belongs defines the categories used for classes in that library.
-/// For example, the Flutter engineering team has defined categories like
-/// "Basic/Buttons" and "Material Design/Buttons" for Flutter widgets.
+/// The engineering team that owns the library to which the class belongs
+/// defines the categories used for classes in that library. For example, the
+/// Flutter engineering team has defined categories like "Basic/Buttons" and
+/// "Material Design/Buttons" for Flutter widgets.
 ///
 /// A class can have multiple categories.
 ///
@@ -21,9 +19,10 @@
 /// ```dart
 /// /// A copper coffee pot, as desired by Ben Turpin.
 /// /// ...documentation...
-/// @Category(<String>['Pots', 'Coffee'])
-/// @Category(<String>['Copper', 'Cookware'])
-/// @DocumentationIcon('https://example.com/images/coffee.png')
+/// @Category('Pots')
+/// @Category('Copper')
+/// @Subcategory('Coffee')
+/// @Subcategory('Cookware')
 /// @Summary('A proper cup of coffee is made in a proper copper coffee pot.')
 /// class CopperCoffeePot {
 ///   // ...code...
@@ -33,21 +32,57 @@
 ///
 /// See also:
 ///
-///  * [DocumentationIcon], which is used to give the URL to an image that
-///    represents the class.
+///  * [Subcategory], to help place the class in a subcategory index.
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
 class Category {
   /// Create an annotation to provide a categorization of a class.
-  const Category(this.sections) : assert(sections != null);
+  const Category(this.value) : assert(value != null);
 
-  /// The strings the correspond to the section and subsection of the
-  /// category represented by this object.
+  /// The string that corresponds to the category represented by this object.
   ///
-  /// By convention, this list usually has two items. The allowed values
-  /// are defined by the team that owns the library to which the annotated
-  /// class belongs.
-  final List<String> sections;
+  /// The allowed values are defined by the team that owns the library to which
+  /// the annotated class belongs.
+  final String value;
+}
+
+/// A subcategory with which to annotate a class, for documentation purposes.
+///
+/// The engineering team that owns the library to which the class belongs
+/// defines the categories and subcategories used for classes in that library.
+///
+/// A class can have multiple subcategories.
+///
+/// {@tool sample}
+///
+/// ```dart
+/// /// A copper coffee pot, as desired by Ben Turpin.
+/// /// ...documentation...
+/// @Category('Pots')
+/// @Category('Copper')
+/// @Subcategory('Coffee')
+/// @Subcategory('Cookware')
+/// @Summary('A proper cup of coffee is made in a proper copper coffee pot.')
+/// class CopperCoffeePot {
+///   // ...code...
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [Subcategory], to help place the class in a subcategory index.
+///  * [Summary], which is used to provide a one-line description of a
+///    class that overrides the inline documentations' own description.
+class Subcategory {
+  /// Create an annotation to provide a subcategory of a class.
+  const Subcategory(this.value);
+
+  /// The string that corresponds to the subcategory represented by this object.
+  ///
+  /// The allowed values are defined by the team that owns the library to which
+  /// the annotated class belongs.
+  final String value;
 }
 
 /// A class annotation to provide a URL to an image that represents the class.
@@ -59,7 +94,8 @@ class Category {
 /// ```dart
 /// /// Utility class for beginning a dream-sharing sequence.
 /// /// ...documentation...
-/// @Category(<String>['Military Technology', 'Experimental'])
+/// @Category('Military Technology')
+/// @Subcategory('Experimental')
 /// @DocumentationIcon('https://docs.example.org/icons/top.png')
 /// class DreamSharing {
 ///   // ...code...
@@ -70,6 +106,7 @@ class Category {
 /// See also:
 ///
 ///  * [Category], to help place the class in an index.
+///  * [Subcategory], to help place the class in a subcategory index.
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
 class DocumentationIcon {
@@ -80,12 +117,12 @@ class DocumentationIcon {
   final String url;
 }
 
-/// An annotation that provides a short description of a class for use
-/// in an index.
+/// An annotation that provides a short description of a class for use in an
+/// index.
 ///
-/// Usually the first paragraph of the documentation for a class can be used
-/// for this purpose, but on occasion the first paragraph is either too short
-/// or too long for use in isolation, without the remainder of the documentation.
+/// Usually the first paragraph of the documentation for a class can be used for
+/// this purpose, but on occasion the first paragraph is either too short or too
+/// long for use in isolation, without the remainder of the documentation.
 ///
 /// {@tool sample}
 ///
@@ -94,9 +131,8 @@ class DocumentationIcon {
 /// ///
 /// /// Instances of this class can hunt small animals.
 /// /// This cat has three legs.
-/// @Category(<String>['Animals', 'Cats'])
-/// @Category(<String>['Cute', 'Pets'])
-/// @DocumentationIcon('https://www.examples.net/docs/images/icons/pillar.jpeg')
+/// @Category('Animals')
+/// @Subcategory('Cute')
 /// @Summary('A famous three-legged cat.')
 /// class Pillar extends Cat {
 ///   // ...code...
@@ -107,8 +143,7 @@ class DocumentationIcon {
 /// See also:
 ///
 ///  * [Category], to help place the class in an index.
-///  * [DocumentationIcon], which is used to give the URL to an image that
-///    represents the class.
+///  * [Subcategory], to help place the class in a subcategory index.
 class Summary {
   /// Create an annotation to provide a short description of a class.
   const Summary(this.text) : assert(text != null);
