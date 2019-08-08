@@ -654,7 +654,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw 'Application isolate not found';
+          return OperationResult(2, 'Application isolate not found', fatal: true);
         }
       }
     }
@@ -762,7 +762,6 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
-
     final Stopwatch reassembleTimer = Stopwatch()..start();
     // Reload the isolate.
     final List<Future<void>> allDevices = <Future<void>>[];
