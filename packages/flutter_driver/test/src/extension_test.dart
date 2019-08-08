@@ -10,6 +10,7 @@ import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:flutter_driver/src/common/find.dart';
 import 'package:flutter_driver/src/common/geometry.dart';
+import 'package:flutter_driver/src/common/message.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
 import 'package:flutter_driver/src/common/text.dart';
 import 'package:flutter_driver/src/common/wait.dart';

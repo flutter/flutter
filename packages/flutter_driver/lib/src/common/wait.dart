@@ -7,8 +7,21 @@ import 'dart:convert';
 
 import 'package:flutter/scheduler.dart';
 
-/// Base class for a class that can be serialized to JSON.
-abstract class Jsonable {
+/// Base class for a condition that can be waited upon.
+abstract class WaitCondition {
+  /// Gets the current status of the [condition], executed in the context of the
+  /// Flutter app:
+  ///
+  /// - True, if the condition is satisfied.
+  /// - False otherwise.
+  ///
+  /// The future returned by [wait] will complete when this [condition] is
+  /// fulfilled.
+  bool get condition;
+
+  /// Returns a future that completes when [condition] turns true.
+  Future<void> wait();
+
   /// Serializes the object to JSON.
   Map<String, dynamic> serialize();
 }
@@ -25,22 +38,6 @@ class SerializationException implements Exception {
   String toString() => 'SerializationException($message)';
 }
 
-/// Base class for a condition that can be waited upon.
-abstract class WaitCondition extends Jsonable {
-  /// Gets the current status of the [condition], executed in the context of the
-  /// Flutter app:
-  ///
-  /// - True, if the condition is satisfied.
-  /// - False otherwise.
-  ///
-  /// The future returned by [wait] will complete when this [condition] is
-  /// fulfilled.
-  bool get condition;
-
-  /// Returns a future that completes when [condition] turns true.
-  Future<void> wait();
-}
-
 /// A condition that waits until no transient callbacks are scheduled.
 class NoTransientCallbacksCondition implements WaitCondition {
   /// Creates a [NoTransientCallbacksCondition] instance.
@@ -50,7 +47,7 @@ class NoTransientCallbacksCondition implements WaitCondition {
   /// from the given JSON map.
   factory NoTransientCallbacksCondition.deserialize(Map<String, dynamic> json) {
     if (json['conditionName'] != 'NoTransientCallbacksCondition')
-      throw SerializationException('Error occurred when deserializing the NoTransientCallbacksCondition JSON string: $json');
+      throw SerializationException('Error occurred during deserializing the NoTransientCallbacksCondition JSON string: $json');
     return const NoTransientCallbacksCondition();
   }
 
@@ -82,7 +79,7 @@ class NoPendingFrameCondition implements WaitCondition {
   /// given JSON map.
   factory NoPendingFrameCondition.deserialize(Map<String, dynamic> json) {
     if (json['conditionName'] != 'NoPendingFrameCondition')
-      throw SerializationException('Error occurred when deserializing the NoPendingFrameCondition JSON string: $json');
+      throw SerializationException('Error occurred during deserializing the NoPendingFrameCondition JSON string: $json');
     return const NoPendingFrameCondition();
   }
 
@@ -115,7 +112,7 @@ class CombinedCondition implements WaitCondition {
   /// JSON map.
   factory CombinedCondition.deserialize(Map<String, dynamic> jsonMap) {
     if (jsonMap['conditionName'] != 'CombinedCondition')
-      throw SerializationException('Error occurred when deserializing the CombinedCondition JSON string: $jsonMap');
+      throw SerializationException('Error occurred during deserializing the CombinedCondition JSON string: $jsonMap');
     CombinedCondition combinedCondition;
     if (jsonMap['conditions'] == null) {
       combinedCondition = const CombinedCondition(<WaitCondition>[]);

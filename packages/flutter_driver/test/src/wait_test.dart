@@ -26,7 +26,7 @@ void main() {
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
                   e.message ==
-                  'Error occurred when deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
+                  'Error occurred during deserializing the NoTransientCallbacksCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
@@ -48,7 +48,7 @@ void main() {
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
-                  e.message == 'Error occurred when deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
+                  e.message == 'Error occurred during deserializing the NoPendingFrameCondition JSON string: {conditionName: Unknown}')));
     });
   });
 
@@ -98,7 +98,7 @@ void main() {
               }),
           throwsA(predicate<SerializationException>(
               (SerializationException e) =>
-                  e.message == 'Error occurred when deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
+                  e.message == 'Error occurred during deserializing the CombinedCondition JSON string: {conditionName: Unknown}')));
     });
 
     test('CombinedCondition fromJson error - Unknown condition type', () {
