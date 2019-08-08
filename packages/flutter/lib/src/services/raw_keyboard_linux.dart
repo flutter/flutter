@@ -23,7 +23,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// arguments must not be null.
   const RawKeyEventDataLinux({
     @required this.keyHelper,
-    this.unicodeScalarValuesProduced = '',
+    this.unicodeScalarValuesProduced = 0,
     this.scanCode = 0,
     this.keyCode = 0,
     this.modifiers = 0,
@@ -39,11 +39,11 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
   final KeyHelper keyHelper;
 
-  /// A string with one or more unicode scalar values in a single keystroke. Two values are handled
+  /// An with one or more unicode scalar values in a single keystroke. Two values are handled
   /// at most. Otherwise, an assertion will be raised. This is typically the character
   /// that [keyCode] would produce without any modifier keys. For dead keys, it is typically
   /// the diacritic it would add to a character. Defaults to an empty string, asserted to be not null.
-  final String unicodeScalarValuesProduced;
+  final int unicodeScalarValuesProduced;
 
   /// The hardware scan code id corresponding to this key event.
   ///
@@ -63,7 +63,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   final int modifiers;
 
   @override
-  String get keyLabel => unicodeScalarValuesProduced.isEmpty ? null : unicodeScalarValuesProduced;
+  String get keyLabel => unicodeScalarValuesProduced == 0 ? null : String.fromCharCode(unicodeScalarValuesProduced);
 
   @override
   PhysicalKeyboardKey get physicalKey => kLinuxToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
@@ -84,15 +84,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
     // plane.
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel)) {
-      // Not covering length > 2 case since > 1 is already unlikely.
-      assert(unicodeScalarValuesProduced.length <= 2);
-      int codeUnit = unicodeScalarValuesProduced.codeUnitAt(0);
-      if (unicodeScalarValuesProduced.length == 2) {
-        final int secondCode = unicodeScalarValuesProduced.codeUnitAt(1);
-        codeUnit = (codeUnit << 16) | secondCode;
-      }
-
-      final int keyId = LogicalKeyboardKey.unicodePlane | (codeUnit & LogicalKeyboardKey.valueMask);
+      final int keyId = LogicalKeyboardKey.unicodePlane | (unicodeScalarValuesProduced & LogicalKeyboardKey.valueMask);
       return LogicalKeyboardKey.findKeyByKeyId(keyId) ?? LogicalKeyboardKey(
         keyId,
         keyLabel: keyLabel,
