@@ -65,7 +65,7 @@ void main() {
     when(mockVmService.onStdoutEvent).thenAnswer((Invocation _) {
       return const Stream<Event>.empty();
     });
-    when(mockDebugConnection.wsUri).thenReturn('ws://127.0.0.1/abcd/');
+    when(mockDebugConnection.uri).thenReturn('ws://127.0.0.1/abcd/');
   }
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {

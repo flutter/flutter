@@ -477,7 +477,7 @@ Future<void> _runWebTests() async {
   //   'test/painting/',
   //   'test/scheduler/',
   //   'test/semantics/',
-  //   // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
+  // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
   //   // resolved.
   //   // 'test/widgets/',
   //   // 'test/material/',
