@@ -45,11 +45,9 @@ class Tracing {
       );
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
-        (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
-          final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
-          for (Map<String, dynamic> event in events) {
-            if (event['name'] == firstUsefulFrameEventName)
-              whenFirstFrameRendered.complete();
+        (await vmService.onExtensionEvent).listen((ServiceEvent event) {
+          if (event.extensionKind == 'Flutter.FirstFrame') {
+            whenFirstFrameRendered.complete();
           }
         });
         bool done = false;
