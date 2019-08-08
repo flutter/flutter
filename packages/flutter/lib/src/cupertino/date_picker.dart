@@ -19,6 +19,7 @@ import 'theme.dart';
 const double _kItemExtent = 32.0;
 // From the picker's intrinsic content size constraint.
 const double _kPickerWidth = 320.0;
+const double _kPickerHeight = 216.0;
 const bool _kUseMagnifier = true;
 const double _kMagnification = 2.35/2.1;
 const double _kDatePickerPadSize = 12.0;
@@ -1362,7 +1363,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         // as well in our picker.
         textScaleFactor: 1.0,
       ),
-      child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+      child: Container(
+        decoration: BoxDecoration(color: _kBackgroundColor),
+        width: _kPickerWidth,
+        height: _kPickerHeight,
+        child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+      ),
     );
   }
 }
