@@ -381,11 +381,8 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
   name: deploy_gallery-macos
-  pub_cache:
-    folder: ~/.pub-cache
   depends_on:
     - analyze
-    - build_tests-macos
   env:
     # Name the SDK directory to include a space so that we constantly
     # test path names with spaces in them.
@@ -431,15 +428,6 @@ task:
     - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version
-  artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
@@ -463,6 +451,7 @@ task:
         SUBSHARD: create
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-macos
+      only_if: $CIRRUS_BRANCH == 'master'
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -488,66 +477,13 @@ task:
     - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version
-  artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
     - bin/flutter update-packages
   matrix:
-    - name: tests_widgets-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: widgets
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_all_script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
-      on_failure:
-        print_failure_time_script: date
-    - name: tests_framework_other-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: framework_other
-        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
-        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      goldctl_script: ./dev/bots/download_goldctl.sh
-      test_all_script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
-      on_failure:
-        print_failure_time_script: date
-    - name: tests_extras-macos
-      env:
-        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
-        SHARD: tests
-        SUBSHARD: extras
-      test_all_script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
-    - name: build_tests-macos
-      env:
-        SHARD: build_tests
-        COCOAPODS_DISABLE_STATS: true
-        FLUTTER_FRAMEWORK_DIR: "/tmp/flutter sdk/bin/cache/artifacts/engine/ios/"
-      osx_instance:
-        image: mojave-flutter
-      remove_preinstalled_flutter_script: rm -rf $FLUTTER_HOME
-      test_all_script:
-        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
-        - dart --enable-asserts dev/bots/test.dart
     - name: integration_tests-macos
+      only_if: $CIRRUS_BRANCH == 'master'
       env:
         SHARD: integration_tests
       test_all_script:
