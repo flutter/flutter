@@ -46,25 +46,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   // Whether this layer has any changes since its last call to [addToScene].
   //
   // Initialized to true as a new layer has never called [addToScene].
+  //
+  // The final value is only valid after calling [updateSubtreeNeedsAddToScene].
   bool _needsAddToScene = true;
-
-  /// Whether the parent layer is required to call this layer's [addToScene]
-  /// method to render it.
-  ///
-  /// If false, the parent layer may pass this layer's engine layer to
-  /// [SceneBuilder.addRetained]. If true, [SceneBuilder.addRetained] may not
-  /// be used.
-  ///
-  /// This getter is intended for debugging purposes only. In release builds, it
-  /// always returns null.
-  bool get debugNeedsAddToScene {
-    bool result;
-    assert(() {
-      result = _needsAddToScene;
-      return true;
-    }());
-    return result;
-  }
 
   /// Mark that this layer has changed and [addToScene] needs to be called.
   @protected
@@ -82,9 +66,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     }
 
     _needsAddToScene = true;
-    if (parent != null && !parent.alwaysNeedsAddToScene) {
-      parent.markNeedsAddToScene();
-    }
   }
 
   /// Mark that this layer is in sync with engine.
@@ -102,9 +83,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @protected
   bool get alwaysNeedsAddToScene => false;
 
-  bool _subtreeNeedsAddToScene;
-
-  /// Whether any layer in the subtree needs [addToScene].
+  /// Whether this or any descendant layer in the subtree needs [addToScene].
   ///
   /// This is for debug and test purpose only. It only becomes valid after
   /// calling [updateSubtreeNeedsAddToScene].
@@ -112,7 +91,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   bool get debugSubtreeNeedsAddToScene {
     bool result;
     assert(() {
-      result = _subtreeNeedsAddToScene;
+      result = _needsAddToScene;
       return true;
     }());
     return result;
@@ -156,14 +135,19 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   }
   ui.EngineLayer _engineLayer;
 
-  /// Traverse the layer tree and compute if any subtree needs [addToScene].
+  /// Traverses the layer subtree starting from this layer and determines whether it needs [addToScene].
   ///
-  /// A subtree needs [addToScene] if any of its layers need [addToScene].
-  /// The [ContainerLayer] will override this to respect its children.
+  /// A layer needs [addToScene] if any of the following is true:
+  ///
+  /// - [alwaysNeedsAddToScene] is true.
+  /// - [markNeedsAddToScene] has been called.
+  /// - Any of its descendants need [addToScene].
+  ///
+  /// [ContainerLayer] overrides this method to recursively call it on its children.
   @protected
   @visibleForTesting
   void updateSubtreeNeedsAddToScene() {
-    _subtreeNeedsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
+    _needsAddToScene = _needsAddToScene || alwaysNeedsAddToScene;
   }
 
   /// This layer's next sibling in the parent layer's child list.
@@ -233,15 +217,15 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
     // There can't be a loop by adding a retained layer subtree whose
-    // _subtreeNeedsAddToScene is false.
+    // _needsAddToScene is false.
     //
     // Proof by contradiction:
     //
     // If we introduce a loop, this retained layer must be appended to one of
     // its descendant layers, say A. That means the child structure of A has
     // changed so A's _needsAddToScene is true. This contradicts
-    // _subtreeNeedsAddToScene being false.
-    if (!_subtreeNeedsAddToScene && _engineLayer != null) {
+    // _needsAddToScene being false.
+    if (!_needsAddToScene && _engineLayer != null) {
       builder.addRetained(_engineLayer);
       return;
     }
@@ -700,7 +684,7 @@ class ContainerLayer extends Layer {
     Layer child = firstChild;
     while (child != null) {
       child.updateSubtreeNeedsAddToScene();
-      _subtreeNeedsAddToScene = _subtreeNeedsAddToScene || child._subtreeNeedsAddToScene;
+      _needsAddToScene = _needsAddToScene || child._needsAddToScene;
       child = child.nextSibling;
     }
   }

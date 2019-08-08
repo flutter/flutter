@@ -44,64 +44,53 @@ void main() {
     expect(boundary.layer.attached, isTrue); // this time it did again!
   });
 
-  test('layer _subtreeNeedsAddToScene is correctly computed', () {
+  test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
-    final ContainerLayer d = ContainerLayer();
+    final _TestAlwaysNeedsAddToSceneLayer d = _TestAlwaysNeedsAddToSceneLayer();
     final ContainerLayer e = ContainerLayer();
     final ContainerLayer f = ContainerLayer();
-    final ContainerLayer g = ContainerLayer();
 
-    final PictureLayer h = PictureLayer(Rect.zero);
-    final PictureLayer i = PictureLayer(Rect.zero);
-    final PictureLayer j = PictureLayer(Rect.zero);
-
-    // The tree is like the following where b and j are dirty:
-    //        a____
-    //       /     \
-    //   (x)b___    c
-    //     / \  \   |
-    //    d   e  f  g
-    //   / \        |
-    //  h   i       j(x)
+    // Tree structure:
+    //        a
+    //       / \
+    //      b   c
+    //     / \
+    // (x)d   e
+    //   /
+    //  f
     a.append(b);
     a.append(c);
     b.append(d);
     b.append(e);
-    b.append(f);
-    d.append(h);
-    d.append(i);
-    c.append(g);
-    g.append(j);
+    d.append(f);
 
     a.debugMarkClean();
-    b.markNeedsAddToScene();
+    b.debugMarkClean();
     c.debugMarkClean();
     d.debugMarkClean();
     e.debugMarkClean();
     f.debugMarkClean();
-    g.debugMarkClean();
-    h.debugMarkClean();
-    i.debugMarkClean();
-    j.markNeedsAddToScene();
+
+    expect(a.debugSubtreeNeedsAddToScene, false);
+    expect(b.debugSubtreeNeedsAddToScene, false);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
 
     a.updateSubtreeNeedsAddToScene();
 
     expect(a.debugSubtreeNeedsAddToScene, true);
     expect(b.debugSubtreeNeedsAddToScene, true);
-    expect(c.debugSubtreeNeedsAddToScene, true);
-    expect(g.debugSubtreeNeedsAddToScene, true);
-    expect(j.debugSubtreeNeedsAddToScene, true);
-
-    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, true);
     expect(e.debugSubtreeNeedsAddToScene, false);
     expect(f.debugSubtreeNeedsAddToScene, false);
-    expect(h.debugSubtreeNeedsAddToScene, false);
-    expect(i.debugSubtreeNeedsAddToScene, false);
   });
 
-  test('layer _needsAddToScene is correctly computed', () {
+  test('updateSubtreeNeedsAddToScene propagates Layer._needsAddToScene up the tree', () {
     final ContainerLayer a = ContainerLayer();
     final ContainerLayer b = ContainerLayer();
     final ContainerLayer c = ContainerLayer();
@@ -125,7 +114,7 @@ void main() {
     c.append(g);
 
     for (ContainerLayer layer in allLayers) {
-      expect(layer.debugNeedsAddToScene, true);
+      expect(layer.debugSubtreeNeedsAddToScene, true);
     }
 
     for (ContainerLayer layer in allLayers) {
@@ -133,32 +122,34 @@ void main() {
     }
 
     for (ContainerLayer layer in allLayers) {
-      expect(layer.debugNeedsAddToScene, false);
+      expect(layer.debugSubtreeNeedsAddToScene, false);
     }
 
     b.markNeedsAddToScene();
+    a.updateSubtreeNeedsAddToScene();
 
-    expect(a.debugNeedsAddToScene, true);
-    expect(b.debugNeedsAddToScene, true);
-    expect(c.debugNeedsAddToScene, false);
-    expect(d.debugNeedsAddToScene, false);
-    expect(e.debugNeedsAddToScene, false);
-    expect(f.debugNeedsAddToScene, false);
-    expect(g.debugNeedsAddToScene, false);
+    expect(a.debugSubtreeNeedsAddToScene, true);
+    expect(b.debugSubtreeNeedsAddToScene, true);
+    expect(c.debugSubtreeNeedsAddToScene, false);
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+    expect(g.debugSubtreeNeedsAddToScene, false);
 
     g.markNeedsAddToScene();
+    a.updateSubtreeNeedsAddToScene();
 
-    expect(a.debugNeedsAddToScene, true);
-    expect(b.debugNeedsAddToScene, true);
-    expect(c.debugNeedsAddToScene, true);
-    expect(d.debugNeedsAddToScene, false);
-    expect(e.debugNeedsAddToScene, false);
-    expect(f.debugNeedsAddToScene, false);
-    expect(g.debugNeedsAddToScene, true);
+    expect(a.debugSubtreeNeedsAddToScene, true);
+    expect(b.debugSubtreeNeedsAddToScene, true);
+    expect(c.debugSubtreeNeedsAddToScene, true);
+    expect(d.debugSubtreeNeedsAddToScene, false);
+    expect(e.debugSubtreeNeedsAddToScene, false);
+    expect(f.debugSubtreeNeedsAddToScene, false);
+    expect(g.debugSubtreeNeedsAddToScene, true);
 
     a.buildScene(SceneBuilder());
     for (ContainerLayer layer in allLayers) {
-      expect(layer.debugNeedsAddToScene, false);
+      expect(layer.debugSubtreeNeedsAddToScene, false);
     }
   });
 
@@ -544,4 +535,9 @@ void main() {
     // layer.
     parent.buildScene(SceneBuilder());
   });
+}
+
+class _TestAlwaysNeedsAddToSceneLayer extends ContainerLayer {
+  @override
+  bool get alwaysNeedsAddToScene => true;
 }
