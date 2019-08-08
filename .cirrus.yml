@@ -94,7 +94,7 @@ task:
         cd $ENGINE_PATH/src/flutter/testing/scenario_app
         ./compile_android_aot.sh "$ENGINE_PATH/src/out/host_profile" "$ENGINE_PATH/src/out/android_profile_arm64/clang_x64"
         cd android
-        ./gradlew assembleDebug
+        ./gradlew --no-daemon assembleDebug
       firebase_test_script: |
          cd $ENGINE_PATH/src
          ./flutter/ci/firebase_testlab.sh "$ENGINE_PATH/src/flutter/testing/scenario_app/android/app/build/outputs/apk/debug/app-debug.apk"
