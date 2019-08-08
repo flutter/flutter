@@ -165,7 +165,7 @@ List<GalleryDemo> _buildGalleryDemos() {
       icon: GalleryIcons.lists_leave_behind,
       category: _kMaterialComponents,
       routeName: BannerDemo.routeName,
-      documentationUrl: 'https://docs.flutter.io/flutter/material/MaterialBanner-class.html',
+      documentationUrl: 'https://api.flutter.dev/flutter/material/MaterialBanner-class.html',
       buildRoute: (BuildContext context) => const BannerDemo(),
     ),
     GalleryDemo(

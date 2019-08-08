@@ -27,17 +27,13 @@ class _BannerDemoState extends State<BannerDemo> {
   bool _showMultipleActions = true;
   bool _showLeading = true;
 
-  void initBanner() {
-    _displayBanner = true;
-    _showMultipleActions = true;
-    _showLeading = true;
-  }
-
   void handleDemoAction(BannerDemoAction action) {
     setState(() {
       switch (action) {
         case BannerDemoAction.reset:
-          initBanner();
+          _displayBanner = true;
+          _showMultipleActions = true;
+          _showLeading = true;
           break;
         case BannerDemoAction.showMultipleActions:
           _showMultipleActions = !_showMultipleActions;
@@ -105,9 +101,8 @@ class _BannerDemoState extends State<BannerDemo> {
       body: ListView.builder(itemCount: _displayBanner ? _numItems + 1 : _numItems, itemBuilder: (BuildContext context, int index) {
         if (index == 0 && _displayBanner) {
           return banner;
-        } else {
-          return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
         }
+        return ListTile(title: Text('Item ${_displayBanner ? index : index + 1}'),);
       }),
     );
   }
