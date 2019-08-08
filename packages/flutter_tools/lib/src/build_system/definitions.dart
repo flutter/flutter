@@ -21,12 +21,12 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
     BuildPhase.static(
       name: 'dart',
       target: CopyKernelDill(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
   ],
 );
@@ -39,12 +39,12 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
     BuildPhase.static(
       name: 'dart',
       target: CopyKernelDill(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
   ],
 );
@@ -57,12 +57,12 @@ const BuildDefinition releaseMacOSApplication = BuildDefinition(
     BuildPhase.static(
       name: 'unpack',
       target: UnpackMacOS(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
     BuildPhase.static(
       name: 'dart',
       target: CopyKernelDill(),
-      dependencies: <String>[]
+      dependencies: <String>[],
     ),
   ],
 );

@@ -8,11 +8,11 @@ import '../base/file_system.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
-/// An build that produces artifacts that can be built.
+/// A build that produces artifacts that can be built.
 ///
 /// A [BuildDefinition] can be executed via `flutter assemble`.
 class BuildDefinition {
-  /// Create a new [BuildDefinition].
+  /// Creates a new [BuildDefinition].
   ///
   /// Both [name] and [phases] must not be null. Phases must not be empty
   /// or [createBuild] will throw a [StateError].
@@ -60,7 +60,7 @@ class BuildDefinition {
   }
 }
 
-// A synthetic target created from a List of [BuildPhase] aggregate targets.
+/// A synthetic target created from a list of [BuildPhase] aggregate targets.
 class _RootTarget extends Target {
   _RootTarget(this.dependencies, this.definition);
 
@@ -82,7 +82,7 @@ class _RootTarget extends Target {
   List<Source> get outputs => const <Source>[];
 }
 
-// A synthetic target created from the result of a [BuildPhase.plan].
+/// A synthetic target created from the result of a [BuildPhase.plan].
 class _AggregateTarget extends Target {
   _AggregateTarget(this.dependencies, this.phase);
 
@@ -104,15 +104,15 @@ class _AggregateTarget extends Target {
   List<Source> get outputs => const <Source>[];
 }
 
-/// A Phase is a creator of [Targets].
+/// A phase creates a list of targets.
 ///
 /// A phase doesn't have explicit dependencies on individual targets. Instead,
 /// the build system requires all phases in [dependencies] to have run before
 /// this phase.
 ///
-/// A phase will always be run, but the targets that constitute it may be
-/// skipped. The [plan] method of a build's phases are always invoked before
-/// any targets are run.
+/// A phase's [plan] method will always be run, but the targets that are created
+/// from it may be skipped. This method is always invoked before before build
+/// execution begins.
 abstract class BuildPhase {
   const BuildPhase();
 
