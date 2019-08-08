@@ -39,10 +39,10 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// (GLFW, GTK, QT, etc) may have a different key code mapping.
   final KeyHelper keyHelper;
 
-  /// An with one or more unicode scalar values in a single keystroke. Two values are handled
+  /// An int with one or more unicode scalar values in a single keystroke. Two values are handled
   /// at most. Otherwise, an assertion will be raised. This is typically the character
   /// that [keyCode] would produce without any modifier keys. For dead keys, it is typically
-  /// the diacritic it would add to a character. Defaults to an empty string, asserted to be not null.
+  /// the diacritic it would add to a character. Defaults to 0, asserted to be not null.
   final int unicodeScalarValuesProduced;
 
   /// The hardware scan code id corresponding to this key event.
@@ -54,7 +54,6 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The hardware key code corresponding to this key event.
   ///
   /// This is the physical key that was pressed, not the Unicode character.
-  /// See [unicodeScalarValuesProduced] for the unmodified Unicode character.
   /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int keyCode;
 
@@ -122,7 +121,8 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   @override
   String toString() {
     return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
-        ' unicodeScalarValuesProduced: $unicodeScalarValuesProduced, modifiers: $modifiers, modifiers down: $modifiersPressed)';
+        ' unicodeScalarValuesProduced: $unicodeScalarValuesProduced, modifiers: $modifiers, '
+        'modifiers down: $modifiersPressed)';
   }
 }
 
