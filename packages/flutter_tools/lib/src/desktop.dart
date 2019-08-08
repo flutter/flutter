@@ -32,7 +32,7 @@ Future<bool> killProcess(String executable) async {
       final String processPid = values[1];
       final String currentRunningProcessPid = pid.toString();
       // Don't kill the flutter tool process
-      if (processPid == currentRunningProcessPid){
+      if (processPid == currentRunningProcessPid) {
         continue;
       }
 

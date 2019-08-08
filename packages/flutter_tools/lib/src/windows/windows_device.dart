@@ -178,7 +178,7 @@ List<String> runningProcess(String processName) {
     final String processPid = parts[0];
     final String currentRunningProcessPid = pid.toString();
     // Don't kill the flutter tool process
-    if (processPid == currentRunningProcessPid){
+    if (processPid == currentRunningProcessPid) {
       continue;
     }
     final List<String> data = <String>[
