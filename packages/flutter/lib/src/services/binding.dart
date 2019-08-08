@@ -40,8 +40,8 @@ mixin ServicesBinding on BindingBase {
   BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
   BinaryMessenger _defaultBinaryMessenger;
 
-  /// Initializes a default [BinaryMessenger] instance that can be used for
-  /// sending platform messages.
+  /// Creates a default [BinaryMessenger] instance that can be used for sending
+  /// platform messages.
   @protected
   BinaryMessenger createBinaryMessenger() {
     return const _DefaultBinaryMessenger._();
