@@ -4,7 +4,12 @@
 
 import '../widgets/framework.dart';
 
-/// Indicates the visual level for a piece of content.
+/// Indicates the visual level for a piece of content. Equivalent to `UIUserInterfaceLevel`
+/// from `UIKit`.
+///
+/// See also:
+///
+/// * `UIUserInterfaceLevel`, the UIKit equivalent: https://developer.apple.com/documentation/uikit/uiuserinterfacelevel.
 enum CupertinoUserInterfaceLevelData {
   /// The level for your window's main content.
   base,
@@ -13,7 +18,7 @@ enum CupertinoUserInterfaceLevelData {
   elevated,
 }
 
-/// Establishes a subtree in which [CupertinoUserInterfaceLevel.of] resolve to
+/// Establishes a subtree in which [CupertinoUserInterfaceLevel.of] resolves to
 /// the given data.
 ///
 /// Querying the current elevation status using [CupertinoUserInterfaceLevel.of]
@@ -23,14 +28,19 @@ enum CupertinoUserInterfaceLevelData {
 /// If no [CupertinoUserInterfaceLevel] is in scope then the [CupertinoUserInterfaceLevel.of]
 /// method will throw an exception, unless the `nullOk` argument is set to true,
 /// in which case it returns null.
+///
+/// See also:
+///
+/// * [CupertinoUserInterfaceLevelData], specifies the visual level for the content
+/// in the subtree [CupertinoUserInterfaceLevel] established.
 class CupertinoUserInterfaceLevel extends InheritedWidget {
-  /// Creates a
+  /// Creates a [CupertinoUserInterfaceLevel] to change descendant Cupertino widget's
+  /// visual level.
   const CupertinoUserInterfaceLevel({
     Key key,
     @required CupertinoUserInterfaceLevelData data,
     Widget child,
-  })
-    : assert(data != null),
+  }) : assert(data != null),
       _data = data,
       super(key: key, child: child);
 
