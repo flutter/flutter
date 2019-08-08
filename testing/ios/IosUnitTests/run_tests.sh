@@ -12,6 +12,6 @@ fi
 
 set -o pipefail && xcodebuild -sdk iphonesimulator \
   -scheme IosUnitTests \
-  -destination 'platform=iOS Simulator,name=iPhone SE,OS=12.2' \
+  -destination 'platform=iOS Simulator,name=iPhone 8,OS=13.0' \
   test \
   FLUTTER_ENGINE=$FLUTTER_ENGINE | $PRETTY
