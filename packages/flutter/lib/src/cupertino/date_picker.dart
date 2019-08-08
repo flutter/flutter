@@ -40,7 +40,8 @@ const double _kTimerPickerLabelPadSize = 4.5;
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 
 // The total width of the picker's currently selected number.
-const double _kTimerPickerNumberLabelWidth = 29.5;
+// On iOS 13 beta the actual number is 29.5.
+const double _kTimerPickerNumberLabelWidth = 30;
 
 
 TextStyle _themeTextStyle(BuildContext context) {
