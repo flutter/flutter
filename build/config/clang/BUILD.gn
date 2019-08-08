@@ -25,6 +25,9 @@ config("extra_warnings") {
       "-Wthread-safety",
     ]
   }
+  if (is_fuchsia) {
+    cflags += [ "-Wno-implicit-int-float-conversion" ]
+  }
 
   defines = [ "_LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS" ]
 }
