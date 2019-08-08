@@ -58,8 +58,8 @@ abstract class BinaryMessenger {
 
 /// The default instance of [BinaryMessenger].
 ///
-/// This API has been deprecated in favor of [ServicesBinding.instance.defaultBinaryMessenger].
-/// Please use [ServicesBinding.instance.defaultBinaryMessenger] as the default
+/// This API has been deprecated in favor of [ServicesBinding.defaultBinaryMessenger].
+/// Please use [ServicesBinding.defaultBinaryMessenger] as the default
 /// instance of [BinaryMessenger].
 ///
 /// This is used to send messages from the application to the platform, and

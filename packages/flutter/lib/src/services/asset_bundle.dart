@@ -214,13 +214,11 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
 
-  BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
-
   @override
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData asset =
-        await _binaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
+        await ServicesBinding.instance.defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;
