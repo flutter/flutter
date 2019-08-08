@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:dwds/dwds.dart';
-import 'package:flutter_tools/src/web/web_runner.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
@@ -21,6 +20,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../resident_runner.dart';
+import '../web/web_runner.dart';
 import 'web_fs.dart';
 
 /// Injectable factory to create a [ResidentWebRunner].
