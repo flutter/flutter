@@ -56,14 +56,10 @@ class Category {
 /// {@tool sample}
 ///
 /// ```dart
-/// /// A copper coffee pot, as desired by Ben Turpin.
 /// /// ...documentation...
 /// @Category('Pots')
-/// @Category('Copper')
 /// @Subcategory('Coffee')
-/// @Subcategory('Cookware')
-/// @Summary('A proper cup of coffee is made in a proper copper coffee pot.')
-/// class CopperCoffeePot {
+/// class FrenchPress {
 ///   // ...code...
 /// }
 /// ```
