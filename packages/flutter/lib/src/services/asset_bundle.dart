@@ -9,7 +9,6 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'binary_messenger.dart';
 import 'binding.dart';
 
 /// A collection of resources used by the application.
