@@ -33,19 +33,19 @@ class LayerHitTestResult<T> {
      : _path = <LayerHitTestEntry<T>>[];
 
   /// An unmodifiable list of [LayerHitTestEntry] objects recorded during the
-  /// hit test.
+  /// hit test, in the visual order from front to behind.
   ///
   /// The path starts with the most specific and visually front-most entry,
-  /// typically the one at the leaf of tree being hit tested, and proceeds onto
-  /// the visually behind entries and less specific entries.
+  /// typically the one at the leaf of the layer tree and the one added the
+  /// latest among its siblings, then proceeds onto the visually behind and less
+  /// specific entries.
   Iterable<LayerHitTestEntry<T>> get path => _path;
   final List<LayerHitTestEntry<T>> _path;
 
   /// Add a [LayerHitTestEntry] to the path.
   ///
   /// The new entry is added at the end of the path, which means entries should
-  /// be added in order from visually front to behind, and most specific to
-  /// least specific, typically during an upward walk of the layer tree.
+  /// be added in order from visually behind to front.
   void add(LayerHitTestEntry<T> entry) {
     _path.add(entry);
   }
@@ -200,12 +200,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Determines the list of annotations located at the given position.
   ///
-  /// Returns true, and adds any annotations that contain the point to the
-  /// given annotation test result, if this render object or one of its
-  /// descendants absorbs the hit (preventing non-ancestral layers below this
-  /// one from being hit).
-  /// Returns false if the hit can continue to other non-ancestral objects below
-  /// this one.
+  /// It adds any annotations of the given type `T` that contain the point to
+  /// the given layer hit test result.
+  ///
+  /// It returns true if this layer or one of its descendants absorbs the hit
+  /// (preventing non-ancestral layers below this one from being hit).
+  /// Returns false if the hit can continue to other non-ancestral objects
+  /// behind this one.
   bool hitTest<S>(LayerHitTestResult<S> result, { @required Offset regionOffset }) {
     return false;
   }

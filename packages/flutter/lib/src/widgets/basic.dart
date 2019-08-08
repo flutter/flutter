@@ -37,7 +37,6 @@ export 'package:flutter/rendering.dart' show
   FlowPaintingContext,
   FractionalOffsetTween,
   HitTestBehavior,
-  LayerHitTestBehavior,
   LayerLink,
   MainAxisAlignment,
   MainAxisSize,
