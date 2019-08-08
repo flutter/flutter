@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'feedback.dart';
+import 'material.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 import 'tooltip_theme.dart';
@@ -500,16 +501,18 @@ class _TooltipOverlay extends StatelessWidget {
             opacity: animation,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
-              child: Container(
-                decoration: decoration,
-                padding: padding,
-                margin: margin,
-                child: Center(
-                  widthFactor: 1.0,
-                  heightFactor: 1.0,
-                  child: Text(
-                    message,
-                    style: textStyle,
+              child: Material(
+                child: Container(
+                  decoration: decoration,
+                  padding: padding,
+                  margin: margin,
+                  child: Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: Text(
+                      message,
+                      style: textStyle,
+                    ),
                   ),
                 ),
               ),
