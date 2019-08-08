@@ -31,9 +31,9 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
 
-// Half of the horizontal padding value between the countdown time picker's columns.
+// Half of the horizontal padding value between the timer picker's columns.
 const double _kTimerPickerHalfColumnPadding = 2;
-// The horizontal padding between the countdown time picker's number label and its
+// The horizontal padding between the timer picker's number label and its
 // corresponding unit label.
 const double _kTimerPickerLabelPadSize = 4.5;
 
@@ -1002,11 +1002,16 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
 
 // The iOS date picker and timer picker has their width fixed to 320.0 in all
-// modes.
+// modes. The only exception is the hms mode (which doesn't have a native counterpart),
+// with a fixed width of
 //
-// If the maximum width given to the picker is greater than 320.0, the leftmost
-// and rightmost column will be extended equally so that the widths match, and
-// the picker is in the center.
+// For date pickers, if the maximum width given to the picker is greater than
+// 320.0, the leftmost and rightmost column will be extended equally so that the
+// widths match, and the picker is in the center.
+//
+// For timer pickers, if the maximum width given to the picker is greater than
+// its intrinsic width, it will keep its intrinsic size and position itself in the
+// parent using its alignment parameter.
 //
 // If the maximum width given to the picker is smaller than 320.0, the picker's
 // layout will be broken.
@@ -1040,7 +1045,10 @@ enum CupertinoTimerPickerMode {
 ///
 /// There are several modes of the timer picker listed in [CupertinoTimerPickerMode].
 ///
-/// The picker has a fixed size of 320 x 216. Put it
+/// The picker has a fixed size of 320 x 216, in logical pixels, with the exception
+/// of [CupertinoTimerPickerMode.hms], which is 330 x 216. If the parent widget
+/// provides more space than it needs, the picker will position itself according
+/// to its [alignment] property.
 ///
 /// See also:
 ///
@@ -1177,7 +1185,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
   }
 
-  // The picker has to occupy more width than its content, since the separators
+  // The picker has to be wider than its content, since the separators
   // are part of the picker.
   Widget _buildPickerDigitLabel(Text child, EdgeInsetsDirectional padding) {
     return Container(
@@ -1368,30 +1376,34 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     // label on top of it.
 
     List<Widget> columns;
+    double totalWidth;
+
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
+        totalWidth = _kPickerWidth;
         // pad the widget to make it as wide as `_kPickerWidth`.
-        final double paddingValue = math.max(0, _kPickerWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
+        final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
           _buildHourColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
           _buildMinuteColumn(EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
         ];
         break;
       case CupertinoTimerPickerMode.ms:
+        totalWidth = _kPickerWidth;
         // pad the widget to make it as wide as `_kPickerWidth`.
-        final double paddingValue = math.max(0, _kPickerWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
+        final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
           _buildMinuteColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
           _buildSecondColumn(EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
         ];
         break;
       case CupertinoTimerPickerMode.hms:
-        // pad the widget to make it as wide as `_kPickerWidth`.
-        final double paddingValue = math.max(0, _kPickerWidth - 3 * _kTimerPickerColumnIntrinsicWidth - 4 * _kTimerPickerHalfColumnPadding);
+      const double paddingValue = _kTimerPickerHalfColumnPadding * 2;
+        totalWidth = _kTimerPickerColumnIntrinsicWidth * 3 + 4 * _kTimerPickerHalfColumnPadding + paddingValue;
         columns = <Widget>[
-          _buildHourColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
+          _buildHourColumn(const EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
           _buildMinuteColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: _kTimerPickerHalfColumnPadding)),
-          _buildSecondColumn(EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
+          _buildSecondColumn(const EdgeInsetsDirectional.only(start: _kTimerPickerHalfColumnPadding, end: paddingValue / 2))
         ];
         break;
     }
@@ -1406,7 +1418,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         alignment: widget.alignment,
         child: Container(
           color: _kBackgroundColor,
-          width: _kPickerWidth,
+          width: totalWidth,
           height: _kPickerHeight,
           child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
         ),
