@@ -14,8 +14,6 @@ import 'theme.dart';
 
 // Values derived from https://developer.apple.com/design/resources/ and on iOS
 // simulators with "Debug View Hierarchy".
-// The values may not be entirely accurate because the picker provided in the
-// sketch file was a bitmap.
 const double _kItemExtent = 32.0;
 // From the picker's intrinsic content size constraint.
 const double _kPickerWidth = 320.0;
@@ -33,11 +31,13 @@ const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
 
-// Half of the horizontal padding value between the time picker's columns.
+// Half of the horizontal padding value between the countdown time picker's columns.
 const double _kTimerPickerHalfColumnPadding = 2;
-// The horizontal padding between the time picker's picker and its label.
+// The horizontal padding between the countdown time picker's number label and its
+// corresponding unit label.
 const double _kTimerPickerLabelPadSize = 4.5;
 
+// The width of each colmn of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 
 // The total width of the picker's currently selected number.
@@ -1040,7 +1040,7 @@ enum CupertinoTimerPickerMode {
 ///
 /// There are several modes of the timer picker listed in [CupertinoTimerPickerMode].
 ///
-/// Sizes itself to its parent.
+/// The picker has a fixed size of 320 x 216. Put it
 ///
 /// See also:
 ///
@@ -1148,7 +1148,6 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       start: _kTimerPickerNumberLabelWidth
            + _kTimerPickerLabelPadSize
            + pickerPadding.start
-           + 14
     );
 
     return IgnorePointer(
@@ -1159,6 +1158,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           text,
           textScaleFactor: 0.9,
           style: const TextStyle(fontWeight: FontWeight.w600),
+          maxLines: 1,
         ),
       ),
     );
