@@ -94,29 +94,46 @@ class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> wit
     final T currentAnimationValue = _animation.value;
 
     final bool hasStatusListener = _cachedEnd != null || _cachedBegin != null;
-    if (identical(oldWidget.tween, widget.tween)) {
-      if (_cachedBegin != null) {
-        widget.tween.begin = _cachedBegin;
-      }
-      if (_cachedEnd != null) {
-        widget.tween.end = _cachedEnd;
-      }
+    T oldBegin = oldWidget.tween.begin;
+    T oldEnd = oldWidget.tween.end;
+    if (_cachedBegin != null) {
+      oldBegin = oldWidget.tween.begin;
+      oldWidget.tween.begin = _cachedBegin;
+      _cachedBegin = null;
     }
-    _cachedEnd = null;
-    _cachedBegin = null;
+    if (_cachedEnd != null) {
+      oldEnd = oldWidget.tween.end;
+      oldWidget.tween.end = _cachedEnd;
+      _cachedEnd = null;
+    }
 
     final bool tweenChanged = oldWidget.tween != widget.tween;
+    final bool directionChanged = oldWidget.direction != widget.direction;
+    final bool curveChanged = oldWidget.curve != widget.curve;
+    final bool triggerAnimation = tweenChanged || directionChanged;
 
-    if (widget.gapless) {
-      _updateTween(currentAnimationValue);
+    if (triggerAnimation || (curveChanged && widget.gapless && _controller.isAnimating)) {
+      _temporaryDirectionOverride = null;
+      if (widget.gapless) {
+        _updateTween(currentAnimationValue);
+      }
+      if (_tweenIsAnimatable) {
+        _updateDirection();
+      }
+    } else {
+      // Updated Widget doesn't trigger anything, restore tween to what it was.
+      if (oldBegin != null) {
+        _cachedBegin = widget.tween.begin;
+        widget.tween.begin = oldBegin;
+      }
+      if (oldEnd != null) {
+        _cachedEnd = widget.tween.end;
+        widget.tween.end = oldEnd;
+      }
     }
 
-    if (!identical(oldWidget.tween, widget.tween) || oldWidget.curve != widget.curve) {
+    if (!identical(oldWidget.tween, widget.tween) || curveChanged) {
       _updateAnimation();
-    }
-
-    if (_tweenIsAnimatable && (oldWidget.direction != widget.direction || tweenChanged)) {
-      _updateDirection();
     }
 
     final bool shouldHaveStatusListener = _cachedEnd != null || _cachedBegin != null;
@@ -130,17 +147,26 @@ class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> wit
   }
 
   void _resetTweenWhenAnimationIsDone(AnimationStatus status) {
+    bool updateDirection = false;
     switch (status) {
       case AnimationStatus.dismissed:
         if (_cachedEnd != null) {
           widget.tween.end = _cachedEnd;
           _cachedEnd = null;
+          if (_temporaryDirectionOverride != null) {
+            _temporaryDirectionOverride = null;
+            updateDirection = true;
+          }
         }
         break;
       case AnimationStatus.completed:
         if (_cachedBegin != null) {
           widget.tween.begin = _cachedBegin;
           _cachedBegin = null;
+          if (_temporaryDirectionOverride != null) {
+            _temporaryDirectionOverride = null;
+            updateDirection = true;
+          }
         }
         break;
       case AnimationStatus.forward:
@@ -149,27 +175,46 @@ class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> wit
         break;
     }
     if (_cachedEnd == null && _cachedBegin == null) {
+      assert(_temporaryDirectionOverride == null);
       _controller.removeStatusListener(_resetTweenWhenAnimationIsDone);
     }
+    if (updateDirection) {
+      _updateDirection();
+    }
   }
+
+  PlaybackDirection _temporaryDirectionOverride;
 
   void _updateTween(T currentAnimationValue) {
     assert(widget.gapless);
     switch (widget.direction) {
-      case PlaybackDirection.repeatReverse:
-      // Ideally, we would set begin to the currentValue when the animation
-      // is running forward, and end to the currentValue when the animation
-      // is running in reverse. However, since [AnimationController.repeat]
-      // starts a simulation and simulations always run forward,
-      // we cannot differentiate between the two cases. Therefore, we just
-      // fallthrough here to the forward case.
       case PlaybackDirection.repeat:
+        if (widget.tween.begin != currentAnimationValue) {
+          assert(_cachedBegin == null);
+          _cachedBegin = widget.tween.begin;
+          widget.tween.begin = currentAnimationValue;
+          _temporaryDirectionOverride = PlaybackDirection.forward;
+        }
+        break;
       case PlaybackDirection.forward:
         if (widget.tween.begin != currentAnimationValue) {
           assert(_cachedBegin == null);
           _cachedBegin = widget.tween.begin;
           widget.tween.begin = currentAnimationValue;
-          _controller.value = 0.0;
+        }
+        break;
+      case PlaybackDirection.repeatReverse:
+        // Ideally, we would set begin to the currentValue when the animation
+        // is running forward, and end to the currentValue when the animation
+        // is running in reverse. However, since [AnimationController.repeat]
+        // starts a simulation and simulations always run forward,
+        // we cannot differentiate between the two cases. Therefore, we just
+        // fallthrough here to the forward case.
+        if (widget.tween.end != currentAnimationValue) {
+          assert(_cachedEnd == null);
+          _cachedEnd = widget.tween.end;
+          widget.tween.end = currentAnimationValue;
+          _temporaryDirectionOverride = PlaybackDirection.reverse;
         }
         break;
       case PlaybackDirection.reverse:
@@ -177,7 +222,6 @@ class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> wit
           assert(_cachedEnd == null);
           _cachedEnd = widget.tween.end;
           widget.tween.end = currentAnimationValue;
-          _controller.value = 1.0;
         }
         break;
     }
@@ -189,7 +233,7 @@ class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> wit
 
   void _updateDirection() {
     assert(_tweenIsAnimatable);
-    switch (widget.direction) {
+    switch (_temporaryDirectionOverride ?? widget.direction) {
       case PlaybackDirection.forward:
         _controller.value = 0.0;
         _controller.forward();
