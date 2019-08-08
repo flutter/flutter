@@ -200,10 +200,6 @@ final class AccessibilityViewEmbedder {
             @NonNull Rect displayBounds,
             @NonNull AccessibilityNodeInfo resultNode
     ) {
-        Rect boundsInParent = new Rect();
-        originNode.getBoundsInParent(boundsInParent);
-        resultNode.setBoundsInParent(boundsInParent);
-
         Rect boundsInScreen = new Rect();
         originNode.getBoundsInScreen(boundsInScreen);
         boundsInScreen.offset(displayBounds.left, displayBounds.top);
