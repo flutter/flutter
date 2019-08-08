@@ -276,6 +276,7 @@ void main() {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       addTearDown(gesture.removePointer);
       await gesture.moveTo(const Offset(400.0, 0.0));
+      addTearDown(gesture.removePointer);
       await tester.pump();
       await tester.pumpWidget(
         Column(
@@ -424,6 +425,7 @@ void main() {
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
       await gesture.addPointer();
       addTearDown(gesture.removePointer);
       await gesture.moveTo(topLeft - const Offset(1, 1));
@@ -452,6 +454,7 @@ void main() {
     testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
       // Pretend that we have a mouse connected.
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
       await gesture.addPointer();
       addTearDown(gesture.removePointer);
 
@@ -497,6 +500,7 @@ void main() {
 
     testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
       await gesture.addPointer();
       addTearDown(gesture.removePointer);
 
@@ -537,6 +541,7 @@ void main() {
     testWidgets("MouseRegion activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
       final GlobalKey feedbackKey = GlobalKey();
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
       await gesture.addPointer();
       addTearDown(gesture.removePointer);
 
@@ -621,6 +626,24 @@ void main() {
       expect(exit.length, 1);
       expect(exit.single.position, const Offset(400.0, 300.0));
       expect(exit.single.delta, const Offset(0.0, 0.0));
+    });
+
+    testWidgets('detects pointer enter with closure arguments', (WidgetTester tester) async {
+      await tester.pumpWidget(_HoverClientWithClosures());
+      expect(find.text('not hovering'), findsOneWidget);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(gesture.removePointer);
+      await gesture.addPointer();
+      // Move to a position out of MouseRegion
+      await gesture.moveTo(tester.getBottomRight(find.byType(MouseRegion)) + const Offset(10, -10));
+      await tester.pumpAndSettle();
+      expect(find.text('not hovering'), findsOneWidget);
+
+      // Move into MouseRegion
+      await gesture.moveBy(const Offset(-20, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('HOVERING'), findsOneWidget);
     });
   });
 
@@ -710,5 +733,27 @@ class _PaintCallbackObject extends RenderProxyBox {
     if (onPaint != null)
       onPaint();
     super.paint(context, offset);
+  }
+}
+
+class _HoverClientWithClosures extends StatefulWidget {
+  @override
+  _HoverClientWithClosuresState createState() => _HoverClientWithClosuresState();
+}
+
+class _HoverClientWithClosuresState extends State<_HoverClientWithClosures> {
+
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: MouseRegion(
+        onEnter: (PointerEnterEvent _) { setState(() { _hovering = true; }); },
+        onExit: (PointerExitEvent _) { setState(() { _hovering = false; }); },
+        child: Text(_hovering ? 'HOVERING' : 'not hovering'),
+      ),
+    );
   }
 }
