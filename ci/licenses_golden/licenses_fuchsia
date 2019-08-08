@@ -1,4 +1,4 @@
-Signature: edb9be523654fd0233172cf8e15e3b97
+Signature: fd68277d973a8911300fb02d28257a7d
 
 UNUSED LICENSES:
 
@@ -1933,6 +1933,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/modular_config.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/test_harness.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/annotation/annotation.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular/story/story_shell_factory.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net.http/meta.json
