@@ -2576,15 +2576,13 @@ class RenderMouseRegion extends RenderProxyBox {
        _onEnter = onEnter,
        _onHover = onHover,
        _onExit = onExit,
+       _annotationIsActive = false,
        super(child) {
-    if (_onEnter != null || _onHover != null || _onExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onEnter,
-        onHover: _onHover,
-        onExit: _onExit,
-      );
-    }
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
+    );
   }
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
@@ -2613,6 +2611,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
 
   /// Called when a pointer that has not triggered an [onPointerDown] changes
   /// position.
@@ -2626,6 +2628,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
 
   /// Called when a hovering pointer leaves the region for this widget.
   ///
@@ -2639,6 +2645,10 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
   PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
 
   // Object used for annotation of the layer used for hover hit detection.
   MouseTrackerAnnotation _hoverAnnotation;
@@ -2651,45 +2661,22 @@ class RenderMouseRegion extends RenderProxyBox {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    assert(_hoverAnnotation == null || _onEnter != _hoverAnnotation.onEnter || _onHover != _hoverAnnotation.onHover || _onExit != _hoverAnnotation.onExit,
-      "Shouldn't call _updateAnnotations if nothing has changed.");
-    bool changed = false;
-    final bool hadHoverAnnotation = _hoverAnnotation != null;
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-      changed = true;
-    }
-    if (_onEnter != null || _onHover != null || _onExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onEnter,
-        onHover: _onHover,
-        onExit: _onExit,
-      );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-        changed = true;
-      }
-    } else {
-      _hoverAnnotation = null;
-    }
-    if (changed) {
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
+        _onEnter != null ||
+        _onHover != null ||
+        _onExit != null
+      ) &&
+      RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (annotationWasActive != annotationWillBeActive) {
       markNeedsPaint();
-    }
-    final bool hasHoverAnnotation = _hoverAnnotation != null;
-    if (hadHoverAnnotation != hasHoverAnnotation) {
       markNeedsCompositingBitsUpdate();
-    }
-  }
-
-  bool _mouseIsConnected;
-  void _handleMouseTrackerChanged() {
-    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (newState != _mouseIsConnected) {
-      _mouseIsConnected = newState;
-      if (_hoverAnnotation != null) {
-        markNeedsCompositingBitsUpdate();
-        markNeedsPaint();
+      if (annotationWillBeActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       }
+      _annotationIsActive = annotationWillBeActive;
     }
   }
 
@@ -2697,52 +2684,50 @@ class RenderMouseRegion extends RenderProxyBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
-    postActivate();
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    _updateAnnotations();
   }
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach any new annotations.
-  ///
-  /// This is also called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
   /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
   /// the widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void postActivate() {
-    if (_hoverAnnotation != null) {
+    if (_annotationIsActive)
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-    }
   }
 
   /// Detaches the annotation for this render object, if any.
   ///
-  /// This is called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
   /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
   /// widget that provided the callback, and [State.setState] can safely be
   /// called within that callback.
   void preDeactivate() {
-    if (_hoverAnnotation != null) {
+    if (_annotationIsActive)
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
   }
 
   @override
   void detach() {
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
 
-  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
+  bool _annotationIsActive;
 
   @override
-  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hasActiveAnnotation) {
+    if (_annotationIsActive) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,

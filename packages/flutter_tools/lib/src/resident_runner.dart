@@ -540,12 +540,10 @@ abstract class ResidentRunner {
     this.stayResident = true,
     this.hotMode = true,
     this.dillOutputPath,
-  }) {
-    _mainPath = findMainDartFile(target);
-    _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
-    _assetBundle = AssetBundleFactory.instance.createBundle();
+  }) : mainPath = findMainDartFile(target),
+       projectRootPath = projectRootPath ?? fs.currentDirectory.path,
+       packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath),
+       assetBundle = AssetBundleFactory.instance.createBundle() {
     // TODO(jonahwilliams): this is transitionary logic to allow us to support
     // platforms that are not yet using flutter assemble. In the "new world",
     // builds are isolated based on a number of factors. Thus, we cannot assume
@@ -570,18 +568,14 @@ abstract class ResidentRunner {
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
   final String dillOutputPath;
+  final String packagesFilePath;
+  final String projectRootPath;
+  final String mainPath;
+  final AssetBundle assetBundle;
+
   bool _exited = false;
   bool hotMode ;
-  String _packagesFilePath;
-  String get packagesFilePath => _packagesFilePath;
-  String _projectRootPath;
-  String get projectRootPath => _projectRootPath;
-  String _mainPath;
-  String get mainPath => _mainPath;
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
-
-  AssetBundle _assetBundle;
-  AssetBundle get assetBundle => _assetBundle;
 
   bool get isRunningDebug => debuggingOptions.buildInfo.isDebug;
   bool get isRunningProfile => debuggingOptions.buildInfo.isProfile;
