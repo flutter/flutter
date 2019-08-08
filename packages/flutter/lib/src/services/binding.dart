@@ -22,7 +22,7 @@ mixin ServicesBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    initBinaryMessenger();
+    _defaultBinaryMessenger = createBinaryMessenger();
     window
       ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
@@ -37,13 +37,14 @@ mixin ServicesBinding on BindingBase {
   /// This is used to send messages from the application to the platform, and
   /// keeps track of which handlers have been registered on each channel so
   /// it may dispatch incoming messages to the registered handler.
-  BinaryMessenger defaultBinaryMessenger;
+  BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
+  BinaryMessenger _defaultBinaryMessenger;
 
   /// Initializes a default [BinaryMessenger] instance that can be used for
   /// sending platform messages.
   @protected
-  void initBinaryMessenger() {
-    defaultBinaryMessenger = const _DefaultBinaryMessenger._();
+  BinaryMessenger createBinaryMessenger() {
+    return const _DefaultBinaryMessenger._();
   }
 
   /// Adds relevant licenses to the [LicenseRegistry].
