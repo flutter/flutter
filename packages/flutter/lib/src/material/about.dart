@@ -48,6 +48,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.aboutBoxChildren,
+    this.dense,
   }) : super(key: key);
 
   /// The icon to show for this drawer item.
@@ -106,14 +107,23 @@ class AboutListTile extends StatelessWidget {
   /// Defaults to nothing.
   final List<Widget> aboutBoxChildren;
 
+  /// Whether this list tile is part of a vertically dense list.
+  ///
+  /// If this property is null, then its value is based on [ListTileTheme.dense].
+  ///
+  /// Dense list tiles default to a smaller height.
+  final bool dense;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ??
-        Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
+      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
+        applicationName ?? _defaultApplicationName(context),
+      )),
+      dense: dense,
       onTap: () {
         showAboutDialog(
           context: context,
