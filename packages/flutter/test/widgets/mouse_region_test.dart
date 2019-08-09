@@ -689,6 +689,159 @@ void main() {
       await gesture.removePointer();
     });
   });
+
+  group('MouseRegion respects opacity:', () {
+
+    // A widget that contains 3 MouseRegions:
+    //                           y
+    //   ——————————————————————  0
+    //   | ———————————     A  |  20
+    //   | | B       |        |
+    //   | |     ———————————  |  50
+    //   | |     |       C |  |
+    //   | ——————|         |  |  100
+    //   |       |         |  |
+    //   |       ———————————  |  130
+    //   ——————————————————————  150
+    // x 0 20   50  100   130 150
+    Widget tripleRegions({bool opaqueC, void Function(String) addLog}) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: MouseRegion(
+            onEnter: (PointerEnterEvent e) { addLog('enterA'); },
+            onExit: (PointerExitEvent e) { addLog('exitA'); },
+            child: SizedBox(
+              width: 150,
+              height: 150,
+              child: Stack(
+                children: <Widget>[
+                  Positioned(
+                    left: 20,
+                    top: 20,
+                    width: 80,
+                    height: 80,
+                    child: MouseRegion(
+                      onEnter: (PointerEnterEvent e) { addLog('enterB'); },
+                      onExit: (PointerExitEvent e) { addLog('exitB'); },
+                    ),
+                  ),
+                  Positioned(
+                    left: 50,
+                    top: 50,
+                    width: 80,
+                    height: 80,
+                    child: MouseRegion(
+                      opaque: opaqueC,
+                      onEnter: (PointerEnterEvent e) { addLog('enterC'); },
+                      onExit: (PointerExitEvent e) { addLog('exitC'); },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('a transparent one should allow MouseRegions behind it to receive pointers', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      await tester.pumpWidget(tripleRegions(
+        opaqueC: false,
+        addLog: (String log) => logs.add(log),
+      ));
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
+
+      // Move to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterA', 'enterC', 'enterB']);
+      logs.clear();
+
+      // Move to the B only area
+      await gesture.moveTo(const Offset(25, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['exitC']);
+      logs.clear();
+
+      // Move back to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterC']);
+      logs.clear();
+
+      // Move to the C only area
+      await gesture.moveTo(const Offset(125, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['exitB']);
+      logs.clear();
+
+      // Move back to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterB']);
+      logs.clear();
+
+      // Move out
+      await gesture.moveTo(const Offset(160, 160));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['exitA', 'exitB', 'exitC']);
+    });
+
+    testWidgets('an opaque one should prevent MouseRegions behind it receiving pointers', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      await tester.pumpWidget(tripleRegions(
+        opaqueC: true,
+        addLog: (String log) => logs.add(log),
+      ));
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
+
+      // Move to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterA', 'enterC']);
+      logs.clear();
+
+      // Move to the B only area
+      await gesture.moveTo(const Offset(25, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterB', 'exitC']);
+      logs.clear();
+
+      // Move back to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterC', 'exitB']);
+      logs.clear();
+
+      // Move to the C only area
+      await gesture.moveTo(const Offset(125, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>[]);
+      logs.clear();
+
+      // Move back to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>[]);
+      logs.clear();
+
+      // Move out
+      await gesture.moveTo(const Offset(160, 160));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['exitA', 'exitC']);
+    });
+  });
 }
 
 // This widget allows you to send a callback that is called during `onPaint.
