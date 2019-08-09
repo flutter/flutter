@@ -93,8 +93,9 @@ class SimControl {
       return json.decode(results.stdout)[section.name];
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
-      // One known message is "Install Started" which seems to be retunred when
-      // the binary needs to download additional artifacts.
+      // One known message is "Install Started" isn't valid JSON but is
+      // returned sometimes.
+      printError('simctl returned non-JSON response: ${results.stdout}');
       return <String, dynamic>{};
     }
   }
