@@ -42,6 +42,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     Directory projectDirectory,
     String testOutputDir,
     bool release = false,
+    @required List<String> targets,
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
     projectDirectory.childDirectory('.dart_tool').createSync();
@@ -94,6 +95,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         buildOptions,
         release,
         buildDirs,
+        targets,
       );
       return result.status == core.BuildStatus.success;
     } on core.BuildConfigChangedException {
@@ -103,6 +105,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         buildOptions,
         release,
         buildDirs,
+        targets,
       );
       return result.status == core.BuildStatus.success;
     } on core.BuildScriptChangedException {
@@ -112,6 +115,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         buildOptions,
         release,
         buildDirs,
+        targets,
       );
       return result.status == core.BuildStatus.success;
     }
@@ -135,7 +139,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     return result.status == core.BuildStatus.success;
   }
 
-  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs) async {
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment,
+      BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs, List<String> targets) async {
     _builder = await BuildImpl.create(
       buildOptions,
       buildEnvironment,
@@ -147,9 +152,11 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         'flutter_tools:entrypoint': <String, dynamic>{
           'release': release,
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
+          'targets': targets?.join(',')
         },
         'flutter_tools:test_entrypoint': <String, dynamic>{
           'release': release,
+          'targets': targets?.join(',')
         },
       },
       isReleaseBuild: false,

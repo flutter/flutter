@@ -71,7 +71,8 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:test_bootstrap',
     <BuilderFactory>[
       (BuilderOptions options) => const DebugTestBuilder(),
-      (BuilderOptions options) => const FlutterWebTestBootstrapBuilder(),
+      (BuilderOptions options) => FlutterWebTestBootstrapBuilder(
+          options.config['targets']?.split(',') ?? const <String>[]),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -142,6 +143,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
           options.config['release'] ??  false,
           options.config['flutterWebSdk'],
+          options.config['targets']?.split(',') ?? const <String>[],
       ),
     ],
     core.toRoot(),
@@ -200,10 +202,11 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.release, this.flutterWebSdk);
+  const FlutterWebEntrypointBuilder(this.release, this.flutterWebSdk, this.targets);
 
   final bool release;
   final String flutterWebSdk;
+  final List<String> targets;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -218,6 +221,9 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    if (!targets.contains(buildStep.inputId.path)) {
+      return;
+    }
     if (release) {
       await bootstrapDart2Js(buildStep, flutterWebSdk);
     } else {
@@ -228,7 +234,9 @@ class FlutterWebEntrypointBuilder implements Builder {
 
 /// Bootstraps the test entrypoint.
 class FlutterWebTestBootstrapBuilder implements Builder {
-  const FlutterWebTestBootstrapBuilder();
+  const FlutterWebTestBootstrapBuilder(this.targets);
+
+  final List<String> targets;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -244,6 +252,9 @@ class FlutterWebTestBootstrapBuilder implements Builder {
     final String assetPath = id.pathSegments.first == 'lib'
         ? path.url.join('packages', id.package, id.path)
         : id.path;
+    if (!targets.contains(id.path)) {
+      return;
+    }
     final Metadata metadata = parseMetadata(
         assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
 
