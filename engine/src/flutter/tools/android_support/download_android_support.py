@@ -48,8 +48,8 @@ def main():
   with open (os.path.join(THIS_DIR, 'files.json')) as f:
     files = json.load(f)
 
-  for file, url in files.items():
-    getFile(url, file)
+  for entry in files:
+    getFile(entry['url'], entry['out_file_name'])
 
 if __name__ == '__main__':
   sys.exit(main())

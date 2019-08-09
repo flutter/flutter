@@ -1,10 +1,42 @@
-{
-  "android_arch_lifecycle_common.jar": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/common/1.1.1/common-1.1.1.jar",
-  "android_arch_lifecycle_common_java8.jar": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/common-java8/1.1.1/common-java8-1.1.1.jar",
-  "android_arch_lifecycle_runtime.jar": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/runtime/1.1.1/runtime-1.1.1.aar",
-  "android_arch_lifecycle_viewmodel.jar": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/viewmodel/1.1.1/viewmodel-1.1.1.aar",
-  "android_support_fragment.jar": "https://dl.google.com/dl/android/maven2/com/android/support/support-fragment/28.0.0/support-fragment-28.0.0.aar",
-  "android_support_v13.jar": "https://dl.google.com/dl/android/maven2/com/android/support/support-v13/28.0.0/support-v13-28.0.0.aar",
-  "android_support_annotations.jar": "https://dl.google.com/dl/android/maven2/com/android/support/support-annotations/28.0.0/support-annotations-28.0.0.jar",
-  "android_support_compat.jar": "https://dl.google.com/dl/android/maven2/com/android/support/support-compat/28.0.0/support-compat-28.0.0.aar"
-}
+[
+  {
+    "url": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/common/1.1.1/common-1.1.1.jar",
+    "out_file_name": "android_arch_lifecycle_common.jar",
+    "maven_dependency": "android.arch.lifecycle:common:1.1.1"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/common-java8/1.1.1/common-java8-1.1.1.jar",
+    "out_file_name": "android_arch_lifecycle_common_java8.jar",
+    "maven_dependency": "android.arch.lifecycle:common-java8:1.1.1"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/runtime/1.1.1/runtime-1.1.1.aar",
+    "out_file_name": "android_arch_lifecycle_runtime.jar",
+    "maven_dependency": "android.arch.lifecycle:runtime:1.1.1"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/android/arch/lifecycle/viewmodel/1.1.1/viewmodel-1.1.1.aar",
+    "out_file_name": "android_arch_lifecycle_viewmodel.jar",
+    "maven_dependency": "android.arch.lifecycle:viewmodel:1.1.1"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/com/android/support/support-fragment/28.0.0/support-fragment-28.0.0.aar",
+    "out_file_name": "android_support_fragment.jar",
+    "maven_dependency": "com.android.support:support-fragment:28.0.0"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/com/android/support/support-v13/28.0.0/support-v13-28.0.0.aar",
+    "out_file_name": "android_support_v13.jar",
+    "maven_dependency": "com.android.support:support-v13:28.0.0"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/com/android/support/support-annotations/28.0.0/support-annotations-28.0.0.jar",
+    "out_file_name": "android_support_annotations.jar",
+    "maven_dependency": "com.android.support:support-annotations:28.0.0"
+  },
+  {
+    "url": "https://dl.google.com/dl/android/maven2/com/android/support/support-compat/28.0.0/support-compat-28.0.0.aar",
+    "out_file_name": "android_support_compat.jar",
+    "maven_dependency": "com.android.support:support-compat:28.0.0"
+  }
+]
