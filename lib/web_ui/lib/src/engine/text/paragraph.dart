@@ -707,7 +707,7 @@ class EngineParagraphBuilder implements ui.ParagraphBuilder {
     double baselineOffset,
     ui.TextBaseline baseline,
   }) {
-    // TODO(garyq): Implement stub_ui version of this.
+    // TODO(garyq): Implement web_ui version of this.
     throw UnimplementedError();
   }
 

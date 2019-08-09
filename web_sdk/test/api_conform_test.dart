@@ -10,7 +10,7 @@ void main() {
   // These files just contain imports to the part files;
   final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
-  final CompilationUnit webUnit = parseDartFile('lib/stub_ui/lib/ui.dart',
+  final CompilationUnit webUnit = parseDartFile('lib/web_ui/lib/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
   final Map<String, ClassDeclaration> uiClasses = <String, ClassDeclaration>{};
   final Map<String, ClassDeclaration> webClasses = <String, ClassDeclaration>{};
@@ -18,7 +18,7 @@ void main() {
   // Gather all public classes from each library. For now we are skiping
   // other top level members.
   _collectPublicClasses(uiUnit, uiClasses, 'lib/ui/');
-  _collectPublicClasses(webUnit, webClasses, 'lib/stub_ui/lib/');
+  _collectPublicClasses(webUnit, webClasses, 'lib/web_ui/lib/');
 
   if (uiClasses.isEmpty || webClasses.isEmpty) {
     print('Warning: did not resolve any classes.');
@@ -34,7 +34,7 @@ void main() {
     if (webClass == null) {
       failed = true;
       print('Warning: lib/ui/ui.dart contained public class $className, but '
-          'this was missing from lib/stub_ui/ui.dart.');
+          'this was missing from lib/web_ui/ui.dart.');
       continue;
     }
     // Next will check that the public methods exposed in each library are
@@ -58,7 +58,7 @@ void main() {
       if (webConstructor == null) {
         failed = true;
         print(
-          'Warning: lib/ui/ui.dart $className.$name is missing from lib/stub_ui/ui.dart.',
+          'Warning: lib/ui/ui.dart $className.$name is missing from lib/web_ui/ui.dart.',
         );
         continue;
       }
@@ -68,7 +68,7 @@ void main() {
         failed = true;
         print(
             'Warning: lib/ui/ui.dart $className.$name has a different parameter '
-            'length than in lib/stub_ui/ui.dart.');
+            'length than in lib/web_ui/ui.dart.');
       }
 
       for (int i = 0;
@@ -88,17 +88,17 @@ void main() {
           if (webParam.identifier.name != uiParam.identifier.name) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                ' ${uiParam.identifier.name} has a different name in lib/stub_ui/ui.dart.');
+                ' ${uiParam.identifier.name} has a different name in lib/web_ui/ui.dart.');
           }
           if (uiParam.isPositional != webParam.isPositional) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier.name} is positional, but not in lib/stub_ui/ui.dart.');
+                '${uiParam.identifier.name} is positional, but not in lib/web_ui/ui.dart.');
           }
           if (uiParam.isNamed != webParam.isNamed) {
             failed = true;
             print('Warning: lib/ui/ui.dart $className.$name parameter $i'
-                '${uiParam.identifier.name} is named, but not in lib/stub_ui/ui.dart.');
+                '${uiParam.identifier.name} is named, but not in lib/web_ui/ui.dart.');
           }
         }
       }
@@ -110,7 +110,7 @@ void main() {
       if (webMethod == null) {
         failed = true;
         print(
-          'Warning: lib/ui/ui.dart $className.$methodName is missing from lib/stub_ui/ui.dart.',
+          'Warning: lib/ui/ui.dart $className.$methodName is missing from lib/web_ui/ui.dart.',
         );
         continue;
       }
@@ -122,7 +122,7 @@ void main() {
         failed = true;
         print(
             'Warning: lib/ui/ui.dart $className.$methodName has a different parameter '
-            'length than in lib/stub_ui/ui.dart.');
+            'length than in lib/web_ui/ui.dart.');
       }
       // Technically you could re-order named parameters and still be valid,
       // but we enforce that they are identical.
@@ -135,17 +135,17 @@ void main() {
         if (webParam.identifier.name != uiParam.identifier.name) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              ' ${uiParam.identifier.name} has a different name in lib/stub_ui/ui.dart.');
+              ' ${uiParam.identifier.name} has a different name in lib/web_ui/ui.dart.');
         }
         if (uiParam.isPositional != webParam.isPositional) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier.name} is positional, but not in lib/stub_ui/ui.dart.');
+              '${uiParam.identifier.name} is positional, but not in lib/web_ui/ui.dart.');
         }
         if (uiParam.isNamed != webParam.isNamed) {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName parameter $i'
-              '${uiParam.identifier.name} is named, but not in lib/stub_ui/ui.dart.');
+              '${uiParam.identifier.name} is named, but not in lib/web_ui/ui.dart.');
         }
       }
       // check return type.
@@ -154,7 +154,7 @@ void main() {
         if (webMethod.returnType?.toString() != 'dynamic') {
           failed = true;
           print('Warning: lib/ui/ui.dart $className.$methodName return type'
-              '${uiMethod.returnType?.toString()} is not the same as in lib/stub_ui/ui.dart.');
+              '${uiMethod.returnType?.toString()} is not the same as in lib/web_ui/ui.dart.');
         }
       }
     }
