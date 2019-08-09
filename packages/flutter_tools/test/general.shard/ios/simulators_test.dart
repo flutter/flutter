@@ -390,8 +390,9 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(any))
-          .thenReturn(ProcessResult(mockPid, 0, validSimControlOutput, ''));
+      when(mockProcessManager.run(any)).thenAnswer((Invocation _) async {
+        return ProcessResult(mockPid, 0, validSimControlOutput, '');
+      });
 
       simControl = SimControl();
     });
@@ -422,6 +423,17 @@ void main() {
       expect(tv.name, 'Apple TV');
       expect(tv.udid, 'TEST-TV-UDID');
       expect(tv.isBooted, isFalse);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      SimControl: () => simControl,
+    });
+
+    testUsingContext('getDevices handles bad simctl output', () async {
+      when(mockProcessManager.run(any))
+          .thenAnswer((Invocation _) async => ProcessResult(mockPid, 0, 'Install Started', ''));
+      final List<SimDevice> devices = await simControl.getDevices();
+
+      expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
