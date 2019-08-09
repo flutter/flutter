@@ -403,8 +403,8 @@ abstract class CachedArtifact {
       } on FileSystemException catch (err) {
         printError(err.toString());
         throwToolExit(
-          'Failed to create directory for flutter cache. Flutter may be missing '
-          'permissions in its cache directory.'
+          'Failed to create directory for flutter cache at ${location.path}. '
+          'Flutter may be missing permissions in its cache directory.'
         );
       }
     }
