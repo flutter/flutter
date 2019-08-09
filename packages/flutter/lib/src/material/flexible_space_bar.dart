@@ -46,6 +46,7 @@ class FlexibleSpaceBar extends StatefulWidget {
     Key key,
     this.title,
     this.background,
+    this.expandedScale = 1.5,
     this.centerTitle,
     this.titlePadding,
     this.collapseMode = CollapseMode.parallax,
@@ -61,6 +62,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget background;
+
+  /// Set the maximum scale value of the title.
+  ///
+  /// By default this property is 1.5.
+  final double expandedScale;
 
   /// Whether the title should be centered.
   ///
@@ -225,7 +231,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             start: effectiveCenterTitle ? 0.0 : 72.0,
             bottom: 16.0,
           );
-        final double scaleValue = Tween<double>(begin: 1.5, end: 1.0).transform(t);
+        final double scaleValue = Tween<double>(begin: widget.expandedScale, end: 1.0).transform(t);
         final Matrix4 scaleTransform = Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
         final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
