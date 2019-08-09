@@ -6,6 +6,7 @@ import("//build/config/android/config.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/shell/version/version.gni")
 
 shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
@@ -327,6 +328,57 @@ action("android") {
   deps = [
     ":flutter_shell_java",
     ":flutter_shell_native",
+    ":pom_embedding",
+    ":pom_libflutter",
+  ]
+}
+
+action("pom_libflutter") {
+  script = "$flutter_root/tools/android_support/generate_pom_file.py"
+
+  inputs = [
+    "$flutter_root/tools/android_support/files.json",
+  ]
+
+  artifact_id =
+      string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+
+  outputs = [
+    "$root_build_dir/$artifact_id-1.0.0-$engine_version.pom",
+  ]
+
+  args = [
+    "--destination",
+    rebase_path(root_build_dir),
+    "--engine-version",
+    engine_version,
+    "--engine-artifact-id",
+    artifact_id,
+  ]
+}
+
+action("pom_embedding") {
+  script = "$flutter_root/tools/android_support/generate_pom_file.py"
+
+  inputs = [
+    "$flutter_root/tools/android_support/files.json",
+  ]
+
+  artifact_id = "flutter_embedding_$flutter_runtime_mode"
+
+  outputs = [
+    "$root_build_dir/$artifact_id-1.0.0-$engine_version.pom",
+  ]
+
+  args = [
+    "--destination",
+    rebase_path(root_build_dir),
+    "--engine-version",
+    engine_version,
+    "--engine-artifact-id",
+    artifact_id,
+    "--include-embedding-dependencies",
+    "true",
   ]
 }
 
