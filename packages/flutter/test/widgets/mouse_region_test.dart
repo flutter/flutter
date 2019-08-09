@@ -705,6 +705,19 @@ void main() {
     //   ——————————————————————  150
     // x 0 20   50  100   130 150
     Widget tripleRegions({bool opaqueC, void Function(String) addLog}) {
+      // Same as MouseRegion, but when opaque is null, use the default value.
+      Widget MouseRegionWithOptionalOpaque({
+        void Function(PointerEnterEvent e) onEnter,
+        void Function(PointerExitEvent e) onExit,
+        Widget child,
+        bool opaque,
+      }) {
+        if (opaque == null) {
+          return MouseRegion(onEnter: onEnter, onExit: onExit, child: child);
+        }
+        return MouseRegion(onEnter: onEnter, onExit: onExit, child: child, opaque: opaque);
+      }
+
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Align(
@@ -732,7 +745,7 @@ void main() {
                     top: 50,
                     width: 80,
                     height: 80,
-                    child: MouseRegion(
+                    child: MouseRegionWithOptionalOpaque(
                       opaque: opaqueC,
                       onEnter: (PointerEnterEvent e) { addLog('enterC'); },
                       onExit: (PointerExitEvent e) { addLog('exitC'); },
@@ -834,6 +847,30 @@ void main() {
       await gesture.moveTo(const Offset(75, 75));
       await tester.pumpAndSettle();
       expect(logs, <String>[]);
+      logs.clear();
+
+      // Move out
+      await gesture.moveTo(const Offset(160, 160));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['exitA', 'exitC']);
+    });
+
+    testWidgets('opaque should default to true', (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+      await tester.pumpWidget(tripleRegions(
+        opaqueC: null,
+        addLog: (String log) => logs.add(log),
+      ));
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      addTearDown(gesture.removePointer);
+      await tester.pumpAndSettle();
+
+      // Move to the overlapping area
+      await gesture.moveTo(const Offset(75, 75));
+      await tester.pumpAndSettle();
+      expect(logs, <String>['enterA', 'enterC']);
       logs.clear();
 
       // Move out
