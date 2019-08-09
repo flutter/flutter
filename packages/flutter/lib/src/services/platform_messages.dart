@@ -31,6 +31,9 @@ import 'platform_channel.dart';
 class BinaryMessages {
   BinaryMessages._();
 
+  /// The messenger which sends the platform messages, not null.
+  static final BinaryMessenger _binaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
+
   /// Calls the handler registered for the given channel.
   ///
   /// Typically called by [ServicesBinding] to handle platform messages received
@@ -43,7 +46,7 @@ class BinaryMessages {
     ByteData data,
     ui.PlatformMessageResponseCallback callback,
   ) {
-    return defaultBinaryMessenger.handlePlatformMessage(channel, data, callback);
+    return _binaryMessenger.handlePlatformMessage(channel, data, callback);
   }
 
   /// Send a binary message to the platform plugins on the given channel.
@@ -52,7 +55,7 @@ class BinaryMessages {
   /// binary form.
   @Deprecated('Use defaultBinaryMessenger.send instead.')
   static Future<ByteData> send(String channel, ByteData message) {
-    return defaultBinaryMessenger.send(channel, message);
+    return _binaryMessenger.send(channel, message);
   }
 
   /// Set a callback for receiving messages from the platform plugins on the
@@ -65,7 +68,7 @@ class BinaryMessages {
   /// The handler's return value, if non-null, is sent as a response, unencoded.
   @Deprecated('Use defaultBinaryMessenger.setMessageHandler instead.')
   static void setMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
-    defaultBinaryMessenger.setMessageHandler(channel, handler);
+    _binaryMessenger.setMessageHandler(channel, handler);
   }
 
   /// Set a mock callback for intercepting messages from the `send*` methods on
@@ -81,6 +84,6 @@ class BinaryMessages {
   /// sent to platform plugins.
   @Deprecated('Use defaultBinaryMessenger.setMockMessageHandler instead.')
   static void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
-    defaultBinaryMessenger.setMockMessageHandler(channel, handler);
+    _binaryMessenger.setMockMessageHandler(channel, handler);
   }
 }
