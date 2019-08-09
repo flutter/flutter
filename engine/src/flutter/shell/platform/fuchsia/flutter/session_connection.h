@@ -77,6 +77,11 @@ class SessionConnection final {
   // convention, the Scenic side will also contain its own trace id that
   // begins at 0, and is incremented each |Session::Present| call.
   uint64_t next_present_trace_id_ = 0;
+  uint64_t next_present_session_trace_id_ = 0;
+  uint64_t processed_present_session_trace_id_ = 0;
+
+  bool presentation_callback_pending_ = false;
+  bool present_session_pending_ = false;
 
   void EnqueueClearOps();
 
