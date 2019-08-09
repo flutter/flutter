@@ -706,7 +706,7 @@ void main() {
     // x 0 20   50  100   130 150
     Widget tripleRegions({bool opaqueC, void Function(String) addLog}) {
       // Same as MouseRegion, but when opaque is null, use the default value.
-      Widget MouseRegionWithOptionalOpaque({
+      Widget mouseRegionWithOptionalOpaque({
         void Function(PointerEnterEvent e) onEnter,
         void Function(PointerExitEvent e) onExit,
         Widget child,
@@ -745,7 +745,7 @@ void main() {
                     top: 50,
                     width: 80,
                     height: 80,
-                    child: MouseRegionWithOptionalOpaque(
+                    child: mouseRegionWithOptionalOpaque(
                       opaque: opaqueC,
                       onEnter: (PointerEnterEvent e) { addLog('enterC'); },
                       onExit: (PointerExitEvent e) { addLog('exitC'); },
