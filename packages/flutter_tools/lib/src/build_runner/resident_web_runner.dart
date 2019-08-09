@@ -8,19 +8,40 @@ import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
-import 'application_package.dart';
-import 'base/common.dart';
-import 'base/file_system.dart';
-import 'base/logger.dart';
-import 'base/terminal.dart';
-import 'base/utils.dart';
-import 'build_info.dart';
-import 'convert.dart';
-import 'device.dart';
-import 'globals.dart';
-import 'project.dart';
-import 'resident_runner.dart';
-import 'web/web_fs.dart';
+import '../application_package.dart';
+import '../base/common.dart';
+import '../base/file_system.dart';
+import '../base/logger.dart';
+import '../base/terminal.dart';
+import '../base/utils.dart';
+import '../build_info.dart';
+import '../convert.dart';
+import '../device.dart';
+import '../globals.dart';
+import '../project.dart';
+import '../resident_runner.dart';
+import '../web/web_runner.dart';
+import 'web_fs.dart';
+
+/// Injectable factory to create a [ResidentWebRunner].
+class DwdsWebRunnerFactory extends WebRunnerFactory {
+  @override
+  ResidentRunner createWebRunner(
+    Device device, {
+    String target,
+    @required FlutterProject flutterProject,
+    @required bool ipv6,
+    @required DebuggingOptions debuggingOptions
+  }) {
+    return ResidentWebRunner(
+      device,
+      target: target,
+      flutterProject: flutterProject,
+      debuggingOptions: debuggingOptions,
+      ipv6: ipv6,
+    );
+  }
+}
 
 // TODO(jonahwilliams): remove this constant when the error message is removed.
 // The web engine is currently spamming this message on certain pages. Filter it out
