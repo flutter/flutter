@@ -5,10 +5,12 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
@@ -176,6 +178,32 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
   final RenderBox box1 = boxes[1];
   expect(box0.localToGlobal(Offset.zero), equals(box1.localToGlobal(Offset.zero)));
   expect(box0.size, equals(box1.size));
+}
+
+void verifyPaintedShadow(Finder customPaint, int elevation){
+  const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
+
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index)=> kElevationToShadow[elevation][index]);
+  final List<RRect> rrects = List<RRect>.generate(
+    3, 
+    (int index){
+      return RRect.fromRectAndRadius(
+        originalRectangle.shift(
+          boxShadows[index].offset
+        ).inflate(boxShadows[index].spreadRadius),
+        const Radius.circular(2.0),
+      );
+    },
+  );
+
+  expect(
+    customPaint,
+    paints
+      ..save()
+      ..rrect(rrect: rrects[0], color: boxShadows[0].color, hasMaskFilter: true)
+      ..rrect(rrect: rrects[1], color: boxShadows[1].color, hasMaskFilter: true)
+      ..rrect(rrect: rrects[2], color: boxShadows[2].color, hasMaskFilter: true),
+  );
 }
 
 bool sameGeometry(RenderBox box1, RenderBox box2) {
@@ -1540,5 +1568,63 @@ void main() {
 
     final RichText disabledRichText = tester.widget<RichText>(_iconRichText(iconKey));
     expect(disabledRichText.text.style.color, Colors.orange);
+  });
+
+  testWidgets('Dropdown form field - default elevation', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+    debugDisableShadows = false;
+    await tester.pumpWidget(buildFormFrame(
+      buttonKey: buttonKey,
+      items: menuItems,
+    ));
+    await tester.tap(find.byKey(buttonKey));
+    await tester.pumpAndSettle();
+
+    final Finder customPaint = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
+
+    // Verifying whether or not default elevation(i.e. 8) paints desired shadow
+    verifyPaintedShadow(customPaint, 8);
+    debugDisableShadows = true;
+  });
+
+  testWidgets('Dropdown form field - custom elevation', (WidgetTester tester) async {
+    debugDisableShadows = false;
+    final Key buttonKeyOne = UniqueKey();
+    final Key buttonKeyTwo = UniqueKey();
+
+    await tester.pumpWidget(buildFormFrame(
+      buttonKey: buttonKeyOne,
+      items: menuItems,
+      elevation: 16,
+    ));
+    await tester.tap(find.byKey(buttonKeyOne));
+    await tester.pumpAndSettle();
+
+    final Finder customPaintOne = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
+
+    verifyPaintedShadow(customPaintOne, 16);
+    
+    await tester.tap(find.text('one').last);
+    await tester.pumpWidget(buildFormFrame(
+      buttonKey: buttonKeyTwo,
+      items: menuItems,
+      elevation: 24,
+    ));
+    await tester.tap(find.byKey(buttonKeyTwo));
+    await tester.pumpAndSettle();
+
+    final Finder customPaintTwo = find.ancestor(
+      of: find.text('one').last,
+      matching: find.byType(CustomPaint),
+    ).last;
+
+    verifyPaintedShadow(customPaintTwo, 24);
+    debugDisableShadows = true;
   });
 }
