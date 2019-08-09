@@ -125,7 +125,6 @@ class PathPointsMatcher extends Matcher {
 
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
