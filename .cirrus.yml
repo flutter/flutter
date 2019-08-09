@@ -96,6 +96,7 @@ task:
         memory: 12G
     # all of the tests except the ones in test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-linux
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -106,6 +107,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tool_tests_create-linux
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -117,6 +119,7 @@ task:
         memory: 12G
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-linux
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -264,6 +267,7 @@ task:
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-windows
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -271,12 +275,14 @@ task:
         SHARD_INDEX: 1
     # all of the tests in test/commands/create_test
     - name: tool_tests_create-windows
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
         SUBSHARD: create
     # all of the tests in test/integration for packages/flutter_tools
     - name: tool_tests_integration-windows
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -438,6 +444,7 @@ task:
   matrix:
     # all of the tests except test/integration and test/commands/create_test for packages/flutter_tools
     - name: tool_tests-macos
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
@@ -445,6 +452,7 @@ task:
         SHARD_INDEX: 1
     # all of the tests in test/commands/create_test
     - name: tool_tests_create-macos
+      skip: "!changesInclude('packages/flutter_tools/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
