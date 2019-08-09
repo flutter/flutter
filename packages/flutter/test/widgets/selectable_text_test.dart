@@ -122,7 +122,6 @@ double getOpacity(WidgetTester tester, Finder finder) {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
   final MockClipboard mockClipboard = MockClipboard();
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
@@ -1248,7 +1247,7 @@ void main() {
   });
 
   void sendFakeKeyEvent(Map<String, dynamic> data) {
-    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+    defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.keyEvent.name,
       SystemChannels.keyEvent.codec.encodeMessage(data),
           (ByteData data) { },
