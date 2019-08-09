@@ -1065,7 +1065,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         debugPrint('');
       }
       return false;
-    }(),'A Timer is still pending even after the widget tree was disposed.');
+    }(), 'A Timer is still pending even after the widget tree was disposed.');
 
     assert(_currentFakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }

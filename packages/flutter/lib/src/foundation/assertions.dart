@@ -740,7 +740,8 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 /// Dump the stack to the console using [debugPrint] and
 /// [FlutterError.defaultStackFilter].
 ///
-/// If `stackTrace` is null, dumps the current stack using [StackTrace.current].
+/// If the `stackTrace` parameter is null, the [StackTrace.current] is used to
+/// obtain the stack.
 ///
 /// The `maxFrames` argument can be given to limit the stack to the given number
 /// of lines before filtering is applied. By default, all stack lines are
