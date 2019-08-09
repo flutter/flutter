@@ -359,7 +359,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _settle(DragEndDetails details) {
-    if (_controller.isDismissed)
+    if (_controller.isDismissed || _controller.isCompleted)
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;

@@ -209,7 +209,7 @@ void main() {
 
     expect(isDrawerOpenCount, 0);
     expect(isDrawerCloseCount, 0);
-    // Fully drag to the right.
+    // Fully drags to the right.
     TestGesture gesture = await tester.startGesture(const Offset(10.0, 200.0));
     await tester.pump();
     expect(isDrawerOpenCount, 0);
@@ -227,9 +227,12 @@ void main() {
     expect(isDrawerOpenCount, 1);
     expect(isDrawerCloseCount, 0);
     await gesture.up();
-    await tester.pump();
+    // Makes sure animation settling does not cause another callback.
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
 
-    // Fully drag it back.
+    // Fully drags it back.
     gesture = await tester.startGesture(const Offset(400.0, 200.0));
     await tester.pump();
     expect(isDrawerOpenCount, 1);
@@ -253,7 +256,7 @@ void main() {
     expect(isDrawerOpenCount, 1);
     expect(isDrawerCloseCount, 1);
 
-    // Slightly drag to the right should close upon release.
+    // Slightly drags to the right should close upon release.
     gesture = await tester.startGesture(const Offset(10.0, 200.0));
     await tester.pump();
     expect(isDrawerOpenCount, 1);
