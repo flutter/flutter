@@ -429,7 +429,7 @@ void main() {
     bool completed;
 
     completed = false;
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -448,12 +448,13 @@ void main() {
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
     expect(data, isFalse);
     expect(completed, isTrue);
-    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
+    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
-    expect(binding.extensions.containsKey('exit'), isTrue);
+    // Not expecting extension to be available for web platform.
+    expect(binding.extensions.containsKey('exit'), !isBrowser);
   });
 
   test('Service extensions - platformOverride', () async {
@@ -671,5 +672,5 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  });
+  }, skip: isBrowser);
 }

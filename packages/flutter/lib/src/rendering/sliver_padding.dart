@@ -328,12 +328,12 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     super.debugPaint(context, offset);
     assert(() {
       if (debugPaintSizeEnabled) {
-        final Size parentSize = getAbsoluteSizeRelativeToOrigin();
+        final Size parentSize = getAbsoluteSize();
         final Rect outerRect = offset & parentSize;
         Size childSize;
         Rect innerRect;
         if (child != null) {
-          childSize = child.getAbsoluteSizeRelativeToOrigin();
+          childSize = child.getAbsoluteSize();
           final SliverPhysicalParentData childParentData = child.parentData;
           innerRect = (offset + childParentData.paintOffset) & childSize;
           assert(innerRect.top >= outerRect.top);

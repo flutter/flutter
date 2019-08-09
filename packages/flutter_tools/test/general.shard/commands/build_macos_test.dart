@@ -97,6 +97,7 @@ void main() {
       '-derivedDataPath', flutterBuildDir.absolute.path,
       'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'COMPILER_INDEX_STORE_ENABLE=NO',
     ])).thenAnswer((Invocation invocation) async {
       fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
         ..createSync(recursive: true)

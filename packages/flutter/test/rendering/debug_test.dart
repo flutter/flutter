@@ -124,4 +124,70 @@ void main() {
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
     debugPaintSizeEnabled = false;
   });
+
+  test('debugPaintPadding from render objects with inverted direction vertical', () {
+    debugPaintSizeEnabled = true;
+    RenderSliver s;
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        s = RenderSliverPadding(
+          padding: const EdgeInsets.all(10.0),
+          child: RenderSliverToBoxAdapter(
+            child: RenderPadding(
+              padding: const EdgeInsets.all(10.0),
+            ),
+          ),
+        ),
+      ],
+    );
+    layout(root);
+    dynamic error;
+    try {
+      s.debugPaint(
+        PaintingContext(
+          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        const Offset(0.0, 500)
+      );
+    } catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
+    debugPaintSizeEnabled = false;
+  });
+
+  test('debugPaintPadding from render objects with inverted direction horizontal', () {
+    debugPaintSizeEnabled = true;
+    RenderSliver s;
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.left,
+      crossAxisDirection: AxisDirection.down,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        s = RenderSliverPadding(
+          padding: const EdgeInsets.all(10.0),
+          child: RenderSliverToBoxAdapter(
+            child: RenderPadding(
+              padding: const EdgeInsets.all(10.0),
+            ),
+          ),
+        ),
+      ],
+    );
+    layout(root);
+    dynamic error;
+    try {
+      s.debugPaint(
+        PaintingContext(
+          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        const Offset(0.0, 500)
+      );
+    } catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
+    debugPaintSizeEnabled = false;
+  });
 }

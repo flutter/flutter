@@ -160,6 +160,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => BackdropDemo(),
     ),
     GalleryDemo(
+      title: 'Banner',
+      subtitle: 'Displaying a banner within a list',
+      icon: GalleryIcons.lists_leave_behind,
+      category: _kMaterialComponents,
+      routeName: BannerDemo.routeName,
+      documentationUrl: 'https://api.flutter.dev/flutter/material/MaterialBanner-class.html',
+      buildRoute: (BuildContext context) => const BannerDemo(),
+    ),
+    GalleryDemo(
       title: 'Bottom app bar',
       subtitle: 'Optional floating action button notch',
       icon: GalleryIcons.bottom_app_bar,

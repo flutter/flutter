@@ -44,6 +44,8 @@ import 'theme_data.dart';
 ///
 /// This example shows a simple [FlatButton].
 ///
+/// ![A simple FlatButton](https://flutter.github.io/assets-for-api-docs/assets/material/flat_button.png)
+///
 /// ```dart
 /// FlatButton(
 ///   onPressed: () {
@@ -62,6 +64,8 @@ import 'theme_data.dart';
 /// with splashes rendered in a different shade of blue.
 /// It turns black-on-grey when disabled.
 /// The button has 8px of padding on each side, and the text is 20px high.
+///
+/// ![A FlatButton with white text on a blue background](https://flutter.github.io/assets-for-api-docs/assets/material/flat_button_properties.png)
 ///
 /// ```dart
 /// FlatButton(
