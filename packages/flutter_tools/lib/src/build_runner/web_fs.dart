@@ -30,7 +30,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../globals.dart';
 import '../project.dart';
-import 'chrome.dart';
+import '../web/chrome.dart';
 
 /// The name of the built web project.
 const String kBuildTargetName = 'web';
