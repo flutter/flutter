@@ -49,7 +49,7 @@ class _BannerDemoState extends State<BannerDemo> {
   Widget build(BuildContext context) {
     final Widget banner = MaterialBanner(
       content: const Text('Your password was updated on your other device. Please sign in again.'),
-      leading: _showLeading ? CircleAvatar(child: Icon(Icons.access_alarm)) : null,
+      leading: _showLeading ? const CircleAvatar(child: Icon(Icons.access_alarm)) : null,
       actions: <Widget>[
         FlatButton(
           child: const Text('SIGN IN'),
