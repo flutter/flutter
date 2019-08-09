@@ -61,7 +61,7 @@ void main() {
   test('setApplicationSwitcherDescription missing plugin', () async {
     final List<ByteData> log = <ByteData>[];
 
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData message) {
+    defaultBinaryMessenger.setMockMessageHandler('flutter/platform', (ByteData message) {
       log.add(message);
       return null;
     });

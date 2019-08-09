@@ -46,13 +46,12 @@ void main() {
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(
       <String, dynamic>{'type': 'memoryPressure'});
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/system', message, (_) { });
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('handleLifecycleStateChanged callback', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     final AppLifecycleStateObserver observer = AppLifecycleStateObserver();
     WidgetsBinding.instance.addObserver(observer);
 
@@ -80,14 +79,13 @@ void main() {
     const String testRouteName = 'testRouteName';
     final ByteData message = const JSONMethodCodec().encodeMethodCall(
       const MethodCall('pushRoute', testRouteName));
-    await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     expect(observer.pushedRoute, testRouteName);
 
     WidgetsBinding.instance.removeObserver(observer);
   });
 
   testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
-    final BinaryMessenger defaultBinaryMessenger = ServicesBinding.instance.defaultBinaryMessenger;
     ByteData message;
     expect(tester.binding.hasScheduledFrame, isFalse);
 
