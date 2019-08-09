@@ -101,10 +101,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.widget<RichText>(
-        find.descendant(
-          of: find.byType(TextField),
-          matching: find.byType(RichText),
-        )).text.style.color,
+      find.descendant(
+        of: find.byType(TextField),
+        matching: find.byType(RichText),
+      )).text.style.color,
       Colors.green,
     );
   });
@@ -678,10 +678,10 @@ void main() {
     await tester.enterText(find.byType(TextField), 'abc');
 
     expect(tester.widget<InputDecorator>(
-        find.descendant(
-          of: find.byType(AppBar),
-          matching: find.byType(InputDecorator),
-        )).decoration.enabledBorder,
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byType(InputDecorator),
+      )).decoration.enabledBorder,
       InputBorder.none,
     );
   });
