@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'base/io.dart';
 import 'base/process_manager.dart';
@@ -29,9 +30,14 @@ Future<bool> killProcess(String executable) async {
       if (values.length < 2) {
         continue;
       }
-      final String pid = values[1];
+      final String nextPid = values[1];
+      // Some toolchains run this code from a command that includes [executable]
+      // on the command line. Muke sure we don't kill our own pid.
+      if (int.tryParse(nextPid) == pid) {
+        continue;
+      }
       final ProcessResult killResult = await processManager.run(<String>[
-        'kill', pid,
+        'kill', nextPid,
       ]);
       succeeded &= killResult.exitCode == 0;
     }
