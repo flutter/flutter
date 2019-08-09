@@ -958,7 +958,9 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButtonAnimator,
     this.persistentFooterButtons,
     this.drawer,
+    this.onDrawerAnimationEnd,
     this.endDrawer,
+    this.onEndDrawerAnimationEnd,
     this.bottomNavigationBar,
     this.bottomSheet,
     this.backgroundColor,
@@ -1057,6 +1059,14 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget endDrawer;
+
+  /// A callback function that is called when the [drawer] open or close
+  /// animation ends.
+  final DrawerCallback onDrawerAnimationEnd;
+
+  /// A callback function that is called when the [endDrawer] open or close
+  /// animation ends.
+  final DrawerCallback onEndDrawerAnimationEnd;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
   ///
@@ -1971,6 +1981,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
+  void _handleEndDrawerAnimationStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+        widget.onEndDrawerAnimationEnd(false);
+        return;
+      case AnimationStatus.completed:
+        widget.onEndDrawerAnimationEnd(true);
+        return;
+      default:
+        return;
+    }
+  }
+
   void _buildEndDrawer(List<LayoutId> children, TextDirection textDirection) {
     if (widget.endDrawer != null) {
       assert(hasEndDrawer);
@@ -1979,6 +2002,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         DrawerController(
           key: _endDrawerKey,
           alignment: DrawerAlignment.end,
+          onDrawerAnimationStatusChange: widget.onEndDrawerAnimationEnd != null ?
+            _handleEndDrawerAnimationStatusChange : null,
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
@@ -1994,6 +2019,19 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     }
   }
 
+  void _handleDrawerAnimationStatusChange(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+        widget.onDrawerAnimationEnd(false);
+        return;
+      case AnimationStatus.completed:
+        widget.onDrawerAnimationEnd(true);
+        return;
+      default:
+        return;
+    }
+  }
+
   void _buildDrawer(List<LayoutId> children, TextDirection textDirection) {
     if (widget.drawer != null) {
       assert(hasDrawer);
@@ -2002,6 +2040,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         DrawerController(
           key: _drawerKey,
           alignment: DrawerAlignment.start,
+          onDrawerAnimationStatusChange: widget.onDrawerAnimationEnd != null ?
+          _handleDrawerAnimationStatusChange : null,
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,

@@ -181,6 +181,7 @@ class DrawerController extends StatefulWidget {
     @required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.onDrawerAnimationStatusChange,
     this.scrimColor,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
@@ -228,6 +229,9 @@ class DrawerController extends StatefulWidget {
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
 
+  /// The callback function that is called when animation controller has status change.
+  final AnimationStatusListener onDrawerAnimationStatusChange;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -243,6 +247,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
+    if (widget.onDrawerAnimationStatusChange != null)
+      _controller.addStatusListener(widget.onDrawerAnimationStatusChange);
   }
 
   @override

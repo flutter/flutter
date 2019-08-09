@@ -107,6 +107,165 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Drawer callback is called when animation ends', (WidgetTester tester) async {
+    int isDrawerOpenCount = 0;
+    int isDrawerCloseCount = 0;
+    int isEndDrawerOpenCount = 0;
+    int isEndDrawerCloseCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          onDrawerAnimationEnd: (bool isOpen) {
+            if (isOpen)
+              isDrawerOpenCount += 1;
+            else
+              isDrawerCloseCount += 1;
+          },
+          drawer: const Drawer(),
+          onEndDrawerAnimationEnd: (bool isOpen) {
+            if (isOpen)
+              isEndDrawerOpenCount += 1;
+            else
+              isEndDrawerCloseCount += 1;
+          },
+          endDrawer: const Drawer(),
+        ),
+      ),
+    );
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    expect(isEndDrawerOpenCount, 0);
+    expect(isEndDrawerCloseCount, 0);
+
+    state.openDrawer();
+    // First pump to kick start animation.
+    await tester.pump();
+    // No callback should be called before animation ends.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    expect(isEndDrawerOpenCount, 0);
+    expect(isEndDrawerCloseCount, 0);
+
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    expect(isEndDrawerOpenCount, 0);
+    expect(isEndDrawerCloseCount, 0);
+
+    state.openEndDrawer();
+    // First pump to kick start animation.
+    await tester.pump();
+    // No new callback should be called before animation ends.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    expect(isEndDrawerOpenCount, 0);
+    expect(isEndDrawerCloseCount, 0);
+
+    // Draw Should be closed while endDrawer open.
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 1);
+    expect(isEndDrawerOpenCount, 1);
+    expect(isEndDrawerCloseCount, 0);
+
+    state.openDrawer();
+    // First pump to kick start animation.
+    await tester.pump();
+    // No new callback should be called before animation ends.
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 1);
+    expect(isEndDrawerOpenCount, 1);
+    expect(isEndDrawerCloseCount, 0);
+
+    // Draw Should be closed while endDrawer open.
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 2);
+    expect(isDrawerCloseCount, 1);
+    expect(isEndDrawerOpenCount, 1);
+    expect(isEndDrawerCloseCount, 1);
+  });
+
+  testWidgets('Drawer callback is called when drag', (WidgetTester tester) async {
+    int isDrawerOpenCount = 0;
+    int isDrawerCloseCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          onDrawerAnimationEnd: (bool isOpen) {
+            if (isOpen)
+              isDrawerOpenCount += 1;
+            else
+              isDrawerCloseCount += 1;
+          },
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    // Fully drag to the right.
+    TestGesture gesture = await tester.startGesture(const Offset(10.0, 200.0));
+    await tester.pump();
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(isDrawerOpenCount, 0);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    await gesture.up();
+    await tester.pump();
+
+    // Fully drag it back.
+    gesture = await tester.startGesture(const Offset(400.0, 200.0));
+    await tester.pump();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 0);
+    // Reverse drag requires additional animation to close.
+    await gesture.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 1);
+
+    // Slightly drag to the right should close upon release.
+    gesture = await tester.startGesture(const Offset(10.0, 200.0));
+    await tester.pump();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 1);
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(isDrawerOpenCount, 1);
+    expect(isDrawerCloseCount, 2);
+  });
+
   testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
     // The scrim is a Container within a Semantics node labeled "Dismiss",
     // within a DrawerController. Sorry.
