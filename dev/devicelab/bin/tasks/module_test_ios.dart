@@ -250,6 +250,7 @@ Future<void> main() async {
             'CODE_SIGN_IDENTITY=-',
             'EXPANDED_CODE_SIGN_IDENTITY=-',
             'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
           ],
           environment: <String, String> {
             'FLUTTER_ANALYTICS_LOG_FILE': analyticsOutputFile.path,
@@ -274,6 +275,34 @@ Future<void> main() async {
           'Building outer app produced the following analytics: "$analyticsOutput"'
           'but not the expected strings: "cd24: ios", "cd25: true", "viewName: build/bundle"'
         );
+      }
+
+      section('Fail building existing iOS app if flutter script fails');
+      int xcodebuildExitCode = 0;
+      await inDirectory(hostApp, () async {
+        xcodebuildExitCode = await exec(
+          'xcodebuild',
+          <String>[
+            '-workspace',
+            'Host.xcworkspace',
+            '-scheme',
+            'Host',
+            '-configuration',
+            'Debug',
+            'ARCHS=i386', // i386 is not supported in Debug mode.
+            'CODE_SIGNING_ALLOWED=NO',
+            'CODE_SIGNING_REQUIRED=NO',
+            'CODE_SIGN_IDENTITY=-',
+            'EXPANDED_CODE_SIGN_IDENTITY=-',
+            'CONFIGURATION_BUILD_DIR=${tempDir.path}',
+            'COMPILER_INDEX_STORE_ENABLE=NO',
+          ],
+          canFail: true
+        );
+      });
+
+      if (xcodebuildExitCode != 65) { // 65 returned on PhaseScriptExecution failure.
+        return TaskResult.failure('Host app build succeeded though flutter script failed');
       }
 
       return TaskResult.success(null);

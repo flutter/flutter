@@ -775,7 +775,7 @@ Future<void> _buildGradleProjectV2(
           color: TerminalColor.green);
     }
   } else {
-    final File bundleFile = _findBundleFile(project, buildInfo);
+    final File bundleFile = findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
 
@@ -820,24 +820,30 @@ Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuild
   });
 }
 
-File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
+@visibleForTesting
+File findBundleFile(GradleProject project, BuildInfo buildInfo) {
   final String bundleFileName = project.bundleFileFor(buildInfo);
-
-  if (bundleFileName == null)
+  if (bundleFileName == null) {
     return null;
-  final String modeName = camelCase(buildInfo.modeName);
-  File bundleFile = project.bundleDirectory.childDirectory(modeName).childFile(bundleFileName);
-  if (bundleFile.existsSync())
+  }
+  File bundleFile = project.bundleDirectory
+    .childDirectory(camelCase(buildInfo.modeName))
+    .childFile(bundleFileName);
+  if (bundleFile.existsSync()) {
     return bundleFile;
-  if (buildInfo.flavor != null) {
-
-    // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
-    // On linux, filenames are case sensitive.
-    bundleFile = project.bundleDirectory
-        .childDirectory(camelCase('${buildInfo.flavor}_$modeName'))
-        .childFile(bundleFileName);
-    if (bundleFile.existsSync())
-      return bundleFile;
+  }
+  if (buildInfo.flavor == null) {
+    return null;
+  }
+  // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the
+  // folder name is the flavor plus the mode name. On Windows, filenames aren't case sensitive.
+  // For example: foo_barRelease where `foo_bar` is the flavor and `Release` the mode name.
+  final String childDirName = '${buildInfo.flavor}${camelCase('_' + buildInfo.modeName)}';
+  bundleFile = project.bundleDirectory
+      .childDirectory(childDirName)
+      .childFile(bundleFileName);
+  if (bundleFile.existsSync()) {
+    return bundleFile;
   }
   return null;
 }

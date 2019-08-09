@@ -312,7 +312,13 @@ class IOSDevice extends Device {
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled) {
+    // "--enable-checked-mode" and "--verify-entry-points" should always be
+    // passed when we launch debug build via "ios-deploy". However, we don't
+    // pass them if a certain environment variable is set to enable the
+    // "system_debug_ios" integration test in the CI, which simulates a
+    // home-screen launch.
+    if (debuggingOptions.debuggingEnabled &&
+        platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') {
       launchArguments.add('--enable-checked-mode');
       launchArguments.add('--verify-entry-points');
     }

@@ -155,6 +155,13 @@ class HotRunner extends ResidentRunner {
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
+      // https://github.com/flutter/flutter/issues/33050
+      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
+          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
+        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318.');
+      }
       return 2;
     }
 
@@ -231,7 +238,6 @@ class HotRunner extends ResidentRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
@@ -247,7 +253,6 @@ class HotRunner extends ResidentRunner {
       final int result = await device.runHot(
         hotRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0) {
         return result;
@@ -649,7 +654,7 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null) {
-          throw 'Application isolate not found';
+          return OperationResult(2, 'Application isolate not found', fatal: true);
         }
       }
     }
@@ -757,7 +762,6 @@ class HotRunner extends ResidentRunner {
     }
     // Record time it took for the VM to reload the sources.
     _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
-
     final Stopwatch reassembleTimer = Stopwatch()..start();
     // Reload the isolate.
     final List<Future<void>> allDevices = <Future<void>>[];

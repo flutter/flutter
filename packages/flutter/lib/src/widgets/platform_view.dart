@@ -580,3 +580,95 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     renderObject.updateGestureRecognizers(gestureRecognizers);
   }
 }
+
+/// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
+///
+/// See also:
+/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+// TODO(amirh): Link to the embedder's system compositor documentation once available.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`.
+  ///
+  /// The [controller] must not be null.
+  const PlatformViewSurface({
+    @required this.controller,
+    @required this.hitTestBehavior,
+    @required this.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  /// The controller for the platform view integrated by this [PlatformViewSurface].
+  ///
+  /// [PlatformViewController] is used for dispatching touch events to the platform view.
+  /// [PlatformViewController.viewId] identifies the platform view whose contents are painted by this widget.
+  final PlatformViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the platform view
+  /// as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: PlatformViewSurface(
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// To get the [PlatformViewSurface] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: PlatformViewSurface(
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.platformViews.hittestParam}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+    renderObject
+      ..controller = controller
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
+  }
+}

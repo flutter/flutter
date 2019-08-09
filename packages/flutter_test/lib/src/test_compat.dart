@@ -150,12 +150,6 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 ///
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
-///
-/// If the `solo` flag is `true`, only tests and groups marked as
-/// 'solo' will be be run. This only restricts tests *within this test
-/// suite*—tests in other suites will run as normal. We recommend that users
-/// avoid this flag if possible and instead use the test runner flag `-n` to
-/// filter tests by name.
 @isTest
 void test(
   Object description,
@@ -225,12 +219,6 @@ void test(
 ///
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
-///
-/// If the `solo` flag is `true`, only tests and groups marked as
-/// 'solo' will be be run. This only restricts tests *within this test
-/// suite*—tests in other suites will run as normal. We recommend that users
-/// avoid this flag if possible, and instead use the test runner flag `-n` to
-/// filter tests by name.
 @isTestGroup
 void group(Object description, Function body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);
