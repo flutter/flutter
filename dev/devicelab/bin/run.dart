@@ -32,24 +32,21 @@ Future<void> main(List<String> rawArgs) async {
   }
 
   if (!args.wasParsed('task')) {
-    if (args.wasParsed('stage')) {
-      final String stageName = args['stage'];
-      final List<ManifestTask> tasks = loadTaskManifest().tasks;
-      for (ManifestTask task in tasks) {
-        if (!args['match-host-platform'] ||
-            task.isSupportedByHost() &&
-            task.stage == stageName) {
-          _taskNames.add(task.name);
-        }
-      }
-    } else if (args.wasParsed('all')) {
-      final List<ManifestTask> tasks = loadTaskManifest().tasks;
-      for (ManifestTask task in tasks) {
-        if (!args['match-host-platform'] || task.isSupportedByHost()) {
-          _taskNames.add(task.name);
-        }
-      }
+    if (args.wasParsed('stage') || args.wasParsed('all')) {
+      addTasks(
+        tasks: loadTaskManifest().tasks,
+        args: args,
+        taskNames: _taskNames,
+      );
     }
+  }
+
+  if (args.wasParsed('list')) {
+    for (int i = 0; i < _taskNames.length; i++) {
+      print('${(i + 1).toString().padLeft(3)} - ${_taskNames[i]}');
+    }
+    exitCode = 0;
+    return;
   }
 
   if (_taskNames.isEmpty) {
@@ -80,6 +77,30 @@ Future<void> main(List<String> rawArgs) async {
       if (args['exit']) {
         return;
       }
+    }
+  }
+}
+
+void addTasks({
+  List<ManifestTask> tasks,
+  ArgResults args,
+  List<String> taskNames,
+}) {
+  if (args.wasParsed('continue-from')) {
+    final int index = tasks.indexWhere((ManifestTask task) => task.name == args['continue-from']);
+    if (index == -1) {
+      throw 'Invalid task name "${args['continue-from']}"';
+    }
+    tasks.removeRange(0, index);
+  }
+  // Only start skipping if user specified a task to continue from
+  bool isQualifyingStage;
+  bool isQualifyingHost;
+  for (ManifestTask task in tasks) {
+    isQualifyingStage = !args.wasParsed('stage') || task.stage == args['stage'];
+    isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
+    if (isQualifyingHost && isQualifyingStage) {
+      taskNames.add(task.name);
     }
   }
 }
@@ -115,7 +136,12 @@ final ArgParser _argParser = ArgParser()
   ..addFlag(
     'all',
     abbr: 'a',
-    help: 'Runs all tasks defined in manifest.yaml.',
+    help: 'Runs all tasks defined in manifest.yaml in alphabetical order.',
+  )
+  ..addOption(
+    'continue-from',
+    abbr: 'c',
+    help: 'With --all or --stage, continue from the given test.',
   )
   ..addFlag(
     'exit',
@@ -128,6 +154,12 @@ final ArgParser _argParser = ArgParser()
           'are building Flutter locally. Use this to select a specific\n'
           'version of the engine if you have built multiple engine targets.\n'
           'This path is relative to --local-engine-src-path/out.',
+  )
+  ..addFlag(
+    'list',
+    abbr: 'l',
+    help: 'Don\'t actually run the tasks, but list out the tasks that would\n'
+          'have been run, in the order they would have run.',
   )
   ..addOption(
     'local-engine-src-path',
