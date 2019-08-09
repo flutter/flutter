@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -185,7 +184,7 @@ void verifyPaintedShadow(Finder customPaint, int elevation){
 
   final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index)=> kElevationToShadow[elevation][index]);
   final List<RRect> rrects = List<RRect>.generate(
-    3, 
+    3,
     (int index){
       return RRect.fromRectAndRadius(
         originalRectangle.shift(
@@ -1609,7 +1608,6 @@ void main() {
     ).last;
 
     verifyPaintedShadow(customPaintOne, 16);
-    
     await tester.tap(find.text('one').last);
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKeyTwo,
