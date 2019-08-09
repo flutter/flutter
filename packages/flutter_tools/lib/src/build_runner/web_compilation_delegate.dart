@@ -154,9 +154,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
           'targets': targets?.join(',')
         },
-        'flutter_tools:test_entrypoint': <String, dynamic>{
+        'flutter_tools:test_bootstrap': <String, dynamic>{
           'release': release,
-          'targets': targets?.join(',')
+          'targets': targets?.map((String target) => fs.path.relative(target, from: fs.currentDirectory.path))?.join(',')
         },
       },
       isReleaseBuild: false,

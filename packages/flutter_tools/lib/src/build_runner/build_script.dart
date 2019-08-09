@@ -221,7 +221,9 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    if (!targets.contains(buildStep.inputId.path)) {
+    log.info('building for target ${buildStep.inputId.path}');
+    if (!targets.any((String target) => buildStep
+        .inputId.path.contains(target.replaceFirst('.dart', '_web_entrypoint.dart')))) {
       return;
     }
     if (release) {
@@ -253,6 +255,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
         ? path.url.join('packages', id.package, id.path)
         : id.path;
     if (!targets.contains(id.path)) {
+      log.info('skipping target ${buildStep.inputId.path} with targets: $targets');
       return;
     }
     final Metadata metadata = parseMetadata(
