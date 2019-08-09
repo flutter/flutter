@@ -99,7 +99,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       );
     }
 
-    // Control keys like "backspace", and function keys like arrow keys, won't have a character,
+    // Control keys like "backspace" and movement keys like arrow keys won't have a character,
     // but it's known by the physical keyboard. Since there is no logical keycode map for macOS
     // (macOS uses the keycode to reference physical keys), a LogicalKeyboardKey is created with
     // the physical key's HID usage and debugName. This avoids the need for duplicating the physical
