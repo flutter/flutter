@@ -77,7 +77,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     }
     // If this key is printable, generate the LogicalKeyboardKey from its unicode value. 
     // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
-    // keys are considered modifier function keys, which generate invalid unicode scalar values.
+    // keys are considered modifier function keys, which generate invalid Unicode scalar values.
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel) && 
         !isFunctionKey(keyLabel)) {
