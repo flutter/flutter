@@ -108,12 +108,14 @@ action("gen_android_build_config_java") {
 }
 
 flutter_jar_path = "$root_out_dir/flutter_java.jar"
+flutter_source_jar_path = "$root_out_dir/flutter_java.srcjar"
 
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
 
   jar_path = flutter_jar_path
+  source_jar_path = flutter_source_jar_path
 
   sources = [
     "io/flutter/Log.java",
@@ -238,13 +240,17 @@ action("flutter_shell_java") {
     depfile,
     jar_path,
     jar_path + ".md5.stamp",
+    source_jar_path,
+    source_jar_path + ".md5.stamp",
   ]
   inputs = [
     android_sdk_jar,
   ]
   inputs += android_support_jars
 
+  _rebased_current_path = rebase_path(".")
   _rebased_jar_path = rebase_path(jar_path, root_build_dir)
+  _rebased_source_jar_path = rebase_path(source_jar_path, root_build_dir)
   _rebased_depfile = rebase_path(depfile, root_build_dir)
   _rebased_android_sdk_jar = rebase_path(android_sdk_jar, root_build_dir)
   _rebased_classpath = [ _rebased_android_sdk_jar ] +
@@ -253,6 +259,8 @@ action("flutter_shell_java") {
   args = [
     "--depfile=$_rebased_depfile",
     "--jar-path=$_rebased_jar_path",
+    "--jar-source-path=$_rebased_source_jar_path",
+    "--jar-source-base-dir=$_rebased_current_path",
     "--classpath=$_rebased_classpath",
     "--bootclasspath=$_rebased_android_sdk_jar",
   ]
@@ -300,11 +308,14 @@ action("android") {
 
   outputs = [
     "$root_build_dir/flutter.jar",
+    "$root_build_dir/flutter_engine.jar",
   ]
 
   args = [
     "--output",
     rebase_path("flutter.jar", root_build_dir, root_build_dir),
+    "--output_native_jar",
+    rebase_path("flutter_engine.jar", root_build_dir, root_build_dir),
     "--dist_jar",
     rebase_path("flutter_java.jar", root_build_dir, root_build_dir),
     "--native_lib",
