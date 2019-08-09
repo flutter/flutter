@@ -16,7 +16,6 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/lib/ui/text/font_collection.h"
 #include "flutter/runtime/dart_vm.h"
-#include "fuchsia_font_manager.h"
 #include "runtime/dart/utils/vmo.h"
 #include "runtime/dart/utils/vmservice_object.h"
 #include "third_party/icu/source/common/unicode/udata.h"

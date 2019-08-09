@@ -56,8 +56,6 @@ template("flutter_runner") {
       "compositor_context.h",
       "engine.cc",
       "engine.h",
-      "fuchsia_font_manager.cc",
-      "fuchsia_font_manager.h",
       "isolate_configurator.cc",
       "isolate_configurator.h",
       "logging.h",
@@ -128,6 +126,7 @@ template("flutter_runner") {
              "$fuchsia_sdk_root/pkg:zx",
              "$fuchsia_sdk_root/pkg/lib/sys/cpp",
              "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+             "//third_party/skia",
              "//third_party/tonic",
            ] + extra_deps
 

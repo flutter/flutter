@@ -14,11 +14,10 @@
 #include "flutter/runtime/dart_vm_lifecycle.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/run_configuration.h"
-#include "runtime/dart/utils/files.h"
-
-#include "fuchsia_font_manager.h"
 #include "platform_view.h"
+#include "runtime/dart/utils/files.h"
 #include "task_runner_adapter.h"
+#include "third_party/skia/include/ports/SkFontMgr_fuchsia.h"
 #include "thread.h"
 
 namespace flutter_runner {
@@ -275,7 +274,7 @@ Engine::Engine(Delegate& delegate,
 
         // Set default font manager.
         engine->GetFontCollection().GetFontCollection()->SetDefaultFontManager(
-            sk_make_sp<txt::FuchsiaFontManager>(std::move(sync_font_provider)));
+            SkFontMgr_New_Fuchsia(std::move(sync_font_provider)));
 
         if (engine->Run(std::move(run_configuration)) ==
             flutter::Engine::RunStatus::Failure) {
