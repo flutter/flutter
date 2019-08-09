@@ -3,4 +3,4 @@
 // found in the LICENSE file.
 
 // Re-export diagnostics node for formatting.
-export '../../../flutter/lib/src/foundation/diagnostics.dart'; // ignore: uri_does_not_exist
+export 'package:flutter/foundation.dart';
