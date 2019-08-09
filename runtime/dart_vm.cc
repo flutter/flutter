@@ -27,6 +27,7 @@
 #include "flutter/runtime/ptrace_ios.h"
 #include "flutter/runtime/start_up.h"
 #include "third_party/dart/runtime/include/bin/dart_io_api.h"
+#include "third_party/skia/include/core/SkExecutor.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_class_library.h"
 #include "third_party/tonic/dart_class_provider.h"
@@ -255,12 +256,19 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
                std::shared_ptr<IsolateNameServer> isolate_name_server)
     : settings_(vm_data->GetSettings()),
       concurrent_message_loop_(fml::ConcurrentMessageLoop::Create()),
+      skia_concurrent_executor_(
+          [runner = concurrent_message_loop_->GetTaskRunner()](
+              fml::closure work) { runner->PostTask(work); }),
       vm_data_(vm_data),
       isolate_name_server_(std::move(isolate_name_server)),
       service_protocol_(std::make_shared<ServiceProtocol>()) {
   TRACE_EVENT0("flutter", "DartVMInitializer");
 
   gVMLaunchCount++;
+
+  // Setting the executor is not thread safe but Dart VM initialization is. So
+  // this call is thread-safe.
+  SkExecutor::SetDefault(&skia_concurrent_executor_);
 
   FML_DCHECK(vm_data_);
   FML_DCHECK(isolate_name_server_);
@@ -425,6 +433,10 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
 }
 
 DartVM::~DartVM() {
+  // Setting the executor is not thread safe but Dart VM shutdown is. So
+  // this call is thread-safe.
+  SkExecutor::SetDefault(nullptr);
+
   if (Dart_CurrentIsolate() != nullptr) {
     Dart_ExitIsolate();
   }

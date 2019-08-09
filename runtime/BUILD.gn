@@ -66,6 +66,8 @@ source_set("runtime") {
     "runtime_delegate.h",
     "service_protocol.cc",
     "service_protocol.h",
+    "skia_concurrent_executor.cc",
+    "skia_concurrent_executor.h",
     "start_up.cc",
     "start_up.h",
   ]
