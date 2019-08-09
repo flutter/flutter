@@ -346,6 +346,7 @@ tasks:
       framework, and therefore does not require a host computer to run. This
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_attach_test:
