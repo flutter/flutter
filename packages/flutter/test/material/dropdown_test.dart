@@ -182,18 +182,15 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
 void verifyPaintedShadow(Finder customPaint, int elevation){
   const Rect originalRectangle = Rect.fromLTRB(0.0, 0.0, 800, 208.0);
 
-  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index)=> kElevationToShadow[elevation][index]);
-  final List<RRect> rrects = List<RRect>.generate(
-    3,
-    (int index){
-      return RRect.fromRectAndRadius(
-        originalRectangle.shift(
-          boxShadows[index].offset
-        ).inflate(boxShadows[index].spreadRadius),
-        const Radius.circular(2.0),
-      );
-    },
-  );
+  final List<BoxShadow> boxShadows = List<BoxShadow>.generate(3, (int index) => kElevationToShadow[elevation][index]);
+  final List<RRect> rrects = List<RRect>.generate(3, (int index){
+    return RRect.fromRectAndRadius(
+      originalRectangle.shift(
+        boxShadows[index].offset
+      ).inflate(boxShadows[index].spreadRadius),
+      const Radius.circular(2.0),
+    );
+  });
 
   expect(
     customPaint,
@@ -1356,8 +1353,8 @@ void main() {
               ),
             ),
           );
-        }
-      )
+        },
+      ),
     );
 
     expect(_validateCalled, 1);
