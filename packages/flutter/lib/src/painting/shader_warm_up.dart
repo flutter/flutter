@@ -189,7 +189,9 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
         ..clipRRect(ui.RRect.fromLTRBR(8, 8, 328, 248, const ui.Radius.circular(16)))
         ..drawRect(ui.Rect.fromLTRB(10, 10, 320, 240), ui.Paint())
         ..restore();
+      canvas.translate(drawCallSpacing, 0.0);
     }
+    canvas.translate(0.0, drawCallSpacing);
 
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
