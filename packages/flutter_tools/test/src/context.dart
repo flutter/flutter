@@ -77,7 +77,7 @@ void testUsingContext(
           HttpClient: () => MockHttpClient(),
           IOSSimulatorUtils: () {
             final MockIOSSimulatorUtils mock = MockIOSSimulatorUtils();
-            when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
+            when(mock.getAttachedDevices()).thenAnswer((Invocation _) async => <IOSSimulator>[]);
             return mock;
           },
           OutputPreferences: () => OutputPreferences(showColor: false),
@@ -227,7 +227,7 @@ class FakeDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(getConnectedDevices()).thenReturn(<SimDevice>[]);
+    when(getConnectedDevices()).thenAnswer((Invocation _) async => <SimDevice>[]);
   }
 }
 

@@ -396,8 +396,8 @@ void main() {
       simControl = SimControl();
     });
 
-    testUsingContext('getDevices succeeds', () {
-      final List<SimDevice> devices = simControl.getDevices();
+    testUsingContext('getDevices succeeds', () async {
+      final List<SimDevice> devices = await simControl.getDevices();
 
       final SimDevice watch = devices[0];
       expect(watch.category, 'watchOS 4.3');
