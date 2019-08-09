@@ -108,15 +108,20 @@ action("gen_android_build_config_java") {
   ]
 }
 
-flutter_jar_path = "$root_out_dir/flutter_java.jar"
-flutter_source_jar_path = "$root_out_dir/flutter_java.srcjar"
+embedding_artifact_id = "flutter_embedding_$flutter_runtime_mode"
+embedding_jar_filename = "$embedding_artifact_id-1.0.0-$engine_version.jar"
+embedding_jar_path = "$root_out_dir/$embedding_jar_filename"
+
+embedding_sources_jar_filename =
+    "$embedding_artifact_id-1.0.0-$engine_version-sources.jar"
+embedding_source_jar_path = "$root_out_dir/$embedding_sources_jar_filename"
 
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
 
-  jar_path = flutter_jar_path
-  source_jar_path = flutter_source_jar_path
+  jar_path = embedding_jar_path
+  source_jar_path = embedding_source_jar_path
 
   sources = [
     "io/flutter/Log.java",
@@ -303,22 +308,28 @@ action("android") {
   script = "//build/android/gyp/create_flutter_jar.py"
 
   inputs = [
-    "$root_build_dir/flutter_java.jar",
+    "$root_build_dir/$embedding_jar_filename",
     "$root_build_dir/lib.stripped/libflutter.so",
   ]
 
+  engine_artifact_id =
+      string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
+
+  engine_jar_filename =
+      "$root_build_dir/$engine_artifact_id-1.0.0-$engine_version.jar"
+
   outputs = [
     "$root_build_dir/flutter.jar",
-    "$root_build_dir/flutter_engine.jar",
+    "$root_build_dir/$engine_jar_filename",
   ]
 
   args = [
     "--output",
     rebase_path("flutter.jar", root_build_dir, root_build_dir),
     "--output_native_jar",
-    rebase_path("flutter_engine.jar", root_build_dir, root_build_dir),
+    rebase_path(engine_jar_filename, root_build_dir, root_build_dir),
     "--dist_jar",
-    rebase_path("flutter_java.jar", root_build_dir, root_build_dir),
+    rebase_path(embedding_jar_filename, root_build_dir, root_build_dir),
     "--native_lib",
     rebase_path("lib.stripped/libflutter.so", root_build_dir, root_build_dir),
     "--android_abi",
@@ -408,7 +419,7 @@ action("robolectric_tests") {
 
   _jar_dependencies = [
     android_sdk_jar,
-    flutter_jar_path,
+    embedding_jar_path,
     "//third_party/robolectric/lib/junit-3.8.jar",
     "//third_party/robolectric/lib/junit-4.13-beta-3.jar",
     "//third_party/robolectric/lib/robolectric-3.8.jar",
