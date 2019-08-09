@@ -12,8 +12,7 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/resident_runner.dart';
-import 'package:flutter_tools/src/resident_web_runner.dart';
+import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
@@ -71,7 +70,7 @@ void main() {
     fs.file(fs.path.join('web', 'index.html')).deleteSync();
 
     final ResidentWebRunner runner = ResidentWebRunner(
-      <FlutterDevice>[],
+      null,
       flutterProject: FlutterProject.current(),
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),

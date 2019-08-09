@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'card.dart';
+import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'debug.dart';
@@ -70,7 +71,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.dataRowHeight = 48.0,
+    this.dataRowHeight = kMinInteractiveDimension,
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
@@ -141,7 +142,8 @@ class PaginatedDataTable extends StatefulWidget {
 
   /// The height of each row (excluding the row that contains column headings).
   ///
-  /// This value is optional and defaults to 48.0 if not specified.
+  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// specified.
   final double dataRowHeight;
 
   /// The height of the heading row.
