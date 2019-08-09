@@ -62,13 +62,13 @@ CompositorContext::CompositorContext(
     std::string debug_label,
     fuchsia::ui::views::ViewToken view_token,
     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-    fit::closure session_error_callback,
+    fml::closure session_error_callback,
     zx_handle_t vsync_event_handle)
     : debug_label_(std::move(debug_label)),
       session_connection_(debug_label_,
                           std::move(view_token),
                           std::move(session),
-                          std::move(session_error_callback),
+                          session_error_callback,
                           vsync_event_handle) {}
 
 void CompositorContext::OnSessionMetricsDidChange(

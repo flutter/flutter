@@ -16,6 +16,7 @@
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
+#include "flutter/fml/closure.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/trace_event.h"
 #include "vulkan_surface_producer.h"
@@ -29,7 +30,7 @@ class SessionConnection final {
   SessionConnection(std::string debug_label,
                     fuchsia::ui::views::ViewToken view_token,
                     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
-                    fit::closure session_error_callback,
+                    fml::closure session_error_callback,
                     zx_handle_t vsync_event_handle);
 
   ~SessionConnection();
@@ -68,6 +69,7 @@ class SessionConnection final {
 
   std::unique_ptr<VulkanSurfaceProducer> surface_producer_;
   flutter::SceneUpdateContext scene_update_context_;
+
   zx_handle_t vsync_event_handle_;
 
   // A flow event trace id for following |Session::Present| calls into
