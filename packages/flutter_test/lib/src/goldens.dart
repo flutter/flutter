@@ -317,6 +317,7 @@ class LocalFileComparator extends GoldenFileComparator {
           output.parent.createSync(recursive: true);
           output.writeAsBytesSync(encodePng(image));
         });
+        // Check that this is the right place.
         additionalFeedback += '\nFailure feedback can be found at ${basedir.path.toString()}';
       }
       throw test_package.TestFailure('Golden "$golden": ' + result.error + additionalFeedback);
