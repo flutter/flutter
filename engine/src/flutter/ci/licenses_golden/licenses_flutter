@@ -466,6 +466,8 @@ FILE: ../../../flutter/runtime/runtime_test.cc
 FILE: ../../../flutter/runtime/runtime_test.h
 FILE: ../../../flutter/runtime/service_protocol.cc
 FILE: ../../../flutter/runtime/service_protocol.h
+FILE: ../../../flutter/runtime/skia_concurrent_executor.cc
+FILE: ../../../flutter/runtime/skia_concurrent_executor.h
 FILE: ../../../flutter/runtime/start_up.cc
 FILE: ../../../flutter/runtime/start_up.h
 FILE: ../../../flutter/runtime/test_font_data.cc
