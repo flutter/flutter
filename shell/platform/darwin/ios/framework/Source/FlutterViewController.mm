@@ -681,11 +681,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
   [_engine.get() updateViewportMetrics:_viewportMetrics];
 }
 
-- (void)updateViewConstraints {
-  [super updateViewConstraints];
-  [self onUserSettingsChanged:nil];
-}
-
 - (CGFloat)statusBarPadding {
   UIScreen* screen = self.view.window.screen;
   CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
@@ -693,11 +688,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                           toCoordinateSpace:screen.coordinateSpace];
   CGRect intersection = CGRectIntersection(statusFrame, viewFrame);
   return CGRectIsNull(intersection) ? 0.0 : intersection.size.height;
-}
-
-- (void)viewWillLayoutSubviews {
-  [super viewWillLayoutSubviews];
-  [self onUserSettingsChanged:nil];
 }
 
 - (void)viewDidLayoutSubviews {
@@ -712,7 +702,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
   [self updateViewportPadding];
   [self updateViewportMetrics];
-  [self onUserSettingsChanged:nil];
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
   // the viewport metrics update tasks.
@@ -874,16 +863,10 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Set user settings
 
-- (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
-  [super traitCollectionDidChange:previousTraitCollection];
-  [self onUserSettingsChanged:nil];
-}
-
 - (void)onUserSettingsChanged:(NSNotification*)notification {
   [[_engine.get() settingsChannel] sendMessage:@{
     @"textScaleFactor" : @([self textScaleFactor]),
     @"alwaysUse24HourFormat" : @([self isAlwaysUse24HourFormat]),
-    @"platformBrightness" : [self brightnessMode]
   }];
 }
 
@@ -955,20 +938,6 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                                          options:0
                                                           locale:[NSLocale currentLocale]];
   return [dateFormat rangeOfString:@"a"].location == NSNotFound;
-}
-
-- (NSString*)brightnessMode {
-  if (@available(iOS 13, *)) {
-    UIUserInterfaceStyle style = UITraitCollection.currentTraitCollection.userInterfaceStyle;
-
-    if (style == UIUserInterfaceStyleDark) {
-      return @"dark";
-    } else {
-      return @"light";
-    }
-  } else {
-    return @"light";
-  }
 }
 
 #pragma mark - Status Bar touch event handling
