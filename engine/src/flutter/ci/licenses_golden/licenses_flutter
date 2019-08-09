@@ -897,9 +897,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_font_manager.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_font_manager.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_font_manager_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/isolate_configurator.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/extract_far.dart
