@@ -100,7 +100,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       typedOther._currentDrag = null;
     }
     assert(_currentHold == null);
-    if(typedOther._currentHold != null) {
+    if (typedOther._currentHold != null) {
       _currentHold = typedOther._currentHold;
       _currentHold.updateDelegate(this);
       typedOther._currentHold = null;
