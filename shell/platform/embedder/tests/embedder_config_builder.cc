@@ -57,6 +57,10 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
 
 EmbedderConfigBuilder::~EmbedderConfigBuilder() = default;
 
+FlutterProjectArgs& EmbedderConfigBuilder::GetProjectArgs() {
+  return project_args_;
+}
+
 void EmbedderConfigBuilder::SetSoftwareRendererConfig() {
   renderer_config_.type = FlutterRendererType::kSoftware;
   renderer_config_.software = software_renderer_config_;

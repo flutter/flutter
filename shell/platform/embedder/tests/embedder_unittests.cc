@@ -487,5 +487,28 @@ TEST_F(EmbedderTest, VMShutsDownWhenNoEnginesInProcess) {
   }
 }
 
+//------------------------------------------------------------------------------
+/// These snapshots may be materialized from symbols and the size field may not
+/// be relevant. Since this information is redundant, engine launch should not
+/// be gated on a non-zero buffer size.
+///
+TEST_F(EmbedderTest, VMAndIsolateSnapshotSizesAreRedundantInAOTMode) {
+  if (!DartVM::IsRunningPrecompiledCode()) {
+    GTEST_SKIP();
+    return;
+  }
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+
+  // The fixture sets this up correctly. Intentionally mess up the args.
+  builder.GetProjectArgs().vm_snapshot_data_size = 0;
+  builder.GetProjectArgs().vm_snapshot_instructions_size = 0;
+  builder.GetProjectArgs().isolate_snapshot_data_size = 0;
+  builder.GetProjectArgs().isolate_snapshot_instructions_size = 0;
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
 }  // namespace testing
 }  // namespace flutter

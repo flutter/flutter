@@ -40,6 +40,8 @@ class EmbedderConfigBuilder {
 
   ~EmbedderConfigBuilder();
 
+  FlutterProjectArgs& GetProjectArgs();
+
   void SetSoftwareRendererConfig();
 
   void SetOpenGLRendererConfig();

@@ -614,28 +614,32 @@ typedef struct {
   // the Wiki at
   // https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
   const uint8_t* vm_snapshot_data;
-  // The size of the VM snapshot data buffer.
+  // The size of the VM snapshot data buffer.  If vm_snapshot_data is a symbol
+  // reference, 0 may be passed here.
   size_t vm_snapshot_data_size;
   // The VM snapshot instructions buffer used in AOT operation. This buffer must
   // be mapped in as read-execute. For more information refer to the
   // documentation on the Wiki at
   // https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
   const uint8_t* vm_snapshot_instructions;
-  // The size of the VM snapshot instructions buffer.
+  // The size of the VM snapshot instructions buffer. If
+  // vm_snapshot_instructions is a symbol reference, 0 may be passed here.
   size_t vm_snapshot_instructions_size;
   // The isolate snapshot data buffer used in AOT operation. This buffer must be
   // mapped in as read-only. For more information refer to the documentation on
   // the Wiki at
   // https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
   const uint8_t* isolate_snapshot_data;
-  // The size of the isolate snapshot data buffer.
+  // The size of the isolate snapshot data buffer.  If isolate_snapshot_data is
+  // a symbol reference, 0 may be passed here.
   size_t isolate_snapshot_data_size;
   // The isolate snapshot instructions buffer used in AOT operation. This buffer
   // must be mapped in as read-execute. For more information refer to the
   // documentation on the Wiki at
   // https://github.com/flutter/flutter/wiki/Flutter-engine-operation-in-AOT-Mode
   const uint8_t* isolate_snapshot_instructions;
-  // The size of the isolate snapshot instructions buffer.
+  // The size of the isolate snapshot instructions buffer. If
+  // isolate_snapshot_instructions is a symbol reference, 0 may be passed here.
   size_t isolate_snapshot_instructions_size;
   // The callback invoked by the engine in root isolate scope. Called
   // immediately after the root isolate has been created and marked runnable.
