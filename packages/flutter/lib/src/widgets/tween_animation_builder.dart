@@ -9,260 +9,171 @@ import 'package:flutter/material.dart';
 
 import 'framework.dart';
 
-// ignore_for_file: public_member_api_docs
 
+/// Builder callback for [TweenAnimationBuilder].
+///
+/// The callback is expected to return a [Widget] built with the current
+/// `value` of the animation. The `child` is passed-though from the
+/// [TweenAnimationBuilder] as-is and should be incorporated into the widget
+/// subtree if it is non-null.
 typedef TweenAnimationBuilderCallback<T> = Widget Function(BuildContext context, T value, Widget child);
 
-
-enum PlaybackDirection {
-  forward,
-  reverse,
-  repeat,
-  repeatReverse,
-}
-
-class TweenAnimationBuilder<T> extends StatefulWidget {
+/// [Widget] builder that animates a property of a [Widget] to a target value
+/// whenever the target value changes.
+///
+/// The type of the animated property ([Color], [Rect], [double], etc.) is
+/// defined via the type of the provided [tween] (e.g. [ColorTween],
+/// [RectTween], [Tween<double>], etc.).
+///
+/// The [tween] also defines the target value for the animation: When the widget
+/// first builds, it animates from [Tween.begin] to [Tween.end]. A new animation
+/// can be triggered anytime by providing a new [tween] with a new [Tween.end]
+/// value. The new animation runs from the current animation value (which may be
+/// [Tween.end] of the old [tween], if that animation completed) to [Tween.end]
+/// of the new [tween].
+///
+/// The animation is further customized by providing a [curve] and [duration].
+///
+/// The current value of the animation along with the [child] is passed to
+/// the [builder] callback, which is expected to build a [Widget] based on the
+/// current animation value. The [builder] is called throughout the animation
+/// for every animation value until [Tween.end] is reached.
+///
+/// The [animationStatusListener] is informed of the current status of the
+/// animation. Registering an [animationStatusListener] may be useful to trigger
+/// an action (like another animation) at the end of the current animation.
+///
+/// See also:
+///
+///  * [AnimatedBuilder], which builds custom animations that are controlled
+///    by a manually managed [AnimationController].
+///  * [ImplicitlyAnimatedWidget], which is a base class for [Widget]s that
+///    automatically animate any changes to their property values.
+class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
+  /// Creates a [TweenAnimationBuilder].
+  ///
+  /// The properties [tween], [duration], and [builder] are required. The values
+  /// for [tween], [curve], and [builder] must not be null.
   const TweenAnimationBuilder({
     Key key,
     @required this.tween,
-    @required this.duration,
-    this.curve = Curves.linear,
-    this.direction = PlaybackDirection.forward,
-    this.gapless = true,
+    @required Duration duration,
+    Curve curve = Curves.linear,
     @required this.builder,
     this.animationStatusListener,
     this.child,
   }) : assert(tween != null),
-       assert(direction != null),
        assert(curve != null),
-       assert(direction != null),
        assert(builder != null),
-       assert(gapless != null),
-       super(key: key);
+       super(key: key, duration: duration, curve: curve);
 
+  /// Defines the target value for the animation.
+  ///
+  /// When the widget first builds, the animation runs from [Tween.begin] to
+  /// [Tween.end], if [Tween.begin] is non-null. A new animation can be
+  /// triggered at anytime by providing a new [Tween] with a new [Tween.end]
+  /// value. The new animation runs from the current animation value (which may
+  /// be [Tween.end] of the old [tween], if that animation completed) to
+  /// [Tween.end] of the new [tween]. The [Tween.begin] value is ignored except
+  /// for the initial animation that is triggered when the widget builds for the
+  /// first time.
+  ///
+  /// Any (subclass of) [Tween] is accepted as an argument. For example, to
+  /// animate the height or width of a [Widget], use a [Tween<double>], or
+  /// check out the [ColorTween] to animate the color property of a [Widget].
+  ///
+  /// Any [Tween] provided must have a non-null [Tween.end] value.
+  ///
+  /// ## Ownership
+  ///
+  /// The [TweenAnimationBuilder] takes full ownership of the provided [Tween].
+  /// Once a [Tween] instance has been passed to [TweenAnimationBuilder] its
+  /// properties should not be accessed or changed anymore as they may have been
+  /// modified by the [TweenAnimationBuilder]. If you need to change the
+  /// [Tween], create a **new instance** with the new values.
+  ///
+  /// It is good practice to never store a [Tween] provided to a
+  /// [TweenAnimationBuilder] in an instance variable.
   final Tween<T> tween;
-  final Duration duration;
-  final Curve curve;
-  final PlaybackDirection direction;
+
+  /// Called every time the animation value changes.
+  ///
+  /// The current animation value is passed to the builder along with the
+  /// [child]. The builder should build a [Widget] based on the current
+  /// animation value and incorporate the [child] into it, if it is non-null.
   final TweenAnimationBuilderCallback<T> builder;
+
+  /// The child widget to pass to the builder.
+  ///
+  /// If a builder callback's return value contains a subtree that does not
+  /// depend on the animation, it's more efficient to build that subtree once
+  /// instead of rebuilding it on every animation tick.
+  ///
+  /// If the pre-built subtree is passed as the child parameter, the
+  /// [TweenAnimationBuilder] will pass it back to the [builder] function so
+  /// that it can be incorporated into the build.
+  ///
+  /// Using this pre-built child is entirely optional, but can improve
+  /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
+
+  /// Called every time the [AnimationStatus] of the underlying animation
+  /// changes.
+  ///
+  /// This can be useful to trigger additional actions (e.g. another animation)
+  /// at the end of the current animation (which is signaled by
+  /// [AnimationStatus.completed]).
   final AnimationStatusListener animationStatusListener;
-  final bool gapless;
 
   @override
-  State<TweenAnimationBuilder<T>> createState() => _TweenAnimationBuilderState<T>();
+  ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
+    return _TweenAnimationBuilderState<T>();
+  }
 }
 
-class _TweenAnimationBuilderState<T> extends State<TweenAnimationBuilder<T>> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
-  Animation<T> _animation;
+class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimationBuilder<T>> {
+  Tween<T> _currentTween;
 
   @override
   void initState() {
+    widget.tween.begin ??= widget.tween.end;
+    _currentTween = widget.tween;
     super.initState();
-    _controller = AnimationController(vsync: this, duration: widget.duration)
-    ..addListener(() {
-      setState(() { });
-    });
     if (widget.animationStatusListener != null) {
-      _controller.addStatusListener(widget.animationStatusListener);
+      controller.addStatusListener(widget.animationStatusListener);
     }
-    _animation = widget.tween.chain(CurveTween(curve: widget.curve)).animate(_controller);
-    _updateDirection();
+    if (_currentTween.begin != _currentTween.end) {
+      controller.forward();
+    }
   }
-
-  T _cachedBegin;
-  T _cachedEnd;
 
   @override
   void didUpdateWidget(TweenAnimationBuilder<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.duration != widget.duration) {
-      _controller.duration = widget.duration;
-    }
-
     if (oldWidget.animationStatusListener != widget.animationStatusListener) {
       if (oldWidget.animationStatusListener != null) {
-        _controller.removeStatusListener(oldWidget.animationStatusListener);
+        controller.removeStatusListener(oldWidget.animationStatusListener);
       }
       if (widget.animationStatusListener != null) {
-        _controller.addStatusListener(widget.animationStatusListener);
-      }
-    }
-
-    final T currentAnimationValue = _animation.value;
-
-    final bool hasStatusListener = _cachedEnd != null || _cachedBegin != null;
-    T oldBegin = oldWidget.tween.begin;
-    T oldEnd = oldWidget.tween.end;
-    if (_cachedBegin != null) {
-      oldBegin = oldWidget.tween.begin;
-      oldWidget.tween.begin = _cachedBegin;
-      _cachedBegin = null;
-    }
-    if (_cachedEnd != null) {
-      oldEnd = oldWidget.tween.end;
-      oldWidget.tween.end = _cachedEnd;
-      _cachedEnd = null;
-    }
-
-    final bool tweenChanged = oldWidget.tween != widget.tween;
-    final bool directionChanged = oldWidget.direction != widget.direction;
-    final bool curveChanged = oldWidget.curve != widget.curve;
-    final bool triggerAnimation = tweenChanged || directionChanged;
-
-    if (triggerAnimation || (curveChanged && widget.gapless && _controller.isAnimating)) {
-      _temporaryDirectionOverride = null;
-      if (widget.gapless) {
-        _updateTween(currentAnimationValue);
-      }
-      if (_tweenIsAnimatable) {
-        _updateDirection();
-      }
-    } else {
-      // Updated Widget doesn't trigger anything, restore tween to what it was.
-      if (oldBegin != null) {
-        _cachedBegin = widget.tween.begin;
-        widget.tween.begin = oldBegin;
-      }
-      if (oldEnd != null) {
-        _cachedEnd = widget.tween.end;
-        widget.tween.end = oldEnd;
-      }
-    }
-
-    if (!identical(oldWidget.tween, widget.tween) || curveChanged) {
-      _updateAnimation();
-    }
-
-    final bool shouldHaveStatusListener = _cachedEnd != null || _cachedBegin != null;
-    if (hasStatusListener != shouldHaveStatusListener) {
-      if (hasStatusListener) {
-        _controller.removeStatusListener(_resetTweenWhenAnimationIsDone);
-      } else {
-        _controller.addStatusListener(_resetTweenWhenAnimationIsDone);
+        controller.addStatusListener(widget.animationStatusListener);
       }
     }
   }
-
-  void _resetTweenWhenAnimationIsDone(AnimationStatus status) {
-    bool updateDirection = false;
-    switch (status) {
-      case AnimationStatus.dismissed:
-        if (_cachedEnd != null) {
-          widget.tween.end = _cachedEnd;
-          _cachedEnd = null;
-          if (_temporaryDirectionOverride != null) {
-            _temporaryDirectionOverride = null;
-            updateDirection = true;
-          }
-        }
-        break;
-      case AnimationStatus.completed:
-        if (_cachedBegin != null) {
-          widget.tween.begin = _cachedBegin;
-          _cachedBegin = null;
-          if (_temporaryDirectionOverride != null) {
-            _temporaryDirectionOverride = null;
-            updateDirection = true;
-          }
-        }
-        break;
-      case AnimationStatus.forward:
-      case AnimationStatus.reverse:
-        // Nothing to do.
-        break;
-    }
-    if (_cachedEnd == null && _cachedBegin == null) {
-      assert(_temporaryDirectionOverride == null);
-      _controller.removeStatusListener(_resetTweenWhenAnimationIsDone);
-    }
-    if (updateDirection) {
-      _updateDirection();
-    }
-  }
-
-  PlaybackDirection _temporaryDirectionOverride;
-
-  void _updateTween(T currentAnimationValue) {
-    assert(widget.gapless);
-    switch (widget.direction) {
-      case PlaybackDirection.repeat:
-        if (widget.tween.begin != currentAnimationValue) {
-          assert(_cachedBegin == null);
-          _cachedBegin = widget.tween.begin;
-          widget.tween.begin = currentAnimationValue;
-          _temporaryDirectionOverride = PlaybackDirection.forward;
-        }
-        break;
-      case PlaybackDirection.forward:
-        if (widget.tween.begin != currentAnimationValue) {
-          assert(_cachedBegin == null);
-          _cachedBegin = widget.tween.begin;
-          widget.tween.begin = currentAnimationValue;
-        }
-        break;
-      case PlaybackDirection.repeatReverse:
-        // Ideally, we would set begin to the currentValue when the animation
-        // is running forward, and end to the currentValue when the animation
-        // is running in reverse. However, since [AnimationController.repeat]
-        // starts a simulation and simulations always run forward,
-        // we cannot differentiate between the two cases. Therefore, we just
-        // fallthrough here to the forward case.
-        if (widget.tween.end != currentAnimationValue) {
-          assert(_cachedEnd == null);
-          _cachedEnd = widget.tween.end;
-          widget.tween.end = currentAnimationValue;
-          _temporaryDirectionOverride = PlaybackDirection.reverse;
-        }
-        break;
-      case PlaybackDirection.reverse:
-        if (widget.tween.end != currentAnimationValue) {
-          assert(_cachedEnd == null);
-          _cachedEnd = widget.tween.end;
-          widget.tween.end = currentAnimationValue;
-        }
-        break;
-    }
-  }
-
-  void _updateAnimation() {
-    _animation = widget.tween.chain(CurveTween(curve: widget.curve)).animate(_controller);
-  }
-
-  void _updateDirection() {
-    assert(_tweenIsAnimatable);
-    switch (_temporaryDirectionOverride ?? widget.direction) {
-      case PlaybackDirection.forward:
-        _controller.value = 0.0;
-        _controller.forward();
-        break;
-      case PlaybackDirection.reverse:
-        _controller.value = 1.0;
-        _controller.reverse();
-        break;
-      case PlaybackDirection.repeat:
-        _controller.value = 0.0;
-        _controller.repeat();
-        break;
-      case PlaybackDirection.repeatReverse:
-        _controller.value = 0.0;
-        _controller.repeat(reverse: true);
-        break;
-    }
-  }
-
-  bool get _tweenIsAnimatable => widget.tween.begin != widget.tween.end;
 
   @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    assert(
+      widget.tween.end != null,
+      'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
+    );
+    _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
+      assert(false);
+      return null;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context, _animation.value, widget.child);
+    return widget.builder(context, _currentTween.evaluate(animation), widget.child);
   }
 }

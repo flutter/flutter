@@ -37,14 +37,13 @@ void main() {
     expect(values, <int>[10, 60, 110]);
   });
 
-  testWidgets('Animates backwards when built', (WidgetTester tester) async {
+  testWidgets('No initial animation when begin=null', (WidgetTester tester) async {
     final List<int> values = <int>[];
     final List<AnimationStatus> statuses = <AnimationStatus>[];
     await tester.pumpWidget(
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
-        direction: PlaybackDirection.reverse,
-        tween: IntTween(begin: 10, end: 110),
+        tween: IntTween(end: 100),
         builder: (BuildContext context, int i, Widget child) {
           values.add(i);
           return const Placeholder();
@@ -54,29 +53,20 @@ void main() {
         },
       ),
     );
-    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse]);
-    expect(values, <int>[110]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[110, 60]);
-
-    await tester.pump(const Duration(milliseconds: 501));
-    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
-    expect(values, <int>[110, 60, 10]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(statuses, <AnimationStatus>[AnimationStatus.completed, AnimationStatus.reverse, AnimationStatus.dismissed]);
-    expect(values, <int>[110, 60, 10]);
+    expect(statuses, <AnimationStatus>[]);
+    expect(values, <int>[100]);
+    await tester.pump(const Duration(seconds: 2));
+    expect(values, <int>[100]);
   });
 
-  testWidgets('Repeats animation', (WidgetTester tester) async {
+
+  testWidgets('No initial animation when begin=end', (WidgetTester tester) async {
     final List<int> values = <int>[];
     final List<AnimationStatus> statuses = <AnimationStatus>[];
     await tester.pumpWidget(
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
-        direction: PlaybackDirection.repeat,
-        tween: IntTween(begin: 10, end: 110),
+        tween: IntTween(begin: 100, end: 100),
         builder: (BuildContext context, int i, Widget child) {
           values.add(i);
           return const Placeholder();
@@ -86,55 +76,10 @@ void main() {
         },
       ),
     );
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
-    expect(values, <int>[10]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[10, 60]);
-
-    await tester.pump(const Duration(milliseconds: 499));
-    expect(values, <int>[10, 60, 110]);
-
-    await tester.pump(const Duration(milliseconds: 1));
-    expect(values, <int>[10, 60, 110, 10]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
-    expect(values, <int>[10, 60, 110, 10, 60]);
-  });
-
-  testWidgets('Repeats animation reversed', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    final List<AnimationStatus> statuses = <AnimationStatus>[];
-    await tester.pumpWidget(
-      TweenAnimationBuilder<int>(
-        duration: const Duration(seconds: 1),
-        direction: PlaybackDirection.repeatReverse,
-        tween: IntTween(begin: 10, end: 110),
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-        animationStatusListener: (AnimationStatus status) {
-          statuses.add(status);
-        },
-      ),
-    );
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
-    expect(values, <int>[10]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[10, 60]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[10, 60, 110]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[10, 60, 110, 60]);
-
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
-    expect(values, <int>[10, 60, 110, 60, 10]);
+    expect(statuses, <AnimationStatus>[]);
+    expect(values, <int>[100]);
+    await tester.pump(const Duration(seconds: 2));
+    expect(values, <int>[100]);
   });
 
   testWidgets('Replace tween animates new tween', (WidgetTester tester) async {
@@ -223,62 +168,6 @@ void main() {
     expect(values, <int>[100, 125]);
   });
 
-  testWidgets('Direction changes trigger animation', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    Widget buildWidget({PlaybackDirection direction}) {
-      return TweenAnimationBuilder<int>(
-        tween: IntTween(begin: 0, end: 100),
-        direction: direction,
-        duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-      );
-    }
-
-    await tester.pumpWidget(buildWidget(direction: PlaybackDirection.forward));
-    await tester.pump(const Duration(seconds: 2)); // finish animation.
-    expect(values, <int>[0, 100]);
-
-    values.clear();
-    // Update duration (and tween to re-trigger animation).
-    await tester.pumpWidget(buildWidget(direction: PlaybackDirection.reverse));
-    await tester.pump(const Duration(seconds: 2)); // finish animation.
-    expect(values, <int>[100, 0]);
-  });
-
-  testWidgets('animationStatusListener can be changed', (WidgetTester tester) async {
-    Widget buildWidget({PlaybackDirection direction, AnimationStatusListener listener}) {
-      return TweenAnimationBuilder<int>(
-        tween: IntTween(begin: 0, end: 100),
-        direction: direction,
-        duration: const Duration(seconds: 1),
-        animationStatusListener: listener,
-        builder: (BuildContext context, int i, Widget child) {
-          return const Placeholder();
-        },
-      );
-    }
-
-    final List<AnimationStatus> listener1 = <AnimationStatus>[];
-    final List<AnimationStatus> listener2 = <AnimationStatus>[];
-    await tester.pumpWidget(buildWidget(direction: PlaybackDirection.forward, listener: (AnimationStatus s) {
-      listener1.add(s);
-    }));
-    await tester.pump(const Duration(seconds: 2)); // finish animation.
-    expect(listener1, <AnimationStatus>[AnimationStatus.forward, AnimationStatus.completed]);
-    expect(listener2, isEmpty);
-
-    listener1.clear();
-    await tester.pumpWidget(buildWidget(direction: PlaybackDirection.reverse, listener: (AnimationStatus s) {
-      listener2.add(s);
-    }));
-    await tester.pump(const Duration(seconds: 2)); // finish animation.
-    expect(listener1, isEmpty);
-    expect(listener2, <AnimationStatus>[AnimationStatus.reverse, AnimationStatus.dismissed]);
-  });
-
   testWidgets('Child is integrated into tree', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -300,10 +189,9 @@ void main() {
   group('Change tween gapless while', () {
     testWidgets('running forward', (WidgetTester tester) async {
       final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
+      Widget buildWidget({IntTween tween}) {
         return TweenAnimationBuilder<int>(
           tween: tween,
-          direction: direction ?? PlaybackDirection.forward,
           duration: const Duration(seconds: 1),
           builder: (BuildContext context, int i, Widget child) {
             values.add(i);
@@ -332,25 +220,13 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(values, <int>[0, 50, 50, 175, 300]);
       values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-        direction: PlaybackDirection.reverse,
-      ));
-      expect(values, <int>[300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250, 200]);
     });
 
     testWidgets('running forward and then reverse with same tween instance', (WidgetTester tester) async {
       final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
+      Widget buildWidget({IntTween tween}) {
         return TweenAnimationBuilder<int>(
           tween: tween,
-          direction: direction ?? PlaybackDirection.forward,
           duration: const Duration(seconds: 1),
           builder: (BuildContext context, int i, Widget child) {
             values.add(i);
@@ -373,317 +249,7 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(values, <int>[0, 50, 50, 175, 300]);
       values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-        direction: PlaybackDirection.reverse,
-      ));
-      expect(values, <int>[300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250, 200]);
     });
-
-    testWidgets('running reverse', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          direction: direction ?? PlaybackDirection.reverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      expect(values, <int>[100]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[100, 50]);
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[100, 50, 50]); // gapless: animation continues where it left off.
-
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[100, 50, 50, 125]); // 175 = halfway between 50 and new target 200.
-
-      // Run animation to end
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[100, 50, 50, 125, 200]);
-      values.clear();
-
-      // Run animation forward to end
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-        direction: PlaybackDirection.forward,
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-    });
-
-    testWidgets('running reverse and then forward with same tween instance', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          direction: direction ?? PlaybackDirection.reverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      final IntTween tween1 = IntTween(begin: 0, end: 100);
-      final IntTween tween2 = IntTween(begin: 200, end: 300);
-
-      await tester.pumpWidget(buildWidget(
-        tween: tween1,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[100, 50, 50, 125, 200]);
-      values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-        direction: PlaybackDirection.forward,
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-    });
-
-    testWidgets('running repeat', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          direction: PlaybackDirection.repeat,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 499));
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 999));
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 0, 100, 0, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[50]); // gapless: animation continues where it left off.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 175]); // 175 = halfway between 50 and new target 200.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 175, 300]);
-      values.clear();
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 999));
-      expect(values, <int>[200, 300]);
-    });
-
-    testWidgets('running repeatReverse (replaced while runnign forward)', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          direction: PlaybackDirection.repeatReverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 50, 0, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[50]); // gapless: animation continues where it left off.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 125]); // 125 = halfway between 50 and new target 200.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 125, 200]);
-      values.clear();
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 999));
-      expect(values, <int>[200, 250, 300, 200]);
-    });
-
-    testWidgets('running repeatReverse (replaced while runnign reverse)', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          direction: PlaybackDirection.repeatReverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-          animationStatusListener: (AnimationStatus s) {
-            print(s);
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[50]); // gapless: animation continues where it left off.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 125]); // 125 = halfway between 50 and new target 200.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[50, 125, 200]);
-      values.clear();
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 999));
-      expect(values, <int>[200, 250, 300, 200]);
-    });
-  });
-
-  testWidgets('Changing direction while gapless tween change is in progress', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-      return TweenAnimationBuilder<int>(
-        tween: tween,
-        direction: direction,
-        duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-      );
-    }
-
-    final IntTween tween1 = IntTween(begin: 0, end: 100);
-    final IntTween tween2 = IntTween(begin: 200, end: 300);
-
-    await tester.pumpWidget(buildWidget(
-      tween: tween1,
-      direction: PlaybackDirection.forward,
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[0, 50]);
-    values.clear();
-
-    // Change tween
-    await tester.pumpWidget(buildWidget(
-      tween: tween2,
-      direction: PlaybackDirection.forward,
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[50, 175]);
-    values.clear();
-
-    await tester.pumpWidget(buildWidget(
-      tween: tween2,
-      direction: PlaybackDirection.reverse,
-    ));
-    await tester.pump(const Duration(seconds: 2));
-    expect(values, <int>[175, 200]);
-  });
-
-  testWidgets('Changing direction while gapless tween change is in progress (reverse)', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-      return TweenAnimationBuilder<int>(
-        tween: tween,
-        direction: direction,
-        duration: const Duration(seconds: 1),
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-      );
-    }
-
-    final IntTween tween1 = IntTween(begin: 0, end: 100);
-    final IntTween tween2 = IntTween(begin: 200, end: 300);
-
-    await tester.pumpWidget(buildWidget(
-      tween: tween1,
-      direction: PlaybackDirection.reverse,
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[100, 50]);
-    values.clear();
-
-    // Change tween
-    await tester.pumpWidget(buildWidget(
-      tween: tween2,
-      direction: PlaybackDirection.reverse,
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(values, <int>[50, 125]);
-    values.clear();
-
-    await tester.pumpWidget(buildWidget(
-      tween: tween2,
-      direction: PlaybackDirection.forward,
-    ));
-    await tester.pump(const Duration(seconds: 2));
-    expect(values, <int>[125, 300]);
   });
 
   testWidgets('Changing tween while gapless tween change is in progress', (WidgetTester tester) async {
@@ -791,10 +357,9 @@ void main() {
 
   testWidgets('Setting same tween and direction does not trigger animation', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({PlaybackDirection direction, IntTween tween}) {
+    Widget buildWidget({IntTween tween}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
-        direction: direction,
         duration: const Duration(seconds: 1),
         builder: (BuildContext context, int i, Widget child) {
           values.add(i);
@@ -804,7 +369,6 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
       tween: IntTween(begin: 0, end: 100),
     ));
     await tester.pump(const Duration(milliseconds: 500));
@@ -813,53 +377,18 @@ void main() {
     values.clear();
 
     await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
       tween: IntTween(begin: 0, end: 100),
     ));
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(values, everyElement(100));
-  });
-
-  testWidgets('Setting same tween and direction does not trigger animation (gapless: false)', (WidgetTester tester) async {
-    final List<int> values = <int>[];
-    Widget buildWidget({PlaybackDirection direction, IntTween tween}) {
-      return TweenAnimationBuilder<int>(
-        tween: tween,
-        direction: direction,
-        duration: const Duration(seconds: 1),
-        gapless: false,
-        builder: (BuildContext context, int i, Widget child) {
-          values.add(i);
-          return const Placeholder();
-        },
-      );
-    }
-
-    await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
-      tween: IntTween(begin: 0, end: 100),
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(seconds: 2));
-    expect(values, <int>[0, 50, 100]);
-    values.clear();
-
-    await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
-      tween: IntTween(begin: 0, end: 100),
-    ));
-    await tester.pump(const Duration(milliseconds: 500));
-    await tester.pump(const Duration(seconds: 2));
     expect(values, everyElement(100));
   });
 
   testWidgets('Setting same tween and direction while gapless animation is in progress works', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    Widget buildWidget({PlaybackDirection direction, IntTween tween}) {
+    Widget buildWidget({IntTween tween}) {
       return TweenAnimationBuilder<int>(
         tween: tween,
-        direction: direction,
         duration: const Duration(seconds: 1),
         builder: (BuildContext context, int i, Widget child) {
           values.add(i);
@@ -869,20 +398,17 @@ void main() {
     }
 
     await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
       tween: IntTween(begin: 0, end: 100),
     ));
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[0, 50]);
     await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
       tween: IntTween(begin: 200, end: 300),
     ));
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[0, 50, 50, 175]);
 
     await tester.pumpWidget(buildWidget(
-      direction: PlaybackDirection.forward,
       tween: IntTween(begin: 200, end: 300),
     ));
     expect(values, <int>[0, 50, 50, 175, 175]);
@@ -892,309 +418,5 @@ void main() {
     values.clear();
     await tester.pump(const Duration(seconds: 2));
     expect(values, everyElement(300));
-  });
-
-  group('Change tween while', () {
-    testWidgets('running forward', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: direction ?? PlaybackDirection.forward,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      expect(values, <int>[0]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50]);
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[0, 50, 200]);
-
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 200, 250]);
-
-      // Run animation to end
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[0, 50, 200, 250, 300]);
-      values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-        direction: PlaybackDirection.reverse,
-      ));
-      expect(values, <int>[300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250, 200]);
-    });
-
-    testWidgets('running forward and then reverse with same tween instance', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: direction ?? PlaybackDirection.forward,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      final IntTween tween1 = IntTween(begin: 0, end: 100);
-      final IntTween tween2 = IntTween(begin: 200, end: 300);
-
-      await tester.pumpWidget(buildWidget(
-        tween: tween1,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[0, 50, 200, 250, 300]);
-      values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-        direction: PlaybackDirection.reverse,
-      ));
-      expect(values, <int>[300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[300, 250, 200]);
-    });
-
-    testWidgets('running reverse', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: direction ?? PlaybackDirection.reverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      expect(values, <int>[100]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[100, 50]);
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[100, 50, 300]);
-
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[100, 50, 300, 250]);
-
-      // Run animation to end
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[100, 50, 300, 250, 200]);
-      values.clear();
-
-      // Run animation forward to end
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-        direction: PlaybackDirection.forward,
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-    });
-
-    testWidgets('running reverse and then forward with same tween instance', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween, PlaybackDirection direction}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: direction ?? PlaybackDirection.reverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      final IntTween tween1 = IntTween(begin: 0, end: 100);
-      final IntTween tween2 = IntTween(begin: 200, end: 300);
-
-      await tester.pumpWidget(buildWidget(
-        tween: tween1,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(seconds: 2));
-      expect(values, <int>[100, 50, 300, 250, 200]);
-      values.clear();
-
-      // Run animation back to beginning
-      await tester.pumpWidget(buildWidget(
-        tween: tween2,
-        direction: PlaybackDirection.forward,
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-    });
-
-    testWidgets('running repeat', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: PlaybackDirection.repeat,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 499));
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 999));
-      await tester.pump(const Duration(milliseconds: 1));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 0, 100, 0, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]); // 175 = halfway between 50 and new target 200.
-      await tester.pump(const Duration(milliseconds: 499));
-      expect(values, <int>[200, 250, 300]);
-      values.clear();
-
-      await tester.pump(const Duration(milliseconds: 1));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 999));
-      expect(values, <int>[200, 300]);
-    });
-
-    testWidgets('running repeatReverse (replaced while runnign forward)', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: PlaybackDirection.repeatReverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 50, 0, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300, 250, 200]);
-    });
-
-    testWidgets('running repeatReverse (replaced while runnign reverse)', (WidgetTester tester) async {
-      final List<int> values = <int>[];
-      Widget buildWidget({IntTween tween}) {
-        return TweenAnimationBuilder<int>(
-          tween: tween,
-          gapless: false,
-          direction: PlaybackDirection.repeatReverse,
-          duration: const Duration(seconds: 1),
-          builder: (BuildContext context, int i, Widget child) {
-            values.add(i);
-            return const Placeholder();
-          },
-        );
-      }
-
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 0, end: 100),
-      ));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[0, 50, 100, 50]);
-      values.clear();
-
-      // Change tween
-      await tester.pumpWidget(buildWidget(
-        tween: IntTween(begin: 200, end: 300),
-      ));
-      expect(values, <int>[200]);
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250]); // 125 = halfway between 50 and new target 300.
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300]);
-      await tester.pump(const Duration(milliseconds: 500));
-      await tester.pump(const Duration(milliseconds: 500));
-      expect(values, <int>[200, 250, 300, 250, 200]);
-    });
   });
 }
