@@ -17,7 +17,7 @@ import 'theme_data.dart';
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
 /// the checkbox.
 ///
-/// The [value], [onChanged], and [activeColor] properties of this widget are
+/// The [value], [onChanged], [activeColor] and [checkColor] properties of this widget are
 /// identical to the similarly-named properties on the [Checkbox] widget.
 ///
 /// The [title], [subtitle], [isThreeLine], and [dense] properties are like
@@ -268,6 +268,7 @@ class CheckboxListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.checkColor,
     this.title,
     this.subtitle,
     this.isThreeLine = false,
@@ -317,6 +318,11 @@ class CheckboxListTile extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color to use for the check icon when this checkbox is checked.
+  ///
+  /// Defaults to Color(0xFFFFFFFF).
+  final Color checkColor;
+
   /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
@@ -361,6 +367,7 @@ class CheckboxListTile extends StatelessWidget {
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      checkColor: checkColor,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
