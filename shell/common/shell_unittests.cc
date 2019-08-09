@@ -22,6 +22,7 @@
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
+#include "third_party/tonic/converter/dart_converter.h"
 
 namespace flutter {
 namespace testing {
@@ -728,6 +729,39 @@ TEST_F(ShellTest, SetResourceCacheSizeNotifiesDart) {
 
   EXPECT_EQ(GetRasterizerResourceCacheBytesSync(*shell),
             static_cast<size_t>(10000U));
+}
+
+TEST_F(ShellTest, CanCreateImagefromDecompressedBytes) {
+  Settings settings = CreateSettingsForFixture();
+  auto task_runner = GetThreadTaskRunner();
+
+  TaskRunners task_runners("test", task_runner, task_runner, task_runner,
+                           task_runner);
+
+  std::unique_ptr<Shell> shell =
+      CreateShell(std::move(settings), std::move(task_runners));
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canCreateImageFromDecompressedData");
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyWidthHeight",
+                    CREATE_NATIVE_ENTRY([&latch](auto args) {
+                      auto width = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 0));
+                      auto height = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 1));
+                      ASSERT_EQ(width, 10);
+                      ASSERT_EQ(height, 10);
+                      latch.Signal();
+                    }));
+
+  RunEngine(shell.get(), std::move(configuration));
+
+  latch.Wait();
 }
 
 }  // namespace testing
