@@ -10,9 +10,9 @@ import '../../devfs.dart';
 import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
-import '../phases.dart';
+import '../groups.dart';
 
-class AssetsBuildPhase extends BuildPhase {
+class AssetsBuildPhase extends TargetGroup {
   const AssetsBuildPhase();
 
   @override

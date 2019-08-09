@@ -31,6 +31,10 @@ void main() {
       'foobar',
       'example',
     );
+    final NameCollisionException nameCollisionException = NameCollisionException(
+      TestTarget(),
+      TestTarget(),
+    );
 
     expect(
         missingInputException.toString(),
@@ -57,6 +61,10 @@ void main() {
     expect(
         missingDefineException.toString(),
         'Target example required define foobar but it was not provided'
+    );
+    expect(
+        nameCollisionException.toString(),
+        contains('test')
     );
   });
 }

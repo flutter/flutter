@@ -9,7 +9,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_system/build_system.dart';
 import '../build_system/definitions.dart';
-import '../build_system/phases.dart';
+import '../build_system/groups.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';

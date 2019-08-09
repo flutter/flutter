@@ -5,7 +5,7 @@
 import 'package:file/src/interface/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/phases.dart';
+import 'package:flutter_tools/src/build_system/groups.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -24,7 +24,7 @@ void main() {
   test('Can generate reasonable build graph', () => testbed.run(() async {
     final BuildDefinition definition = BuildDefinition(
       name: 'example',
-      phases: <BuildPhase>[
+      groups: <TargetGroup>[
         TestPhaseHello(),
         TestPhaseGoodbye(),
       ]
@@ -37,7 +37,7 @@ void main() {
   }));
 }
 
-class TestPhaseHello extends BuildPhase {
+class TestPhaseHello extends TargetGroup {
   @override
   List<String> get dependencies => <String>[];
 
@@ -52,7 +52,7 @@ class TestPhaseHello extends BuildPhase {
   }
 }
 
-class TestPhaseGoodbye extends BuildPhase {
+class TestPhaseGoodbye extends TargetGroup {
   @override
   List<String> get dependencies => <String>[
     'hello'

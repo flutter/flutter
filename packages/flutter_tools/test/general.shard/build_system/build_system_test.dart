@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
-import 'package:flutter_tools/src/build_system/phases.dart';
+import 'package:flutter_tools/src/build_system/groups.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:mockito/mockito.dart';
@@ -239,7 +239,25 @@ void main() {
     barTarget.dependencies.add(fooTarget);
     fooTarget.dependencies.add(barTarget);
 
-    expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
+    expect(GraphValidater(barTarget).validate, throwsA(isInstanceOf<CycleException>()));
+  });
+
+  test('Can find naming collisions', () {
+    final Target fooTarget = TestTarget()..name = 'foo';
+    final Target fooTarget2 = TestTarget()..name = 'foo';
+    fooTarget2.dependencies.add(fooTarget);
+
+    expect(GraphValidater(fooTarget2).validate, throwsA(isInstanceOf<NameCollisionException>()));
+  });
+
+  test('Allows multiple nodes with same name and identical instance', () {
+    final Target barTarget = TestTarget()..name = 'bar';
+    final Target fooTarget = TestTarget()..name = 'foo';
+    barTarget.dependencies.add(fooTarget);
+    barTarget.dependencies.add(fooTarget);
+
+    // Doesn't throw.
+    GraphValidater(barTarget).validate();
   });
 }
 

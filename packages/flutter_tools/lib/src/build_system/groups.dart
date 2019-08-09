@@ -14,32 +14,32 @@ import 'exceptions.dart';
 class BuildDefinition {
   /// Creates a new [BuildDefinition].
   ///
-  /// Both [name] and [phases] must not be null. Phases must not be empty
+  /// Both [name] and [groups] must not be null. [groups] must not be empty
   /// or [createBuild] will throw a [StateError].
   const BuildDefinition({
     @required this.name,
-    @required this.phases,
+    @required this.groups,
   }) : assert(name != null && name != ''),
-       assert(phases != null);
+       assert(groups != null);
 
   final String name;
-  final List<BuildPhase> phases;
+  final List<TargetGroup> groups;
 
   /// Create the root [Target] to be invoked via the [BuildSystem].
   ///
   /// This method is also responsible for validating the target graph, including
   /// checking for cycles and naming collisions.
   ///
-  /// Throws a [StateError] if [phases] is empty.
+  /// Throws a [StateError] if [groups] is empty.
   // TODO(jonahwilliams): add output file collision detection.
   Future<Target> createBuild(Environment environment) async {
-    if (phases.isEmpty) {
+    if (groups.isEmpty) {
       throw StateError('A BuildDefinition was created with no phases.');
     }
-    // First create an aggregate target for each phase and store then by.
+    // First create an aggregate target for each group and store them by.
     // phase name.
     final Map<String, _AggregateTarget> aggregates = <String, _AggregateTarget>{};
-    for (BuildPhase buildPhase in phases) {
+    for (TargetGroup buildPhase in groups) {
       final List<Target> targets = await buildPhase.plan(environment);
       final _AggregateTarget target = _AggregateTarget(targets, buildPhase);
       aggregates[target.name] = target;
@@ -55,12 +55,12 @@ class BuildDefinition {
         target.dependencies.add(dependency);
       }
     }
-    checkCycles(result);
+    GraphValidater(result).validate();
     return result;
   }
 }
 
-/// A synthetic target created from a list of [BuildPhase] aggregate targets.
+/// A synthetic target created from a list of [TargetGroup] aggregate targets.
 class _RootTarget extends Target {
   _RootTarget(this.dependencies, this.definition);
 
@@ -82,11 +82,11 @@ class _RootTarget extends Target {
   List<Source> get outputs => const <Source>[];
 }
 
-/// A synthetic target created from the result of a [BuildPhase.plan].
+/// A synthetic target created from the result of a [TargetGroup.plan].
 class _AggregateTarget extends Target {
   _AggregateTarget(this.dependencies, this.phase);
 
-  final BuildPhase phase;
+  final TargetGroup phase;
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async { }
@@ -104,39 +104,39 @@ class _AggregateTarget extends Target {
   List<Source> get outputs => const <Source>[];
 }
 
-/// A phase creates a list of targets.
+/// A group creates a list of targets.
 ///
-/// A phase doesn't have explicit dependencies on individual targets. Instead,
+/// A group doesn't have explicit dependencies on individual targets. Instead,
 /// the build system requires all phases in [dependencies] to have run before
 /// this phase.
 ///
-/// A phase's [plan] method will always be run, but the targets that are created
+/// A group's [plan] method will always be run, but the targets that are created
 /// from it may be skipped. This method is always invoked before before build
 /// execution begins.
-abstract class BuildPhase {
-  const BuildPhase();
+abstract class TargetGroup {
+  const TargetGroup();
 
-  /// A build phase that consists entirely of static targets.
+  /// A target group that consists entirely of static targets.
   ///
   /// All of [name], [target], and [dependencies] must not be null.
-  const factory BuildPhase.static({
+  const factory TargetGroup.static({
     @required String name,
     @required Target target,
     @required List<String> dependencies,
-  }) = _StaticBuildPhase;
+  }) = _StaticTargetGroup;
 
-  /// The name of the build phase.
+  /// The name of the target group.
   String get name;
 
-  /// The names of the [BuildPhase]s this phase depends on.
+  /// The names of the [TargetGroup]s this phase depends on.
   List<String> get dependencies;
 
   /// Generate one or more targets for this build phase.
   Future<List<Target>> plan(Environment environment);
 }
 
-class _StaticBuildPhase implements BuildPhase {
-  const _StaticBuildPhase({
+class _StaticTargetGroup implements TargetGroup {
+  const _StaticTargetGroup({
     @required this.name,
     @required this.target,
     @required this.dependencies
@@ -160,21 +160,41 @@ class _StaticBuildPhase implements BuildPhase {
 
 /// Check if there are any dependency cycles in the target.
 ///
-/// Throws a [CycleException] if one is encountered.
-void checkCycles(Target initial) {
-  void checkInternal(Target target, Set<String> visited, Set<String> stack) {
+/// Throws a [CycleException] if a cycle is detected.
+/// Throws a [NameCollisionException] if there exist two nodes with the same
+/// name and different identities.
+class GraphValidater {
+  GraphValidater(this.root);
+
+  final Target root;
+  final Map<String, Target> visited = <String, Target>{};
+
+  void validate() {
+    return _checkInternal(root, visited, <String>{});
+  }
+
+  void _checkInternal(Target target, Map<String, Target> visited, Set<String> stack) {
     if (stack.contains(target.name)) {
+      final Target previousTarget = visited[target.name];
+      // Check that instance is the same.
+      if (!identical(previousTarget, target)) {
+        throw NameCollisionException(previousTarget, target);
+      }
       throw CycleException(stack..add(target.name));
     }
-    if (visited.contains(target.name)) {
+    if (visited.keys.contains(target.name)) {
+      // Check that instance is the same.
+      final Target previousTarget = visited[target.name];
+      if (!identical(previousTarget, target)) {
+        throw NameCollisionException(previousTarget, target);
+      }
       return;
     }
-    visited.add(target.name);
+    visited[target.name] = target;
     stack.add(target.name);
     for (Target dependency in target.dependencies) {
-      checkInternal(dependency, visited, stack);
+      _checkInternal(dependency, visited, stack);
     }
     stack.remove(target.name);
   }
-  checkInternal(initial, <String>{}, <String>{});
 }

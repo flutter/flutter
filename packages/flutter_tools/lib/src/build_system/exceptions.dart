@@ -93,3 +93,18 @@ class MissingDefineException implements Exception {
         'but it was not provided';
   }
 }
+
+/// An exception thrown if multiple targets in the build graph share the same
+/// name but aren't the same instance.
+class NameCollisionException implements Exception {
+  NameCollisionException(this.left, this.right);
+
+  final Target left;
+  final Target right;
+
+  @override
+  String toString() {
+    return 'Target $left and $right are both named ${left.name} but '
+      'were different instances.';
+  }
+}

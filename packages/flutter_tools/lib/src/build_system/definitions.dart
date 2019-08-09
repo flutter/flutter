@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'phases.dart';
+import 'groups.dart';
 import 'targets/assets.dart';
 import 'targets/macos.dart';
 
@@ -16,14 +16,14 @@ final Map<String, BuildDefinition> kAllBuildDefinitions = <String, BuildDefiniti
 /// The build definition for a debug macOS application.
 const BuildDefinition debugMacOSApplication = BuildDefinition(
   name: 'debug_macos_application',
-  phases: <BuildPhase>[
+  groups: <TargetGroup>[
     AssetsBuildPhase(),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'unpack',
       target: UnpackMacOS(),
       dependencies: <String>[],
     ),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[],
@@ -34,14 +34,14 @@ const BuildDefinition debugMacOSApplication = BuildDefinition(
 /// The build definition for a profile macOS application.
 const BuildDefinition profileMacOSApplication = BuildDefinition(
   name: 'profile_macos_application',
-  phases: <BuildPhase>[
+  groups: <TargetGroup>[
     AssetsBuildPhase(),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'unpack',
       target: UnpackMacOS(),
       dependencies: <String>[],
     ),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[],
@@ -52,14 +52,14 @@ const BuildDefinition profileMacOSApplication = BuildDefinition(
 /// The build definition for a release macOS application.
 const BuildDefinition releaseMacOSApplication = BuildDefinition(
   name: 'release_macos_application',
-  phases: <BuildPhase>[
+  groups: <TargetGroup>[
     AssetsBuildPhase(),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'unpack',
       target: UnpackMacOS(),
       dependencies: <String>[],
     ),
-    BuildPhase.static(
+    TargetGroup.static(
       name: 'dart',
       target: CopyKernelDill(),
       dependencies: <String>[],
