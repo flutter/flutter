@@ -63,7 +63,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
+    ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
