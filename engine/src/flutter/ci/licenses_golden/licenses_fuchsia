@@ -1,4 +1,4 @@
-Signature: e788f1a500f7041d1b2da8a1db255d83
+Signature: e41d02e4d056b220e45335868b580a60
 
 UNUSED LICENSES:
 
@@ -3039,8 +3039,6 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/events.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/commands.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.common/wlan_common.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.wlan.stats/wlan_stats.fidl
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/exception.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-cpp/include/lib/async/cpp/trap.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/test_loop.h
@@ -3048,7 +3046,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/tes
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/include/lib/async-testing/test_subloop.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/test_loop.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/async-testing/test_loop_dispatcher.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/exception.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/time.h
 FILE: ../../../fuchsia/sdk/linux/pkg/async/include/lib/async/trap.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fdio/include/lib/fdio/spawn.h
