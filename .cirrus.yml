@@ -87,7 +87,7 @@ task:
         cpu: 4
         memory: 12G
     - name: tests_extras-linux
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
+      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
@@ -343,7 +343,7 @@ task:
       test_all_script:
         - dart --enable-asserts dev\bots\test.dart
     - name: tests_extras-windows
-      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
+      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**', 'dev/**') && $CIRRUS_BRANCH != 'master'"
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tests
