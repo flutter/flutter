@@ -176,6 +176,21 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
       canvas.translate(0.0, drawCallSpacing);
     }
 
+    // Draw a rect inside a rrect with a non-trivial intersection. If the
+    // intersection is trivial (e.g., equals the rrect clip), Skia will optimize
+    // the clip out.
+    //
+    // Add an integral or fractional translation to trigger Skia's non-AA or AA
+    // optimizations (as did before in normal FillRectOp in rrect clip cases).
+    for (double fraction in <double>[0.0, 0.5]) {
+      canvas
+        ..save()
+        ..translate(fraction, fraction)
+        ..clipRRect(ui.RRect.fromLTRBR(8, 8, 328, 248, const ui.Radius.circular(16)))
+        ..drawRect(ui.Rect.fromLTRB(10, 10, 320, 240), ui.Paint())
+        ..restore();
+    }
+
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
     canvas.save();
