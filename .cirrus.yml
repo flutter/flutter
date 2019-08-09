@@ -25,6 +25,7 @@ task:
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
+      skip: "!changesInclude('packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_drive/**', 'packages/flutter_localizations/**', 'packages/flutter_goldens/**', 'bin/internal/**') && $CIRRUS_BRANCH != 'master'"
       env:
         SHARD: docs
         # For uploading master docs to Firebase master branch staging site
