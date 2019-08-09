@@ -83,7 +83,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
         !isFunctionKey(keyLabel)) {
       // Given that |charactersIgnoringModifiers| can contain a String of arbitrary length,
       // limit to a maximum of two unicode scalar values. It is unlikely that a keyboard would produce a code point
-      // bigger than 32 bits, but is still worth defending against this case. 
+      // bigger than 32 bits, but it is still worth defending against this case. 
       assert(charactersIgnoringModifiers.length <= 2);
       int codeUnit = charactersIgnoringModifiers.codeUnitAt(0);
       if (charactersIgnoringModifiers.length == 2) {
