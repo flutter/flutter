@@ -15,6 +15,14 @@ import 'run_command.dart';
 
 typedef ShardRunner = Future<void> Function();
 
+/// A function used to validate the output of a test.
+///
+/// If the output matches expectations, the function shall return null.
+///
+/// If the output does not match expectations, the function shall return an
+/// appropriate error message.
+typedef OutputChecker = String Function(CapturedOutput);
+
 final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
@@ -142,7 +150,7 @@ Future<void> _runSmokeTests() async {
         <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
         workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
         expectNonZeroExit: true,
-        printOutput: false,
+        outputMode: OutputMode.discard,
         timeout: _kShortTimeout,
       ),
     ],
@@ -765,8 +773,6 @@ class EvalResult {
 }
 
 Future<void> _runFlutterWebTest(String workingDirectory, {
-  bool printOutput = true,
-  bool skip = false,
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
@@ -802,6 +808,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
   bool printOutput = true,
+  OutputChecker outputChecker,
   List<String> options = const <String>[],
   bool skip = false,
   Duration timeout = _kLongTimeout,
@@ -809,6 +816,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
+  // Support printing output or capturing it for matching, but not both.
+  assert(_implies(printOutput, outputChecker == null));
+
   final List<String> args = <String>[
     'test',
     ...options,
@@ -838,14 +848,38 @@ Future<void> _runFlutterTest(String workingDirectory, {
   args.addAll(tests);
 
   if (!shouldProcessOutput) {
-    return runCommand(flutter, args,
+    OutputMode outputMode = OutputMode.discard;
+    CapturedOutput output;
+
+    if (outputChecker != null) {
+      outputMode = OutputMode.capture;
+      output = CapturedOutput();
+    } else if (printOutput) {
+      outputMode = OutputMode.print;
+    }
+
+    await runCommand(
+      flutter,
+      args,
       workingDirectory: workingDirectory,
       expectNonZeroExit: expectFailure,
-      printOutput: printOutput,
+      outputMode: outputMode,
+      output: output,
       skip: skip,
       timeout: timeout,
       environment: environment,
     );
+
+    if (outputChecker != null) {
+      final String message = outputChecker(output);
+      if (message != null) {
+        print('$redLine');
+        print(message);
+        print('$redLine');
+        exit(1);
+      }
+    }
+    return;
   }
 
   if (useFlutterTestFormatter) {
@@ -975,3 +1009,8 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('module_host_with_custom_build_test', env: env);
   }
 }
+
+/// Returns true if `p` logically implies `q`, false otherwise.
+///
+/// If `p` is true, `q` must be true.
+bool _implies(bool p, bool q) => !p || q;
