@@ -167,6 +167,7 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
       'Tween provided to TweenAnimationBuilder must have non-null Tween.end value.',
     );
     _currentTween = visitor(_currentTween, widget.tween.end, (dynamic value) {
+      // Constructor will never be called because null is never provided as current tween.
       assert(false);
       return null;
     });
