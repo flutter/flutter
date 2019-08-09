@@ -1737,7 +1737,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [BottomSheet], which becomes the parent of the widget returned by the
+  ///    `builder`.
   ///  * [showBottomSheet], which calls this method given a [BuildContext].
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
