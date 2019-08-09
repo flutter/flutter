@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
@@ -65,6 +66,76 @@ abstract class GoldenFileComparator {
         .join() + '.' + version.toString() + extension
     );
   }
+
+  /// TODO Doc
+  Uri getOutputUri(ColorChannels channel, Uri golden) {
+    return golden;
+  }
+
+  /// TODO Doc
+  static ComparisonResult compareLists<T>(List<int> test, List<int> master) {
+    if (identical(test, master))
+      return ComparisonResult(true);
+
+    if (test == null || master == null)
+      return ComparisonResult(
+        false,
+        failMessage: 'Pixel test failed, null image provided.'
+
+      );
+
+    final Image testImage = decodePng(test);
+    final Image masterImage = decodePng(master);
+    final int width = testImage.width;
+    final int height = testImage.height;
+
+    if (width != masterImage.width || height != masterImage.height)
+      return ComparisonResult(
+        false,
+        failMessage: 'Pixel test failed, image sizes do not match.\n'
+          'Master Image: ${masterImage.width} X ${masterImage.height}\n'
+          'Test Image: ${testImage.width} X ${testImage.height}',
+      );
+
+    int pixelDiffCount = 0;
+    final int totalPixels = width * height;
+    final int transparentPixel = Color.fromRgba(0, 0, 0, 0);
+
+    final Map<ColorChannels, Image> diffs = <ColorChannels, Image>{};
+    for (ColorChannels channel in ColorChannels.values)
+      diffs[channel] = Image(width, height);
+
+    for (int x = 0; x < width; x++) {
+      for (int y =0; y < height; y++) {
+        final int testPixel = testImage.getPixel(x, y);
+        final int masterPixel = masterImage.getPixel(x, y);
+
+        final int redDiff = getRed(testPixel) - getRed(masterPixel);
+        diffs[ColorChannels.red].setPixel(x, y, redDiff == 0 ? transparentPixel : redDiff);
+
+        final int greenDiff = getGreen(testPixel) - getGreen(masterPixel);
+        diffs[ColorChannels.green].setPixel(x, y, greenDiff == 0 ? transparentPixel : greenDiff);
+
+        final int blueDiff = getBlue(testPixel) - getBlue(masterPixel);
+        diffs[ColorChannels.blue].setPixel(x, y, blueDiff == 0 ? transparentPixel : blueDiff);
+
+        final int all = redDiff + greenDiff + blueDiff;
+        diffs[ColorChannels.all].setPixel(x, y, all == 0 ? transparentPixel : all);
+
+        if (all != 0 )
+          pixelDiffCount++;
+      }
+    }
+
+    if (pixelDiffCount > 0) {
+      return ComparisonResult(
+        false,
+        failMessage: 'Pixel test failed, ${pixelDiffCount/totalPixels}% diff detected.',
+        fileOutput: diffs,
+      );
+    }
+    return ComparisonResult(true);
+  }
 }
 
 /// Compares rasterized image bytes against a golden image file.
@@ -116,6 +187,41 @@ set goldenFileComparator(GoldenFileComparator value) {
 ///
 ///   * [goldenFileComparator]
 bool autoUpdateGoldenFiles = false;
+
+/// TODO Doc
+enum ColorChannels {
+  /// TODO Doc
+  red,
+
+  /// TODO Doc
+  green,
+
+  /// TODO Doc
+  blue,
+
+  /// TODO Doc
+  all
+}
+
+/// TODO Doc
+class ComparisonResult {
+  ///TODO Doc
+  ComparisonResult(
+    this.passed, {
+    String failMessage,
+    Map<ColorChannels, Image> fileOutput,
+  }) : error = failMessage,
+       diffs = fileOutput;
+
+  /// TODO Doc
+  final bool passed;
+
+  /// TODO Doc
+  final String error;
+
+  /// TODO Doc
+  final Map<ColorChannels, Image> diffs;
+}
 
 /// Placeholder comparator that is set as the value of [goldenFileComparator]
 /// when the initialization that happens in the test bootstrap either has not
@@ -205,7 +311,21 @@ class LocalFileComparator extends GoldenFileComparator {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
     final List<int> goldenBytes = await goldenFile.readAsBytes();
-    return _areListsEqual<int>(imageBytes, goldenBytes);
+    final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
+
+    if (!result.passed) {
+      String additionalFeedback = '';
+      if(result.diffs != null) {
+        result.diffs.forEach((ColorChannels channel, Image image) {
+          final File output = _getFile(getOutputUri(channel, golden));
+          output.parent.createSync(recursive: true);
+          output.writeAsBytesSync(encodePng(image));
+        });
+        additionalFeedback += '\nFailure feedback can be found at ${basedir.path.toString()}';
+      }
+      throw test_package.TestFailure('Golden "$golden": ' + result.error + additionalFeedback);
+    }
+    return result.passed;
   }
 
   @override
@@ -217,24 +337,5 @@ class LocalFileComparator extends GoldenFileComparator {
 
   File _getFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
-  }
-
-  static bool _areListsEqual<T>(List<T> list1, List<T> list2) {
-    if (identical(list1, list2)) {
-      return true;
-    }
-    if (list1 == null || list2 == null) {
-      return false;
-    }
-    final int length = list1.length;
-    if (length != list2.length) {
-      return false;
-    }
-    for (int i = 0; i < length; i++) {
-      if (list1[i] != list2[i]) {
-        return false;
-      }
-    }
-    return true;
   }
 }

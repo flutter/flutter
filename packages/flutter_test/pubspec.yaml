@@ -17,6 +17,7 @@ dependencies:
 
   # Used by golden file comparator
   path: 1.6.4
+  image: ^2.1.4
 
   # We use FakeAsync and other testing utilities.
   quiver: 2.0.4
