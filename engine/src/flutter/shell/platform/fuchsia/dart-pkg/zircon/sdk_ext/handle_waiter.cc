@@ -81,21 +81,11 @@ void HandleWaiter::OnWaitComplete(async_dispatcher_t* dispatcher,
   // Remove this waiter from the handle.
   handle_->ReleaseWaiter(this);
 
+  // Schedule the callback on the microtask queue.
+  handle_->ScheduleCallback(std::move(callback_), status, signal);
+
   // Clear handle_.
   handle_ = nullptr;
-
-  auto state = callback_.dart_state().lock();
-  FML_DCHECK(state);
-  DartState::Scope scope(state);
-
-  std::vector<Dart_Handle> args{ToDart(status), ToDart(signal->observed)};
-  FML_DCHECK(!callback_.is_empty());
-  Dart_Handle result =
-      Dart_InvokeClosure(callback_.Release(), args.size(), args.data());
-  // If there was an uncaught error from the callback propagate it out.
-  if (tonic::LogIfError(result)) {
-    state->message_handler().UnhandledError(result);
-  }
 }
 
 }  // namespace dart

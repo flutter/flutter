@@ -16,7 +16,29 @@ namespace dart {
 
 IMPLEMENT_WRAPPERTYPEINFO(zircon, Handle);
 
-Handle::Handle(zx_handle_t handle) : handle_(handle) {}
+Handle::Handle(zx_handle_t handle) : handle_(handle) {
+  tonic::DartState* state = tonic::DartState::Current();
+  FML_DCHECK(state);
+  Dart_Handle zircon_lib = Dart_LookupLibrary(ToDart("dart:zircon"));
+  FML_DCHECK(!tonic::LogIfError(zircon_lib));
+
+  Dart_Handle on_wait_completer_type =
+      Dart_GetClass(zircon_lib, ToDart("_OnWaitCompleteClosure"));
+  FML_DCHECK(!tonic::LogIfError(on_wait_completer_type));
+  on_wait_completer_type_.Set(state, on_wait_completer_type);
+
+  Dart_Handle async_lib = Dart_LookupLibrary(ToDart("dart:async"));
+  FML_DCHECK(!tonic::LogIfError(async_lib));
+  async_lib_.Set(state, async_lib);
+
+  Dart_Handle closure_string = ToDart("_closure");
+  FML_DCHECK(!tonic::LogIfError(closure_string));
+  closure_string_.Set(state, closure_string);
+
+  Dart_Handle schedule_microtask_string = ToDart("scheduleMicrotask");
+  FML_DCHECK(!tonic::LogIfError(schedule_microtask_string));
+  schedule_microtask_string_.Set(state, schedule_microtask_string);
+}
 
 Handle::~Handle() {
   if (is_valid()) {
@@ -91,6 +113,36 @@ Dart_Handle Handle::Duplicate(uint32_t rights) {
     return ToDart(Create(ZX_HANDLE_INVALID));
   }
   return ToDart(Create(out_handle));
+}
+
+void Handle::ScheduleCallback(tonic::DartPersistentValue callback,
+                              zx_status_t status,
+                              const zx_packet_signal_t* signal) {
+  auto state = callback.dart_state().lock();
+  FML_DCHECK(state);
+  tonic::DartState::Scope scope(state);
+
+  // Make a new _OnWaitCompleteClosure(callback, status, signal->observed).
+  FML_DCHECK(!callback.is_empty());
+  std::vector<Dart_Handle> constructor_args{callback.Release(), ToDart(status),
+                                            ToDart(signal->observed)};
+  Dart_Handle on_wait_complete_closure =
+      Dart_New(on_wait_completer_type_.Get(), Dart_Null(),
+               constructor_args.size(), constructor_args.data());
+  FML_DCHECK(!tonic::LogIfError(on_wait_complete_closure));
+
+  // The _callback field contains the thunk:
+  // () => callback(status, signal->observed)
+  Dart_Handle closure =
+      Dart_GetField(on_wait_complete_closure, closure_string_.Get());
+  FML_DCHECK(!tonic::LogIfError(closure));
+
+  // Put the thunk on the microtask queue by calling scheduleMicrotask().
+  std::vector<Dart_Handle> sm_args{closure};
+  Dart_Handle sm_result =
+      Dart_Invoke(async_lib_.Get(), schedule_microtask_string_.Get(),
+                  sm_args.size(), sm_args.data());
+  FML_DCHECK(!tonic::LogIfError(sm_result));
 }
 
 // clang-format: off
