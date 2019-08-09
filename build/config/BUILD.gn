@@ -6,15 +6,13 @@ import("//build/config/allocator.gni")
 import("//build/config/crypto.gni")
 import("//build/config/features.gni")
 import("//build/config/ui.gni")
+import("//build/config/dcheck_always_on.gni")
 
 declare_args() {
   # When set, turns off the (normally-on) iterator debugging and related stuff
   # that is normally turned on for Debug builds. These are generally useful for
   # catching bugs but in some cases may cause conflicts or excessive slowness.
   disable_iterator_debugging = false
-
-  # Set to true to enable dcheck in Release builds.
-  dcheck_always_on = false
 
   # Set to true to compile with the OpenGL ES 2.0 conformance tests.
   internal_gles2_conform_tests = false

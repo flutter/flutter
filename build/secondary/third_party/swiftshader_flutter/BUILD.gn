@@ -587,7 +587,7 @@ source_set("main") {
 
 shared_library("egl") {
   if (is_win) {
-    output_name = "libEGL"
+    output_name = "libswiftshader_libEGL"
   } else {
     output_name = "EGL"
   }
@@ -645,7 +645,7 @@ shared_library("egl") {
 
 shared_library("gles") {
   if (is_win) {
-    output_name = "libGLESv2"
+    output_name = "libswiftshader_libGLESv2"
   } else {
     output_name = "GLESv2"
   }

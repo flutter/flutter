@@ -18,3 +18,9 @@ declare_args() {
   # window system events and input.
   use_glfw = false
 }
+
+# For ANGLE build. It's a build option there, but hard-coded here.
+use_x11 = false
+
+# For ANGLE build. It's a build option there, but hard-coded here.
+use_ozone = false
