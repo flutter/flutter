@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -68,11 +69,6 @@ abstract class GoldenFileComparator {
   }
 
   /// TODO Doc
-  Uri getOutputUri(ColorChannels channel, Uri golden) {
-    return golden;
-  }
-
-  /// TODO Doc
   static ComparisonResult compareLists<T>(List<int> test, List<int> master) {
     if (identical(test, master))
       return ComparisonResult(true);
@@ -110,13 +106,13 @@ abstract class GoldenFileComparator {
         final int testPixel = testImage.getPixel(x, y);
         final int masterPixel = masterImage.getPixel(x, y);
 
-        final int redDiff = getRed(testPixel) - getRed(masterPixel);
+        final int redDiff = (getRed(testPixel) - getRed(masterPixel)).abs();
         diffs[ColorChannels.red].setPixel(x, y, redDiff == 0 ? transparentPixel : redDiff);
 
-        final int greenDiff = getGreen(testPixel) - getGreen(masterPixel);
+        final int greenDiff = (getGreen(testPixel) - getGreen(masterPixel)).abs();
         diffs[ColorChannels.green].setPixel(x, y, greenDiff == 0 ? transparentPixel : greenDiff);
 
-        final int blueDiff = getBlue(testPixel) - getBlue(masterPixel);
+        final int blueDiff = (getBlue(testPixel) - getBlue(masterPixel)).abs();
         diffs[ColorChannels.blue].setPixel(x, y, blueDiff == 0 ? transparentPixel : blueDiff);
 
         final int all = redDiff + greenDiff + blueDiff;
@@ -317,7 +313,7 @@ class LocalFileComparator extends GoldenFileComparator {
       String additionalFeedback = '';
       if(result.diffs != null) {
         result.diffs.forEach((ColorChannels channel, Image image) {
-          final File output = _getFile(getOutputUri(channel, golden));
+          final File output = _getFile(_getOutputUri(channel, golden));
           output.parent.createSync(recursive: true);
           output.writeAsBytesSync(encodePng(image));
         });
@@ -337,5 +333,14 @@ class LocalFileComparator extends GoldenFileComparator {
 
   File _getFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
+  }
+
+  /// TODO Doc
+  Uri _getOutputUri(ColorChannels channel, Uri golden) {
+    // split by separator
+    // append output directory
+    // append to test file name (last path segment) to create new file name
+    // join and return
+    return golden;
   }
 }
