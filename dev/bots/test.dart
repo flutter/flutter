@@ -817,7 +817,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   List<String> tests = const <String>[],
 }) async {
   // Support printing output or capturing it for matching, but not both.
-  assert(_implies(printOutput, outputChecker == null));
+  assert(!printOutput || outputChecker == null);
 
   final List<String> args = <String>[
     'test',
@@ -1009,8 +1009,3 @@ Future<void> _androidGradleTests(String subShard) async {
     await _runDevicelabTest('module_host_with_custom_build_test', env: env);
   }
 }
-
-/// Returns true if `p` logically implies `q`, false otherwise.
-///
-/// If `p` is true, `q` must be true.
-bool _implies(bool p, bool q) => !p || q;
