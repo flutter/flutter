@@ -114,9 +114,9 @@ class FlutterDriverExtension {
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
       'waitForCondition': _waitForCondition,
-      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks, // ignore: deprecated_member_use
-      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame, // ignore: deprecated_member_use
-      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized, // ignore: deprecated_member_use
+      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks, // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': _waitUntilNoPendingFrame, // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': _waitUntilFirstFrameRasterized, // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
       'get_diagnostics_tree': _getDiagnosticsTree,
@@ -137,9 +137,9 @@ class FlutterDriverExtension {
       'waitFor': (Map<String, String> params) => WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitForCondition': (Map<String, String> params) => WaitForCondition.deserialize(params),
-      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params), // ignore: deprecated_member_use
-      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params), // ignore: deprecated_member_use
-      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params), // ignore: deprecated_member_use
+      'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilNoPendingFrame': (Map<String, String> params) => WaitUntilNoPendingFrame.deserialize(params), // ignore: deprecated_member_use_from_same_package
+      'waitUntilFirstFrameRasterized': (Map<String, String> params) => WaitUntilFirstFrameRasterized.deserialize(params), // ignore: deprecated_member_use_from_same_package
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
       'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),

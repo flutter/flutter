@@ -4,10 +4,6 @@
 
 import 'package:meta/meta.dart';
 
-import 'error.dart';
-import 'find.dart';
-import 'wait.dart';
-
 /// An object sent from the Flutter Driver to a Flutter application to instruct
 /// the application to perform a task.
 abstract class Command {
