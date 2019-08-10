@@ -620,7 +620,13 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
     final Template template = Template.fromName(templateName);
-    return template.render(directory, context, overwriteExisting: overwrite);
+    try {
+      return template.render(directory, context, overwriteExisting: overwrite);
+    } on FileSystemException catch (err) {
+      printError(err.toString());
+      throwToolExit('Failed to create at ${directory.path}.');
+      return 0;
+    }
   }
 
   int _injectGradleWrapper(FlutterProject project) {

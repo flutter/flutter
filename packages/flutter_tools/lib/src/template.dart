@@ -62,6 +62,9 @@ class Template {
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
+  /// Render the template into [directory].
+  ///
+  /// May throw a [FilesystemException] if the directory is not writable.
   int render(
     Directory destination,
     Map<String, dynamic> context, {
