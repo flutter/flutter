@@ -113,14 +113,18 @@ Future<void> runCommand(String executable, List<String> arguments, {
     .where((String line) => removeLine == null || !removeLine(line))
     .map((String line) => '$line\n')
     .transform(const Utf8Encoder());
-  if (outputMode == OutputMode.print) {
-    await Future.wait<void>(<Future<void>>[
-      stdout.addStream(stdoutSource),
-      stderr.addStream(process.stderr),
-    ]);
-  } else {
-    savedStdout = stdoutSource.toList();
-    savedStderr = process.stderr.toList();
+  switch (outputMode) {
+    case OutputMode.print:
+      await Future.wait<void>(<Future<void>>[
+        stdout.addStream(stdoutSource),
+        stderr.addStream(process.stderr),
+      ]);
+      break;
+    case OutputMode.capture:
+    case OutputMode.discard:
+      savedStdout = stdoutSource.toList();
+      savedStderr = process.stderr.toList();
+      break;
   }
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
@@ -145,9 +149,14 @@ Future<void> runCommand(String executable, List<String> arguments, {
 
     // Print the output when we get unexpected results (unless output was
     // printed already).
-    if (outputMode != OutputMode.print) {
-      stdout.writeln(flattenToString(await savedStdout));
-      stderr.writeln(flattenToString(await savedStderr));
+    switch (outputMode) {
+      case OutputMode.print:
+        break;
+      case OutputMode.capture:
+      case OutputMode.discard:
+        stdout.writeln(flattenToString(await savedStdout));
+        stderr.writeln(flattenToString(await savedStderr));
+        break;
     }
     print(
         '$redLine\n'
