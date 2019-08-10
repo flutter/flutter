@@ -463,7 +463,7 @@ class IOSSimulator extends Device {
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch?.group(2)) ?? 11;
+    return int.tryParse(sdkMatch?.group(2)) ?? 11;
   }
 
   @override
