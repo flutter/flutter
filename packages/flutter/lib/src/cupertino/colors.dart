@@ -158,12 +158,12 @@ class CupertinoDynamicColor extends Color {
          color,
          <List<List<Color>>>[
            <List<Color>>[
-             <Color>[color, elevatedColor],
-             <Color>[highContrastColor, highContrastElevatedColor],
-           ],
-           <List<Color>>[
              <Color>[darkColor, darkElevatedColor],
              <Color>[darkHighContrastColor, darkHighContrastElevatedColor],
+           ],
+          <List<Color>>[
+             <Color>[color, elevatedColor],
+             <Color>[highContrastColor, highContrastElevatedColor],
            ],
          ],
        );
@@ -215,42 +215,42 @@ class CupertinoDynamicColor extends Color {
           return (a is Iterable<Object>) ? a.expand<Object>(expand) : <Object>[a];
         }
 
-        final Iterable<Color> expanded = expand(_colorMap);
+        final Iterable<Object> expanded = expand(_colorMap);
         return !expanded.contains(null) && expanded.length == 8 && expanded.contains(value);
       }()),
       super(value.value);
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and base interface elevation.
-  Color get color => _colorMap[0][0][0];
+  Color get color => _colorMap[1][0][0];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
-  Color get darkColor => _colorMap[1][0][0];
+  Color get darkColor => _colorMap[0][0][0];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
-  Color get highContrastColor => _colorMap[0][1][0];
+  Color get highContrastColor => _colorMap[1][1][0];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
-  Color get darkHighContrastColor => _colorMap[1][1][0];
+  Color get darkHighContrastColor => _colorMap[0][1][0];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
-  Color get elevatedColor => _colorMap[0][0][1];
+  Color get elevatedColor => _colorMap[1][0][1];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
-  Color get darkElevatedColor => _colorMap[1][0][1];
+  Color get darkElevatedColor => _colorMap[0][0][1];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
-  Color get highContrastElevatedColor => _colorMap[0][1][1];
+  Color get highContrastElevatedColor => _colorMap[1][1][1];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
-  Color get darkHighContrastElevatedColor => _colorMap[1][1][1];
+  Color get darkHighContrastElevatedColor => _colorMap[0][1][1];
 
   final List<List<List<Color>>> _colorMap;
 
@@ -352,7 +352,19 @@ class CupertinoDynamicColor extends Color {
   }
 
   @override
-  int get hashCode => hashValues(hashList(_colorMap), value);
+  int get hashCode {
+    return hashValues(
+      value,
+      color,
+      darkColor,
+      highContrastColor,
+      elevatedColor,
+      darkElevatedColor,
+      darkHighContrastColor,
+      darkHighContrastElevatedColor,
+      highContrastElevatedColor,
+    );
+  }
 
   @override
   String toString() {
@@ -365,11 +377,11 @@ class CupertinoDynamicColor extends Color {
       toString('color', color),
       if (_isPlatformBrightnessDependent) toString('darkColor', darkColor),
       if (_isHighContrastDependent) toString('highContrastColor', highContrastColor),
-      if (_isPlatformBrightnessDependent || _isHighContrastDependent) toString('darkHighContrastColor', darkHighContrastColor),
+      if (_isPlatformBrightnessDependent && _isHighContrastDependent) toString('darkHighContrastColor', darkHighContrastColor),
       if (_isInterfaceElevationDependent) toString('elevatedColor', elevatedColor),
-      if (_isPlatformBrightnessDependent || _isInterfaceElevationDependent) toString('darkElevatedColor', darkElevatedColor),
-      if (_isHighContrastDependent || _isInterfaceElevationDependent) toString('highContrastElevatedColor', highContrastElevatedColor),
-      if (_isPlatformBrightnessDependent || _isHighContrastDependent || _isInterfaceElevationDependent) toString('darkHighContrastElevatedColor', darkHighContrastElevatedColor),
+      if (_isPlatformBrightnessDependent && _isInterfaceElevationDependent) toString('darkElevatedColor', darkElevatedColor),
+      if (_isHighContrastDependent && _isInterfaceElevationDependent) toString('highContrastElevatedColor', highContrastElevatedColor),
+      if (_isPlatformBrightnessDependent && _isHighContrastDependent && _isInterfaceElevationDependent) toString('darkHighContrastElevatedColor', darkHighContrastElevatedColor),
     ];
 
     return '$runtimeType(${xs.join(', ')})';
