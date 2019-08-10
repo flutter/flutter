@@ -65,9 +65,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       )
       ..addFlag(
         'consumer-only',
-        help: 'Only prints the dependency graph that is the transitive closure'
-              'that a consumer of the Flutter SDK will observe (When combined '
-              'with transitive-closure)',
+        help: 'Only update packages relevant to consumers of the Flutter SDK',
         defaultsTo: false,
         negatable: false,
       )
@@ -76,6 +74,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         help: 'verifies the package checksum without changing or updating deps',
         defaultsTo: false,
         negatable: false,
+      )
+      ..addFlag(
+        'coverage',
+        help: 'Download Flutter lcov data',
+        defaultsTo: true,
+        negatable: true,
       );
   }
 
@@ -122,11 +126,6 @@ class UpdatePackagesCommand extends FlutterCommand {
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
-      if (!isPrintTransitiveClosure) {
-        throwToolExit(
-          '--consumer-only can only be used with the --transitive-closure flag'
-        );
-      }
       // Only retain flutter, flutter_test, flutter_driver, and flutter_localizations.
       const List<String> consumerPackages = <String>['flutter', 'flutter_test', 'flutter_driver', 'flutter_localizations'];
       // ensure we only get flutter/packages
@@ -325,7 +324,9 @@ class UpdatePackagesCommand extends FlutterCommand {
       count += 1;
     }
 
-    await _downloadCoverageData();
+    if (argResults['coverage']) {
+      await _downloadCoverageData();
+    }
 
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
