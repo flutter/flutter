@@ -1,4 +1,4 @@
-Signature: 1a00e182162322a120ff175a5d29c02a
+Signature: 3ce91d077a3d7736b90c7d1b2d7fbc78
 
 UNUSED LICENSES:
 
@@ -4836,6 +4836,8 @@ FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.cpp
 FILE: ../../../third_party/skia/src/gpu/GrShaderUtils.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureResolveManager.h
+FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.cpp
+FILE: ../../../third_party/skia/src/gpu/GrTextureResolveRenderTask.h
 FILE: ../../../third_party/skia/src/gpu/GrUtil.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
@@ -5009,6 +5011,8 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnProgramDataManager.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.cpp
