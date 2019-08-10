@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
-import 'package:flutter_driver/src/common/wait.dart';
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -29,6 +28,7 @@ import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
+import '../common/wait.dart';
 import 'common.dart';
 import 'timeline.dart';
 
@@ -510,7 +510,7 @@ class FlutterDriver {
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
   Future<void> waitUntilFirstFrameRasterized() async {
-    await _sendCommand(const WaitUntilFirstFrameRasterized());
+    await _sendCommand(const WaitForCondition(FirstFrameRasterizedCondition()));
   }
 
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
