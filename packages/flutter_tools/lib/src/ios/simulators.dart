@@ -90,7 +90,7 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
     try {
-      return json.decode(results.stdout)[section.name];
+      return json.decode(results.stdout?.toString())[section.name] as Map<String, dynamic>;
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
@@ -107,7 +107,7 @@ class SimControl {
     final Map<String, dynamic> devicesSection = await _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
-      final List<dynamic> devicesData = devicesSection[deviceCategory];
+      final List<dynamic> devicesData = devicesSection[deviceCategory] as List<dynamic>;
       for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
         devices.add(SimDevice(deviceCategory, data));
       }
@@ -220,10 +220,10 @@ class SimDevice {
   final String category;
   final Map<String, dynamic> data;
 
-  String get state => data['state'];
-  String get availability => data['availability'];
-  String get name => data['name'];
-  String get udid => data['udid'];
+  String get state => data['state']?.toString();
+  String get availability => data['availability']?.toString();
+  String get name => data['name']?.toString();
+  String get udid => data['udid']?.toString();
 
   bool get isBooted => state == 'Booted';
 }
@@ -269,7 +269,7 @@ class IOSSimulator extends Device {
   @override
   Future<bool> installApp(ApplicationPackage app) async {
     try {
-      final IOSApp iosApp = app;
+      final IOSApp iosApp = app as IOSApp;
       await SimControl.instance.install(id, iosApp.simulatorBundlePath);
       return true;
     } catch (e) {
@@ -371,7 +371,7 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final IOSApp iosApp = package;
+      final IOSApp iosApp = package as IOSApp;
       final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
       final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
 
@@ -412,7 +412,7 @@ class IOSSimulator extends Device {
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
-      app: app,
+      app: app as BuildableIOSApp,
       buildInfo: debugBuildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
@@ -422,7 +422,7 @@ class IOSSimulator extends Device {
       throwToolExit('Could not build the application for the simulator.');
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final IOSApp iosApp = app;
+    final IOSApp iosApp = app as IOSApp;
     final Directory bundle = fs.directory(iosApp.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists)
@@ -463,14 +463,14 @@ class IOSSimulator extends Device {
 
   Future<int> get sdkMajorVersion async {
     final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
-    return int.parse(sdkMatch?.group(2) ?? 11);
+    return int.parse(sdkMatch?.group(2)) ?? 11;
   }
 
   @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
-    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
+    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app as IOSApp));
   }
 
   @override
