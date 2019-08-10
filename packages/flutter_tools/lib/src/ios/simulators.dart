@@ -46,11 +46,12 @@ class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
   static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
-  List<IOSSimulator> getAttachedDevices() {
+  Future<List<IOSSimulator>> getAttachedDevices() async {
     if (!xcode.isInstalledAndMeetsVersionCheck)
       return <IOSSimulator>[];
 
-    return SimControl.instance.getConnectedDevices().map<IOSSimulator>((SimDevice device) {
+    final List<SimDevice> connected = await SimControl.instance.getConnectedDevices();
+    return connected.map<IOSSimulator>((SimDevice device) {
       return IOSSimulator(device.udid, name: device.name, simulatorCategory: device.category);
     }).toList();
   }
@@ -63,7 +64,7 @@ class SimControl {
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
-  Map<String, dynamic> _list(SimControlListSection section) {
+  Future<Map<String, dynamic>> _list(SimControlListSection section) async {
     // Sample output from `simctl list --json`:
     //
     // {
@@ -83,20 +84,27 @@ class SimControl {
 
     final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
     printTrace(command.join(' '));
-    final ProcessResult results = processManager.runSync(command);
+    final ProcessResult results = await processManager.run(command);
     if (results.exitCode != 0) {
       printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
     }
-
-    return json.decode(results.stdout)[section.name];
+    try {
+      return json.decode(results.stdout)[section.name];
+    } on FormatException {
+      // We failed to parse the simctl output, or it returned junk.
+      // One known message is "Install Started" isn't valid JSON but is
+      // returned sometimes.
+      printError('simctl returned non-JSON response: ${results.stdout}');
+      return <String, dynamic>{};
+    }
   }
 
   /// Returns a list of all available devices, both potential and connected.
-  List<SimDevice> getDevices() {
+  Future<List<SimDevice>> getDevices() async {
     final List<SimDevice> devices = <SimDevice>[];
 
-    final Map<String, dynamic> devicesSection = _list(SimControlListSection.devices);
+    final Map<String, dynamic> devicesSection = await _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
       final List<dynamic> devicesData = devicesSection[deviceCategory];
@@ -109,8 +117,9 @@ class SimControl {
   }
 
   /// Returns all the connected simulator devices.
-  List<SimDevice> getConnectedDevices() {
-    return getDevices().where((SimDevice device) => device.isBooted).toList();
+  Future<List<SimDevice>> getConnectedDevices() async {
+    final List<SimDevice> simDevices = await getDevices();
+    return simDevices.where((SimDevice device) => device.isBooted).toList();
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
