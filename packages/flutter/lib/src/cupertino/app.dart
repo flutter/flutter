@@ -337,7 +337,7 @@ class CupertinoSystemColors extends InheritedWidget {
   /// from the given [BuildContext] to its descendants.
   ///
   /// The [context] and [child] arguments must not be null.
-  CupertinoSystemColors.fromCurrentContext({
+  CupertinoSystemColors.fromBuildContext({
     Key key,
     BuildContext context,
     Widget child,
@@ -348,14 +348,17 @@ class CupertinoSystemColors extends InheritedWidget {
   @override
   bool updateShouldNotify(CupertinoSystemColors oldWidget) => oldWidget._data != _data;
 
-
   /// Retrieves the iOS system colors from the given [BuildContext].
   ///
-  /// Falls back to [fromSystem] and then [fallbackValues], if such information
-  /// is not available in the given [BuildContext].
-  static CupertinoSystemColorsData of(BuildContext context) {
+  /// Falls back to [fromSystem] if a [CupertinoSystemColors] widget couldn't be
+  /// found in the ancestry tree. When [fromSystem] returns null, setting [useFallbackValues]
+  /// to true will make the method return a set of default system colors extracted
+  /// from iOS 13 beta.
+  static CupertinoSystemColorsData of(BuildContext context, { bool useFallbackValues = true }) {
+    assert(context != null);
+    assert(useFallbackValues != null);
     final CupertinoSystemColors widget = context.inheritFromWidgetOfExactType(CupertinoSystemColors);
-    return widget?._data ?? fromSystem ?? fallbackValues;
+    return widget?._data ?? fromSystem ?? (useFallbackValues ? fallbackValues : null);
   }
 
   /// System Colors fetched from the OS.
@@ -367,10 +370,11 @@ class CupertinoSystemColors extends InheritedWidget {
   /// Fallback System Colors, extracted from:
   /// https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/color/#dynamic-system-colors
   /// and iOS 13 beta.
+  @visibleForTesting
   static CupertinoSystemColorsData get fallbackValues {
     return CupertinoSystemColorsData(
       label: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 0, 0, 0),
+        color: const Color.fromARGB(255, 0, 0, 0),
         darkColor: const Color.fromARGB(255, 255, 255, 255),
         highContrastColor: const Color.fromARGB(255, 0, 0, 0),
         darkHighContrastColor: const Color.fromARGB(255, 255, 255, 255),
@@ -380,7 +384,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       secondaryLabel: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 0, 0, 0),
+        color: const Color.fromARGB(255, 0, 0, 0),
         darkColor: const Color.fromARGB(255, 255, 255, 255),
         highContrastColor: const Color.fromARGB(255, 0, 0, 0),
         darkHighContrastColor: const Color.fromARGB(255, 255, 255, 255),
@@ -390,7 +394,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 255, 255, 255),
       ),
       tertiaryLabel: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(76, 60, 60, 67),
+        color: const Color.fromARGB(76, 60, 60, 67),
         darkColor: const Color.fromARGB(76, 235, 235, 245),
         highContrastColor: const Color.fromARGB(96, 60, 60, 67),
         darkHighContrastColor: const Color.fromARGB(96, 235, 235, 245),
@@ -400,7 +404,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(96, 235, 235, 245),
       ),
       quaternaryLabel: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(45, 60, 60, 67),
+        color: const Color.fromARGB(45, 60, 60, 67),
         darkColor: const Color.fromARGB(40, 235, 235, 245),
         highContrastColor: const Color.fromARGB(66, 60, 60, 67),
         darkHighContrastColor: const Color.fromARGB(61, 235, 235, 245),
@@ -410,7 +414,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(61, 235, 235, 245),
       ),
       systemFill: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(51, 120, 120, 128),
+        color: const Color.fromARGB(51, 120, 120, 128),
         darkColor: const Color.fromARGB(91, 120, 120, 128),
         highContrastColor: const Color.fromARGB(71, 120, 120, 128),
         darkHighContrastColor: const Color.fromARGB(112, 120, 120, 128),
@@ -420,7 +424,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(112, 120, 120, 128),
       ),
       secondarySystemFill: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(153, 60, 60, 67),
+        color: const Color.fromARGB(153, 60, 60, 67),
         darkColor: const Color.fromARGB(153, 235, 235, 245),
         highContrastColor: const Color.fromARGB(173, 60, 60, 67),
         darkHighContrastColor: const Color.fromARGB(173, 235, 235, 245),
@@ -430,7 +434,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(173, 235, 235, 245),
       ),
       tertiarySystemFill: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(30, 118, 118, 128),
+        color: const Color.fromARGB(30, 118, 118, 128),
         darkColor: const Color.fromARGB(61, 118, 118, 128),
         highContrastColor: const Color.fromARGB(51, 118, 118, 128),
         darkHighContrastColor: const Color.fromARGB(81, 118, 118, 128),
@@ -440,7 +444,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(81, 118, 118, 128),
       ),
       quaternarySystemFill: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(20, 116, 116, 128),
+        color: const Color.fromARGB(20, 116, 116, 128),
         darkColor: const Color.fromARGB(45, 118, 118, 128),
         highContrastColor: const Color.fromARGB(40, 116, 116, 128),
         darkHighContrastColor: const Color.fromARGB(66, 118, 118, 128),
@@ -450,7 +454,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(66, 118, 118, 128),
       ),
       placeholderText: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(76, 60, 60, 67),
+        color: const Color.fromARGB(76, 60, 60, 67),
         darkColor: const Color.fromARGB(76, 235, 235, 245),
         highContrastColor: const Color.fromARGB(96, 60, 60, 67),
         darkHighContrastColor: const Color.fromARGB(96, 235, 235, 245),
@@ -460,7 +464,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(96, 235, 235, 245),
       ),
       systemBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 255, 255, 255),
+        color: const Color.fromARGB(255, 255, 255, 255),
         darkColor: const Color.fromARGB(255, 0, 0, 0),
         highContrastColor: const Color.fromARGB(255, 255, 255, 255),
         darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
@@ -470,7 +474,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
       ),
       secondarySystemBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        color: const Color.fromARGB(255, 242, 242, 247),
         darkColor: const Color.fromARGB(255, 28, 28, 30),
         highContrastColor: const Color.fromARGB(255, 235, 235, 240),
         darkHighContrastColor: const Color.fromARGB(255, 36, 36, 38),
@@ -480,7 +484,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 54, 54, 56),
       ),
       tertiarySystemBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 255, 255, 255),
+        color: const Color.fromARGB(255, 255, 255, 255),
         darkColor: const Color.fromARGB(255, 44, 44, 46),
         highContrastColor: const Color.fromARGB(255, 255, 255, 255),
         darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
@@ -490,7 +494,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 68, 68, 70),
       ),
       systemGroupedBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        color: const Color.fromARGB(255, 242, 242, 247),
         darkColor: const Color.fromARGB(255, 0, 0, 0),
         highContrastColor: const Color.fromARGB(255, 235, 235, 240),
         darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
@@ -500,7 +504,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
       ),
       secondarySystemGroupedBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        color: const Color.fromARGB(255, 242, 242, 247),
         darkColor: const Color.fromARGB(255, 0, 0, 0),
         highContrastColor: const Color.fromARGB(255, 235, 235, 240),
         darkHighContrastColor: const Color.fromARGB(255, 0, 0, 0),
@@ -510,7 +514,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 36, 36, 38),
       ),
       tertiarySystemGroupedBackground: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        color: const Color.fromARGB(255, 242, 242, 247),
         darkColor: const Color.fromARGB(255, 44, 44, 46),
         highContrastColor: const Color.fromARGB(255, 235, 235, 240),
         darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
@@ -520,7 +524,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 68, 68, 70),
       ),
       separator: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(73, 60, 60, 67),
+        color: const Color.fromARGB(73, 60, 60, 67),
         darkColor: const Color.fromARGB(153, 84, 84, 88),
         highContrastColor: const Color.fromARGB(94, 60, 60, 67),
         darkHighContrastColor: const Color.fromARGB(173, 84, 84, 88),
@@ -530,7 +534,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(173, 84, 84, 88),
       ),
       opaqueSeparator: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 198, 198, 200),
+        color: const Color.fromARGB(255, 198, 198, 200),
         darkColor: const Color.fromARGB(255, 56, 56, 58),
         highContrastColor: const Color.fromARGB(255, 198, 198, 200),
         darkHighContrastColor: const Color.fromARGB(255, 56, 56, 58),
@@ -540,7 +544,7 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 56, 56, 58),
       ),
       link: CupertinoDynamicColor(
-        normalColor: const Color.fromARGB(255, 0, 122, 255),
+        color: const Color.fromARGB(255, 0, 122, 255),
         darkColor: const Color.fromARGB(255, 9, 132, 255),
         highContrastColor: const Color.fromARGB(255, 0, 122, 255),
         darkHighContrastColor: const Color.fromARGB(255, 9, 132, 255),
@@ -550,91 +554,91 @@ class CupertinoSystemColors extends InheritedWidget {
         darkHighContrastElevatedColor: const Color.fromARGB(255, 9, 132, 255),
       ),
       systemBlue: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 0, 122, 255),
+        color: const Color.fromARGB(255, 0, 122, 255),
         darkColor: const Color.fromARGB(255, 10, 132, 255),
         highContrastColor: const Color.fromARGB(255, 0, 64, 221),
         darkHighContrastColor: const Color.fromARGB(255, 64, 156, 255),
       ),
       systemGreen: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 52, 199, 89),
+        color: const Color.fromARGB(255, 52, 199, 89),
         darkColor: const Color.fromARGB(255, 48, 209, 88),
         highContrastColor: const Color.fromARGB(255, 36, 138, 61),
         darkHighContrastColor: const Color.fromARGB(255, 48, 219, 91),
       ),
       systemIndigo: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 88, 86, 214),
+        color: const Color.fromARGB(255, 88, 86, 214),
         darkColor: const Color.fromARGB(255, 94, 92, 230),
         highContrastColor: const Color.fromARGB(255, 54, 52, 163),
         darkHighContrastColor: const Color.fromARGB(255, 125, 122, 255),
       ),
       systemOrange: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 255, 149, 0),
+        color: const Color.fromARGB(255, 255, 149, 0),
         darkColor: const Color.fromARGB(255, 255, 159, 10),
         highContrastColor: const Color.fromARGB(255, 201, 52, 0),
         darkHighContrastColor: const Color.fromARGB(255, 255, 179, 64),
       ),
       systemPink: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 255, 45, 85),
+        color: const Color.fromARGB(255, 255, 45, 85),
         darkColor: const Color.fromARGB(255, 255, 55, 95),
         highContrastColor: const Color.fromARGB(255, 211, 15, 69),
         darkHighContrastColor: const Color.fromARGB(255, 255, 100, 130),
       ),
       systemPurple: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 175, 82, 222),
+        color: const Color.fromARGB(255, 175, 82, 222),
         darkColor: const Color.fromARGB(255, 191, 90, 242),
         highContrastColor: const Color.fromARGB(255, 137, 68, 171),
         darkHighContrastColor: const Color.fromARGB(255, 218, 143, 255),
       ),
       systemRed: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 255, 59, 48),
+        color: const Color.fromARGB(255, 255, 59, 48),
         darkColor: const Color.fromARGB(255, 255, 69, 58),
         highContrastColor: const Color.fromARGB(255, 215, 0, 21),
         darkHighContrastColor: const Color.fromARGB(255, 255, 105, 97),
       ),
       systemTeal: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 90, 200, 250),
+        color: const Color.fromARGB(255, 90, 200, 250),
         darkColor: const Color.fromARGB(255, 100, 210, 255),
         highContrastColor: const Color.fromARGB(255, 0, 113, 164),
         darkHighContrastColor: const Color.fromARGB(255, 112, 215, 255),
       ),
       systemYellow: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 255, 204, 0),
+        color: const Color.fromARGB(255, 255, 204, 0),
         darkColor: const Color.fromARGB(255, 255, 214, 10),
         highContrastColor: const Color.fromARGB(255, 160, 90, 0),
         darkHighContrastColor: const Color.fromARGB(255, 255, 212, 38),
       ),
       systemGray: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 142, 142, 147),
+        color: const Color.fromARGB(255, 142, 142, 147),
         darkColor: const Color.fromARGB(255, 142, 142, 147),
         highContrastColor: const Color.fromARGB(255, 108, 108, 112),
         darkHighContrastColor: const Color.fromARGB(255, 174, 174, 178),
       ),
       systemGray2: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 174, 174, 178),
+        color: const Color.fromARGB(255, 174, 174, 178),
         darkColor: const Color.fromARGB(255, 99, 99, 102),
         highContrastColor: const Color.fromARGB(255, 142, 142, 147),
         darkHighContrastColor: const Color.fromARGB(255, 124, 124, 128),
       ),
       systemGray3: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 199, 199, 204),
+        color: const Color.fromARGB(255, 199, 199, 204),
         darkColor: const Color.fromARGB(255, 72, 72, 74),
         highContrastColor: const Color.fromARGB(255, 174, 174, 178),
         darkHighContrastColor: const Color.fromARGB(255, 84, 84, 86),
       ),
       systemGray4: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 209, 209, 214),
+        color: const Color.fromARGB(255, 209, 209, 214),
         darkColor: const Color.fromARGB(255, 58, 58, 60),
         highContrastColor: const Color.fromARGB(255, 188, 188, 192),
         darkHighContrastColor: const Color.fromARGB(255, 68, 68, 70),
       ),
       systemGray5: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 229, 229, 234),
+        color: const Color.fromARGB(255, 229, 229, 234),
         darkColor: const Color.fromARGB(255, 44, 44, 46),
         highContrastColor: const Color.fromARGB(255, 216, 216, 220),
         darkHighContrastColor: const Color.fromARGB(255, 54, 54, 56),
       ),
       systemGray6: CupertinoDynamicColor.withVibrancyAndContrast(
-        normalColor: const Color.fromARGB(255, 242, 242, 247),
+        color: const Color.fromARGB(255, 242, 242, 247),
         darkColor: const Color.fromARGB(255, 28, 28, 30),
         highContrastColor: const Color.fromARGB(255, 235, 235, 240),
         darkHighContrastColor: const Color.fromARGB(255, 36, 36, 38),

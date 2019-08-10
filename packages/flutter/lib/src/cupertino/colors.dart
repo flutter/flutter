@@ -94,17 +94,16 @@ class CupertinoColors {
   static const Color destructiveRed = Color(0xFFFF3B30);
 }
 
-/// A color that can be resolved to different [Color]s, based on the [BuildContext]
-/// provided.
+/// A [Color] subclass that represents an effective color and its color variants, in
+/// order to adapt to different [BuildContext].
 ///
-/// `CupertinoDynamicColor` is a subtype of [Color]. When used as a regular color,
-/// it is equivalent to [defaultColor], or [normalColor] if [defaultColor] is not
-/// specified.
+/// When used as a regular color, `CupertinoDynamicColor` is equivalent to one of
+/// the color variants (the "effective color"), depending on the [BuildContext]
+/// it is last resolved against. If it has never been resolved, typically the
+/// light, normal contrast, base elevation variant [color] will be the effective
+/// color.
 ///
 // TODO(LongCatIsLooong): publicize once all Cupertino components have adopted this.
-// This class is typically used in Cupertino components to represent colors that
-// may change in different [BuildContext].
-//
 // {@tool sample}
 //
 // The following snippet will create a [CupertinoButton] whose background color
@@ -115,7 +114,7 @@ class CupertinoColors {
 // CupertinoButton(
 //   child: child,
 //   color: CupertinoDynamicColor.withVibrancy(
-//     normalColor: lightModeColor,
+//     color: lightModeColor,
 //     darkColor: darkModeColor,
 //   ),
 //   onTap: () => null,
@@ -142,165 +141,169 @@ class CupertinoColors {
 /// * https://developer.apple.com/documentation/uikit/uicolor/3238042-resolvedcolor.
 @immutable
 class CupertinoDynamicColor extends Color {
-  /// Creates a [Color] that can be resolved to different [Color]s in different
-  /// [BuildContext], using [CupertinoDynamicColor.resolve].
+  /// Creates an adaptive [Color] that changes its effective color based on the
+  /// [BuildContext] given. The default effective color is [color].
   ///
-  /// [defaultColor] will be used in other colors' absence, and it must not be null,
-  /// unless all the other colors are not null.
+  /// All the colors must not be null.
   CupertinoDynamicColor({
-    Color defaultColor,
-    Color normalColor,
-    Color darkColor,
-    Color highContrastColor,
-    Color darkHighContrastColor,
-    Color elevatedColor,
-    Color darkElevatedColor,
-    Color highContrastElevatedColor,
-    Color darkHighContrastElevatedColor,
+    @required Color color,
+    @required Color darkColor,
+    @required Color highContrastColor,
+    @required Color darkHighContrastColor,
+    @required Color elevatedColor,
+    @required Color darkElevatedColor,
+    @required Color highContrastElevatedColor,
+    @required Color darkHighContrastElevatedColor,
   }) : this._(
-         defaultColor,
-         <Color>[
-           normalColor,
-           darkColor,
-           highContrastColor,
-           darkHighContrastColor,
-           elevatedColor,
-           darkElevatedColor,
-           highContrastElevatedColor,
-           darkHighContrastElevatedColor,
-         ]
+         color,
+         <List<List<Color>>>[
+           <List<Color>>[
+             <Color>[color, elevatedColor],
+             <Color>[highContrastColor, highContrastElevatedColor],
+           ],
+           <List<Color>>[
+             <Color>[darkColor, darkElevatedColor],
+             <Color>[darkHighContrastColor, darkHighContrastElevatedColor],
+           ],
+         ],
        );
 
-  /// Creates a Color that can be resolved to different [Color]s, based on the given
-  /// [BuildContext]'s color vibrancy and accessibility contrast.
+  /// Creates an adaptive [Color] that changes its effective color based on the given
+  /// [BuildContext]'s color vibrancy and accessibility contrast setting. The default
+  /// effective color is [color].
   ///
-  /// [defaultColor] will be used in other colors' absence, and it must not be null,
-  /// unless all the other colors are not null.
+  /// All the colors must not be null.
   CupertinoDynamicColor.withVibrancyAndContrast({
-    Color defaultColor,
-    Color normalColor,
-    Color darkColor,
-    Color highContrastColor,
-    Color darkHighContrastColor,
+    @required Color color,
+    @required Color darkColor,
+    @required Color highContrastColor,
+    @required Color darkHighContrastColor,
   }) : this(
-    defaultColor: defaultColor,
-    normalColor: normalColor,
+    color: color,
     darkColor: darkColor,
     highContrastColor: highContrastColor,
     darkHighContrastColor: darkHighContrastColor,
-    elevatedColor: normalColor,
+    elevatedColor: color,
     darkElevatedColor: darkColor,
     highContrastElevatedColor: highContrastColor,
     darkHighContrastElevatedColor: darkHighContrastColor,
   );
-
-  /// Creates a Color that can be resolved to different [Color]s, based on the given
-  /// [BuildContext]'s color vibrancy.
+  /// Creates an adaptive [Color] that changes its effective color based on the given
+  /// [BuildContext]'s color vibrancy (i.e., whether the subtree is in dark mode).
+  /// The default effective color is [color].
   ///
-  /// [defaultColor] will be used in other colors' absence, and it must not be null,
-  /// unless all the other colors are not null.
+  /// All the colors must not be null.
   CupertinoDynamicColor.withVibrancy({
-    Color defaultColor,
-    Color normalColor,
-    Color darkColor,
+    @required Color color,
+    @required Color darkColor,
   }) : this(
-    defaultColor: defaultColor,
-    normalColor: normalColor,
+    color: color,
     darkColor: darkColor,
-    highContrastColor: normalColor,
+    highContrastColor: color,
     darkHighContrastColor: darkColor,
-    elevatedColor: normalColor,
+    elevatedColor: color,
     darkElevatedColor: darkColor,
-    highContrastElevatedColor: normalColor,
+    highContrastElevatedColor: color,
     darkHighContrastElevatedColor: darkColor,
   );
 
   CupertinoDynamicColor._(
-    this.defaultColor,
+    Color value,
     this._colorMap,
-  ) : assert(defaultColor != null || !_colorMap.contains(null)),
-      assert(_colorMap.length == 8),
-      super(defaultColor?.value ?? _colorMap[0].value);
+  ) : assert(() {
+        Iterable<Object> expand(Object a) {
+          return (a is Iterable<Object>) ? a.expand<Object>(expand) : <Object>[a];
+        }
 
-  /// The defaultColor color to use when the requested color is not specified.
-  ///
-  /// Must not be null unless all other colors are specified.
-  final Color defaultColor;
+        final Iterable<Color> expanded = expand(_colorMap);
+        return !expanded.contains(null) && expanded.length == 8 && expanded.contains(value);
+      }()),
+      super(value.value);
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and base interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get normalColor => _colorMap[0];
+  Color get color => _colorMap[0][0][0];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and base interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get darkColor => _colorMap[1];
+  Color get darkColor => _colorMap[1][0][0];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and base interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get highContrastColor => _colorMap[2];
+  Color get highContrastColor => _colorMap[0][1][0];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and base interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get darkHighContrastColor => _colorMap[3];
+  Color get darkHighContrastColor => _colorMap[1][1][0];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// normal contrast, and elevated interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get elevatedColor => _colorMap[4];
+  Color get elevatedColor => _colorMap[0][0][1];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// normal contrast, and elevated interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get darkElevatedColor => _colorMap[5];
+  Color get darkElevatedColor => _colorMap[1][0][1];
 
   /// The color to use when the [BuildContext] implies a combination of light mode,
   /// high contrast, and elevated interface elevation.
-  ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get highContrastElevatedColor => _colorMap[6];
+  Color get highContrastElevatedColor => _colorMap[0][1][1];
 
   /// The color to use when the [BuildContext] implies a combination of dark mode,
   /// high contrast, and elevated interface elevation.
+  Color get darkHighContrastElevatedColor => _colorMap[1][1][1];
+
+  final List<List<List<Color>>> _colorMap;
+
+  /// Resolves the given [Color] by calling [resolveFrom].
   ///
-  /// Defaults to [defaultColor] when unspecified.
-  Color get darkHighContrastElevatedColor => _colorMap[7];
-
-  final List<Color> _colorMap;
-
-  /// Resolves the given [Color] to a concrete [Color], using the given [BuildContext].
   /// If the given color is already a concrete [Color], it will be returned as is.
-  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false })
-    => (resolvable is CupertinoDynamicColor)
+  /// If the given color is a [CupertinoDynamicColor], but the given [BuildContext]
+  /// lacks the dependencies essential to the color resolution, an exception will
+  /// be thrown, unless [nullOk] is set to true.
+  static Color resolve(Color resolvable, BuildContext context, { bool nullOk = false }) {
+    assert(resolvable != null);
+    assert(context != null);
+    return (resolvable is CupertinoDynamicColor)
       ? resolvable.resolveFrom(context, nullOk: nullOk)
       : resolvable;
+  }
+
+  bool get _isPlatformBrightnessDependent {
+    return color != darkColor
+        || elevatedColor != darkElevatedColor
+        || highContrastColor != darkHighContrastColor
+        || highContrastElevatedColor != darkHighContrastElevatedColor;
+  }
+
+  bool get _isHighContrastDependent {
+    return color != highContrastColor
+        || darkColor != darkHighContrastColor
+        || elevatedColor != highContrastElevatedColor
+        || darkElevatedColor != darkHighContrastElevatedColor;
+  }
+
+  bool get _isInterfaceElevationDependent {
+    return color != elevatedColor
+        || darkColor != darkElevatedColor
+        || highContrastColor != highContrastElevatedColor
+        || darkHighContrastColor != darkHighContrastElevatedColor;
+  }
 
   /// Resolves this `CupertinoDynamicColor` using the provided [BuildContext].
   ///
   /// Calling this method will create a new `CupertinoDynamicColor` that is almost
-  /// identical to the orignal `CupertinoDynamicColor` except with a different
-  /// [defaultColor], such that when the new `CupertinoDynamicColor` is used as
-  /// a regular [Color], it is equivalent to one of the specified colors that
-  /// matches the given [BuildContext]'s traits.
+  /// identical to this `CupertinoDynamicColor`, except the effective color is
+  /// changed to adapt to the given [BuildContext].
   ///
   /// For example, if the given [BuildContext] indicates the widgets in the subtree
   /// should be displayed in dark mode, with high accessibility contrast and an
   /// elevated interface elevation, the resolved `CupertinoDynamicColor` will be
-  /// the same as this [CupertinoDynamicColor], except that its [defaultColor]
-  /// is `darkHighContrastElevatedColor` from the orignal `CupertinoDynamicColor`.
+  /// the same as this [CupertinoDynamicColor], except its effective color will
+  /// be `darkHighContrastElevatedColor` from the orignal `CupertinoDynamicColor`.
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
-  /// is different from [normalColor], this function will call [CupertinoTheme.of],
+  /// is different from [color], this function will call [CupertinoTheme.of],
   /// and then [MediaQuery.of] if brightness wasn't specified in the theme data
   /// retrived from the previous [CupertinoTheme.of] call, in an effort to determine
   /// the brightness value.
@@ -308,82 +311,69 @@ class CupertinoDynamicColor extends Color {
   /// If any of the required dependecies is missing from the given context, an exception
   /// will be thrown unless [nullOk] is set to `true`.
   CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
-    int dependencyBitMask = 0, configBitMask = 0;
-    final List<Color> colors = _colorMap;
-
-    for (int i = 0; i < colors.length; i++) {
-      for(int bitShift = 0; bitShift < 3; bitShift ++) {
-        // mask - represented trait
-        // 001  - color vibrancy
-        // 010  - accessibility contrast
-        // 100  - user interface level
-        final int mask = 1 << bitShift;
-        if (i & mask != 0 || dependencyBitMask & mask != 0)
-          continue;
-        final bool isSameColor = (colors[i] ?? defaultColor) == (colors[i | mask] ?? defaultColor);
-        dependencyBitMask |= isSameColor ? 0 : mask;
-      }
-    }
+    int brightnessNumber = 0;
+    int highContrastNumber = 0;
+    int interfaceElevationNumber = 0;
 
     // If this CupertinoDynamicColor cares about color vibrancy.
-    if (dependencyBitMask & 1 != 0) {
+    if (_isPlatformBrightnessDependent) {
       final Brightness brightness = CupertinoTheme.brightnessOf(context, nullOk: nullOk) ?? Brightness.light;
-
-      switch (brightness) {
-        case Brightness.light:
-          break;
-        case Brightness.dark:
-          configBitMask |= 1;
-      }
+      brightnessNumber = brightness.index;
     }
 
     // If this CupertinoDynamicColor cares about accessibility contrast.
-    if (dependencyBitMask & 2 != 0) {
+    if (_isHighContrastDependent) {
       final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrastContent
         ?? false;
 
-        configBitMask |= isHighContrastEnabled ? 2 : 0;
+        highContrastNumber = isHighContrastEnabled ? 1 : 0;
     }
 
     // If this CupertinoDynamicColor cares about user interface elevation.
-    if (dependencyBitMask & 4 != 0) {
+    if (_isInterfaceElevationDependent) {
       final CupertinoUserInterfaceLevelData level =
         CupertinoUserInterfaceLevel.of(context, nullOk: nullOk)
         ?? CupertinoUserInterfaceLevelData.base;
 
-      switch (level) {
-        case CupertinoUserInterfaceLevelData.base:
-          break;
-        case CupertinoUserInterfaceLevelData.elevated:
-          configBitMask |= 4;
-      }
+      interfaceElevationNumber = level.index;
     }
 
-    final Color resolved = _colorMap[configBitMask] ?? defaultColor;
-    return resolved == defaultColor ? this : CupertinoDynamicColor._(resolved, _colorMap);
+    final Color resolved = _colorMap[brightnessNumber][highContrastNumber][interfaceElevationNumber];
+    return resolved.value == value ? this : CupertinoDynamicColor._(resolved, _colorMap);
   }
 
   @override
   bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
     return other.runtimeType == runtimeType
         && value == other.value
-        && ListEquality<Color>(_ColorMapElementEquality<Color>(defaultColor, other.defaultColor))
-            .equals(_colorMap, other._colorMap);
+        && const ListEquality<List<List<Color>>>(ListEquality<List<Color>>(ListEquality<Color>())).equals(_colorMap, other._colorMap);
   }
 
   @override
-  int get hashCode => _colorMap.map((Color color) => color ?? defaultColor).hashCode;
+  int get hashCode => hashValues(hashList(_colorMap), value);
 
   @override
-  String toString() => '$runtimeType { $defaultColor & $_colorMap }';
-}
+  String toString() {
+    String toString(String name, Color color) {
+      final String marker = color.value == value ? '*' : '';
+      return '$marker$name = $color$marker';
+    }
 
-class _ColorMapElementEquality<E> extends DefaultEquality<E> {
-  const _ColorMapElementEquality(this.nullFallbackValue1, this.nullFallbackValue2) : super();
-  final E nullFallbackValue1, nullFallbackValue2;
+    final List<String> xs = <String>[
+      toString('color', color),
+      if (_isPlatformBrightnessDependent) toString('darkColor', darkColor),
+      if (_isHighContrastDependent) toString('highContrastColor', highContrastColor),
+      if (_isPlatformBrightnessDependent || _isHighContrastDependent) toString('darkHighContrastColor', darkHighContrastColor),
+      if (_isInterfaceElevationDependent) toString('elevatedColor', elevatedColor),
+      if (_isPlatformBrightnessDependent || _isInterfaceElevationDependent) toString('darkElevatedColor', darkElevatedColor),
+      if (_isHighContrastDependent || _isInterfaceElevationDependent) toString('highContrastElevatedColor', highContrastElevatedColor),
+      if (_isPlatformBrightnessDependent || _isHighContrastDependent || _isInterfaceElevationDependent) toString('darkHighContrastElevatedColor', darkHighContrastElevatedColor),
+    ];
 
-  @override
-  bool equals(Object e1, Object e2) => (e1 ?? nullFallbackValue1) == (e2 ?? nullFallbackValue2);
+    return '$runtimeType(${xs.join(', ')})';
+  }
 }
 
 /// A color palette that typically matches iOS 13+ system colors.
@@ -662,39 +652,41 @@ class CupertinoSystemColorsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => hashList(<Color>[label,
-                                secondaryLabel,
-                                tertiaryLabel,
-                                quaternaryLabel,
-                                systemFill,
-                                secondarySystemFill,
-                                tertiarySystemFill,
-                                quaternarySystemFill,
-                                placeholderText,
-                                systemBackground,
-                                secondarySystemBackground,
-                                tertiarySystemBackground,
-                                systemGroupedBackground,
-                                secondarySystemGroupedBackground,
-                                tertiarySystemGroupedBackground,
-                                separator,
-                                opaqueSeparator,
-                                link,
-                                systemBlue,
-                                systemGreen,
-                                systemIndigo,
-                                systemOrange,
-                                systemPink,
-                                systemPurple,
-                                systemRed,
-                                systemTeal,
-                                systemYellow,
-                                systemGray,
-                                systemGray2,
-                                systemGray3,
-                                systemGray4,
-                                systemGray5,
-                                systemGray6,
-                            ]);
-
+  int get hashCode {
+    return hashList(
+      <Color>[label,
+        secondaryLabel,
+        tertiaryLabel,
+        quaternaryLabel,
+        systemFill,
+        secondarySystemFill,
+        tertiarySystemFill,
+        quaternarySystemFill,
+        placeholderText,
+        systemBackground,
+        secondarySystemBackground,
+        tertiarySystemBackground,
+        systemGroupedBackground,
+        secondarySystemGroupedBackground,
+        tertiarySystemGroupedBackground,
+        separator,
+        opaqueSeparator,
+        link,
+        systemBlue,
+        systemGreen,
+        systemIndigo,
+        systemOrange,
+        systemPink,
+        systemPurple,
+        systemRed,
+        systemTeal,
+        systemYellow,
+        systemGray,
+        systemGray2,
+        systemGray3,
+        systemGray4,
+        systemGray5,
+        systemGray6,
+    ]);
+  }
 }
