@@ -36,6 +36,8 @@ const Color color5 = Color(0xFF000005);
 const Color color6 = Color(0xFF000006);
 const Color color7 = Color(0xFF000007);
 
+// A color that depends on color vibrancy, accessibility contrast, as well as user
+// interface elevation.
 final CupertinoDynamicColor dynamicColor = CupertinoDynamicColor(
   color: color0,
   darkColor: color1,
@@ -47,6 +49,7 @@ final CupertinoDynamicColor dynamicColor = CupertinoDynamicColor(
   darkHighContrastElevatedColor: color7,
 );
 
+// A color that uses [color0] in every circumstance.
 final Color notSoDynamicColor1 = CupertinoDynamicColor(
   color: color0,
   darkColor: color0,
@@ -58,6 +61,7 @@ final Color notSoDynamicColor1 = CupertinoDynamicColor(
   elevatedColor: color0,
 );
 
+// A color that uses [color1] for light mode, and [color0] for dark mode.
 final Color vibrancyDependentColor1 = CupertinoDynamicColor(
   color: color1,
   elevatedColor: color1,
@@ -69,6 +73,8 @@ final Color vibrancyDependentColor1 = CupertinoDynamicColor(
   darkHighContrastElevatedColor: color0,
 );
 
+// A color that uses [color1] for normal contrast mode, and [color0] for high
+// contrast mode.
 final Color contrastDependentColor1 = CupertinoDynamicColor(
   color: color1,
   darkColor: color1,
@@ -80,6 +86,8 @@ final Color contrastDependentColor1 = CupertinoDynamicColor(
   darkHighContrastElevatedColor: color0,
 );
 
+// A color that uses [color1] for base interface elevation, and [color0] for elevated
+// interface elevation.
 final Color elevationDependentColor1 = CupertinoDynamicColor(
   color: color1,
   darkColor: color1,
@@ -105,7 +113,6 @@ void main() {
       )
     );
 
-
     expect(notSoDynamicColor1, isNot(vibrancyDependentColor1));
 
     expect(notSoDynamicColor1, isNot(contrastDependentColor1));
@@ -122,19 +129,36 @@ void main() {
     )));
   });
 
-  test('withVibrancy constructor works', () {
+  test('withVibrancy constructor creates colors that may depend on vibrancy', () {
     expect(vibrancyDependentColor1, CupertinoDynamicColor.withVibrancy(
       color: color1,
       darkColor: color0,
     ));
   });
 
-  test('withVibrancyAndContrast constructor works', () {
+  test('withVibrancyAndContrast constructor creates colors that may depend on contrast and vibrancy', () {
     expect(contrastDependentColor1, CupertinoDynamicColor.withVibrancyAndContrast(
       color: color1,
       darkColor: color1,
       highContrastColor: color0,
       darkHighContrastColor: color0,
+    ));
+
+    expect(CupertinoDynamicColor(
+        color: color0,
+        darkColor: color1,
+        highContrastColor: color2,
+        darkHighContrastColor: color3,
+        elevatedColor: color0,
+        darkElevatedColor: color1,
+        highContrastElevatedColor: color2,
+        darkHighContrastElevatedColor: color3,
+      ),
+      CupertinoDynamicColor.withVibrancyAndContrast(
+        color: color0,
+        darkColor: color1,
+        highContrastColor: color2,
+        darkHighContrastColor: color3,
     ));
   });
 
@@ -195,7 +219,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(highContrastContent: false),
+          data: const MediaQueryData(highContrast: false),
           child: DependentWidget(color: contrastDependentColor1),
         ),
       );
@@ -207,7 +231,7 @@ void main() {
       // Changing accessibility contrast works.
       await tester.pumpWidget(
         MediaQuery(
-          data: const MediaQueryData(highContrastContent: true),
+          data: const MediaQueryData(highContrast: true),
           child: DependentWidget(color: contrastDependentColor1),
         ),
       );
@@ -267,7 +291,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: false),
+        data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -278,7 +302,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: false),
+        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: false),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -289,7 +313,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: true),
+        data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -300,7 +324,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: true),
+        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.base,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -311,7 +335,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: false),
+        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: false),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -322,7 +346,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: true),
+        data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -333,7 +357,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: true),
+        data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -344,7 +368,7 @@ void main() {
 
     await tester.pumpWidget(
       MediaQuery(
-        data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: false),
+        data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
         child: CupertinoUserInterfaceLevel(
           data: CupertinoUserInterfaceLevelData.elevated,
           child: DependentWidget(color: dynamicRainbowColor1),
@@ -455,7 +479,7 @@ void main() {
       CupertinoApp(
         theme: CupertinoThemeData(primaryColor: dynamicColor),
         home: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: false),
+          data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.base,
             child: Builder(
@@ -477,7 +501,7 @@ void main() {
         // No brightness is explicitly specified here so it should defer to MediaQuery.
         theme: CupertinoThemeData(primaryColor: dynamicColor),
         home: MediaQuery(
-          data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: true),
+          data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
           child: CupertinoUserInterfaceLevel(
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Builder(
@@ -510,7 +534,7 @@ void main() {
             ),
           ),
           home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.light, highContrastContent: false),
+            data: const MediaQueryData(platformBrightness: Brightness.light, highContrast: false),
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.base,
               child: Builder(
@@ -538,7 +562,7 @@ void main() {
             ),
           ),
           home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: true),
+            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Builder(
@@ -561,7 +585,7 @@ void main() {
           // This will create a MaterialBasedCupertinoThemeData with primaryColor set to `dynamicColor`.
           theme: ThemeData(colorScheme: ColorScheme.dark(primary: dynamicColor)),
           home: MediaQuery(
-            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrastContent: true),
+            data: const MediaQueryData(platformBrightness: Brightness.dark, highContrast: true),
             child: CupertinoUserInterfaceLevel(
               data: CupertinoUserInterfaceLevelData.elevated,
               child: Builder(

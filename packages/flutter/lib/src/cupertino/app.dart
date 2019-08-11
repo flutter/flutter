@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/cupertino/interface_level.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
+import 'interface_level.dart';
 import 'localizations.dart';
 import 'route.dart';
 import 'theme.dart';

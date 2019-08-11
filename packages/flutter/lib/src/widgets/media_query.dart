@@ -96,7 +96,7 @@ class MediaQueryData {
     this.alwaysUse24HourFormat = false,
     this.accessibleNavigation = false,
     this.invertColors = false,
-    this.highContrastContent = false,
+    this.highContrast = false,
     this.disableAnimations = false,
     this.boldText = false,
   });
@@ -119,7 +119,7 @@ class MediaQueryData {
       invertColors = window.accessibilityFeatures.invertColors,
       disableAnimations = window.accessibilityFeatures.disableAnimations,
       boldText = window.accessibilityFeatures.boldText,
-      highContrastContent = false,
+      highContrast = false,
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixels (e.g, the size of the screen).
@@ -252,7 +252,7 @@ class MediaQueryData {
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
   /// or above, and Android devices that are running Android Q and above.
-  final bool highContrastContent;
+  final bool highContrast;
 
   /// Whether the platform is requesting that animations be disabled or reduced
   /// as much as possible.
@@ -286,7 +286,7 @@ class MediaQueryData {
     EdgeInsets viewPadding,
     EdgeInsets viewInsets,
     bool alwaysUse24HourFormat,
-    bool highContrastContent,
+    bool highContrast,
     bool disableAnimations,
     bool invertColors,
     bool accessibleNavigation,
@@ -302,7 +302,7 @@ class MediaQueryData {
       viewInsets: viewInsets ?? this.viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
       invertColors: invertColors ?? this.invertColors,
-      highContrastContent: highContrastContent ?? this.highContrastContent,
+      highContrast: highContrast ?? this.highContrast,
       disableAnimations: disableAnimations ?? this.disableAnimations,
       accessibleNavigation: accessibleNavigation ?? this.accessibleNavigation,
       boldText: boldText ?? this.boldText,
@@ -351,7 +351,7 @@ class MediaQueryData {
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrastContent: highContrastContent,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -399,7 +399,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrastContent: highContrastContent,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -447,7 +447,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       alwaysUse24HourFormat: alwaysUse24HourFormat,
-      highContrastContent: highContrastContent,
+      highContrast: highContrast,
       disableAnimations: disableAnimations,
       invertColors: invertColors,
       accessibleNavigation: accessibleNavigation,
@@ -468,7 +468,7 @@ class MediaQueryData {
         && typedOther.viewPadding == viewPadding
         && typedOther.viewInsets == viewInsets
         && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && typedOther.highContrastContent == highContrastContent
+        && typedOther.highContrast == highContrast
         && typedOther.disableAnimations == disableAnimations
         && typedOther.invertColors == invertColors
         && typedOther.accessibleNavigation == accessibleNavigation
@@ -486,7 +486,7 @@ class MediaQueryData {
       viewPadding,
       viewInsets,
       alwaysUse24HourFormat,
-      highContrastContent,
+      highContrast,
       disableAnimations,
       invertColors,
       accessibleNavigation,
@@ -506,7 +506,7 @@ class MediaQueryData {
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
              'accessibleNavigation: $accessibleNavigation, '
-             'highContrastContent: $highContrastContent,'
+             'highContrast: $highContrast,'
              'disableAnimations: $disableAnimations, '
              'invertColors: $invertColors, '
              'boldText: $boldText'

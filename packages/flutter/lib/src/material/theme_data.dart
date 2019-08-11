@@ -1293,7 +1293,6 @@ class ThemeData extends Diagnosticable {
 // is from the superclass and based on the primaryColor but the primaryColor
 // comes from the Material theme unless overridden.
 class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
-
   /// Create a [MaterialBasedCupertinoThemeData] based on a Material [ThemeData]
   /// and its `cupertinoOverrideTheme`.
   ///

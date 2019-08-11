@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -308,7 +308,7 @@ class CupertinoDynamicColor extends Color {
   /// retrived from the previous [CupertinoTheme.of] call, in an effort to determine
   /// the brightness value.
   ///
-  /// If any of the required dependecies is missing from the given context, an exception
+  /// If any of the required dependecies are missing from the given context, an exception
   /// will be thrown unless [nullOk] is set to `true`.
   CupertinoDynamicColor resolveFrom(BuildContext context, { bool nullOk = false }) {
     int brightnessNumber = 0;
@@ -323,7 +323,7 @@ class CupertinoDynamicColor extends Color {
 
     // If this CupertinoDynamicColor cares about accessibility contrast.
     if (_isHighContrastDependent) {
-      final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrastContent
+      final bool isHighContrastEnabled = MediaQuery.of(context, nullOk: nullOk)?.highContrast
         ?? false;
 
         highContrastNumber = isHighContrastEnabled ? 1 : 0;
@@ -390,7 +390,7 @@ class CupertinoDynamicColor extends Color {
 
 /// A color palette that typically matches iOS 13+ system colors.
 ///
-/// Generally you shouldn't not create a [CupertinoSystemColorsData] yourself.
+/// Generally you should not create a [CupertinoSystemColorsData] yourself.
 /// Use [CupertinoSystemColors.of] to get the [CupertinoSystemColorsData] from the
 /// current [BuildContext] if possible, or [CupertinoSystemColors.fromSystem]
 /// when the current [BuildContext] is not available (e.g., in [CupertinoApp]'s
