@@ -2350,94 +2350,72 @@ void main() {
     expect(find.text('Tab1'), findsOneWidget);
     expect(find.text('Tab2'), findsOneWidget);
   });
+  testWidgets('DefaultTabController should allow for a length of zero', (
+      WidgetTester tester) async {
+    // Test for https://github.com/flutter/flutter/issues/37139
+    final List<Widget> tabList = <Widget>[];
+    final List<Widget> tabViewList = <Widget>[];
 
-    testWidgets('DefaultTabController with zero tabs',
-          (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/32428
-        int noOfTabs = 0;
-        List<Widget> tabList;
-        List<Widget> tabViewList;
-
-        await tester.pumpWidget(
-          MaterialApp(
-            home: StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-                return DefaultTabController(
-                    length: noOfTabs,
-                    child: Scaffold(
-                      appBar: AppBar(
-                        title: const Text('Default TabBar Preview'),
-                        bottom: (noOfTabs > 0)
-                            ? TabBar(isScrollable: true, tabs: tabList)
-                            : null,
-                      ),
-                      body: (noOfTabs > 0)
-                          ? TabBarView(children: tabViewList)
-                          : const Center(
-                        child: Text('No tabs'),
-                      ),
-                      bottomNavigationBar: BottomAppBar(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            IconButton(
-                              key: const Key('Add tab'),
-                              icon: const Icon(Icons.add),
-                              onPressed: () {
-                                setState(() {
-                                  noOfTabs++;
-                                });
-
-                                tabList = <Widget>[];
-                                tabViewList = <Widget>[];
-
-                                for (int i = 0; i < noOfTabs; i++) {
-                                  tabList
-                                      .add(
-                                      Tab(text: 'Tab ' + (i + 1).toString()));
-                                  tabViewList.add(Center(
-                                      child: Text(
-                                          'Tab ' + (i + 1).toString())));
-                                }
-                              },
-                            ),
-                            IconButton(
-                              key: const Key('Del tab'),
-                              icon: const Icon(Icons.delete),
-                              onPressed: () {
-                                setState(() {
-                                  noOfTabs--;
-                                });
-
-                                tabList = <Widget>[];
-                                tabViewList = <Widget>[];
-
-                                for (int i = 0; i < noOfTabs; i++) {
-                                  tabList
-                                      .add(
-                                      Tab(text: 'Tab ' + (i + 1).toString()));
-                                  tabViewList.add(Center(
-                                      child: Text(
-                                          'Tab ' + (i + 1).toString())));
-                                }
-                              },
-                            )
-                          ],
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return DefaultTabController(
+                length: tabList.length,
+                child: Scaffold(
+                  appBar: AppBar(
+                    title: const Text('Default TabBar Preview'),
+                    bottom: (tabList.length > 0)
+                        ? TabBar(isScrollable: true, tabs: tabList)
+                        : null,
+                  ),
+                  body: (tabList.length > 0)
+                      ? TabBarView(children: tabViewList)
+                      : const Center(
+                    child: Text('No tabs'),
+                  ),
+                  bottomNavigationBar: BottomAppBar(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        IconButton(
+                          key: const Key('Add tab'),
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            setState(() {
+                              tabList.add(
+                                  Tab(text: 'Tab ${tabList.length + 1}'));
+                              tabViewList.add(Center(child: Text(
+                                  'Tab ${tabViewList.length + 1}')));
+                            });
+                          },
                         ),
-                      ),
-                    ));
-              },
-            ),
-          ),
-        );
-        expect(find.text('No tabs'), findsOneWidget);
-        await tester.tap(find.byKey(const Key('Add tab')));
-        await tester.pumpAndSettle();
-        expect(find.text('Tab 1'), findsNWidgets(2));
-        await tester.tap(find.byKey(const Key('Del tab')));
-        await tester.pumpAndSettle();
-        expect(find.text('Tab 1'), findsNothing);
-        expect(find.text('No tabs'), findsOneWidget);
-      });
+                        IconButton(
+                          key: const Key('Del tab'),
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              tabList.removeLast();
+                              tabViewList.removeLast();
+                            });
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                ));
+          },
+        ),
+      ),
+    );
+    expect(find.text('No tabs'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('Add tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNWidgets(2));
+    await tester.tap(find.byKey(const Key('Del tab')));
+    await tester.pumpAndSettle();
+    expect(find.text('Tab 1'), findsNothing);
+    expect(find.text('No tabs'), findsOneWidget);
+  });
 }
