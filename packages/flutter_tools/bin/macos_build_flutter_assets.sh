@@ -39,12 +39,6 @@ if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
   track_widget_creation_flag="--track-widget-creation"
 fi
 
-# Copy the framework and handle local engine builds.
-framework_name="FlutterMacOS.framework"
-ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
-framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
-flutter_framework="${framework_path}/${framework_name}"
-
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
@@ -63,22 +57,18 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-  flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/${framework_name}"
 fi
-
-RunCommand mkdir -p -- "$ephemeral_dir"
-RunCommand rm -rf -- "${ephemeral_dir}/${framework_name}"
-RunCommand cp -Rp -- "${flutter_framework}" "${ephemeral_dir}"
 
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
-    build bundle                                                            \
-    --target-platform=darwin-x64                                            \
-    --target="${target_path}"                                               \
-    --${build_mode}                                                         \
     ${track_widget_creation_flag}                                           \
     ${flutter_engine_flag}                                                  \
-    ${local_engine_flag}
+    ${local_engine_flag}                                                    \
+    assemble                                                                \
+    -dTargetPlatform=darwin-x64                                             \
+    -dTargetFile="${target_path}"                                           \
+    -dBuildMode="${build_mode}"                                             \
+   debug_macos_framework

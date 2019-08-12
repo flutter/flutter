@@ -35,6 +35,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugMacOSApplication(),
   ProfileMacOSApplication(),
   ReleaseMacOSApplication(),
+  DebugMacOSFramework(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

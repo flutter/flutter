@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/asset.dart';
+import 'package:pool/pool.dart';
+
 import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../devfs.dart';
 import '../../globals.dart';
 import '../../macos/cocoapods.dart';
 import '../../project.dart';
@@ -139,22 +143,21 @@ class MacOSAotAssembly extends Target {
   ];
 }
 
-/// Create an App.framework for debug targets.
+/// Create an App.framework for debug macOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// string.
-class DummyMacOSAotAssembly extends Target {
-  const DummyMacOSAotAssembly();
+class DebugMacOSFramework extends Target {
+  const DebugMacOSFramework();
 
   @override
-  String get name => 'dummy_macos_aot_assembly';
+  String get name => 'debug_macos_framework';
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final String outputPath = fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral');
-    final String outputFile = fs.path.join(outputPath, 'App.framework', 'App');
-    fs.file(outputFile).createSync(recursive: true);
+    final File outputFile = fs.file(fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral', 'App.framework', 'App'));
+    outputFile.createSync(recursive: true);
     // TODO(jonahwilliams): rewrite this in dart.
     final ProcessResult processResult = await processManager.run(<String>[
       environment.flutterRootDir
@@ -166,74 +169,74 @@ class DummyMacOSAotAssembly extends Target {
     if (processResult.exitCode != 0) {
       throw Exception('Failed to compile debug App.framework');
     }
+    // Copy assets into asset directory.
+    final Directory assetDirectory = outputFile.parent.childDirectory('flutter_assets')
+      ..createSync();
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final int result = await assetBundle.build(
+      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+    );
+    if (result != 0) {
+      throw Exception('Failed to create asset bundle: $result');
+    }
+    // Limit number of open files to avoid running out of file descriptors.
+    try {
+      final Pool pool = Pool(64);
+      await Future.wait<void>(
+        assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+          final PoolResource resource = await pool.request();
+          try {
+            final File file = fs.file(fs.path.join(assetDirectory.path, entry.key));
+            file.parent.createSync(recursive: true);
+            print('writing to ${file.path}');
+            await file.writeAsBytes(await entry.value.contentsAsBytes());
+          } finally {
+            resource.release();
+          }
+        }));
+    } catch (err, st){
+      throw Exception('Failed to copy assets: $st');
+    }
+    // Copy dill file.
+    try {
+      final File sourceFile = environment.buildDir.childFile('app.dill');
+      sourceFile.copySync(assetDirectory.childFile('kernel_blob.bin').path);
+    } catch (err, st) {
+      throw Exception('Failed to copy app.dill: $st');
+    }
+
+    // Copy precompiled runtimes.
+    try {
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData,
+          platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData,
+          platform: TargetPlatform.darwin_x64, mode: BuildMode.debug);
+      fs.file(vmSnapshotData).copySync(
+          assetDirectory.childFile('vm_snapshot_data').path);
+      fs.file(isolateSnapshotData).copySync(
+          assetDirectory.childFile('isolate_snapshot_data').path);
+    } catch (err, st) {
+      throw Exception('Failed to copy precompiled runtimes: $st');
+    }
   }
 
   @override
-  List<Target> get dependencies => const <Target>[];
+  List<Target> get dependencies => const <Target>[
+    UnpackMacOS(),
+    KernelSnapshot(),
+  ];
 
   @override
   List<Source> get inputs => const <Source>[];
 
   @override
-  List<Source> get outputs => <Source>[
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App')
-  ];
-}
-
-/// Tell cocoapods to re-fetch dependencies.
-class DebugMacOSPodInstall extends Target {
-  const DebugMacOSPodInstall();
-
-  @override
-  String get name => 'debug_macos_pod_install';
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.artifact(Artifact.flutterMacOSPodspec,
-      platform: TargetPlatform.darwin_x64,
-      mode: BuildMode.debug
-    ),
-    Source.pattern('{PROJECT_DIR}/macos/Podfile', optional: true),
-    Source.pattern('{PROJECT_DIR}/macos/Runner.xcodeproj/project.pbxproj'),
-    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/Flutter-Generated.xcconfig'),
-  ];
-
-  @override
   List<Source> get outputs => const <Source>[
-    // TODO(jonahwilliams): introduce configuration/planning phase to build.
-    // No outputs because Cocoapods is fully responsible for tracking. plus there
-    // is no concept of an optional output. Instead we will need a build config
-    // phase to conditionally add this rule so that it can be written properly.
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/AssetManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/FontManifest.json'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/flutter_assets/LICENSE'),
   ];
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    UnpackMacOS(),
-    FlutterPlugins(),
-  ];
-
-  @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'debug_macos_pod_install');
-    }
-    // If there is no podfile do not perform any pods actions.
-    if (!environment.projectDir.childDirectory('macos')
-        .childFile('Podfile').existsSync()) {
-      return;
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final FlutterProject project = FlutterProject.fromDirectory(environment.projectDir);
-    final String enginePath = artifacts.getArtifactPath(Artifact.flutterMacOSPodspec,
-        mode: buildMode, platform: TargetPlatform.darwin_x64);
-
-    await cocoaPods.processPods(
-      xcodeProject: project.macos,
-      engineDir: enginePath,
-      isSwift: true,
-      dependenciesChanged: true,
-    );
-  }
 }
 
 /// Build all of the artifacts for a debug macOS application.
@@ -258,8 +261,8 @@ class DebugMacOSApplication extends Target {
     UnpackMacOS(),
     KernelSnapshot(),
     CopyAssets(),
-    DebugMacOSPodInstall(),
-    DummyMacOSAotAssembly(),
+    // DebugMacOSPodInstall(),
+    // DummyMacOSAotAssembly(),
   ];
 
   @override
@@ -288,7 +291,7 @@ class ReleaseMacOSApplication extends Target {
     UnpackMacOS(),
     MacOSAotAssembly(),
     CopyAssets(),
-    DebugMacOSPodInstall(),
+    // DebugMacOSPodInstall(),
   ];
 
   @override
@@ -312,7 +315,6 @@ class ProfileMacOSApplication extends Target {
     UnpackMacOS(),
     MacOSAotAssembly(),
     CopyAssets(),
-    DebugMacOSPodInstall(),
   ];
 
   @override
