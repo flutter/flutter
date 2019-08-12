@@ -971,6 +971,7 @@ FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/digest/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/hmac/hmac.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/md4/md4.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/md5/md5.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/blinding.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/internal.h
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/rsa.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/rsa_impl.c
@@ -1082,7 +1083,10 @@ FILE: ../../../third_party/boringssl/src/include/openssl/tls1.h
 FILE: ../../../third_party/boringssl/src/include/openssl/type_check.h
 FILE: ../../../third_party/boringssl/src/include/openssl/x509.h
 FILE: ../../../third_party/boringssl/src/include/openssl/x509_vfy.h
+FILE: ../../../third_party/boringssl/src/ssl/d1_both.cc
+FILE: ../../../third_party/boringssl/src/ssl/d1_pkt.cc
 FILE: ../../../third_party/boringssl/src/ssl/d1_srtp.cc
+FILE: ../../../third_party/boringssl/src/ssl/dtls_record.cc
 FILE: ../../../third_party/boringssl/src/ssl/handshake.cc
 FILE: ../../../third_party/boringssl/src/ssl/handshake_client.cc
 FILE: ../../../third_party/boringssl/src/ssl/handshake_server.cc
@@ -2178,6 +2182,67 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/err/err.c
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/crypto/err/err.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/montgomery.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/blinding.c
+FILE: ../../../third_party/boringssl/src/include/openssl/bn.h
+FILE: ../../../third_party/boringssl/src/include/openssl/err.h
+FILE: ../../../third_party/boringssl/src/include/openssl/tls1.h
+FILE: ../../../third_party/boringssl/src/ssl/d1_srtp.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_session.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 1998-2006 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/evp/digestsign.c
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/evp/digestsign.c
@@ -2482,6 +2547,130 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/exponentiation.c
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/exponentiation.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec_key.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec_montgomery.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/internal.h
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/oct.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/simple.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/wnaf.c
+FILE: ../../../third_party/boringssl/src/include/openssl/ec.h
+FILE: ../../../third_party/boringssl/src/include/openssl/ec_key.h
+FILE: ../../../third_party/boringssl/src/ssl/d1_both.cc
+FILE: ../../../third_party/boringssl/src/ssl/d1_pkt.cc
+FILE: ../../../third_party/boringssl/src/ssl/dtls_record.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 1998-2005 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/gcd.c
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/crypto/ex_data.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/gcd.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/prime.c
+FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/random.c
+FILE: ../../../third_party/boringssl/src/crypto/internal.h
+FILE: ../../../third_party/boringssl/src/include/openssl/base.h
+FILE: ../../../third_party/boringssl/src/include/openssl/ex_data.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 1998-2001 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/internal.h
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/bn/internal.h
@@ -2693,71 +2882,7 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec_key.c
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec_montgomery.c
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/internal.h
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/oct.c
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/simple.c
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/wnaf.c
-FILE: ../../../third_party/boringssl/src/include/openssl/ec.h
-FILE: ../../../third_party/boringssl/src/include/openssl/ec_key.h
-FILE: ../../../third_party/boringssl/src/ssl/d1_both.cc
-FILE: ../../../third_party/boringssl/src/ssl/d1_pkt.cc
-FILE: ../../../third_party/boringssl/src/ssl/dtls_record.cc
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1998-2005 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c + ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c
+ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c + ../../../third_party/boringssl/src/crypto/fipsmodule/bn/exponentiation.c
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec.c
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/ec/ec_key.c
@@ -2968,59 +3093,6 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/blinding.c
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/blinding.c
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1998-2006 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/padding.c
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/rsa/padding.c
@@ -3077,8 +3149,82 @@ LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/kdf.c
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/crypto/fipsmodule/tls/kdf.c
+FILE: ../../../third_party/boringssl/src/decrepit/ssl/ssl_decrepit.c
+FILE: ../../../third_party/boringssl/src/include/openssl/ssl.h
+FILE: ../../../third_party/boringssl/src/ssl/handshake_client.cc
+FILE: ../../../third_party/boringssl/src/ssl/handshake_server.cc
+FILE: ../../../third_party/boringssl/src/ssl/internal.h
+FILE: ../../../third_party/boringssl/src/ssl/s3_lib.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_cert.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_cipher.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_file.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_lib.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_transcript.cc
+FILE: ../../../third_party/boringssl/src/ssl/ssl_x509.cc
+FILE: ../../../third_party/boringssl/src/ssl/t1_enc.cc
+FILE: ../../../third_party/boringssl/src/ssl/t1_lib.cc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 1998-2007 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: boringssl
+ORIGIN: ../../../third_party/boringssl/src/crypto/pem/pem_all.c
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/boringssl/src/crypto/pem/pem_all.c
+FILE: ../../../third_party/boringssl/src/decrepit/dh/dh_decrepit.c
+FILE: ../../../third_party/boringssl/src/decrepit/dsa/dsa_decrepit.c
+FILE: ../../../third_party/boringssl/src/include/openssl/ssl3.h
+FILE: ../../../third_party/boringssl/src/ssl/handshake.cc
+FILE: ../../../third_party/boringssl/src/ssl/s3_both.cc
+FILE: ../../../third_party/boringssl/src/ssl/s3_pkt.cc
+FILE: ../../../third_party/boringssl/src/ssl/tls_record.cc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 1998-2002 The OpenSSL Project.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -3648,118 +3794,11 @@ SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/decrepit/dh/dh_decrepit.c
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/decrepit/dh/dh_decrepit.c
-FILE: ../../../third_party/boringssl/src/decrepit/dsa/dsa_decrepit.c
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1998-2002 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
 ORIGIN: ../../../third_party/boringssl/src/include/openssl/arm_arch.h
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/boringssl/src/include/openssl/arm_arch.h
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: boringssl
-ORIGIN: ../../../third_party/boringssl/src/include/openssl/base.h
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/boringssl/src/include/openssl/base.h
-----------------------------------------------------------------------------------------------------
-Copyright (c) 1998-2001 The OpenSSL Project.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -5247,6 +5286,7 @@ FILE: ../../../third_party/dart/sdk/lib/core/type.dart
 FILE: ../../../third_party/dart/sdk/lib/core/uri.dart
 FILE: ../../../third_party/dart/sdk/lib/html/dart2js/html_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/dart2js/html_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/html/dart2js/html_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/html/dartium/nativewrappers.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions.dart
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/css_class_set.dart
@@ -5272,6 +5312,7 @@ FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/svg/dart2js/svg_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_audio/dart2js/web_audio_dart2js.dart
@@ -5281,6 +5322,8 @@ FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_gl/dart2js/web_gl_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
