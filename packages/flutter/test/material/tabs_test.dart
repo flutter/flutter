@@ -2365,11 +2365,11 @@ void main() {
                 child: Scaffold(
                   appBar: AppBar(
                     title: const Text('Default TabBar Preview'),
-                    bottom: (tabList.length > 0)
+                    bottom: (tabList.isNotEmpty)
                         ? TabBar(isScrollable: true, tabs: tabList)
                         : null,
                   ),
-                  body: (tabList.length > 0)
+                  body: (tabList.isNotEmpty)
                       ? TabBarView(children: tabViewList)
                       : const Center(
                     child: Text('No tabs'),
