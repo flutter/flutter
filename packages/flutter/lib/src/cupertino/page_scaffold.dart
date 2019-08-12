@@ -137,6 +137,16 @@ class _CupertinoPageScaffoldState extends State<CupertinoPageScaffold> {
           ),
         );
       }
+    } else {
+      // If there is no navigation bar, still may need to add padding in order
+      // to support resizeToAvoidBottomInset.
+      final double bottomPadding = widget.resizeToAvoidBottomInset
+          ? existingMediaQuery.viewInsets.bottom
+          : 0.0;
+      paddedContent = Padding(
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        child: paddedContent,
+      );
     }
 
     // The main content being at the bottom is added to the stack first.
