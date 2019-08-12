@@ -43,6 +43,39 @@ typedef TweenAnimationBuilderCallback<T> = Widget Function(BuildContext context,
 /// animation. Registering an [animationStatusListener] may be useful to trigger
 /// an action (like another animation) at the end of the current animation.
 ///
+/// {@tool snippet --template=stateful_widget_scaffold}
+/// This example shows an [IconButton] that "zooms" in when the widget first
+/// builds (its size smoothly increases from 0 to 24). Whenever the button
+/// is pressed, it smoothly changes it size from 24 to 48 or vice versa.
+///
+/// ```dart
+/// double targetValue = 24.0;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: TweenAnimationBuilder(
+///       tween: Tween<double>(begin: 0, end: targetValue),
+///       duration: Duration(seconds: 1),
+///       builder: (BuildContext context, double size, Widget child) {
+///         return IconButton(
+///           iconSize: size,
+///           color: Colors.blue,
+///           icon: child,
+///           onPressed: () {
+///             setState(() {
+///               targetValue = targetValue == 24.0 ? 48.0 : 24.0;
+///             });
+///           },
+///         );
+///       },
+///       child: Icon(Icons.aspect_ratio),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AnimatedBuilder], which builds custom animations that are controlled
