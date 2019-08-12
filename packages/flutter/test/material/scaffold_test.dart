@@ -1423,7 +1423,7 @@ void main() {
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.dragFrom(
-        Offset(scaffoldWidth - simulatedNotchSize -15.0, 100),
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
         const Offset(-300, 0),
       );
       await tester.pumpAndSettle();
@@ -1455,7 +1455,7 @@ void main() {
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.dragFrom(
-        Offset(scaffoldWidth - simulatedNotchSize -15.0, 100),
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
         const Offset(-300, 0),
       );
       await tester.pumpAndSettle();
