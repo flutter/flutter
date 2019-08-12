@@ -2123,19 +2123,24 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Ignored if [size] is not set.
   final Offset offset;
 
-  /// Whether this layer should prevent layers visually behind it from receiving
-  /// the hit testing.
+  /// Whether this layer should prevent layers visually behind it from being
+  /// visible to the hit during a hit test.
   ///
-  /// If [opaque] is true, it will "absorb" the hit test if any of its children
-  /// absorb it, or if this layer contains the target position and has the
-  /// requested annotation. Absorbing the hit test prevents layers visually
-  /// behind it from also receiving the test.
+  /// If [opaque] is true, this layer will "absorb" the hit if any of its
+  /// children absorb it, or if this layer contains the target position and
+  /// has the requested annotation. A hit that is absorbed will not be received
+  /// by this layer's siblings (or any other layers that are not ancestors or
+  /// descendants of this layer).
   ///
-  /// If [opaque] is false, the layer will always allow layers visually behind
-  /// it to receive the test no matter whether the layer or its children would
-  /// absorb the test otherwise.
+  /// If [opaque] is false, this layer will unconditionally allow layers
+  /// visually behind it to receive the hit .
   ///
   /// This defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestBehavior], which controls similar logic when hit-testing in the
+  ///    render tree.
   final bool opaque;
 
   @override
