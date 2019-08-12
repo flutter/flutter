@@ -63,35 +63,19 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(1), reason: 'Expected an animation.');
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/14452
-  testWidgets('Gesture interrupted by animation does not crash from errant idle notification', (WidgetTester tester) async {
-    // This crash is more easily triggered using BouncingScrollPhysics
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('HoldActivity interrupted by animateTo does not crash', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
 
-    bool animateForIdle(ScrollNotification notification) {
-      if (notification is UserScrollNotification && notification.direction == ScrollDirection.idle) {
-        controller.position.animateTo(
-          200.0,
-          duration: const Duration(seconds: 10),
-          curve: Curves.linear,
-        );
-      }
-      return true;
-    }
-
-    await tester.pumpWidget(NotificationListener<ScrollNotification>(
-      onNotification: animateForIdle,
-      child: boilerplate(controller),
-    ));
+    await tester.pumpWidget(boilerplate(controller));
 
     expectNoAnimation();
 
-    await tester.drag(find.byType(ListView), const Offset(0.0, 10.0));
-    await tester.pump();
-    await tester.press(find.byType(ListView));
+    final Offset listCenter = tester.getCenter(find.byType(ListView));
+    await tester.startGesture(listCenter);
+    // Hold
+    await tester.pump(const Duration(milliseconds: 500));
+    controller.animateTo(1000, duration: const Duration(seconds: 1), curve: Curves.linear);
     expect(tester.takeException(), null);
-    debugDefaultTargetPlatformOverride = null;
   });
 }
 
