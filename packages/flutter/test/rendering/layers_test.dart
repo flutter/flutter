@@ -22,26 +22,26 @@ void main() {
     );
     layout(root, phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(inner.layer, null);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isTrue); // this time it painted...
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isTrue); // this time it painted...
 
     root.opacity = 0.0;
     pumpFrame(phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(inner.layer, null);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isFalse); // this time it did not.
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isFalse); // this time it did not.
 
     root.opacity = 0.5;
     pumpFrame(phase: EnginePhase.paint);
     expect(inner.isRepaintBoundary, isFalse);
-    expect(inner.layer, null);
+    expect(inner.debugLayer, null);
     expect(boundary.isRepaintBoundary, isTrue);
-    expect(boundary.layer, isNotNull);
-    expect(boundary.layer.attached, isTrue); // this time it did again!
+    expect(boundary.debugLayer, isNotNull);
+    expect(boundary.debugLayer.attached, isTrue); // this time it did again!
   });
 
   test('updateSubtreeNeedsAddToScene propagates Layer.alwaysNeedsAddToScene up the tree', () {

@@ -218,7 +218,7 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.layer;
+    final OffsetLayer layer = boundary.debugLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
@@ -538,9 +538,9 @@ class _FakeTicker implements Ticker {
 // - the layer is reused on the second frame
 void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
   expect(L, isNot(Layer));
-  expect(renderObject.layer, null);
+  expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
-  final Layer layer = renderObject.layer;
+  final Layer layer = renderObject.debugLayer;
   expect(layer, isInstanceOf<L>());
   expect(layer, isNotNull);
 
@@ -549,7 +549,7 @@ void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
   expect(renderObject.debugNeedsPaint, true);
   pumpFrame(phase: EnginePhase.paint);
   expect(renderObject.debugNeedsPaint, false);
-  expect(renderObject.layer, same(layer));
+  expect(renderObject.debugLayer, same(layer));
 }
 
 class _TestPathClipper extends CustomClipper<Path> {

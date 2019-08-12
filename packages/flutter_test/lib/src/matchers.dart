@@ -1620,7 +1620,7 @@ Future<ui.Image> _captureImage(Element element) {
     assert(renderObject != null);
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.layer;
+  final OffsetLayer layer = renderObject.debugLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 

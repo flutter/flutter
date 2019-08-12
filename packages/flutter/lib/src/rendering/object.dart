@@ -1905,13 +1905,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// creates an [OffsetLayer] and populates this field prior to calling the
   /// [paint] method. The [paint] method must not replace the value of this
   /// field.
+  @protected
   ContainerLayer get layer {
     assert(!isRepaintBoundary || (_layer == null || _layer is OffsetLayer));
     return _layer;
   }
 
-  // Protect the setter because it only makes sense for [RenderObject]
-  // implementations to set the layer.
   @protected
   set layer(ContainerLayer newLayer) {
     assert(
@@ -1931,10 +1930,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// is dirty.
   ///
   /// For production code, consider [layer].
-  // Deprecated as of July 17, 2019.
-  @Deprecated('use the "layer" getter instead.')
-  OffsetLayer get debugLayer {
-    OffsetLayer result;
+  ContainerLayer get debugLayer {
+    ContainerLayer result;
     assert(() {
       result = _layer;
       return true;

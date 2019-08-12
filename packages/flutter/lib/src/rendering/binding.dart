@@ -242,12 +242,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   // Creates a [MouseTracker] which manages state about currently connected
   // mice, for hover notification.
   MouseTracker _createMouseTracker() {
-    return MouseTracker(pointerRouter, (Offset offset) {
-      // Layer hit testing is done using device pixels, so we have to convert
-      // the logical coordinates of the event location back to device pixels
-      // here.
-      return renderView.layer.findAll<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
-    });
+    return MouseTracker(pointerRouter, renderView.hitTestMouseTrackers);
   }
 
   void _handleSemanticsEnabledChanged() {
@@ -388,7 +383,7 @@ void debugDumpRenderTree() {
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.layer?.toStringDeep() ?? 'Layer tree unavailable.');
+  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.

@@ -487,7 +487,7 @@ void main() {
       return null;
     }
 
-    final ContainerLayer nestedScrollViewLayer = find.byType(NestedScrollView).evaluate().first.renderObject.layer;
+    final ContainerLayer nestedScrollViewLayer = find.byType(NestedScrollView).evaluate().first.renderObject.debugLayer;
     void _checkPhysicalLayer({@required double elevation}) {
       final PhysicalModelLayer layer = _dfsFindPhysicalLayer(nestedScrollViewLayer);
       expect(layer, isNotNull);

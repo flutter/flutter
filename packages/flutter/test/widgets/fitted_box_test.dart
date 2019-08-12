@@ -476,7 +476,7 @@ void main() {
 
 List<Type> getLayers() {
   final List<Type> layers = <Type>[];
-  Layer layer = RendererBinding.instance.renderView.layer;
+  Layer layer = RendererBinding.instance.renderView.debugLayer;
   while (layer is ContainerLayer) {
     final ContainerLayer container = layer;
     layers.add(container.runtimeType);

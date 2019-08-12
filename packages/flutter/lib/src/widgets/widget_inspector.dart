@@ -548,7 +548,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     assert(repaintBoundary != null);
     final _ScreenshotData data = _ScreenshotData(target: renderObject);
     final _ScreenshotPaintingContext context = _ScreenshotPaintingContext(
-      containerLayer: repaintBoundary.layer,
+      containerLayer: repaintBoundary.debugLayer,
       estimatedBounds: repaintBoundary.paintBounds,
       screenshotData: data,
     );
@@ -557,9 +557,9 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // Painting the existing repaint boundary to the screenshot is sufficient.
       // We don't just take a direct screenshot of the repaint boundary as we
       // want to capture debugPaint information as well.
-      data.containerLayer.append(_ProxyLayer(repaintBoundary.layer));
+      data.containerLayer.append(_ProxyLayer(repaintBoundary.debugLayer));
       data.foundTarget = true;
-      final OffsetLayer offsetLayer = repaintBoundary.layer;
+      final OffsetLayer offsetLayer = repaintBoundary.debugLayer;
       data.screenshotOffset = offsetLayer.offset;
     } else {
       // Repaint everything under the repaint boundary.
@@ -593,7 +593,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
     // We must build the regular scene before we can build the screenshot
     // scene as building the screenshot scene assumes addToScene has already
     // been called successfully for all layers in the regular scene.
-    repaintBoundary.layer.buildScene(ui.SceneBuilder());
+    repaintBoundary.debugLayer.buildScene(ui.SceneBuilder());
 
     return data.containerLayer.toImage(renderBounds, pixelRatio: pixelRatio);
   }

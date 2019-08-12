@@ -2019,7 +2019,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       final RenderRepaintBoundary renderObject = repaintBoundary.renderObject;
 
-      final OffsetLayer layer = renderObject.layer;
+      final OffsetLayer layer = renderObject.debugLayer;
       final int expectedChildLayerCount = getChildLayerCount(layer);
       expect(expectedChildLayerCount, equals(2));
       await expectLater(
@@ -2074,7 +2074,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       // Verify that taking a screenshot didn't change the layers associated with
       // the renderObject.
-      expect(renderObject.layer, equals(layer));
+      expect(renderObject.debugLayer, equals(layer));
       // Verify that taking a screenshot did not change the number of children
       // of the layer.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
@@ -2094,7 +2094,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       // Verify that taking a screenshot didn't change the layers associated with
       // the renderObject.
-      expect(renderObject.layer, equals(layer));
+      expect(renderObject.debugLayer, equals(layer));
       // Verify that taking a screenshot did not change the number of children
       // of the layer.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
@@ -2128,7 +2128,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
 
-      expect(renderObject.layer, equals(layer));
+      expect(renderObject.debugLayer, equals(layer));
       expect(layer.attached, isTrue);
 
       // Full size image

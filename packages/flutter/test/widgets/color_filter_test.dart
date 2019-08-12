@@ -80,11 +80,11 @@ void main() {
 
     await pumpWithColor(Colors.red);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer = renderObject.layer;
+    final ColorFilterLayer originalLayer = renderObject.debugLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.
     await pumpWithColor(Colors.green);
-    expect(renderObject.layer, same(originalLayer));
+    expect(renderObject.debugLayer, same(originalLayer));
   });
 }
