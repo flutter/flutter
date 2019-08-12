@@ -79,4 +79,12 @@ void MessageLoop::SwapTaskQueues(MessageLoop* other) {
   loop_->SwapTaskQueues(other->loop_);
 }
 
+TaskQueueId MessageLoop::GetCurrentTaskQueueId() {
+  auto* loop = tls_message_loop.get();
+  FML_CHECK(loop != nullptr)
+      << "MessageLoop::EnsureInitializedForCurrentThread was not called on "
+         "this thread prior to message loop use.";
+  return loop->GetLoopImpl()->GetTaskQueueId();
+}
+
 }  // namespace fml

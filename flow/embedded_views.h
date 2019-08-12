@@ -7,6 +7,7 @@
 
 #include <vector>
 
+#include "flutter/fml/gpu_thread_merger.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPath.h"
@@ -182,6 +183,8 @@ class EmbeddedViewParams {
   }
 };
 
+enum class PostPrerollResult { kResubmitFrame, kSuccess };
+
 // This is only used on iOS when running in a non headless mode,
 // in this case ExternalViewEmbedder is a reference to the
 // FlutterPlatformViewsController which is owned by FlutterViewController.
@@ -190,10 +193,6 @@ class ExternalViewEmbedder {
 
  public:
   ExternalViewEmbedder() = default;
-
-  // This will return true after pre-roll if any of the embedded views
-  // have mutated for last layer tree.
-  virtual bool HasPendingViewOperations() = 0;
 
   // Call this in-lieu of |SubmitFrame| to clear pre-roll state and
   // sets the stage for the next pre-roll.
@@ -204,6 +203,15 @@ class ExternalViewEmbedder {
   virtual void PrerollCompositeEmbeddedView(
       int view_id,
       std::unique_ptr<EmbeddedViewParams> params) = 0;
+
+  // This needs to get called after |Preroll| finishes on the layer tree.
+  // Returns kResubmitFrame if the frame needs to be processed again, this is
+  // after it does any requisite tasks needed to bring itself to a valid state.
+  // Returns kSuccess if the view embedder is already in a valid state.
+  virtual PostPrerollResult PostPrerollAction(
+      fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+    return PostPrerollResult::kSuccess;
+  }
 
   virtual std::vector<SkCanvas*> GetCurrentCanvases() = 0;
 

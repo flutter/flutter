@@ -11,6 +11,7 @@
 #include "flutter/fml/logging.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/message_loop_impl.h"
+#include "flutter/fml/message_loop_task_queues.h"
 
 namespace fml {
 
@@ -41,8 +42,8 @@ bool TaskRunner::RunsTasksOnCurrentThread() {
   if (!fml::MessageLoop::IsInitializedForCurrentThread()) {
     return false;
   }
-  const auto current_queue_id =
-      MessageLoop::GetCurrent().GetLoopImpl()->GetTaskQueueId();
+
+  const auto current_queue_id = MessageLoop::GetCurrentTaskQueueId();
   const auto loop_queue_id = loop_->GetTaskQueueId();
 
   if (current_queue_id == loop_queue_id) {

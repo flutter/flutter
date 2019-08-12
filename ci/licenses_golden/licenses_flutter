@@ -102,6 +102,9 @@ FILE: ../../../flutter/fml/eintr_wrapper.h
 FILE: ../../../flutter/fml/file.cc
 FILE: ../../../flutter/fml/file.h
 FILE: ../../../flutter/fml/file_unittest.cc
+FILE: ../../../flutter/fml/gpu_thread_merger.cc
+FILE: ../../../flutter/fml/gpu_thread_merger.h
+FILE: ../../../flutter/fml/gpu_thread_merger_unittests.cc
 FILE: ../../../flutter/fml/icu_util.cc
 FILE: ../../../flutter/fml/icu_util.h
 FILE: ../../../flutter/fml/log_level.h
