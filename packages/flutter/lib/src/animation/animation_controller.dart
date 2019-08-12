@@ -828,7 +828,7 @@ class _InterpolationSimulation extends Simulation {
   bool isDone(double timeInSeconds) => timeInSeconds > _durationInSeconds;
 }
 
-typedef _DirectionSetter = Function(_AnimationDirection direction);
+typedef _DirectionSetter = void Function(_AnimationDirection direction);
 
 class _RepeatingSimulation extends Simulation {
   _RepeatingSimulation(double initialValue, this.min, this.max, this.reverse, Duration period, this.directionSetter)
