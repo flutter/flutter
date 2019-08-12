@@ -61,6 +61,13 @@ void Rasterizer::Setup(std::unique_ptr<Surface> surface) {
                              user_override_resource_cache_bytes_);
   }
   compositor_context_->OnGrContextCreated();
+  if (surface_->GetExternalViewEmbedder()) {
+    const auto platform_id =
+        task_runners_.GetPlatformTaskRunner()->GetTaskQueueId();
+    const auto gpu_id = task_runners_.GetGPUTaskRunner()->GetTaskQueueId();
+    gpu_thread_merger_ =
+        fml::MakeRefCounted<fml::GpuThreadMerger>(platform_id, gpu_id);
+  }
 }
 
 void Rasterizer::Teardown() {
@@ -99,13 +106,32 @@ void Rasterizer::DrawLastLayerTree() {
 
 void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   TRACE_EVENT0("flutter", "GPURasterizer::Draw");
+  if (gpu_thread_merger_ && !gpu_thread_merger_->IsOnRasterizingThread()) {
+    // we yield and let this frame be serviced on the right thread.
+    return;
+  }
+  FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
 
+  RasterStatus raster_status = RasterStatus::kFailed;
   Pipeline<flutter::LayerTree>::Consumer consumer =
-      std::bind(&Rasterizer::DoDraw, this, std::placeholders::_1);
+      [&](std::unique_ptr<LayerTree> layer_tree) {
+        raster_status = DoDraw(std::move(layer_tree));
+      };
+
+  PipelineConsumeResult consume_result = pipeline->Consume(consumer);
+  // if the raster status is to resubmit the frame, we push the frame to the
+  // front of the queue and also change the consume status to more available.
+  if (raster_status == RasterStatus::kResubmit) {
+    auto front_continuation = pipeline->ProduceToFront();
+    front_continuation.Complete(std::move(resubmitted_layer_tree_));
+    consume_result = PipelineConsumeResult::MoreAvailable;
+  } else if (raster_status == RasterStatus::kEnqueuePipeline) {
+    consume_result = PipelineConsumeResult::MoreAvailable;
+  }
 
   // Consume as many pipeline items as possible. But yield the event loop
   // between successive tries.
-  switch (pipeline->Consume(consumer)) {
+  switch (consume_result) {
     case PipelineConsumeResult::MoreAvailable: {
       task_runners_.GetGPUTaskRunner()->PostTask(
           [weak_this = weak_factory_.GetWeakPtr(), pipeline]() {
@@ -120,11 +146,12 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   }
 }
 
-void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
+RasterStatus Rasterizer::DoDraw(
+    std::unique_ptr<flutter::LayerTree> layer_tree) {
   FML_DCHECK(task_runners_.GetGPUTaskRunner()->RunsTasksOnCurrentThread());
 
   if (!layer_tree || !surface_) {
-    return;
+    return RasterStatus::kFailed;
   }
 
   FrameTiming timing;
@@ -135,8 +162,12 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   persistent_cache->ResetStoredNewShaders();
 
-  if (DrawToSurface(*layer_tree) == RasterStatus::kSuccess) {
+  RasterStatus raster_status = DrawToSurface(*layer_tree);
+  if (raster_status == RasterStatus::kSuccess) {
     last_layer_tree_ = std::move(layer_tree);
+  } else if (raster_status == RasterStatus::kResubmit) {
+    resubmitted_layer_tree_ = std::move(layer_tree);
+    return raster_status;
   }
 
   if (persistent_cache->IsDumpingSkp() &&
@@ -151,6 +182,31 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
   // for Fuchsia to capture SceneUpdateContext::ExecutePaintTasks.
   timing.Set(FrameTiming::kRasterFinish, fml::TimePoint::Now());
   delegate_.OnFrameRasterized(timing);
+
+  // Pipeline pressure is applied from a couple of places:
+  // rasterizer: When there are more items as of the time of Consume.
+  // animator (via shell): Frame gets produces every vsync.
+  // Enqueing here is to account for the following scenario:
+  // T = 1
+  //  - one item (A) in the pipeline
+  //  - rasterizer starts (and merges the threads)
+  //  - pipeline consume result says no items to process
+  // T = 2
+  //  - animator produces (B) to the pipeline
+  //  - applies pipeline pressure via platform thread.
+  // T = 3
+  //   - rasterizes finished (and un-merges the threads)
+  //   - |Draw| for B yields as its on the wrong thread.
+  // This enqueue ensures that we attempt to consume from the right
+  // thread one more time after un-merge.
+  if (gpu_thread_merger_) {
+    if (gpu_thread_merger_->DecrementLease() ==
+        fml::GpuThreadStatus::kUnmergedNow) {
+      return RasterStatus::kEnqueuePipeline;
+    }
+  }
+
+  return raster_status;
 }
 
 RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
@@ -177,7 +233,7 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
 
   auto compositor_frame = compositor_context_->AcquireFrame(
       surface_->GetContext(), canvas, external_view_embedder,
-      surface_->GetRootTransformation(), true);
+      surface_->GetRootTransformation(), true, gpu_thread_merger_);
 
   if (compositor_frame) {
     RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
@@ -218,7 +274,7 @@ static sk_sp<SkData> ScreenshotLayerTreeAsPicture(
   // https://github.com/flutter/flutter/issues/23435
   auto frame = compositor_context.AcquireFrame(
       nullptr, recorder.getRecordingCanvas(), nullptr,
-      root_surface_transformation, false);
+      root_surface_transformation, false, nullptr);
 
   frame->Raster(*tree, true);
 
@@ -268,8 +324,9 @@ static sk_sp<SkData> ScreenshotLayerTreeAsImage(
   SkMatrix root_surface_transformation;
   root_surface_transformation.reset();
 
-  auto frame = compositor_context.AcquireFrame(
-      surface_context, canvas, nullptr, root_surface_transformation, false);
+  auto frame = compositor_context.AcquireFrame(surface_context, canvas, nullptr,
+                                               root_surface_transformation,
+                                               false, nullptr);
   canvas->clear(SK_ColorTRANSPARENT);
   frame->Raster(*tree, true);
   canvas->flush();

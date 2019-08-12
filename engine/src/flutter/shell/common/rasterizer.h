@@ -13,6 +13,7 @@
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/fml/closure.h"
+#include "flutter/fml/gpu_thread_merger.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/fml/synchronization/waitable_event.h"
 #include "flutter/shell/common/pipeline.h"
@@ -400,13 +401,19 @@ class Rasterizer final {
   TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;
+  // This is the last successfully rasterized layer tree.
   std::unique_ptr<flutter::LayerTree> last_layer_tree_;
+  // Set when we need attempt to rasterize the layer tree again. This layer_tree
+  // has not successfully rasterized. This can happen due to the change in the
+  // thread configuration. This will be inserted to the front of the pipeline.
+  std::unique_ptr<flutter::LayerTree> resubmitted_layer_tree_;
   fml::closure next_frame_callback_;
   bool user_override_resource_cache_bytes_;
   std::optional<size_t> max_cache_bytes_;
   fml::WeakPtrFactory<Rasterizer> weak_factory_;
+  fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
 
-  void DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
+  RasterStatus DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
 
   RasterStatus DrawToSurface(flutter::LayerTree& layer_tree);
 

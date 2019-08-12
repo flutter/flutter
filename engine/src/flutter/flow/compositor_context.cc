@@ -34,10 +34,11 @@ std::unique_ptr<CompositorContext::ScopedFrame> CompositorContext::AcquireFrame(
     SkCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
-    bool instrumentation_enabled) {
-  return std::make_unique<ScopedFrame>(*this, gr_context, canvas, view_embedder,
-                                       root_surface_transformation,
-                                       instrumentation_enabled);
+    bool instrumentation_enabled,
+    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+  return std::make_unique<ScopedFrame>(
+      *this, gr_context, canvas, view_embedder, root_surface_transformation,
+      instrumentation_enabled, gpu_thread_merger);
 }
 
 CompositorContext::ScopedFrame::ScopedFrame(
@@ -46,13 +47,15 @@ CompositorContext::ScopedFrame::ScopedFrame(
     SkCanvas* canvas,
     ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
-    bool instrumentation_enabled)
+    bool instrumentation_enabled,
+    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger)
     : context_(context),
       gr_context_(gr_context),
       canvas_(canvas),
       view_embedder_(view_embedder),
       root_surface_transformation_(root_surface_transformation),
-      instrumentation_enabled_(instrumentation_enabled) {
+      instrumentation_enabled_(instrumentation_enabled),
+      gpu_thread_merger_(gpu_thread_merger) {
   context_.BeginFrame(*this, instrumentation_enabled_);
 }
 
@@ -64,6 +67,14 @@ RasterStatus CompositorContext::ScopedFrame::Raster(
     flutter::LayerTree& layer_tree,
     bool ignore_raster_cache) {
   layer_tree.Preroll(*this, ignore_raster_cache);
+  PostPrerollResult post_preroll_result = PostPrerollResult::kSuccess;
+  if (view_embedder_ && gpu_thread_merger_) {
+    post_preroll_result = view_embedder_->PostPrerollAction(gpu_thread_merger_);
+  }
+
+  if (post_preroll_result == PostPrerollResult::kResubmitFrame) {
+    return RasterStatus::kResubmit;
+  }
   // Clearing canvas after preroll reduces one render target switch when preroll
   // paints some raster cache.
   if (canvas()) {

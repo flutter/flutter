@@ -49,9 +49,6 @@ class IOSSurfaceSoftware final : public IOSSurface,
   void CancelFrame() override;
 
   // |flutter::ExternalViewEmbedder|
-  bool HasPendingViewOperations() override;
-
-  // |flutter::ExternalViewEmbedder|
   void BeginFrame(SkISize frame_size) override;
 
   // |flutter::ExternalViewEmbedder|

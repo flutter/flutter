@@ -42,7 +42,8 @@ class CompositorContext final : public flutter::CompositorContext {
       SkCanvas* canvas,
       flutter::ExternalViewEmbedder* view_embedder,
       const SkMatrix& root_surface_transformation,
-      bool instrumentation_enabled) override;
+      bool instrumentation_enabled,
+      fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(CompositorContext);
 };

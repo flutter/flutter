@@ -19,7 +19,8 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
                                                 nullptr,
                                                 nullptr,
                                                 root_surface_transformation,
-                                                instrumentation_enabled),
+                                                instrumentation_enabled,
+                                                nullptr),
         session_connection_(session_connection) {}
 
  private:
@@ -85,11 +86,13 @@ void CompositorContext::OnSessionSizeChangeHint(float width_change_factor,
 CompositorContext::~CompositorContext() = default;
 
 std::unique_ptr<flutter::CompositorContext::ScopedFrame>
-CompositorContext::AcquireFrame(GrContext* gr_context,
-                                SkCanvas* canvas,
-                                flutter::ExternalViewEmbedder* view_embedder,
-                                const SkMatrix& root_surface_transformation,
-                                bool instrumentation_enabled) {
+CompositorContext::AcquireFrame(
+    GrContext* gr_context,
+    SkCanvas* canvas,
+    flutter::ExternalViewEmbedder* view_embedder,
+    const SkMatrix& root_surface_transformation,
+    bool instrumentation_enabled,
+    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   // TODO: The AcquireFrame interface is too broad and must be refactored to get
   // rid of the context and canvas arguments as those seem to be only used for
   // colorspace correctness purposes on the mobile shells.
