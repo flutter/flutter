@@ -42,8 +42,9 @@ typedef TweenAnimationBuilderCallback<T> = Widget Function(BuildContext context,
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows an [IconButton] that "zooms" in when the widget first
-/// builds (its size smoothly increases from 0 to 24). Whenever the button
-/// is pressed, it smoothly changes it size from 24 to 48 or vice versa.
+/// builds (its size smoothly increases from 0 to 24) and whenever the button
+/// is pressed, it smoothly changes its size to the new target value of either
+/// 48 or 24).
 ///
 /// ```dart
 /// double targetValue = 24.0;
