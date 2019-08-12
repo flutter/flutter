@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-
 import 'package:flutter/animation.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import 'framework.dart';
-
+import 'implicit_animations.dart';
 
 /// Builder callback for [TweenAnimationBuilder].
 ///
