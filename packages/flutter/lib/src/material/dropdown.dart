@@ -532,8 +532,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// This sample shows a `DropdownButton` whose value is one of
-/// "One", "Two", "Free", or "Four".
+/// This sample shows a `DropdownButton` with a customized icon, text style,
+/// and underline and whose value is one of "One", "Two", "Free", or "Four".
+///
+/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
 /// ```dart
 /// String dropdownValue = 'One';
@@ -544,6 +546,16 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///     body: Center(
 ///       child: DropdownButton<String>(
 ///         value: dropdownValue,
+///         icon: Icon(Icons.arrow_downward),
+///         iconSize: 24,
+///         elevation: 16,
+///         style: TextStyle(
+///           color: Colors.deepPurple
+///         ),
+///         underline: Container(
+///           height: 2,
+///           color: Colors.deepPurpleAccent,
+///         ),
 ///         onChanged: (String newValue) {
 ///           setState(() {
 ///             dropdownValue = newValue;

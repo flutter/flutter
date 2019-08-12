@@ -36,9 +36,9 @@ Future<String> respondToHostRequestForSplashLog(String _) {
 
 void createTestChannelBetweenAndroidAndFlutter() {
   // Channel used for Android to send Flutter changes to the splash display.
-  const BasicMessageChannel<String> testChannel = BasicMessageChannel<String>(
+  final BasicMessageChannel<String> testChannel = BasicMessageChannel<String>(
       'testChannel',
-      StringCodec()
+      const StringCodec()
   );
 
   // Every splash display change message that we receive from Android is either

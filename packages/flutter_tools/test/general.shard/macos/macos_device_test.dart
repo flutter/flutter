@@ -96,6 +96,25 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
         FileSystem: () => mockFileSystem,
         ProcessManager: () => mockProcessManager,
       });
+
+      testUsingContext('The current running process is not killed when stopping the app', () async {
+        final String psOut = '''
+tester    $pid   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 flutter run --use-application-binary /Applications/foo
+''';
+        final MockMacOSApp mockMacOSApp = MockMacOSApp();
+        // The name of the executable is the same as a command line argument to the flutter tool
+        when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
+        when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
+          return ProcessResult(1, 0, psOut, '');
+        });
+        when(mockProcessManager.run(<String>[
+          'kill', '$pid',
+        ])).thenThrow(Exception('Flutter tool process has been killed'));
+
+        expect(await device.stopApp(mockMacOSApp), true);
+      }, overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+      });
     });
 
     test('noop port forwarding', () async {

@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
@@ -22,7 +20,6 @@ mixin ServicesBinding on BindingBase {
   void initInstances() {
     super.initInstances();
     _instance = this;
-    _defaultBinaryMessenger = createBinaryMessenger();
     window
       ..onPlatformMessage = defaultBinaryMessenger.handlePlatformMessage;
     initLicenses();
@@ -31,21 +28,6 @@ mixin ServicesBinding on BindingBase {
   /// The current [ServicesBinding], if one has been created.
   static ServicesBinding get instance => _instance;
   static ServicesBinding _instance;
-
-  /// The default instance of [BinaryMessenger].
-  ///
-  /// This is used to send messages from the application to the platform, and
-  /// keeps track of which handlers have been registered on each channel so
-  /// it may dispatch incoming messages to the registered handler.
-  BinaryMessenger get defaultBinaryMessenger => _defaultBinaryMessenger;
-  BinaryMessenger _defaultBinaryMessenger;
-
-  /// Creates a default [BinaryMessenger] instance that can be used for sending
-  /// platform messages.
-  @protected
-  BinaryMessenger createBinaryMessenger() {
-    return const _DefaultBinaryMessenger._();
-  }
 
   /// Adds relevant licenses to the [LicenseRegistry].
   ///
@@ -133,94 +115,5 @@ mixin ServicesBinding on BindingBase {
   @mustCallSuper
   void evict(String asset) {
     rootBundle.evict(asset);
-  }
-}
-
-/// The default implementation of [BinaryMessenger].
-///
-/// This messenger sends messages from the app-side to the platform-side and
-/// dispatches incoming messages from the platform-side to the appropriate
-/// handler.
-class _DefaultBinaryMessenger extends BinaryMessenger {
-  const _DefaultBinaryMessenger._();
-
-  // Handlers for incoming messages from platform plugins.
-  // This is static so that this class can have a const constructor.
-  static final Map<String, MessageHandler> _handlers =
-      <String, MessageHandler>{};
-
-  // Mock handlers that intercept and respond to outgoing messages.
-  // This is static so that this class can have a const constructor.
-  static final Map<String, MessageHandler> _mockHandlers =
-      <String, MessageHandler>{};
-
-  Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
-    final Completer<ByteData> completer = Completer<ByteData>();
-    // ui.window is accessed directly instead of using ServicesBinding.instance.window
-    // because this method might be invoked before any binding is initialized.
-    // This issue was reported in #27541. It is not ideal to statically access
-    // ui.window because the Window may be dependency injected elsewhere with
-    // a different instance. However, static access at this location seems to be
-    // the least bad option.
-    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
-      try {
-        completer.complete(reply);
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'services library',
-          context: ErrorDescription('during a platform message response callback'),
-        ));
-      }
-    });
-    return completer.future;
-  }
-
-  @override
-  Future<void> handlePlatformMessage(
-    String channel,
-    ByteData data,
-    ui.PlatformMessageResponseCallback callback,
-  ) async {
-    ByteData response;
-    try {
-      final MessageHandler handler = _handlers[channel];
-      if (handler != null)
-        response = await handler(data);
-    } catch (exception, stack) {
-      FlutterError.reportError(FlutterErrorDetails(
-        exception: exception,
-        stack: stack,
-        library: 'services library',
-        context: ErrorDescription('during a platform message callback'),
-      ));
-    } finally {
-      callback(response);
-    }
-  }
-
-  @override
-  Future<ByteData> send(String channel, ByteData message) {
-    final MessageHandler handler = _mockHandlers[channel];
-    if (handler != null)
-      return handler(message);
-    return _sendPlatformMessage(channel, message);
-  }
-
-  @override
-  void setMessageHandler(String channel, MessageHandler handler) {
-    if (handler == null)
-      _handlers.remove(channel);
-    else
-      _handlers[channel] = handler;
-  }
-
-  @override
-  void setMockMessageHandler(String channel, MessageHandler handler) {
-    if (handler == null)
-      _mockHandlers.remove(channel);
-    else
-      _mockHandlers[channel] = handler;
   }
 }

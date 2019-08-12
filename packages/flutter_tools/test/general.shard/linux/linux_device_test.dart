@@ -22,16 +22,21 @@ void main() {
     final LinuxDevice device = LinuxDevice();
     final MockPlatform notLinux = MockPlatform();
     final MockProcessManager mockProcessManager = MockProcessManager();
+    const String flutterToolCommand = 'flutter --someoption somevalue';
 
     when(notLinux.isLinux).thenReturn(false);
     when(mockProcessManager.run(<String>[
       'ps', 'aux',
     ])).thenAnswer((Invocation invocation) async {
+      // The flutter tool process is returned as output to the ps aux command
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);
-      when<String>(result.stdout).thenReturn('');
+      when<String>(result.stdout).thenReturn('username  $pid  $flutterToolCommand');
       return result;
     });
+    when(mockProcessManager.run(<String>[
+      'kill', '$pid',
+    ])).thenThrow(Exception('Flutter tool process has been killed'));
 
     testUsingContext('defaults', () async {
       final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
@@ -53,6 +58,14 @@ void main() {
       final int result = await portForwarder.forward(2);
       expect(result, 2);
       expect(portForwarder.forwardedPorts.isEmpty, true);
+    });
+
+    testUsingContext('The current running process is not killed when stopping the app', () async {
+      // The name of the executable is the same as a command line argument to the flutter tool
+      final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'somevalue');
+      expect(await device.stopApp(linuxApp), true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('No devices listed if platform unsupported', () async {

@@ -4,16 +4,11 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_test/flutter_test.dart' show TestWidgetsFlutterBinding;
 import '../flutter_test_alternative.dart';
 
 import 'fake_platform_views.dart';
 
 void main() {
-
-  setUp(() {
-    TestWidgetsFlutterBinding.ensureInitialized();
-  });
 
   group('Android', () {
     FakeAndroidPlatformViewsController viewsController;

@@ -16,18 +16,18 @@ void main() {
 
     final List<ByteData> log = <ByteData>[];
 
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('test1', (ByteData message) async {
+    defaultBinaryMessenger.setMockMessageHandler('test1', (ByteData message) async {
       log.add(message);
       return null;
     });
 
     final ByteData message = ByteData(2)..setUint16(0, 0xABCD);
-    await ServicesBinding.instance.defaultBinaryMessenger.send('test1', message);
+    await defaultBinaryMessenger.send('test1', message);
     expect(log, equals(<ByteData>[message]));
     log.clear();
 
-    ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler('test1', null);
-    await ServicesBinding.instance.defaultBinaryMessenger.send('test1', message);
+    defaultBinaryMessenger.setMockMessageHandler('test1', null);
+    await defaultBinaryMessenger.send('test1', message);
     expect(log, isEmpty);
   });
 }

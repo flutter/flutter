@@ -36,9 +36,6 @@ class TestTextInput {
   /// first be requested, e.g. using [WidgetTester.showKeyboard].
   final VoidCallback onCleared;
 
-  /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
-
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
@@ -111,7 +108,7 @@ class TestTextInput {
     // test this code does not run in a package:test test zone.
     if (_client == 0)
       throw TestFailure('Tried to use TestTextInput with no keyboard attached. You must use WidgetTester.showKeyboard() first.');
-    _binaryMessenger.handlePlatformMessage(
+    defaultBinaryMessenger.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         MethodCall(
@@ -143,7 +140,7 @@ class TestTextInput {
 
       final Completer<void> completer = Completer<void>();
 
-      _binaryMessenger.handlePlatformMessage(
+      defaultBinaryMessenger.handlePlatformMessage(
         SystemChannels.textInput.name,
         SystemChannels.textInput.codec.encodeMethodCall(
           MethodCall(

@@ -285,6 +285,26 @@ void main() {
     );
     expect(find.text('flutter_tester'), findsOneWidget);
   });
+
+  testWidgets('AboutListTile dense property is applied', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(child: Center(child: AboutListTile())),
+    ));
+    Rect tileRect = tester.getRect(find.byType(AboutListTile));
+    expect(tileRect.height, 56.0);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(child: Center(child: AboutListTile(dense: false))),
+    ));
+    tileRect = tester.getRect(find.byType(AboutListTile));
+    expect(tileRect.height, 56.0);
+
+    await tester.pumpWidget(const MaterialApp(
+      home: Material(child: Center(child: AboutListTile(dense: true))),
+    ));
+    tileRect = tester.getRect(find.byType(AboutListTile));
+    expect(tileRect.height, 48.0);
+  });
 }
 
 class FakeLicenseEntry extends LicenseEntry {

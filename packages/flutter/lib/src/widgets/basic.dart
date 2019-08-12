@@ -4376,6 +4376,8 @@ class Flexible extends ParentDataWidget<Flex> {
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
+/// ![An example using Expanded widget in a Column](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_column.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
@@ -4386,18 +4388,18 @@ class Flexible extends ParentDataWidget<Flex> {
 ///        child: Column(
 ///         children: <Widget>[
 ///           Container(
-///             color: Colors.red,
+///             color: Colors.blue,
 ///             height: 100,
 ///             width: 100,
 ///           ),
 ///           Expanded(
 ///             child: Container(
-///               color: Colors.blue,
+///               color: Colors.amber,
 ///               width: 100,
 ///             ),
 ///           ),
 ///           Container(
-///             color: Colors.red,
+///             color: Colors.blue,
 ///             height: 100,
 ///             width: 100,
 ///           ),
@@ -4413,6 +4415,8 @@ class Flexible extends ParentDataWidget<Flex> {
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
+/// ![An example using Expanded widget in a Row](https://flutter.github.io/assets-for-api-docs/assets/widgets/expanded_row.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
@@ -4425,7 +4429,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///           Expanded(
 ///             flex: 2,
 ///             child: Container(
-///               color: Colors.red,
+///               color: Colors.amber,
 ///               height: 100,
 ///             ),
 ///           ),
@@ -4437,7 +4441,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///           Expanded(
 ///             flex: 1,
 ///             child: Container(
-///               color: Colors.red,
+///               color: Colors.amber,
 ///               height: 100,
 ///             ),
 ///           ),
