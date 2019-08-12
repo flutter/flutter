@@ -234,7 +234,7 @@ class DrawerController extends StatefulWidget {
   /// `MediaQuery.of(context).padding` that corresponds to [alignment].
   /// This ensures that the drag area for notched devices is not obscured. For
   /// example, if [alignment] is set to [DrawerAlignment.start] and
-  /// [TextDirection.of(context)] is set to [TextDirection.ltr],
+  /// `TextDirection.of(context)` is set to [TextDirection.ltr],
   /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double edgeDragWidth;
 
@@ -443,19 +443,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (widget.edgeDragWidth == null) {
       switch (textDirection) {
         case TextDirection.ltr: {
-          if (drawerIsStart) {
-            dragAreaWidth = _kEdgeDragWidth + padding.left;
-          } else {
-            dragAreaWidth = _kEdgeDragWidth + padding.right;
-          }
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.left : padding.right);
         }
         break;
         case TextDirection.rtl: {
-          if (drawerIsStart) {
-            dragAreaWidth = _kEdgeDragWidth + padding.right;
-          } else {
-            dragAreaWidth = _kEdgeDragWidth + padding.left;
-          }
+          dragAreaWidth = _kEdgeDragWidth +
+            (drawerIsStart ? padding.right : padding.left);
         }
         break;
       }
