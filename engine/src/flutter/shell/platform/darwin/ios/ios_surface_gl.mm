@@ -106,7 +106,8 @@ void IOSSurfaceGL::PrerollCompositeEmbeddedView(
   platform_views_controller->PrerollCompositeEmbeddedView(view_id, std::move(params));
 }
 
-PostPrerollResult IOSSurfaceGL::PostPrerollAction(fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
+PostPrerollResult IOSSurfaceGL::PostPrerollAction(
+    fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   FlutterPlatformViewsController* platform_views_controller = GetPlatformViewsController();
   FML_CHECK(platform_views_controller != nullptr);
   return platform_views_controller->PostPrerollAction(gpu_thread_merger);
