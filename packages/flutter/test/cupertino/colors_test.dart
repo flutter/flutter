@@ -130,14 +130,14 @@ void main() {
   });
 
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
-    expect(vibrancyDependentColor1, CupertinoDynamicColor.withVibrancy(
+    expect(vibrancyDependentColor1, CupertinoDynamicColor.withBrightness(
       color: color1,
       darkColor: color0,
     ));
   });
 
   test('withVibrancyAndContrast constructor creates colors that may depend on contrast and vibrancy', () {
-    expect(contrastDependentColor1, CupertinoDynamicColor.withVibrancyAndContrast(
+    expect(contrastDependentColor1, CupertinoDynamicColor.withBrightnessAndContrast(
       color: color1,
       darkColor: color1,
       highContrastColor: color0,
@@ -154,7 +154,7 @@ void main() {
         highContrastElevatedColor: color2,
         darkHighContrastElevatedColor: color3,
       ),
-      CupertinoDynamicColor.withVibrancyAndContrast(
+      CupertinoDynamicColor.withBrightnessAndContrast(
         color: color0,
         darkColor: color1,
         highContrastColor: color2,
