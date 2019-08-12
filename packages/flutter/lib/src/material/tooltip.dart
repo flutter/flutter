@@ -501,7 +501,8 @@ class _TooltipOverlay extends StatelessWidget {
             opacity: animation,
             child: ConstrainedBox(
               constraints: BoxConstraints(minHeight: height),
-              child: Material(
+              child: DefaultTextStyle(
+                style: Theme.of(context).textTheme.body1,
                 child: Container(
                   decoration: decoration,
                   padding: padding,
