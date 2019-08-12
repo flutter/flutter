@@ -6,14 +6,7 @@ import 'package:flutter/animation.dart';
 
 import 'framework.dart';
 import 'implicit_animations.dart';
-
-/// Builder callback for [TweenAnimationBuilder].
-///
-/// The callback is expected to return a [Widget] built with the current
-/// `value` of the animation. The `child` is passed-though from the
-/// [TweenAnimationBuilder] as-is and should be incorporated into the widget
-/// subtree if it is non-null.
-typedef TweenAnimationBuilderCallback<T> = Widget Function(BuildContext context, T value, Widget child);
+import 'value_listenable_builder.dart';
 
 /// [Widget] builder that animates a property of a [Widget] to a target value
 /// whenever the target value changes.
@@ -36,9 +29,29 @@ typedef TweenAnimationBuilderCallback<T> = Widget Function(BuildContext context,
 /// current animation value. The [builder] is called throughout the animation
 /// for every animation value until [Tween.end] is reached.
 ///
-/// The [animationStatusListener] is informed of the current status of the
-/// animation. Registering an [animationStatusListener] may be useful to trigger
-/// an action (like another animation) at the end of the current animation.
+/// If the [builder] callback's return value contains a subtree that does not
+/// depend on the animation, it's more efficient to build that subtree once
+/// instead of rebuilding it on every animation tick. Such a pre-built subtree
+/// can be provided to the [TweenAnimationBuilder] via the [child] property
+/// and it will pass it back to the [builder] function so that it can be
+/// incorporated into the build.
+///
+/// A provided [onEnd] callback is called whenever an animation completes.
+/// Registering an [onEnd] callback my be useful to trigger an action (like
+/// another animation) at the end of the current animation.
+///
+/// ## Ownership of the [Tween]
+///
+/// The [TweenAnimationBuilder] takes full ownership of the provided [tween]
+/// instance and it will mutate it. Once a [Tween] has been passed to a
+/// [TweenAnimationBuilder], its properties should not be accessed or changed
+/// anymore to avoid interference with the [TweenAnimationBuilder].
+///
+/// It is good practice to never store a [Tween] provided to a
+/// [TweenAnimationBuilder] in an instance variable to avoid accidental
+/// modifications of the [Tween].
+///
+/// ## Example Code
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 /// This example shows an [IconButton] that "zooms" in when the widget first
@@ -85,13 +98,18 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   ///
   /// The properties [tween], [duration], and [builder] are required. The values
   /// for [tween], [curve], and [builder] must not be null.
+  ///
+  /// The [TweenAnimationBuilder] takes full ownership of the provided [tween]
+  /// instance and mutates it. Once a [Tween] has been passed to a
+  /// [TweenAnimationBuilder], its properties should not be accessed or changed
+  /// anymore to avoid interference with the [TweenAnimationBuilder].
   const TweenAnimationBuilder({
     Key key,
     @required this.tween,
     @required Duration duration,
     Curve curve = Curves.linear,
     @required this.builder,
-    this.animationStatusListener,
+    this.onEnd,
     this.child,
   }) : assert(tween != null),
        assert(curve != null),
@@ -117,14 +135,16 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   ///
   /// ## Ownership
   ///
-  /// The [TweenAnimationBuilder] takes full ownership of the provided [Tween].
-  /// Once a [Tween] instance has been passed to [TweenAnimationBuilder] its
-  /// properties should not be accessed or changed anymore as they may have been
-  /// modified by the [TweenAnimationBuilder]. If you need to change the
-  /// [Tween], create a **new instance** with the new values.
+  /// The [TweenAnimationBuilder] takes full ownership of the provided [Tween]
+  /// and it will mutate the [Tween]. Once a [Tween] instance has been passed
+  /// to [TweenAnimationBuilder] its properties should not be accessed or
+  /// changed anymore to avoid any interference with the
+  /// [TweenAnimationBuilder]. If you need to change the [Tween], create a
+  /// **new instance** with the new values.
   ///
   /// It is good practice to never store a [Tween] provided to a
-  /// [TweenAnimationBuilder] in an instance variable.
+  /// [TweenAnimationBuilder] in an instance variable to avoid accidental
+  /// modifications of the [Tween].
   final Tween<T> tween;
 
   /// Called every time the animation value changes.
@@ -132,7 +152,7 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// The current animation value is passed to the builder along with the
   /// [child]. The builder should build a [Widget] based on the current
   /// animation value and incorporate the [child] into it, if it is non-null.
-  final TweenAnimationBuilderCallback<T> builder;
+  final ValueWidgetBuilder<T> builder;
 
   /// The child widget to pass to the builder.
   ///
@@ -148,13 +168,11 @@ class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// performance significantly in some cases and is therefore a good practice.
   final Widget child;
 
-  /// Called every time the [AnimationStatus] of the underlying animation
-  /// changes.
+  /// Called every time an animation completes.
   ///
   /// This can be useful to trigger additional actions (e.g. another animation)
-  /// at the end of the current animation (which is signaled by
-  /// [AnimationStatus.completed]).
-  final AnimationStatusListener animationStatusListener;
+  /// at the end of the current animation.
+  final VoidCallback onEnd;
 
   @override
   ImplicitlyAnimatedWidgetState<ImplicitlyAnimatedWidget> createState() {
@@ -170,24 +188,24 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
     widget.tween.begin ??= widget.tween.end;
     _currentTween = widget.tween;
     super.initState();
-    if (widget.animationStatusListener != null) {
-      controller.addStatusListener(widget.animationStatusListener);
-    }
+    // The statusListener is removed when the superclass disposes the controller.
+    controller.addStatusListener(_onAnimationStatusChanged);
     if (_currentTween.begin != _currentTween.end) {
       controller.forward();
     }
   }
 
-  @override
-  void didUpdateWidget(TweenAnimationBuilder<T> oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.animationStatusListener != widget.animationStatusListener) {
-      if (oldWidget.animationStatusListener != null) {
-        controller.removeStatusListener(oldWidget.animationStatusListener);
-      }
-      if (widget.animationStatusListener != null) {
-        controller.addStatusListener(widget.animationStatusListener);
-      }
+  void _onAnimationStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.dismissed:
+      case AnimationStatus.forward:
+      case AnimationStatus.reverse:
+        break;
+      case AnimationStatus.completed:
+        if (widget.onEnd != null) {
+          widget.onEnd();
+        }
+        break;
     }
   }
 

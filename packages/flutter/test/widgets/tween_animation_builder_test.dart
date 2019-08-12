@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Animates forward when built', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    int endCount = 0;
     await tester.pumpWidget(
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
@@ -17,29 +17,29 @@ void main() {
           values.add(i);
           return const Placeholder();
         },
-        animationStatusListener: (AnimationStatus status) {
-          statuses.add(status);
+        onEnd: () {
+          endCount++;
         },
       ),
     );
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward]);
+    expect(endCount, 0);
     expect(values, <int>[10]);
 
     await tester.pump(const Duration(milliseconds: 500));
     expect(values, <int>[10, 60]);
 
     await tester.pump(const Duration(milliseconds: 501));
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward, AnimationStatus.completed]);
+    expect(endCount, 1);
     expect(values, <int>[10, 60, 110]);
 
     await tester.pump(const Duration(milliseconds: 500));
-    expect(statuses, <AnimationStatus>[AnimationStatus.forward, AnimationStatus.completed]);
+    expect(endCount, 1);
     expect(values, <int>[10, 60, 110]);
   });
 
   testWidgets('No initial animation when begin=null', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    int endCount = 0;
     await tester.pumpWidget(
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
@@ -48,21 +48,22 @@ void main() {
           values.add(i);
           return const Placeholder();
         },
-        animationStatusListener: (AnimationStatus status) {
-          statuses.add(status);
+        onEnd: () {
+          endCount++;
         },
       ),
     );
-    expect(statuses, <AnimationStatus>[]);
+    expect(endCount, 0);
     expect(values, <int>[100]);
     await tester.pump(const Duration(seconds: 2));
+    expect(endCount, 0);
     expect(values, <int>[100]);
   });
 
 
   testWidgets('No initial animation when begin=end', (WidgetTester tester) async {
     final List<int> values = <int>[];
-    final List<AnimationStatus> statuses = <AnimationStatus>[];
+    int endCount = 0;
     await tester.pumpWidget(
       TweenAnimationBuilder<int>(
         duration: const Duration(seconds: 1),
@@ -71,14 +72,15 @@ void main() {
           values.add(i);
           return const Placeholder();
         },
-        animationStatusListener: (AnimationStatus status) {
-          statuses.add(status);
+        onEnd: () {
+          endCount++;
         },
       ),
     );
-    expect(statuses, <AnimationStatus>[]);
+    expect(endCount, 0);
     expect(values, <int>[100]);
     await tester.pump(const Duration(seconds: 2));
+    expect(endCount, 0);
     expect(values, <int>[100]);
   });
 
