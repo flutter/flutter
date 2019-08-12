@@ -1010,7 +1010,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
   /// A message to show when the dropdown is disabled.
   ///
-  /// Displayed if [items] or [onChanged] is null.
+  /// Displayed if [items] is null.
   final Widget disabledHint;
 
   /// Called when the user selects an item.
