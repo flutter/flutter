@@ -90,7 +90,12 @@ class SimControl {
       return <String, Map<String, dynamic>>{};
     }
     try {
-      return json.decode(results.stdout?.toString())[section.name] as Map<String, dynamic>;
+      final Object decodeResult = json.decode(results.stdout?.toString())[section.name];
+      if (decodeResult is Map<String, dynamic>) {
+        return decodeResult;
+      }
+      printError('simctl returned unexpected JSON response: ${results.stdout}');
+      return <String, dynamic>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
@@ -107,9 +112,11 @@ class SimControl {
     final Map<String, dynamic> devicesSection = await _list(SimControlListSection.devices);
 
     for (String deviceCategory in devicesSection.keys) {
-      final List<dynamic> devicesData = devicesSection[deviceCategory] as List<dynamic>;
-      for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
-        devices.add(SimDevice(deviceCategory, data));
+      final Object devicesData = devicesSection[deviceCategory];
+      if (devicesData != null && devicesData is List<dynamic>) {
+        for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
+          devices.add(SimDevice(deviceCategory, data));
+        }
       }
     }
 
@@ -267,9 +274,9 @@ class IOSSimulator extends Device {
   Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async {
+  Future<bool> installApp(covariant IOSApp app) async {
     try {
-      final IOSApp iosApp = app as IOSApp;
+      final IOSApp iosApp = app;
       await SimControl.instance.install(id, iosApp.simulatorBundlePath);
       return true;
     } catch (e) {
@@ -316,7 +323,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant IOSApp package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -325,7 +332,7 @@ class IOSSimulator extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    if (!prebuiltApplication) {
+    if (!prebuiltApplication && package is BuildableIOSApp) {
       printTrace('Building ${package.name} for $id.');
 
       try {
@@ -371,8 +378,7 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final IOSApp iosApp = package as IOSApp;
-      final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
+      final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
       final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
@@ -400,7 +406,7 @@ class IOSSimulator extends Device {
     }
   }
 
-  Future<void> _setupUpdatedApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
+  Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath, bool usesTerminalUi) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
 
     // Step 1: Build the Xcode project.
@@ -412,7 +418,7 @@ class IOSSimulator extends Device {
         extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
-      app: app as BuildableIOSApp,
+      app: app,
       buildInfo: debugBuildInfo,
       targetOverride: mainPath,
       buildForDevice: false,
@@ -422,8 +428,7 @@ class IOSSimulator extends Device {
       throwToolExit('Could not build the application for the simulator.');
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final IOSApp iosApp = app as IOSApp;
-    final Directory bundle = fs.directory(iosApp.simulatorBundlePath);
+    final Directory bundle = fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists)
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
@@ -467,10 +472,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({ covariant IOSApp app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
-    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app as IOSApp));
+    return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
   }
 
   @override
