@@ -5533,11 +5533,11 @@ class Listener extends StatelessWidget {
     // TODO(tongmu): After it goes stable, remove these 3 parameters from Listener
     // and Listener should no longer need an intermediate class _PointerListener.
     // https://github.com/flutter/flutter/issues/36085
-    @Deprecated('Use MouseRegion.onEnter instead')
+    @Deprecated('Use MouseRegion.onEnter instead. Read MouseRegion.opaque for behavioral difference.')
     this.onPointerEnter, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onExit instead')
+    @Deprecated('Use MouseRegion.onExit instead. Read MouseRegion.opaque for behavioral difference.')
     this.onPointerExit, // ignore: deprecated_member_use_from_same_package
-    @Deprecated('Use MouseRegion.onHover instead')
+    @Deprecated('Use MouseRegion.onHover instead. Read MouseRegion.opaque for behavioral difference.')
     this.onPointerHover, // ignore: deprecated_member_use_from_same_package
     this.onPointerUp,
     this.onPointerCancel,
@@ -5799,16 +5799,16 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
-  /// Whether this object should prevent [MouseRegion]s visually behind it
-  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
-  /// and [onExit] behave.
+  /// Whether this object should prevent other [MouseRegion]s that are visually
+  /// behind it from detecting the pointer, therefore affecting how their
+  /// [onHover], [onEnter], and [onExit] behave.
   ///
   /// If [opaque] is true, this object will "absorb" the mouse pointer so that
   /// [MouseRegion]s visually behind it will not consider themselves being
   /// hovered even when the pointer is within their areas.
   ///
   /// If [opaque] is false, whether the pointer is contained by this mouse
-  /// region will not affect how [MouseRegion]s behind it behaves.
+  /// region will not affect how [MouseRegion]s behind it behave.
   ///
   /// This defaults to true.
   final bool opaque;
