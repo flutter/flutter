@@ -961,6 +961,9 @@ class RenderShaderMask extends RenderProxyBox {
        _blendMode = blendMode,
        super(child);
 
+  @override
+  ShaderMaskLayer get layer => super.layer;
+
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
@@ -998,37 +1001,15 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = _createOrUpdateShaderMaskLayer(
-        shader: _shaderCallback(offset & size),
-        maskRect: offset & size,
-        blendMode: _blendMode,
-        oldLayer: layer,
-      );
+      layer ??= ShaderMaskLayer();
+      layer
+        ..shader = _shaderCallback(offset & size)
+        ..maskRect = offset & size
+        ..blendMode = _blendMode;
       context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
-  }
-}
-
-ShaderMaskLayer _createOrUpdateShaderMaskLayer({
-  @required Shader shader,
-  @required Rect maskRect,
-  @required BlendMode blendMode,
-  @required ShaderMaskLayer oldLayer,
-}) {
-  if (oldLayer == null) {
-    return ShaderMaskLayer(
-      shader: shader,
-      maskRect: maskRect,
-      blendMode: blendMode,
-    );
-  } else {
-    oldLayer
-      ..shader = shader
-      ..maskRect = maskRect
-      ..blendMode = blendMode;
-    return oldLayer;
   }
 }
 
@@ -1044,6 +1025,9 @@ class RenderBackdropFilter extends RenderProxyBox {
     : assert(filter != null),
       _filter = filter,
       super(child);
+
+  @override
+  BackdropFilterLayer get layer => super.layer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1067,23 +1051,12 @@ class RenderBackdropFilter extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      layer = _createOrUpdateBackdropFilterLayer(filter: _filter, oldLayer: layer);
+      layer ??= BackdropFilterLayer();
+      layer.filter = _filter;
       context.pushLayer(layer, super.paint, offset);
     } else {
       layer = null;
     }
-  }
-}
-
-BackdropFilterLayer _createOrUpdateBackdropFilterLayer({
-  @required ui.ImageFilter filter,
-  @required BackdropFilterLayer oldLayer,
-}) {
-  if (oldLayer == null) {
-    return BackdropFilterLayer(filter: filter);
-  } else {
-    oldLayer.filter = filter;
-    return oldLayer;
   }
 }
 
@@ -1684,6 +1657,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
          shadowColor: shadowColor
        );
 
+  @override
+  PhysicalModelLayer get layer => super.layer;
+
   /// The shape of the layer.
   ///
   /// Defaults to [BoxShape.rectangle]. The [borderRadius] affects the corners
@@ -1763,16 +1739,14 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
         }
         return true;
       }());
-      layer = _createOrUpdatePhysicalModelLayer(
-        clipPath: offsetRRectAsPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-        childPaintBounds: offsetBounds,
-        oldLayer: layer,
-      );
-      context.pushLayer(layer, super.paint, offset);
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetRRectAsPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
         layer.debugCreator = debugCreator;
         return true;
@@ -1787,34 +1761,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<BoxShape>('shape', shape));
     description.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
-  }
-}
-
-PhysicalModelLayer _createOrUpdatePhysicalModelLayer({
-  @required Path clipPath,
-  @required Clip clipBehavior,
-  @required double elevation,
-  @required Color color,
-  @required Color shadowColor,
-  @required Rect childPaintBounds,
-  @required PhysicalModelLayer oldLayer,
-}) {
-  if (oldLayer == null) {
-    return PhysicalModelLayer(
-      clipPath: clipPath,
-      clipBehavior: clipBehavior,
-      elevation: elevation,
-      color: color,
-      shadowColor: shadowColor,
-    );
-  } else {
-    oldLayer
-      ..clipPath = clipPath
-      ..clipBehavior = clipBehavior
-      ..elevation = elevation
-      ..color = color
-      ..shadowColor = shadowColor;
-    return oldLayer;
   }
 }
 
@@ -1854,6 +1800,9 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
+  PhysicalModelLayer get layer => super.layer;
+
+  @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
@@ -1889,16 +1838,14 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
         }
         return true;
       }());
-      layer = _createOrUpdatePhysicalModelLayer(
-        clipPath: offsetPath,
-        clipBehavior: clipBehavior,
-        elevation: paintShadows ? elevation : 0.0,
-        color: color,
-        shadowColor: shadowColor,
-        childPaintBounds: offsetBounds,
-        oldLayer: layer,
-      );
-      context.pushLayer(layer, super.paint, offset);
+      layer ??= PhysicalModelLayer();
+      layer
+        ..clipPath = offsetPath
+        ..clipBehavior = clipBehavior
+        ..elevation = paintShadows ? elevation : 0.0
+        ..color = color
+        ..shadowColor = shadowColor;
+      context.pushLayer(layer, super.paint, offset, childPaintBounds: offsetBounds);
       assert(() {
         layer.debugCreator = debugCreator;
         return true;

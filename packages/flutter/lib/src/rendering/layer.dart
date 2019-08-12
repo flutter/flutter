@@ -1024,10 +1024,10 @@ class OffsetLayer extends ContainerLayer {
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
-  /// The [clipRect] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// The [clipRect] and [clipBehavior] properties must be non-null before the
+  /// compositing phase of the pipeline.
   ClipRectLayer({
-    @required Rect clipRect,
+    Rect clipRect,
     Clip clipBehavior = Clip.hardEdge,
   }) : _clipRect = clipRect,
        _clipBehavior = clipBehavior,
@@ -1079,6 +1079,8 @@ class ClipRectLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipRect != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1110,10 +1112,10 @@ class ClipRectLayer extends ContainerLayer {
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
-  /// The [clipRRect] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// The [clipRRect] and [clipBehavior] properties must be non-null before the
+  /// compositing phase of the pipeline.
   ClipRRectLayer({
-    @required RRect clipRRect,
+    RRect clipRRect,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipRRect = clipRRect,
        _clipBehavior = clipBehavior,
@@ -1161,6 +1163,8 @@ class ClipRRectLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipRRect != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1192,10 +1196,10 @@ class ClipRRectLayer extends ContainerLayer {
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
-  /// The [clipPath] property must be non-null before the compositing phase of
-  /// the pipeline.
+  /// The [clipPath] and [clipBehavior] properties must be non-null before the
+  /// compositing phase of the pipeline.
   ClipPathLayer({
-    @required Path clipPath,
+    Path clipPath,
     Clip clipBehavior = Clip.antiAlias,
   }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
@@ -1243,6 +1247,8 @@ class ClipPathLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipPath != null);
+    assert(clipBehavior != null);
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1264,12 +1270,11 @@ class ClipPathLayer extends ContainerLayer {
 class ColorFilterLayer extends ContainerLayer {
   /// Creates a layer that applies a [ColorFilter] to its children.
   ///
-  /// The [ColorFilter] property must be non-null before the compositing phase
+  /// The [colorFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ColorFilterLayer({
-    @required ColorFilter colorFilter,
-  }) : _colorFilter = colorFilter,
-       assert(colorFilter != null);
+    ColorFilter colorFilter,
+  }) : _colorFilter = colorFilter;
 
   /// The color filter to apply to children.
   ///
@@ -1278,6 +1283,7 @@ class ColorFilterLayer extends ContainerLayer {
   ColorFilter get colorFilter => _colorFilter;
   ColorFilter _colorFilter;
   set colorFilter(ColorFilter value) {
+    assert(value != null);
     if (value != _colorFilter) {
       _colorFilter = value;
       markNeedsAddToScene();
@@ -1286,6 +1292,7 @@ class ColorFilterLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(colorFilter != null);
     final ui.EngineLayer newEngineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -1310,8 +1317,7 @@ class TransformLayer extends OffsetLayer {
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
   TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
-    : assert(transform.storage.every((double value) => value.isFinite)),
-      _transform = transform,
+    : _transform = transform,
       super(offset: offset);
 
   /// The matrix to apply.
@@ -1326,6 +1332,8 @@ class TransformLayer extends OffsetLayer {
   Matrix4 get transform => _transform;
   Matrix4 _transform;
   set transform(Matrix4 value) {
+    assert(value != null);
+    assert(value.storage.every((double component) => component.isFinite));
     if (value == _transform)
       return;
     _transform = value;
@@ -1339,6 +1347,7 @@ class TransformLayer extends OffsetLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(transform != null);
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
@@ -1413,7 +1422,7 @@ class OpacityLayer extends ContainerLayer {
   /// The [alpha] property must be non-null before the compositing phase of
   /// the pipeline.
   OpacityLayer({
-    @required int alpha,
+    int alpha,
     Offset offset = Offset.zero,
   }) : _alpha = alpha,
        _offset = offset;
@@ -1428,6 +1437,7 @@ class OpacityLayer extends ContainerLayer {
   int get alpha => _alpha;
   int _alpha;
   set alpha(int value) {
+    assert(value != null);
     if (value != _alpha) {
       _alpha = value;
       markNeedsAddToScene();
@@ -1453,6 +1463,7 @@ class OpacityLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(alpha != null);
     bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
@@ -1483,9 +1494,9 @@ class ShaderMaskLayer extends ContainerLayer {
   /// The [shader], [maskRect], and [blendMode] properties must be non-null
   /// before the compositing phase of the pipeline.
   ShaderMaskLayer({
-    @required Shader shader,
-    @required Rect maskRect,
-    @required BlendMode blendMode,
+    Shader shader,
+    Rect maskRect,
+    BlendMode blendMode,
   }) : _shader = shader,
        _maskRect = maskRect,
        _blendMode = blendMode;
@@ -1531,6 +1542,9 @@ class ShaderMaskLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(shader != null);
+    assert(maskRect != null);
+    assert(blendMode != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
     final ui.EngineLayer newEngineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
@@ -1553,7 +1567,7 @@ class BackdropFilterLayer extends ContainerLayer {
   ///
   /// The [filter] property must be non-null before the compositing phase of the
   /// pipeline.
-  BackdropFilterLayer({ @required ui.ImageFilter filter }) : _filter = filter;
+  BackdropFilterLayer({ ui.ImageFilter filter }) : _filter = filter;
 
   /// The filter to apply to the existing contents of the scene.
   ///
@@ -1570,6 +1584,7 @@ class BackdropFilterLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(filter != null);
     final ui.EngineLayer newEngineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
@@ -1590,19 +1605,15 @@ class PhysicalModelLayer extends ContainerLayer {
   /// Creates a composited layer that uses a physical model to producing
   /// lighting effects.
   ///
-  /// The [clipPath], [elevation], and [color] arguments must not be null.
+  /// The [clipPath], [clipBehavior], [elevation], [color], and [shadowColor]
+  /// arguments must be non-null before the compositing phase of the pipeline.
   PhysicalModelLayer({
-    @required Path clipPath,
+    Path clipPath,
     Clip clipBehavior = Clip.none,
-    @required double elevation,
-    @required Color color,
-    @required Color shadowColor,
-  }) : assert(clipPath != null),
-       assert(clipBehavior != null),
-       assert(elevation != null),
-       assert(color != null),
-       assert(shadowColor != null),
-       _clipPath = clipPath,
+    double elevation,
+    Color color,
+    Color shadowColor,
+  }) : _clipPath = clipPath,
        _clipBehavior = clipBehavior,
        _elevation = elevation,
        _color = color,
@@ -1700,6 +1711,12 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(clipPath != null);
+    assert(clipBehavior != null);
+    assert(elevation != null);
+    assert(color != null);
+    assert(shadowColor != null);
+
     bool enabled = true;
     assert(() {
       enabled = !debugDisablePhysicalShapeLayers;

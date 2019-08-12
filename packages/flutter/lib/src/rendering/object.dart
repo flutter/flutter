@@ -415,14 +415,10 @@ class PaintingContext extends ClipContext {
   ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer oldLayer }) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
-      ClipRectLayer layer = oldLayer;
-      if (layer == null) {
-        layer = ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior);
-      } else {
-        layer
-          ..clipRect = offsetClipRect
-          ..clipBehavior = clipBehavior;
-      }
+      final ClipRectLayer layer = oldLayer ?? ClipRectLayer();
+      layer
+        ..clipRect = offsetClipRect
+        ..clipBehavior = clipBehavior;
       pushLayer(layer, painter, offset, childPaintBounds: offsetClipRect);
       return layer;
     } else {
@@ -449,14 +445,10 @@ class PaintingContext extends ClipContext {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      ClipRRectLayer layer = oldLayer;
-      if (layer == null) {
-        layer = ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior);
-      } else {
-        layer
-          ..clipRRect = offsetClipRRect
-          ..clipBehavior = clipBehavior;
-      }
+      final ClipRRectLayer layer = oldLayer ?? ClipRRectLayer();
+      layer
+        ..clipRRect = offsetClipRRect
+        ..clipBehavior = clipBehavior;
       pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
       return layer;
     } else {
@@ -483,14 +475,10 @@ class PaintingContext extends ClipContext {
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      ClipPathLayer layer = oldLayer;
-      if (layer == null) {
-        layer = ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior);
-      } else {
-        layer
-          ..clipPath = offsetClipPath
-          ..clipBehavior = clipBehavior;
-      }
+      final ClipPathLayer layer = oldLayer ?? ClipPathLayer();
+      layer
+        ..clipPath = offsetClipPath
+        ..clipBehavior = clipBehavior;
       pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
       return layer;
     } else {
@@ -515,12 +503,8 @@ class PaintingContext extends ClipContext {
   /// layer, which, for example, causes them to use composited clips.
   ColorFilterLayer pushColorFilter(Offset offset, ColorFilter colorFilter, PaintingContextCallback painter, { ColorFilterLayer oldLayer }) {
     assert(colorFilter != null);
-    ColorFilterLayer layer = oldLayer;
-    if (layer == null) {
-      layer = ColorFilterLayer(colorFilter: colorFilter);
-    } else {
-      layer.colorFilter = colorFilter;
-    }
+    final ColorFilterLayer layer = oldLayer ?? ColorFilterLayer();
+    layer.colorFilter = colorFilter;
     pushLayer(layer, painter, offset);
     return layer;
   }
@@ -538,12 +522,8 @@ class PaintingContext extends ClipContext {
     final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
-      TransformLayer layer = oldLayer;
-      if (layer == null) {
-        layer = TransformLayer(transform: effectiveTransform);
-      } else {
-        layer.transform = effectiveTransform;
-      }
+      final TransformLayer layer = oldLayer ?? TransformLayer();
+      layer.transform = effectiveTransform;
       pushLayer(
         layer,
         painter,
@@ -578,14 +558,10 @@ class PaintingContext extends ClipContext {
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
   OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer oldLayer }) {
-    OpacityLayer layer = oldLayer;
-    if (layer == null) {
-      layer = OpacityLayer(alpha: alpha, offset: offset);
-    } else {
-      layer
-        ..alpha = alpha
-        ..offset = offset;
-    }
+    final OpacityLayer layer = oldLayer ?? OpacityLayer();
+    layer
+      ..alpha = alpha
+      ..offset = offset;
     pushLayer(layer, painter, Offset.zero);
     return layer;
   }
