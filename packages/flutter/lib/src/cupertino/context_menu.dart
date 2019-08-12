@@ -1,8 +1,11 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
-import 'package:flutter/painting.dart' show MatrixUtils;
+//import 'package:flutter/painting.dart' show MatrixUtils;
 import 'package:vector_math/vector_math_64.dart';
-import 'route.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
@@ -41,8 +44,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   Animation<int> _mask;
   Animation<Matrix4> _transform;
   AnimationController _controller;
-  double _scaleStart;
   bool _isOpen = false;
+  _ContextMenuRoute<void> _route;
 
   @override
   void initState() {
@@ -55,7 +58,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _mask = IntTween(begin: 1, end: 0).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: Interval(
+        curve: const Interval(
           0.0,
           0.9,
         ),
@@ -79,7 +82,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     }
   }
 
-  void _openContextMenu() async {
+  void _openContextMenu() {
     setState(() {
       _isOpen = true;
     });
@@ -91,7 +94,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     final Offset offset = renderBox.localToGlobal(renderBox.paintBounds.topLeft);
     final Rect originalRect = offset & renderBox.paintBounds.size;
     //final Rect rect = MatrixUtils.transformRect(_transform.value, originalRect);
-    Vector4 sizeVector = _transform.value.transform(Vector4(originalRect.width, originalRect.height, 0, 0));
+    final Vector4 sizeVector = _transform.value.transform(Vector4(originalRect.width, originalRect.height, 0, 0));
     final Rect rect = Rect.fromLTWH(
       originalRect.left,
       originalRect.top,
@@ -99,7 +102,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       sizeVector.y,
     );
 
-    final _ContextMenuRoute route = _ContextMenuRoute<void>(
+    _route = _ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
@@ -110,19 +113,24 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         return container.child;
       },
     );
-    await Navigator.of(context, rootNavigator: true).push(route);
+    // TODO(justinmc): Use context to get screen size and pas to CMR?
+    Navigator.of(context, rootNavigator: true).push<void>(_route);
 
     // Run the reverse animation in the main view after the modal finishes
     // animating out.
-    route.animation.addStatusListener((AnimationStatus status) {
-      if (status != AnimationStatus.dismissed) {
-        return;
-      }
-      _controller.reverse();
-      setState(() {
-        _isOpen = false;
-      });
+    _route.animation.addStatusListener(routeAnimationStatusListener);
+  }
+
+  void routeAnimationStatusListener(AnimationStatus status) {
+    if (status != AnimationStatus.dismissed) {
+      return;
+    }
+    _controller.reverse();
+    setState(() {
+      _isOpen = false;
     });
+    _route.animation.removeStatusListener(routeAnimationStatusListener);
+    _route = null;
   }
 
   void _onTapDown(TapDownDetails details) {
