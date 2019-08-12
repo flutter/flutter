@@ -22,7 +22,7 @@ fi
 
 echo "Using dart from $HOST_TOOLS, gen_snapshot from $DEVICE_TOOLS."
 
-OUTDIR="build/ios"
+OUTDIR="${BASH_SOURCE%/*}/build/ios"
 
 echo "Creating $OUTDIR..."
 
@@ -36,7 +36,7 @@ echo "Compiling kernel..."
   --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
   --aot --tfa --target=flutter \
   --output-dill "$OUTDIR/app.dill" \
-  lib/main.dart
+  "${BASH_SOURCE%/*}/lib/main.dart"
 
 echo "Compiling AOT Assembly..."
 
@@ -65,12 +65,12 @@ clang -arch arm64 \
 
 strip "$OUTDIR/App.framework/App"
 
-cp ios/AppFrameworkInfo.plist "$OUTDIR/App.framework/Info.plist"
+cp "${BASH_SOURCE%/*}/ios/AppFrameworkInfo.plist" "$OUTDIR/App.framework/Info.plist"
 
 echo "Created $OUTDIR/App.framework/App."
 
-rm -rf ios/Scenarios/App.framework
-rm -rf ios/Scenarios/Flutter.framework
-cp -R "$OUTDIR/App.framework" ios/Scenarios
-cp -R "$DEVICE_TOOLS/../Flutter.framework" ios/Scenarios
+rm -rf "${BASH_SOURCE%/*}/ios/Scenarios/App.framework"
+rm -rf "${BASH_SOURCE%/*}/ios/Scenarios/Flutter.framework"
+cp -R "$OUTDIR/App.framework" "${BASH_SOURCE%/*}/ios/Scenarios"
+cp -R "$DEVICE_TOOLS/../Flutter.framework" "${BASH_SOURCE%/*}/ios/Scenarios"
 

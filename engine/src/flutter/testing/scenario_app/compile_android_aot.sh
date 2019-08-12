@@ -22,7 +22,7 @@ fi
 
 echo "Using dart from $HOST_TOOLS, gen_snapshot from $DEVICE_TOOLS."
 
-OUTDIR="build/android"
+OUTDIR="${BASH_SOURCE%/*}/build/android"
 
 echo "Creating $OUTDIR..."
 
@@ -35,15 +35,15 @@ echo "Compiling kernel..."
   --sdk-root "$HOST_TOOLS/flutter_patched_sdk" \
   --aot --tfa --target=flutter \
   --output-dill "$OUTDIR/app.dill" \
-  lib/main.dart
+  "${BASH_SOURCE%/*}/lib/main.dart"
 
 echo "Compiling ELF Shared Library..."
 
 "$DEVICE_TOOLS/gen_snapshot" --deterministic --snapshot_kind=app-aot-elf --elf="$OUTDIR/libapp.so" --strip "$OUTDIR/app.dill"
 
-mkdir -p "android/app/src/main/jniLibs/arm64-v8a"
-mkdir -p "android/app/libs"
-cp "$OUTDIR/libapp.so" "android/app/src/main/jniLibs/arm64-v8a/"
-cp "$DEVICE_TOOLS/../flutter.jar" "android/app/libs/"
+mkdir -p "${BASH_SOURCE%/*}/android/app/src/main/jniLibs/arm64-v8a"
+mkdir -p "${BASH_SOURCE%/*}/android/app/libs"
+cp "$OUTDIR/libapp.so" "${BASH_SOURCE%/*}/android/app/src/main/jniLibs/arm64-v8a/"
+cp "$DEVICE_TOOLS/../flutter.jar" "${BASH_SOURCE%/*}/android/app/libs/"
 
 echo "Created $OUTDIR/libapp.so."
