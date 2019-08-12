@@ -230,9 +230,12 @@ class DrawerController extends StatefulWidget {
   /// The width of the area within which a horizontal swipe will open the
   /// drawer.
   ///
-  /// By default, the value used is 20.0 added to the value of
-  /// `MediaQuery.of(context).padding`. This ensures that the drag area for
-  /// notched devices is not obscured.
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if [alignment] is set to [DrawerAlignment.start] and
+  /// [TextDirection.of(context)] is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double edgeDragWidth;
 
   @override
@@ -438,10 +441,23 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
     double dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
-      if (drawerIsStart && textDirection == TextDirection.ltr || !drawerIsStart && textDirection == TextDirection.rtl) {
-        dragAreaWidth = _kEdgeDragWidth + padding.left;
-      } else {
-        dragAreaWidth = _kEdgeDragWidth + padding.right;
+      switch (textDirection) {
+        case TextDirection.ltr: {
+          if (drawerIsStart) {
+            dragAreaWidth = _kEdgeDragWidth + padding.left;
+          } else {
+            dragAreaWidth = _kEdgeDragWidth + padding.right;
+          }
+        }
+        break;
+        case TextDirection.rtl: {
+          if (drawerIsStart) {
+            dragAreaWidth = _kEdgeDragWidth + padding.right;
+          } else {
+            dragAreaWidth = _kEdgeDragWidth + padding.left;
+          }
+        }
+        break;
       }
     }
 

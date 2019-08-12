@@ -1141,15 +1141,14 @@ class Scaffold extends StatefulWidget {
   /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
 
-  /// The horizontal width from the edge of the screen that will respond to a
-  /// drag gesture to open the drawer.
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
   ///
-  /// By default, the value used is 20.0.
-  ///
-  /// If `MediaQuery.of(context).padding` is larger than the default drawer
-  /// edge width of 20.0 or the custom passed in drawerEdgeDragWidth value,
-  /// `MediaQuery.of(context).padding` will be used instead to properly
-  /// accommodate the drag widths of notched devices.
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
   final double drawerEdgeDragWidth;
 
   /// The state from the closest instance of this class that encloses the given context.
