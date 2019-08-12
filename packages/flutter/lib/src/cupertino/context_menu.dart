@@ -63,7 +63,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   void _onTapDown(TapDownDetails details) {
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
-      // todo(justinmc): make end centered instead of using alignment.
+      // TODO(justinmc): Make end centered instead of using alignment.
       end: Matrix4.identity()..scale(_kOpenScale),//..translate(-100.0),
     ).animate(
       CurvedAnimation(
@@ -98,24 +98,29 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       sizeVector.y,
     );
 
-    await Navigator.of(context, rootNavigator: true).push(
-      _ContextMenuRoute<void>(
-        barrierLabel: 'Dismiss',
-        filter: ui.ImageFilter.blur(
-          sigmaX: 5.0,
-          sigmaY: 5.0,
-        ),
-        rect: rect,
-        builder: (BuildContext context) {
-          return container.child;
-        },
+    final _ContextMenuRoute route = _ContextMenuRoute<void>(
+      barrierLabel: 'Dismiss',
+      filter: ui.ImageFilter.blur(
+        sigmaX: 5.0,
+        sigmaY: 5.0,
       ),
+      rect: rect,
+      builder: (BuildContext context) {
+        return container.child;
+      },
     );
+    await Navigator.of(context, rootNavigator: true).push(route);
 
-    // TODO(justinmc): This happens when the transition starts and the child is
-    // still in the scene.  Should happen when the transition ends.
-    setState(() {
-      _isOpen = false;
+    // Run the reverse animation in the main view after the modal finishes
+    // animating out.
+    route.animation.addStatusListener((AnimationStatus status) {
+      if (status != AnimationStatus.dismissed) {
+        return;
+      }
+      _controller.reverse();
+      setState(() {
+        _isOpen = false;
+      });
     });
   }
 
