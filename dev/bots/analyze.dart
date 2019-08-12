@@ -435,6 +435,20 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
       );
     }
   }
+
+  for (final String key in dependencyMap.keys) {
+    for (final String dependency in dependencyMap[key]) {
+      if (dependencyMap[dependency] != null)
+        continue;
+      // Sanity check before performing _deepSearch, to ensure there's no rogue
+      // dependencies.
+      errors.add(
+        '$key imported $dependency which is not one of the valid directories ${dependencyMap.keys}. '
+        'Consider changing $dependency to one of them.'
+      );
+    }
+  }
+
   for (final String package in dependencyMap.keys) {
     final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
@@ -1180,6 +1194,9 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
+  if (map[start] == null)
+    return null; // We catch these separately.
+
   for (final T key in map[start]) {
     if (key == start)
       continue; // we catch these separately
