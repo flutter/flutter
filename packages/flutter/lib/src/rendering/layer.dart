@@ -557,6 +557,10 @@ class ContainerLayer extends Layer {
 
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
+  // The reason this method is in the `ContainerLayer` class rather than
+  // `PipelineOwner` or other singleton level is because this method can beused
+  // both to render the whole layer tree (e.g. a normal application frame) as
+  // as to render a subtree (e.g. `OffsetLayer.toImage`).
   ui.Scene buildScene(ui.SceneBuilder builder) {
     List<PictureLayer> temporaryLayers;
     assert(() {
