@@ -127,6 +127,24 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       // to add this layer as retained or use it as `oldLayer`). However, the
       // parent must construct a new engine layer to add this layer to, and so
       // we mark it as needing its [addToScene] called next frame.
+      //
+      // This is designed to handle two situations:
+      //
+      // 1. When rendering the complete layer tree as normal. In this case we
+      // call child `addToScene` methods first, then we call `set engineLayer`
+      // for the parent. The children will call `markNeedsAddToScene` on the
+      // parent to signal that they produced new engine layers and therefore
+      // the parent needs to update. In this case, the parent is already adding
+      // itself to the scene via [addToScene], and so after it's done, its
+      // `set engineLayer` is called and it clears the `_needsAddToScene` flag.
+      //
+      // 2. When rendering an interior layer (e.g. `OffsetLayer.toImage`). In
+      // this case we call `addToScene` for one of the children but not the
+      // parent, i.e. we produce new engine layers for children but not for the
+      // parent. Here the children will mark the parent as needing
+      // `addToScene`, but the parent does not clear the flag until some future
+      // frame decides to render it, at which point the parent knows that it
+      // cannot retain its engine layer and will call `addToScene` again.
       if (parent != null && !parent.alwaysNeedsAddToScene) {
         parent.markNeedsAddToScene();
       }
