@@ -367,6 +367,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
 
+  // The amount of offset that will be added to [minScrollExtent] and subtracted
+  // from [maxScrollExtent], such that every page will properly snap to the center
+  // of the viewport when viewportFraction is greater than 1.
+  //
+  // The value is 0 if viewportFraction is less than or equal to 1, larger than 0
+  // otherwise.
   double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
 
   double getPageFromPixels(double pixels, double viewportDimension) {
