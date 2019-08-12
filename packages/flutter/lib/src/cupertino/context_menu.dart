@@ -16,8 +16,9 @@ class ContextMenu extends StatefulWidget {
   /// Create a context menu.
   const ContextMenu({
     Key key,
-    this.child,
-  }) : super(key: key);
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget that can be opened in a ContextMenu.
   ///
@@ -37,30 +38,29 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
   final GlobalKey _childGlobalKey = GlobalKey();
 
+  Animation<int> _mask;
   Animation<Matrix4> _transform;
   AnimationController _controller;
   double _scaleStart;
-  // TODO(justinmc): Get mask flash working again.
-  bool _isMasked = false;
   bool _isOpen = false;
 
   @override
   void initState() {
+    super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 600),
     );
     _controller.addStatusListener(_onAnimationChangeStatus);
-    super.initState();
-  }
-
-  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
-    if (animationStatus == AnimationStatus.completed) {
-      _openContextMenu();
-    }
-  }
-
-  void _onTapDown(TapDownDetails details) {
+    _mask = IntTween(begin: 1, end: 0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(
+          0.0,
+          0.9,
+        ),
+      ),
+    );
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
       // TODO(justinmc): Make end centered instead of using alignment.
@@ -71,11 +71,12 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         curve: Curves.easeInBack,
       ),
     );
-    _controller.forward();
   }
 
-  void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
+  void _onAnimationChangeStatus(AnimationStatus animationStatus) {
+    if (animationStatus == AnimationStatus.completed) {
+      _openContextMenu();
+    }
   }
 
   void _openContextMenu() async {
@@ -124,29 +125,19 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     });
   }
 
-  @override
-  void dispose() {
-    _controller.stop();
-    _controller.reset();
-    _transform = null;
-    super.dispose();
+  void _onTapDown(TapDownDetails details) {
+    _controller.forward();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      child: AnimatedBuilder(
-        builder: _buildAnimation,
-        animation: _controller,
-      ),
-    );
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
   }
 
-  Widget _buildAnimation(BuildContext context, Widget child) {
-    final Color maskColor = _isMasked ? _lightModeMaskColor : const Color(0xFFFFFFFF);
-
+  Widget _buildAnimation(BuildContext context, Widget whatever) {
+    final bool isAnimating = _controller.status == AnimationStatus.forward;
+    final Color maskColor = isAnimating && _mask.value == 1
+      ? _lightModeMaskColor
+      : const Color(0xFFFFFFFF);
     return Transform(
       transform: _transform?.value ?? Matrix4.identity(),
       child: ShaderMask(
@@ -167,6 +158,26 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      child: AnimatedBuilder(
+        builder: _buildAnimation,
+        animation: _controller,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.stop();
+    _controller.reset();
+    _transform = null;
+    super.dispose();
   }
 }
 
