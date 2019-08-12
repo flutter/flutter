@@ -2124,7 +2124,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   final Offset offset;
 
   /// Whether this layer should prevent layers visually behind it from being
-  /// visible to the hit during a hit test.
+  /// hit during a hit test.
   ///
   /// If [opaque] is true, this layer will "absorb" the hit if any of its
   /// children absorb it, or if this layer contains the target position and
