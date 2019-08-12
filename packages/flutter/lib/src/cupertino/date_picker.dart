@@ -40,9 +40,10 @@ const double _kTimerPickerLabelPadSize = 4.5;
 // The width of each colmn of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
 
+
 // The total width of the picker's currently selected number.
 // On iOS 13 beta the actual number is 29.5.
-const double _kTimerPickerNumberLabelWidth = 30;
+//const double _kTimerPickerNumberLabelWidth = 30;
 
 
 TextStyle _themeTextStyle(BuildContext context) {
@@ -1139,6 +1140,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   int lastSelectedMinute;
   int lastSelectedSecond;
 
+  final TextPainter textPainter = TextPainter();
+  final List<String> numbers = List<String>.generate(10, (int i) => '${9 - i}');
+  double numberLabelWidth;
+  double numberLabelHeight;
+  double numberLabelBaseline;
+
   @override
   void initState() {
     super.initState();
@@ -1158,6 +1165,42 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
     textDirection = Directionality.of(context);
     localizations = CupertinoLocalizations.of(context);
+
+    textPainter.textDirection = textDirection;
+    final TextStyle textStyle = _textStyleFrom(context);
+
+    double maxWidth = double.negativeInfinity;
+    String widestNumber;
+
+    // Assumes that:
+    // - 2-digit numbers are always wider than 1-digit numbers.
+    // - There's at least one number in 1-9 that's wider than or equal to 0.
+    // - The widest 2-digit number is composed of 2 same 1-digit numbers
+    //   that has the biggest width.
+    // - If two different 1-digit numbers are of the same width, their corresponding
+    //   2 digit numbers are of the same width.
+    for (String input in numbers) {
+      textPainter.text = TextSpan(
+        text: input,
+        style: textStyle
+      );
+      textPainter.layout();
+
+      if (textPainter.maxIntrinsicWidth > maxWidth) {
+        maxWidth = textPainter.maxIntrinsicWidth;
+        widestNumber = input;
+      }
+    }
+
+    textPainter.text = TextSpan(
+      text: '$widestNumber$widestNumber',
+      style: textStyle
+    );
+
+    textPainter.layout();
+    numberLabelWidth = textPainter.maxIntrinsicWidth;
+    numberLabelHeight = textPainter.height;
+    numberLabelBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
   // Builds a text label with customized scale factor and font weight.
@@ -1166,7 +1209,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   // encompassing widget.
   Widget _buildLabel(String text, EdgeInsetsDirectional pickerPadding) {
     final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
-      start: _kTimerPickerNumberLabelWidth
+      start: numberLabelWidth
            + _kTimerPickerLabelPadSize
            + pickerPadding.start
     );
@@ -1175,11 +1218,18 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       child: Container(
         alignment: AlignmentDirectional.centerStart.resolve(textDirection),
         padding: padding.resolve(textDirection),
-        child: Text(
-          text,
-          textScaleFactor: 0.9,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-          maxLines: 1,
+        child: SizedBox(
+          height: numberLabelHeight,
+          child: Baseline(
+            baseline: numberLabelBaseline,
+            baselineType: TextBaseline.alphabetic,
+            child: Text(
+              text,
+              textScaleFactor: 17.0 / 23.0,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              maxLines: 1,
+            ),
+          ),
         ),
       ),
     );
@@ -1187,15 +1237,15 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   // The picker has to be wider than its content, since the separators
   // are part of the picker.
-  Widget _buildPickerDigitLabel(Text child, EdgeInsetsDirectional padding) {
+  Widget _buildPickerDigitLabel(String text, EdgeInsetsDirectional padding) {
     return Container(
       width: _kTimerPickerColumnIntrinsicWidth + padding.horizontal,
       padding: padding.resolve(textDirection),
       alignment: AlignmentDirectional.centerStart.resolve(textDirection),
       child: Container(
-        width: _kTimerPickerNumberLabelWidth,
+        width: numberLabelWidth,
         alignment: AlignmentDirectional.centerEnd.resolve(textDirection),
-        child: child,
+        child: Text(text, softWrap: false, maxLines: 1),
       ),
     );
   }
@@ -1225,7 +1275,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(Text(localizations.timerPickerHour(index)), additionalPadding),
+          child: _buildPickerDigitLabel(localizations.timerPickerHour(index), additionalPadding),
         );
       }),
     );
@@ -1270,6 +1320,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
       squeeze: _kSqueeze,
+      looping: true,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
@@ -1290,7 +1341,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(Text(localizations.timerPickerMinute(minute)), additionalPadding),
+          child: _buildPickerDigitLabel(localizations.timerPickerMinute(minute), additionalPadding),
         );
       }),
     );
@@ -1325,6 +1376,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
       squeeze: _kSqueeze,
+      looping: true,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedSecond = index * widget.secondInterval;
@@ -1345,7 +1397,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(Text(localizations.timerPickerSecond(second)), additionalPadding),
+          child: _buildPickerDigitLabel(localizations.timerPickerSecond(second), additionalPadding),
         );
       }),
     );
@@ -1366,6 +1418,14 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           additionalPadding,
         ),
       ],
+    );
+  }
+
+  TextStyle _textStyleFrom(BuildContext context) {
+    return _themeTextStyle(context).merge(
+      const TextStyle(
+        fontSize: 23,
+      )
     );
   }
 
@@ -1420,7 +1480,10 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
           color: _kBackgroundColor,
           width: totalWidth,
           height: _kPickerHeight,
-          child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+          child: DefaultTextStyle(
+            style: _textStyleFrom(context),
+            child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+          ),
         ),
       ),
     );
