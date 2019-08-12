@@ -442,9 +442,11 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
         continue;
       // Sanity check before performing _deepSearch, to ensure there's no rogue
       // dependencies.
+      final String validFilenames = dependencyMap.keys.map((String name) => name + '.dart').join(', ');
       errors.add(
-        '$key imported $dependency which is not one of the valid directories ${dependencyMap.keys}. '
-        'Consider changing $dependency to one of them.'
+        '$key imported package:flutter/$dependency.dart '
+        'which is not one of the valid exports { $validFilenames }.\n'
+        'Consider changing $dependency.dart to one of them.'
       );
     }
   }
