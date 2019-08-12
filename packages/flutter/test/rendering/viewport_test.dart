@@ -314,6 +314,104 @@ void main() {
     expect(revealed.offset, 5 * (100 + 22 + 22) + 22 - 100);
   });
 
+  testWidgets('Viewport getOffsetToReveal Sliver - up - reverse growth', (WidgetTester tester) async {
+    const Key centerKey = ValueKey<String>('center');
+    final Widget centerSliver = SliverPadding(
+      key: centerKey,
+      padding: const EdgeInsets.all(22.0),
+      sliver: SliverToBoxAdapter(
+        child: Container(
+          height: 100.0,
+          child: const Text('Tile center'),
+        ),
+      ),
+    );
+    final Widget lowerItem = Container(
+      height: 100.0,
+      child: const Text('Tile lower'),
+    );
+    final Widget lowerSliver  = SliverPadding(
+      padding: const EdgeInsets.all(22.0),
+      sliver: SliverToBoxAdapter(
+        child: lowerItem,
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              center: centerKey,
+              reverse: true,
+              slivers: <Widget>[lowerSliver, centerSliver],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, - 100 - 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, - 100 - 22 - 100);
+  });
+
+  testWidgets('Viewport getOffsetToReveal Sliver - left - reverse growth', (WidgetTester tester) async {
+    const Key centerKey = ValueKey<String>('center');
+    final Widget centerSliver = SliverPadding(
+      key: centerKey,
+      padding: const EdgeInsets.all(22.0),
+      sliver: SliverToBoxAdapter(
+        child: Container(
+          width: 100.0,
+          child: const Text('Tile center'),
+        ),
+      ),
+    );
+    final Widget lowerItem = Container(
+      width: 100.0,
+      child: const Text('Tile lower'),
+    );
+    final Widget lowerSliver  = SliverPadding(
+      padding: const EdgeInsets.all(22.0),
+      sliver: SliverToBoxAdapter(
+        child: lowerItem,
+      ),
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Container(
+            height: 200.0,
+            width: 300.0,
+            child: CustomScrollView(
+              scrollDirection: Axis.horizontal,
+              center: centerKey,
+              reverse: true,
+              slivers: <Widget>[lowerSliver, centerSliver],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
+
+    final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
+    final RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    expect(revealed.offset, -100 - 22);
+  });
+
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[];
     await tester.pumpWidget(
