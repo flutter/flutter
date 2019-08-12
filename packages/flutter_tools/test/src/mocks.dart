@@ -592,8 +592,8 @@ class FakeProcessResult implements ProcessResult {
   FakeProcessResult({
     this.exitCode = 0,
     this.pid = 1,
-    this.stderr = '',
-    this.stdout = '',
+    this.stderr,
+    this.stdout,
   });
 
   @override
@@ -610,19 +610,4 @@ class FakeProcessResult implements ProcessResult {
 
   @override
   String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
-}
-
-Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
-  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stdout),
-  ]);
-  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
-    utf8.encode(stderr),
-  ]);
-  final Process process = MockProcess();
-
-  when(process.stdout).thenAnswer((_) => stdoutStream);
-  when(process.stderr).thenAnswer((_) => stderrStream);
-  when(process.exitCode).thenAnswer((_) => Future<int>.value(exitCode));
-  return process;
 }
