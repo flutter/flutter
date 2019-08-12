@@ -4,9 +4,9 @@
 
 import 'dart:ui' show Color;
 import 'package:collection/collection.dart';
-import 'package:flutter/src/widgets/basic.dart';
 
 import '../../foundation.dart';
+import '../widgets/basic.dart';
 import '../widgets/framework.dart' show BuildContext;
 import '../widgets/media_query.dart';
 import 'interface_level.dart';
