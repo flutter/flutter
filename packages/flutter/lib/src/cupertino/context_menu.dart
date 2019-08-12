@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 //import 'package:flutter/painting.dart' show MatrixUtils;
 import 'package:vector_math/vector_math_64.dart';
@@ -66,8 +67,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     );
     _transform = Tween<Matrix4>(
       begin: Matrix4.identity(),
-      // TODO(justinmc): Make end centered instead of using alignment.
-      end: Matrix4.identity()..scale(_kOpenScale),//..translate(-100.0),
+      end: Matrix4.identity()..scale(_kOpenScale),
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -92,28 +92,34 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     final RenderBox renderBox = _childGlobalKey.currentContext.findRenderObject();
     final Opacity container = _childGlobalKey.currentContext.widget;
     final Offset offset = renderBox.localToGlobal(renderBox.paintBounds.topLeft);
-    final Rect originalRect = offset & renderBox.paintBounds.size;
-    //final Rect rect = MatrixUtils.transformRect(_transform.value, originalRect);
-    final Vector4 sizeVector = _transform.value.transform(Vector4(originalRect.width, originalRect.height, 0, 0));
-    final Rect rect = Rect.fromLTWH(
-      originalRect.left,
-      originalRect.top,
+    final Rect originalChildRect = offset & renderBox.paintBounds.size;
+    //final Rect rect = MatrixUtils.transformRect(_transform.value, originalChildRect);
+    final Vector4 sizeVector = _transform.value.transform(Vector4(
+      originalChildRect.width,
+      originalChildRect.height,
+      0.0,
+      0.0,
+    ));
+    final Rect childRect = Rect.fromLTWH(
+      originalChildRect.left,
+      originalChildRect.top,
       sizeVector.x,
       sizeVector.y,
     );
 
+    final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
     _route = _ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
         sigmaY: 5.0,
       ),
-      rect: rect,
+      childRect: childRect,
+      parentRect: parentRect,
       builder: (BuildContext context) {
         return container.child;
       },
     );
-    // TODO(justinmc): Use context to get screen size and pas to CMR?
     Navigator.of(context, rootNavigator: true).push<void>(_route);
 
     // Run the reverse animation in the main view after the modal finishes
@@ -147,6 +153,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ? _lightModeMaskColor
       : const Color(0xFFFFFFFF);
     return Transform(
+      alignment: Alignment.center,
       transform: _transform?.value ?? Matrix4.identity(),
       child: ShaderMask(
         shaderCallback: (Rect bounds) {
@@ -193,20 +200,28 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     this.builder,
     ui.ImageFilter filter,
     RouteSettings settings,
-    Rect rect,
-  }) : _rect = rect,
+    Rect childRect,
+    Rect parentRect,
+  }) : _childRect = childRect,
+       _parentRect = parentRect,
        super(
          filter: filter,
          settings: settings,
        );
 
   // The rect containing the widget that should show in the ContextMenu.
-  final Rect _rect;
+  final Rect _childRect;
+
+  // A rect that indicates the space available to position the child.
+  // TODO(justinmc): I don't like the idea of needing to pass this in. Is it
+  // possible to get the full screen size in createAnimation? Problem is that
+  // this widget hasn't built yet by the time createAnimation is called.
+  final Rect _parentRect;
 
   // Barrier color for a Cupertino modal barrier.
   static const Color _kModalBarrierColor = Color(0x6604040F);
   // The duration of the transition used when a modal popup is shown.
-  static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 1335);
+  static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
   final WidgetBuilder builder;
 
@@ -235,42 +250,74 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-
       // These curves were initially measured from native iOS horizontal page
       // route animations and seemed to be a good match here as well.
       curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linearToEaseOut.flipped,
+      reverseCurve: Curves.linear,//Curves.easeInToLinear,
     );
-    _offsetTween = Tween<Offset>(
-      begin: _rect.topLeft,
-      // TODO(justinmc): Should end such that bottom of child is at center of
-      // screen vertically.
-      end: _rect.topLeft + const Offset(-100.0, -100.0),
+
+    // endScale is the scale that fits the original child into the parent.
+    //final Rect parentRect = Offset.zero & MediaQuery.of(subtreeContext).size;
+    final double endScale = math.max(
+      _parentRect.width / _childRect.width * _kOpenScale,
+      _parentRect.height / _parentRect.height * _kOpenScale,
     );
     _scaleTween = Tween<double>(
       begin: _kOpenScale,
-      // TODO(justinmc): Should end so that it fits inside top of screen with
-      // padding. Maybe add this padding to Stack.
-      end: _kOpenScale + 1.5,
+      end: endScale,
     );
+
+    final double centerY = _parentRect.height / 2;
+    final double endChildHeight = _childRect.height * endScale;
+    // TODO(justinmc): topLeftEnd is off for now. Should align child's bottom to
+    // midpoint of screen.
+    final Offset topLeftEnd = Offset(0.0, _parentRect.height / 2 - endChildHeight);
+    _offsetTween = Tween<Offset>(
+      begin: _childRect.topLeft,
+      end: topLeftEnd,
+    );
+
     return _animation;
   }
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return Stack(
-      children: <Widget>[
-        builder(context),
-      ],
-    );
+    return builder(context);
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final Offset offset = _offsetTween.evaluate(_animation);
-    return Transform(
-      transform: Matrix4.identity()..translate(offset.dx, offset.dy)..scale(_scaleTween.evaluate(_animation)),
-      child: child,
+    return SafeArea(
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                child: Stack(
+                  children: <Widget>[
+                    Positioned(
+                      top: 0.0,
+                      left: 0.0,
+                      child: Transform(
+                        transform: Matrix4.identity()
+                          ..translate(offset.dx, offset.dy)
+                          ..scale(_scaleTween.evaluate(_animation)),
+                        child: child,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: Container(
+                child: Text('TODO make me a menu'),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
