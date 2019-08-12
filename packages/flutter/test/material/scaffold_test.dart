@@ -1490,10 +1490,10 @@ void main() {
         MaterialApp(
           home: Scaffold(
             drawer: const Drawer(
-              child: Text('drawer'),
+              child: Text('Drawer'),
             ),
             drawerEdgeDragWidth: 40.0,
-            body: const Text('scaffold body'),
+            body: const Text('Scaffold Body'),
             appBar: AppBar(
               centerTitle: true,
               title: const Text('Title'),
