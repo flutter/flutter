@@ -1,4 +1,4 @@
-Signature: b8cb5dcf981bc89ba663c7c188cc7159
+Signature: fecb9bdc827a89ac8663b885360b1f50
 
 UNUSED LICENSES:
 
@@ -4751,6 +4751,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/asm_intrinsifier_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/bce_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/block_builder.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
