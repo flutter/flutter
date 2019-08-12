@@ -557,7 +557,7 @@ void main() {
         key: key,
         textStyle: const TextStyle(
           color: Colors.orange,
-          decoration: TextDecoration.underline
+          decoration: TextDecoration.underline,
         ),
         message: tooltipText,
         child: Container(
@@ -574,6 +574,39 @@ void main() {
     expect(textStyle.color, Colors.orange);
     expect(textStyle.fontFamily, null);
     expect(textStyle.decoration, TextDecoration.underline);
+  });
+
+  testWidgets('Tooltip overlay wrapped with a non-fallback DefaultTextStyle widget', (WidgetTester tester) async {
+    // A Material widget is needed as an ancestor of the Text widget.
+    // It is invalid to have text in a Material application that
+    // does not have a Material ancestor.
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Tooltip(
+        key: key,
+        message: tooltipText,
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+          color: Colors.green[500],
+        ),
+      ),
+    ));
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final TextStyle textStyle = tester.widget<DefaultTextStyle>(
+      find.ancestor(
+        of: find.text(tooltipText),
+        matching: find.byType(DefaultTextStyle),
+      ).first,
+    ).style;
+
+    // The default fallback text style results in a text with a
+    // double underline of Color(0xffffff00).
+    expect(textStyle.decoration, isNot(TextDecoration.underline));
+    expect(textStyle.decorationColor, isNot(const Color(0xffffff00)));
+    expect(textStyle.decorationStyle, isNot(TextDecorationStyle.double));
   });
 
   testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
