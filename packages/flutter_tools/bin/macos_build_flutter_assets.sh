@@ -62,6 +62,10 @@ fi
 # Set the build mode
 build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[:lower:]")"
 
+# The path where the input/output xcfilelists are stored. These are used by xcode
+# to conditionally skip this script phase if neither have changed.
+build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
+build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${track_widget_creation_flag}                                           \
@@ -70,5 +74,7 @@ RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     assemble                                                                \
     -dTargetPlatform=darwin-x64                                             \
     -dTargetFile="${target_path}"                                           \
-    -dBuildMode="${build_mode}"                                             \
-   debug_macos_framework
+    -dBuildMode=debug                                                       \
+    --build-inputs="${build_inputs_path}"                                   \
+    --build-outputs="${build_outputs_path}"                                 \
+   debug_bundle_flutter_assets

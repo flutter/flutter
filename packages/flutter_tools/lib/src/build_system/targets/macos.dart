@@ -48,7 +48,8 @@ class MacOSAssetBehavior extends SourceBehavior {
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
     );
-    final String prefix = fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral', 'flutter_assets');
+    final String prefix = fs.path.join(environment.projectDir.path, 'macos',
+        'Flutter', 'ephemeral', 'App.framework', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
       final File file = fs.file(fs.path.join(prefix, key));
