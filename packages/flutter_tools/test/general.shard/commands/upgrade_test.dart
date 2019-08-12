@@ -17,7 +17,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/mocks.dart';
 
 Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
   final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
@@ -127,7 +126,8 @@ void main() {
         environment:anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory')),
       ).thenAnswer((Invocation invocation) async {
-        return FakeProcessResult();
+        return FakeProcessResult()
+          ..exitCode = 0;
       });
       await realCommandRunner.verifyUpstreamConfigured();
     }, overrides: <Type, Generator>{
@@ -219,3 +219,16 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class FakeProcessResult implements ProcessResult {
+  @override
+  int exitCode;
+
+  @override
+  int pid = 0;
+
+  @override
+  String stderr = '';
+
+  @override
+  String stdout = '';
+}
