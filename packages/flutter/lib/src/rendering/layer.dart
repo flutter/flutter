@@ -207,9 +207,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// (preventing non-ancestral layers below this one from being hit).
   /// Returns false if the hit can continue to other non-ancestral objects
   /// behind this one.
-  bool hitTest<S>(LayerHitTestResult<S> result, { @required Offset regionOffset }) {
-    return false;
-  }
+  bool hitTest<S>(LayerHitTestResult<S> result, { @required Offset regionOffset });
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -330,6 +328,9 @@ class PictureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -399,6 +400,9 @@ class TextureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -435,6 +439,9 @@ class PlatformViewLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -509,6 +516,9 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
 }
 
 /// A composited layer that has a list of children.
