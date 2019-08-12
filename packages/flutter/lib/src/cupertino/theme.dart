@@ -329,8 +329,8 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   @override
   _NoDefaultCupertinoThemeData resolveFrom(BuildContext context, { bool nullOk = false }) {
     Color convertColor(Color color) => color == null
-    ? null
-    : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
+      ? null
+      : CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return _NoDefaultCupertinoThemeData(
       brightness,

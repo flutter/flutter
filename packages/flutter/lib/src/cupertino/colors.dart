@@ -352,17 +352,21 @@ class CupertinoDynamicColor extends Color {
   /// changed to adapt to the given [BuildContext].
   ///
   /// For example, if the given [BuildContext] indicates the widgets in the subtree
-  /// should be displayed in dark mode, with high accessibility contrast and an
-  /// elevated interface elevation, the resolved `CupertinoDynamicColor` will be
-  /// the same as this [CupertinoDynamicColor], except its effective color will
-  /// be `darkHighContrastElevatedColor` from the orignal `CupertinoDynamicColor`.
+  /// should be displayed in dark mode (the surrounding [CupertinoTheme]'s [CupertinoThemeData.brightness]
+  /// or [MediaQuery]'s [MediaQueryData.platformBrightness] is [PlatformBrightness.dark]),
+  /// with a high accessibility contrast (the surrounding [MediaQuery]'s [MediaQueryData.highContrast]
+  /// is `true`), and an elevated interface elevation (the surrounding [CupertinoUserInterfaceLevel]'s
+  /// `data` is [CupertinoUserInterfaceLevelData.elevated]), the resolved
+  /// `CupertinoDynamicColor` will be the same as this [CupertinoDynamicColor],
+  /// except its effective color will be the `darkHighContrastElevatedColor` variant
+  /// from the orignal `CupertinoDynamicColor`.
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
-  /// is different from [color], this function will call [CupertinoTheme.of],
-  /// and then [MediaQuery.of] if brightness wasn't specified in the theme data
-  /// retrived from the previous [CupertinoTheme.of] call, in an effort to determine
-  /// the brightness value.
+  /// is different from [color], this method will call [CupertinoTheme.of], and
+  /// then [MediaQuery.of] if brightness wasn't specified in the theme data retrived
+  /// from the previous [CupertinoTheme.of] call, in an effort to determine the
+  /// brightness value.
   ///
   /// If any of the required dependecies are missing from the given context, an exception
   /// will be thrown unless [nullOk] is set to `true`.

@@ -273,7 +273,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
         data: CupertinoUserInterfaceLevelData.base,
         child: CupertinoTheme(
           data: effectiveThemeData,
-          child: CupertinoSystemColors._(
+          child: CupertinoSystemColors(
             data: CupertinoSystemColors.fromSystem ?? CupertinoSystemColors.fallbackValues,
             child: WidgetsApp(
               key: GlobalObjectKey(this),
@@ -325,7 +325,9 @@ class _CupertinoAppState extends State<CupertinoApp> {
 /// Typically the given [CupertinoSystemColorsData] is resolved against its own
 /// [BuildContext] using [CupertinoSystemColorsData.resolveColors].
 class CupertinoSystemColors extends InheritedWidget {
-  const CupertinoSystemColors._({
+  /// Creates a widget that provides a given [CupertinoSystemColorsData] to its
+  /// descendants.
+  const CupertinoSystemColors({
     Key key,
     @required CupertinoSystemColorsData data,
     Widget child,
@@ -333,15 +335,15 @@ class CupertinoSystemColors extends InheritedWidget {
        assert(data != null),
        super(key: key, child: child);
 
-  /// Creates a widget that provides a [CupertinoSystemColorsData] which is extracted
-  /// from the given [BuildContext] to its descendants.
+  /// Creates a widget that provides a [CupertinoSystemColorsData] extracted from
+  /// and resolved against the given [BuildContext], to its descendants.
   ///
   /// The [context] and [child] arguments must not be null.
   CupertinoSystemColors.fromBuildContext({
     Key key,
     BuildContext context,
     Widget child,
-  }) : this._(key: key, data: CupertinoSystemColors.of(context).resolveColors(context), child: child);
+  }) : this(key: key, data: CupertinoSystemColors.of(context).resolveColors(context), child: child);
 
   final CupertinoSystemColorsData _data;
 
