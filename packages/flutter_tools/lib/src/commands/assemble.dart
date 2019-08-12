@@ -32,9 +32,6 @@ const List<Target> _kDefaultTargets = <Target>[
   AotElfRelease(),
   AotAssemblyProfile(),
   AotAssemblyRelease(),
-  DebugMacOSApplication(),
-  ProfileMacOSApplication(),
-  ReleaseMacOSApplication(),
   DebugMacOSFramework(),
 ];
 
