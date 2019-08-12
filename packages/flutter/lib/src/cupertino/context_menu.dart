@@ -87,7 +87,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     // Get the current position of the child
     assert(_childGlobalKey.currentContext != null);
     final RenderBox renderBox = _childGlobalKey.currentContext.findRenderObject();
-    final Container container = _childGlobalKey.currentContext.widget;
+    final Opacity container = _childGlobalKey.currentContext.widget;
     final Offset offset = renderBox.localToGlobal(renderBox.paintBounds.topLeft);
     final Rect originalRect = offset & renderBox.paintBounds.size;
     //final Rect rect = MatrixUtils.transformRect(_transform.value, originalRect);
@@ -150,11 +150,8 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
         },
         child: Opacity(
           opacity: _isOpen ? 0.0 : 1.0,
-          // TODO(justinmc): Maybe get rid of Container and put key on Opacity.
-          child: Container(
-            key: _childGlobalKey,
-            child: widget.child,
-          ),
+          key: _childGlobalKey,
+          child: widget.child,
         ),
       ),
     );
