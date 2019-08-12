@@ -491,15 +491,6 @@ task:
     - git clean -xfd
     - git fetch origin
     - git fetch origin master # To set FETCH_HEAD for "git merge-base" to work
-  pub_cache:
-    folder: $HOME/.pub-cache
-    fingerprint_script: echo $OS; grep -r --include=pubspec.yaml 'PUBSPEC CHECKSUM' "$CIRRUS_WORKING_DIR"
-  flutter_pkg_cache:
-    folder: bin/cache/pkg
-    fingerprint_script: echo $OS; cat bin/internal/*.version
-  artifacts_cache:
-    folder: bin/cache/artifacts
-    fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
