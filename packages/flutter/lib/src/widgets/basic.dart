@@ -5614,6 +5614,7 @@ class Listener extends StatelessWidget {
         onEnter: onPointerEnter,
         onExit: onPointerExit,
         onHover: onPointerHover,
+        opaque: false,
         child: result,
       );
     }
