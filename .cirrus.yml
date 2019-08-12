@@ -496,6 +496,34 @@ task:
     - bin/flutter doctor -v
     - bin/flutter update-packages
   matrix:
+    - name: tests_widgets-macos
+      only_if: $CIRRUS_BRANCH == 'master'
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: widgets
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
+    - name: tests_framework_other-macos
+      only_if: $CIRRUS_BRANCH == 'master'
+      env:
+        GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
+        SHARD: tests
+        SUBSHARD: framework_other
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
+      goldctl_script: ./dev/bots/download_goldctl.sh
+      test_all_script:
+        - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
+        - dart --enable-asserts dev/bots/test.dart
+      on_failure:
+        print_failure_time_script: date
     - name: integration_tests-macos
       only_if: $CIRRUS_BRANCH == 'master'
       env:
