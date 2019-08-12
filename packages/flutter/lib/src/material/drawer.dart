@@ -229,15 +229,12 @@ class DrawerController extends StatefulWidget {
   /// By default, the color used is [Colors.black54]
   final Color scrimColor;
 
-  /// The horizontal width from the edge of the screen that will respond to a
-  /// drag gesture to open the drawer.
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
   ///
-  /// By default, the value used is 20.0.
-  ///
-  /// If `MediaQuery.of(context).padding` is larger than the default drawer
-  /// edge width of 20.0 or the custom passed in drawerEdgeDragWidth value,
-  /// `MediaQuery.of(context).padding` will be used instead to properly
-  /// accommodate the drag widths of notched devices.
+  /// By default, the value used is 20.0 added to the value of
+  /// `MediaQuery.of(context).padding`. This ensures that the drag area for
+  /// notched devices is not obscured.
   final double edgeDragWidth;
 
   @override
@@ -441,14 +438,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     final EdgeInsets padding = MediaQuery.of(context).padding;
     final TextDirection textDirection = Directionality.of(context);
 
-    double dragAreaWidth = _kEdgeDragWidth;
-    if (drawerIsStart && textDirection == TextDirection.ltr ||
-        !drawerIsStart && textDirection == TextDirection.rtl) {
-      dragAreaWidth += padding.left;
-    } else {
-      dragAreaWidth += padding.right;
+    double dragAreaWidth = widget.edgeDragWidth;
+    if (widget.edgeDragWidth == null) {
+      if (drawerIsStart && textDirection == TextDirection.ltr || !drawerIsStart && textDirection == TextDirection.rtl) {
+        dragAreaWidth = _kEdgeDragWidth + padding.left;
+      } else {
+        dragAreaWidth = _kEdgeDragWidth + padding.right;
+      }
     }
-    dragAreaWidth = max(dragAreaWidth, widget.edgeDragWidth);
 
     if (_controller.status == AnimationStatus.dismissed) {
       return Align(
