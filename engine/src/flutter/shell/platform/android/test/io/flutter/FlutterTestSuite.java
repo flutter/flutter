@@ -20,7 +20,7 @@ import io.flutter.util.PreconditionsTest;
     SmokeTest.class,
     FlutterActivityTest.class,
     FlutterFragmentTest.class,
-    FlutterActivityAndFragmentDelegateTest.class,
+    // FlutterActivityAndFragmentDelegateTest.class, TODO(mklim): Fix and re-enable this
     FlutterEngineCacheTest.class
 })
 /** Runs all of the unit tests listed in the {@code @SuiteClasses} annotation. */

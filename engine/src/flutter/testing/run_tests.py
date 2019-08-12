@@ -232,7 +232,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
   classpath = map(str, [
     os.path.join(buildroot_dir, 'third_party', 'android_tools', 'sdk', 'platforms', 'android-29', 'android.jar'),
     os.path.join(robolectric_dir, '*'), # Wildcard for all jars in the directory
-    os.path.join(android_out_dir, 'flutter_java.jar'),
+    os.path.join(android_out_dir, 'flutter.jar'),
     os.path.join(android_out_dir, 'robolectric_tests.jar')
   ])
 
@@ -246,7 +246,7 @@ def RunJavaTests(filter, android_variant='android_debug_unopt'):
     test_class
   ]
 
-  return subprocess.call(command)
+  return subprocess.check_call(command)
 
 def RunDartTests(build_dir, filter):
   # This one is a bit messy. The pubspec.yaml at flutter/testing/dart/pubspec.yaml
