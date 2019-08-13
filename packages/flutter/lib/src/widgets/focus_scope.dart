@@ -205,9 +205,11 @@ class Focus extends StatefulWidget {
   /// {@template flutter.widgets.Focus.focusNode}
   /// An optional focus node to use as the focus node for this widget.
   ///
-  /// If one is not supplied, then one will be allocated and owned by this
-  /// widget. If supplied, the given focusNode will be _hosted_ by this widget.
-  /// See [FocusNode] for more information on what that implies.
+  /// If one is not supplied, then one will be automatically allocated, owned,
+  /// and managed by this widget. The widget will be focusable even if a
+  /// [focusNode] is not supplied. If supplied, the given `focusNode` will be
+  /// _hosted_ by this widget, but not owned. See [FocusNode] for more
+  /// information on what being hosted and/or owned implies.
   ///
   /// Supplying a focus node is sometimes useful if an ancestor to this widget
   /// wants to control when this widget has the focus. The owner will be
