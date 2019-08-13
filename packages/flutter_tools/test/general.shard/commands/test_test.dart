@@ -103,6 +103,21 @@ void main() {
       expect(result.exitCode, 0);
     });
 
+    testUsingContext('run all tests inside of a directory with no trailing slash', () async {
+      Cache.flutterRoot = '../..';
+      final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
+        extraArguments: const <String>['--verbose']);
+      if ((!result.stdout.contains('+2: All tests passed')) ||
+          (!result.stdout.contains('test 0: starting shell process')) ||
+          (!result.stdout.contains('test 0: deleting temporary directory')) ||
+          (!result.stdout.contains('test 0: finished')) ||
+          (!result.stdout.contains('test package returned with exit code 0')))
+        fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+      if (result.stderr.isNotEmpty)
+        fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
+      expect(result.exitCode, 0);
+    });
+
   });
 }
 
@@ -194,10 +209,20 @@ Future<ProcessResult> _runFlutterTest(
   List<String> extraArguments = const <String>[],
 }) async {
 
-  final String testFilePath = fs.path.join(testDirectory, '${testName}_test.dart');
-  final File testFile = fs.file(testFilePath);
-  if (!testFile.existsSync())
-    fail('missing test file: $testFile');
+  String testPath;
+  if (testName == null) {
+    // Test everything in the directory.
+    testPath = testDirectory;
+    final Directory directoryToTest = fs.directory(testPath);
+    if (!directoryToTest.existsSync())
+      fail('missing test directory: $directoryToTest');
+  } else {
+    // Test just a specific test file.
+     testPath = fs.path.join(testDirectory, '${testName}_test.dart');
+    final File testFile = fs.file(testPath);
+    if (!testFile.existsSync())
+      fail('missing test file: $testFile');
+  }
 
   final List<String> args = <String>[
     ...dartVmFlags,
@@ -205,7 +230,7 @@ Future<ProcessResult> _runFlutterTest(
     'test',
     '--no-color',
     ...extraArguments,
-    testFilePath
+    testPath
   ];
 
   while (_testExclusionLock != null)
