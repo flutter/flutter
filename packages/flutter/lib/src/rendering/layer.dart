@@ -23,7 +23,7 @@ class LayerHitTestEntry<T> {
   final T value;
 
   @override
-  String toString() => '$value';
+  String toString() => '$runtimeType($value)';
 }
 
 /// The result of performing a hit test on layers.
