@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'package:vector_math/vector_math_64.dart';
+import 'colors.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
 const double _kOpenScale = 1.2;
@@ -17,10 +18,12 @@ const double _kOpenScale = 1.2;
 // TODO(justinmc): Set up type param here for return value.
 class ContextMenu extends StatefulWidget {
   /// Create a context menu.
-  const ContextMenu({
+  ContextMenu({
     Key key,
     @required this.child,
-  }) : assert(child != null),
+    @required this.actions,
+  }) : assert(actions != null && actions.isNotEmpty),
+       assert(child != null),
        super(key: key);
 
   /// The widget that can be opened in a ContextMenu.
@@ -28,6 +31,8 @@ class ContextMenu extends StatefulWidget {
   /// This widget will be displayed at its normal position in the widget tree,
   /// but long pressing or 3d touching on it will cause the ContextMenu to open.
   final Widget child;
+
+  final List<ContextMenuSheetAction> actions;
 
   @override
   _ContextMenuState createState() => _ContextMenuState();
@@ -118,6 +123,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ),
       childRect: childRect,
       parentRect: parentRect,
+      actions: widget.actions,
       builder: (BuildContext context) => container.child,
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
@@ -166,6 +172,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
           child: Opacity(
             opacity: _isOpen ? 0.0 : 1.0,
             key: _childGlobalKey,
+            // TODO(justinmc): Round corners of child?
             child: widget.child,
           ),
         ),
@@ -195,15 +202,21 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 }
 
 // The open context menu.
+// TODO(justinmc): In native, dragging on the menu or the child animates and
+// eventually dismisses.
 class _ContextMenuRoute<T> extends PopupRoute<T> {
   _ContextMenuRoute({
     this.barrierLabel,
-    this.builder,
+    @required List<ContextMenuSheetAction> actions,
+    WidgetBuilder builder,
     ui.ImageFilter filter,
     RouteSettings settings,
     Rect childRect,
     Rect parentRect,
-  }) : _childRect = childRect,
+  }) : assert(actions != null && actions.isNotEmpty),
+       _actions = actions,
+       _builder = builder,
+       _childRect = childRect,
        _parentRect = parentRect,
        super(
          filter: filter,
@@ -225,7 +238,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // The duration of the transition used when a modal popup is shown.
   static const Duration _kModalPopupTransitionDuration = Duration(milliseconds: 335);
 
-  final WidgetBuilder builder;
+  final List<ContextMenuSheetAction> _actions;
+  final WidgetBuilder _builder;
 
   @override
   final String barrierLabel;
@@ -254,6 +268,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // The final position is aligned so that its bottom is at the center of the
   // screen, and it's sized to be as big as possible. It's considered to be
   // inside of a Transform with `alignment` set to `Alignment.center`.
+  // TODO(justinmc): Try this with a child that has a portrait aspect ratio. May
+  // need to manually calculate safe area.
   static Rect _getEndRect(Rect child, Rect parent) {
     // The rect of the child at the time that the ContextMenu opens.
     final Rect openChildRect = Rect.fromLTWH(
@@ -311,7 +327,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return builder(context);
+    return _builder(context);
   }
 
   @override
@@ -339,11 +355,130 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
           ),
         ),
         Expanded(
-          child: Container(
-            child: const Text('TODO make me a menu'),
+          child: _ContextMenuSheet(
+            actions: _actions,
           ),
         ),
       ],
+    );
+  }
+}
+
+// A menu of _ContextMenuSheetActions.
+class _ContextMenuSheet extends StatelessWidget {
+  _ContextMenuSheet({
+    Key key,
+    @required this.actions,
+  }) : assert(actions != null && actions.isNotEmpty),
+       super(key: key);
+
+  final List<ContextMenuSheetAction> actions;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Flexible(
+          fit: FlexFit.tight,
+          flex: 2,
+          child: IntrinsicHeight(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: actions,
+              ),
+            ),
+          ),
+        ),
+        const Spacer(
+          flex: 1,
+        ),
+      ],
+    );
+  }
+}
+
+/// A button in a _ContextMenuSheet.
+class ContextMenuSheetAction extends StatefulWidget {
+  /// Construct a ContextMenuSheetAction.
+  const ContextMenuSheetAction({
+    Key key,
+    @required this.child,
+    this.onPressed,
+  }) : assert(child != null),
+       super(key: key);
+
+  final Widget child;
+  final VoidCallback onPressed;
+
+  @override
+  _ContextMenuSheetActionState createState() => _ContextMenuSheetActionState();
+}
+
+class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
+  static const Color _kBackgroundColor = Color(0xAAFFFFFF);
+  static const Color _kBackgroundColorPressed = Color(0xAADDDDDD);
+  static const double _kButtonHeight = 56.0;
+  static const TextStyle _kActionSheetActionStyle = TextStyle(
+    fontFamily: '.SF UI Text',
+    inherit: false,
+    fontSize: 20.0,
+    fontWeight: FontWeight.w400,
+    color: CupertinoColors.activeBlue,
+    textBaseline: TextBaseline.alphabetic,
+  );
+
+  final GlobalKey _globalKey = GlobalKey();
+  bool _isPressed = false;
+
+  void onTapDown(TapDownDetails details) {
+    setState(() {
+      _isPressed = true;
+    });
+  }
+
+  void onTapUp(TapUpDetails details) {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
+  void onTapCancel() {
+    setState(() {
+      _isPressed = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      key: _globalKey,
+      onTapDown: onTapDown,
+      onTapUp: onTapUp,
+      onTapCancel: onTapCancel,
+      onTap: widget.onPressed,
+      behavior: HitTestBehavior.opaque,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: _kButtonHeight,
+        ),
+        child: Semantics(
+          button: true,
+          child: Container(
+            color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
+            padding: const EdgeInsets.symmetric(
+              vertical: 16.0,
+              horizontal: 10.0,
+            ),
+            child: DefaultTextStyle(
+              style: _kActionSheetActionStyle,
+              child: widget.child,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
