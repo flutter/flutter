@@ -115,6 +115,10 @@ class PaintingContext extends ClipContext {
     OffsetLayer childLayer = child._layer;
     if (childLayer == null) {
       assert(debugAlsoPaintedParent);
+      // Not using the `layer` setter because the setter asserts that we not
+      // replace the layer for repaint boundaries. That assertion does not
+      // apply here because this is exactly the place designed to create a
+      // layer for repaint boundaries.
       child._layer = childLayer = OffsetLayer();
     } else {
       assert(childLayer is OffsetLayer);
