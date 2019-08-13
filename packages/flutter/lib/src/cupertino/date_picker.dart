@@ -45,11 +45,9 @@ const double _kTimerPickerColumnIntrinsicWidth = 106;
 // for now.
 const double _kTimerPickerNumberLabelFontSize = 23;
 
-
 TextStyle _themeTextStyle(BuildContext context) {
   return CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
 }
-
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -1198,7 +1196,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
 
     textPainter.layout();
-    numberLabelWidth = textPainter.width;
+    numberLabelWidth = textPainter.maxIntrinsicWidth;
     numberLabelHeight = textPainter.height;
     numberLabelBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }

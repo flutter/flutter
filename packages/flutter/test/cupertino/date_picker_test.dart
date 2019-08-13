@@ -864,9 +864,17 @@ void main() {
     });
   });
 
-  testWidgets('TimerPicker golden tets', (WidgetTester tester) async {
+  testWidgets('TimerPicker golden tests', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
+        // Also check if the picker respects the theme.
+        theme: CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            pickerTextStyle: const TextStyle(
+              color: Color(0xFF663311),
+            ),
+          ),
+        ),
         home: Center(
           child: SizedBox(
             width: 320,
@@ -879,8 +887,8 @@ void main() {
               ),
             )
           ),
-        )
-      )
+        ),
+      ),
     );
 
     await expectLater(
@@ -891,7 +899,7 @@ void main() {
       ),
     );
 
-    // Slightly drag the hour component to make the current hour off-center.
+    // Slightly drag the minute component to make the current minute off-center.
     await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
     await tester.pump();
 
