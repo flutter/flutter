@@ -1508,7 +1508,7 @@ void main() {
     expect(find.text('disabled'), findsOneWidget);
   });
 
-  testWidgets('Dropdown form field - disabledHint displays when onChnaged is null', (WidgetTester tester) async {
+  testWidgets('Dropdown form field - disabledHint displays when onChanged is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
     Widget build({ List<String> items, ValueChanged<String> onChanged }){
