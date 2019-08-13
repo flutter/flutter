@@ -150,7 +150,7 @@ void main() {
       group('fails', () {
         test('when golden file does not exist', () async {
           try {
-            doComparison();
+            await doComparison();
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('Could not be compared against non-existent file'));
@@ -160,7 +160,7 @@ void main() {
         test('when images are not the same size', () async{
           await fs.file(fix('/golden.png')).writeAsBytes(_kSizeFailurePngBytes);
           try {
-            doComparison();
+            await doComparison();
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('image sizes do not match'));
@@ -170,7 +170,7 @@ void main() {
         test('when pixels do not match', () async{
           await fs.file(fix('/golden.png')).writeAsBytes(_kColorFailurePngBytes);
           try {
-            doComparison();
+            await doComparison();
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('% diff detected'));
@@ -180,7 +180,7 @@ void main() {
         test('when golden bytes are empty', () async {
           await fs.file(fix('/golden.png')).writeAsBytes(<int>[]);
           try {
-            doComparison();
+            await doComparison();
             fail('TestFailure expected but not thrown.');
           } on TestFailure catch (error) {
             expect(error.message, contains('null image provided'));
