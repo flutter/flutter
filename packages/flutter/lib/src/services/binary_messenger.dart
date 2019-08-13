@@ -66,4 +66,11 @@ abstract class BinaryMessenger {
 /// keeps track of which handlers have been registered on each channel so
 /// it may dispatch incoming messages to the registered handler.
 @Deprecated('Use ServicesBinding.instance.defaultBinaryMessenger instead.')
-BinaryMessenger get defaultBinaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
+BinaryMessenger get defaultBinaryMessenger {
+  const String errMsg =
+      'ServicesBinding is not properly initialized when accessing the [defaultBinaryMessenger] instance. '
+      'If you need the binding to be constructed before calling [runApp], e.g. using platform channels/plugins, '
+      'call the `WidgetsFlutterBinding.ensureInitialized()` function.';
+  assert(ServicesBinding.instance != null, errMsg);
+  return ServicesBinding.instance.defaultBinaryMessenger;
+}
