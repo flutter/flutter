@@ -756,11 +756,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             }
         }
 
-        if (semanticsNode.childrenInTraversalOrder != null) {
-            for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
-                if (!child.hasFlag(Flag.IS_HIDDEN)) {
-                    result.addChild(rootAccessibilityView, child.id);
-                }
+        for (SemanticsNode child : semanticsNode.childrenInTraversalOrder) {
+            if (!child.hasFlag(Flag.IS_HIDDEN)) {
+                result.addChild(rootAccessibilityView, child.id);
             }
         }
 
@@ -1335,6 +1333,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                         if (object.scrollIndex + visibleChildren > object.scrollChildren) {
                             Log.e(TAG, "Scroll index is out of bounds.");
                         }
+
+                        if (object.childrenInHitTestOrder.isEmpty()) {
+                            Log.e(TAG, "Had scrollChildren but no childrenInHitTestOrder");
+                        }
                     }
                     // The setToIndex should be the index of the last visible child. Because we counted all
                     // children, including the first index we need to subtract one.
@@ -1752,8 +1754,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         private float[] transform;
 
         private SemanticsNode parent;
-        private List<SemanticsNode> childrenInTraversalOrder;
-        private List<SemanticsNode> childrenInHitTestOrder;
+        private List<SemanticsNode> childrenInTraversalOrder = new ArrayList<>();
+        private List<SemanticsNode> childrenInHitTestOrder = new ArrayList<>();
         private List<CustomAccessibilityAction> customAccessibilityActions;
         private CustomAccessibilityAction onTapOverride;
         private CustomAccessibilityAction onLongPressOverride;
@@ -1833,7 +1835,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                                 + textDirection + "\n" + indent + "  +-- rect.ltrb=(" + left + ", "
                                 + top + ", " + right + ", " + bottom + ")\n" + indent
                                 + "  +-- transform=" + Arrays.toString(transform) + "\n");
-                if (childrenInTraversalOrder != null && recursive) {
+                if (recursive) {
                     String childIndent = indent + "  ";
                     for (SemanticsNode child : childrenInTraversalOrder) {
                         child.log(childIndent, recursive);
@@ -1897,32 +1899,19 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             globalGeometryDirty = true;
 
             final int childCount = buffer.getInt();
-            if (childCount == 0) {
-                childrenInTraversalOrder = null;
-                childrenInHitTestOrder = null;
-            } else {
-                if (childrenInTraversalOrder == null)
-                    childrenInTraversalOrder = new ArrayList<>(childCount);
-                else
-                    childrenInTraversalOrder.clear();
-
-                for (int i = 0; i < childCount; ++i) {
-                    SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
-                    child.parent = this;
-                    childrenInTraversalOrder.add(child);
-                }
-
-                if (childrenInHitTestOrder == null)
-                    childrenInHitTestOrder = new ArrayList<>(childCount);
-                else
-                    childrenInHitTestOrder.clear();
-
-                for (int i = 0; i < childCount; ++i) {
-                    SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
-                    child.parent = this;
-                    childrenInHitTestOrder.add(child);
-                }
+            childrenInTraversalOrder.clear();
+            childrenInHitTestOrder.clear();
+            for (int i = 0; i < childCount; ++i) {
+                SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
+                child.parent = this;
+                childrenInTraversalOrder.add(child);
             }
+            for (int i = 0; i < childCount; ++i) {
+                SemanticsNode child = accessibilityBridge.getOrCreateSemanticsNode(buffer.getInt());
+                child.parent = this;
+                childrenInHitTestOrder.add(child);
+            }
+
             final int actionCount = buffer.getInt();
             if (actionCount == 0) {
                 customAccessibilityActions = null;
@@ -1976,19 +1965,16 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             final float x = point[0] / w;
             final float y = point[1] / w;
             if (x < left || x >= right || y < top || y >= bottom) return null;
-            if (childrenInHitTestOrder != null) {
-                final float[] transformedPoint = new float[4];
-                for (int i = 0; i < childrenInHitTestOrder.size(); i += 1) {
-                    final SemanticsNode child = childrenInHitTestOrder.get(i);
-                    if (child.hasFlag(Flag.IS_HIDDEN)) {
-                        continue;
-                    }
-                    child.ensureInverseTransform();
-                    Matrix.multiplyMV(transformedPoint, 0, child.inverseTransform, 0, point, 0);
-                    final SemanticsNode result = child.hitTest(transformedPoint);
-                    if (result != null) {
-                        return result;
-                    }
+            final float[] transformedPoint = new float[4];
+            for (SemanticsNode child : childrenInHitTestOrder) {
+                if (child.hasFlag(Flag.IS_HIDDEN)) {
+                    continue;
+                }
+                child.ensureInverseTransform();
+                Matrix.multiplyMV(transformedPoint, 0, child.inverseTransform, 0, point, 0);
+                final SemanticsNode result = child.hitTest(transformedPoint);
+                if (result != null) {
+                    return result;
                 }
             }
             return this;
@@ -2013,10 +1999,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
             if (hasFlag(Flag.SCOPES_ROUTE)) {
                 edges.add(this);
             }
-            if (childrenInTraversalOrder != null) {
-                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
-                    childrenInTraversalOrder.get(i).collectRoutes(edges);
-                }
+            for (SemanticsNode child : childrenInTraversalOrder) {
+                child.collectRoutes(edges);
             }
         }
 
@@ -2028,12 +2012,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                     return label;
                 }
             }
-            if (childrenInTraversalOrder != null) {
-                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
-                    String newName = childrenInTraversalOrder.get(i).getRouteName();
-                    if (newName != null && !newName.isEmpty()) {
-                        return newName;
-                    }
+            for (SemanticsNode child : childrenInTraversalOrder) {
+                String newName = child.getRouteName();
+                if (newName != null && !newName.isEmpty()) {
+                    return newName;
                 }
             }
             return null;
@@ -2097,11 +2079,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 }
             }
 
-            if (childrenInTraversalOrder != null) {
-                for (int i = 0; i < childrenInTraversalOrder.size(); ++i) {
-                    childrenInTraversalOrder.get(i).updateRecursively(
-                            globalTransform, visitedObjects, forceUpdate);
-                }
+            for (SemanticsNode child : childrenInTraversalOrder) {
+                child.updateRecursively(globalTransform, visitedObjects, forceUpdate);
             }
         }
 
