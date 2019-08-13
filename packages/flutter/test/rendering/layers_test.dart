@@ -466,212 +466,210 @@ void main() {
     });
   }, skip: isBrowser);
 
-  group('Layer hit testing', () {
-    List<S> pathToValues<S>(Iterable<LayerHitTestEntry<S>> path) {
-      return path.map((LayerHitTestEntry<S> entry) => entry.value).toList();
-    }
+  test('OffsetLayer.hitTesting respects offset (positive)', () {
+    // The target position would have fallen outside of child1 without the
+    // offset of root.
+    const Offset position = Offset(-5, 5);
 
-    group('of OffsetLayer', () {
-      test('of OffsetLayer respects offset (positive)', () {
-        // The target position would have fallen outside of child1 without the
-        // offset of root.
-        const Offset position = Offset(-5, 5);
+    final ContainerLayer root = OffsetLayer(offset: const Offset(-10, 0));
+    final Layer child1 = AnnotatedRegionLayer<int>(
+      1, size: const Size(10, 10), opaque: true);
+    root.append(child1);
 
-        final ContainerLayer root = OffsetLayer(offset: const Offset(-10, 0));
-        final Layer child1 = AnnotatedRegionLayer<int>(
-          1, size: const Size(10, 10), opaque: true);
-        root.append(child1);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: position);
-        expect(absorbed, isTrue);
-        expect(pathToValues(result.path), <int>[1]);
-      });
-
-      test('of OffsetLayer respects offset (negative)', () {
-        // The target position would have fallen inside of child1 without the
-        // offset of root.
-        const Offset position = Offset(5, 5);
-
-        final ContainerLayer root = OffsetLayer(offset: const Offset(-10, 0));
-        final Layer child1 = AnnotatedRegionLayer<int>(
-          1, size: const Size(10, 10), opaque: true);
-        root.append(child1);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: position);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[]);
-      });
-    });
-
-    group('of AnnotatedRegionLayer', () {
-      test('should return its descendents\' value froms front to back', () {
-
-        // Tests:
-        //
-        //     o            (child21)
-        //     │
-        //     o            (child2)
-        //     |   o        (child11)
-        //     |   |
-        //     |   o        (child1)
-        //      \ /
-        //       o          (root)
-
-        final ContainerLayer root = AnnotatedRegionLayer<int>(0);
-        final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
-        root.append(child1);
-        final ContainerLayer child2 = AnnotatedRegionLayer<int>(2);
-        root.append(child2);
-
-        final ContainerLayer child11 = AnnotatedRegionLayer<int>(11);
-        child1.append(child11);
-        final ContainerLayer child21 = AnnotatedRegionLayer<int>(21);
-        child2.append(child21);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[21, 2, 11, 1, 0]);
-      });
-
-      test('should only return the requested type', () {
-
-        // Tests:
-        //
-        //     .            (child21, double)
-        //     │
-        //     o            (child2, int)
-        //     |   o        (child11, int)
-        //     |   |
-        //     |   .        (child1, double)
-        //      \ /
-        //       .          (root, double)
-
-        final ContainerLayer root = AnnotatedRegionLayer<double>(0);
-        final ContainerLayer child1 = AnnotatedRegionLayer<double>(1);
-        root.append(child1);
-        final ContainerLayer child2 = AnnotatedRegionLayer<int>(2);
-        root.append(child2);
-
-        final ContainerLayer child11 = AnnotatedRegionLayer<int>(11);
-        child1.append(child11);
-        final ContainerLayer child21 = AnnotatedRegionLayer<double>(21);
-        child2.append(child21);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[2, 11]);
-      });
-
-      test('should respect size and offset, and always return children', () {
-
-        // Tests:
-        //           v
-        //    ──────────              (child21, contains despite being child)
-        //     │
-        //    ────                    (child2, fails because of size)
-        //     |    ────────          (child11, contains)
-        //     |         |
-        //     |    ────────          (child1, contains)
-        //     │         │
-        //    ──────────────          (root)
-
-        const Offset position = Offset(50, 5);
-
-        final ContainerLayer root = AnnotatedRegionLayer<int>(
-          0, size: const Size(100, 10));
-        final ContainerLayer child1 = AnnotatedRegionLayer<int>(
-          1, size: const Size(60, 10), offset: const Offset(40, 0));
-        root.append(child1);
-        final ContainerLayer child2 = AnnotatedRegionLayer<int>(
-          2, size: const Size(30, 10));
-        root.append(child2);
-
-        final ContainerLayer child11 = AnnotatedRegionLayer<int>(
-          11, size: const Size(60, 10), offset: const Offset(40, 0));
-        child1.append(child11);
-        final ContainerLayer child21 = AnnotatedRegionLayer<int>(
-          21, size: const Size(60, 10));
-        child2.append(child21);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: position);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[21, 11, 1, 0]);
-      });
-
-      test('when opaque should stop checking following children if one child absorbs, and return true', () {
-
-        // Tests:
-        //
-        //     o            (child3, translucent)
-        //     | x          (child2, opaque)
-        //     | | o        (child1)
-        //      \|/
-        //       x          (root, opaque)
-
-        final ContainerLayer root = AnnotatedRegionLayer<int>(0, opaque: true);
-        final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
-        root.append(child1);
-        final ContainerLayer child2 = AnnotatedRegionLayer<int>(2, opaque: true);
-        root.append(child2);
-        final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
-        root.append(child3);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
-        expect(absorbed, isTrue);
-        expect(pathToValues(result.path), <int>[3, 2, 0]);
-      });
-
-      test('when translucent should stop checking following children if one child absorbs, and return false', () {
-
-        // Tests:
-        //
-        //     o            (child3, translucent)
-        //     | x          (child2, opaque)
-        //     | | o        (child1)
-        //      \|/
-        //       o          (root, translucent)
-
-        final ContainerLayer root = AnnotatedRegionLayer<int>(0);
-        final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
-        root.append(child1);
-        final ContainerLayer child2 = AnnotatedRegionLayer<int>(2, opaque: true);
-        root.append(child2);
-        final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
-        root.append(child3);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[3, 2, 0]);
-      });
-
-      test('should not add to opacity if the layer does not contains', () {
-
-        // Tests:
-        //         v
-        //    ──────────        (child1, translucent)
-        //     │
-        //    ────              (root, opaque)
-
-        const Offset position = Offset(50, 5);
-
-        final ContainerLayer root = AnnotatedRegionLayer<int>(
-          0, size: const Size(20, 10), opaque: true);
-        final ContainerLayer child1 = AnnotatedRegionLayer<int>(
-          1, size: const Size(100, 10), opaque: false);
-        root.append(child1);
-
-        final LayerHitTestResult<int> result = LayerHitTestResult<int>();
-        final bool absorbed = root.hitTest(result, regionOffset: position);
-        expect(absorbed, isFalse);
-        expect(pathToValues(result.path), <int>[1]);
-      });
-    });
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: position);
+    expect(absorbed, isTrue);
+    expect(_pathToValues(result.path), <int>[1]);
   });
+
+  test('OffsetLayer.hitTesting respects offset (negative)', () {
+    // The target position would have fallen inside of child1 without the
+    // offset of root.
+    const Offset position = Offset(5, 5);
+
+    final ContainerLayer root = OffsetLayer(offset: const Offset(-10, 0));
+    final Layer child1 = AnnotatedRegionLayer<int>(
+      1, size: const Size(10, 10), opaque: true);
+    root.append(child1);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: position);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest should return its descendents\' value froms front to back', () {
+
+    // Tests:
+    //
+    //     o            (child21)
+    //     │
+    //     o            (child2)
+    //     |   o        (child11)
+    //     |   |
+    //     |   o        (child1)
+    //      \ /
+    //       o          (root)
+
+    final ContainerLayer root = AnnotatedRegionLayer<int>(0);
+    final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
+    root.append(child1);
+    final ContainerLayer child2 = AnnotatedRegionLayer<int>(2);
+    root.append(child2);
+
+    final ContainerLayer child11 = AnnotatedRegionLayer<int>(11);
+    child1.append(child11);
+    final ContainerLayer child21 = AnnotatedRegionLayer<int>(21);
+    child2.append(child21);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[21, 2, 11, 1, 0]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest should only add to the list when type matches', () {
+
+    // Tests:
+    //
+    //     .            (child21, double)
+    //     │
+    //     o            (child2, int)
+    //     |   o        (child11, int)
+    //     |   |
+    //     |   .        (child1, double)
+    //      \ /
+    //       .          (root, double)
+
+    final ContainerLayer root = AnnotatedRegionLayer<double>(0);
+    final ContainerLayer child1 = AnnotatedRegionLayer<double>(1);
+    root.append(child1);
+    final ContainerLayer child2 = AnnotatedRegionLayer<int>(2);
+    root.append(child2);
+
+    final ContainerLayer child11 = AnnotatedRegionLayer<int>(11);
+    child1.append(child11);
+    final ContainerLayer child21 = AnnotatedRegionLayer<double>(21);
+    child2.append(child21);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[2, 11]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest should respect size and offset, '
+    'and always allow children to add to the result', () {
+
+    // Tests:
+    //           v
+    //    ──────────              (child21, contains despite being child)
+    //     │
+    //    ────                    (child2, fails because of size)
+    //     |    ────────          (child11, contains)
+    //     |         |
+    //     |    ────────          (child1, contains)
+    //     │         │
+    //    ──────────────          (root)
+
+    const Offset position = Offset(50, 5);
+
+    final ContainerLayer root = AnnotatedRegionLayer<int>(
+      0, size: const Size(100, 10));
+    final ContainerLayer child1 = AnnotatedRegionLayer<int>(
+      1, size: const Size(60, 10), offset: const Offset(40, 0));
+    root.append(child1);
+    final ContainerLayer child2 = AnnotatedRegionLayer<int>(
+      2, size: const Size(30, 10));
+    root.append(child2);
+
+    final ContainerLayer child11 = AnnotatedRegionLayer<int>(
+      11, size: const Size(60, 10), offset: const Offset(40, 0));
+    child1.append(child11);
+    final ContainerLayer child21 = AnnotatedRegionLayer<int>(
+      21, size: const Size(60, 10));
+    child2.append(child21);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: position);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[21, 11, 1, 0]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest when opaque should stop at the first child '
+    'that absorbs, then return true', () {
+
+    // Tests:
+    //
+    //     o            (child3, translucent)
+    //     | x          (child2, opaque)
+    //     | | o        (child1)
+    //      \|/
+    //       x          (root, opaque)
+
+    final ContainerLayer root = AnnotatedRegionLayer<int>(0, opaque: true);
+    final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
+    root.append(child1);
+    final ContainerLayer child2 = AnnotatedRegionLayer<int>(2, opaque: true);
+    root.append(child2);
+    final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
+    root.append(child3);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
+    expect(absorbed, isTrue);
+    expect(_pathToValues(result.path), <int>[3, 2, 0]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest when translucent should stop at the first '
+    'that absorbs, then return false', () {
+
+    // Tests:
+    //
+    //     o            (child3, translucent)
+    //     | x          (child2, opaque)
+    //     | | o        (child1)
+    //      \|/
+    //       o          (root, translucent)
+
+    final ContainerLayer root = AnnotatedRegionLayer<int>(0);
+    final ContainerLayer child1 = AnnotatedRegionLayer<int>(1);
+    root.append(child1);
+    final ContainerLayer child2 = AnnotatedRegionLayer<int>(2, opaque: true);
+    root.append(child2);
+    final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
+    root.append(child3);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[3, 2, 0]);
+  });
+
+  test('AnnotatedRegionLayer.hitTest should not change the return value if it '
+    'does not contain the pointer', () {
+
+    // Tests:
+    //         v
+    //    ──────────        (child1, translucent)
+    //     │
+    //    ────              (root, opaque)
+
+    const Offset position = Offset(50, 5);
+
+    final ContainerLayer root = AnnotatedRegionLayer<int>(
+      0, size: const Size(20, 10), opaque: true);
+    final ContainerLayer child1 = AnnotatedRegionLayer<int>(
+      1, size: const Size(100, 10), opaque: false);
+    root.append(child1);
+
+    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final bool absorbed = root.hitTest(result, regionOffset: position);
+    expect(absorbed, isFalse);
+    expect(_pathToValues(result.path), <int>[1]);
+  });
+}
+
+List<S> _pathToValues<S>(Iterable<LayerHitTestEntry<S>> path) {
+  return path.map((LayerHitTestEntry<S> entry) => entry.value).toList();
 }
