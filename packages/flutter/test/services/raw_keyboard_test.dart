@@ -546,7 +546,7 @@ void main() {
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
     });
-    test('Code points with 2 Unicode scalar values are allowed', () {
+    test('Code points with two Unicode scalar values are allowed', () {
       final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'linux',
@@ -562,15 +562,15 @@ void main() {
       expect(data.keyLabel, equals('􏿿'));
     });
 
-    test('Code points with more than 3 Unicode scalar values are not allowed', () {
+    test('Code points with more than three Unicode scalar values are not allowed', () {
       // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
       void _createFailingKey() {
         RawKeyEvent.fromMessage(const <String, dynamic>{
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
-          'keyCode': 65, 
-          'scanCode': 0x00000026, 
+          'keyCode': 65,
+          'scanCode': 0x00000026,
           'unicodeScalarValues': 0x1F00000000,
           'modifiers': 0x0,
         });
