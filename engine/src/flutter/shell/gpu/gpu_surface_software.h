@@ -5,22 +5,12 @@
 #ifndef FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 #define FLUTTER_SHELL_GPU_GPU_SURFACE_SOFTWARE_H_
 
-#include "flutter/flow/embedded_views.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
-#include "third_party/skia/include/core/SkSurface.h"
+#include "flutter/shell/gpu/gpu_surface_software_delegate.h"
 
 namespace flutter {
-
-class GPUSurfaceSoftwareDelegate {
- public:
-  virtual sk_sp<SkSurface> AcquireBackingStore(const SkISize& size) = 0;
-
-  virtual bool PresentBackingStore(sk_sp<SkSurface> backing_store) = 0;
-
-  virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
-};
 
 class GPUSurfaceSoftware : public Surface {
  public:

@@ -13,12 +13,7 @@ std::string GetCurrentTestName() {
   return ::testing::UnitTest::GetInstance()->current_test_info()->name();
 }
 
-fml::UniqueFD OpenFixture(std::string fixture_name) {
-  if (fixture_name.size() == 0) {
-    FML_LOG(ERROR) << "Invalid fixture name.";
-    return {};
-  }
-
+fml::UniqueFD OpenFixturesDirectory() {
   auto fixtures_directory =
       OpenDirectory(GetFixturesPath(),          // path
                     false,                      // create
@@ -29,6 +24,16 @@ fml::UniqueFD OpenFixture(std::string fixture_name) {
     FML_LOG(ERROR) << "Could not open fixtures directory.";
     return {};
   }
+  return fixtures_directory;
+}
+
+fml::UniqueFD OpenFixture(std::string fixture_name) {
+  if (fixture_name.size() == 0) {
+    FML_LOG(ERROR) << "Invalid fixture name.";
+    return {};
+  }
+
+  auto fixtures_directory = OpenFixturesDirectory();
 
   auto fixture_fd = fml::OpenFile(fixtures_directory,         // base directory
                                   fixture_name.c_str(),       // path

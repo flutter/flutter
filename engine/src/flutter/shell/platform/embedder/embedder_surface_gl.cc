@@ -8,10 +8,13 @@
 
 namespace flutter {
 
-EmbedderSurfaceGL::EmbedderSurfaceGL(GLDispatchTable gl_dispatch_table,
-                                     bool fbo_reset_after_present)
+EmbedderSurfaceGL::EmbedderSurfaceGL(
+    GLDispatchTable gl_dispatch_table,
+    bool fbo_reset_after_present,
+    std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder)
     : gl_dispatch_table_(gl_dispatch_table),
-      fbo_reset_after_present_(fbo_reset_after_present) {
+      fbo_reset_after_present_(fbo_reset_after_present),
+      external_view_embedder_(std::move(external_view_embedder)) {
   // Make sure all required members of the dispatch table are checked.
   if (!gl_dispatch_table_.gl_make_current_callback ||
       !gl_dispatch_table_.gl_clear_current_callback ||
@@ -67,13 +70,22 @@ SkMatrix EmbedderSurfaceGL::GLContextSurfaceTransformation() const {
 }
 
 // |GPUSurfaceGLDelegate|
+ExternalViewEmbedder* EmbedderSurfaceGL::GetExternalViewEmbedder() {
+  return external_view_embedder_.get();
+}
+
+// |GPUSurfaceGLDelegate|
 EmbedderSurfaceGL::GLProcResolver EmbedderSurfaceGL::GetGLProcResolver() const {
   return gl_dispatch_table_.gl_proc_resolver;
 }
 
 // |EmbedderSurface|
 std::unique_ptr<Surface> EmbedderSurfaceGL::CreateGPUSurface() {
-  return std::make_unique<GPUSurfaceGL>(this);
+  bool render_to_surface = !external_view_embedder_;
+  return std::make_unique<GPUSurfaceGL>(this,  // GPU surface GL delegate
+                                        render_to_surface  // render to surface
+
+  );
 }
 
 // |EmbedderSurface|

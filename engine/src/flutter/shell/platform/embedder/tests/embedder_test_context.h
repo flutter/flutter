@@ -14,8 +14,10 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/shell/platform/embedder/embedder.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
 #include "flutter/testing/test_dart_native_resolver.h"
 #include "flutter/testing/test_gl_surface.h"
+#include "third_party/skia/include/core/SkImage.h"
 
 namespace flutter {
 namespace testing {
@@ -24,11 +26,11 @@ using SemanticsNodeCallback = std::function<void(const FlutterSemanticsNode*)>;
 using SemanticsActionCallback =
     std::function<void(const FlutterSemanticsCustomAction*)>;
 
-class EmbedderContext {
+class EmbedderTestContext {
  public:
-  EmbedderContext(std::string assets_path = "");
+  EmbedderTestContext(std::string assets_path = "");
 
-  ~EmbedderContext();
+  ~EmbedderTestContext();
 
   const std::string& GetAssetsPath() const;
 
@@ -52,6 +54,13 @@ class EmbedderContext {
   void SetPlatformMessageCallback(
       std::function<void(const FlutterPlatformMessage*)> callback);
 
+  void SetupCompositor();
+
+  EmbedderTestCompositor& GetCompositor();
+
+  using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
+  void SetNextSceneCallback(NextSceneCallback next_scene_callback);
+
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
@@ -67,6 +76,8 @@ class EmbedderContext {
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
   std::unique_ptr<TestGLSurface> gl_surface_;
+  std::unique_ptr<EmbedderTestCompositor> compositor_;
+  NextSceneCallback next_scene_callback_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
@@ -96,7 +107,7 @@ class EmbedderContext {
 
   void PlatformMessageCallback(const FlutterPlatformMessage* message);
 
-  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderContext);
+  FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };
 
 }  // namespace testing

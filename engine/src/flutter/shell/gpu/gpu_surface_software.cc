@@ -9,11 +9,6 @@
 
 namespace flutter {
 
-flutter::ExternalViewEmbedder*
-GPUSurfaceSoftwareDelegate::GetExternalViewEmbedder() {
-  return nullptr;
-}
-
 GPUSurfaceSoftware::GPUSurfaceSoftware(GPUSurfaceSoftwareDelegate* delegate)
     : delegate_(delegate), weak_factory_(this) {}
 

@@ -7,6 +7,7 @@
 
 #include "flutter/fml/macros.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
+#include "flutter/shell/platform/embedder/embedder_external_view_embedder.h"
 #include "flutter/shell/platform/embedder/embedder_surface.h"
 
 namespace flutter {
@@ -25,8 +26,10 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
     std::function<void*(const char*)> gl_proc_resolver;  // optional
   };
 
-  EmbedderSurfaceGL(GLDispatchTable gl_dispatch_table,
-                    bool fbo_reset_after_present);
+  EmbedderSurfaceGL(
+      GLDispatchTable gl_dispatch_table,
+      bool fbo_reset_after_present,
+      std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder);
 
   ~EmbedderSurfaceGL() override;
 
@@ -34,6 +37,8 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
   bool valid_ = false;
   GLDispatchTable gl_dispatch_table_;
   bool fbo_reset_after_present_;
+
+  std::unique_ptr<EmbedderExternalViewEmbedder> external_view_embedder_;
 
   // |EmbedderSurface|
   bool IsValid() const override;
@@ -61,6 +66,9 @@ class EmbedderSurfaceGL final : public EmbedderSurface,
 
   // |GPUSurfaceGLDelegate|
   SkMatrix GLContextSurfaceTransformation() const override;
+
+  // |GPUSurfaceGLDelegate|
+  ExternalViewEmbedder* GetExternalViewEmbedder() override;
 
   // |GPUSurfaceGLDelegate|
   GLProcResolver GetGLProcResolver() const override;

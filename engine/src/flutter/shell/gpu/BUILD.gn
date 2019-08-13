@@ -18,6 +18,8 @@ source_set("gpu_surface_software") {
   sources = [
     "$gpu_dir/gpu_surface_software.cc",
     "$gpu_dir/gpu_surface_software.h",
+    "$gpu_dir/gpu_surface_software_delegate.cc",
+    "$gpu_dir/gpu_surface_software_delegate.h",
   ]
 
   deps = gpu_common_deps

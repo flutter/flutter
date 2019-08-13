@@ -33,8 +33,11 @@ static const int kGrCacheMaxCount = 8192;
 // system channel.
 static const size_t kGrCacheMaxByteSize = 24 * (1 << 20);
 
-GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
-    : delegate_(delegate), weak_factory_(this) {
+GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate,
+                           bool render_to_surface)
+    : delegate_(delegate),
+      render_to_surface_(render_to_surface),
+      weak_factory_(this) {
   if (!delegate_->GLContextMakeCurrent()) {
     FML_LOG(ERROR)
         << "Could not make the context current to setup the gr context.";
@@ -68,13 +71,18 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
 
   delegate_->GLContextClearCurrent();
 
-  valid_ = true;
   context_owner_ = true;
+
+  valid_ = true;
 }
 
 GPUSurfaceGL::GPUSurfaceGL(sk_sp<GrContext> gr_context,
-                           GPUSurfaceGLDelegate* delegate)
-    : delegate_(delegate), context_(gr_context), weak_factory_(this) {
+                           GPUSurfaceGLDelegate* delegate,
+                           bool render_to_surface)
+    : delegate_(delegate),
+      context_(gr_context),
+      render_to_surface_(render_to_surface),
+      weak_factory_(this) {
   if (!delegate_->GLContextMakeCurrent()) {
     FML_LOG(ERROR)
         << "Could not make the context current to setup the gr context.";
@@ -234,6 +242,15 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
     FML_LOG(ERROR)
         << "Could not make the context current to acquire the frame.";
     return nullptr;
+  }
+
+  // TODO(38466): Refactor GPU surface APIs take into account the fact that an
+  // external view embedder may want to render to the root surface.
+  if (!render_to_surface_) {
+    return std::make_unique<SurfaceFrame>(
+        nullptr, [](const SurfaceFrame& surface_frame, SkCanvas* canvas) {
+          return true;
+        });
   }
 
   const auto root_surface_transformation = GetRootTransformation();

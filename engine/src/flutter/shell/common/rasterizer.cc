@@ -223,17 +223,34 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   // for instrumentation.
   compositor_context_->ui_time().SetLapTime(layer_tree.build_time());
 
-  auto* canvas = frame->SkiaCanvas();
-
   auto* external_view_embedder = surface_->GetExternalViewEmbedder();
 
+  sk_sp<SkSurface> embedder_root_surface;
+
   if (external_view_embedder != nullptr) {
-    external_view_embedder->BeginFrame(layer_tree.frame_size());
+    external_view_embedder->BeginFrame(layer_tree.frame_size(),
+                                       surface_->GetContext());
+    embedder_root_surface = external_view_embedder->GetRootSurface();
   }
 
+  // If the external view embedder has specified an optional root surface, the
+  // root surface transformation is set by the embedder instead of
+  // having to apply it here.
+  SkMatrix root_surface_transformation =
+      embedder_root_surface ? SkMatrix{} : surface_->GetRootTransformation();
+
+  auto root_surface_canvas = embedder_root_surface
+                                 ? embedder_root_surface->getCanvas()
+                                 : frame->SkiaCanvas();
+
   auto compositor_frame = compositor_context_->AcquireFrame(
-      surface_->GetContext(), canvas, external_view_embedder,
-      surface_->GetRootTransformation(), true, gpu_thread_merger_);
+      surface_->GetContext(),       // skia GrContext
+      root_surface_canvas,          // root surface canvas
+      external_view_embedder,       // external view embedder
+      root_surface_transformation,  // root surface transformation
+      true,                         // instrumentation enabled
+      gpu_thread_merger_            // thread merger
+  );
 
   if (compositor_frame) {
     RasterStatus raster_status = compositor_frame->Raster(layer_tree, false);
@@ -244,10 +261,12 @@ RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
     if (external_view_embedder != nullptr) {
       external_view_embedder->SubmitFrame(surface_->GetContext());
     }
+
     FireNextFrameCallbackIfPresent();
 
-    if (surface_->GetContext())
+    if (surface_->GetContext()) {
       surface_->GetContext()->performDeferredCleanup(kSkiaCleanupExpiration);
+    }
 
     return raster_status;
   }

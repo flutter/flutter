@@ -79,6 +79,17 @@ const uint8_t* DataMapping::GetMapping() const {
 
 // NonOwnedMapping
 
+NonOwnedMapping::NonOwnedMapping(const uint8_t* data,
+                                 size_t size,
+                                 ReleaseProc release_proc)
+    : data_(data), size_(size), release_proc_(release_proc) {}
+
+NonOwnedMapping::~NonOwnedMapping() {
+  if (release_proc_) {
+    release_proc_(data_, size_);
+  }
+}
+
 size_t NonOwnedMapping::GetSize() const {
   return size_;
 }

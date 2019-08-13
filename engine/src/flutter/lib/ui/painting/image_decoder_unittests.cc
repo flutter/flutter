@@ -19,7 +19,7 @@ class TestIOManager final : public IOManager {
  public:
   TestIOManager(fml::RefPtr<fml::TaskRunner> task_runner,
                 bool has_gpu_context = true)
-      : gl_context_(has_gpu_context ? gl_surface_.CreateContext() : nullptr),
+      : gl_context_(has_gpu_context ? gl_surface_.CreateGrContext() : nullptr),
         weak_gl_context_factory_(
             has_gpu_context ? std::make_unique<fml::WeakPtrFactory<GrContext>>(
                                   gl_context_.get())

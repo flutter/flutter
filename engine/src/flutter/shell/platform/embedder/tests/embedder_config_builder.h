@@ -8,8 +8,9 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/unique_object.h"
 #include "flutter/shell/platform/embedder/embedder.h"
-#include "flutter/shell/platform/embedder/tests/embedder_context.h"
 #include "flutter/shell/platform/embedder/tests/embedder_test.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_compositor.h"
+#include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
 namespace flutter {
 namespace testing {
@@ -34,7 +35,7 @@ class EmbedderConfigBuilder {
     kNoInitialize,
   };
 
-  EmbedderConfigBuilder(EmbedderContext& context,
+  EmbedderConfigBuilder(EmbedderTestContext& context,
                         InitializationPreference preference =
                             InitializationPreference::kInitialize);
 
@@ -63,16 +64,21 @@ class EmbedderConfigBuilder {
   void SetPlatformMessageCallback(
       std::function<void(const FlutterPlatformMessage*)> callback);
 
+  void SetCompositor();
+
+  FlutterCompositor& GetCompositor();
+
   UniqueEngine LaunchEngine();
 
  private:
-  EmbedderContext& context_;
+  EmbedderTestContext& context_;
   FlutterProjectArgs project_args_ = {};
   FlutterRendererConfig renderer_config_ = {};
   FlutterSoftwareRendererConfig software_renderer_config_ = {};
   FlutterOpenGLRendererConfig opengl_renderer_config_ = {};
   std::string dart_entrypoint_;
   FlutterCustomTaskRunners custom_task_runners_ = {};
+  FlutterCompositor compositor_ = {};
   std::vector<std::string> command_line_arguments_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderConfigBuilder);

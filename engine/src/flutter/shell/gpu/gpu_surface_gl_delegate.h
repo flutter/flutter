@@ -44,7 +44,7 @@ class GPUSurfaceGLDelegate {
 
   // Get a reference to the external views embedder. This happens on the same
   // thread that the renderer is operating on.
-  virtual flutter::ExternalViewEmbedder* GetExternalViewEmbedder();
+  virtual ExternalViewEmbedder* GetExternalViewEmbedder() = 0;
 
   sk_sp<const GrGLInterface> GetGLInterface() const;
 
