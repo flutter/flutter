@@ -23,6 +23,7 @@
 		248D76DA22E388380012F0C1 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76D922E388380012F0C1 /* main.m */; };
 		248D76E422E388380012F0C1 /* ScenariosTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76E322E388380012F0C1 /* ScenariosTests.m */; };
 		248D76EF22E388380012F0C1 /* ScenariosUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 248D76EE22E388380012F0C1 /* ScenariosUITests.m */; };
+		248FDFC422FE7CD0009CC7CD /* FlutterEngineTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 248FDFC322FE7CD0009CC7CD /* FlutterEngineTest.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 		248D76EA22E388380012F0C1 /* ScenariosUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScenariosUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		248D76EE22E388380012F0C1 /* ScenariosUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScenariosUITests.m; sourceTree = "<group>"; };
 		248D76F022E388380012F0C1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		248FDFC322FE7CD0009CC7CD /* FlutterEngineTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlutterEngineTest.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -162,6 +164,7 @@
 		248D76E222E388380012F0C1 /* ScenariosTests */ = {
 			isa = PBXGroup;
 			children = (
+				248FDFC322FE7CD0009CC7CD /* FlutterEngineTest.m */,
 				0DB781FC22EA2C0300E9B371 /* FlutterViewControllerTest.m */,
 				248D76E322E388380012F0C1 /* ScenariosTests.m */,
 				248D76E522E388380012F0C1 /* Info.plist */,
@@ -329,6 +332,7 @@
 			files = (
 				248D76E422E388380012F0C1 /* ScenariosTests.m in Sources */,
 				0DB7820222EA493B00E9B371 /* FlutterViewControllerTest.m in Sources */,
+				248FDFC422FE7CD0009CC7CD /* FlutterEngineTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
