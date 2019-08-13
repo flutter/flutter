@@ -1488,7 +1488,7 @@ void main() {
   testWidgets('Dropdown form field - disabledHint displays when the items list is empty, when items is null', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
 
-    Widget build({ List<String> items}){
+    Widget build({ List<String> items }){
       return buildFormFrame(
         items: items,
         buttonKey: buttonKey,
@@ -1504,6 +1504,24 @@ void main() {
 
     // [disabledHint] should display when [items] is an empty list.
     await tester.pumpWidget(build(items: <String>[]));
+    expect(find.text('enabled'), findsNothing);
+    expect(find.text('disabled'), findsOneWidget);
+  });
+
+  testWidgets('Dropdown form field - disabledHint displays when onChnaged is null', (WidgetTester tester) async {
+    final Key buttonKey = UniqueKey();
+
+    Widget build({ List<String> items, ValueChanged<String> onChanged }){
+      return buildFormFrame(
+        items: items,
+        buttonKey: buttonKey,
+        value: null,
+        onChanged: onChanged,
+        hint: const Text('enabled'),
+        disabledHint: const Text('disabled'),
+      );
+    }
+    await tester.pumpWidget(build(items: menuItems, onChanged: null));
     expect(find.text('enabled'), findsNothing);
     expect(find.text('disabled'), findsOneWidget);
   });
@@ -1572,6 +1590,7 @@ void main() {
     await tester.pumpWidget(buildFormFrame(
       buttonKey: buttonKey,
       items: menuItems,
+      onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKey));
     await tester.pumpAndSettle();
@@ -1595,6 +1614,7 @@ void main() {
       buttonKey: buttonKeyOne,
       items: menuItems,
       elevation: 16,
+      onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKeyOne));
     await tester.pumpAndSettle();
@@ -1610,6 +1630,7 @@ void main() {
       buttonKey: buttonKeyTwo,
       items: menuItems,
       elevation: 24,
+      onChanged: onChanged,
     ));
     await tester.tap(find.byKey(buttonKeyTwo));
     await tester.pumpAndSettle();

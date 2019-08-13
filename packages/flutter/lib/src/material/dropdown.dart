@@ -976,7 +976,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
                  value: value,
                  items: items,
                  hint: hint,
-                 onChanged: field.didChange,
+                 onChanged: onChanged == null ? null : field.didChange,
                  disabledHint: disabledHint,
                  elevation: elevation,
                  style: style,
@@ -1010,7 +1010,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
   /// A message to show when the dropdown is disabled.
   ///
-  /// Displayed if [items] is null.
+  /// Displayed if [items] or [onChanged] is null.
   final Widget disabledHint;
 
   /// Called when the user selects an item.
@@ -1097,7 +1097,6 @@ class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
   void didChange(T value) {
     super.didChange(value);
-    if (widget.onChanged != null)
-      widget.onChanged(value);
+    widget.onChanged(value);
   }
 }
