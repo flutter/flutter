@@ -330,7 +330,7 @@ void main() {
       height: 100.0,
       child: const Text('Tile lower'),
     );
-    final Widget lowerSliver  = SliverPadding(
+    final Widget lowerSliver = SliverPadding(
       padding: const EdgeInsets.all(22.0),
       sliver: SliverToBoxAdapter(
         child: lowerItem,
@@ -380,7 +380,7 @@ void main() {
       width: 100.0,
       child: const Text('Tile lower'),
     );
-    final Widget lowerSliver  = SliverPadding(
+    final Widget lowerSliver = SliverPadding(
       padding: const EdgeInsets.all(22.0),
       sliver: SliverToBoxAdapter(
         child: lowerItem,
