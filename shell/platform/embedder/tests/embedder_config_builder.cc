@@ -4,42 +4,46 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_config_builder.h"
 
+#include "flutter/shell/platform/embedder/embedder.h"
+
 namespace flutter {
 namespace testing {
 
 EmbedderConfigBuilder::EmbedderConfigBuilder(
-    EmbedderContext& context,
+    EmbedderTestContext& context,
     InitializationPreference preference)
     : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
   project_args_.shutdown_dart_vm_when_done = true;
   project_args_.platform_message_callback =
       [](const FlutterPlatformMessage* message, void* context) {
-        reinterpret_cast<EmbedderContext*>(context)->PlatformMessageCallback(
-            message);
+        reinterpret_cast<EmbedderTestContext*>(context)
+            ->PlatformMessageCallback(message);
       };
 
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
 
   opengl_renderer_config_.struct_size = sizeof(FlutterOpenGLRendererConfig);
   opengl_renderer_config_.make_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderContext*>(context)->GLMakeCurrent();
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLMakeCurrent();
   };
   opengl_renderer_config_.clear_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderContext*>(context)->GLClearCurrent();
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLClearCurrent();
   };
   opengl_renderer_config_.present = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderContext*>(context)->GLPresent();
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLPresent();
   };
   opengl_renderer_config_.fbo_callback = [](void* context) -> uint32_t {
-    return reinterpret_cast<EmbedderContext*>(context)->GLGetFramebuffer();
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLGetFramebuffer();
   };
   opengl_renderer_config_.make_resource_current = [](void* context) -> bool {
-    return reinterpret_cast<EmbedderContext*>(context)->GLMakeResourceCurrent();
+    return reinterpret_cast<EmbedderTestContext*>(context)
+        ->GLMakeResourceCurrent();
   };
   opengl_renderer_config_.gl_proc_resolver = [](void* context,
                                                 const char* name) -> void* {
-    return reinterpret_cast<EmbedderContext*>(context)->GLGetProcAddress(name);
+    return reinterpret_cast<EmbedderTestContext*>(context)->GLGetProcAddress(
+        name);
   };
 
   software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
@@ -100,14 +104,14 @@ void EmbedderConfigBuilder::SetSnapshots() {
 
 void EmbedderConfigBuilder::SetIsolateCreateCallbackHook() {
   project_args_.root_isolate_create_callback =
-      EmbedderContext::GetIsolateCreateCallbackHook();
+      EmbedderTestContext::GetIsolateCreateCallbackHook();
 }
 
 void EmbedderConfigBuilder::SetSemanticsCallbackHooks() {
   project_args_.update_semantics_node_callback =
-      EmbedderContext::GetUpdateSemanticsNodeCallbackHook();
+      EmbedderTestContext::GetUpdateSemanticsNodeCallbackHook();
   project_args_.update_semantics_custom_action_callback =
-      EmbedderContext::GetUpdateSemanticsCustomActionCallbackHook();
+      EmbedderTestContext::GetUpdateSemanticsCustomActionCallbackHook();
 }
 
 void EmbedderConfigBuilder::SetDartEntrypoint(std::string entrypoint) {
@@ -139,6 +143,43 @@ void EmbedderConfigBuilder::SetPlatformTaskRunner(
 void EmbedderConfigBuilder::SetPlatformMessageCallback(
     std::function<void(const FlutterPlatformMessage*)> callback) {
   context_.SetPlatformMessageCallback(callback);
+}
+
+void EmbedderConfigBuilder::SetCompositor() {
+  context_.SetupCompositor();
+  auto& compositor = context_.GetCompositor();
+  compositor_.struct_size = sizeof(compositor_);
+  compositor_.user_data = &compositor;
+  compositor_.create_backing_store_callback =
+      [](const FlutterBackingStoreConfig* config,  //
+         FlutterBackingStore* backing_store_out,   //
+         void* user_data                           //
+      ) {
+        return reinterpret_cast<EmbedderTestCompositor*>(user_data)
+            ->CreateBackingStore(config, backing_store_out);
+      };
+  compositor_.collect_backing_store_callback =
+      [](const FlutterBackingStore* backing_store,  //
+         void* user_data                            //
+      ) {
+        return reinterpret_cast<EmbedderTestCompositor*>(user_data)
+            ->CollectBackingStore(backing_store);
+      };
+  compositor_.present_layers_callback = [](const FlutterLayer** layers,  //
+                                           size_t layers_count,          //
+                                           void* user_data               //
+                                        ) {
+    return reinterpret_cast<EmbedderTestCompositor*>(user_data)->Present(
+        layers,       //
+        layers_count  //
+
+    );
+  };
+  project_args_.compositor = &compositor_;
+}
+
+FlutterCompositor& EmbedderConfigBuilder::GetCompositor() {
+  return compositor_;
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() {

@@ -6,6 +6,7 @@ source_set("testing_lib") {
   testonly = true
 
   sources = [
+    "$flutter_root/testing/assertions.h",
     "$flutter_root/testing/testing.cc",
     "$flutter_root/testing/testing.h",
   ]
@@ -58,12 +59,9 @@ if (current_toolchain == host_toolchain) {
     ]
 
     deps = [
-      "//$flutter_root/fml",
-      "//third_party/swiftshader_flutter:swiftshader",
-    ]
-
-    public_deps = [
+      "$flutter_root/fml",
       "//third_party/skia",
+      "//third_party/swiftshader_flutter:swiftshader",
     ]
   }
 }

@@ -22,10 +22,6 @@ SkMatrix GPUSurfaceGLDelegate::GLContextSurfaceTransformation() const {
   return matrix;
 }
 
-flutter::ExternalViewEmbedder* GPUSurfaceGLDelegate::GetExternalViewEmbedder() {
-  return nullptr;
-}
-
 GPUSurfaceGLDelegate::GLProcResolver GPUSurfaceGLDelegate::GetGLProcResolver()
     const {
   return nullptr;

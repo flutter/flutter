@@ -102,8 +102,12 @@ class DataMapping final : public Mapping {
 
 class NonOwnedMapping final : public Mapping {
  public:
-  NonOwnedMapping(const uint8_t* data, size_t size)
-      : data_(data), size_(size) {}
+  using ReleaseProc = std::function<void(const uint8_t* data, size_t size)>;
+  NonOwnedMapping(const uint8_t* data,
+                  size_t size,
+                  ReleaseProc release_proc = nullptr);
+
+  ~NonOwnedMapping() override;
 
   // |Mapping|
   size_t GetSize() const override;
@@ -114,6 +118,7 @@ class NonOwnedMapping final : public Mapping {
  private:
   const uint8_t* const data_;
   const size_t size_;
+  const ReleaseProc release_proc_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(NonOwnedMapping);
 };

@@ -27,9 +27,13 @@ template("embedder_source_set") {
       "embedder_engine.h",
       "embedder_external_texture_gl.cc",
       "embedder_external_texture_gl.h",
+      "embedder_external_view_embedder.cc",
+      "embedder_external_view_embedder.h",
       "embedder_include.c",
       "embedder_platform_message_response.cc",
       "embedder_platform_message_response.h",
+      "embedder_render_target.cc",
+      "embedder_render_target.h",
       "embedder_safe_access.h",
       "embedder_surface.cc",
       "embedder_surface.h",
@@ -79,6 +83,7 @@ config("embedder_prefix_config") {
 
 test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
+  fixtures = [ "fixtures/compositor.png" ]
 }
 
 if (current_toolchain == host_toolchain) {
@@ -93,10 +98,12 @@ if (current_toolchain == host_toolchain) {
       "tests/embedder_a11y_unittests.cc",
       "tests/embedder_config_builder.cc",
       "tests/embedder_config_builder.h",
-      "tests/embedder_context.cc",
-      "tests/embedder_context.h",
       "tests/embedder_test.cc",
       "tests/embedder_test.h",
+      "tests/embedder_test_compositor.cc",
+      "tests/embedder_test_compositor.h",
+      "tests/embedder_test_context.cc",
+      "tests/embedder_test_context.h",
       "tests/embedder_unittests.cc",
     ]
 

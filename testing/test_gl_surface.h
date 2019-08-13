@@ -19,6 +19,8 @@ class TestGLSurface {
 
   ~TestGLSurface();
 
+  SkISize GetSize() const;
+
   bool MakeCurrent();
 
   bool ClearCurrent();
@@ -31,7 +33,13 @@ class TestGLSurface {
 
   void* GetProcAddress(const char* name) const;
 
-  sk_sp<GrContext> CreateContext();
+  sk_sp<SkSurface> GetOnscreenSurface();
+
+  sk_sp<GrContext> GetGrContext();
+
+  sk_sp<GrContext> CreateGrContext();
+
+  sk_sp<SkImage> GetRasterSurfaceSnapshot();
 
  private:
   // Importing the EGL.h pulls in platform headers which are problematic
@@ -47,6 +55,7 @@ class TestGLSurface {
   EGLContext offscreen_context_;
   EGLSurface onscreen_surface_;
   EGLSurface offscreen_surface_;
+  sk_sp<GrContext> context_;
 
   FML_DISALLOW_COPY_AND_ASSIGN(TestGLSurface);
 };

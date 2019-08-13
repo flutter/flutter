@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:core';
 import 'dart:convert';
 
 void main() {}
@@ -178,3 +179,78 @@ void null_platform_messages() {
   };
   signalNativeTest();
 }
+
+Picture CreateSimplePicture() {
+  Paint blackPaint = Paint();
+  PictureRecorder baseRecorder = PictureRecorder();
+  Canvas canvas = Canvas(baseRecorder);
+  canvas.drawRect(Rect.fromLTRB(0.0, 0.0, 1000.0, 1000.0), blackPaint);
+  return baseRecorder.endRecording();
+}
+
+@pragma('vm:entry-point')
+void can_composite_platform_views() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset(1.0, 1.0), CreateSimplePicture());
+    builder.pushOffset(1.0, 2.0);
+    builder.addPlatformView(42, width: 123.0, height: 456.0);
+    builder.addPicture(Offset(1.0, 1.0), CreateSimplePicture());
+    builder.pop(); // offset
+    signalNativeTest(); // Signal 2
+    window.render(builder.build());
+  };
+  signalNativeTest(); // Signal 1
+  window.scheduleFrame();
+}
+
+Picture CreateColoredBox(Color color, Size size) {
+  Paint paint = Paint();
+  paint.color = color;
+  PictureRecorder baseRecorder = PictureRecorder();
+  Canvas canvas = Canvas(baseRecorder);
+  canvas.drawRect(Rect.fromLTRB(0.0, 0.0, size.width, size.height), paint);
+  return baseRecorder.endRecording();
+}
+
+@pragma('vm:entry-point')
+void can_composite_platform_views_with_known_scene() {
+  window.onBeginFrame = (Duration duration) {
+    Color red = Color.fromARGB(127, 255, 0, 0);
+    Color blue = Color.fromARGB(127, 0, 0, 255);
+    Color gray = Color.fromARGB(127, 127, 127, 127);
+
+    Size size = Size(50.0, 150.0);
+
+    SceneBuilder builder = SceneBuilder();
+    builder.pushOffset(0.0, 0.0);
+
+    // 10 (Index 0)
+    builder.addPicture(Offset(10.0, 10.0), CreateColoredBox(red, size)); // red - flutter
+
+    builder.pushOffset(20.0, 20.0);
+      // 20 (Index 1)
+      builder.addPlatformView(1, width: size.width, height:size.height); // green - platform
+    builder.pop();
+
+    // 30 (Index 2)
+    builder.addPicture(Offset(30.0, 30.0), CreateColoredBox(blue, size)); // blue - flutter
+
+    builder.pushOffset(40.0, 40.0);
+      // 40 (Index 3)
+      builder.addPlatformView(2, width: size.width, height:size.height); // magenta - platform
+    builder.pop();
+
+    // 50  (Index 4)
+    builder.addPicture(Offset(50.0, 50.0), CreateColoredBox(gray, size)); // gray - flutter
+
+    builder.pop();
+
+    window.render(builder.build());
+
+    signalNativeTest(); // Signal 2
+  };
+  signalNativeTest(); // Signal 1
+  window.scheduleFrame();
+}
+

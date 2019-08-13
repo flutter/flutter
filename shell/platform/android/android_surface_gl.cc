@@ -56,7 +56,7 @@ bool AndroidSurfaceGL::IsValid() const {
 }
 
 std::unique_ptr<Surface> AndroidSurfaceGL::CreateGPUSurface() {
-  auto surface = std::make_unique<GPUSurfaceGL>(this);
+  auto surface = std::make_unique<GPUSurfaceGL>(this, true);
   return surface->IsValid() ? std::move(surface) : nullptr;
 }
 
@@ -123,6 +123,11 @@ intptr_t AndroidSurfaceGL::GLContextFBO() const {
   FML_DCHECK(onscreen_context_ && onscreen_context_->IsValid());
   // The default window bound framebuffer on Android.
   return 0;
+}
+
+// |GPUSurfaceGLDelegate|
+ExternalViewEmbedder* AndroidSurfaceGL::GetExternalViewEmbedder() {
+  return nullptr;
 }
 
 }  // namespace flutter
