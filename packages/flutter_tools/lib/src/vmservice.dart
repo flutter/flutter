@@ -18,6 +18,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
+import 'base/zone_check.dart';
 import 'convert.dart' show base64;
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
@@ -376,7 +377,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
+      await runZoneChecked(() => _sendRequest('streamListen', <String, dynamic>{'streamId': streamId}));
     }
   }
 
