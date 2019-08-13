@@ -28,41 +28,38 @@ class CleanCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
     final Directory buildDir = fs.directory(getBuildDirectory());
+    _deleteFile(buildDir);
 
-    printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
-    if (buildDir.existsSync()) {
-      try {
-        buildDir.deleteSync(recursive: true);
-      } on FileSystemException catch (error) {
-        if (platform.isWindows) {
-          _windowsDeleteFailure(buildDir.path);
-        }
-        throwToolExit(error.toString());
-      }
-    }
+    final FlutterProject flutterProject = FlutterProject.current();
+    _deleteFile(flutterProject.dartTool);
 
-    printStatus("Deleting '${flutterProject.dartTool.path}${fs.path.separator}'.");
-    if (flutterProject.dartTool.existsSync()) {
-      try {
-        flutterProject.dartTool.deleteSync(recursive: true);
-      } on FileSystemException catch (error) {
-        if (platform.isWindows) {
-          _windowsDeleteFailure(flutterProject.dartTool.path);
-        }
-        throwToolExit(error.toString());
-      }
-    }
+    final Directory androidEphemeralDirectory = flutterProject.android.ephemeralDirectory;
+    _deleteFile(androidEphemeralDirectory);
+
+    final Directory iosEphemeralDirectory = flutterProject.ios.ephemeralDirectory;
+    _deleteFile(iosEphemeralDirectory);
+
     return const FlutterCommandResult(ExitStatus.success);
   }
 
-  void _windowsDeleteFailure(String path) {
-    printError(
-      'Failed to remove $path. '
-      'A program may still be using a file in the directory or the directory itself. '
-      'To find and stop such a program, see: '
-      'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');
+  void _deleteFile(FileSystemEntity file) {
+    final String path = file.path;
+    printStatus("Deleting '$path${fs.path.separator}'.");
+    if (file.existsSync()) {
+      try {
+        file.deleteSync(recursive: true);
+      } on FileSystemException catch (error) {
+        if (platform.isWindows) {
+          printError(
+            'Failed to remove $path. '
+            'A program may still be using a file in the directory or the directory itself. '
+            'To find and stop such a program, see: '
+            'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');
+        }
+        throwToolExit(error.toString());
+      }
+    }
   }
 }
 

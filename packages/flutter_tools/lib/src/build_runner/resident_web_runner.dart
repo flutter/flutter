@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
-import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
+import 'package:vm_service/vm_service.dart' as vmservice;
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -201,7 +201,7 @@ class ResidentWebRunner extends ResidentRunner {
           printStatus(message);
         }
       });
-      websocketUri = Uri.parse(_debugConnection.wsUri);
+      websocketUri = Uri.parse(_debugConnection.uri);
     }
     connectionInfoCompleter?.complete(
       DebugConnectionInfo(wsUri: websocketUri)

@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
-import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../src/common.dart';
 import 'test_data/basic_project.dart';

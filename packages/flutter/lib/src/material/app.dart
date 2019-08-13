@@ -77,6 +77,71 @@ enum ThemeMode {
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
 ///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that disables the "debug"
+/// banner with a [home] route that will be displayed when the app is launched.
+///
+/// ![A screenshot of the MaterialApp class with a home Scaffold](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
+///
+/// ```dart
+/// MaterialApp(
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Home'),
+///     ),
+///   ),
+///   debugShowCheckedModeBanner: false,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that uses the [routes]
+/// `Map` to define the "home" route and an "about" route.
+///
+/// ```dart
+/// MaterialApp(
+///   routes: <String, WidgetBuilder>{
+///     '/': (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Home Route'),
+///         ),
+///       );
+///     },
+///     '/about': (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: const Text('About Route'),
+///         ),
+///       );
+///      }
+///    },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that defines a [theme] that
+/// will be used for material widgets in the app.
+///
+/// ![A screenshot of the MaterialApp class with a custom theme](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
+///
+/// ```dart
+/// MaterialApp(
+///   theme: ThemeData(
+///     brightness: Brightness.dark,
+///     primaryColor: Colors.blueGrey
+///   ),
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('MaterialApp Theme'),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [Scaffold], which provides standard app elements like an [AppBar] and a [Drawer].

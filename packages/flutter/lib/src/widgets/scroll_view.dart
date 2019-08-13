@@ -339,6 +339,8 @@ abstract class ScrollView extends StatelessWidget {
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
 ///
+/// {@animation 400 376 https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_scroll_view.mp4}
+///
 /// {@tool sample}
 ///
 /// This sample code shows a scroll view that contains a flexible pinned app
@@ -366,7 +368,7 @@ abstract class ScrollView extends StatelessWidget {
 ///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.teal[100 * (index % 9)],
-///             child: Text('grid item $index'),
+///             child: Text('Grid Item $index'),
 ///           );
 ///         },
 ///         childCount: 20,
@@ -379,7 +381,7 @@ abstract class ScrollView extends StatelessWidget {
 ///           return Container(
 ///             alignment: Alignment.center,
 ///             color: Colors.lightBlue[100 * (index % 9)],
-///             child: Text('list item $index'),
+///             child: Text('List Item $index'),
 ///           );
 ///         },
 ///       ),
@@ -612,7 +614,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// ```dart
 /// ListView(
-///   padding: const EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8),
 ///   children: <Widget>[
 ///     Container(
 ///       height: 50,
@@ -646,7 +648,7 @@ abstract class BoxScrollView extends ScrollView {
 /// final List<int> colorCodes = <int>[600, 500, 100];
 ///
 /// ListView.builder(
-///   padding: const EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8),
 ///   itemCount: entries.length,
 ///   itemBuilder: (BuildContext context, int index) {
 ///     return Container(
@@ -672,7 +674,7 @@ abstract class BoxScrollView extends ScrollView {
 /// final List<int> colorCodes = <int>[600, 500, 100];
 ///
 /// ListView.separated(
-///   padding: const EdgeInsets.all(8.0),
+///   padding: const EdgeInsets.all(8),
 ///   itemCount: entries.length,
 ///   itemBuilder: (BuildContext context, int index) {
 ///     return Container(
@@ -1284,45 +1286,102 @@ class ListView extends BoxScrollView {
 /// list.
 ///
 /// {@tool sample}
+/// This example demonstrates how to create a [GridView] with two columns. The
+/// children are spaced apart using the [crossAxisSpacing] and [mainAxisSpacing]
+/// properties.
 ///
-/// Here are two brief snippets showing a [GridView] and its equivalent using
-/// [CustomScrollView]:
+/// ![A screenshot of a GridView](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view.png)
 ///
 /// ```dart
 /// GridView.count(
 ///   primary: false,
-///   padding: const EdgeInsets.all(20.0),
-///   crossAxisSpacing: 10.0,
+///   padding: const EdgeInsets.all(20),
+///   crossAxisSpacing: 10,
+///   mainAxisSpacing: 10,
 ///   crossAxisCount: 2,
 ///   children: <Widget>[
-///     const Text('He\'d have you all unravel at the'),
-///     const Text('Heed not the rabble'),
-///     const Text('Sound of screams but the'),
-///     const Text('Who scream'),
-///     const Text('Revolution is coming...'),
-///     const Text('Revolution, they...'),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('He\'d have you all unravel at the'),
+///       color: Colors.teal[100],
+///     ),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('Heed not the rabble'),
+///       color: Colors.teal[200],
+///     ),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('Sound of screams but the'),
+///       color: Colors.teal[300],
+///     ),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('Who scream'),
+///       color: Colors.teal[400],
+///     ),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('Revolution is coming...'),
+///       color: Colors.teal[500],
+///     ),
+///     Container(
+///       padding: const EdgeInsets.all(8),
+///       child: const Text('Revolution, they...'),
+///       color: Colors.teal[600],
+///     ),
 ///   ],
 /// )
 /// ```
 /// {@end-tool}
+///
 /// {@tool sample}
+/// This example shows how to create the same grid as the previous example
+/// using a [CustomScrollView] and a [SliverGrid].
+///
+/// ![A screenshot of a CustomScrollView with a SliverGrid](https://flutter.github.io/assets-for-api-docs/assets/widgets/grid_view_custom_scroll.png)
 ///
 /// ```dart
 /// CustomScrollView(
 ///   primary: false,
 ///   slivers: <Widget>[
 ///     SliverPadding(
-///       padding: const EdgeInsets.all(20.0),
+///       padding: const EdgeInsets.all(20),
 ///       sliver: SliverGrid.count(
-///         crossAxisSpacing: 10.0,
+///         crossAxisSpacing: 10,
+///         mainAxisSpacing: 10,
 ///         crossAxisCount: 2,
 ///         children: <Widget>[
-///           const Text('He\'d have you all unravel at the'),
-///           const Text('Heed not the rabble'),
-///           const Text('Sound of screams but the'),
-///           const Text('Who scream'),
-///           const Text('Revolution is coming...'),
-///           const Text('Revolution, they...'),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('He\'d have you all unravel at the'),
+///             color: Colors.green[100],
+///           ),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('Heed not the rabble'),
+///             color: Colors.green[200],
+///           ),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('Sound of screams but the'),
+///             color: Colors.green[300],
+///           ),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('Who scream'),
+///             color: Colors.green[400],
+///           ),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('Revolution is coming...'),
+///             color: Colors.green[500],
+///           ),
+///           Container(
+///             padding: const EdgeInsets.all(8),
+///             child: const Text('Revolution, they...'),
+///             color: Colors.green[600],
+///           ),
 ///         ],
 ///       ),
 ///     ),

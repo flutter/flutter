@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -86,9 +87,18 @@ void main() {
     await scrollGesture.up();
     await tester.pump();
 
-    // Longpress on the scrollbar thumb.
+    int hapticFeedbackCalls = 0;
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        hapticFeedbackCalls++;
+      }
+    });
+
+    // Longpress on the scrollbar thumb and expect a vibration.
+    expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
     await tester.pump(const Duration(milliseconds: 500));
+    expect(hapticFeedbackCalls, 1);
 
     // Drag the thumb down to scroll down.
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));
@@ -145,11 +155,21 @@ void main() {
     await scrollGesture.up();
     await tester.pump();
 
-    // Drag in from the right side on top of the scrollbar thumb.
+    int hapticFeedbackCalls = 0;
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'HapticFeedback.vibrate') {
+        hapticFeedbackCalls++;
+      }
+    });
+
+    // Drag in from the right side on top of the scrollbar thumb and expect a
+    // vibration.
+    expect(hapticFeedbackCalls, 0);
     final TestGesture dragScrollbarGesture = await tester.startGesture(const Offset(796.0, 50.0));
     await tester.pump();
     await dragScrollbarGesture.moveBy(const Offset(-50.0, 0.0));
     await tester.pump(_kScrollbarResizeDuration);
+    expect(hapticFeedbackCalls, 1);
 
     // Drag the thumb down to scroll down.
     await dragScrollbarGesture.moveBy(const Offset(0.0, scrollAmount));

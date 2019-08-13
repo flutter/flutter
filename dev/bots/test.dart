@@ -463,19 +463,25 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
+  // Run a small subset of web tests to smoke-test the Web test infrastructure.
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
-    'test/foundation/',
-    'test/physics/',
-    'test/rendering/',
-    'test/services/',
-    'test/painting/',
-    'test/scheduler/',
-    'test/semantics/',
-    // TODO(flutterweb): re-enable when instabiliy around pumpAndSettle is
-    // resolved.
-    // 'test/widgets/',
-    // 'test/material/',
+    'test/foundation/assertions_test.dart',
   ]);
+
+  // TODO(yjbanov): re-enable when web test cirrus flakiness is resolved
+  // await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+  //   'test/foundation/',
+  //   'test/physics/',
+  //   'test/rendering/',
+  //   'test/services/',
+  //   'test/painting/',
+  //   'test/scheduler/',
+  //   'test/semantics/',
+  // TODO(yjbanov): re-enable when instabiliy around pumpAndSettle is
+  //   // resolved.
+  //   // 'test/widgets/',
+  //   // 'test/material/',
+  // ]);
 }
 
 Future<void> _runCoverage() async {

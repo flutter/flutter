@@ -281,6 +281,29 @@ Future<void> main() async {
     expect(find.byKey(thirdKey), isInCard);
   });
 
+  testWidgets('Heroes animate should hide original hero', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    // Checks initial state.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle(); // Waits for transition finishes.
+
+    expect(find.byKey(firstKey), findsNothing);
+    final Offstage first = tester.widget(
+      find.ancestor(
+        of: find.byKey(firstKey, skipOffstage: false),
+        matching: find.byType(Offstage, skipOffstage: false),
+      ).first
+    );
+    // Original hero should stay hidden.
+    expect(first.offstage, isTrue);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+  });
+
   testWidgets('Destination hero is rebuilt midflight', (WidgetTester tester) async {
     final MutatingRoute route = MutatingRoute();
 
@@ -1640,6 +1663,45 @@ Future<void> main() async {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
+    transitionFromUserGestures = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(50.0, 0.0));
+    await tester.pump();
+    // It will only register the drag if we move a second time.
+    await gesture.moveBy(const Offset(50.0, 0.0));
+    await tester.pump();
+
+    // We're going to page 1 so page 1's Hero is lifted into flight.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // Dismisses hero transition.
+    await gesture.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // We goes back to second page.
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
   });
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
