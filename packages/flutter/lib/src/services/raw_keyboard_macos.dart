@@ -75,12 +75,12 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (numPadKey != null) {
       return numPadKey;
     }
-    // If this key is printable, generate the LogicalKeyboardKey from its Unicode value.
+    // If this key is printable, generate the LogicalKeyboardKey from its unicode value.
     // Control keys such as ESC, CRTL, and SHIFT are not printable. HOME, DEL, arrow keys, and function
     // keys are considered modifier function keys, which generate invalid Unicode scalar values.
     if (keyLabel != null &&
         !LogicalKeyboardKey.isControlCharacter(keyLabel) &&
-        !isFunctionKey(keyLabel)) {
+        !_isUnprintableKey(keyLabel)) {
       // Given that |charactersIgnoringModifiers| can contain a String of arbitrary length,
       // limit to a maximum of two unicode scalar values. It is unlikely that a keyboard would produce a code point
       // bigger than 32 bits, but it is still worth defending against this case.
@@ -211,7 +211,7 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   /// information.
   ///
   /// Used by [RawKeyEvent] subclasses to help construct IDs.
-  static bool isFunctionKey(String label) {
+  static bool _isUnprintableKey(String label) {
     if (label.length > 1) {
       return false;
     }
