@@ -5,6 +5,7 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -209,8 +210,8 @@ void main() {
           width: 400.0,
           child: CupertinoTimerPicker(
             minuteInterval: 10,
-            secondInterval: 15,
-            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 45),
+            secondInterval: 12,
+            initialTimerDuration: const Duration(hours: 10, minutes: 40, seconds: 48),
             mode: CupertinoTimerPickerMode.hms,
             onTimerDurationChanged: (Duration d) {
               duration = d;
@@ -222,13 +223,13 @@ void main() {
 
     await tester.drag(find.text('40'), _kRowOffset);
     await tester.pump();
-    await tester.drag(find.text('45'), -_kRowOffset);
+    await tester.drag(find.text('48'), -_kRowOffset);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(
       duration,
-      const Duration(hours: 10, minutes: 50, seconds: 30),
+      const Duration(hours: 10, minutes: 50, seconds: 36),
     );
   });
 
@@ -827,7 +828,7 @@ void main() {
         CupertinoApp(
           home: Center(
             child: SizedBox(
-              width: 400,
+              width: 500,
               height: 400,
               child: RepaintBoundary(
                 child: CupertinoDatePicker(
@@ -845,7 +846,7 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.initial.png',
-          version: 1,
+          version: 2,
         ),
       );
 
@@ -857,10 +858,50 @@ void main() {
         find.byType(CupertinoDatePicker),
         matchesGoldenFile(
           'date_picker_test.datetime.drag.png',
-          version: 1,
+          version: 2,
         ),
       );
     });
+  });
+
+  testWidgets('TimerPicker golden tets', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 216,
+            child: RepaintBoundary(
+              child: CupertinoTimerPicker(
+                mode: CupertinoTimerPickerMode.hm,
+                initialTimerDuration: const Duration(hours: 23, minutes: 59),
+                onTimerDurationChanged: (_) {},
+              ),
+            )
+          ),
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile(
+        'timer_picker_test.datetime.initial.png',
+        version: 1,
+      ),
+    );
+
+    // Slightly drag the hour component to make the current hour off-center.
+    await tester.drag(find.text('59'), Offset(0, _kRowOffset.dy / 2));
+    await tester.pump();
+
+    await expectLater(
+      find.byType(CupertinoTimerPicker),
+      matchesGoldenFile(
+        'timer_picker_test.datetime.drag.png',
+        version: 1,
+      ),
+    );
   });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {

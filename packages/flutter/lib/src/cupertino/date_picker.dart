@@ -1198,7 +1198,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     );
 
     textPainter.layout();
-    numberLabelWidth = textPainter.maxIntrinsicWidth;
+    numberLabelWidth = textPainter.width;
     numberLabelHeight = textPainter.height;
     numberLabelBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
@@ -1237,7 +1237,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
 
   // The picker has to be wider than its content, since the separators
   // are part of the picker.
-  Widget _buildPickerDigitLabel(String text, EdgeInsetsDirectional padding) {
+  Widget _buildPickerNumberLabel(String text, EdgeInsetsDirectional padding) {
     return Container(
       width: _kTimerPickerColumnIntrinsicWidth + padding.horizontal,
       padding: padding.resolve(textDirection),
@@ -1245,7 +1245,15 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       child: Container(
         width: numberLabelWidth,
         alignment: AlignmentDirectional.centerEnd.resolve(textDirection),
-        child: Text(text, softWrap: false, maxLines: 1),
+        child: DefaultTextStyle(
+          overflow: TextOverflow.visible,
+          style: _themeTextStyle(context).copyWith(
+            // Unfortunately turning on magnification messes up the label alignment.
+            // So we'll have to hard code the font size and turn magnification off.
+            fontSize: 23.5,
+          ),
+          child: Text(text, softWrap: false, maxLines: 1, overflow: TextOverflow.visible),
+        ),
       ),
     );
   }
@@ -1275,7 +1283,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(localizations.timerPickerHour(index), additionalPadding),
+          child: _buildPickerNumberLabel(localizations.timerPickerHour(index), additionalPadding),
         );
       }),
     );
@@ -1341,7 +1349,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(localizations.timerPickerMinute(minute), additionalPadding),
+          child: _buildPickerNumberLabel(localizations.timerPickerMinute(minute), additionalPadding),
         );
       }),
     );
@@ -1397,7 +1405,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         return Semantics(
           label: semanticsLabel,
           excludeSemantics: true,
-          child: _buildPickerDigitLabel(localizations.timerPickerSecond(second), additionalPadding),
+          child: _buildPickerNumberLabel(localizations.timerPickerSecond(second), additionalPadding),
         );
       }),
     );
