@@ -242,6 +242,13 @@ FLUTTER_EXPORT
  */
 @property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger;
 
+/**
+ * The UI Isolate ID of of the engine.
+ *
+ * This property will be nil if the engine is not running.
+ */
+@property(nonatomic, readonly, copy) NSString* isolateId;
+
 @end
 
 #endif  // FLUTTER_FLUTTERENGINE_H_
