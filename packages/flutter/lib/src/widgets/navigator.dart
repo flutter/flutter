@@ -18,6 +18,7 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
 import 'routes.dart';
+import 'route_notification_messages.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -1774,7 +1775,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
-    _sendRouteChangeToSystemChannels(_routePushedMethod, route, oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(route);
     return route.popped;
@@ -1818,26 +1819,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       });
     }
     _cancelActivePointers();
-  }
-
-  /// Notifies the platform of a route change.
-  ///
-  /// There are three methods: 'routePushed', 'routePopped', 'routeReplaced'.
-  ///
-  /// See also [SystemChannels.navigation], which handles subsequent navigation
-  /// requests.
-  void _sendRouteChangeToSystemChannels(String methodName, Route<dynamic> route, Route<dynamic> previousRoute) {
-    final String previousRouteName = previousRoute?.settings?.name;
-    final String routeName = route?.settings?.name;
-    if (previousRouteName != null || routeName != null) {
-      SystemChannels.navigation.invokeMethod<void>(
-        methodName,
-        <String, dynamic>{
-          'previousRouteName': previousRouteName,
-          'routeName': routeName,
-        },
-      );
-    }
   }
 
   /// Replace the current route of the navigator by pushing the given route and
@@ -1888,7 +1869,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    _sendRouteChangeToSystemChannels(_routeReplacedMethod, newRoute, oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     assert(() { _debugLocked = false; return true; }());
     _afterNavigation(newRoute);
     return newRoute.popped;
@@ -2000,7 +1981,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
-    _sendRouteChangeToSystemChannels(_routeReplacedMethod, newRoute, oldRoute);
+    RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     oldRoute.dispose();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -2103,7 +2084,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _history.last.didPopNext(route);
         for (NavigatorObserver observer in widget.observers)
           observer.didPop(route, _history.last);
-        _sendRouteChangeToSystemChannels(_routePoppedMethod, route, _history.last);
+        RouteNotificationMessages.maybeNotifyRouteChange(_routePoppedMethod, route, _history.last);
       } else {
         assert(() { _debugLocked = false; return true; }());
         return false;
