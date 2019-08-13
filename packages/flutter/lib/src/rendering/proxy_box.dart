@@ -2589,20 +2589,20 @@ class RenderMouseRegion extends RenderProxyBox {
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
   /// and [onExit] behave.
   ///
-  /// If [opaque] is true, this object will absorb the mouse pointer so that
-  /// [RenderMouseRegion]s visually behind it will not consider themselves being
-  /// hovered even when the pointer is within their areas.
+  /// If [opaque] is true, this object will absorb the mouse pointer, and
+  /// prevents this object's siblings (or any other objects that are not
+  /// ancestors or descendants of this object) from detecting the mouse
+  /// pointer even when the pointer is within their areas.
   ///
-  /// If [opaque] is false, whether the pointer is contained by this mouse
-  /// region will not affect how [RenderMouseRegion]s behind it behaves.
+  /// If [opaque] is false, this object will not affect how [RenderMouseRegion]s
+  /// behind it behave, which will detect the mouse pointer as long as the
+  /// pointer is within their areas.
   ///
   /// This defaults to true.
   bool opaque;
 
-  /// Called when a hovering pointer enters the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget.
+  /// Called when a mouse pointer enters the region (with or without buttons
+  /// pressed).
   PointerEnterEventListener get onEnter => _onEnter;
   set onEnter(PointerEnterEventListener value) {
     if (_onEnter != value) {
@@ -2616,10 +2616,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onEnter(event);
   }
 
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
-  ///
-  /// Typically only triggered for mouse pointers.
+  /// Called when a pointer changes position (with or without buttons pressed),
+  /// and the end position is within the region.
   PointerHoverEventListener get onHover => _onHover;
   set onHover(PointerHoverEventListener value) {
     if (_onHover != value) {
@@ -2633,10 +2631,7 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a hovering pointer leaves the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget.
+  /// Called when a pointer leaves the region.
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {

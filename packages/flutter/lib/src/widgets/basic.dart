@@ -5799,16 +5799,18 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// the pointer.
   final PointerExitEventListener onExit;
 
-  /// Whether this object should prevent other [MouseRegion]s that are visually
-  /// behind it from detecting the pointer, therefore affecting how their
-  /// [onHover], [onEnter], and [onExit] behave.
+  /// Whether this widget should prevent other [MouseRegion]s visually behind it
+  /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
+  /// and [onExit] behave.
   ///
-  /// If [opaque] is true, this object will absorb the mouse pointer so that
-  /// [MouseRegion]s visually behind it will not consider themselves being
-  /// hovered even when the pointer is within their areas.
+  /// If [opaque] is true, this widget will absorb the mouse pointer, and
+  /// prevents this widget's siblings (or any other widgets that are not
+  /// ancestors or descendants of this widgets) from detecting the mouse
+  /// pointer even when the pointer is within their areas.
   ///
-  /// If [opaque] is false, whether the pointer is contained by this mouse
-  /// region will not affect how [MouseRegion]s behind it behave.
+  /// If [opaque] is false, this object will not affect how [MouseRegion]s
+  /// behind it behave, which will detect the mouse pointer as long as the
+  /// pointer is within their areas.
   ///
   /// This defaults to true.
   final bool opaque;
