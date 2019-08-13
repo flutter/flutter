@@ -868,9 +868,9 @@ void main() {
     await tester.pumpWidget(
       CupertinoApp(
         // Also check if the picker respects the theme.
-        theme: CupertinoThemeData(
+        theme: const CupertinoThemeData(
           textTheme: CupertinoTextThemeData(
-            pickerTextStyle: const TextStyle(
+            pickerTextStyle: TextStyle(
               color: Color(0xFF663311),
             ),
           ),
