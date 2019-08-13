@@ -29,16 +29,22 @@ import 'value_listenable_builder.dart';
 /// current animation value. The [builder] is called throughout the animation
 /// for every animation value until [Tween.end] is reached.
 ///
-/// If the [builder] callback's return value contains a subtree that does not
-/// depend on the animation, it's more efficient to build that subtree once
-/// instead of rebuilding it on every animation tick. Such a pre-built subtree
-/// can be provided to the [TweenAnimationBuilder] via the [child] property
-/// and it will pass it back to the [builder] function so that it can be
-/// incorporated into the build.
-///
 /// A provided [onEnd] callback is called whenever an animation completes.
 /// Registering an [onEnd] callback my be useful to trigger an action (like
 /// another animation) at the end of the current animation.
+///
+/// ## Performance optimizations
+///
+/// If your [builder] function contains a subtree that does not depend on the
+/// animation, it's more efficient to build that subtree once instead of
+/// rebuilding it on every animation tick.
+///
+/// If you pass the pre-built subtree as the [child] parameter, the
+/// AnimatedBuilder will pass it back to your builder function so that you
+/// can incorporate it into your build.
+///
+/// Using this pre-built child is entirely optional, but can improve
+/// performance significantly in some cases and is therefore a good practice.
 ///
 /// ## Ownership of the [Tween]
 ///
@@ -87,12 +93,26 @@ import 'value_listenable_builder.dart';
 /// ```
 /// {@end-tool}
 ///
-/// See also:
+/// ## Relationship to [ImplicitlyAnimatedWidget]s and [AnimatedWidget]s
 ///
-///  * [AnimatedBuilder], which builds custom animations that are controlled
-///    by a manually managed [AnimationController].
-///  * [ImplicitlyAnimatedWidget], which is a base class for [Widget]s that
-///    automatically animate any changes to their property values.
+/// The [ImplicitlyAnimatedWidget] has many subclasses that provide animated
+/// versions of regular widgets. These subclasses (like [AnimatedOpacity],
+/// [AnimatedContainer], [AnimatedSize], etc.) animate changes in their
+/// properties smoothly and they are easier to use than this general-purpose
+/// builder. However, [TweenAnimationBuilder] (which itself is a subclass of
+/// [ImplicitlyAnimatedWidget]) is handy for animating any widget property to a
+/// given target value even when the framework (or third-party widget library)
+/// doesn't ship with an animated version of that widget.
+///
+/// Those [ImplicitlyAnimatedWidget]s (including this [TweenAnimationBuilder])
+/// all manage an internal [AnimationController] to drive the animation. If you
+/// want more control over the animation than just setting a target value,
+/// [duration], and [curve], have a look at (subclasses of) [AnimatedWidget]s.
+/// For those, you have to manually manage an [AnimationController] giving you
+/// full control over the animation. An example of an [AnimatedWidget] is the
+/// [AnimatedBuilder], which can be used similarly to this
+/// [TweenAnimationBuilder], but unlike the latter it is powered by a
+/// developer-managed [AnimationController].
 class TweenAnimationBuilder<T> extends ImplicitlyAnimatedWidget {
   /// Creates a [TweenAnimationBuilder].
   ///
