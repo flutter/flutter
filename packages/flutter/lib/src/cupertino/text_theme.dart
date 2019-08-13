@@ -110,7 +110,6 @@ const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 21,
   fontWeight: FontWeight.normal,
-  //letterSpacing: -1.05,
   color: CupertinoColors.black,
 );
 
@@ -121,7 +120,6 @@ const TextStyle _kDefaultDateTimePickerDarkTextStyle = TextStyle(
   fontFamily: '.SF Pro Display',
   fontSize: 21,
   fontWeight: FontWeight.normal,
-  //letterSpacing: -1.05,
   color: CupertinoColors.white,
 );
 

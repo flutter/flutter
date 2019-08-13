@@ -36,9 +36,14 @@ const double _kTimerPickerHalfColumnPadding = 2;
 // The horizontal padding between the timer picker's number label and its
 // corresponding unit label.
 const double _kTimerPickerLabelPadSize = 4.5;
+const double _kTimerPickerLabelFontSize = 17.0;
 
 // The width of each colmn of the countdown time picker.
 const double _kTimerPickerColumnIntrinsicWidth = 106;
+// Unfortunately turning on magnification for the timer picker messes up the label
+// alignment. So we'll have to hard code the font size and turn magnification off
+// for now.
+const double _kTimerPickerNumberLabelFontSize = 23;
 
 
 // The total width of the picker's currently selected number.
@@ -1225,9 +1230,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
             baselineType: TextBaseline.alphabetic,
             child: Text(
               text,
-              textScaleFactor: 17.0 / 23.0,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: _kTimerPickerLabelFontSize,
+                fontWeight: FontWeight.w600
+              ),
               maxLines: 1,
+              softWrap: false,
             ),
           ),
         ),
@@ -1245,15 +1253,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       child: Container(
         width: numberLabelWidth,
         alignment: AlignmentDirectional.centerEnd.resolve(textDirection),
-        child: DefaultTextStyle(
-          overflow: TextOverflow.visible,
-          style: _themeTextStyle(context).copyWith(
-            // Unfortunately turning on magnification messes up the label alignment.
-            // So we'll have to hard code the font size and turn magnification off.
-            fontSize: 23.5,
-          ),
-          child: Text(text, softWrap: false, maxLines: 1, overflow: TextOverflow.visible),
-        ),
+        child: Text(text, softWrap: false, maxLines: 1, overflow: TextOverflow.visible),
       ),
     );
   }
@@ -1432,7 +1432,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   TextStyle _textStyleFrom(BuildContext context) {
     return _themeTextStyle(context).merge(
       const TextStyle(
-        fontSize: 23,
+        fontSize: _kTimerPickerNumberLabelFontSize,
       )
     );
   }
@@ -1449,7 +1449,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     switch (widget.mode) {
       case CupertinoTimerPickerMode.hm:
         totalWidth = _kPickerWidth;
-        // pad the widget to make it as wide as `_kPickerWidth`.
+        // Pad the widget to make it as wide as `_kPickerWidth`.
         final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
           _buildHourColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
@@ -1458,7 +1458,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         break;
       case CupertinoTimerPickerMode.ms:
         totalWidth = _kPickerWidth;
-        // pad the widget to make it as wide as `_kPickerWidth`.
+        // Pad the widget to make it as wide as `_kPickerWidth`.
         final double paddingValue = math.max(0, totalWidth - 2 * _kTimerPickerColumnIntrinsicWidth - 2 * _kTimerPickerHalfColumnPadding);
         columns = <Widget>[
           _buildMinuteColumn(EdgeInsetsDirectional.only(start: paddingValue / 2, end: _kTimerPickerHalfColumnPadding)),
