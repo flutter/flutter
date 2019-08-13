@@ -15,8 +15,8 @@
 #include <lib/fidl/cpp/string.h>
 #include <lib/sys/cpp/service_directory.h>
 #include <lib/syslog/global.h>
+#include <lib/zx/clock.h>
 #include <lib/zx/thread.h>
-#include <lib/zx/time.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
