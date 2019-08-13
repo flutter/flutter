@@ -912,6 +912,41 @@ void main() {
     );
   });
 
+  testWidgets('TimerPicker only changes hour label after scrolling stops', (WidgetTester tester) async {
+    Duration duration;
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 320,
+            height: 216,
+            child: CupertinoTimerPicker(
+              mode: CupertinoTimerPickerMode.hm,
+              initialTimerDuration: const Duration(hours: 2, minutes: 30),
+              onTimerDurationChanged: (Duration d) { duration = d; },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(duration, isNull);
+    expect(find.text('hour'), findsNothing);
+    expect(find.text('hours'), findsOneWidget);
+
+    await tester.drag(find.text('2'), Offset(0, -_kRowOffset.dy));
+    // Duration should change but not the label.
+    expect(duration?.inHours, 1);
+    expect(find.text('hour'), findsNothing);
+    expect(find.text('hours'), findsOneWidget);
+    await tester.pumpAndSettle();
+
+    // Now the label should change.
+    expect(duration?.inHours, 1);
+    expect(find.text('hours'), findsNothing);
+    expect(find.text('hour'), findsOneWidget);
+  });
+
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     int lastSelectedItem;
