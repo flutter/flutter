@@ -657,6 +657,71 @@ void main() {
       );
     }
 
+    testWidgets('Reverse List showOnScreen', (WidgetTester tester) async {
+      const double screenHeight = 400.0;
+      const double screenWidth = 400.0;
+      const double itemHeight = screenHeight / 10.0;
+      const ValueKey<String> centerKey = ValueKey<String>('center');
+
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      tester.binding.window.physicalSizeTestValue = const Size(screenWidth, screenHeight);
+
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+            center: centerKey,
+            reverse: true,
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    10,
+                        (int index) => SizedBox(
+                      height: itemHeight,
+                      child: Text('Item ${-index - 1}'),
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                key: centerKey,
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    1,
+                        (int index) => const SizedBox(
+                      height: itemHeight,
+                      child: Text('Item 0'),
+                    ),
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  List<Widget>.generate(
+                    10,
+                    (int index) => SizedBox(
+                      height: itemHeight,
+                      child: Text('Item ${index + 1}'),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(find.text('Item -1'), findsNothing);
+
+      final RenderBox itemNeg1 =
+        tester.renderObject(find.text('Item -1', skipOffstage: false));
+
+      itemNeg1.showOnScreen(duration: const Duration(seconds: 1));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Item -1'), findsOneWidget);
+    });
+
     testWidgets('in view in inner, but not in outer', (WidgetTester tester) async {
       final ScrollController inner = ScrollController();
       final ScrollController outer = ScrollController();
