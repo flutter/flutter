@@ -968,10 +968,10 @@ enum FocusHighlightStrategy {
   /// kind of input that was received. This is the default.
   automatic,
 
-  /// [FocusManager.highlightMode] Always returns [FocusHighlightMode.touch].
+  /// [FocusManager.highlightMode] always returns [FocusHighlightMode.touch].
   alwaysTouch,
 
-  /// [FocusManager.highlightMode] Always returns [FocusHighlightMode.traditional].
+  /// [FocusManager.highlightMode] always returns [FocusHighlightMode.traditional].
   alwaysTraditional,
 }
 
@@ -1056,8 +1056,7 @@ class FocusManager with DiagnosticableTreeMixin {
   /// interaction mode that they user used.
   ///
   /// If [highlightMode] returns [FocusHighlightMode.touch], then widgets should
-  /// only draw their focus highlight if they are currently focused, and they
-  /// bring up the soft keyboard (e.g. [TextField]) when focused.
+  /// not draw their focus highlight unless they perform text entry.
   ///
   /// If [highlightMode] returns [FocusHighlightMode.traditional], then widgets should
   /// draw their focus highlight whenever they are focused.
@@ -1159,7 +1158,6 @@ class FocusManager with DiagnosticableTreeMixin {
         break;
     }
     if (_lastInteractionWasTouch != newState) {
-      final FocusHighlightMode oldMode = highlightMode;
       _lastInteractionWasTouch = newState;
       _updateHighlightMode();
     }
