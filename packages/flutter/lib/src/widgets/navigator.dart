@@ -17,8 +17,8 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
-import 'routes.dart';
 import 'route_notification_messages.dart';
+import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
