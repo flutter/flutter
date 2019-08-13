@@ -1,4 +1,4 @@
-Signature: c63428134703069cd6bc8be83da66a0d
+Signature: b686bb238b2b79290a0884989c84b58e
 
 UNUSED LICENSES:
 
@@ -444,6 +444,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
@@ -1118,6 +1119,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
@@ -1856,6 +1858,9 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/node.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/semantics_manager.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/credentials_producer.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
@@ -2573,6 +2578,7 @@ FILE: ../../../fuchsia/sdk/linux/device/generic-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/generic-x64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-arm64.json
 FILE: ../../../fuchsia/sdk/linux/device/qemu-x64.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.accessibility.semantics/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth.oldtokens/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.bluetooth.gatt/meta.json
@@ -3135,8 +3141,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/single_threaded_executor.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/images.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/include/lib/images/cpp/images.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/id.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/util/mesh_utils.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/util/mesh_utils.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/view_token_pair.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/svc/include/lib/svc/dir.h
 FILE: ../../../fuchsia/sdk/linux/pkg/sync/include/lib/sync/condition.h
@@ -3331,9 +3335,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/function_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/memfs/include/lib/memfs/memfs.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/commands.cc
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/host_memory.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/commands.h
-FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/host_memory.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/resources.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/include/lib/ui/scenic/cpp/session.h
 FILE: ../../../fuchsia/sdk/linux/pkg/scenic_cpp/resources.cc
