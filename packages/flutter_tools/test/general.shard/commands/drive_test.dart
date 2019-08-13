@@ -266,18 +266,18 @@ void main() {
             .thenReturn(false);
         when(mockUnsupportedDevice.name).thenReturn('mock-web');
         when(mockUnsupportedDevice.id).thenReturn('web-1');
-        when(mockUnsupportedDevice.targetPlatform).thenAnswer((_) => new Future(() => TargetPlatform.web_javascript));
-        when(mockUnsupportedDevice.isLocalEmulator).thenAnswer((_) => new Future(() => false));
-        when(mockUnsupportedDevice.sdkNameAndVersion).thenAnswer((_) => new Future(() => 'html5'));
+        when(mockUnsupportedDevice.targetPlatform).thenAnswer((_) => Future<TargetPlatform>(() => TargetPlatform.web_javascript));
+        when(mockUnsupportedDevice.isLocalEmulator).thenAnswer((_) => Future<bool>(() => false));
+        when(mockUnsupportedDevice.sdkNameAndVersion).thenAnswer((_) => Future<String>(() => 'html5'));
         when(mockDevice.name).thenReturn('mock-android-device');
         when(mockDevice.id).thenReturn('mad-28');
         when(mockDevice.isSupported())
             .thenReturn(true);
         when(mockDevice.isSupportedForProject(any))
             .thenReturn(true);
-        when(mockDevice.targetPlatform).thenAnswer((_) => new Future(() => TargetPlatform.android_x64));
-        when(mockDevice.isLocalEmulator).thenAnswer((_) => new Future(() => false));
-        when(mockDevice.sdkNameAndVersion).thenAnswer((_) => new Future(() => 'sdk-28'));
+        when(mockDevice.targetPlatform).thenAnswer((_) => Future<TargetPlatform>(() => TargetPlatform.android_x64));
+        when(mockDevice.isLocalEmulator).thenAnswer((_) => Future<bool>(() => false));
+        when(mockDevice.sdkNameAndVersion).thenAnswer((_) => Future<String>(() => 'sdk-28'));
         testDeviceManager.addDevice(mockDevice);
         testDeviceManager.addDevice(mockUnsupportedDevice);
 
