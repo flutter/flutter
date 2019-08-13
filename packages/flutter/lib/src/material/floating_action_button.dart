@@ -133,6 +133,7 @@ class FloatingActionButton extends StatelessWidget {
     this.backgroundColor,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
     this.focusElevation,
@@ -173,6 +174,7 @@ class FloatingActionButton extends StatelessWidget {
     this.elevation,
     this.focusElevation,
     this.hoverElevation,
+    this.splashColor,
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
@@ -242,6 +244,11 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
+
+  /// The splash color for this [FloatingActionButton]'s [InkWell].
+  ///
+  /// Defaults to [ThemeData.splashColor] for the current theme.
+  final Color splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
   ///
@@ -410,6 +417,9 @@ class FloatingActionButton extends StatelessWidget {
     final Color hoverColor = this.hoverColor
       ?? floatingActionButtonTheme.hoverColor
       ?? theme.hoverColor;
+    final Color splashColor = this.splashColor
+        ?? floatingActionButtonTheme.splashColor
+        ?? theme.splashColor;
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
@@ -447,6 +457,7 @@ class FloatingActionButton extends StatelessWidget {
       fillColor: backgroundColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       textStyle: textStyle,
       shape: shape,
       clipBehavior: clipBehavior ?? Clip.none,
@@ -480,6 +491,7 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));

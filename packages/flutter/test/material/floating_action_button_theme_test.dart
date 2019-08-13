@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
   test('FloatingActionButtonThemeData copyWith, ==, hashCode basics', () {
     expect(const FloatingActionButtonThemeData(), const FloatingActionButtonThemeData().copyWith());
@@ -31,11 +33,13 @@ void main() {
     expect(_getRawMaterialButton(tester).elevation, 6);
     expect(_getRawMaterialButton(tester).highlightElevation, 12);
     expect(_getRawMaterialButton(tester).shape, const CircleBorder());
+    expect(_getRawMaterialButton(tester).splashColor, ThemeData().splashColor);
   });
 
   testWidgets('FloatingActionButtonThemeData values are used when no FloatingActionButton properties are specified', (WidgetTester tester) async {
     const Color backgroundColor = Color(0xBEEFBEEF);
     const Color foregroundColor = Color(0xFACEFACE);
+    const Color splashColor = Color(0xCAFEFEED);
     const double elevation = 7;
     const double disabledElevation = 1;
     const double highlightElevation = 13;
@@ -46,6 +50,7 @@ void main() {
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
+          splashColor: splashColor,
           elevation: elevation,
           disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
@@ -66,11 +71,13 @@ void main() {
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
     expect(_getRawMaterialButton(tester).shape, shape);
+    expect(_getRawMaterialButton(tester).splashColor, splashColor);
   });
 
   testWidgets('FloatingActionButton values take priority over FloatingActionButtonThemeData values when both properties are specified', (WidgetTester tester) async {
-    const Color backgroundColor = Color(0xBEEFBEEF);
-    const Color foregroundColor = Color(0xFACEFACE);
+    const Color backgroundColor = Color(0x00000001);
+    const Color foregroundColor = Color(0x00000002);
+    const Color splashColor = Color(0x00000003);
     const double elevation = 7;
     const double disabledElevation = 1;
     const double highlightElevation = 13;
@@ -79,8 +86,9 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData().copyWith(
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xCAFECAFE),
-          foregroundColor: Color(0xFEEDFEED),
+          backgroundColor: Color(0x00000004),
+          foregroundColor: Color(0x00000005),
+          splashColor: Color(0x00000006),
           elevation: 23,
           disabledElevation: 11,
           highlightElevation: 43,
@@ -93,6 +101,7 @@ void main() {
           child: const Icon(Icons.add),
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
+          splashColor: splashColor,
           elevation: elevation,
           disabledElevation: disabledElevation,
           highlightElevation: highlightElevation,
@@ -107,6 +116,7 @@ void main() {
     expect(_getRawMaterialButton(tester).disabledElevation, disabledElevation);
     expect(_getRawMaterialButton(tester).highlightElevation, highlightElevation);
     expect(_getRawMaterialButton(tester).shape, shape);
+    expect(_getRawMaterialButton(tester).splashColor, splashColor);
   });
 
   testWidgets('FloatingActionButton foreground color uses iconAccentTheme if no widget or widget theme color is specified', (WidgetTester tester) async {
