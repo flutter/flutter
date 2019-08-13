@@ -31,6 +31,8 @@
 #   - FLUTTER_HOME: the absolute path to the 'flutter' directory
 #   - ENGINE_HOME: the absolute path to the 'engine/src' directory
 #   - DART_SDK_HOME: the absolute path to the root of a Dart SDK project
+#   - ENGINE_FORK: the name of the GitHub fork to use (e.g., bkonyi/engine or
+#     flutter/engine)
 #
 # Finally, the following pip commands need to be run:
 #   - `pip install gitpython` for GitPython (git)
@@ -64,6 +66,7 @@ FLAG_skip_wait_for_artifacts = False
 CURRENT_SUBPROCESS = None
 CURRENT_PR = None
 GITHUB_ENGINE_REPO = None
+GITHUB_ENGINE_FORK = None
 
 def run_dart_roll_helper(most_recent_commit, extra_args):
   global CURRENT_SUBPROCESS
@@ -184,6 +187,13 @@ def clean_and_update_repo(local_repo):
   local_repo.git.checkout('master')
   local_repo.git.pull()
 
+def clean_and_update_forked_repo(local_repo):
+  local_repo.git.checkout('.')
+  local_repo.git.clean('-xdf')
+  local_repo.git.fetch('upstream')
+  local_repo.git.checkout('master')
+  local_repo.git.merge('upstream/master')
+
 def clean_build_outputs():
   print_status('Cleaning build directory...')
   args = ['rm', '-rf',
@@ -223,9 +233,10 @@ def create_pull_request(github_repo, local_repo, title, branch):
   commit = get_most_recent_commit(local_repo)
   description = PULL_REQUEST_DESCRIPTION + '\n\n' + commit.message
   try:
-    return github_repo.create_pull(title, description, 'master', branch)
+    return github_repo.create_pull(title, description,
+                                   'master', '{}:{}'.format('bkonyi', branch))
   except GithubException as e:
-    delete_remote_branch(github_repo, branch)
+    delete_remote_branch(GITHUB_ENGINE_FORK, branch)
     raise DartAutorollerException(e.data['errors'][0]['message'])
   finally:
     print_status('Cleaning up local branch: {}'.format(branch))
@@ -239,7 +250,7 @@ def cleanup_pr(github_repo, pull_request, reason):
   pull_request.create_issue_comment(msg)
   pull_request.edit(state='closed')
   print_error(msg)
-  delete_remote_branch(github_repo, pull_request.head.ref)
+  delete_remote_branch(GITHUB_ENGINE_FORK, pull_request.head.ref)
 
 
 def merge_on_success(github_repo, local_repo, pull_request):
@@ -259,7 +270,7 @@ def merge_on_success(github_repo, local_repo, pull_request):
   else:
     cleanup_pr(github_repo, pull_request, 'Checks failed')
     sys.exit(1)
-  delete_remote_branch(github_repo, pull_request.head.ref)
+  delete_remote_branch(GITHUB_ENGINE_FORK, pull_request.head.ref)
 
 
 # TODO(bkonyi): Check to see if the Flutter build is green for flutter/flutter
@@ -339,6 +350,7 @@ def main():
   global CURRENT_PR
   global FLAG_skip_wait_for_artifacts
   global GITHUB_ENGINE_REPO
+  global GITHUB_ENGINE_FORK
 
   parser = argparse.ArgumentParser(description='Dart SDK autoroller for Flutter.')
   parser.add_argument('--dart-sdk-revision',
@@ -376,6 +388,7 @@ def main():
   dart_sdk_path  = os.getenv('DART_SDK_HOME')
   flutter_path   = os.getenv('FLUTTER_HOME')
   engine_path    = os.getenv('ENGINE_HOME')
+  engine_fork    = os.getenv('ENGINE_FORK')
   local_dart_sdk_repo       = Repo(dart_sdk_path)
   local_flutter_repo        = Repo(flutter_path)
   local_engine_flutter_repo = Repo(os.path.join(engine_path, 'flutter'))
@@ -385,6 +398,7 @@ def main():
 
   github = Github(github_api_key)
   GITHUB_ENGINE_REPO  = github.get_repo('flutter/engine')
+  GITHUB_ENGINE_FORK  = github.get_repo(engine_fork)
   github_flutter_repo = github.get_repo('flutter/flutter')
 
   atexit.register(cleanup_children)
@@ -395,7 +409,7 @@ def main():
     clean_build_outputs()
     clean_and_update_repo(local_dart_sdk_repo)
     clean_and_update_repo(local_flutter_repo)
-    clean_and_update_repo(local_engine_flutter_repo)
+    clean_and_update_forked_repo(local_engine_flutter_repo)
   else:
     print_warning('Skipping cleaning and updating of local trees')
 
