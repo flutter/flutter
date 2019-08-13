@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart';
@@ -95,38 +96,45 @@ abstract class GoldenFileComparator {
 
     int pixelDiffCount = 0;
     final int totalPixels = width * height;
-    final int transparentPixel = Color.fromRgba(0, 0, 0, 0);
+    final Image invertedMaster = invert(Image.from(masterImage));
+    final Image invertedTest = invert(Image.from(testImage));
 
-    final Map<ColorChannels, Image> diffs = <ColorChannels, Image>{};
-    for (ColorChannels channel in ColorChannels.values)
-      diffs[channel] = Image(width, height);
+    // Colors
+    final int transparentPixel = Color.fromRgba(0, 0, 0, 0);
+    final int diffPixel = Color.fromRgba(34, 64, 255, 255);
+
+    final Map<String, Image> diffs = <String, Image>{
+      'masterImage' : masterImage,
+      'testImage' : testImage,
+      'maskedDiff' : Image.from(testImage),
+      'isolatedDiff' : Image(width, height),
+    };
 
     for (int x = 0; x < width; x++) {
       for (int y =0; y < height; y++) {
         final int testPixel = testImage.getPixel(x, y);
         final int masterPixel = masterImage.getPixel(x, y);
 
-        final int redDiff = (getRed(testPixel) - getRed(masterPixel)).abs();
-        diffs[ColorChannels.red].setPixel(x, y, redDiff == 0 ? transparentPixel : redDiff);
+        int pixel = (getRed(testPixel) - getRed(masterPixel)).abs()
+          + (getGreen(testPixel) - getGreen(masterPixel)).abs()
+          + (getBlue(testPixel) - getBlue(masterPixel)).abs();
+        pixel = pixel != 0 ? diffPixel : transparentPixel;
+        diffs['isolatedDiff'].setPixel(x, y, pixel);
 
-        final int greenDiff = (getGreen(testPixel) - getGreen(masterPixel)).abs();
-        diffs[ColorChannels.green].setPixel(x, y, greenDiff == 0 ? transparentPixel : greenDiff);
-
-        final int blueDiff = (getBlue(testPixel) - getBlue(masterPixel)).abs();
-        diffs[ColorChannels.blue].setPixel(x, y, blueDiff == 0 ? transparentPixel : blueDiff);
-
-        final int all = redDiff + greenDiff + blueDiff;
-        diffs[ColorChannels.all].setPixel(x, y, all == 0 ? transparentPixel : all);
-
-        if (all != 0 )
+        if (pixel != 0 ) {
+          final int invertedMasterPixel = invertedMaster.getPixel(x, y);
+          final int invertedTestPixel = invertedTest.getPixel(x, y);
+          final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
+          diffs['maskedDiff'].setPixel(x, y, maskPixel);
           pixelDiffCount++;
+        }
       }
     }
 
     if (pixelDiffCount > 0) {
       return ComparisonResult(
         false,
-        failMessage: 'Pixel test failed, ${pixelDiffCount/totalPixels}% diff detected.',
+        failMessage: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
         fileOutput: diffs,
       );
     }
@@ -185,27 +193,12 @@ set goldenFileComparator(GoldenFileComparator value) {
 bool autoUpdateGoldenFiles = false;
 
 /// TODO Doc
-enum ColorChannels {
-  /// TODO Doc
-  red,
-
-  /// TODO Doc
-  green,
-
-  /// TODO Doc
-  blue,
-
-  /// TODO Doc
-  all
-}
-
-/// TODO Doc
 class ComparisonResult {
   ///TODO Doc
   ComparisonResult(
     this.passed, {
     String failMessage,
-    Map<ColorChannels, Image> fileOutput,
+    Map<String, Image> fileOutput,
   }) : error = failMessage,
        diffs = fileOutput;
 
@@ -216,7 +209,7 @@ class ComparisonResult {
   final String error;
 
   /// TODO Doc
-  final Map<ColorChannels, Image> diffs;
+  final Map<String, Image> diffs;
 }
 
 /// Placeholder comparator that is set as the value of [goldenFileComparator]
@@ -312,12 +305,13 @@ class LocalFileComparator extends GoldenFileComparator {
     if (!result.passed) {
       String additionalFeedback = '';
       if(result.diffs != null) {
-        result.diffs.forEach((ColorChannels channel, Image image) {
-          final File output = _getFile(_getOutputUri(channel, golden));
+        print(basedir);
+        result.diffs.forEach((String name, Image image) {
+          final File output = _getFailureFile(name, golden);
           output.parent.createSync(recursive: true);
           output.writeAsBytesSync(encodePng(image));
         });
-        // Check that this is the right place.
+
         additionalFeedback += '\nFailure feedback can be found at ${basedir.path.toString()}';
       }
       throw test_package.TestFailure('Golden "$golden": ' + result.error + additionalFeedback);
@@ -337,11 +331,20 @@ class LocalFileComparator extends GoldenFileComparator {
   }
 
   /// TODO Doc
-  Uri _getOutputUri(ColorChannels channel, Uri golden) {
+  File _getFailureFile(String name, Uri golden) {
+//    Directory filures = Directory('failures').create(recursive: true);
     // split by separator
     // append output directory
     // append to test file name (last path segment) to create new file name
     // join and return
-    return golden;
+//    final String goldenPath = golden.path;
+
+    final String fileName = golden.pathSegments[0];
+    final String testName = fileName.split(path.extension(fileName))[0]
+      + '_'
+      + name
+      + '.png';
+    return File(_path.join('failures', testName));
+//    return Uri.parse(testName);
   }
 }
