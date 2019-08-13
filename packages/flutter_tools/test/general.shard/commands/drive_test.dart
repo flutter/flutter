@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -261,9 +262,22 @@ void main() {
         mockUnsupportedDevice = MockDevice();
         when(mockUnsupportedDevice.isSupportedForProject(any))
             .thenReturn(false);
+        when(mockUnsupportedDevice.isSupported())
+            .thenReturn(false);
+        when(mockUnsupportedDevice.name).thenReturn('mock-web');
+        when(mockUnsupportedDevice.id).thenReturn('web-1');
+        when(mockUnsupportedDevice.targetPlatform).thenAnswer((_) => new Future(() => TargetPlatform.web_javascript));
+        when(mockUnsupportedDevice.isLocalEmulator).thenAnswer((_) => new Future(() => false));
+        when(mockUnsupportedDevice.sdkNameAndVersion).thenAnswer((_) => new Future(() => 'html5'));
+        when(mockDevice.name).thenReturn('mock-android-device');
+        when(mockDevice.id).thenReturn('mad-28');
+        when(mockDevice.isSupported())
+            .thenReturn(true);
         when(mockDevice.isSupportedForProject(any))
             .thenReturn(true);
-        when(mockDevice.name).thenReturn('mock-android-device');
+        when(mockDevice.targetPlatform).thenAnswer((_) => new Future(() => TargetPlatform.android_x64));
+        when(mockDevice.isLocalEmulator).thenAnswer((_) => new Future(() => false));
+        when(mockDevice.sdkNameAndVersion).thenAnswer((_) => new Future(() => 'sdk-28'));
         testDeviceManager.addDevice(mockDevice);
         testDeviceManager.addDevice(mockUnsupportedDevice);
 
