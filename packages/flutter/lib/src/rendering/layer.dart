@@ -14,46 +14,6 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 
-/// Data collected during a layer hit test.
-class LayerHitTestEntry<T> {
-  /// Creates a hit test entry.
-  LayerHitTestEntry(this.value);
-
-  /// The [HitTestTarget] encountered during the hit test.
-  final T value;
-
-  @override
-  String toString() => '$runtimeType($value)';
-}
-
-/// The result of performing a hit test on layers.
-class LayerHitTestResult<T> {
-  /// Creates an empty layer hit test result.
-  LayerHitTestResult()
-     : _path = <LayerHitTestEntry<T>>[];
-
-  /// An unmodifiable list of [LayerHitTestEntry] objects recorded during the
-  /// hit test, in the visual order from front to behind.
-  ///
-  /// The path starts with the most specific and visually front-most entry,
-  /// typically the one at the leaf of the layer tree and the one added the
-  /// latest among its siblings, then proceeds onto the visually behind and less
-  /// specific entries.
-  Iterable<LayerHitTestEntry<T>> get path => _path;
-  final List<LayerHitTestEntry<T>> _path;
-
-  /// Add a [LayerHitTestEntry] to the path.
-  ///
-  /// The new entry is added at the end of the path, which means entries should
-  /// be added in order from visually behind to front.
-  void add(LayerHitTestEntry<T> entry) {
-    _path.add(entry);
-  }
-
-  @override
-  String toString() => 'LayerHitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
-}
-
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
@@ -194,10 +154,10 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [hitTest], the default implementation of this method.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   Iterable<S> findAll<S>(Offset regionOffset) {
-    final LayerHitTestResult<S> result = LayerHitTestResult<S>();
+    final List<S> result = <S>[];
     hitTest<S>(result, regionOffset: regionOffset);
-    return result.path.map((LayerHitTestEntry<S> entry) {
-      return entry.value;
+    return result.map((S entry) {
+      return entry;
     });
   }
 
@@ -210,7 +170,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// (preventing non-ancestral layers below this one from being hit).
   /// Returns false if the hit can continue to other non-ancestral objects
   /// behind this one.
-  bool hitTest<S>(LayerHitTestResult<S> result, { @required Offset regionOffset });
+  bool hitTest<S>(List<S> result, { @required Offset regionOffset });
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -333,7 +293,7 @@ class PictureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -405,7 +365,7 @@ class TextureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -444,7 +404,7 @@ class PlatformViewLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -521,7 +481,7 @@ class PerformanceOverlayLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
 }
 
 /// A composited layer that has a list of children.
@@ -677,7 +637,7 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     for (Layer child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.hitTest<S>(result, regionOffset: regionOffset);
       if (isAbsorbed)
@@ -911,7 +871,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     return super.hitTest<S>(result, regionOffset: regionOffset - offset);
   }
 
@@ -1065,7 +1025,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     if (!clipRect.contains(regionOffset))
       return false;
     return super.hitTest<S>(result, regionOffset: regionOffset);
@@ -1146,7 +1106,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     if (!clipRRect.contains(regionOffset))
       return false;
     return super.hitTest<S>(result, regionOffset: regionOffset);
@@ -1227,7 +1187,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     if (!clipPath.contains(regionOffset))
       return false;
     return super.hitTest<S>(result, regionOffset: regionOffset);
@@ -1362,7 +1322,7 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null) {
       return false;
@@ -1680,7 +1640,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     if (!clipPath.contains(regionOffset))
       return false;
     return super.hitTest<S>(result, regionOffset: regionOffset);
@@ -1800,7 +1760,7 @@ class LeaderLayer extends ContainerLayer {
   S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     return super.hitTest<S>(result, regionOffset: regionOffset - offset);
   }
 
@@ -1938,7 +1898,7 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     if (link.leader == null) {
       if (showWhenUnlinked)
         return super.hitTest(result, regionOffset: regionOffset - unlinkedOffset);
@@ -2161,7 +2121,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     return null;
   }
 
-  bool _hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool _hitTest<S>(List<S> result, {Offset regionOffset}) {
     bool isAbsorbed = super.hitTest(result, regionOffset: regionOffset);
     if (size != null && !(offset & size).contains(regionOffset)) {
       return isAbsorbed;
@@ -2169,14 +2129,14 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     if (T == S) {
       isAbsorbed = true;
       final Object untypedValue = value;
-      final LayerHitTestEntry<S> typedEntry = LayerHitTestEntry<S>(untypedValue);
+      final S typedEntry = untypedValue;
       result.add(typedEntry);
     }
     return isAbsorbed;
   }
 
   @override
-  bool hitTest<S>(LayerHitTestResult<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
     return _hitTest(result, regionOffset: regionOffset) && opaque;
   }
 

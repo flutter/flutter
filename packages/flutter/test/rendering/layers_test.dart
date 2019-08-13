@@ -476,10 +476,10 @@ void main() {
       1, size: const Size(10, 10), opaque: true);
     root.append(child1);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: position);
     expect(absorbed, isTrue);
-    expect(_pathToValues(result.path), <int>[1]);
+    expect(result, <int>[1]);
   });
 
   test('OffsetLayer.hitTest respects offset (negative)', () {
@@ -492,10 +492,10 @@ void main() {
       1, size: const Size(10, 10), opaque: true);
     root.append(child1);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: position);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[]);
+    expect(result, <int>[]);
   });
 
   test('AnnotatedRegionLayer.hitTest should return its descendents\' value froms front to back', () {
@@ -522,10 +522,10 @@ void main() {
     final ContainerLayer child21 = AnnotatedRegionLayer<int>(21);
     child2.append(child21);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[21, 2, 11, 1, 0]);
+    expect(result, <int>[21, 2, 11, 1, 0]);
   });
 
   test('AnnotatedRegionLayer.hitTest should only add to the list when type matches', () {
@@ -552,10 +552,10 @@ void main() {
     final ContainerLayer child21 = AnnotatedRegionLayer<double>(21);
     child2.append(child21);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[2, 11]);
+    expect(result, <int>[2, 11]);
   });
 
   test('AnnotatedRegionLayer.hitTest should respect size and offset, '
@@ -590,10 +590,10 @@ void main() {
       21, size: const Size(60, 10));
     child2.append(child21);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: position);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[21, 11, 1, 0]);
+    expect(result, <int>[21, 11, 1, 0]);
   });
 
   test('AnnotatedRegionLayer.hitTest when opaque should stop at the first child '
@@ -615,10 +615,10 @@ void main() {
     final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
     root.append(child3);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
     expect(absorbed, isTrue);
-    expect(_pathToValues(result.path), <int>[3, 2, 0]);
+    expect(result, <int>[3, 2, 0]);
   });
 
   test('AnnotatedRegionLayer.hitTest when translucent should stop at the first '
@@ -640,10 +640,10 @@ void main() {
     final ContainerLayer child3 = AnnotatedRegionLayer<int>(3);
     root.append(child3);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: Offset.zero);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[3, 2, 0]);
+    expect(result, <int>[3, 2, 0]);
   });
 
   test('AnnotatedRegionLayer.hitTest should not change the return value if it '
@@ -663,13 +663,9 @@ void main() {
       1, size: const Size(100, 10), opaque: false);
     root.append(child1);
 
-    final LayerHitTestResult<int> result = LayerHitTestResult<int>();
+    final List<int> result = <int>[];
     final bool absorbed = root.hitTest(result, regionOffset: position);
     expect(absorbed, isFalse);
-    expect(_pathToValues(result.path), <int>[1]);
+    expect(result, <int>[1]);
   });
-}
-
-List<S> _pathToValues<S>(Iterable<LayerHitTestEntry<S>> path) {
-  return path.map((LayerHitTestEntry<S> entry) => entry.value).toList();
 }
