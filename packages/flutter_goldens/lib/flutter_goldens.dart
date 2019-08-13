@@ -155,15 +155,6 @@ class FlutterGoldensRepositoryFileComparator extends FlutterGoldenFileComparator
     final List<int> goldenBytes = await goldenFile.readAsBytes();
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
     return result.passed;
-//    if (goldenBytes.length != imageBytes.length) {
-//      return false;
-//    }
-//    for (int i = 0; i < goldenBytes.length; i++) {
-//      if (goldenBytes[i] != imageBytes[i]) {
-//        return false;
-//      }
-//    }
-//    return true;
   }
 
   /// Decides based on the current platform whether goldens tests should be
