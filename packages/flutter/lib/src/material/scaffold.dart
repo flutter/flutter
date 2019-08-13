@@ -968,6 +968,7 @@ class Scaffold extends StatefulWidget {
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
     this.drawerScrimColor,
+    this.drawerEdgeDragWidth,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
@@ -1139,6 +1140,16 @@ class Scaffold extends StatefulWidget {
 
   /// {@macro flutter.material.drawer.dragStartBehavior}
   final DragStartBehavior drawerDragStartBehavior;
+
+  /// The width of the area within which a horizontal swipe will open the
+  /// drawer.
+  ///
+  /// By default, the value used is 20.0 added to the padding edge of
+  /// `MediaQuery.of(context).padding` that corresponds to [alignment].
+  /// This ensures that the drag area for notched devices is not obscured. For
+  /// example, if `TextDirection.of(context)` is set to [TextDirection.ltr],
+  /// 20.0 will be added to `MediaQuery.of(context).padding.left`.
+  final double drawerEdgeDragWidth;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -1984,6 +1995,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -2007,6 +2019,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
           scrimColor: widget.drawerScrimColor,
+          edgeDragWidth: widget.drawerEdgeDragWidth,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching

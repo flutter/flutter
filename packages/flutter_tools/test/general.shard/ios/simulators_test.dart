@@ -438,6 +438,12 @@ void main() {
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
     });
+
+    testUsingContext('sdkMajorVersion defaults to 11 when sdkNameAndVersion is junk', () async {
+      final IOSSimulator iosSimulatorA = IOSSimulator('x', name: 'Testo', simulatorCategory: 'NaN');
+
+      expect(await iosSimulatorA.sdkMajorVersion, 11);
+    });
   });
 
   group('startApp', () {
