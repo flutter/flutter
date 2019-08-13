@@ -46,11 +46,6 @@ const double _kTimerPickerColumnIntrinsicWidth = 106;
 const double _kTimerPickerNumberLabelFontSize = 23;
 
 
-// The total width of the picker's currently selected number.
-// On iOS 13 beta the actual number is 29.5.
-//const double _kTimerPickerNumberLabelWidth = 30;
-
-
 TextStyle _themeTextStyle(BuildContext context) {
   return CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
 }
@@ -1430,11 +1425,12 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   TextStyle _textStyleFrom(BuildContext context) {
-    return _themeTextStyle(context).merge(
-      const TextStyle(
-        fontSize: _kTimerPickerNumberLabelFontSize,
-      )
-    );
+    return CupertinoTheme.of(context).textTheme
+      .pickerTextStyle.merge(
+        const TextStyle(
+          fontSize: _kTimerPickerNumberLabelFontSize,
+        )
+      );
   }
 
   @override
@@ -1475,22 +1471,29 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         ];
         break;
     }
-
+    final CupertinoThemeData themeData = CupertinoTheme.of(context);
     return MediaQuery(
       data: const MediaQueryData(
         // The native iOS picker's text scaling is fixed, so we will also fix it
         // as well in our picker.
         textScaleFactor: 1.0,
       ),
-      child: Align(
-        alignment: widget.alignment,
-        child: Container(
-          color: _kBackgroundColor,
-          width: totalWidth,
-          height: _kPickerHeight,
-          child: DefaultTextStyle(
-            style: _textStyleFrom(context),
-            child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+      child: CupertinoTheme(
+        data: themeData.copyWith(
+          textTheme: themeData.textTheme.copyWith(
+            pickerTextStyle: _textStyleFrom(context),
+          )
+        ),
+        child: Align(
+          alignment: widget.alignment,
+          child: Container(
+            color: _kBackgroundColor,
+            width: totalWidth,
+            height: _kPickerHeight,
+            child: DefaultTextStyle(
+              style: _textStyleFrom(context),
+              child: Row(children: columns.map((Widget child) => Expanded(child: child)).toList(growable: false)),
+            ),
           ),
         ),
       ),
