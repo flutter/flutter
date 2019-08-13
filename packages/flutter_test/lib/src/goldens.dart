@@ -75,7 +75,10 @@ abstract class GoldenFileComparator {
     if (identical(test, master))
       return ComparisonResult(true);
 
-    if (test == null || master == null) {
+    if (test == null
+      || master == null
+      || test.isEmpty
+      || master.isEmpty) {
       return ComparisonResult(
         false,
         failMessage: 'Pixel test failed, null image provided.'
@@ -84,6 +87,10 @@ abstract class GoldenFileComparator {
 
     final Image testImage = decodePng(test);
     final Image masterImage = decodePng(master);
+
+    assert(testImage != null);
+    assert(masterImage != null);
+
     final int width = testImage.width;
     final int height = testImage.height;
 
@@ -308,15 +315,17 @@ class LocalFileComparator extends GoldenFileComparator {
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
 
     if (!result.passed) {
-      final Map<String, Image> diffs = result.diffs;
-      diffs.forEach((String name, Image image) {
-        final File output = _getFailureFile(name, golden);
-        output.parent.createSync(recursive: true);
-        output.writeAsBytesSync(encodePng(image));
-      });
-
-      throw test_package.TestFailure('Golden "$golden": ${result.error}'
-        '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}');
+      String additionalFeedback = '';
+      if (result.diffs != null) {
+        additionalFeedback = '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}';
+        final Map<String, Image> diffs = result.diffs;
+        diffs.forEach((String name, Image image) {
+          final File output = _getFailureFile(name, golden);
+          output.parent.createSync(recursive: true);
+          output.writeAsBytesSync(encodePng(image));
+        });
+      }
+      throw test_package.TestFailure('Golden "$golden": ${result.error}$additionalFeedback');
     }
     return result.passed;
   }
