@@ -6,11 +6,8 @@ import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
-import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -162,84 +159,6 @@ void main() {
     //     throwsA(isInstanceOf<Exception>()));
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
-  }));
-
-  test('MacOSAotAssembly requires BuildMode', () => testbed.run(() async {
-    expect(const MacOSAotAssembly().build(<File>[], environment..defines.remove(kBuildMode)),
-        throwsA(isInstanceOf<MissingDefineException>()));
-  }));
-
-  test('MacOSAotAssembly requires TargePlatform', () => testbed.run(() async {
-    expect(const MacOSAotAssembly().build(<File>[], environment..defines.remove(kTargetPlatform)),
-        throwsA(isInstanceOf<MissingDefineException>()));
-  }));
-
-  test('MacOSAotAssembly requires TargetPlatform.darwin_x64', () => testbed.run(() async {
-    expect(const MacOSAotAssembly().build(<File>[], environment..defines[kTargetPlatform] = 'android_arm'),
-        throwsA(isInstanceOf<Exception>()));
-  }));
-
-  test('MacOSAotAssembly requires BuildMode.profile or BuildMode.release', () => testbed.run(() async {
-    expect(const MacOSAotAssembly().build(<File>[], environment..defines[kBuildMode] = 'debug'),
-        throwsA(isInstanceOf<Exception>()));
-  }));
-
-  test('MacOSAotAssembly invokes gen_snapshot and clang with correct arguments', () => testbed.run(() async {
-    fs.file('.packages').writeAsStringSync('''
-foo:lib/
-sky_engine:/
-''');
-    fs.file(environment.buildDir.childFile('app.dill')).createSync(recursive: true);
-    fs.file(fs.path.join('lib', 'ui', 'ui.dart')).createSync(recursive: true);
-    fs.file(fs.path.join('sdk_ext', 'vmservice_io.dart')).createSync(recursive: true);
-    when(genSnapshot.run(
-      snapshotType: anyNamed('snapshotType'),
-      iosArch: IOSArch.x86_64,
-      additionalArgs: <String>[
-        '--deterministic',
-        '--snapshot_kind=app-aot-assembly',
-        '--assembly=/macos/Flutter/ephemeral/snapshot_assembly.S',
-        environment.buildDir.childFile('app.dill').path,
-      ],
-    )).thenAnswer((Invocation _) async {
-      return 0;
-    });
-    when(xcode.cc(<String>[
-      '-arch', 'x86_64',
-      '-c', '/macos/Flutter/ephemeral/snapshot_assembly.S',
-      '-o', '/macos/Flutter/ephemeral/snapshot_assembly.o'
-    ])).thenAnswer((Invocation _) async {
-      return RunResult(FakeProcessResult()..exitCode = 0, _.positionalArguments.first);
-    });
-    when(xcode.clang(<String>[
-      '-arch', 'x86_64',
-      '-dynamiclib',
-      '-Xlinker',
-      '-rpath',
-      '-Xlinker',
-      '@executable_path/Frameworks',
-      '-Xlinker',
-      '-rpath',
-      '-Xlinker',
-      '@loader_path/Frameworks',
-      '-install_name',
-      '@rpath/App.framework/App',
-      '-o', '/macos/Flutter/ephemeral/App.framework/App',
-      '/macos/Flutter/ephemeral/snapshot_assembly.o',
-    ])).thenAnswer((Invocation _) async {
-      return RunResult(FakeProcessResult()..exitCode = 0, _.positionalArguments.first);
-    });
-    when(xcode.dsymutil(<String>[
-      '/macos/Flutter/ephemeral/App.framework/App',
-      '-o', '/macos/Flutter/ephemeral/App.framework.dSYM.noindex',
-    ])).thenAnswer((Invocation _) async {
-      return RunResult(FakeProcessResult()..exitCode = 0, _.positionalArguments.first);
-    });
-
-    await const MacOSAotAssembly().build(<File>[], environment..defines[kBuildMode] = 'release');
-  }, overrides: <Type, Generator>{
-    GenSnapshot: () => MockGenSnapshot(),
-    Xcode: () => MockXCode(),
   }));
 }
 

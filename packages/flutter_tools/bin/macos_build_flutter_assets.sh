@@ -68,7 +68,6 @@ build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
 build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
-    ${track_widget_creation_flag}                                           \
     ${flutter_engine_flag}                                                  \
     ${local_engine_flag}                                                    \
     assemble                                                                \

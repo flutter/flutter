@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
-import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
@@ -14,7 +15,6 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../build_system.dart';
-import '../exceptions.dart';
 import 'dart.dart';
 
 const String _kOutputPrefix = '{PROJECT_DIR}/macos/Flutter/ephemeral/FlutterMacOS.framework';
@@ -125,61 +125,6 @@ class UnpackMacOS extends Target {
   }
 }
 
-/// Compile an App.framework for a macOS target device.
-class MacOSAotAssembly extends Target {
-  const MacOSAotAssembly();
-
-  @override
-  String get name => 'macos_aot_assembly';
-
-  @override
-  Future<void> build(List<File> inputFiles, Environment environment) async {
-    final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: false);
-    final String outputPath = fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral');
-    if (environment.defines[kBuildMode] == null) {
-      throw MissingDefineException(kBuildMode, 'macos_aot_assembly');
-    }
-    if (environment.defines[kTargetPlatform] == null) {
-      throw MissingDefineException(kTargetPlatform, 'macos_aot_assembly');
-    }
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    if (targetPlatform != TargetPlatform.darwin_x64) {
-      throw Exception('macos_aot_assembly is only supported for iOS application.s');
-    }
-    if (buildMode == BuildMode.debug) {
-      throw Exception('macos_aot_assembly is only supported in profile or release mode.');
-    }
-    final int snapshotExitCode = await snapshotter.build(
-      platform: targetPlatform,
-      buildMode: buildMode,
-      mainPath: environment.buildDir.childFile('app.dill').path,
-      packagesPath: environment.projectDir.childFile('.packages').path,
-      outputPath: outputPath,
-      iosArch: IOSArch.x86_64,
-      bitcode: false,
-    );
-    if (snapshotExitCode != 0) {
-      throw Exception('AOT snapshotter exited with code $snapshotExitCode');
-    }
-  }
-
-  @override
-  List<Target> get dependencies => const <Target>[
-    KernelSnapshot(),
-  ];
-
-  @override
-  List<Source> get inputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/app.dill')
-  ];
-
-  @override
-  List<Source> get outputs => <Source>[
-    const Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App')
-  ];
-}
-
 /// Create an App.framework for debug macOS targets.
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
@@ -195,31 +140,37 @@ class DebugMacOSFramework extends Target {
   Future<void> build(List<File> inputFiles, Environment environment) async {
     final File outputFile = fs.file(fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral', 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
-    // TODO(jonahwilliams): rewrite this in dart.
-    final ProcessResult processResult = await processManager.run(<String>[
-      environment.flutterRootDir
-        .childDirectory('packages')
-        .childDirectory('flutter_tools')
-        .childDirectory('bin')
-        .childFile('hack_script.sh').path,
-    ], runInShell: true);
-    if (processResult.exitCode != 0) {
+    final File debugApp = environment.buildDir.childFile('debug_app.cc')
+        ..writeAsStringSync(r'''
+static const int Moo = 88;
+''');
+    final RunResult result = await xcode.clang(<String>[
+      '-x',
+      'c',
+      debugApp.path,
+      '-arch', 'x86_64',
+      '-dynamiclib',
+      '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
+      '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
+      '-install_name', '@rpath/App.framework/App',
+      '-o', 'macos/Flutter/ephemeral/App.framework/App',
+    ]);
+    if (result.exitCode != 0) {
       throw Exception('Failed to compile debug App.framework');
     }
   }
 
   @override
-  List<Target> get dependencies => const <Target>[
-    UnpackMacOS(),
-  ];
+  List<Target> get dependencies => const <Target>[];
 
   @override
   List<Source> get inputs => const <Source>[
-    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/bin/hack_script.sh'),
+    Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
+    Source.pattern('{BUILD_DIR}/debug_app.cc'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
   ];
 }
@@ -296,6 +247,7 @@ class DebugBundleFlutterAssets extends Target {
   List<Target> get dependencies => const <Target>[
     KernelSnapshot(),
     DebugMacOSFramework(),
+    UnpackMacOS(),
   ];
 
   @override

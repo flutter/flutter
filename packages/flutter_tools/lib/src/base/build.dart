@@ -130,7 +130,7 @@ class AOTSnapshotter {
     }
 
     final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
+    if (platform == TargetPlatform.ios) {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
@@ -197,8 +197,8 @@ class AOTSnapshotter {
 
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
-    if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
-      final RunResult result = await _buildFramework(
+    if (platform == TargetPlatform.ios) {
+      final RunResult result = await _buildIosFramework(
         iosArch: iosArch,
         assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
         outputPath: outputDir.path,
@@ -212,19 +212,15 @@ class AOTSnapshotter {
 
   /// Builds an iOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
-  Future<RunResult> _buildFramework({
+  Future<RunResult> _buildIosFramework({
     @required IOSArch iosArch,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
   }) async {
-    final String targetArch = getNameForIOSArch(iosArch);
+    final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
     printStatus('Building App.framework for $targetArch...');
-    final List<String> commonBuildOptions = <String>[
-      '-arch', targetArch,
-      if (iosArch == IOSArch.arm64 || iosArch == IOSArch.armv7)
-        '-miphoneos-version-min=8.0'
-    ];
+    final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     final RunResult compileResult = await xcode.cc(<String>[
@@ -326,7 +322,6 @@ class AOTSnapshotter {
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
       TargetPlatform.ios,
-      TargetPlatform.darwin_x64,
     ].contains(platform);
   }
 
