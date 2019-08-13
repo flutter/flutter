@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/process.dart';
-import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:pool/pool.dart';
 
 import '../../artifacts.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
+import '../../base/process.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
+import '../../macos/xcode.dart';
 import '../build_system.dart';
 import 'dart.dart';
 
