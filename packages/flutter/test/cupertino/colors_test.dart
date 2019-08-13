@@ -129,6 +129,37 @@ void main() {
     )));
   });
 
+  test('CupertinoDynamicColor.toString() works', () {
+    expect(
+      dynamicColor.toString(),
+      'CupertinoDynamicColor(*color = Color(0xff000000)*, '
+      'darkColor = Color(0xff000001), '
+      'highContrastColor = Color(0xff000003), '
+      'darkHighContrastColor = Color(0xff000005), '
+      'elevatedColor = Color(0xff000002), '
+      'darkElevatedColor = Color(0xff000004), '
+      'highContrastElevatedColor = Color(0xff000006), '
+      'darkHighContrastElevatedColor = Color(0xff000007))'
+    );
+    expect(notSoDynamicColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000000)*)');
+    expect(vibrancyDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, darkColor = Color(0xff000000))');
+    expect(contrastDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, highContrastColor = Color(0xff000000))');
+    expect(elevationDependentColor1.toString(), 'CupertinoDynamicColor(*color = Color(0xff000001)*, elevatedColor = Color(0xff000000))');
+
+    expect(
+      CupertinoDynamicColor.withBrightnessAndContrast(
+        color: color0,
+        darkColor: color1,
+        highContrastColor: color2,
+        darkHighContrastColor: color3,
+      ).toString(),
+      'CupertinoDynamicColor(*color = Color(0xff000000)*, '
+      'darkColor = Color(0xff000001), '
+      'highContrastColor = Color(0xff000002), '
+      'darkHighContrastColor = Color(0xff000003))',
+    );
+  });
+
   test('withVibrancy constructor creates colors that may depend on vibrancy', () {
     expect(vibrancyDependentColor1, CupertinoDynamicColor.withBrightness(
       color: color1,
@@ -400,9 +431,9 @@ void main() {
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Builder(
               builder: (BuildContext context) {
-                return CupertinoSystemColors.fromBuildContext(
+                return CupertinoSystemColors(
                   child: Builder(builder: systemColorGetter),
-                  context: context,
+                  data: CupertinoSystemColors.of(context).resolveColors(context),
                 );
               },
             ),
@@ -423,12 +454,12 @@ void main() {
             builder: (BuildContext context) {
               return CupertinoUserInterfaceLevel(
                 data: CupertinoUserInterfaceLevelData.elevated,
-                child: CupertinoSystemColors.fromBuildContext(
+                child: CupertinoSystemColors(
                   child: Builder(builder: systemColorGetter),
-                  context: context,
+                  data: CupertinoSystemColors.of(context).resolveColors(context),
                 ),
               );
-            }
+            },
           ),
         ),
       );
@@ -602,6 +633,116 @@ void main() {
       // The color is not resolved.
       expect(color, dynamicColor);
       expect(color, isNot(dynamicColor.darkHighContrastElevatedColor));
+    });
+  });
+
+  group('CupertinoSystemColors', () {
+    final Color dynamicColor0 = CupertinoDynamicColor.withBrightness(
+      color: const Color(0x00000000),
+      darkColor: const Color(0x00000000)
+    );
+    final Color dynamicColor1 = CupertinoDynamicColor.withBrightness(
+      color: const Color(0x00000001),
+      darkColor: const Color(0x00000000)
+    );
+
+    final CupertinoSystemColorsData system0 = CupertinoSystemColorsData(
+      label: dynamicColor0,
+      secondaryLabel: dynamicColor0,
+      tertiaryLabel: dynamicColor0,
+      quaternaryLabel: dynamicColor0,
+      systemFill: dynamicColor0,
+      secondarySystemFill: dynamicColor0,
+      tertiarySystemFill: dynamicColor0,
+      quaternarySystemFill: dynamicColor0,
+      placeholderText: dynamicColor0,
+      systemBackground: dynamicColor0,
+      secondarySystemBackground: dynamicColor0,
+      tertiarySystemBackground: dynamicColor0,
+      systemGroupedBackground: dynamicColor0,
+      secondarySystemGroupedBackground: dynamicColor0,
+      tertiarySystemGroupedBackground: dynamicColor0,
+      separator: dynamicColor0,
+      opaqueSeparator: dynamicColor0,
+      link: dynamicColor0,
+      systemBlue: dynamicColor0,
+      systemGreen: dynamicColor0,
+      systemIndigo: dynamicColor0,
+      systemOrange: dynamicColor0,
+      systemPink: dynamicColor0,
+      systemPurple: dynamicColor0,
+      systemRed: dynamicColor0,
+      systemTeal: dynamicColor0,
+      systemYellow: dynamicColor0,
+      systemGray: dynamicColor0,
+      systemGray2: dynamicColor0,
+      systemGray3: dynamicColor0,
+      systemGray4: dynamicColor0,
+      systemGray5: dynamicColor0,
+      systemGray6: dynamicColor0,
+    );
+
+    test('CupertinoSystemColorsData.== and CupertinoSystemColorsData.copyWith', () {
+      expect(system0, system0);
+      expect(system0, system0.copyWith());
+      expect(system0, system0.copyWith(link: dynamicColor0));
+      final CupertinoSystemColorsData withDifferentLink = system0.copyWith(link: dynamicColor1);
+      expect(withDifferentLink.link, dynamicColor1);
+      expect(system0, isNot(withDifferentLink));
+    });
+
+    test('CupertinoSystemColorsData.hasCode', () {
+      expect(system0.hashCode, system0.hashCode);
+      expect(system0.hashCode, system0.copyWith().hashCode);
+      expect(system0.hashCode, system0.copyWith(link: dynamicColor0).hashCode);
+      expect(system0.hashCode, isNot(system0.copyWith(link: dynamicColor1).hashCode));
+    });
+
+    test('CupertinoSystemColorsData.debugFillProperties', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      system0.debugFillProperties(builder);
+
+      expect(
+        builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList(),
+        <String>[
+          'label: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'secondaryLabel: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'tertiaryLabel: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'quaternaryLabel: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemFill: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'secondarySystemFill: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'tertiarySystemFill: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'quaternarySystemFill: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'placeholderText: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'secondarySystemBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'tertiarySystemBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGroupedBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'secondarySystemGroupedBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'tertiarySystemGroupedBackground: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'separator: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'opaqueSeparator: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'link: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemBlue: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGreen: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemIndigo: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemOrange: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemPink: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemPurple: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemRed: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemTeal: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemYellow: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray2: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray3: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray4: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray5: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+          'systemGray6: CupertinoDynamicColor(*color = Color(0x00000000)*)',
+        ],
+      );
     });
   });
 }

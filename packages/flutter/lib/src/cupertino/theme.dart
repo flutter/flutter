@@ -57,7 +57,8 @@ class CupertinoTheme extends StatelessWidget {
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
   }
 
-  /// Retrieve the [Brightness] value from an ancestor [CupertinoTheme] widget.
+  /// Retrieve the [Brightness] value from the closest ancestor [CupertinoTheme]
+  /// widget.
   ///
   /// If no ancestral [CupertinoTheme] widget with explicit brightness value could
   /// be found, the method will resort to the closest ancestor [MediaQuery] widget.
