@@ -154,7 +154,7 @@ class _CategoriesPage extends StatelessWidget {
                       );
                     }),
                   );
-                }),
+                })..insert(0,               CircularProgressIndicator()),
               ),
             );
           },

@@ -90,6 +90,10 @@ class OverlayEntry {
     _overlay._didChangeEntryOpacity();
   }
 
+  void makeOpaqueHack() {
+    _opaque = true;
+  }
+
   /// Whether this entry must be included in the tree even if there is a fully
   /// [opaque] entry above it.
   ///
@@ -162,6 +166,12 @@ class _OverlayEntry extends StatefulWidget {
 
   @override
   _OverlayEntryState createState() => _OverlayEntryState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder builder) {
+    super.debugFillProperties(builder);
+    builder.add(DiagnosticsProperty<OverlayEntry>('entry', entry));
+  }
 }
 
 class _OverlayEntryState extends State<_OverlayEntry> {

@@ -1540,6 +1540,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
     for (Route<dynamic> route in _history)
       _initialOverlayEntries.addAll(route.overlayEntries);
+
+    _history.last.overlayEntries.first.makeOpaqueHack();
   }
 
   @override
