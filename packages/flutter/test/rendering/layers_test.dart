@@ -466,7 +466,7 @@ void main() {
     });
   }, skip: isBrowser);
 
-  test('OffsetLayer.hitTesting respects offset (positive)', () {
+  test('OffsetLayer.hitTest respects offset (positive)', () {
     // The target position would have fallen outside of child1 without the
     // offset of root.
     const Offset position = Offset(-5, 5);
@@ -482,7 +482,7 @@ void main() {
     expect(_pathToValues(result.path), <int>[1]);
   });
 
-  test('OffsetLayer.hitTesting respects offset (negative)', () {
+  test('OffsetLayer.hitTest respects offset (negative)', () {
     // The target position would have fallen inside of child1 without the
     // offset of root.
     const Offset position = Offset(5, 5);

@@ -184,11 +184,14 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns an empty list if no matching region is found.
   ///
+  /// By default it calls [hitTest] and returns its result.
+  ///
   /// The main way for a value to be found here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree.
   ///
   /// See also:
   ///
+  ///  * [hitTest], the default implementation of this method.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   Iterable<S> findAll<S>(Offset regionOffset) {
     final LayerHitTestResult<S> result = LayerHitTestResult<S>();
