@@ -408,8 +408,11 @@ void main() {
     final RenderAbstractViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderAbstractViewport);
 
     final RenderObject target = tester.renderObject(find.byWidget(lowerItem, skipOffstage: false));
-    final RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
+    RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, -100 - 22);
+
+    revealed = viewport.getOffsetToReveal(target, 1.0);
+    expect(revealed.offset, - 100 - 22 - 200);
   });
 
   testWidgets('Viewport getOffsetToReveal Sliver - left', (WidgetTester tester) async {
