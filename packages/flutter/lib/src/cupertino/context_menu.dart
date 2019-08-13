@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
-//import 'package:flutter/painting.dart' show MatrixUtils;
 import 'package:vector_math/vector_math_64.dart';
 
 // The scale of the child at the time that the ContextMenu opens.
@@ -41,6 +40,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   static const Color _lightModeMaskColor = Color(0xAAAAAAAA);
 
   final GlobalKey _childGlobalKey = GlobalKey();
+  final GlobalKey _containerGlobalKey = GlobalKey();
 
   Animation<int> _mask;
   Animation<Matrix4> _transform;
@@ -87,13 +87,14 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       _isOpen = true;
     });
 
-    // Get the current position of the child
+    // Get the original Rect of the child before any transformation.
     assert(_childGlobalKey.currentContext != null);
-    final RenderBox renderBox = _childGlobalKey.currentContext.findRenderObject();
-    final Opacity container = _childGlobalKey.currentContext.widget;
-    final Offset offset = renderBox.localToGlobal(renderBox.paintBounds.topLeft);
-    final Rect originalChildRect = offset & renderBox.paintBounds.size;
-    //final Rect rect = MatrixUtils.transformRect(_transform.value, originalChildRect);
+    final RenderBox renderBoxContainer = _containerGlobalKey.currentContext.findRenderObject();
+    final Offset containerOffset = renderBoxContainer.localToGlobal(renderBoxContainer.paintBounds.topLeft);
+    final Rect originalChildRect = containerOffset & renderBoxContainer.paintBounds.size;
+
+    // Get the Rect of the child right at the end of the transformation.
+    // Consider that the Transform has `alignment` set to `Alignment.center`.
     final Vector4 sizeVector = _transform.value.transform(Vector4(
       originalChildRect.width,
       originalChildRect.height,
@@ -108,6 +109,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     );
 
     final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
+    final Opacity container = _childGlobalKey.currentContext.widget;
     _route = _ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
@@ -116,26 +118,21 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       ),
       childRect: childRect,
       parentRect: parentRect,
-      builder: (BuildContext context) {
-        return container.child;
-      },
+      builder: (BuildContext context) => container.child,
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
-
-    // Run the reverse animation in the main view after the modal finishes
-    // animating out.
-    _route.animation.addStatusListener(routeAnimationStatusListener);
+    _route.animation.addStatusListener(_routeAnimationStatusListener);
   }
 
-  void routeAnimationStatusListener(AnimationStatus status) {
+  void _routeAnimationStatusListener(AnimationStatus status) {
     if (status != AnimationStatus.dismissed) {
       return;
     }
-    _controller.reverse();
+    _controller.reset();
     setState(() {
       _isOpen = false;
     });
-    _route.animation.removeStatusListener(routeAnimationStatusListener);
+    _route.animation.removeStatusListener(_routeAnimationStatusListener);
     _route = null;
   }
 
@@ -147,26 +144,30 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
     _controller.reverse();
   }
 
-  Widget _buildAnimation(BuildContext context, Widget whatever) {
+  Widget _buildAnimation(BuildContext context, Widget child) {
     final bool isAnimating = _controller.status == AnimationStatus.forward;
     final Color maskColor = isAnimating && _mask.value == 1
       ? _lightModeMaskColor
       : const Color(0xFFFFFFFF);
-    return Transform(
-      alignment: Alignment.center,
-      transform: _transform?.value ?? Matrix4.identity(),
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: <Color>[maskColor, maskColor],
-          ).createShader(bounds);
-        },
-        child: Opacity(
-          opacity: _isOpen ? 0.0 : 1.0,
-          key: _childGlobalKey,
-          child: widget.child,
+
+    return Container(
+      key: _containerGlobalKey,
+      child: Transform(
+        alignment: Alignment.center,
+        transform: _transform?.value ?? Matrix4.identity(),
+        child: ShaderMask(
+          shaderCallback: (Rect bounds) {
+            return LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: <Color>[maskColor, maskColor],
+            ).createShader(bounds);
+          },
+          child: Opacity(
+            opacity: _isOpen ? 0.0 : 1.0,
+            key: _childGlobalKey,
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -209,7 +210,8 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
          settings: settings,
        );
 
-  // The rect containing the widget that should show in the ContextMenu.
+  // The rect containing the widget that should show in the ContextMenu, in its
+  // original position before animating.
   final Rect _childRect;
 
   // A rect that indicates the space available to position the child.
@@ -244,37 +246,64 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   Tween<Offset> _offsetTween;
   Tween<double> _scaleTween;
+  Tween<double> _scaleTweenReverse;
+
+  // Given an initial untransformed child Rect and a parent to put it in, return
+  // the Rect for its final position in the open ContextMenu.
+  //
+  // The final position is aligned so that its bottom is at the center of the
+  // screen, and it's sized to be as big as possible. It's considered to be
+  // inside of a Transform with `alignment` set to `Alignment.center`.
+  static Rect _getEndRect(Rect child, Rect parent) {
+    // The rect of the child at the time that the ContextMenu opens.
+    final Rect openChildRect = Rect.fromLTWH(
+      child.left,
+      child.top,
+      child.width * _kOpenScale,
+      child.height * _kOpenScale,
+    );
+
+    final double endScale = math.max(
+      parent.width / child.width * _kOpenScale,
+      parent.height / parent.height * _kOpenScale,
+    );
+    final Size endChildSize = Size(
+      child.width * endScale,
+      child.height * endScale,
+    );
+    final Offset topLeftEnd = Offset(0.0, parent.height / 2 - endChildSize.height);
+    final Offset adjustmentFromScale = Offset(
+      (endChildSize.width - openChildRect.width) / 2,
+      (endChildSize.height - openChildRect.height) / 2,
+    );
+    return (topLeftEnd + adjustmentFromScale) & endChildSize;
+  }
 
   @override
   Animation<double> createAnimation() {
     assert(_animation == null);
     _animation = CurvedAnimation(
       parent: super.createAnimation(),
-      // These curves were initially measured from native iOS horizontal page
-      // route animations and seemed to be a good match here as well.
       curve: Curves.linearToEaseOut,
-      reverseCurve: Curves.linear,//Curves.easeInToLinear,
     );
 
-    // endScale is the scale that fits the original child into the parent.
-    //final Rect parentRect = Offset.zero & MediaQuery.of(subtreeContext).size;
-    final double endScale = math.max(
-      _parentRect.width / _childRect.width * _kOpenScale,
-      _parentRect.height / _parentRect.height * _kOpenScale,
+    final Rect endChildRect = _getEndRect(_childRect, _parentRect);
+    _offsetTween = Tween<Offset>(
+      begin: _childRect.topLeft,
+      end: endChildRect.topLeft,
     );
+
+    // When opening, the scale happens from the end of the child's bounce
+    // animation to the final state. When closing, it goes from the final state
+    // to the original position before the bounce.
+    final double endScale = endChildRect.width / _childRect.width;
     _scaleTween = Tween<double>(
       begin: _kOpenScale,
       end: endScale,
     );
-
-    final double centerY = _parentRect.height / 2;
-    final double endChildHeight = _childRect.height * endScale;
-    // TODO(justinmc): topLeftEnd is off for now. Should align child's bottom to
-    // midpoint of screen.
-    final Offset topLeftEnd = Offset(0.0, _parentRect.height / 2 - endChildHeight);
-    _offsetTween = Tween<Offset>(
-      begin: _childRect.topLeft,
-      end: topLeftEnd,
+    _scaleTweenReverse = Tween<double>(
+      begin: 1.0,
+      end: endScale,
     );
 
     return _animation;
@@ -287,37 +316,34 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    final bool reverse = _animation.status == AnimationStatus.reverse;
     final Offset offset = _offsetTween.evaluate(_animation);
-    return SafeArea(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: Stack(
-                  children: <Widget>[
-                    Positioned(
-                      top: 0.0,
-                      left: 0.0,
-                      child: Transform(
-                        transform: Matrix4.identity()
-                          ..translate(offset.dx, offset.dy)
-                          ..scale(_scaleTween.evaluate(_animation)),
-                        child: child,
-                      ),
-                    ),
-                  ],
-                ),
+    final double scale = reverse
+      ? _scaleTweenReverse.evaluate(_animation)
+      : _scaleTween.evaluate(_animation);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(
+          child: Stack(
+            children: <Widget>[
+              Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..translate(offset.dx, offset.dy)
+                  ..scale(scale),
+                child: child,
               ),
-            ),
-            Expanded(
-              child: Container(
-                child: Text('TODO make me a menu'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        Expanded(
+          child: Container(
+            child: const Text('TODO make me a menu'),
+          ),
+        ),
+      ],
     );
   }
 }
