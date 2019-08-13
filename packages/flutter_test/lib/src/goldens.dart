@@ -69,17 +69,18 @@ abstract class GoldenFileComparator {
     );
   }
 
-  /// TODO Doc
+  /// Returns a [ComparisonResult] to describe the pixel differential of the
+  /// [test] and [master] image bytes provided.
   static ComparisonResult compareLists<T>(List<int> test, List<int> master) {
     if (identical(test, master))
       return ComparisonResult(true);
 
-    if (test == null || master == null)
+    if (test == null || master == null) {
       return ComparisonResult(
         false,
         failMessage: 'Pixel test failed, null image provided.'
-
       );
+    }
 
     final Image testImage = decodePng(test);
     final Image masterImage = decodePng(master);
@@ -99,10 +100,6 @@ abstract class GoldenFileComparator {
     final Image invertedMaster = invert(Image.from(masterImage));
     final Image invertedTest = invert(Image.from(testImage));
 
-    // Colors
-    final int transparentPixel = Color.fromRgba(0, 0, 0, 0);
-    final int diffPixel = Color.fromRgba(34, 64, 255, 255);
-
     final Map<String, Image> diffs = <String, Image>{
       'masterImage' : masterImage,
       'testImage' : testImage,
@@ -115,17 +112,16 @@ abstract class GoldenFileComparator {
         final int testPixel = testImage.getPixel(x, y);
         final int masterPixel = masterImage.getPixel(x, y);
 
-        int pixel = (getRed(testPixel) - getRed(masterPixel)).abs()
+        final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
           + (getGreen(testPixel) - getGreen(masterPixel)).abs()
           + (getBlue(testPixel) - getBlue(masterPixel)).abs();
-        pixel = pixel != 0 ? diffPixel : transparentPixel;
-        diffs['isolatedDiff'].setPixel(x, y, pixel);
 
-        if (pixel != 0 ) {
+        if (diffPixel != 0 ) {
           final int invertedMasterPixel = invertedMaster.getPixel(x, y);
           final int invertedTestPixel = invertedTest.getPixel(x, y);
           final int maskPixel = math.max(invertedMasterPixel, invertedTestPixel);
           diffs['maskedDiff'].setPixel(x, y, maskPixel);
+          diffs['isolatedDiff'].setPixel(x, y, maskPixel);
           pixelDiffCount++;
         }
       }
@@ -192,23 +188,32 @@ set goldenFileComparator(GoldenFileComparator value) {
 ///   * [goldenFileComparator]
 bool autoUpdateGoldenFiles = false;
 
-/// TODO Doc
+/// The result of a pixel comparison test.
+///
+/// The [ComparisonResult] will always indicate if a test has [passed]. The
+/// optional [failMessage] and [fileOutput] parameters are used ot set [error]
+/// and [diffs], which provide further information about the result of a failing
+/// test.
 class ComparisonResult {
-  ///TODO Doc
+  /// Creates a new [ComparisonResult] for the current test.
   ComparisonResult(
     this.passed, {
     String failMessage,
     Map<String, Image> fileOutput,
-  }) : error = failMessage,
+  }) : assert(passed != null),
+       error = failMessage,
        diffs = fileOutput;
 
-  /// TODO Doc
+  /// Indicates whether or not a pixel comparison test has failed.
+  ///
+  /// This value cannot be null.
   final bool passed;
 
-  /// TODO Doc
+  /// Error message used to describe the cause of the pixel comparison failure.
   final String error;
 
-  /// TODO Doc
+  /// Map containing differential images to illustrate found variants in pixel
+  /// values in the execution of the pixel test.
   final Map<String, Image> diffs;
 }
 
@@ -295,7 +300,7 @@ class LocalFileComparator extends GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    final File goldenFile = _getFile(golden);
+    final File goldenFile = _getGoldenFile(golden);
     if (!goldenFile.existsSync()) {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
     }
@@ -303,48 +308,36 @@ class LocalFileComparator extends GoldenFileComparator {
     final ComparisonResult result = GoldenFileComparator.compareLists<Uint8List>(imageBytes, goldenBytes);
 
     if (!result.passed) {
-      String additionalFeedback = '';
-      if(result.diffs != null) {
-        print(basedir);
-        result.diffs.forEach((String name, Image image) {
-          final File output = _getFailureFile(name, golden);
-          output.parent.createSync(recursive: true);
-          output.writeAsBytesSync(encodePng(image));
-        });
+      final Map<String, Image> diffs = result.diffs;
+      diffs.forEach((String name, Image image) {
+        final File output = _getFailureFile(name, golden);
+        output.parent.createSync(recursive: true);
+        output.writeAsBytesSync(encodePng(image));
+      });
 
-        additionalFeedback += '\nFailure feedback can be found at ${basedir.path.toString()}';
-      }
-      throw test_package.TestFailure('Golden "$golden": ' + result.error + additionalFeedback);
+      throw test_package.TestFailure('Golden "$golden": ${result.error}'
+        '\nFailure feedback can be found at ${path.join(basedir.path, 'failures')}');
     }
     return result.passed;
   }
 
   @override
   Future<void> update(Uri golden, Uint8List imageBytes) async {
-    final File goldenFile = _getFile(golden);
+    final File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
   }
 
-  File _getFile(Uri golden) {
+  File _getGoldenFile(Uri golden) {
     return File(_path.join(_path.fromUri(basedir), _path.fromUri(golden.path)));
   }
 
-  /// TODO Doc
-  File _getFailureFile(String name, Uri golden) {
-//    Directory filures = Directory('failures').create(recursive: true);
-    // split by separator
-    // append output directory
-    // append to test file name (last path segment) to create new file name
-    // join and return
-//    final String goldenPath = golden.path;
-
+  File _getFailureFile(String failure, Uri golden) {
     final String fileName = golden.pathSegments[0];
     final String testName = fileName.split(path.extension(fileName))[0]
       + '_'
-      + name
+      + failure
       + '.png';
     return File(_path.join('failures', testName));
-//    return Uri.parse(testName);
   }
 }
