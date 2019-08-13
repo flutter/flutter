@@ -67,7 +67,10 @@ class FileMapping final : public Mapping {
 
   uint8_t* GetMutableMapping();
 
+  bool IsValid() const;
+
  private:
+  bool valid_ = false;
   size_t size_ = 0;
   uint8_t* mapping_ = nullptr;
   uint8_t* mutable_mapping_ = nullptr;

@@ -54,6 +54,11 @@ FileMapping::FileMapping(const fml::UniqueFD& fd,
     return;
   }
 
+  if (mapping_size == 0) {
+    valid_ = true;
+    return;
+  }
+
   DWORD protect_flags = 0;
   bool read_only = !IsWritable(protections);
 
@@ -90,6 +95,7 @@ FileMapping::FileMapping(const fml::UniqueFD& fd,
 
   mapping_ = mapping;
   size_ = mapping_size;
+  valid_ = true;
   if (IsWritable(protections)) {
     mutable_mapping_ = mapping_;
   }
@@ -107,6 +113,10 @@ size_t FileMapping::GetSize() const {
 
 const uint8_t* FileMapping::GetMapping() const {
   return mapping_;
+}
+
+bool FileMapping::IsValid() const {
+  return valid_;
 }
 
 }  // namespace fml

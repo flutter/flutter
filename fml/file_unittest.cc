@@ -155,3 +155,17 @@ TEST(FileTest, AtomicWriteTest) {
   // Cleanup.
   ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "precious_data"));
 }
+
+TEST(FileTest, EmptyMappingTest) {
+  fml::ScopedTemporaryDirectory dir;
+
+  auto file = fml::OpenFile(dir.fd(), "my_contents", true,
+                            fml::FilePermission::kReadWrite);
+
+  fml::FileMapping mapping(file);
+  ASSERT_TRUE(mapping.IsValid());
+  ASSERT_EQ(mapping.GetSize(), 0ul);
+  ASSERT_EQ(mapping.GetMapping(), nullptr);
+
+  ASSERT_TRUE(fml::UnlinkFile(dir.fd(), "my_contents"));
+}
