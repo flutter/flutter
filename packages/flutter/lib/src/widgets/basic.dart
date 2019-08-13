@@ -5803,7 +5803,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// behind it from detecting the pointer, therefore affecting how their
   /// [onHover], [onEnter], and [onExit] behave.
   ///
-  /// If [opaque] is true, this object will "absorb" the mouse pointer so that
+  /// If [opaque] is true, this object will absorb the mouse pointer so that
   /// [MouseRegion]s visually behind it will not consider themselves being
   /// hovered even when the pointer is within their areas.
   ///

@@ -2126,7 +2126,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Whether this layer should prevent layers visually behind it from being
   /// hit during a hit test.
   ///
-  /// If [opaque] is true, this layer will "absorb" the hit if any of its
+  /// If [opaque] is true, this layer will absorb the hit if any of its
   /// children absorb it, or if this layer contains the target position and
   /// has the requested annotation. A hit that is absorbed will not be received
   /// by this layer's siblings (or any other layers that are not ancestors or

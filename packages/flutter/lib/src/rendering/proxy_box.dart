@@ -2589,7 +2589,7 @@ class RenderMouseRegion extends RenderProxyBox {
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
   /// and [onExit] behave.
   ///
-  /// If [opaque] is true, this object will "absorb" the mouse pointer so that
+  /// If [opaque] is true, this object will absorb the mouse pointer so that
   /// [RenderMouseRegion]s visually behind it will not consider themselves being
   /// hovered even when the pointer is within their areas.
   ///
