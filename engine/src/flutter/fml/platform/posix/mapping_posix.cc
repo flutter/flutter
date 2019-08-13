@@ -63,7 +63,8 @@ FileMapping::FileMapping(const fml::UniqueFD& handle,
     return;
   }
 
-  if (stat_buffer.st_size <= 0) {
+  if (stat_buffer.st_size == 0) {
+    valid_ = true;
     return;
   }
 
@@ -79,6 +80,7 @@ FileMapping::FileMapping(const fml::UniqueFD& handle,
 
   mapping_ = static_cast<uint8_t*>(mapping);
   size_ = stat_buffer.st_size;
+  valid_ = true;
   if (is_writable) {
     mutable_mapping_ = mapping_;
   }
@@ -96,6 +98,10 @@ size_t FileMapping::GetSize() const {
 
 const uint8_t* FileMapping::GetMapping() const {
   return mapping_;
+}
+
+bool FileMapping::IsValid() const {
+  return valid_;
 }
 
 }  // namespace fml

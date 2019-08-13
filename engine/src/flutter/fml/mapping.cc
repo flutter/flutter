@@ -31,7 +31,7 @@ std::unique_ptr<FileMapping> FileMapping::CreateReadOnly(
   auto mapping = std::make_unique<FileMapping>(
       base_fd, std::initializer_list<Protection>{Protection::kRead});
 
-  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
+  if (!mapping->IsValid()) {
     return nullptr;
   }
 
@@ -56,7 +56,7 @@ std::unique_ptr<FileMapping> FileMapping::CreateReadExecute(
       base_fd, std::initializer_list<Protection>{Protection::kRead,
                                                  Protection::kExecute});
 
-  if (mapping->GetSize() == 0 || mapping->GetMapping() == nullptr) {
+  if (!mapping->IsValid()) {
     return nullptr;
   }
 
