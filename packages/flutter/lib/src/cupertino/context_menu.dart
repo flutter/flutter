@@ -22,6 +22,7 @@ class ContextMenu extends StatefulWidget {
     Key key,
     @required this.child,
     @required this.actions,
+    this.onTap,
   }) : assert(actions != null && actions.isNotEmpty),
        assert(child != null),
        super(key: key);
@@ -32,7 +33,12 @@ class ContextMenu extends StatefulWidget {
   /// but long pressing or 3d touching on it will cause the ContextMenu to open.
   final Widget child;
 
+  /// The actions that are shown in the menu.
   final List<ContextMenuSheetAction> actions;
+
+  /// The callback to call when tapping on the child when the ContextMenu is
+  /// open.
+  final VoidCallback onTap;
 
   @override
   _ContextMenuState createState() => _ContextMenuState();
@@ -124,7 +130,10 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
       childRect: childRect,
       parentRect: parentRect,
       actions: widget.actions,
-      builder: (BuildContext context) => container.child,
+      onTap: widget.onTap,
+      builder: (BuildContext context) {
+        return container.child;
+      },
     );
     Navigator.of(context, rootNavigator: true).push<void>(_route);
     _route.animation.addStatusListener(_routeAnimationStatusListener);
@@ -212,11 +221,13 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
     ui.ImageFilter filter,
     RouteSettings settings,
     Rect childRect,
+    VoidCallback onTap,
     Rect parentRect,
   }) : assert(actions != null && actions.isNotEmpty),
        _actions = actions,
        _builder = builder,
        _childRect = childRect,
+       _onTap = onTap,
        _parentRect = parentRect,
        super(
          filter: filter,
@@ -240,6 +251,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
 
   final List<ContextMenuSheetAction> _actions;
   final WidgetBuilder _builder;
+  final VoidCallback _onTap;
 
   @override
   final String barrierLabel;
@@ -338,18 +350,27 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       ? _scaleTweenReverse.evaluate(_animation)
       : _scaleTween.evaluate(_animation);
 
+    // TODO(justinmc): Are taps not dismissing the modal when above or below?
+    // Might need to make something transparent to gestures if possible. Some
+    // parent of the transformed child is overhanging it.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Expanded(
-          child: Stack(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Transform(
+                transformHitTests: true,
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
                   ..translate(offset.dx, offset.dy)
                   ..scale(scale),
-                child: child,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: _onTap,
+                  child: _builder(context),
+                ),
               ),
             ],
           ),
