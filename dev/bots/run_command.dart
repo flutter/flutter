@@ -90,7 +90,9 @@ Future<void> runCommand(String executable, List<String> arguments, {
   Duration timeout = _kLongTimeout,
   bool Function(String) removeLine,
 }) async {
-  assert((outputMode == OutputMode.capture) == (output != null));
+  assert((outputMode == OutputMode.capture) == (output != null),
+      'The output parameter must be non-null with and only with '
+      'OutputMode.capture');
 
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
