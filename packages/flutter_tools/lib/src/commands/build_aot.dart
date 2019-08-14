@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+
 import '../artifacts.dart';
 import '../base/build.dart';
 import '../base/common.dart';
@@ -11,6 +12,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -225,13 +227,35 @@ Future<void> validateBitcode() async {
     fs.path.join(flutterFrameworkPath, 'Info.plist'),
     'ClangVersion',
   );
-  if (clangVersion != engineClangVersion) {
-    printStatus(
+  final Version engineClangSemVer = _parseVersionFromClang(engineClangVersion);
+  final Version clangSemVer = _parseVersionFromClang(clangVersion);
+  if (engineClangSemVer > clangSemVer) {
+    throwToolExit(
       'The Flutter.framework at $flutterFrameworkPath was built '
       'with "${engineClangVersion ?? 'unknown'}", but the current version '
-      'of clang is "$clangVersion". This may result in failures when '
-      'archiving your application in Xcode.',
-      emphasis: true,
+      'of clang is "$clangVersion". This will result in failures when trying to'
+      'archive an IPA. To resolve this issue, update your version of Xcode to '
+      'at least $engineClangSemVer.',
     );
   }
+}
+
+Version _parseVersionFromClang(String clangVersion) {
+  const String prefix = 'Apple LLVM version ';
+  void _invalid() {
+    throwToolExit('Unable to parse Clang version from "$clangVersion". '
+                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
+  }
+  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
+    _invalid();
+  }
+  final int lastSpace = clangVersion.lastIndexOf(' ');
+  if (lastSpace == -1) {
+    _invalid();
+  }
+  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
+  if (version == null) {
+    _invalid();
+  }
+  return version;
 }
