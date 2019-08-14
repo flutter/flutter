@@ -213,26 +213,22 @@ class LayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
 class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderConstrainedLayoutBuilder<BoxConstraints, RenderBox> {
   @override
   double computeMinIntrinsicWidth(double height) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return child != null ? child.computeMinIntrinsicWidth(height) : 0.0;
   }
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return child != null ? child.computeMaxIntrinsicWidth(height) : 0.0;
   }
 
   @override
   double computeMinIntrinsicHeight(double width) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return child != null ? child.computeMinIntrinsicHeight(width) : 0.0;
   }
 
   @override
   double computeMaxIntrinsicHeight(double width) {
-    assert(_debugThrowIfNotCheckingIntrinsics());
-    return 0.0;
+    return child != null ? child.computeMaxIntrinsicHeight(width) : 0.0;
   }
 
   @override
@@ -255,21 +251,6 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   void paint(PaintingContext context, Offset offset) {
     if (child != null)
       context.paintChild(child, offset);
-  }
-
-  bool _debugThrowIfNotCheckingIntrinsics() {
-    assert(() {
-      if (!RenderObject.debugCheckingIntrinsics) {
-        throw FlutterError(
-          'LayoutBuilder does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require running the layout '
-          'callback speculatively, which might mutate the live render object tree.'
-        );
-      }
-      return true;
-    }());
-
-    return true;
   }
 }
 
