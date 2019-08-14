@@ -66,24 +66,20 @@ import 'dart:async';
 /// 'Error' is instead caught by the `catch`.
 Future<T> asyncGuard<T>(Future<T> Function() fn) {
   final Completer<T> completer = Completer<T>();
-  bool done = false;
 
   runZoned<void>(() async {
     try {
       final T result = await fn();
-      if (!done) {
-        done = true;
+      if (!completer.isCompleted) {
         completer.complete(result);
       }
     } catch (e, s) {
-      if (!done) {
-        done = true;
+      if (!completer.isCompleted) {
         completer.completeError(e, s);
       }
     }
   }, onError: (dynamic e, StackTrace s) {
-    if (!done) {
-      done = true;
+    if (!completer.isCompleted) {
       completer.completeError(e, s);
     }
   });
