@@ -1,4 +1,4 @@
-Signature: 3e6e6ecdd3575a2a55c64bed9b04dd75
+Signature: cd8508d1df356563b0f1b76b85615855
 
 UNUSED LICENSES:
 
@@ -5015,6 +5015,10 @@ FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnStencilAttachment.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTexture.h
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTextureRenderTarget.cpp
+FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnTextureRenderTarget.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.cpp
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUniformHandler.h
 FILE: ../../../third_party/skia/src/gpu/dawn/GrDawnUtil.cpp
@@ -5040,6 +5044,7 @@ FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.h
 FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.cpp
 FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.h
+FILE: ../../../third_party/skia/src/utils/win/SkObjBase.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google Inc.
 
