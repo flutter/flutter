@@ -1002,7 +1002,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
 // The iOS date picker and timer picker has their width fixed to 320.0 in all
 // modes. The only exception is the hms mode (which doesn't have a native counterpart),
-// with a fixed width of
+// with a fixed width of 330.0 px.
 //
 // For date pickers, if the maximum width given to the picker is greater than
 // 320.0, the leftmost and rightmost column will be extended equally so that the
@@ -1072,6 +1072,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// [secondInterval] is the granularity of the second spinner. Must be a
   /// positive integer factor of 60.
   CupertinoTimerPicker({
+    Key key,
     this.mode = CupertinoTimerPickerMode.hms,
     this.initialTimerDuration = Duration.zero,
     this.minuteInterval = 1,
@@ -1086,7 +1087,8 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
-       assert(alignment != null);
+       assert(alignment != null),
+       super(key: key);
 
   /// The mode of the timer picker.
   final CupertinoTimerPickerMode mode;
@@ -1158,6 +1160,16 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   }
 
   @override
+  void didUpdateWidget(CupertinoTimerPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    assert(
+      oldWidget.mode == widget.mode,
+      "The CupertinoTimerPicker's mode cannot change once it's built",
+    );
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
@@ -1201,15 +1213,15 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     numberLabelBaseline = textPainter.computeDistanceToActualBaseline(TextBaseline.alphabetic);
   }
 
-  // Builds a text label with customized scale factor and font weight.
-  // pickerPadding is the additional padding the corresponding picker has to apply,
-  // in order to extend its separators towards the closest horizontal edge of the
-  // encompassing widget.
+  // Builds a text label with scale factor 1.0 and font weight semi-bold.
+  // `pickerPadding ` is the additional padding the corresponding picker has to apply
+  // around the `Text`, in order to extend its separators towards the closest
+  // horizontal edge of the encompassing widget.
   Widget _buildLabel(String text, EdgeInsetsDirectional pickerPadding) {
     final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
       start: numberLabelWidth
            + _kTimerPickerLabelPadSize
-           + pickerPadding.start
+           + pickerPadding.start,
     );
 
     return IgnorePointer(

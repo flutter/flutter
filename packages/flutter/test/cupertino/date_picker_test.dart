@@ -947,6 +947,53 @@ void main() {
     expect(find.text('hour'), findsOneWidget);
   });
 
+  testWidgets('TimerPicker has intrinsic width and height', (WidgetTester tester) async {
+    const Key key = Key('key');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.hm,
+          initialTimerDuration: const Duration(hours: 2, minutes: 30),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(320, 216));
+
+    // Different modes shouldn't share state.
+    await tester.pumpWidget(const Placeholder());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.ms,
+          initialTimerDuration: const Duration(minutes: 30, seconds: 3),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(320, 216));
+
+    // Different modes shouldn't share state.
+    await tester.pumpWidget(const Placeholder());
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTimerPicker(
+          key: key,
+          mode: CupertinoTimerPickerMode.hms,
+          initialTimerDuration: const Duration(hours: 5, minutes: 17, seconds: 19),
+          onTimerDurationChanged: (Duration d) {},
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.descendant(of: find.byKey(key), matching: find.byType(Row))), const Size(330, 216));
+  });
+
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
     int lastSelectedItem;
