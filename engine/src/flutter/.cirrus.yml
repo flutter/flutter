@@ -61,27 +61,6 @@ task:
         mkdir javadoc_tmp
         ./flutter/tools/gen_javadoc.py --out-dir javadoc_tmp
       test_android_script: cd $ENGINE_PATH/src && python ./flutter/testing/run_tests.py --type=java
-    - name: build_and_test_android_profile_app
-      env:
-        USE_ANDROID: "True"
-        ANDROID_HOME: $ENGINE_PATH/src/third_party/android_tools/sdk
-        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[3be31b3547bea4e70cff1d46f9a11ad8c6b42c1982a3964d81e437dee2035f674f12e130bde231352421d8de2029c55f]
-      compile_host_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --runtime-mode=profile --no-lto
-        autoninja -C out/host_profile
-      compile_android_script: |
-        cd $ENGINE_PATH/src
-        ./flutter/tools/gn --android --runtime-mode=profile --no-lto --android-cpu=arm64
-        ninja -C out/android_profile_arm64
-      compile_app_script: |
-        cd $ENGINE_PATH/src/flutter/testing/scenario_app
-        ./compile_android_aot.sh "$ENGINE_PATH/src/out/host_profile" "$ENGINE_PATH/src/out/android_profile_arm64/clang_x64"
-        cd android
-        ./gradlew --no-daemon assembleDebug
-      firebase_test_script: |
-         cd $ENGINE_PATH/src
-         ./flutter/ci/firebase_testlab.sh "$ENGINE_PATH/src/flutter/testing/scenario_app/android/app/build/outputs/apk/debug/app-debug.apk"
     - name: format_and_dart_test
       format_script: |
         cd $ENGINE_PATH/src/flutter
