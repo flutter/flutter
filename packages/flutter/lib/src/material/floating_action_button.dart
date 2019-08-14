@@ -247,7 +247,8 @@ class FloatingActionButton extends StatelessWidget {
 
   /// The splash color for this [FloatingActionButton]'s [InkWell].
   ///
-  /// Defaults to [ThemeData.splashColor] for the current theme.
+  /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
+  /// null, [ThemeData.splashColor] is used.
   final Color splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
@@ -418,8 +419,8 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.hoverColor
       ?? theme.hoverColor;
     final Color splashColor = this.splashColor
-        ?? floatingActionButtonTheme.splashColor
-        ?? theme.splashColor;
+      ?? floatingActionButtonTheme.splashColor
+      ?? theme.splashColor;
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
