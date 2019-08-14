@@ -1294,9 +1294,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else if (caretEnd >= viewportExtent) { // cursor after end of bounds
       scrollOffset += caretEnd - viewportExtent;
     }
-    // Clamp the final results to prevent programmatically scrolling to out-of-paragraph-bounds
-    // positions when encountering tall fonts/scripts that extend past the ascent.
-    return scrollOffset.clamp(0, renderEditable.size.height);
+
+    if (_isMultiline) {
+      // Clamp the final results to prevent programmatically scrolling to
+      // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
+      // extend past the ascent.
+      scrollOffset.clamp(0.0, renderEditable.size.height);
+    }
+    return scrollOffset;
   }
 
   // Calculates where the `caretRect` would be if `_scrollController.offset` is set to `scrollOffset`.
