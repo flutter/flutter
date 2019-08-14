@@ -154,7 +154,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(mini != null),
        assert(isExtended != null),
-       assert(clipBehavior != null),
        assert(autofocus != null),
        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
        super(key: key);
@@ -193,7 +192,6 @@ class FloatingActionButton extends StatelessWidget {
        assert(highlightElevation == null || highlightElevation >= 0.0),
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(isExtended != null),
-       assert(clipBehavior != null),
        assert(autofocus != null),
        _sizeConstraints = _kExtendedSizeConstraints,
        mini = false,

@@ -78,7 +78,6 @@ class MaterialButton extends StatelessWidget {
     this.height,
     this.child,
   }) : assert(autofocus != null),
-       assert(clipBehavior != null),
        assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
