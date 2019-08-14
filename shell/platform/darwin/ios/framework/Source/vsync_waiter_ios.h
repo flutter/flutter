@@ -26,6 +26,9 @@ class VsyncWaiterIOS final : public VsyncWaiter {
   // |VsyncWaiter|
   void AwaitVSync() override;
 
+  // |VsyncWaiter|
+  float GetDisplayRefreshRate() const override;
+
   FML_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterIOS);
 };
 
