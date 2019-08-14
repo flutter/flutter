@@ -272,9 +272,6 @@ class VMService {
   final rpc.Peer _peer;
   final Completer<Map<String, dynamic>> _connectionError = Completer<Map<String, dynamic>>();
 
-  // A zone used to capture and re-throw errors from JSON-RPC.
-  Zone _errorZone;
-
   VM _vm;
   /// The singleton [VM] object. Owns [Isolate] and [FlutterView] objects.
   VM get vm => _vm;
@@ -316,19 +313,10 @@ class VMService {
     String method,
     Map<String, dynamic> params,
   ) {
-    final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
-    _errorZone.runGuarded(() async {
-      try {
-        completer.complete(Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
-          _peer.sendRequest(method, params).then<Map<String, dynamic>>(
-              castStringKeyedMap),
-          _connectionError.future,
-        ]));
-      } catch (err) {
-        completer.complete(err);
-      }
-    });
-    return completer.future;
+    return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
+        _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
+        _connectionError.future,
+    ]);
   }
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
