@@ -79,7 +79,7 @@ BinaryMessenger get defaultBinaryMessenger {
         '`WidgetsFlutterBinding.ensureInitialized()` first.\n'
         'If you\'re running a test, you can call the '
         '`TestWidgetsFlutterBinding.ensureInitialized()` as the first line in '
-        'your test\'s `main()` or `setUp()` method to initialize the binding.'
+        'your test\'s `main()` method to initialize the binding.'
       );
     }
     return true;
