@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLEViewController_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEEngine.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLEEngine_Internal.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterEngine.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterEngine_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 #import "flutter/shell/platform/embedder/embedder.h"
 
@@ -65,9 +65,9 @@ struct MouseState {
 #pragma mark - Private interface declaration.
 
 /**
- * Private interface declaration for FLEViewController.
+ * Private interface declaration for FlutterViewController.
  */
-@interface FLEViewController () <FlutterViewReshapeListener>
+@interface FlutterViewController () <FlutterViewReshapeListener>
 
 /**
  * A list of additional responders to keyboard events. Keybord events are forwarded to all of them.
@@ -146,15 +146,15 @@ struct MouseState {
 
 @end
 
-#pragma mark - FLEViewController implementation.
+#pragma mark - FlutterViewController implementation.
 
-@implementation FLEViewController {
+@implementation FlutterViewController {
   // The project to run in this controller's engine.
-  FLEDartProject* _project;
+  FlutterDartProject* _project;
 
   // The plugin used to handle text input. This is not an FlutterPlugin, so must be owned
   // separately.
-  FLETextInputPlugin* _textInputPlugin;
+  FlutterTextInputPlugin* _textInputPlugin;
 
   // A message channel for passing key events to the Flutter engine. This should be replaced with
   // an embedding API; see Issue #47.
@@ -172,10 +172,10 @@ struct MouseState {
 /**
  * Performs initialization that's common between the different init paths.
  */
-static void CommonInit(FLEViewController* controller) {
-  controller->_engine = [[FLEEngine alloc] initWithName:@"io.flutter"
-                                                project:controller->_project
-                                 allowHeadlessExecution:NO];
+static void CommonInit(FlutterViewController* controller) {
+  controller->_engine = [[FlutterEngine alloc] initWithName:@"io.flutter"
+                                                    project:controller->_project
+                                     allowHeadlessExecution:NO];
   controller->_additionalKeyResponders = [[NSMutableOrderedSet alloc] init];
   controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
 }
@@ -196,7 +196,7 @@ static void CommonInit(FLEViewController* controller) {
   return self;
 }
 
-- (instancetype)initWithProject:(nullable FLEDartProject*)project {
+- (instancetype)initWithProject:(nullable FlutterDartProject*)project {
   self = [super initWithNibName:nil bundle:nil];
   NSAssert(self, @"Super init cannot be nil");
 
@@ -301,7 +301,7 @@ static void CommonInit(FLEViewController* controller) {
 }
 
 - (void)addInternalPlugins {
-  _textInputPlugin = [[FLETextInputPlugin alloc] initWithViewController:self];
+  _textInputPlugin = [[FlutterTextInputPlugin alloc] initWithViewController:self];
   _keyEventChannel =
       [FlutterBasicMessageChannel messageChannelWithName:@"flutter/keyevent"
                                          binaryMessenger:_engine.binaryMessenger
@@ -314,7 +314,7 @@ static void CommonInit(FLEViewController* controller) {
       [FlutterMethodChannel methodChannelWithName:@"flutter/platform"
                                   binaryMessenger:_engine.binaryMessenger
                                             codec:[FlutterJSONMethodCodec sharedInstance]];
-  __weak FLEViewController* weakSelf = self;
+  __weak FlutterViewController* weakSelf = self;
   [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [weakSelf handleMethodCall:call result:result];
   }];

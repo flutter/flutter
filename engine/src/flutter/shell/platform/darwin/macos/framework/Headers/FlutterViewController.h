@@ -4,10 +4,13 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "FLEEngine.h"
+#import "FlutterEngine.h"
 #import "FlutterMacros.h"
 #import "FlutterPluginRegistrarMacOS.h"
 
+/**
+ * Values for the `mouseTrackingMode` property.
+ */
 typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
   // Hover events will never be sent to Flutter.
   FlutterMouseTrackingModeNone = 0,
@@ -20,19 +23,15 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
 };
 
 /**
- * Controls embedder plugins and communication with the underlying Flutter engine, managing a view
- * intended to handle key inputs and drawing protocols (see |view|).
- *
- * Can be launched headless (no managed view), at which point a Dart executable will be run on the
- * Flutter engine in non-interactive mode, or with a drawable Flutter canvas.
+ * Controls a view that displays Flutter content and manages input.
  */
 FLUTTER_EXPORT
-@interface FLEViewController : NSViewController <FlutterPluginRegistry>
+@interface FlutterViewController : NSViewController <FlutterPluginRegistry>
 
 /**
  * The Flutter engine associated with this view controller.
  */
-@property(nonatomic, nonnull, readonly) FLEEngine* engine;
+@property(nonatomic, nonnull, readonly) FlutterEngine* engine;
 
 /**
  * The style of mouse tracking to use for the view. Defaults to
@@ -43,10 +42,11 @@ FLUTTER_EXPORT
 /**
  * Initializes a controller that will run the given project.
  *
- * @param project The project to run in this view controller. If nil, a default `FLEDartProject`
+ * @param project The project to run in this view controller. If nil, a default `FlutterDartProject`
  *                will be used.
  */
-- (nonnull instancetype)initWithProject:(nullable FLEDartProject*)project NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithProject:(nullable FlutterDartProject*)project
+    NS_DESIGNATED_INITIALIZER;
 
 - (nonnull instancetype)initWithNibName:(nullable NSString*)nibNameOrNil
                                  bundle:(nullable NSBundle*)nibBundleOrNil

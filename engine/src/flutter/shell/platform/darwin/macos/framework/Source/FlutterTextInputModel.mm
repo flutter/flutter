@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputModel.h"
 
 static NSString* const kTextAffinityDownstream = @"TextAffinity.downstream";
 static NSString* const kTextAffinityUpstream = @"TextAffinity.upstream";
@@ -62,7 +62,7 @@ static long GetExtentForRange(NSRange range) {
   return range.location + range.length;
 }
 
-@implementation FLETextInputModel
+@implementation FlutterTextInputModel
 
 - (instancetype)initWithClientID:(NSNumber*)clientID configuration:(NSDictionary*)config {
   self = [super init];
@@ -81,14 +81,15 @@ static long GetExtentForRange(NSRange range) {
     _text = [[NSMutableString alloc] init];
     _selectedRange = NSMakeRange(NSNotFound, 0);
     _markedRange = NSMakeRange(NSNotFound, 0);
-    _textAffinity = FLETextAffinityUpstream;
+    _textAffinity = FlutterTextAffinityUpstream;
   }
   return self;
 }
 
 - (NSDictionary*)state {
-  NSString* const textAffinity =
-      (_textAffinity == FLETextAffinityUpstream) ? kTextAffinityUpstream : kTextAffinityDownstream;
+  NSString* const textAffinity = (_textAffinity == FlutterTextAffinityUpstream)
+                                     ? kTextAffinityUpstream
+                                     : kTextAffinityDownstream;
   NSDictionary* state = @{
     kSelectionBaseKey : @(GetBaseForRange(_selectedRange)),
     kSelectionExtentKey : @(GetExtentForRange(_selectedRange)),
@@ -110,8 +111,8 @@ static long GetExtentForRange(NSRange range) {
   NSString* selectionAffinity = state[kSelectionAffinityKey];
   if (selectionAffinity != nil) {
     _textAffinity = [selectionAffinity isEqualToString:kTextAffinityUpstream]
-                        ? FLETextAffinityUpstream
-                        : FLETextAffinityDownstream;
+                        ? FlutterTextAffinityUpstream
+                        : FlutterTextAffinityDownstream;
   }
   _markedRange =
       UpdateRangeFromBaseExtent(state[kComposingBaseKey], state[kComposingExtentKey], _markedRange);

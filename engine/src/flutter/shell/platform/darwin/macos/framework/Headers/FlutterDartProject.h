@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef FLUTTER_FLEDARTPROJECT_H_
-#define FLUTTER_FLEDARTPROJECT_H_
+#ifndef FLUTTER_FLUTTERDARTPROJECT_H_
+#define FLUTTER_FLUTTERDARTPROJECT_H_
 
 #import <Foundation/Foundation.h>
 
@@ -12,10 +12,10 @@
 /**
  * A set of Flutter and Dart assets used by a `FlutterEngine` to initialize execution.
  *
- * TODO(stuartmorgan): Align API with FlutterDartProject.
+ * TODO(stuartmorgan): Align API with FlutterDartProject, and combine.
  */
 FLUTTER_EXPORT
-@interface FLEDartProject : NSObject
+@interface FlutterDartProject : NSObject
 
 /**
  * Initializes a Flutter Dart project from a bundle.
@@ -26,18 +26,20 @@ FLUTTER_EXPORT
  * @param bundle The bundle containing the Flutter assets directory. If nil, the main bundle is
  *               used.
  */
-- (nonnull instancetype)initWithBundle:(nullable NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)initWithPrecompiledDartBundle:(nullable NSBundle*)bundle
+    NS_DESIGNATED_INITIALIZER;
 
 /**
  * Switches to pass to the Flutter engine. See
  * https://github.com/flutter/engine/blob/master/shell/common/switches.h
- * for details. Not all switches will apply to embedding mode.
+ * for details. Not all switches will apply to embedding mode. Switches have not stability
+ * guarantee, and are subject to change without notice.
  *
- * Note: This property is likely to be removed in the future in favor of exposing specific switches
- * via their own APIs.
+ * Note: This property WILL BE REMOVED in the future. If you use this property, please see
+ * https://github.com/flutter/flutter/issue/38569.
  */
 @property(nullable) NSArray<NSString*>* engineSwitches;
 
 @end
 
-#endif  // FLUTTER_FLEDARTPROJECT_H_
+#endif  // FLUTTER_FLUTTERDARTPROJECT_H_

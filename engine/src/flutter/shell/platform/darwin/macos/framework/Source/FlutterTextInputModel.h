@@ -9,12 +9,15 @@
  * a line break, the cursor may be drawn either at the end of the current line (upstream)
  * or at the beginning of the next (downstream).
  */
-typedef NS_ENUM(NSUInteger, FLETextAffinity) { FLETextAffinityUpstream, FLETextAffinityDownstream };
+typedef NS_ENUM(NSUInteger, FlutterTextAffinity) {
+  FlutterTextAffinityUpstream,
+  FlutterTextAffinityDownstream
+};
 
 /**
  * Data model representing text input state during an editing session.
  */
-@interface FLETextInputModel : NSObject
+@interface FlutterTextInputModel : NSObject
 
 /**
  * The full text being edited.
@@ -28,7 +31,7 @@ typedef NS_ENUM(NSUInteger, FLETextAffinity) { FLETextAffinityUpstream, FLETextA
 /**
  * The affinity for the current cursor position.
  */
-@property FLETextAffinity textAffinity;
+@property FlutterTextAffinity textAffinity;
 /**
  * The range of text that is marked for edit, i.e. under the effects of a multi-keystroke input
  * combination.

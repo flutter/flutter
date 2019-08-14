@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputPlugin.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputPlugin.h"
 
 #import <objc/message.h>
 
 #import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLEViewController_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterTextInputModel.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterViewController_Internal.h"
 
 static NSString* const kTextInputChannel = @"flutter/textinput";
 
@@ -25,7 +25,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 /**
  * Private properties of FlutterTextInputPlugin.
  */
-@interface FLETextInputPlugin () <NSTextInputClient>
+@interface FlutterTextInputPlugin () <NSTextInputClient>
 
 /**
  * A text input context, representing a connection to the Cocoa text input system.
@@ -36,7 +36,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
  * A dictionary of text input models, one per client connection, keyed
  * by the client connection ID.
  */
-@property(nonatomic) NSMutableDictionary<NSNumber*, FLETextInputModel*>* textInputModels;
+@property(nonatomic) NSMutableDictionary<NSNumber*, FlutterTextInputModel*>* textInputModels;
 
 /**
  * The currently active client connection ID.
@@ -46,7 +46,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 /**
  * The currently active text input model.
  */
-@property(nonatomic, readonly, nullable) FLETextInputModel* activeModel;
+@property(nonatomic, readonly, nullable) FlutterTextInputModel* activeModel;
 
 /**
  * The channel used to communicate with Flutter.
@@ -54,9 +54,9 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 @property(nonatomic) FlutterMethodChannel* channel;
 
 /**
- * The FLEViewController to manage input for.
+ * The FlutterViewController to manage input for.
  */
-@property(nonatomic, weak) FLEViewController* flutterViewController;
+@property(nonatomic, weak) FlutterViewController* flutterViewController;
 
 /**
  * Handles a Flutter system message on the text input channel.
@@ -65,16 +65,16 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 
 @end
 
-@implementation FLETextInputPlugin
+@implementation FlutterTextInputPlugin
 
-- (instancetype)initWithViewController:(FLEViewController*)viewController {
+- (instancetype)initWithViewController:(FlutterViewController*)viewController {
   self = [super init];
   if (self != nil) {
     _flutterViewController = viewController;
     _channel = [FlutterMethodChannel methodChannelWithName:kTextInputChannel
                                            binaryMessenger:viewController.engine.binaryMessenger
                                                      codec:[FlutterJSONMethodCodec sharedInstance]];
-    __weak FLETextInputPlugin* weakSelf = self;
+    __weak FlutterTextInputPlugin* weakSelf = self;
     [_channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
       [weakSelf handleMethodCall:call result:result];
     }];
@@ -86,7 +86,7 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
 
 #pragma mark - Private
 
-- (FLETextInputModel*)activeModel {
+- (FlutterTextInputModel*)activeModel {
   return (_activeClientID == nil) ? nil : _textInputModels[_activeClientID];
 }
 
@@ -106,8 +106,8 @@ static NSString* const kMultilineInputType = @"TextInputType.multiline";
         (_activeClientID == nil || ![_activeClientID isEqualToNumber:clientID])) {
       _activeClientID = clientID;
       // TODO: Do we need to preserve state across setClient calls?
-      FLETextInputModel* inputModel =
-          [[FLETextInputModel alloc] initWithClientID:clientID configuration:call.arguments[1]];
+      FlutterTextInputModel* inputModel =
+          [[FlutterTextInputModel alloc] initWithClientID:clientID configuration:call.arguments[1]];
       if (!inputModel) {
         result([FlutterError errorWithCode:@"error"
                                    message:@"Failed to create an input model"

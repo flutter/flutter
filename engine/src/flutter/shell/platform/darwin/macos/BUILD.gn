@@ -29,12 +29,12 @@ _flutter_framework_dir = "$root_out_dir/$_flutter_framework_filename"
 # The headers that will be copied to the framework and be accessed from outside
 # the Flutter engine source root.
 _flutter_framework_headers = [
+  "framework/Headers/FlutterDartProject.h",
+  "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterMacOS.h",
   "framework/Headers/FlutterPluginMacOS.h",
   "framework/Headers/FlutterPluginRegistrarMacOS.h",
-  "framework/Headers/FLEDartProject.h",
-  "framework/Headers/FLEEngine.h",
-  "framework/Headers/FLEViewController.h",
+  "framework/Headers/FlutterViewController.h",
 ]
 
 _flutter_framework_headers_copy_dir =
@@ -46,18 +46,18 @@ shared_library("create_flutter_framework_dylib") {
   output_name = "$_flutter_framework_name"
 
   sources = [
-    "framework/Source/FLEDartProject.mm",
-    "framework/Source/FLEDartProject_Internal.h",
-    "framework/Source/FLEEngine.mm",
-    "framework/Source/FLEEngine_Internal.h",
-    "framework/Source/FLETextInputModel.h",
-    "framework/Source/FLETextInputModel.mm",
-    "framework/Source/FLETextInputPlugin.h",
-    "framework/Source/FLETextInputPlugin.mm",
-    "framework/Source/FLEViewController.mm",
-    "framework/Source/FLEViewController_Internal.h",
+    "framework/Source/FlutterDartProject.mm",
+    "framework/Source/FlutterDartProject_Internal.h",
+    "framework/Source/FlutterEngine.mm",
+    "framework/Source/FlutterEngine_Internal.h",
+    "framework/Source/FlutterTextInputModel.h",
+    "framework/Source/FlutterTextInputModel.mm",
+    "framework/Source/FlutterTextInputPlugin.h",
+    "framework/Source/FlutterTextInputPlugin.mm",
     "framework/Source/FlutterView.h",
     "framework/Source/FlutterView.mm",
+    "framework/Source/FlutterViewController.mm",
+    "framework/Source/FlutterViewController_Internal.h",
   ]
 
   sources += _flutter_framework_headers
