@@ -71,7 +71,6 @@ void main() {
       backgroundColor: Colors.blue,
     );
     final ChipThemeData chipTheme = theme.chipTheme;
-    bool value;
 
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
@@ -91,8 +90,8 @@ void main() {
                   avatar: const Placeholder(),
                   deleteIcon: const Placeholder(),
                   isEnabled: true,
-                  selected: value,
-                  label: Text('$value'),
+                  selected: false,
+                  label: const Text('Chip'),
                   onSelected: (bool newValue) { },
                   onPressed: null,
                 ),
