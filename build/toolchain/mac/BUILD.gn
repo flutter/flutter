@@ -70,11 +70,6 @@ template("mac_toolchain") {
       sysroot_flags = invoker.sysroot_flags
     }
 
-    toolchain_flags = ""
-    if (invoker.toolchain_cpu == "i386") {
-      toolchain_flags = "-m32"
-    }
-
     lto_flags = ""
     if (enable_lto) {
       lto_flags = "-flto"
@@ -87,7 +82,7 @@ template("mac_toolchain") {
 
     tool("cc") {
       depfile = "{{output}}.d"
-      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $lto_flags {{cflags}} {{cflags_c}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CC {{output}}"
       outputs = [
@@ -97,7 +92,7 @@ template("mac_toolchain") {
 
     tool("cxx") {
       depfile = "{{output}}.d"
-      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $lto_flags {{cflags}} {{cflags_cc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "CXX {{output}}"
       outputs = [
@@ -108,7 +103,7 @@ template("mac_toolchain") {
     tool("asm") {
       # For GCC we can just use the C compiler to compile assembly.
       depfile = "{{output}}.d"
-      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{asmflags}} $sysroot_flags $lto_flags {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "ASM {{output}}"
       outputs = [
@@ -118,7 +113,7 @@ template("mac_toolchain") {
 
     tool("objc") {
       depfile = "{{output}}.d"
-      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_c}} {{cflags_objc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $lto_flags {{cflags}} {{cflags_c}} {{cflags_objc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJC {{output}}"
       outputs = [
@@ -128,7 +123,7 @@ template("mac_toolchain") {
 
     tool("objcxx") {
       depfile = "{{output}}.d"
-      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $toolchain_flags $lto_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} $coverage_flags -c {{source}} -o {{output}}"
+      command = "$goma_prefix $cxx -MMD -MF $depfile {{defines}} {{include_dirs}} $sysroot_flags $lto_flags {{cflags}} {{cflags_cc}} {{cflags_objcc}} $coverage_flags -c {{source}} -o {{output}}"
       depsformat = "gcc"
       description = "OBJCXX {{output}}"
       outputs = [
@@ -164,7 +159,7 @@ template("mac_toolchain") {
       lto_object_file = "{{root_out_dir}}/lto_{{target_output_name}}.o"
 
       does_reexport_command = "[ ! -e $dylib -o ! -e $tocname ] || otool -l $dylib | grep -q LC_REEXPORT_DYLIB"
-      link_command = "$ld -shared $sysroot_flags $toolchain_flags $lto_flags $coverage_flags -Wl,-object_path_lto,$lto_object_file {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      link_command = "$ld -shared $sysroot_flags $lto_flags $coverage_flags -Wl,-object_path_lto,$lto_object_file {{ldflags}} -o $dylib -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       replace_command = "if ! cmp -s $temporary_tocname $tocname; then mv $temporary_tocname $tocname"
       extract_toc_command = "{ otool -l $dylib | grep LC_ID_DYLIB -A 5; nm -gP $dylib | cut -f1-2 -d' ' | grep -v U\$\$; true; }"
 
@@ -200,7 +195,7 @@ template("mac_toolchain") {
       outfile = "{{root_out_dir}}/{{target_output_name}}{{output_extension}}"
       rspfile = "$outfile.rsp"
 
-      command = "$ld $sysroot_flags $toolchain_flags $lto_flags {{ldflags}} $coverage_flags -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
+      command = "$ld $sysroot_flags $lto_flags {{ldflags}} $coverage_flags -Xlinker -rpath -Xlinker @executable_path/Frameworks -o $outfile -Wl,-filelist,$rspfile {{solibs}} {{libs}}"
       description = "LINK $outfile"
       rspfile_content = "{{inputs_newline}}"
       outputs = [
@@ -270,25 +265,6 @@ mac_toolchain("ios_clang_x64") {
 # Toolchain used for Mac host targets.
 mac_toolchain("clang_x64") {
   toolchain_cpu = "x64"
-  toolchain_os = "mac"
-  if (!enable_bitcode) {
-    prefix = rebase_path(llvm_bin_path, root_build_dir)
-    ar = "$prefix/llvm-ar"
-    cc = "$prefix/clang"
-    cxx = "$prefix/clang++"
-  } else {
-    ar = "ar"
-    cc = "clang"
-    cxx = "clang++"
-  }
-  ld = cxx
-  is_clang = true
-  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
-}
-
-# Toolchain used for Mac host (i386) targets.
-mac_toolchain("clang_x86") {
-  toolchain_cpu = "i386"
   toolchain_os = "mac"
   if (!enable_bitcode) {
     prefix = rebase_path(llvm_bin_path, root_build_dir)
