@@ -611,12 +611,36 @@ class FlutterPlugin implements Plugin<Project> {
                     with flutterTask.assets
                 }
             }
-            variant.outputs.first().processResources.dependsOn(copyFlutterAssetsTask)
         }
         if (project.android.hasProperty("applicationVariants")) {
             project.android.applicationVariants.all addFlutterDeps
         } else {
             project.android.libraryVariants.all addFlutterDeps
+        }
+
+        String mainModuleName = "app"
+        try {
+            String tmpModuleName = project.rootProject.ext.mainModuleName
+            if (tmpModuleName != null && !tmpModuleName.empty) {
+                mainModuleName = tmpModuleName
+            }
+        } catch (Exception e) {
+        }
+        project.gradle.afterProject { p ->
+            if (p.name == mainModuleName) {
+                p.android.applicationVariants.all { v ->
+                    Task packageAssets = project.tasks.findByPath(":flutter:package${v.name.capitalize()}Assets")
+                    if (packageAssets) {
+                        Task copyFlutterAssetsTask = project.tasks.findByPath(":flutter:copyFlutterAssets${v.name.capitalize()}")
+                        if(copyFlutterAssetsTask){
+                            v.mergeAssets?.dependsOn(copyFlutterAssetsTask)
+                        }
+                    } else {
+                        def processResources = variant.outputs.first().processResources
+                        processResources.dependsOn(copyFlutterAssetsTask)
+                    }
+                }
+            }
         }
 
         if (buildPluginAsAar()) {
