@@ -46,7 +46,7 @@ class BasicMessageChannel<T> {
   final MessageCodec<T> codec;
 
   /// The messenger which sends the bytes for this channel, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
   final BinaryMessenger _binaryMessenger;
 
   /// Sends the specified [message] to the platform plugins on this channel.
@@ -135,7 +135,7 @@ class MethodChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
   final BinaryMessenger _binaryMessenger;
 
   /// Invokes a [method] on this channel with the specified [arguments].
@@ -479,7 +479,7 @@ class EventChannel {
   final MethodCodec codec;
 
   /// The messenger used by this channel to send platform messages, not null.
-  BinaryMessenger get binaryMessenger => _binaryMessenger ?? ServicesBinding.instance.defaultBinaryMessenger;
+  BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
   final BinaryMessenger _binaryMessenger;
 
   /// Sets up a broadcast stream for receiving events on this channel.
