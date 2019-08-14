@@ -568,8 +568,8 @@ class ResidentCompiler {
           // when outputFilename future is not completed, but stdout is closed
           // process has died unexpectedly.
           if (!_stdoutHandler.compilerOutput.isCompleted) {
-            throwToolExit('the Dart compiler exited unexpectedly.');
             _stdoutHandler.compilerOutput.complete(null);
+            throwToolExit('the Dart compiler exited unexpectedly.');
           }
         });
 
