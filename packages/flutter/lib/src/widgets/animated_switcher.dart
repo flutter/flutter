@@ -218,17 +218,28 @@ class AnimatedSwitcher extends StatefulWidget {
 
   /// A function that wraps a new [child] with an animation that transitions
   /// the [child] in when the animation runs in the forward direction and out
-  /// when the animation runs in the reverse direction. This is only called
-  /// when a new [child] is set (not for each build), or when a new
-  /// [transitionBuilder] is set. If a new [transitionBuilder] is set, then
-  /// the transition is rebuilt for the current child and all previous children
-  /// using the new [transitionBuilder]. The function must not return null.
+  /// when the animation runs in the reverse direction.
+  ///
+  /// This is only called when a new [child] is set (not for each build), [child]
+  /// animation status has changed, or when a new [transitionBuilder] is set.
+  /// If a new [transitionBuilder] is set, then the transition is rebuilt for
+  /// the current child and all previous children using the new
+  /// [transitionBuilder]. The function must not return null.
   ///
   /// The default is [AnimatedSwitcher.defaultTransitionBuilder].
   ///
   /// The animation provided to the builder has the [duration] and
   /// [switchInCurve] or [switchOutCurve] applied as provided when the
   /// corresponding [child] was first provided.
+  ///
+  /// transitionBuilder will be called any where in the transition life cycle.
+  /// [Animation.status] will dictate the current transition phase.
+  /// [AnimationStatus.dismissed] implies the [child] is at the begin of
+  /// transitioning in. [AnimationStatus.forward] implies the [child] is in the
+  /// progress of transitioning in. [AnimationStatus.completed] implies the
+  /// [child] is at the end of transitioning in or beginning of transitioned out
+  /// [AnimationStatus.reverse] imples [child] is in the progress of
+  /// transitioning out.
   ///
   /// See also:
   ///
@@ -307,15 +318,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   void didUpdateWidget(AnimatedSwitcher oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If the transition builder changed, then update all of the previous
-    // transitions.
-    if (widget.transitionBuilder != oldWidget.transitionBuilder) {
-      _outgoingEntries.forEach(_updateTransitionForEntry);
-      if (_currentEntry != null)
-        _updateTransitionForEntry(_currentEntry);
-      _markChildWidgetCacheAsDirty();
-    }
-
+    _outgoingEntries.forEach(_updateTransitionForEntry);
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
     if (hasNewChild != hasOldChild ||
@@ -333,6 +336,13 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       _currentEntry.widgetChild = widget.child;
       _updateTransitionForEntry(_currentEntry); // uses entry.widgetChild
       _markChildWidgetCacheAsDirty();
+    } else if (widget.transitionBuilder != oldWidget.transitionBuilder) {
+      // If the transition builder changed, then update all of the previous
+      // transitions.
+      _outgoingEntries.forEach(_updateTransitionForEntry);
+      if(_currentEntry != null)
+        _updateTransitionForEntry(_currentEntry);
+      _markChildWidgetCacheAsDirty();
     }
   }
 
@@ -343,6 +353,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       assert(!_outgoingEntries.contains(_currentEntry));
       _outgoingEntries.add(_currentEntry);
       _currentEntry.controller.reverse();
+      _updateTransitionForEntry(_currentEntry);
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
     }
@@ -358,6 +369,11 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
     );
+    // Initial child should start at reverse state.
+    if (!animate) {
+      assert(_outgoingEntries.isEmpty);
+      controller.value = 1.0;
+    }
     _currentEntry = _newEntry(
       child: widget.child,
       controller: controller,
@@ -366,9 +382,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     );
     if (animate) {
       controller.forward();
-    } else {
-      assert(_outgoingEntries.isEmpty);
-      controller.value = 1.0;
     }
   }
 
@@ -402,6 +415,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     _outgoingWidgets = null;
   }
 
+  // This function should be called when entry.animation is updated appropriately.
   void _updateTransitionForEntry(_ChildEntry entry) {
     entry.transition = KeyedSubtree(
       key: entry.transition.key,

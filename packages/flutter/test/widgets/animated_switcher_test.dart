@@ -56,6 +56,141 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  testWidgets('animation.status in transitionBuilder dictates correct transition phase', (WidgetTester tester) async {
+    final UniqueKey containerOne = UniqueKey();
+    final UniqueKey containerTwo = UniqueKey();
+    final UniqueKey containerThree = UniqueKey();
+    final UniqueKey transitionIn = UniqueKey();
+    final UniqueKey transitionOut = UniqueKey();
+    Widget transitionBuilder(Widget child, Animation<double> animation) {
+      UniqueKey key;
+      switch (animation.status) {
+        case AnimationStatus.dismissed:
+        case AnimationStatus.forward:
+          key = transitionIn;
+          break;
+        case AnimationStatus.completed:
+        case AnimationStatus.reverse:
+          key = transitionOut;
+          break;
+      }
+      return Container(key: key, child: child);
+    }
+    Widget transitionBuilderDiffReference(Widget child, Animation<double> animation) {
+      UniqueKey key;
+      switch (animation.status) {
+        case AnimationStatus.dismissed:
+        case AnimationStatus.forward:
+          key = transitionIn;
+          break;
+        case AnimationStatus.completed:
+        case AnimationStatus.reverse:
+          key = transitionOut;
+          break;
+      }
+      return Container(key: key, child: child);
+    }
+    await tester.pumpWidget(
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        transitionBuilder: transitionBuilder,
+        child: Container(key: containerOne, color: const Color(0x00000000)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+      ),
+    );
+
+    // containerOne is on stage and should be in transitioning out cycle.
+    expect(
+      find.descendant(
+        of: find.byKey(transitionOut),
+        matching: find.byKey(containerOne),
+      ),
+      findsOneWidget
+    );
+
+    await tester.pumpWidget(
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        transitionBuilder: transitionBuilder,
+        child: Container(key: containerTwo, color: const Color(0xff000000)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+      ),
+    );
+
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(
+      find.descendant(
+        of: find.byKey(transitionOut),
+        matching: find.byKey(containerOne),
+      ),
+      findsOneWidget
+    );
+    // containerTwo is on stage and should be in transitioning in cycle.
+    expect(
+      find.descendant(
+        of: find.byKey(transitionIn),
+        matching: find.byKey(containerTwo),
+      ),
+      findsOneWidget
+    );
+    // Pumps a new transitionBuilder that has different reference to previous
+    // one to simulate transitionBuilder update.
+    await tester.pumpWidget(
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        transitionBuilder: transitionBuilderDiffReference,
+        child: Container(key: containerTwo, color: const Color(0xff000000)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+      ),
+    );
+
+    // They should still be in the same transition cycle.
+    expect(
+      find.descendant(
+        of: find.byKey(transitionOut),
+        matching: find.byKey(containerOne),
+      ),
+      findsOneWidget
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(transitionIn),
+        matching: find.byKey(containerTwo),
+      ),
+      findsOneWidget
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.byKey(containerOne), findsNothing);
+    await tester.pumpWidget(
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 100),
+        transitionBuilder: transitionBuilderDiffReference,
+        child: Container(key: containerThree, color: const Color(0xff000000)),
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+      ),
+    );
+    // containerTwo transitions out, and containerThree transitions in.
+    expect(
+      find.descendant(
+        of: find.byKey(transitionOut),
+        matching: find.byKey(containerTwo),
+      ),
+      findsOneWidget
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(transitionIn),
+        matching: find.byKey(containerThree),
+      ),
+      findsOneWidget
+    );
+  });
+
   testWidgets('AnimatedSwitcher can handle back-to-back changes.', (WidgetTester tester) async {
     final UniqueKey container1 = UniqueKey();
     final UniqueKey container2 = UniqueKey();
