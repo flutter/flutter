@@ -130,6 +130,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.url.join('kernel', 'flutter_ddc_sdk.dill'),
+              librariesPath: 'libraries.json',
             ),
       ],
       core.toAllPackages(),
