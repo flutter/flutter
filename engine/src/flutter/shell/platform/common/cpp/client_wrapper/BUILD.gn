@@ -3,43 +3,12 @@
 # found in the LICENSE file.
 
 import("$flutter_root/testing/testing.gni")
-import("publish.gni")
-
-_wrapper_includes = [
-  "include/flutter/basic_message_channel.h",
-  "include/flutter/binary_messenger.h",
-  "include/flutter/encodable_value.h",
-  "include/flutter/engine_method_result.h",
-  "include/flutter/json_message_codec.h",
-  "include/flutter/json_method_codec.h",
-  "include/flutter/json_type.h",
-  "include/flutter/message_codec.h",
-  "include/flutter/method_call.h",
-  "include/flutter/method_channel.h",
-  "include/flutter/method_codec.h",
-  "include/flutter/method_result.h",
-  "include/flutter/plugin_registrar.h",
-  "include/flutter/standard_message_codec.h",
-  "include/flutter/standard_method_codec.h",
-]
-
-# TODO: Once the wrapper API is more stable, consolidate to as few files as is
-# reasonable (without forcing different kinds of clients to take unnecessary
-# code) to simplify use.
-_wrapper_sources = [
-  "byte_stream_wrappers.h",
-  "engine_method_result.cc",
-  "json_message_codec.cc",  # TODO combine into a single json_codec.cc.
-  "json_method_codec.cc",  # TODO combine into a single json_codec.cc.
-  "plugin_registrar.cc",
-  "standard_codec_serializer.h",
-  "standard_codec.cc",
-]
+import("core_wrapper_files.gni")
 
 # Client library build for internal use by the shell implementation.
 source_set("client_wrapper") {
-  sources = _wrapper_sources
-  public = _wrapper_includes
+  sources = core_cpp_client_wrapper_sources
+  public = core_cpp_client_wrapper_includes
 
   deps = [
     "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
@@ -55,12 +24,6 @@ source_set("client_wrapper") {
   public_configs = [
     "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
   ]
-}
-
-# Copies the client wrapper code to the output directory.
-publish_client_wrapper("publish_wrapper") {
-  public = _wrapper_includes
-  sources = _wrapper_sources + [ "README" ]
 }
 
 source_set("client_wrapper_library_stubs") {

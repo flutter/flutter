@@ -10,9 +10,9 @@ group("linux") {
   if (build_glfw_shell) {
     deps = [
       ":flutter_linux",
-      "$flutter_root/shell/platform/common/cpp/client_wrapper:publish_wrapper",
       "$flutter_root/shell/platform/glfw:publish_headers_glfw",
       "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+      "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_unprefixed",
     ]
   }
 }

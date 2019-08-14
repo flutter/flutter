@@ -5,11 +5,7 @@
 import("$flutter_root/shell/platform/common/cpp/client_wrapper/publish.gni")
 import("$flutter_root/testing/testing.gni")
 
-_wrapper_includes = [
-  "include/flutter/flutter_window.h",
-  "include/flutter/flutter_window_controller.h",
-  "include/flutter/plugin_registrar_glfw.h",
-]
+_wrapper_includes = [ "include/flutter/flutter_window_controller.h" ]
 
 _wrapper_sources = [ "flutter_window_controller.cc" ]
 
@@ -22,15 +18,15 @@ config("relative_core_wrapper_headers") {
   ]
 }
 
-# GLFW client wrapper build for internal use by the shell implementation.
-source_set("client_wrapper_glfw") {
+# Windows client wrapper build for internal use by the shell implementation.
+source_set("client_wrapper_windows") {
   sources = _wrapper_sources
   public = _wrapper_includes
 
   deps = [
     "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
     "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
-    "$flutter_root/shell/platform/glfw:flutter_glfw_headers",
+    "$flutter_root/shell/platform/windows:flutter_windows_headers",
   ]
 
   configs += [
@@ -40,44 +36,36 @@ source_set("client_wrapper_glfw") {
   public_configs = [
     ":relative_core_wrapper_headers",
     "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
-    "$flutter_root/shell/platform/glfw:relative_flutter_glfw_headers",
+    "$flutter_root/shell/platform/windows:relative_flutter_windows_headers",
   ]
 }
 
-# Copies the GLFW client wrapper code to the output directory in the legacy
-# unsuffixed location.
-# TODO: Remove this copy once build recipes are using the _glfw version below.
-publish_client_wrapper_extension("publish_wrapper_unprefixed") {
-  public = _wrapper_includes
-  sources = _wrapper_sources
-}
-
-# Copies the GLFW client wrapper code to the output directory with a _glfw
+# Copies the Windows client wrapper code to the output directory with a _windows
 # suffix.
-publish_client_wrapper_extension("publish_wrapper_glfw") {
+publish_client_wrapper_extension("publish_wrapper_windows") {
   public = _wrapper_includes
   sources = _wrapper_sources
-  directory_suffix = "glfw"
+  directory_suffix = "windows"
 }
 
-source_set("client_wrapper_library_stubs_glfw") {
+source_set("client_wrapper_library_stubs_windows") {
   sources = [
-    "testing/stub_flutter_glfw_api.cc",
-    "testing/stub_flutter_glfw_api.h",
+    "testing/stub_flutter_windows_api.cc",
+    "testing/stub_flutter_windows_api.h",
   ]
 
   defines = [ "FLUTTER_DESKTOP_LIBRARY" ]
 
   public_deps = [
-    "$flutter_root/shell/platform/glfw:flutter_glfw_headers",
+    "$flutter_root/shell/platform/windows:flutter_windows_headers",
   ]
 }
 
-test_fixtures("client_wrapper_glfw_fixtures") {
+test_fixtures("client_wrapper_windows_fixtures") {
   fixtures = []
 }
 
-executable("client_wrapper_glfw_unittests") {
+executable("client_wrapper_windows_unittests") {
   testonly = true
 
   # TODO: Add more unit tests.
@@ -86,9 +74,9 @@ executable("client_wrapper_glfw_unittests") {
   ]
 
   deps = [
-    ":client_wrapper_glfw",
-    ":client_wrapper_glfw_fixtures",
-    ":client_wrapper_library_stubs_glfw",
+    ":client_wrapper_library_stubs_windows",
+    ":client_wrapper_windows",
+    ":client_wrapper_windows_fixtures",
     "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
     "$flutter_root/testing",
 
