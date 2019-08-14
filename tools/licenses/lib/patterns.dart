@@ -175,6 +175,7 @@ final RegExp lrOpenSSL = RegExp(r'Copyright \(c\) 1998-2011 The OpenSSL Project\
 final RegExp lrBSD = RegExp(r'Redistribution(?: |\n)+and(?: |\n)+use(?: |\n)+in(?: |\n)+source(?: |\n)+and(?: |\n)+binary(?: |\n)+forms(?:(?: |\n)+of(?: |\n)+the(?: |\n)+software(?: |\n)+as(?: |\n)+well(?: |\n)+as(?: |\n)+documentation)?,(?: |\n)+with(?: |\n)+or(?: |\n)+without(?: |\n)+modification,(?: |\n)+are(?: |\n)+permitted(?: |\n)+provided(?: |\n)+that(?: |\n)+the(?: |\n)+following(?: |\n)+conditions(?: |\n)+are(?: |\n)+met:');
 final RegExp lrZlib = RegExp(r'Permission(?: |\n)+is(?: |\n)+granted(?: |\n)+to(?: |\n)+anyone(?: |\n)+to(?: |\n)+use(?: |\n)+this(?: |\n)+software(?: |\n)+for(?: |\n)+any(?: |\n)+purpose,(?: |\n)+including(?: |\n)+commercial(?: |\n)+applications,(?: |\n)+and(?: |\n)+to(?: |\n)+alter(?: |\n)+it(?: |\n)+and(?: |\n)+redistribute(?: |\n)+it(?: |\n)+freely,(?: |\n)+subject(?: |\n)+to(?: |\n)+the(?: |\n)+following(?: |\n)+restrictions:');
 final RegExp lrPNG = RegExp(r'This code is released under the libpng license\.');
+final RegExp lrBison = RegExp(r'This special exception was added by the Free Software Foundation in *\n *version 2.2 of Bison.');
 
 
 // "NO COPYRIGHT" STATEMENTS
@@ -324,6 +325,23 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
       r'(Copyright .+(the .+ authors)\. +All rights reserved.) +' +
       r'Use of this source(?: code)? is governed by a BS?D-style license that can be found in the '.replaceAll(' ', _linebreak) +
       r'([^ ]+) file\b(?! or at)',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // ANGLE .json files
+  LicenseFileReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    copyrightIndex: 3,
+    authorIndex: 4,
+    fileIndex: 5,
+    pattern: RegExp(
+      kIndent +
+      r'(Copyright .+(The .+ Authors)\. +All rights reserved.)", *\n'
+      r'^\1\2Use of this source code is governed by a BSD-style license that can be", *\n'
+      r'^\1\2found in the ([^ ]+) file.",',
       multiLine: true,
       caseSensitive: false,
     )
@@ -1315,6 +1333,11 @@ final List<RegExp> csLicenses = <RegExp>[
 
   RegExp(
     kIndent +
+
+    // Some files in ANGLE prefix the license with a description of the license.
+    r'(?:BSD 2-Clause License \(http://www.opensource.org/licenses/bsd-license.php\))?' +
+    _linebreak +
+
     (
       'Redistribution and use in source and binary forms, with or without '
       'modification, are permitted provided that the following conditions are met:'
@@ -1332,7 +1355,7 @@ final List<RegExp> csLicenses = <RegExp>[
     r'|[\r\n]+' +
 
     // ad clause - ucb
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'All advertising materials mentioning features or use of this software '
       'must display the following acknowledgement: This product includes software '
@@ -1342,7 +1365,7 @@ final List<RegExp> csLicenses = <RegExp>[
     +
 
     // ad clause - netbsd
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'All advertising materials mentioning features or use of this software '
       'must display the following acknowledgement: This product includes software '
@@ -1352,7 +1375,7 @@ final List<RegExp> csLicenses = <RegExp>[
     +
 
     // ack clause
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       r'The origin of this software must not be misrepresented; you must not claim '
       r'that you wrote the original software\. If you use this software in a product, '
@@ -1362,7 +1385,7 @@ final List<RegExp> csLicenses = <RegExp>[
     )
     +
 
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       r'Altered source versions must be plainly marked as such, and must not be '
       r'misrepresented as being the original software\.'
@@ -1371,7 +1394,7 @@ final List<RegExp> csLicenses = <RegExp>[
     +
 
     // no ad clauses
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'Neither my name, .+, nor the names of any other contributors to the code '
       'use may not be used to endorse or promote products derived from this '
@@ -1380,7 +1403,7 @@ final List<RegExp> csLicenses = <RegExp>[
     )
     +
 
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'The name of the author may not be used to endorse or promote products '
       'derived from this software without specific prior written permission\\.?'
@@ -1388,7 +1411,7 @@ final List<RegExp> csLicenses = <RegExp>[
     )
     +
 
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'Neither the name of .+ nor the names of its contributors may be used '
       'to endorse or promote products derived from this software without '
@@ -1398,7 +1421,7 @@ final List<RegExp> csLicenses = <RegExp>[
     +
 
     // notice clauses
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'Redistributions of source code must retain the above copyright notice, '
       'this list of conditions and the following disclaimer\\.'
@@ -1406,7 +1429,7 @@ final List<RegExp> csLicenses = <RegExp>[
     )
     +
 
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'Redistributions in binary form must reproduce the above copyright notice, '
       'this list of conditions and the following disclaimer in the documentation '
@@ -1415,15 +1438,15 @@ final List<RegExp> csLicenses = <RegExp>[
     )
     +
 
-    r'|(?:[-*1-9.)/ ]+)' +
+    r'|(?:[-*1-9.)/ ]*)' +
     (
       'Redistributions in binary form must reproduce the above copyright notice, '
       'this list of conditions and the following disclaimer\\.'
       .replaceAll(' ', _linebreak)
     )
+    +
 
     // end of conditions
-    +
     r')*'
     +
 
@@ -1571,6 +1594,39 @@ final List<RegExp> csLicenses = <RegExp>[
     caseSensitive: false
   ),
 
+  // BISON LICENSE
+  // Seen in some ANGLE source. The usage falls under the "special exception" clause.
+  RegExp(
+    kIndent +
+    r'This program is free software: you can redistribute it and/or modify\n'
+    r'^(?:\1\2)?it under the terms of the GNU General Public License as published by\n'
+    r'^(?:\1\2)?the Free Software Foundation, either version 3 of the License, or\n'
+    r'^(?:\1\2)?\(at your option\) any later version.\n'
+    r'^(?:\1\2)?\n*'
+    r'^(?:\1\2)?This program is distributed in the hope that it will be useful,\n'
+    r'^(?:\1\2)?but WITHOUT ANY WARRANTY; without even the implied warranty of\n'
+    r'^(?:\1\2)?MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n'
+    r'^(?:\1\2)?GNU General Public License for more details.\n'
+    r'^(?:\1\2)?\n*'
+    r'^(?:\1\2)?You should have received a copy of the GNU General Public License\n'
+    r'^(?:\1\2)?along with this program.  If not, see <http://www.gnu.org/licenses/>.  \*/\n'
+    r'^(?:\1\2)?\n*' +
+    kIndent +
+    r'As a special exception, you may create a larger work that contains\n'
+    r'^(?:\1\2)?part or all of the Bison parser skeleton and distribute that work\n'
+    r"^(?:\1\2)?under terms of your choice, so long as that work isn't itself a\n"
+    r'^(?:\1\2)?parser generator using the skeleton or a modified version thereof\n'
+    r'^(?:\1\2)?as a parser skeleton.  Alternatively, if you modify or redistribute\n'
+    r'^(?:\1\2)?the parser skeleton itself, you may \(at your option\) remove this\n'
+    r'^(?:\1\2)?special exception, which will cause the skeleton and the resulting\n'
+    r'^(?:\1\2)?Bison output files to be licensed under the GNU General Public\n'
+    r'^(?:\1\2)?License without this special exception.\n'
+    r'^(?:\1\2)?\n*'
+    r'^(?:\1\2)?This special exception was added by the Free Software Foundation in\n'
+    r'^(?:\1\2)?version 2.2 of Bison.  \*/\n',
+    multiLine: true,
+    caseSensitive: false
+  ),
 
   // OTHER BRIEF LICENSES
 
