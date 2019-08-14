@@ -730,6 +730,8 @@ abstract class PlatformViewController {
   /// Dispatches the `event` to the platform view.
   void dispatchPointerEvent(PointerEvent event);
 
-  /// Disposes the resources related to ths platform view from engine.
+  /// Disposes the platform view.
+  ///
+  /// The [PlatformViewController] is unusable after calling dispose.
   void dispose();
 }

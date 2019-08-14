@@ -583,7 +583,7 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// The parameters used to create a [PlatformViewController].
 ///
-/// See also [CreatePlatformView] which uses this object to create a [PlatformViewController].
+/// See also [CreatePlatformViewController] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
@@ -591,12 +591,12 @@ class PlatformViewCreationParams {
     @required this.onPlatformViewCreated}):assert(id != null),
                           assert(onPlatformViewCreated != null);
 
-  /// The auto generated id for the newly created platform view.
+  /// The unique identifier for the new platform view.
   ///
   /// [PlatformViewController.viewId] should match this id.
   final int id;
 
-  /// Notifies when the PlatformView is ready.
+  /// Callback invoked after the platform view has been created.
   ///
   /// Must be invoked as soon as the embedded platform view is ready.
   /// For example, on iOS, this has to be called when we know the `UIView` is initialized.
@@ -608,14 +608,21 @@ class PlatformViewCreationParams {
 /// It is required when constructing a [PlatformViewLink].
 typedef PlatformViewSurfaceFactory = PlatformViewSurface Function(BuildContext context, PlatformViewController controller);
 
-/// Constructs a [PlatformViewController].
+///Constructs a [PlatformViewController].
 ///
-/// The implementer of a new platform view is responsible to implement this method when constructing a [PlatformViewLink].
-typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreationParams params);
+/// The [PlatformViewController.id] field of the created controller must match the value of the
+/// params [PlatformViewCreationParams.id] field.
+///
+/// See also [PlatformViewLink.onCreate].
+typedef CreatePlatformViewController = PlatformViewController Function(PlatformViewCreationParams params);
 
-/// The widget responsible for handling the life cycle and focus for a platform view.
+/// Links a platform view with the Flutter framework.
 ///
-/// This widget provides simpler way to implement a new platform view.
+/// Provides common functionality for embedding a platform view (e.g an android.view.View on Android)
+/// with the Flutter framework.
+///
+/// {@macro flutter.widgets.platformViews.lifetime}
+///
 /// To implement a new platform view widget, return this widget in the `build` method.
 /// For example:
 /// ```dart
@@ -624,7 +631,7 @@ typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreatio
 ///   Widget build(BuildContext context) {
 ///     return PlatformViewLink(
 ///       createCallback: createFooWebView,
-///       surfaceFactory: (BuildContext context, PlatformViewController controller, int id) {
+///       surfaceFactory: (BuildContext context, PlatformViewController controller) {
 ///        return PlatformViewSurface(
 ///            gestureRecognizers: gestureRecognizers,
 ///            controller: controller,
@@ -635,26 +642,31 @@ typedef CreatePlatformView = PlatformViewController Function(PlatformViewCreatio
 ///   }
 /// }
 /// ```
+///
+/// The `surfaceFactory` and the `createPlatformViewController` only take affect when the state of this widget is initialized.
+/// If the widget is rebuilt without losing its state, `surfaceFactory` and `createPlatformViewController` are ignored.
 class PlatformViewLink extends StatefulWidget {
 
-  /// Construct a `PlatformViewLink` widget.
+  /// Construct a [PlatformViewLink] widget.
   ///
-  /// The [surfaceFactory] and the [createPlatformView] must not be null.
+  /// The `surfaceFactory` and the `createPlatformViewController` must not be null.
   ///
   /// See also:
   /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
   /// * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
+    Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
-    @required CreatePlatformView createPlatformView,
+    @required CreatePlatformViewController createPlatformViewController,
     }) : assert(surfaceFactory != null),
-                                  assert(createPlatformView != null),
+                                  assert(createPlatformViewController != null),
                                   _surfaceFactory = surfaceFactory,
-                                  _createPlatformView = createPlatformView;
+                                  _createPlatformViewController = createPlatformViewController,
+                                  super(key: key);
 
 
   final PlatformViewSurfaceFactory _surfaceFactory;
-  final CreatePlatformView _createPlatformView;
+  final CreatePlatformViewController _createPlatformViewController;
 
   @override
   State<StatefulWidget> createState() {
@@ -666,35 +678,33 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 
   int _id;
   PlatformViewController _controller;
-  bool _initialized = false;
   bool _platformViewCreated = false;
+  PlatformViewSurface _surface;
 
   @override
   Widget build(BuildContext context) {
     if (!_platformViewCreated) {
       return const SizedBox.expand();
     }
-    return widget._surfaceFactory(context, _controller);
-  }
-
-  void _initializeOnce() {
-    if (_initialized) {
-      return;
-    }
-    _initialized = true;
-    _id = platformViewsRegistry.getNextPlatformViewId();
-    _controller = widget._createPlatformView(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
+    _surface ??= widget._surfaceFactory(context, _controller);
+    return _surface;
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _initializeOnce();
+  void initState() {
+    _initialize();
+    super.initState();
+  }
+
+  void _initialize() {
+    _id = platformViewsRegistry.getNextPlatformViewId();
+    _controller = widget._createPlatformViewController(PlatformViewCreationParams._(id:_id, onPlatformViewCreated:_onPlatformViewCreated));
   }
 
   void _onPlatformViewCreated(int id) {
-     _platformViewCreated = true;
-    setState((){});
+    setState((){
+      _platformViewCreated = true;
+    });
   }
 
   @override
