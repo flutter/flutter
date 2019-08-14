@@ -13,12 +13,12 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
-import 'base/zone_check.dart';
 import 'convert.dart' show base64;
 import 'globals.dart';
 import 'vmservice_record_replay.dart';
@@ -108,12 +108,6 @@ class VMService {
     Restart restart,
     CompileExpression compileExpression,
   ) {
-    _errorZone = Zone.current.fork(specification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent,
-          Object error, StackTrace stackTrace) {
-        // Do nothing.
-      }
-    ));
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
 
@@ -377,7 +371,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await runZoneChecked(() => _sendRequest('streamListen', <String, dynamic>{'streamId': streamId}));
+      await asyncGuard(() => _sendRequest('streamListen', <String, dynamic>{'streamId': streamId}));
     }
   }
 
