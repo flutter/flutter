@@ -246,12 +246,10 @@ class MediaQueryData {
   final bool invertColors;
 
   /// Whether the user requested a high contrast between foreground and background
-  /// content, in either:
-  /// * Settings -> Accessibility -> Increase Contrast (iOS)
-  /// * Settings -> Accessibility -> High contrast text (Android)
+  /// content on iOS, via Settings -> Accessibility -> Increase Contrast.
   ///
   /// This flag is currently only updated on iOS devices that are running iOS 13
-  /// or above, and Android devices that are running Android Q and above.
+  /// or above.
   final bool highContrast;
 
   /// Whether the platform is requesting that animations be disabled or reduced

@@ -691,7 +691,7 @@ void main() {
       expect(system0, isNot(withDifferentLink));
     });
 
-    test('CupertinoSystemColorsData.hasCode', () {
+    test('CupertinoSystemColorsData.hashCode', () {
       expect(system0.hashCode, system0.hashCode);
       expect(system0.hashCode, system0.copyWith().hashCode);
       expect(system0.hashCode, system0.copyWith(link: dynamicColor0).hashCode);
