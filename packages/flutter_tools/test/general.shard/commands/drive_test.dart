@@ -324,6 +324,7 @@ void main() {
       });
 
       Future<void> appStarterSetup() async {
+        mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
         final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
