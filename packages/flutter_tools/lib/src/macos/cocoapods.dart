@@ -29,6 +29,12 @@ const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
   Ensure that the output of 'pod --version' contains only digits and . to be recognized by Flutter.''';
 
+const String brokenCocoaPodsConsequence = '''
+  You appear to have CocoaPods installed but it is not working.
+  This can happen if you've upgraded your macOS or are using RVM to change your ruby version.
+  If you are using RVM, reset your ruby to the system version with:
+  rvm use system''';
+
 const String cocoaPodsInstallInstructions = '''
   sudo gem install cocoapods
   pod setup''';
@@ -52,6 +58,8 @@ enum CocoaPodsStatus {
   belowRecommendedVersion,
   /// Everything should be fine.
   recommended,
+  /// iOS plugins will not work, re-install required.
+  brokenInstall,
 }
 
 class CocoaPods {
@@ -59,6 +67,8 @@ class CocoaPods {
 
   String get cocoaPodsMinimumVersion => '1.6.0';
   String get cocoaPodsRecommendedVersion => '1.6.0';
+
+  Future<bool> get isInstalled => exitsHappyAsync(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
     _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
@@ -68,9 +78,13 @@ class CocoaPods {
   }
 
   Future<CocoaPodsStatus> get evaluateCocoaPodsInstallation async {
-    final String versionText = await cocoaPodsVersionText;
-    if (versionText == null)
+    if (!(await isInstalled)) {
       return CocoaPodsStatus.notInstalled;
+    }
+    final String versionText = await cocoaPodsVersionText;
+    if (versionText == null) {
+      return CocoaPodsStatus.brokenInstall;
+    }
     try {
       final Version installedVersion = Version.parse(versionText);
       if (installedVersion == null)
