@@ -355,8 +355,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
       case 'fonts':
         if (kvp.value is! YamlList || kvp.value[0] is! YamlMap) {
           errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+        } else {
+          _validateFonts(kvp.value, errors);
         }
-        _validateFonts(kvp.value, errors);
         break;
       case 'module':
         if (kvp.value is! YamlMap) {
