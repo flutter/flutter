@@ -57,7 +57,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
   Animation<Matrix4> _transform;
   AnimationController _controller;
   bool _isOpen = false;
-  _ContextMenuRoute<void> _route;
+  ContextMenuRoute<void> _route;
 
   @override
   void initState() {
@@ -121,7 +121,7 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 
     final Rect parentRect = Offset.zero & MediaQuery.of(context).size;
     final Opacity container = _childGlobalKey.currentContext.widget;
-    _route = _ContextMenuRoute<void>(
+    _route = ContextMenuRoute<void>(
       barrierLabel: 'Dismiss',
       filter: ui.ImageFilter.blur(
         sigmaX: 5.0,
@@ -213,8 +213,9 @@ class _ContextMenuState extends State<ContextMenu> with TickerProviderStateMixin
 // The open context menu.
 // TODO(justinmc): In native, dragging on the menu or the child animates and
 // eventually dismisses.
-class _ContextMenuRoute<T> extends PopupRoute<T> {
-  _ContextMenuRoute({
+@visibleForTesting
+class ContextMenuRoute<T> extends PopupRoute<T> {
+  ContextMenuRoute({
     this.barrierLabel,
     @required List<ContextMenuSheetAction> actions,
     WidgetBuilder builder,
@@ -280,31 +281,43 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
   // The final position is aligned so that its bottom is at the center of the
   // screen, and it's sized to be as big as possible. It's considered to be
   // inside of a Transform with `alignment` set to `Alignment.center`.
-  // TODO(justinmc): Try this with a child that has a portrait aspect ratio. May
-  // need to manually calculate safe area.
-  static Rect _getEndRect(Rect child, Rect parent) {
-    // The rect of the child at the time that the ContextMenu opens.
-    final Rect openChildRect = Rect.fromLTWH(
+  @visibleForTesting
+  static Rect getEndRect(Rect child, Rect parent) {
+    // The given child is the child at the time the ContextMenu opens, after the
+    // bounce animation. originalChild is the child before any animation.
+    final Rect originalChild = Rect.fromLTWH(
+      // left and top are the same because the transform alignment is center.
       child.left,
       child.top,
-      child.width * _kOpenScale,
-      child.height * _kOpenScale,
+      child.width / _kOpenScale,
+      child.height / _kOpenScale,
     );
 
-    final double endScale = math.max(
-      parent.width / child.width * _kOpenScale,
-      parent.height / parent.height * _kOpenScale,
+    // TODO(justinmc): Use real padding and/or safe area.
+    const double topInset = 40.0;
+    final Rect container = Rect.fromLTWH(
+      parent.left,
+      parent.top + topInset,
+      parent.width,
+      parent.height / 2 - topInset,
+    );
+
+    final double endScale = math.min(
+      container.width / originalChild.width,
+      container.height / originalChild.height,
     );
     final Size endChildSize = Size(
-      child.width * endScale,
-      child.height * endScale,
+      originalChild.width * endScale,
+      originalChild.height * endScale,
     );
-    final Offset topLeftEnd = Offset(0.0, parent.height / 2 - endChildSize.height);
-    final Offset adjustmentFromScale = Offset(
-      (endChildSize.width - openChildRect.width) / 2,
-      (endChildSize.height - openChildRect.height) / 2,
+    final Offset topLeftEnd = Offset(
+      // Center horizontally, which won't be affected by the center alignment.
+      container.left + (container.width - originalChild.width) / 2,
+      // Align the bottom of the child with the bottom of the parent, adjusting
+      // to consider center alignment of the transform.
+      container.bottom - endChildSize.height + (container.height - originalChild.height) / 2,
     );
-    return (topLeftEnd + adjustmentFromScale) & endChildSize;
+    return topLeftEnd & endChildSize;
   }
 
   @override
@@ -315,7 +328,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       curve: Curves.linearToEaseOut,
     );
 
-    final Rect endChildRect = _getEndRect(_childRect, _parentRect);
+    final Rect endChildRect = getEndRect(_childRect, _parentRect);
     _offsetTween = Tween<Offset>(
       begin: _childRect.topLeft,
       end: endChildRect.topLeft,
