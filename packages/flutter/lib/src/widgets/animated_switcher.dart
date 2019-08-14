@@ -349,6 +349,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       assert(!_outgoingEntries.contains(_currentEntry));
       _outgoingEntries.add(_currentEntry);
       _currentEntry.controller.reverse();
+      // Rebuilds the child since its animation status changes from completed to reverse
       _updateTransitionForEntry(_currentEntry);
       _markChildWidgetCacheAsDirty();
       _currentEntry = null;
@@ -365,7 +366,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       curve: widget.switchInCurve,
       reverseCurve: widget.switchOutCurve,
     );
-    // Initial child should start at reverse state.
+    // Initial child should start at completed state.
     if (!animate) {
       assert(_outgoingEntries.isEmpty);
       controller.value = 1.0;
@@ -411,7 +412,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     _outgoingWidgets = null;
   }
 
-  // This function should be called when entry.animation is updated appropriately.
+  // This function should be called after entry.animation is updated appropriately.
   void _updateTransitionForEntry(_ChildEntry entry) {
     entry.transition = KeyedSubtree(
       key: entry.transition.key,
