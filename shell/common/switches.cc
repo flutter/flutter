@@ -53,6 +53,20 @@ static const std::string gDartFlagsWhitelist[] = {
 // Include again for struct definition.
 #include "flutter/shell/common/switches.h"
 
+// Define symbols for the ICU data that is linked into the Flutter library on
+// Android.  This is a workaround for crashes seen when doing dynamic lookups
+// of the engine's own symbols on some older versions of Android.
+#if OS_ANDROID
+extern uint8_t _binary_icudtl_dat_start[];
+extern uint8_t _binary_icudtl_dat_end[];
+
+static std::unique_ptr<fml::Mapping> GetICUStaticMapping() {
+  return std::make_unique<fml::NonOwnedMapping>(
+      _binary_icudtl_dat_start,
+      _binary_icudtl_dat_end - _binary_icudtl_dat_start);
+}
+#endif
+
 namespace flutter {
 
 void PrintUsage(const std::string& executable_name) {
@@ -298,9 +312,14 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
                                   &icu_symbol_prefix);
       command_line.GetOptionValue(FlagForSwitch(Switch::ICUNativeLibPath),
                                   &native_lib_path);
+
+#if OS_ANDROID
+      settings.icu_mapper = GetICUStaticMapping;
+#else
       settings.icu_mapper = [icu_symbol_prefix, native_lib_path] {
         return GetSymbolMapping(icu_symbol_prefix, native_lib_path);
       };
+#endif
     }
   }
 
