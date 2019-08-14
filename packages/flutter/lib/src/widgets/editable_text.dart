@@ -1278,7 +1278,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // The caret is vertically centered within the line. Expand the caret's
       // height so that it spans the line because we're going to ensure that the entire
       // expanded caret is scrolled into view.
-      final double lineHeight = renderEditable.preferredLineHeight;
+      final double lineHeight = renderEditable.realFirstLineHeight;
       final double caretOffset = (lineHeight - caretRect.height) / 2;
       caretStart = caretRect.top - caretOffset;
       caretEnd = caretRect.bottom + caretOffset;

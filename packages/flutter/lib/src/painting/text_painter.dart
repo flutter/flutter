@@ -433,6 +433,14 @@ class TextPainter {
     return _layoutTemplate.height;
   }
 
+  double _firstLineHeight;
+  double getRealFirstLineHeight() {
+    assert(!_needsLayout);
+    List<TextBox> boxes = _paragraph.getBoxesForRange(0, 1, boxHeightStyle: BoxHeightStyle.max);
+    if (!boxes.isEmpty())
+      return boxes[0].bottom - boxes[0].top;
+  }
+
   // Unfortunately, using full precision floating point here causes bad layouts
   // because floating point math isn't associative. If we add and subtract
   // padding, for example, we'll get different values when we estimate sizes and
@@ -553,6 +561,8 @@ class TextPainter {
     }
     _inlinePlaceholderBoxes = _paragraph.getBoxesForPlaceholders();
   }
+
+  ui.Paragraph get para => _paragraph;
 
   /// Paints the text onto the given canvas at the given offset.
   ///
