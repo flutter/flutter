@@ -1,5 +1,5 @@
-# Below is a list of Flutter team members who are suggested reviewers
-# for contributions to this repository.
+# Below is a list of Flutter team members' Github handles who are
+# suggested reviewers for contributions to this repository.
 #
 # These names are just suggestions. It is fine to have your changes
 # reviewed by someone else.
@@ -8,5 +8,5 @@
 
 /bin/internal/goldens.version @Piinks
 /CODEOWNERS @magder
-/packages/flutter_tools/templates/module/ios/ @magder
-/packages/flutter_tools/templates/**/Podfile* @magder
+/packages/flutter_tools/templates/module/ios/ @jmagman
+/packages/flutter_tools/templates/**/Podfile* @jmagman
