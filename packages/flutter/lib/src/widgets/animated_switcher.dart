@@ -317,10 +317,13 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   @override
   void didUpdateWidget(AnimatedSwitcher oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    _outgoingEntries.forEach(_updateTransitionForEntry);
     final bool hasNewChild = widget.child != null;
     final bool hasOldChild = _currentEntry != null;
+    final bool builderChanged = widget.transitionBuilder != oldWidget.transitionBuilder;
+
+    if (builderChanged)
+      _outgoingEntries.forEach(_updateTransitionForEntry);
+
     if (hasNewChild != hasOldChild ||
         hasNewChild && !Widget.canUpdate(widget.child, _currentEntry.widgetChild)) {
       // Child has changed, fade current entry out and add new entry.
@@ -335,13 +338,6 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
       // update the transition instead of replacing it.
       _currentEntry.widgetChild = widget.child;
       _updateTransitionForEntry(_currentEntry); // uses entry.widgetChild
-      _markChildWidgetCacheAsDirty();
-    } else if (widget.transitionBuilder != oldWidget.transitionBuilder) {
-      // If the transition builder changed, then update all of the previous
-      // transitions.
-      _outgoingEntries.forEach(_updateTransitionForEntry);
-      if(_currentEntry != null)
-        _updateTransitionForEntry(_currentEntry);
       _markChildWidgetCacheAsDirty();
     }
   }
