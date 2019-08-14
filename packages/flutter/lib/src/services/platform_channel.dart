@@ -134,7 +134,9 @@ class MethodChannel {
   /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
-  /// The messenger used by this channel to send platform messages, not null.
+  /// The messenger used by this channel to send platform messages.
+  ///
+  /// The messenger may not be null.
   BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
   final BinaryMessenger _binaryMessenger;
 
