@@ -11,10 +11,10 @@ import 'package:meta/meta.dart';
 /// for testing purposes.
 ///
 /// Tests for certain widgets, e.g., [MaterialApp], might require faking certain
-/// properties of a [Window]. [TestWindow] facilitates the faking of these
-/// properties by overriding the properties of a real [Window] with desired fake
-/// values. The binding used within tests, [TestWidgetsFlutterBinding], contains
-/// a [TestWindow] that is used by all tests.
+/// properties of a [Window]. [TestWindow] facilitates the faking of these properties
+/// by overidding the properties of a real [Window] with desired fake values. The
+/// binding used within tests, [TestWidgetsFlutterBinding], contains a [TestWindow]
+/// that is used by all tests.
 ///
 /// ## Sample Code
 ///
@@ -42,11 +42,10 @@ import 'package:meta/meta.dart';
 /// return to using the real [Window] property, [TestWindow] provides
 /// methods to clear each individual test value, e.g., [clearLocaleTestValue()].
 ///
-/// To clear all fake test values in a [TestWindow], consider using
-/// [clearAllTestValues()].
+/// To clear all fake test values in a [TestWindow], consider using [clearAllTestValues()].
 class TestWindow implements Window {
-  /// Constructs a [TestWindow] that defers all behavior to the given [Window]
-  /// unless explicitly overridden for test purposes.
+  /// Constructs a [TestWindow] that defers all behavior to the given [window] unless
+  /// explicitly overidden for test purposes.
   TestWindow({
     @required Window window,
   }) : _window = window;
@@ -57,14 +56,12 @@ class TestWindow implements Window {
   @override
   double get devicePixelRatio => _devicePixelRatio ?? _window.devicePixelRatio;
   double _devicePixelRatio;
-  /// Hides the real device pixel ratio and reports the given [devicePixelRatio]
-  /// instead.
+  /// Hides the real device pixel ratio and reports the given [devicePixelRatio] instead.
   set devicePixelRatioTestValue(double devicePixelRatio) {
     _devicePixelRatio = devicePixelRatio;
     onMetricsChanged();
   }
-  /// Deletes any existing test device pixel ratio and returns to using the real
-  /// device pixel ratio.
+  /// Deletes any existing test device pixel ratio and returns to using the real device pixel ratio.
   void clearDevicePixelRatioTestValue() {
     _devicePixelRatio = null;
     onMetricsChanged();
@@ -73,62 +70,43 @@ class TestWindow implements Window {
   @override
   Size get physicalSize => _physicalSizeTestValue ?? _window.physicalSize;
   Size _physicalSizeTestValue;
-  /// Hides the real physical size and reports the given [physicalSizeTestValue]
-  /// instead.
+  /// Hides the real physical size and reports the given [physicalSizeTestValue] instead.
   set physicalSizeTestValue (Size physicalSizeTestValue) {
     _physicalSizeTestValue = physicalSizeTestValue;
     onMetricsChanged();
   }
-  /// Deletes any existing test physical size and returns to using the real
-  /// physical size.
+  /// Deletes any existing test physical size and returns to using the real physical size.
   void clearPhysicalSizeTestValue() {
     _physicalSizeTestValue = null;
     onMetricsChanged();
   }
 
   @override
-  double get physicalDepth => _physicalDepthTestValue ?? _window.physicalDepth;
-  double _physicalDepthTestValue;
-  /// Hides the real physical depth and reports the given
-  /// [physicalDepthTestValue] instead.
-  set physicalDepthTestValue (double physicalDepthTestValue) {
-    _physicalDepthTestValue = physicalDepthTestValue;
-    onMetricsChanged();
-  }
-  /// Deletes any existing test physical depth and returns to using the real
-  /// physical depth.
-  void clearPhysicalDepthTestValue() {
-    _physicalDepthTestValue = null;
-    onMetricsChanged();
-  }
-
-  @override
   WindowPadding get viewInsets => _viewInsetsTestValue ??  _window.viewInsets;
   WindowPadding _viewInsetsTestValue;
-  /// Hides the real view insets and reports the given [viewInsetsTestValue]
-  /// instead.
+  /// Hides the real view insets and reports the given [viewInsetsTestValue] instead.
   set viewInsetsTestValue(WindowPadding viewInsetsTestValue) {
     _viewInsetsTestValue = viewInsetsTestValue;
     onMetricsChanged();
   }
-  /// Deletes any existing test view insets and returns to using the real view
-  /// insets.
+  /// Deletes any existing test view insets and returns to using the real view insets.
   void clearViewInsetsTestValue() {
     _viewInsetsTestValue = null;
     onMetricsChanged();
   }
 
-  @override
+  // TODO(dnfield): Remove this ignore once custom embedders have had time to catch up
+  // And make this property actually wrap _window.viewPadding.
+  // @override
+  // ignore: annotate_overrides, public_member_api_docs
   WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
   WindowPadding _viewPaddingTestValue;
-  /// Hides the real view padding and reports the given [paddingTestValue]
-  /// instead.
+  /// Hides the real padding and reports the given [paddingTestValue] instead.
   set viewPaddingTestValue(WindowPadding viewPaddingTestValue) {
     _viewPaddingTestValue = viewPaddingTestValue;
     onMetricsChanged();
   }
-  /// Deletes any existing test view padding and returns to using the real
-  /// viewPadding.
+  /// Deletes any existing test padding and returns to using the real padding.
   void clearViewPaddingTestValue() {
     _viewPaddingTestValue = null;
     onMetricsChanged();
@@ -201,14 +179,12 @@ class TestWindow implements Window {
   @override
   double get textScaleFactor => _textScaleFactorTestValue ?? _window.textScaleFactor;
   double _textScaleFactorTestValue;
-  /// Hides the real text scale factor and reports the given
-  /// [textScaleFactorTestValue] instead.
+  /// Hides the real text scale factor and reports the given [textScaleFactorTestValue] instead.
   set textScaleFactorTestValue(double textScaleFactorTestValue) {
     _textScaleFactorTestValue = textScaleFactorTestValue;
     onTextScaleFactorChanged();
   }
-  /// Deletes any existing test text scale factor and returns to using the real
-  /// text scale factor.
+  /// Deletes any existing test text scale factor and returns to using the real text scale factor.
   void clearTextScaleFactorTestValue() {
     _textScaleFactorTestValue = null;
     onTextScaleFactorChanged();
@@ -223,14 +199,12 @@ class TestWindow implements Window {
   set onPlatformBrightnessChanged(VoidCallback callback) {
     _window.onPlatformBrightnessChanged = callback;
   }
-  /// Hides the real text scale factor and reports the given
-  /// [platformBrightnessTestValue] instead.
+  /// Hides the real text scale factor and reports the given [platformBrightnessTestValue] instead.
   set platformBrightnessTestValue(Brightness platformBrightnessTestValue) {
     _platformBrightnessTestValue = platformBrightnessTestValue;
     onPlatformBrightnessChanged();
   }
-  /// Deletes any existing test platform brightness and returns to using the
-  /// real platform brightness.
+  /// Deletes any existing test platform brightness and returns to using the real platform brightness.
   void clearPlatformBrightnessTestValue() {
     _platformBrightnessTestValue = null;
     onPlatformBrightnessChanged();
@@ -239,13 +213,11 @@ class TestWindow implements Window {
   @override
   bool get alwaysUse24HourFormat => _alwaysUse24HourFormatTestValue ?? _window.alwaysUse24HourFormat;
   bool _alwaysUse24HourFormatTestValue;
-  /// Hides the real clock format and reports the given
-  /// [alwaysUse24HourFormatTestValue] instead.
+  /// Hides the real clock format and reports the given [alwaysUse24HourFormatTestValue] instead.
   set alwaysUse24HourFormatTestValue(bool alwaysUse24HourFormatTestValue) {
     _alwaysUse24HourFormatTestValue = alwaysUse24HourFormatTestValue;
   }
-  /// Deletes any existing test clock format and returns to using the real clock
-  /// format.
+  /// Deletes any existing test clock format and returns to using the real clock format.
   void clearAlwaysUse24HourTestValue() {
     _alwaysUse24HourFormatTestValue = null;
   }
@@ -288,13 +260,11 @@ class TestWindow implements Window {
   @override
   String get defaultRouteName => _defaultRouteNameTestValue ?? _window.defaultRouteName;
   String _defaultRouteNameTestValue;
-  /// Hides the real default route name and reports the given
-  /// [defaultRouteNameTestValue] instead.
+  /// Hides the real default route name and reports the given [defaultRouteNameTestValue] instead.
   set defaultRouteNameTestValue(String defaultRouteNameTestValue) {
     _defaultRouteNameTestValue = defaultRouteNameTestValue;
   }
-  /// Deletes any existing test default route name and returns to using the real
-  /// default route name.
+  /// Deletes any existing test default route name and returns to using the real default route name.
   void clearDefaultRouteNameTestValue() {
     _defaultRouteNameTestValue = null;
   }
@@ -312,14 +282,12 @@ class TestWindow implements Window {
   @override
   bool get semanticsEnabled => _semanticsEnabledTestValue ?? _window.semanticsEnabled;
   bool _semanticsEnabledTestValue;
-  /// Hides the real semantics enabled and reports the given
-  /// [semanticsEnabledTestValue] instead.
+  /// Hides the real semantics enabled and reports the given [semanticsEnabledTestValue] instead.
   set semanticsEnabledTestValue(bool semanticsEnabledTestValue) {
     _semanticsEnabledTestValue = semanticsEnabledTestValue;
     onSemanticsEnabledChanged();
   }
-  /// Deletes any existing test semantics enabled and returns to using the real
-  /// semantics enabled.
+  /// Deletes any existing test semantics enabled and returns to using the real semantics enabled.
   void clearSemanticsEnabledTestValue() {
     _semanticsEnabledTestValue = null;
     onSemanticsEnabledChanged();
@@ -342,14 +310,12 @@ class TestWindow implements Window {
   @override
   AccessibilityFeatures get accessibilityFeatures => _accessibilityFeaturesTestValue ?? _window.accessibilityFeatures;
   AccessibilityFeatures _accessibilityFeaturesTestValue;
-  /// Hides the real accessibility features and reports the given
-  /// [accessibilityFeaturesTestValue] instead.
+  /// Hides the real accessibility features and reports the given [accessibilityFeaturesTestValue] instead.
   set accessibilityFeaturesTestValue(AccessibilityFeatures accessibilityFeaturesTestValue) {
     _accessibilityFeaturesTestValue = accessibilityFeaturesTestValue;
     onAccessibilityFeaturesChanged();
   }
-  /// Deletes any existing test accessibility features and returns to using the
-  /// real accessibility features.
+  /// Deletes any existing test accessibility features and returns to using the real accessibility features.
   void clearAccessibilityFeaturesTestValue() {
     _accessibilityFeaturesTestValue = null;
     onAccessibilityFeaturesChanged();
@@ -389,11 +355,10 @@ class TestWindow implements Window {
   }
 
   /// Delete any test value properties that have been set on this [TestWindow]
-  /// and return to reporting the real [Window] values for all [Window]
-  /// properties.
+  /// and return to reporting the real [Window] values for all [Window] properties.
   ///
-  /// If desired, clearing of properties can be done on an individual basis,
-  /// e.g., [clearLocaleTestValue()].
+  /// If desired, clearing of properties can be done on an individual basis, e.g.,
+  /// [clearLocaleTestValue()].
   void clearAllTestValues() {
     clearAccessibilityFeaturesTestValue();
     clearAlwaysUse24HourTestValue();
@@ -404,15 +369,14 @@ class TestWindow implements Window {
     clearLocalesTestValue();
     clearPaddingTestValue();
     clearPhysicalSizeTestValue();
-    clearPhysicalDepthTestValue();
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearViewInsetsTestValue();
   }
 
   /// This gives us some grace time when the dart:ui side adds something to
-  /// Window, and makes things easier when we do rolls to give us time to catch
-  /// up.
+  /// Window, and makes things easier when we do rolls to give us time to
+  /// catch up.
   @override
   dynamic noSuchMethod(Invocation invocation) {
     return null;
