@@ -25,25 +25,31 @@
 }
 
 - (void)testFirstFrameCallback {
+  XCTestExpectation* firstFrameRendered = [self expectationWithDescription:@"firstFrameRendered"];
+
   FlutterEngine* engine = [[FlutterEngine alloc] initWithName:@"test" project:nil];
   [engine runWithEntrypoint:nil];
   self.flutterViewController = [[FlutterViewController alloc] initWithEngine:engine
                                                                      nibName:nil
                                                                       bundle:nil];
-  __block BOOL shouldKeepRunning = YES;
+
+  XCTAssertFalse(self.flutterViewController.isDisplayingFlutterUI);
+
+  XCTestExpectation* displayingFlutterUIExpectation =
+      [self keyValueObservingExpectationForObject:self.flutterViewController
+                                          keyPath:@"displayingFlutterUI"
+                                    expectedValue:@YES];
+  displayingFlutterUIExpectation.assertForOverFulfill = YES;
+
   [self.flutterViewController setFlutterViewDidRenderCallback:^{
-    shouldKeepRunning = NO;
+    [firstFrameRendered fulfill];
   }];
+
   AppDelegate* appDelegate = (AppDelegate*)UIApplication.sharedApplication.delegate;
   UIViewController* rootVC = appDelegate.window.rootViewController;
   [rootVC presentViewController:self.flutterViewController animated:NO completion:nil];
-  NSRunLoop* runLoop = [NSRunLoop currentRunLoop];
-  int countDownMs = 2000;
-  while (shouldKeepRunning && countDownMs > 0) {
-    [runLoop runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-    countDownMs -= 100;
-  }
-  XCTAssertGreaterThan(countDownMs, 0);
+
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
 @end
