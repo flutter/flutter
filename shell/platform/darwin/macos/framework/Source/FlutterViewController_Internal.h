@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterViewController.h"
 
 #import "flutter/shell/platform/darwin/macos/framework/Source/FlutterView.h"
 
-@interface FLEViewController ()
+@interface FlutterViewController ()
 
 // The FlutterView for this view controller.
 @property(nonatomic, readonly, nullable) FlutterView* flutterView;

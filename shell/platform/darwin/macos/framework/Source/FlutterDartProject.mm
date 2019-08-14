@@ -2,22 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#import "flutter/shell/platform/darwin/macos/framework/Headers/FLEDartProject.h"
-#import "flutter/shell/platform/darwin/macos/framework/Source/FLEDartProject_Internal.h"
+#import "flutter/shell/platform/darwin/macos/framework/Headers/FlutterDartProject.h"
+#import "flutter/shell/platform/darwin/macos/framework/Source/FlutterDartProject_Internal.h"
 
 #include <vector>
 
 static NSString* const kICUBundlePath = @"icudtl.dat";
 
-@implementation FLEDartProject {
+@implementation FlutterDartProject {
   NSBundle* _bundle;
 }
 
 - (instancetype)init {
-  return [self initWithBundle:nil];
+  return [self initWithPrecompiledDartBundle:nil];
 }
 
-- (instancetype)initWithBundle:(NSBundle*)bundle {
+- (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle {
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
 
