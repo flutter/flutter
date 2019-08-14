@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -740,19 +740,15 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
     if (_needToReportFirstFrame && _reportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
-      // TODO(liyuqian): use a broadcast stream approach
-      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
-      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
+      StreamSubscription<FrameTiming> firstFrameSubscription;
+      firstFrameSubscription = WidgetsBinding.instance.frameTimingStream.listen((FrameTiming timing) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
-        if (oldCallback != null) {
-          oldCallback(timings);
-        }
-        WidgetsBinding.instance.window.onReportTimings = oldCallback;
         _firstFrameCompleter.complete();
-      };
+        firstFrameSubscription.cancel();
+      });
     }
 
     try {

@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:developer' show Flow, Timeline;
-import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming, TimingsCallback;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -202,12 +202,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
 
-      window.onReportTimings = (List<FrameTiming> timings) {
-        for (FrameTiming frameTiming in timings) {
-          frameNumber += 1;
-          _profileFramePostEvent(frameNumber, frameTiming);
-        }
-      };
+      frameTimingStream.listen((FrameTiming frameTiming) {
+        frameNumber += 1;
+        _profileFramePostEvent(frameNumber, frameTiming);
+      });
     }
   }
 
@@ -346,6 +344,46 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (isFirstTask && !locked)
       _ensureEventLoopCallback();
     return entry.completer.future;
+  }
+
+  TimingsCallback _oldTimingsCallback;
+  StreamController<FrameTiming> _frameTimingBroadcastController;
+  int _frameTimingListenCount = 0;
+
+  void _onFrameTimingListen() {
+    _frameTimingListenCount += 1;
+  }
+
+  // If there's no one listening, remove `_frameTimingBroadcastController` and
+  // reset [window.onReportTimings] back to `_oldTimingsCallback`. This is to
+  // reduce the overhead if `_oldTimingsCallback` is null. Resetting
+  // [window.onReportTimings] back to null tells the engine that there's no need
+  // to send [FrameTiming] from engine to the framework.
+  void _onFrameTimingCancel() {
+    _frameTimingListenCount -= 1;
+    assert(_frameTimingListenCount >= 0);
+    if (_frameTimingListenCount == 0) {
+      window.onReportTimings = _oldTimingsCallback;
+      _frameTimingBroadcastController = null;
+    }
+  }
+
+  /// A broadcast stream of the frames' time-related performance metrics.
+  Stream<FrameTiming> get frameTimingStream {
+    if (_frameTimingBroadcastController == null) {
+      _frameTimingBroadcastController = StreamController<FrameTiming>.broadcast(
+        onListen: _onFrameTimingListen,
+        onCancel: _onFrameTimingCancel,
+      );
+      _oldTimingsCallback = window.onReportTimings;
+      window.onReportTimings = (List<FrameTiming> timings) {
+        if (_oldTimingsCallback != null) {
+          _oldTimingsCallback(timings);
+        }
+        timings.forEach(_frameTimingBroadcastController.add);
+      };
+    }
+    return _frameTimingBroadcastController.stream;
   }
 
   @override

@@ -80,7 +80,9 @@ class TestServiceExtensionsBinding extends BindingBase
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
     if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[]);
+      ui.window.onReportTimings(<ui.FrameTiming>[
+        ui.FrameTiming(List<int>.filled(ui.FramePhase.values.length, 0)),
+      ]);
   }
 
   @override
