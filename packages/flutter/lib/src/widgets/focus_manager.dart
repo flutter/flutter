@@ -680,7 +680,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// need to be attached. [FocusAttachment.detach] should be called on the old
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
-  @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
     _onKey = onKey ?? _onKey;
@@ -800,6 +799,30 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _children.map<DiagnosticsNode>((FocusNode child) {
       return child.toDiagnosticsNode(name: 'Child ${count++}');
     }).toList();
+  }
+}
+
+
+/// The type of [Focus.unfocusable], used as a sentinel value for
+/// [Focus.focusNode] to indicate that the [Focus] widget should not participate
+/// in focus operations.
+///
+/// Used to indicate and enforce that an unfocusable node doesn't appear in the
+/// focus tree.
+class UnfocusableNode extends FocusNode {
+  /// Creates an unfocusable focus node for use as the type for [Focus.unfocusable].
+  ///
+  /// This class is not useful other than as an implementation detail of [Focus.unfocusable].
+  UnfocusableNode() : super(debugLabel: 'Unfocusable Node');
+
+  @override
+  FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
+    _context = context;
+    return null;
+  }
+
+  @override
+  void requestFocus([FocusNode node]) {
   }
 }
 

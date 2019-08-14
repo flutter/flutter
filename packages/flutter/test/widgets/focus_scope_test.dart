@@ -1151,6 +1151,24 @@ void main() {
       expect(gotFocus, isTrue);
       expect(node.hasFocus, isTrue);
     });
+    testWidgets('Focus is ignored when set to Focus.unfocusable.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      bool gotFocus;
+      await tester.pumpWidget(
+        Focus(
+          focusNode: Focus.unfocusable,
+          onFocusChange: (bool focused) => gotFocus = focused,
+          child: Container(key: key1),
+        ),
+      );
+
+      final Element firstNode = tester.element(find.byKey(key1));
+      final FocusNode node = Focus.of(firstNode, nullOk: true);
+      expect(node, isNull);
+      expect(find.byWidgetPredicate((Widget widget) {
+        return widget.runtimeType.toString() == '_FocusMarker';
+      }), findsNothing);
+    });
   });
   testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey(debugLabel: '1');

@@ -152,6 +152,13 @@ class Focus extends StatefulWidget {
         assert(skipTraversal != null),
         super(key: key);
 
+  /// A value to use for [focusNode] when it should not accept focus.
+  ///
+  /// If this value is supplied to [Focus.focusNode], then the [Focus] widget
+  /// will not add a focus node to the focus tree, and it will be invisible to
+  /// focus operations.
+  static final FocusNode unfocusable = UnfocusableNode();
+
   /// A debug label for this widget.
   ///
   /// Not used for anything except to be printed in the diagnostic output from
@@ -308,6 +315,11 @@ class _FocusState extends State<Focus> {
   }
 
   void _initNode() {
+    if (identical(widget.focusNode, Focus.unfocusable)) {
+      _hasFocus = false;
+      return;
+    }
+
     if (widget.focusNode == null) {
       // Only create a new node if the widget doesn't have one.
       // This calls a function instead of just allocating in place because
@@ -328,10 +340,13 @@ class _FocusState extends State<Focus> {
 
   @override
   void dispose() {
-    // Regardless of the node owner, we need to remove it from the tree and stop
-    // listening to it.
-    focusNode.removeListener(_handleFocusChanged);
-    _focusAttachment.detach();
+    if (!identical(widget.focusNode, Focus.unfocusable)) {
+      // Regardless of the node owner, we need to remove it from the tree and stop
+      // listening to it.
+      focusNode.removeListener(_handleFocusChanged);
+      _focusAttachment.detach();
+    }
+
     // Don't manage the lifetime of external nodes given to the widget, just the
     // internal node.
     _internalNode?.dispose();
@@ -373,8 +388,6 @@ class _FocusState extends State<Focus> {
     _focusAttachment.detach();
     focusNode.removeListener(_handleFocusChanged);
     _initNode();
-
-    _hasFocus = focusNode.hasFocus;
   }
 
   void _handleFocusChanged() {
@@ -390,6 +403,10 @@ class _FocusState extends State<Focus> {
 
   @override
   Widget build(BuildContext context) {
+    if (identical(widget.focusNode, Focus.unfocusable)) {
+      return widget.child;
+    }
+
     _focusAttachment.reparent();
     return _FocusMarker(
       node: focusNode,
