@@ -41,23 +41,23 @@ class ValueClipper<T> extends CustomClipper<T> {
 }
 
 class _UpdateCountedClipRect extends ClipRect {
-  const _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
-    : super(clipBehavior: clipBehavior);
+  const _UpdateCountedClipRect({Clip clipBehavior})
+    : super(clipBehavior: clipBehavior ?? Clip.antiAlias);
 }
 
 class _UpdateCountedClipRRect extends ClipRRect {
-  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
+  _UpdateCountedClipRRect({Clip clipBehavior})
+      : super(clipBehavior: clipBehavior ?? Clip.antiAlias, borderRadius: BorderRadius.circular(1.0));
 }
 
 class _UpdateCountedClipOval extends ClipOval {
-  const _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
+  const _UpdateCountedClipOval({Clip clipBehavior})
+      : super(clipBehavior: clipBehavior ?? Clip.antiAlias);
 }
 
 class _UpdateCountedClipPath extends ClipPath {
-  const _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
-      : super(clipBehavior: clipBehavior);
+  const _UpdateCountedClipPath({Clip clipBehavior})
+      : super(clipBehavior: clipBehavior ?? Clip.antiAlias);
 }
 
 void main() {

@@ -1448,9 +1448,9 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
-  /// [duration] arguments must not be null. Additionally, [elevation] must be
-  /// non-negative.
+  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor],
+  /// [curve], [clipBehavior], and [duration] arguments must not be null.
+  /// Additionally, [elevation] must be non-negative.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
   ///
@@ -1490,6 +1490,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   final BoxShape shape;
 
   /// {@macro flutter.widgets.Clip}
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   /// The target border radius of the rounded corners for a rectangle shape.
