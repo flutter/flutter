@@ -520,7 +520,7 @@ void main() {
       longPress.dispose();
     });
 
-    testGesture('A primary long press recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary long press recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       longPress.addPointer(down3);
       tapSecondary.addPointer(down3);
       tester.closeArena(down3.pointer);
@@ -529,7 +529,7 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A primary long press recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary long press recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
       longPress.addPointer(down);
       tapPrimary.addPointer(down);
       tester.closeArena(down.pointer);

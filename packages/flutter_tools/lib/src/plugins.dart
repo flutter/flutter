@@ -9,8 +9,9 @@ import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
+import 'features.dart';
 import 'globals.dart';
-import 'ios/cocoapods.dart';
+import 'macos/cocoapods.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
@@ -27,16 +28,21 @@ class Plugin {
     this.path,
     this.androidPackage,
     this.iosPrefix,
+    this.macosPrefix,
     this.pluginClass,
   });
 
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     String androidPackage;
     String iosPrefix;
+    String macosPrefix;
     String pluginClass;
     if (pluginYaml != null) {
       androidPackage = pluginYaml['androidPackage'];
       iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
+      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
+      macosPrefix = pluginYaml['macosPrefix'];
       pluginClass = pluginYaml['pluginClass'];
     }
     return Plugin(
@@ -44,6 +50,7 @@ class Plugin {
       path: path,
       androidPackage: androidPackage,
       iosPrefix: iosPrefix,
+      macosPrefix: macosPrefix,
       pluginClass: pluginClass,
     );
   }
@@ -52,6 +59,7 @@ class Plugin {
   final String path;
   final String androidPackage;
   final String iosPrefix;
+  final String macosPrefix;
   final String pluginClass;
 }
 
@@ -174,14 +182,14 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
-const String _iosPluginRegistryHeaderTemplate = '''//
+const String _objcPluginRegistryHeaderTemplate = '''//
 //  Generated file. Do not edit.
 //
 
 #ifndef GeneratedPluginRegistrant_h
 #define GeneratedPluginRegistrant_h
 
-#import <Flutter/Flutter.h>
+#import <{{framework}}/{{framework}}.h>
 
 @interface GeneratedPluginRegistrant : NSObject
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
@@ -190,7 +198,7 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
-const String _iosPluginRegistryImplementationTemplate = '''//
+const String _objcPluginRegistryImplementationTemplate = '''//
 //  Generated file. Do not edit.
 //
 
@@ -210,7 +218,24 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 @end
 ''';
 
-const String _iosPluginRegistrantPodspecTemplate = '''
+const String _swiftPluginRegistryTemplate = '''//
+//  Generated file. Do not edit.
+//
+import Foundation
+import {{framework}}
+
+{{#plugins}}
+import {{name}}
+{{/plugins}}
+
+func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  {{#plugins}}
+  {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
+{{/plugins}}
+}
+''';
+
+const String _pluginRegistrantPodspecTemplate = '''
 #
 # Generated file, do not edit.
 #
@@ -225,11 +250,11 @@ Depends on all your plugins, and provides a function to register them.
   s.homepage         = 'https://flutter.dev'
   s.license          = { :type => 'BSD' }
   s.author           = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
-  s.ios.deployment_target = '8.0'
+  s.{{os}}.deployment_target = '{{deploymentTarget}}'
   s.source_files =  "Classes", "Classes/**/*.{h,m}"
   s.source           = { :path => '.' }
   s.public_header_files = './Classes/**/*.h'
-  s.dependency 'Flutter'
+  s.dependency '{{framework}}'
   {{#plugins}}
   s.dependency '{{name}}'
   {{/plugins}}
@@ -245,39 +270,63 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'class': p.pluginClass,
   }).toList();
   final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'ios',
+    'deploymentTarget': '8.0',
+    'framework': 'Flutter',
     'plugins': iosPlugins,
   };
-
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
   if (project.isModule) {
     final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
-      _iosPluginRegistrantPodspecTemplate,
+      _pluginRegistrantPodspecTemplate,
       context,
       fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
     );
     _renderTemplateToFile(
-      _iosPluginRegistryHeaderTemplate,
+      _objcPluginRegistryHeaderTemplate,
       context,
       fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
     );
     _renderTemplateToFile(
-      _iosPluginRegistryImplementationTemplate,
+      _objcPluginRegistryImplementationTemplate,
       context,
       fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
     );
   } else {
     _renderTemplateToFile(
-      _iosPluginRegistryHeaderTemplate,
+      _objcPluginRegistryHeaderTemplate,
       context,
       fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
     );
     _renderTemplateToFile(
-      _iosPluginRegistryImplementationTemplate,
+      _objcPluginRegistryImplementationTemplate,
       context,
       fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
     );
   }
+}
+
+Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
+  // TODO(stuartmorgan): Replace macosPrefix check with formal metadata check,
+  // see https://github.com/flutter/flutter/issues/33597.
+  final List<Map<String, dynamic>> macosPlugins = plugins
+      .where((Plugin p) => p.pluginClass != null && p.macosPrefix != null)
+      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
+    'name': p.name,
+    'class': p.pluginClass,
+  }).toList();
+  final Map<String, dynamic> context = <String, dynamic>{
+    'os': 'macos',
+    'framework': 'FlutterMacOS',
+    'plugins': macosPlugins,
+  };
+  final String registryDirectory = project.macos.managedDirectory.path;
+  _renderTemplateToFile(
+    _swiftPluginRegistryTemplate,
+    context,
+    fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
+  );
 }
 
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin
@@ -312,16 +361,24 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   if ((checkProjects && project.ios.existsSync()) || !checkProjects) {
     await _writeIOSPluginRegistrant(project, plugins);
   }
-  if (!project.isModule && ((project.ios.hostAppRoot.existsSync() && checkProjects) || !checkProjects)) {
+  // TODO(stuartmorgan): Revisit the condition here once the plans for handling
+  // desktop in existing projects are in place. For now, ignore checkProjects
+  // on desktop and always treat it as true.
+  if (featureFlags.isMacOSEnabled && project.macos.existsSync()) {
+    await _writeMacOSPluginRegistrant(project, plugins);
+  }
+  for (final XcodeBasedProject subproject in <XcodeBasedProject>[project.ios, project.macos]) {
+  if (!project.isModule && (!checkProjects || subproject.existsSync())) {
     final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty) {
-      cocoaPods.setupPodfile(project.ios);
+      cocoaPods.setupPodfile(subproject);
     }
     /// The user may have a custom maintained Podfile that they're running `pod install`
     /// on themselves.
-    else if (project.ios.podfile.existsSync() && project.ios.podfileLock.existsSync()) {
-      cocoaPods.addPodsDependencyToFlutterXcconfig(project.ios);
+    else if (subproject.podfile.existsSync() && subproject.podfileLock.existsSync()) {
+      cocoaPods.addPodsDependencyToFlutterXcconfig(subproject);
     }
+  }
   }
 }
 

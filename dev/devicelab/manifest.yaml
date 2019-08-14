@@ -102,7 +102,6 @@ tasks:
       Ensures that an error thrown into the zone can be caught by the ImageStream
       completer
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_android__compile:
@@ -126,6 +125,13 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  windows_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+    flaky: true
+
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -141,6 +147,18 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  tiles_scroll_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone 6.
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+
+  tiles_scroll_perf_iphonexs__timeline_summary:
+    description: >
+      Measures the runtime performance of the tiles tab in the Complex Layout sample app on iPhone XS.
+    stage: devicelab
+    required_agent_capabilities: ["mac/iphonexs"]
+
   home_scroll_perf__timeline_summary:
     description: >
       Measures the runtime performance of scrolling the material page in the
@@ -153,7 +171,6 @@ tasks:
       Check that driver will print warnings when traceAction is called in debug mode.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   cull_opacity_perf__timeline_summary:
     description: >
@@ -164,6 +181,12 @@ tasks:
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
+  backdrop_filter_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of backdrop filter blurs on Android.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
@@ -251,6 +274,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  # hello_world__start_up:
+  #   description: >
+  #     Verifies that Hello World can start on an array of devices.
+  #   stage: devicelab
+  #   required_agent_capabilities: ["linux/android_esoteric"]
+
   microbenchmarks:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks.
@@ -306,25 +335,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
-  # gradle_plugin_test:
-  #   description: >
-  #     Verifies that the Flutter Gradle plugin supports standard and custom Android build types.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-
-  # plugin_test:
-  #   description: >
-  #     Checks that the project template works and supports plugins.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-
-  # module_test:
-  #   description: >
-  #     Checks that the module project template works and supports add2app on Android.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
-
   flutter_gallery_instrumentation_test:
     description: >
       Same as flutter_gallery__transition_perf but uses Android instrumentation
@@ -332,6 +342,7 @@ tasks:
       test can run on off-the-shelf infrastructures, such as Firebase Test Lab.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_attach_test:
     description: >
@@ -345,67 +356,72 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
-  # flutter_create_offline_test_linux:
-  #   description: >
-  #     Tests the `flutter create --offline` command.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
+  linux_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
 
-  # flutter_create_offline_test_windows:
-  #   description: >
-  #     Tests the `flutter create --offline` command.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["windows/android"]
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
-  # flutter_create_offline_test_mac:
-  #   description: >
-  #     Tests the `flutter create --offline` command.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["mac/android"]
+  image_list_reported_duration:
+    description: >
+      Measures image loading performance on release (aot) build.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  image_list_jit_reported_duration:
+    description: >
+      Measures image loading performance on debug (jit) build.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  build_benchmark:
+    description: >
+      Measures APK build performance across config changes.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   # iOS on-device tests
 
   flavors_test_ios:
     description: >
-      Checks that flavored builds work on iOS.
+      Checks that flavored builds work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
-  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
-  # plugin_test_ios:
-  #   description: >
-  #     Checks that the project template works and supports plugins on iOS.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["mac/ios"]
-
-  # module_test_ios:
-  #   description: >
-  #     Checks that the module project template works and supports add2app on iOS.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["mac/ios"]
-
   external_ui_integration_test_ios:
     description: >
-      Checks that external UIs work on iOS.
+      Checks that external UIs work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   channels_integration_test_ios:
     description: >
-      Checks that platform channels work on iOS.
+      Checks that platform channels work on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   platform_interaction_test_ios:
     description: >
-      Checks platform interaction on iOS.
+      Checks platform interaction on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   platform_channel_sample_test_ios:
     description: >
-      Runs a driver test on the Platform Channel sample app on iOS.
+      Runs a driver test on the Platform Channel sample app on iPhone 6 Objective-C project.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  platform_channel_sample_test_swift:
+    description: >
+      Runs a driver test on the Platform Channel sample app on iPhone 6 Swift project.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -424,13 +440,13 @@ tasks:
 
   flutter_gallery_ios__start_up:
     description: >
-      Measures the startup time of the Flutter Gallery app on iOS.
+      Measures the startup time of the Flutter Gallery app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
   complex_layout_ios__start_up:
     description: >
-      Measures the startup time of the Complex Layout sample app on iOS.
+      Measures the startup time of the Complex Layout sample app on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -449,7 +465,7 @@ tasks:
 
   microbenchmarks_ios:
     description: >
-      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+      Runs benchmarks from dev/benchmarks/microbenchmarks on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 30
@@ -458,19 +474,39 @@ tasks:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
+    flaky: true
     required_agent_capabilities: ["mac/ios"]
 
   integration_ui_ios:
     description: >
-      Runs end-to-end Flutter tests on iOS.
+      Runs end-to-end Flutter tests on iPhone 6.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
-    flaky: true
+
+  system_debug_ios:
+    description: >
+      Tests that the Engine correctly initializes the system debugger for debug-mode iOS apps.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    timeout_in_minutes: 10
 
   ios_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and iOS screenshots
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  macos_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true # marekd as flaky while infra is under heavy development
+
+  build_benchmark_ios:
+    description: >
+      Measures iOS build performance across config changes.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -505,7 +541,6 @@ tasks:
       Checks that `flutter run` does not leak dart.exe on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   # Tests running on Linux hosts
 
@@ -514,13 +549,6 @@ tasks:
       Measures the performance of Dart VM hot patching feature on a Linux host.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-
-  # TODO(dnfield): Remove these once we're confident it's all working on cirrus
-  # dartdocs:
-  #   description: >
-  #     Tracks how many members are still lacking documentation.
-  #   stage: devicelab
-  #   required_agent_capabilities: ["linux/android"]
 
   flutter_test_performance:
     description: >
@@ -545,6 +573,7 @@ tasks:
       Measures the performance of screen transitions in Flutter Gallery on
       Android.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__transition_perf_with_semantics:
@@ -552,6 +581,7 @@ tasks:
       Measures the delta in performance of screen transitions without and
       with semantics enabled.
     stage: devicelab
+    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery__memory_nav:
@@ -563,6 +593,12 @@ tasks:
   flutter_gallery__back_button_memory:
     description: >
       Measures memory usage after Android app suspend and resume.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+  flutter_gallery__image_cache_memory:
+    description: >
+      Measures memory usage for a list of large red squares in smaller containers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
@@ -581,14 +617,14 @@ tasks:
 
   flutter_gallery_ios32__start_up:
     description: >
-      Measures the startup time of the Flutter Gallery app on 32-bit iOS.
+      Measures the startup time of the Flutter Gallery app on 32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
   flutter_gallery_ios32__transition_perf:
     description: >
       Measures the performance of screen transitions in Flutter Gallery on
-      32-bit iOS.
+      32-bit iOS (iPhone 4S).
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios32"]
 
@@ -597,4 +633,11 @@ tasks:
       Checks that `flutter run` does not leak dart on macOS.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
+
+  android_splash_screen_integration_test:
+    description: >
+      Runs end-to-end test of Flutter's Android splash behavior.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
     flaky: true

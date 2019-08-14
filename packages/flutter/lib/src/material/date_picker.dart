@@ -392,8 +392,9 @@ class DayPicker extends StatelessWidget {
     final int month = displayedMonth.month;
     final int daysInMonth = getDaysInMonth(year, month);
     final int firstDayOffset = _computeFirstDayOffset(year, month, localizations);
-    final List<Widget> labels = <Widget>[];
-    labels.addAll(_getDayHeaders(themeData.textTheme.caption, localizations));
+    final List<Widget> labels = <Widget>[
+      ..._getDayHeaders(themeData.textTheme.caption, localizations),
+    ];
     for (int i = 0; true; i += 1) {
       // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
       // a leap year.
@@ -438,6 +439,7 @@ class DayPicker extends StatelessWidget {
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
               selected: isSelectedDay,
+              sortKey: OrdinalSortKey(day.toDouble()),
               child: ExcludeSemantics(
                 child: Text(localizations.formatDecimal(day), style: itemStyle),
               ),

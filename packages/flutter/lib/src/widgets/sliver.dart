@@ -1368,10 +1368,45 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   const SliverFillRemaining({
     Key key,
     Widget child,
-  }) : super(key: key, child: child);
+    this.hasScrollBody = true,
+    this.fillOverscroll = false,
+  }) : assert(hasScrollBody != null),
+       super(key: key, child: child);
+
+  /// Indicates whether the child has a scrollable body, this value cannot be
+  /// null.
+  ///
+  /// Defaults to true such that the child will extend beyond the viewport and
+  /// scroll, as seen in [NestedScrollView].
+  ///
+  /// Setting this value to false will allow the child to fill the remainder of
+  /// the viewport and not extend further. However, if the
+  /// [precedingScrollExtent] exceeds the size of the viewport, the sliver will
+  /// defer to the child's size rather than overriding it.
+  final bool hasScrollBody;
+
+  /// Indicates whether the child should stretch to fill the overscroll area
+  /// created by certain scroll physics, such as iOS' default scroll physics.
+  /// This value cannot be null. This flag is only relevant when the
+  /// [hasScrollBody] value is false.
+  ///
+  /// Defaults to false, meaning the default behavior is for the child to
+  /// maintain its size and not extend into the overscroll area.
+  final bool fillOverscroll;
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
+  RenderSliverFillRemaining createRenderObject(BuildContext context) {
+    return RenderSliverFillRemaining(
+      hasScrollBody: hasScrollBody,
+      fillOverscroll: fillOverscroll,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFillRemaining renderObject) {
+    renderObject.hasScrollBody = hasScrollBody;
+    renderObject.fillOverscroll = fillOverscroll;
+  }
 }
 
 /// Mark a child as needing to stay alive even when it's in a lazy list that

@@ -250,13 +250,9 @@ class _TableElement extends RenderObjectElement {
 
   List<_TableElementRow> _children = const<_TableElementRow>[];
 
-  bool _debugWillReattachChildren = false;
-
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
-    assert(!_debugWillReattachChildren);
-    assert(() { _debugWillReattachChildren = true; return true; }());
     _children = widget.children.map<_TableElementRow>((TableRow row) {
       return _TableElementRow(
         key: row.key,
@@ -266,32 +262,20 @@ class _TableElement extends RenderObjectElement {
         }).toList(growable: false),
       );
     }).toList(growable: false);
-    assert(() { _debugWillReattachChildren = false; return true; }());
     _updateRenderObjectChildren();
   }
 
   @override
   void insertChildRenderObject(RenderObject child, Element slot) {
-    assert(_debugWillReattachChildren);
     renderObject.setupParentData(child);
   }
 
   @override
   void moveChildRenderObject(RenderObject child, dynamic slot) {
-    assert(_debugWillReattachChildren);
   }
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    assert(() {
-      if (_debugWillReattachChildren)
-        return true;
-      for (Element forgottenChild in _forgottenChildren) {
-        if (forgottenChild.renderObject == child)
-          return true;
-      }
-      return false;
-    }());
     final TableCellParentData childParentData = child.parentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
@@ -300,8 +284,6 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void update(Table newWidget) {
-    assert(!_debugWillReattachChildren);
-    assert(() { _debugWillReattachChildren = true; return true; }());
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
     for (_TableElementRow row in _children) {
       if (row.key != null) {
@@ -330,7 +312,7 @@ class _TableElement extends RenderObjectElement {
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     for (List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
-    assert(() { _debugWillReattachChildren = false; return true; }());
+
     _children = newChildren;
     _updateRenderObjectChildren();
     _forgottenChildren.clear();

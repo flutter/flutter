@@ -15,6 +15,9 @@ class GetHealth extends Command {
 
   @override
   String get kind => 'get_health';
+
+  @override
+  bool get requiresRootWidgetAttached => false;
 }
 
 /// A description of application state.

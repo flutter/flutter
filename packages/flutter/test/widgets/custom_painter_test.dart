@@ -315,7 +315,7 @@ void _defineTests() {
     expect(tester.binding.pipelineOwner.semanticsOwner, isNotNull);
 
     semantics.dispose();
-  });
+  }, semanticsEnabled: false);
 
   testWidgets('Supports all actions', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -341,6 +341,8 @@ void _defineTests() {
             onPaste: () => performedActions.add(SemanticsAction.paste),
             onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
             onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+            onMoveCursorForwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByWord),
+            onMoveCursorBackwardByWord: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByWord),
             onSetSelection: (TextSelection _) => performedActions.add(SemanticsAction.setSelection),
             onDidGainAccessibilityFocus: () => performedActions.add(SemanticsAction.didGainAccessibilityFocus),
             onDidLoseAccessibilityFocus: () => performedActions.add(SemanticsAction.didLoseAccessibilityFocus),
@@ -349,8 +351,6 @@ void _defineTests() {
       ),
     ));
     final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
-      ..remove(SemanticsAction.moveCursorForwardByWord)
-      ..remove(SemanticsAction.moveCursorBackwardByWord)
       ..remove(SemanticsAction.customAction) // customAction is not user-exposed.
       ..remove(SemanticsAction.showOnScreen); // showOnScreen is not user-exposed
 
@@ -378,6 +378,8 @@ void _defineTests() {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
+        case SemanticsAction.moveCursorBackwardByWord:
+        case SemanticsAction.moveCursorForwardByWord:
           semanticsOwner.performAction(expectedId, action, true);
           break;
         case SemanticsAction.setSelection:
@@ -412,24 +414,25 @@ void _defineTests() {
             hidden: true,
             button: true,
             textField: true,
+            readOnly: true,
             focused: true,
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
+            multiline: true,
             scopesRoute: true,
             namesRoute: true,
             image: true,
             liveRegion: true,
+            toggled: true,
           ),
         ),
       ),
     ));
     List<SemanticsFlag> flags = SemanticsFlag.values.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.hasToggledState)
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.isToggled);
+    // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
+    // therefore it has to be removed.
+    flags.remove(SemanticsFlag.hasImplicitScrolling);
     TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
@@ -453,15 +456,18 @@ void _defineTests() {
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: SemanticsProperties(
             enabled: true,
+            checked: true,
             toggled: true,
             selected: true,
             hidden: true,
             button: true,
             textField: true,
+            readOnly: true,
             focused: true,
             inMutuallyExclusiveGroup: true,
             header: true,
             obscured: true,
+            multiline: true,
             scopesRoute: true,
             namesRoute: true,
             image: true,
@@ -471,11 +477,9 @@ void _defineTests() {
       ),
     ));
     flags = SemanticsFlag.values.values.toList();
-    flags
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.hasCheckedState)
-      ..remove(SemanticsFlag.hasImplicitScrolling)
-      ..remove(SemanticsFlag.isChecked);
+    // [SemanticsFlag.hasImplicitScrolling] isn't part of [SemanticsProperties]
+    // therefore it has to be removed.
+    flags.remove(SemanticsFlag.hasImplicitScrolling);
 
     expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
@@ -493,7 +497,7 @@ void _defineTests() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreRect: true, ignoreTransform: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   group('diffing', () {
     testWidgets('complains about duplicate keys', (WidgetTester tester) async {

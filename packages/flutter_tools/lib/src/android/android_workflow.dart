@@ -258,25 +258,30 @@ class AndroidLicenseValidator extends DoctorValidator {
       return LicensesAccepted.unknown;
     }
 
-    final Process process = await runCommand(
-      <String>[androidSdk.sdkManagerPath, '--licenses'],
-      environment: androidSdk.sdkManagerEnv,
-    );
-    process.stdin.write('n\n');
-    // We expect logcat streams to occasionally contain invalid utf-8,
-    // see: https://github.com/flutter/flutter/pull/8864.
-    final Future<void> output = process.stdout
-      .transform<String>(const Utf8Decoder(reportErrors: false))
-      .transform<String>(const LineSplitter())
-      .listen(_handleLine)
-      .asFuture<void>(null);
-    final Future<void> errors = process.stderr
-      .transform<String>(const Utf8Decoder(reportErrors: false))
-      .transform<String>(const LineSplitter())
-      .listen(_handleLine)
-      .asFuture<void>(null);
-    await Future.wait<void>(<Future<void>>[output, errors]);
-    return status ?? LicensesAccepted.unknown;
+    try {
+      final Process process = await runCommand(
+        <String>[androidSdk.sdkManagerPath, '--licenses'],
+        environment: androidSdk.sdkManagerEnv,
+      );
+      process.stdin.write('n\n');
+      // We expect logcat streams to occasionally contain invalid utf-8,
+      // see: https://github.com/flutter/flutter/pull/8864.
+      final Future<void> output = process.stdout
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .transform<String>(const LineSplitter())
+        .listen(_handleLine)
+        .asFuture<void>(null);
+      final Future<void> errors = process.stderr
+        .transform<String>(const Utf8Decoder(reportErrors: false))
+        .transform<String>(const LineSplitter())
+        .listen(_handleLine)
+        .asFuture<void>(null);
+      await Future.wait<void>(<Future<void>>[output, errors]);
+      return status ?? LicensesAccepted.unknown;
+    } on ProcessException catch (e) {
+      printTrace('Failed to run Android sdk manager: $e');
+      return LicensesAccepted.unknown;
+    }
   }
 
   /// Run the Android SDK manager tool in order to accept SDK licenses.
@@ -296,23 +301,29 @@ class AndroidLicenseValidator extends DoctorValidator {
       throwToolExit(userMessages.androidSdkManagerOutdated(androidSdk.sdkManagerPath));
     }
 
-    final Process process = await runCommand(
-      <String>[androidSdk.sdkManagerPath, '--licenses'],
-      environment: androidSdk.sdkManagerEnv,
-    );
+    try {
+      final Process process = await runCommand(
+        <String>[androidSdk.sdkManagerPath, '--licenses'],
+        environment: androidSdk.sdkManagerEnv,
+      );
 
-    // The real stdin will never finish streaming. Pipe until the child process
-    // finishes.
-    unawaited(process.stdin.addStream(stdin));
-    // Wait for stdout and stderr to be fully processed, because process.exitCode
-    // may complete first.
-    await waitGroup<void>(<Future<void>>[
-      stdout.addStream(process.stdout),
-      stderr.addStream(process.stderr),
-    ]);
+      // The real stdin will never finish streaming. Pipe until the child process
+      // finishes.
+      unawaited(process.stdin.addStream(stdin));
+      // Wait for stdout and stderr to be fully processed, because process.exitCode
+      // may complete first.
+      await waitGroup<void>(<Future<void>>[
+        stdout.addStream(process.stdout),
+        stderr.addStream(process.stderr),
+      ]);
 
-    final int exitCode = await process.exitCode;
-    return exitCode == 0;
+      final int exitCode = await process.exitCode;
+      return exitCode == 0;
+    } on ProcessException catch (e) {
+      throwToolExit(userMessages.androidCannotRunSdkManager(
+          androidSdk.sdkManagerPath, e.toString()));
+      return false;
+    }
   }
 
   static bool _canRunSdkManager() {

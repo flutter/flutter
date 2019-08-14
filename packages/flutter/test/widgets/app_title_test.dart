@@ -55,6 +55,6 @@ void main() {
     await tester.pump();
     expect(tester.widget<Title>(find.byType(Title)).title, 'en_US');
     expect(tester.widget<Title>(find.byType(Title)).color, kTitleColor);
-  });
+  }, skip: isBrowser);
 
 }

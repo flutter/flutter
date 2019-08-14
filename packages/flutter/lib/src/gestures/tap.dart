@@ -21,14 +21,19 @@ class TapDownDetails {
   /// The [globalPosition] argument must not be null.
   TapDownDetails({
     this.globalPosition = Offset.zero,
+    Offset localPosition,
     this.kind,
-  }) : assert(globalPosition != null);
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
 
   /// The kind of the device that initiated the event.
   final PointerDeviceKind kind;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -51,11 +56,17 @@ typedef GestureTapDownCallback = void Function(TapDownDetails details);
 ///  * [TapGestureRecognizer], which passes this information to one of its callbacks.
 class TapUpDetails {
   /// The [globalPosition] argument must not be null.
-  TapUpDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  TapUpDetails({
+    this.globalPosition = Offset.zero,
+    Offset localPosition,
+  }) : assert(globalPosition != null),
+       localPosition = localPosition ?? globalPosition;
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The local position at which the pointer contacted the screen.
+  final Offset localPosition;
 }
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
@@ -221,7 +232,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
-  Offset _finalPosition;
+  OffsetPair _finalPosition;
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
@@ -260,7 +271,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   @override
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
-      _finalPosition = event.position;
+      _finalPosition = OffsetPair(global: event.position, local: event.localPosition);
       _checkUp();
     } else if (event is PointerCancelEvent) {
       resolve(GestureDisposition.rejected);
@@ -319,7 +330,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       return;
     }
     final TapDownDetails details = TapDownDetails(
-      globalPosition: initialPosition,
+      globalPosition: initialPosition.global,
+      localPosition: initialPosition.local,
       kind: getKindForPointer(pointer),
     );
     switch (_initialButtons) {
@@ -342,7 +354,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       return;
     }
     final TapUpDetails details = TapUpDetails(
-      globalPosition: _finalPosition,
+      globalPosition: _finalPosition.global,
+      localPosition: _finalPosition.local,
     );
     switch (_initialButtons) {
       case kPrimaryButton:
@@ -390,7 +403,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
-    properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('finalPosition', _finalPosition?.global, defaultValue: null));
+    properties.add(DiagnosticsProperty<Offset>('finalLocalPosition', _finalPosition?.local, defaultValue: _finalPosition?.global));
     properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
     // TODO(tongmu): Add property _initialButtons and update related tests
   }

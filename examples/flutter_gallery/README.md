@@ -16,7 +16,7 @@ the [Flutter Setup](https://flutter.dev/setup/) guide.
 ### Building and installing the Flutter app
 
 * `cd $FLUTTER_ROOT/examples/flutter_gallery`
-* `flutter packages get`
+* `flutter pub get`
 * `flutter run --release`
 
 The `flutter run --release` command both builds and installs the Flutter app.

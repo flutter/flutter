@@ -85,7 +85,9 @@ Future<void> runCommand(String executable, List<String> arguments, {
   String failureMessage,
   bool printOutput = true,
   bool skip = false,
+  bool expectFlaky = false,
   Duration timeout = _kLongTimeout,
+  bool Function(String) removeLine,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
   final String relativeWorkingDir = path.relative(workingDirectory);
@@ -102,21 +104,31 @@ Future<void> runCommand(String executable, List<String> arguments, {
   );
 
   Future<List<List<int>>> savedStdout, savedStderr;
+  final Stream<List<int>> stdoutSource = process.stdout
+    .transform<String>(const Utf8Decoder())
+    .transform(const LineSplitter())
+    .where((String line) => removeLine == null || !removeLine(line))
+    .map((String line) => '$line\n')
+    .transform(const Utf8Encoder());
   if (printOutput) {
     await Future.wait<void>(<Future<void>>[
-      stdout.addStream(process.stdout),
+      stdout.addStream(stdoutSource),
       stderr.addStream(process.stderr),
     ]);
   } else {
-    savedStdout = process.stdout.toList();
+    savedStdout = stdoutSource.toList();
     savedStderr = process.stderr.toList();
   }
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
-    return expectNonZeroExit ? 0 : 1;
+    return (expectNonZeroExit || expectFlaky) ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  // If the test is flaky we don't care about the actual exit.
+  if (expectFlaky) {
+    return;
+  }
   if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (failureMessage != null) {
       print(failureMessage);

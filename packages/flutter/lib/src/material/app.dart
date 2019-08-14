@@ -34,6 +34,19 @@ const TextStyle _errorTextStyle = TextStyle(
   debugLabel: 'fallback style; consider putting your text in a Material',
 );
 
+/// Describes which theme will be used by [MaterialApp].
+enum ThemeMode {
+  /// Use either the light or dark theme based on what the user has selected in
+  /// the system settings.
+  system,
+
+  /// Always use the light mode regardless of system preference.
+  light,
+
+  /// Always use the dark mode (if available) regardless of system preference.
+  dark,
+}
+
 /// An application that uses material design.
 ///
 /// A convenience widget that wraps a number of widgets that are commonly
@@ -63,6 +76,71 @@ const TextStyle _errorTextStyle = TextStyle(
 ///
 /// If [home], [routes], [onGenerateRoute], and [onUnknownRoute] are all null,
 /// and [builder] is not null, then no [Navigator] is created.
+///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that disables the "debug"
+/// banner with a [home] route that will be displayed when the app is launched.
+///
+/// ![A screenshot of the MaterialApp class with a home Scaffold](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
+///
+/// ```dart
+/// MaterialApp(
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('Home'),
+///     ),
+///   ),
+///   debugShowCheckedModeBanner: false,
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that uses the [routes]
+/// `Map` to define the "home" route and an "about" route.
+///
+/// ```dart
+/// MaterialApp(
+///   routes: <String, WidgetBuilder>{
+///     '/': (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Home Route'),
+///         ),
+///       );
+///     },
+///     '/about': (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: const Text('About Route'),
+///         ),
+///       );
+///      }
+///    },
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// This example shows how to create a [MaterialApp] that defines a [theme] that
+/// will be used for material widgets in the app.
+///
+/// ![A screenshot of the MaterialApp class with a custom theme](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
+///
+/// ```dart
+/// MaterialApp(
+///   theme: ThemeData(
+///     brightness: Brightness.dark,
+///     primaryColor: Colors.blueGrey
+///   ),
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('MaterialApp Theme'),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -99,6 +177,7 @@ class MaterialApp extends StatefulWidget {
     this.color,
     this.theme,
     this.darkTheme,
+    this.themeMode = ThemeMode.system,
     this.locale,
     this.localizationsDelegates,
     this.localeListResolutionCallback,
@@ -169,13 +248,15 @@ class MaterialApp extends StatefulWidget {
   /// Default visual properties, like colors fonts and shapes, for this app's
   /// material widgets.
   ///
-  /// A second [darkTheme] [ThemeData] value, which is used when the underlying
-  /// platform requests a "dark mode" UI, can also be specified.
+  /// A second [darkTheme] [ThemeData] value, which is used to provide a dark
+  /// version of the user interface can also be specified. [themeMode] will
+  /// control which theme will be used if a [darkTheme] is provided.
   ///
   /// The default value of this property is the value of [ThemeData.light()].
   ///
   /// See also:
   ///
+  ///  * [themeMode], which controls which theme to use.
   ///  * [MediaQueryData.platformBrightness], which indicates the platform's
   ///    desired brightness and is used to automatically toggle between [theme]
   ///    and [darkTheme] in [MaterialApp].
@@ -183,26 +264,53 @@ class MaterialApp extends StatefulWidget {
   ///    colors.
   final ThemeData theme;
 
-  /// The [ThemeData] to use when the platform specifically requests a dark
-  /// themed UI.
+  /// The [ThemeData] to use when a 'dark mode' is requested by the system.
   ///
-  /// Host platforms such as Android Pie can request a system-wide "dark mode"
-  /// when entering battery saver mode.
+  /// Some host platforms allow the users to select a system-wide 'dark mode',
+  /// or the application may want to offer the user the ability to choose a
+  /// dark theme just for this application. This is theme that will be used for
+  /// such cases. [themeMode] will control which theme will be used.
   ///
-  /// When the host platform requests a [Brightness.dark] mode, you may want to
-  /// supply a [ThemeData.brightness] that's also [Brightness.dark].
+  /// This theme should have a [ThemeData.brightness] set to [Brightness.dark].
   ///
   /// Uses [theme] instead when null. Defaults to the value of
   /// [ThemeData.light()] when both [darkTheme] and [theme] are null.
   ///
   /// See also:
   ///
+  ///  * [themeMode], which controls which theme to use.
   ///  * [MediaQueryData.platformBrightness], which indicates the platform's
   ///    desired brightness and is used to automatically toggle between [theme]
   ///    and [darkTheme] in [MaterialApp].
   ///  * [ThemeData.brightness], which is typically set to the value of
   ///    [MediaQueryData.platformBrightness].
   final ThemeData darkTheme;
+
+  /// Determines which theme will be used by the application if both [theme]
+  /// and [darkTheme] are provided.
+  ///
+  /// If set to [ThemeMode.system], the choice of which theme to use will
+  /// be based on the user's system preferences. If the [MediaQuery.platformBrightnessOf]
+  /// is [Brightness.light], [theme] will be used. If it is [Brightness.dark],
+  /// [darkTheme] will be used (unless it is [null], in which case [theme]
+  /// will be used.
+  ///
+  /// If set to [ThemeMode.light] the [theme] will always be used,
+  /// regardless of the user's system preference.
+  ///
+  /// If set to [ThemeMode.dark] the [darkTheme] will be used
+  /// regardless of the user's system preference. If [darkTheme] is [null]
+  /// then it will fallback to using [theme].
+  ///
+  /// The default value is [ThemeMode.system].
+  ///
+  /// See also:
+  ///
+  ///   * [theme], which is used when a light mode is selected.
+  ///   * [darkTheme], which is used when a dark mode is selected.
+  ///   * [ThemeData.brightness], which indicates to various parts of the
+  ///     system what kind of theme is being used.
+  final ThemeMode themeMode;
 
   /// {@macro flutter.widgets.widgetsApp.color}
   final Color color;
@@ -454,15 +562,16 @@ class _MaterialAppState extends State<MaterialApp> {
       onUnknownRoute: widget.onUnknownRoute,
       builder: (BuildContext context, Widget child) {
         // Use a light theme, dark theme, or fallback theme.
+        final ThemeMode mode = widget.themeMode ?? ThemeMode.system;
         ThemeData theme;
-        final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
-        if (platformBrightness == ui.Brightness.dark && widget.darkTheme != null) {
-          theme = widget.darkTheme;
-        } else if (widget.theme != null) {
-          theme = widget.theme;
-        } else {
-          theme = ThemeData.fallback();
+        if (widget.darkTheme != null) {
+          final ui.Brightness platformBrightness = MediaQuery.platformBrightnessOf(context);
+          if (mode == ThemeMode.dark ||
+              (mode == ThemeMode.system && platformBrightness == ui.Brightness.dark)) {
+            theme = widget.darkTheme;
+          }
         }
+        theme ??= widget.theme ?? ThemeData.fallback();
 
         return AnimatedTheme(
           data: theme,

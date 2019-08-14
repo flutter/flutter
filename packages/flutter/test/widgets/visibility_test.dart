@@ -64,7 +64,7 @@ void main() {
     final Matcher expectedSemanticsWhenAbsent = hasSemantics(TestSemantics.root());
 
     // We now run a sequence of pumpWidget calls one after the other. In
-    // addition to verifying that the right behaviour is seen in each case, this
+    // addition to verifying that the right behavior is seen in each case, this
     // also verifies that the widget can dynamically change from state to state.
 
     await tester.pumpWidget(Visibility(child: testChild));
@@ -309,5 +309,5 @@ void main() {
     log.clear();
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 }

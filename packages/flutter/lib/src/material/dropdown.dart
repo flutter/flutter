@@ -20,7 +20,7 @@ import 'shadows.dart';
 import 'theme.dart';
 
 const Duration _kDropdownMenuDuration = Duration(milliseconds: 300);
-const double _kMenuItemHeight = 48.0;
+const double _kMenuItemHeight = kMinInteractiveDimension;
 const double _kDenseButtonHeight = 24.0;
 const EdgeInsets _kMenuItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
 const EdgeInsetsGeometry _kAlignedButtonPadding = EdgeInsetsDirectional.only(start: 16.0, end: 4.0);
@@ -532,19 +532,30 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// This sample shows a `DropdownButton` whose value is one of
-/// "One", "Two", "Free", or "Four".
+/// This sample shows a `DropdownButton` with a customized icon, text style,
+/// and underline and whose value is one of "One", "Two", "Free", or "Four".
 ///
-/// ```dart preamble
-/// String dropdownValue = 'One';
-/// ```
+/// ![A screenshot of the dropdown button](https://flutter.github.io/assets-for-api-docs/assets/material/dropdown_button.png)
 ///
 /// ```dart
+/// String dropdownValue = 'One';
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
 ///       child: DropdownButton<String>(
 ///         value: dropdownValue,
+///         icon: Icon(Icons.arrow_downward),
+///         iconSize: 24,
+///         elevation: 16,
+///         style: TextStyle(
+///           color: Colors.deepPurple
+///         ),
+///         underline: Container(
+///           height: 2,
+///           color: Colors.deepPurpleAccent,
+///         ),
 ///         onChanged: (String newValue) {
 ///           setState(() {
 ///             dropdownValue = newValue;
@@ -795,7 +806,8 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
+    final double fontSize = _textStyle.fontSize ?? Theme.of(context).textTheme.subhead.fontSize;
+    return math.max(fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
   Color get _iconColor {

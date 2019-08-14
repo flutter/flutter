@@ -8,6 +8,32 @@ import 'package:collection/collection.dart';
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+
+/// Used in internal testing.
+class FakePlatformViewController extends PlatformViewController {
+
+  FakePlatformViewController(int id) {
+    _id = id;
+  }
+
+  /// Events that are dispatched;
+  List<PointerEvent> dispatchedPointerEvents = <PointerEvent>[];
+
+  int _id;
+
+  @override
+  int get viewId => _id;
+
+  @override
+  void dispatchPointerEvent(PointerEvent event) {
+    dispatchedPointerEvents.add(event);
+  }
+
+  void clearTestingVariables() {
+    dispatchedPointerEvents.clear();
+  }
+}
 
 class FakeAndroidPlatformViewsController {
   FakeAndroidPlatformViewsController() {
@@ -28,6 +54,8 @@ class FakeAndroidPlatformViewsController {
 
   Completer<void> createCompleter;
 
+  int lastClearedFocusViewId;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -35,7 +63,7 @@ class FakeAndroidPlatformViewsController {
   void invokeViewFocused(int viewId) {
     final MethodCodec codec = SystemChannels.platform_views.codec;
     final ByteData data = codec.encodeMethodCall(MethodCall('viewFocused', viewId));
-    BinaryMessages.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
+    defaultBinaryMessenger.handlePlatformMessage(SystemChannels.platform_views.name, data, (ByteData data) {});
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) {
@@ -50,6 +78,8 @@ class FakeAndroidPlatformViewsController {
         return _touch(call);
       case 'setDirection':
         return _setDirection(call);
+      case 'clearFocus':
+        return _clearFocus(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -152,6 +182,19 @@ class FakeAndroidPlatformViewsController {
 
     _views[id].layoutDirection = layoutDirection;
 
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _clearFocus(MethodCall call) {
+    final int id = call.arguments;
+
+    if (!_views.containsKey(id))
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to clear the focus on a platform view with unknown id: $id',
+      );
+
+    lastClearedFocusViewId = id;
     return Future<dynamic>.sync(() => null);
   }
 }

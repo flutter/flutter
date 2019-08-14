@@ -15,6 +15,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
@@ -122,12 +123,12 @@ typedef EvaluatorFunction = dynamic Function();
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_serviceClient], [_peer] and [_appIsolate].
+  /// [serviceClient], [_peer] and [appIsolate].
   @visibleForTesting
   FlutterDriver.connectedTo(
-    this._serviceClient,
+    this.serviceClient,
     this._peer,
-    this._appIsolate, {
+    this.appIsolate, {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
   }) : _printCommunication = printCommunication,
@@ -135,9 +136,9 @@ class FlutterDriver {
        _driverId = _nextDriverId++;
 
   static const String _flutterExtensionMethodName = 'ext.flutter.driver';
-  static const String _setVMTimelineFlagsMethodName = '_setVMTimelineFlags';
-  static const String _getVMTimelineMethodName = '_getVMTimeline';
-  static const String _clearVMTimelineMethodName = '_clearVMTimeline';
+  static const String _setVMTimelineFlagsMethodName = 'setVMTimelineFlags';
+  static const String _getVMTimelineMethodName = 'getVMTimeline';
+  static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
   static int _nextDriverId = 0;
@@ -267,6 +268,8 @@ class FlutterDriver {
       logCommunicationToFile: logCommunicationToFile,
     );
 
+    driver._dartVmReconnectUrl = dartVmServiceUrl;
+
     // Attempts to resume the isolate, but does not crash if it fails because
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
@@ -383,13 +386,42 @@ class FlutterDriver {
   final int _driverId;
 
   /// Client connected to the Dart VM running the Flutter application
-  final VMServiceClient _serviceClient;
+  ///
+  /// You can use [VMServiceClient] to check VM version, flags and get
+  /// notified when a new isolate has been instantiated. That could be
+  /// useful if your application spawns multiple isolates that you
+  /// would like to instrument.
+  final VMServiceClient serviceClient;
 
   /// JSON-RPC client useful for sending raw JSON requests.
-  final rpc.Peer _peer;
+  rpc.Peer _peer;
 
-  /// The main isolate hosting the Flutter application
-  final VMIsolate _appIsolate;
+  String _dartVmReconnectUrl;
+
+  Future<void> _restorePeerConnectionIfNeeded() async {
+    if (!_peer.isClosed || _dartVmReconnectUrl == null) {
+      return;
+    }
+
+    _log.warning(
+        'Peer connection is closed! Trying to restore the connection...'
+    );
+
+    final String webSocketUrl = _getWebSocketUrl(_dartVmReconnectUrl);
+    final WebSocket ws = await WebSocket.connect(webSocketUrl);
+    ws.done.whenComplete(() => _checkCloseCode(ws));
+    _peer = rpc.Peer(
+        IOWebSocketChannel(ws).cast(),
+        onUnhandledError: _unhandledJsonRpcError,
+    )..listen();
+  }
+
+  /// The main isolate hosting the Flutter application.
+  ///
+  /// If you used the [registerExtension] API to instrument your application,
+  /// you can use this [VMIsolate] to call these extension methods via
+  /// [invokeExtension].
+  final VMIsolate appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
@@ -402,7 +434,7 @@ class FlutterDriver {
     try {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
-      final Future<Map<String, dynamic>> future = _appIsolate.invokeExtension(
+      final Future<Map<String, dynamic>> future = appIsolate.invokeExtension(
         _flutterExtensionMethodName,
         serialized,
       ).then<Map<String, dynamic>>((Object value) => value);
@@ -467,6 +499,14 @@ class FlutterDriver {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
   }
 
+  /// Waits until the next [Window.onReportTimings] is called.
+  ///
+  /// Use this method to wait for the first frame to be rasterized during the
+  /// app launch.
+  Future<void> waitUntilFirstFrameRasterized() async {
+    await _sendCommand(const WaitUntilFirstFrameRasterized());
+  }
+
   Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
     final GetOffset command = GetOffset(finder, type, timeout: timeout);
     final GetOffsetResult result = GetOffsetResult.fromJson(await _sendCommand(command));
@@ -474,28 +514,112 @@ class FlutterDriver {
   }
 
   /// Returns the point at the top left of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
   }
 
   /// Returns the point at the top right of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.topRight, timeout: timeout);
   }
 
   /// Returns the point at the bottom left of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
   }
 
   /// Returns the point at the bottom right of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
   }
 
   /// Returns the point at the center of the widget identified by `finder`.
+  ///
+  /// The offset is expressed in logical pixels and can be translated to
+  /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [RenderObject] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [RenderObject] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [RenderObject]s are responsible for positioning, layout, and painting on
+  /// the screen, based on the configuration from a [Widget]. Callers that need
+  /// information about size or position should use this method.
+  ///
+  /// A widget may indirectly create multiple [RenderObject]s, which each
+  /// implement some aspect of the widget configuration. A 1:1 relationship
+  /// should not be assumed.
+  ///
+  /// See also:
+  ///
+  ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
+  Future<Map<String, Object>> getRenderObjectDiagnostics(
+      SerializableFinder finder, {
+      int subtreeDepth = 0,
+      bool includeProperties = true,
+      Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [Widget] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [Widget] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [Widget]s describe configuration for the rendering tree. Individual
+  /// widgets may create multiple [RenderObject]s to actually layout and paint
+  /// the desired configuration.
+  ///
+  /// See also:
+  ///
+  ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
+  ///    [RenderObject].
+  Future<Map<String, Object>> getWidgetDiagnostics(
+    SerializableFinder finder, {
+    int subtreeDepth = 0,
+    bool includeProperties = true,
+    Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -746,6 +870,7 @@ class FlutterDriver {
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
+    await _restorePeerConnectionIfNeeded();
     final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
     return result != null
         ? result['flags'].cast<Map<String,dynamic>>()
@@ -905,7 +1030,7 @@ class FlutterDriver {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
-            'isolateId': 'isolates/${_appIsolate.numberAsString}',
+            'isolateId': 'isolates/${appIsolate.numberAsString}',
           });
     } catch (error, stackTrace) {
       throw DriverError(
@@ -921,7 +1046,7 @@ class FlutterDriver {
   /// Returns a [Future] that fires once the connection has been closed.
   Future<void> close() async {
     // Don't leak vm_service_client-specific objects, if any
-    await _serviceClient.close();
+    await serviceClient.close();
     await _peer.close();
   }
 }
@@ -990,9 +1115,7 @@ void _unhandledJsonRpcError(dynamic error, dynamic stack) {
   // assert(false);
 }
 
-/// Waits for a real Dart VM service to become available, then connects using
-/// the [VMServiceClient].
-Future<VMServiceClientConnection> _waitAndConnect(String url) async {
+String _getWebSocketUrl(String url) {
   Uri uri = Uri.parse(url);
   final List<String> pathSegments = <String>[];
   // If there's an authentication code (default), we need to add it to our path.
@@ -1002,16 +1125,36 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   pathSegments.add('ws');
   if (uri.scheme == 'http')
     uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
+  return uri.toString();
+}
+
+void _checkCloseCode(WebSocket ws) {
+  if (ws.closeCode != 1000 && ws.closeCode != null) {
+    _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
+  }
+}
+
+/// Waits for a real Dart VM service to become available, then connects using
+/// the [VMServiceClient].
+Future<VMServiceClientConnection> _waitAndConnect(String url) async {
+  final String webSocketUrl = _getWebSocketUrl(url);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
     WebSocket ws2;
     try {
-      ws1 = await WebSocket.connect(uri.toString());
-      ws2 = await WebSocket.connect(uri.toString());
+      ws1 = await WebSocket.connect(webSocketUrl);
+      ws2 = await WebSocket.connect(webSocketUrl);
+
+      ws1.done.whenComplete(() => _checkCloseCode(ws1));
+      ws2.done.whenComplete(() => _checkCloseCode(ws2));
+
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
+        rpc.Peer(
+            IOWebSocketChannel(ws2).cast(),
+            onUnhandledError: _unhandledJsonRpcError,
+        )..listen(),
       );
     } catch (e) {
       await ws1?.close();

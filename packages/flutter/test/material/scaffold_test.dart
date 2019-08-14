@@ -66,7 +66,7 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    // Backwards compatiblity: deprecated resizeToAvoidBottomPadding flag
+    // Backwards compatibility: deprecated resizeToAvoidBottomPadding flag
     await tester.pumpWidget(boilerplate(MediaQuery(
       data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
       child: Scaffold(
@@ -201,6 +201,40 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     expect(tester.getCenter(find.byType(FloatingActionButton)), const Offset(44.0, 356.0));
+  });
+
+  testWidgets('Floating Action Button bottom padding not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        floatingActionButton: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
@@ -348,6 +382,40 @@ void main() {
     expect(appBarBottomRight, equals(sheetTopRight));
   });
 
+  testWidgets('BottomSheet bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        bottomSheet: const Placeholder(),
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
+  });
+
   testWidgets('Persistent bottom buttons are persistent', (WidgetTester tester) async {
     bool didPressButton = false;
     await tester.pumpWidget(
@@ -401,6 +469,40 @@ void main() {
     );
     expect(tester.getBottomLeft(find.byType(ButtonBar)), const Offset(10.0, 560.0));
     expect(tester.getBottomRight(find.byType(ButtonBar)), const Offset(770.0, 560.0));
+  });
+
+  testWidgets('Persistent bottom buttons bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Container(),
+        persistentFooterButtons: const <Widget>[Placeholder()],
+      ),
+    );
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child,
+      )
+    );
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   group('back arrow', () {
@@ -907,6 +1009,62 @@ void main() {
       );
     });
 
+    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
+      Widget boilerplate(Widget child) {
+        return Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: child,
+          ),
+        );
+      }
+
+      final Widget child = boilerplate(
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: const Placeholder(),
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: Text('test'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: Text('test'),
+              )
+            ]
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)),
+          child: child,
+        ),
+      );
+      final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+      // Consume bottom padding - as if by the keyboard opening
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      );
+      final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+      expect(initialPoint, finalPoint);
+    });
+
     testWidgets('floatingActionButton', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(
@@ -1187,16 +1345,15 @@ void main() {
       expect(find.text('drawer'), findsOneWidget);
     });
 
-    testWidgets('Drawer opens correctly with padding from MediaQuery', (WidgetTester tester) async {
-      // The padding described by MediaQuery is larger than the default
-      // drawer drag zone width which is 20.
+    testWidgets('Drawer opens correctly with padding from MediaQuery (LTR)', (WidgetTester tester) async {
+      const double simulatedNotchSize = 40.0;
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
             drawer: const Drawer(
-              child: Text('drawer'),
+              child: Text('Drawer'),
             ),
-            body: const Text('scaffold body'),
+            body: const Text('Scaffold Body'),
             appBar: AppBar(
               centerTitle: true,
               title: const Text('Title'),
@@ -1206,25 +1363,23 @@ void main() {
       );
 
       ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.dragFrom(const Offset(simulatedNotchSize + 15.0, 100), const Offset(300, 0));
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, false);
 
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
             data: const MediaQueryData(
-              padding: EdgeInsets.fromLTRB(40, 0, 0, 0)
+              padding: EdgeInsets.fromLTRB(simulatedNotchSize, 0, 0, 0),
             ),
             child: Scaffold(
               drawer: const Drawer(
-                child: Text('drawer'),
+                child: Text('Drawer'),
               ),
-              body: const Text('scaffold body'),
+              body: const Text('Scaffold Body'),
               appBar: AppBar(
                 centerTitle: true,
                 title: const Text('Title'),
@@ -1233,33 +1388,60 @@ void main() {
           ),
         ),
       );
-
       scaffoldState = tester.state(find.byType(Scaffold));
-
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.dragFrom(
+        const Offset(simulatedNotchSize + 15.0, 100),
+        const Offset(300, 0),
+      );
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, true);
     });
 
-    testWidgets('Drawer opens correctly with padding from MediaQuer (RTL)', (WidgetTester tester) async {
-      // The padding described by MediaQuery is larger than the default
-      // drawer drag zone width which is 20.
+    testWidgets('Drawer opens correctly with padding from MediaQuery (RTL)', (WidgetTester tester) async {
+      const double simulatedNotchSize = 40.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            body: const Text('Scaffold Body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+
+      final double scaffoldWidth = tester.renderObject<RenderBox>(
+        find.byType(Scaffold),
+      ).size.width;
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
+        const Offset(-300, 0),
+      );
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
+
       await tester.pumpWidget(
         MaterialApp(
           home: MediaQuery(
             data: const MediaQueryData(
-              padding: EdgeInsets.fromLTRB(0, 0, 40, 0)
+              padding: EdgeInsets.fromLTRB(0, 0, simulatedNotchSize, 0),
             ),
             child: Directionality(
               textDirection: TextDirection.rtl,
               child: Scaffold(
                 drawer: const Drawer(
-                  child: Text('drawer'),
+                  child: Text('Drawer'),
                 ),
-                body: const Text('scaffold body'),
+                body: const Text('Scaffold body'),
                 appBar: AppBar(
                   centerTitle: true,
                   title: const Text('Title'),
@@ -1269,21 +1451,66 @@ void main() {
           ),
         ),
       );
-
-      final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
-
+      scaffoldState = tester.state(find.byType(Scaffold));
       expect(scaffoldState.isDrawerOpen, false);
 
-      await tester.dragFrom(const Offset(765, 100), const Offset(-300, 0));
+      await tester.dragFrom(
+        Offset(scaffoldWidth - simulatedNotchSize - 15.0, 100),
+        const Offset(-300, 0),
+      );
       await tester.pumpAndSettle();
-
       expect(scaffoldState.isDrawerOpen, true);
     });
   });
 
+    testWidgets('Drawer opens correctly with custom edgeDragWidth', (WidgetTester tester) async {
+      // The default edge drag width is 20.0.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            body: const Text('Scaffold body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+      ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            drawer: const Drawer(
+              child: Text('Drawer'),
+            ),
+            drawerEdgeDragWidth: 40.0,
+            body: const Text('Scaffold Body'),
+            appBar: AppBar(
+              centerTitle: true,
+              title: const Text('Title'),
+            ),
+          ),
+        ),
+      );
+      scaffoldState = tester.state(find.byType(Scaffold));
+      expect(scaffoldState.isDrawerOpen, false);
+
+      await tester.dragFrom(const Offset(35, 100), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(scaffoldState.isDrawerOpen, true);
+    });
+
   testWidgets('Nested scaffold body insets', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/20295
-
     final Key bodyKey = UniqueKey();
 
     Widget buildFrame(bool innerResizeToAvoidBottomInset, bool outerResizeToAvoidBottomInset) {

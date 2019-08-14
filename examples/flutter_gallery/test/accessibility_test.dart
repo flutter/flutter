@@ -472,15 +472,15 @@ void main() {
 
   group('All material demos meet text contrast guidelines', () {
     final List<ThemeData> themes = <ThemeData>[
-      kLightGalleryTheme.data,
+      kLightGalleryTheme,
       ThemeData.light(),
-      // TODO(hansmuller): add kDarkGalleryTheme.data, ThemeData.dark(), see #22044
+      // TODO(hansmuller): add kDarkGalleryTheme, ThemeData.dark(), see #22044
     ];
 
     const List<String> themeNames = <String>[
       'kLightGalleryTheme',
       'ThemeData.light()',
-      // TODO(hansmuller): add 'kDarkGalleryTheme', 'ThemeData.dark()', see 22044
+      // TODO(hansmuller): add 'kDarkGalleryTheme', 'ThemeData.dark()', see #22044
     ];
 
     for (int themeIndex = 0; themeIndex < themes.length; themeIndex += 1) {

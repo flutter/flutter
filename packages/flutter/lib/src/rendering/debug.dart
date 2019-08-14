@@ -140,7 +140,7 @@ bool debugCheckIntrinsicSizes = false;
 ///
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
 ///
 /// See also:
 ///
@@ -243,8 +243,8 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/rendering-library.html> for
-/// a complete list.
+/// See [the rendering library](rendering/rendering-library.html) for a complete
+/// list.
 ///
 /// The `debugCheckIntrinsicSizesOverride` argument can be provided to override
 /// the expected value for [debugCheckIntrinsicSizes]. (This exists because the

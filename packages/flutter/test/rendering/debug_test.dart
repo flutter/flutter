@@ -14,12 +14,12 @@ void main() {
   test('Describe transform control test', () {
     final Matrix4 identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
-    expect(description, equals(<String>[
+    expect(description, <String>[
       '[0] 1.0,0.0,0.0,0.0',
       '[1] 0.0,1.0,0.0,0.0',
       '[2] 0.0,0.0,1.0,0.0',
       '[3] 0.0,0.0,0.0,1.0',
-    ]));
+    ]);
   });
 
   test('transform property test', () {
@@ -122,6 +122,72 @@ void main() {
                                      ..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF))));
     expect(b.debugPaint, paints..rect(color: const Color(0xFF00FFFF))..path(color: const Color(0x900090FF))..path(color: const Color(0xFF0090FF)));
     expect(b.debugPaint, isNot(paints..rect(color: const Color(0x90909090))));
+    debugPaintSizeEnabled = false;
+  });
+
+  test('debugPaintPadding from render objects with inverted direction vertical', () {
+    debugPaintSizeEnabled = true;
+    RenderSliver s;
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        s = RenderSliverPadding(
+          padding: const EdgeInsets.all(10.0),
+          child: RenderSliverToBoxAdapter(
+            child: RenderPadding(
+              padding: const EdgeInsets.all(10.0),
+            ),
+          ),
+        ),
+      ],
+    );
+    layout(root);
+    dynamic error;
+    try {
+      s.debugPaint(
+        PaintingContext(
+          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        const Offset(0.0, 500)
+      );
+    } catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
+    debugPaintSizeEnabled = false;
+  });
+
+  test('debugPaintPadding from render objects with inverted direction horizontal', () {
+    debugPaintSizeEnabled = true;
+    RenderSliver s;
+    final RenderViewport root = RenderViewport(
+      axisDirection: AxisDirection.left,
+      crossAxisDirection: AxisDirection.down,
+      offset: ViewportOffset.zero(),
+      children: <RenderSliver>[
+        s = RenderSliverPadding(
+          padding: const EdgeInsets.all(10.0),
+          child: RenderSliverToBoxAdapter(
+            child: RenderPadding(
+              padding: const EdgeInsets.all(10.0),
+            ),
+          ),
+        ),
+      ],
+    );
+    layout(root);
+    dynamic error;
+    try {
+      s.debugPaint(
+        PaintingContext(
+          ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
+        const Offset(0.0, 500)
+      );
+    } catch(e) {
+      error = e;
+    }
+    expect(error, isNull);
     debugPaintSizeEnabled = false;
   });
 }

@@ -129,7 +129,7 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 /// If [retry] is passed, the test will be retried the provided number of times
 /// before being marked as a failure.
 ///
-/// [configuring tags]: https://github.com/dart-lang/test/blob/master/doc/package_config.md#configuring-tags
+/// [configuring tags]: https://github.com/dart-lang/test/blob/44d6cb196f34a93a975ed5f3cb76afcc3a7b39b0/doc/package_config.md#configuring-tags
 ///
 /// [onPlatform] allows tests to be configured on a platform-by-platform
 /// basis. It's a map from strings that are parsed as [PlatformSelector]s to
@@ -150,12 +150,6 @@ Future<void> _runSkippedTest(Suite suiteConfig, Test test, List<Group> parents, 
 ///
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
-///
-/// If the `solo` flag is `true`, only tests and groups marked as
-/// 'solo' will be be run. This only restricts tests *within this test
-/// suite*—tests in other suites will run as normal. We recommend that users
-/// avoid this flag if possible and instead use the test runner flag `-n` to
-/// filter tests by name.
 @isTest
 void test(
   Object description,
@@ -204,7 +198,7 @@ void test(
 /// [package configuration file][configuring tags]. The parameter can be an
 /// [Iterable] of tag names, or a [String] representing a single tag.
 ///
-/// [configuring tags]: https://github.com/dart-lang/test/blob/master/doc/package_config.md#configuring-tags
+/// [configuring tags]: https://github.com/dart-lang/test/blob/44d6cb196f34a93a975ed5f3cb76afcc3a7b39b0/doc/package_config.md#configuring-tags
 ///
 /// [onPlatform] allows groups to be configured on a platform-by-platform
 /// basis. It's a map from strings that are parsed as [PlatformSelector]s to
@@ -225,12 +219,6 @@ void test(
 ///
 /// If multiple platforms match, the annotations apply in order as through
 /// they were in nested groups.
-///
-/// If the `solo` flag is `true`, only tests and groups marked as
-/// 'solo' will be be run. This only restricts tests *within this test
-/// suite*—tests in other suites will run as normal. We recommend that users
-/// avoid this flag if possible, and instead use the test runner flag `-n` to
-/// filter tests by name.
 @isTestGroup
 void group(Object description, Function body, { dynamic skip }) {
   _declarer.group(description.toString(), body, skip: skip);

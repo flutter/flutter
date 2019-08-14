@@ -19,7 +19,7 @@ void main() {
     File template;
 
     setUp(() {
-      tmpDir = Directory.systemTemp.createTempSync('snippets_test');
+      tmpDir = Directory.systemTemp.createTempSync('flutter_snippets_test.');
       configuration = Configuration(flutterRoot: Directory(path.join(
           tmpDir.absolute.path, 'flutter')));
       configuration.createOutputDirectory();
@@ -74,8 +74,14 @@ void main() {
 ```
 ''');
 
-      final String html =
-          generator.generate(inputFile, SnippetType.application, template: 'template', id: 'id');
+      final String html = generator.generate(
+        inputFile,
+        SnippetType.application,
+        template: 'template',
+        metadata: <String, Object>{
+          'id': 'id',
+        },
+      );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('print(&#39;The actual \$name.&#39;);'));
@@ -103,7 +109,7 @@ void main() {
 ```
 ''');
 
-      final String html = generator.generate(inputFile, SnippetType.sample);
+      final String html = generator.generate(inputFile, SnippetType.sample, metadata: <String, Object>{'id': 'id'});
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
       expect(html, contains('  print(&#39;The actual \$name.&#39;);'));
@@ -135,9 +141,8 @@ void main() {
         inputFile,
         SnippetType.application,
         template: 'template',
-        id: 'id',
         output: outputFile,
-        metadata: <String, Object>{'sourcePath': 'some/path.dart'},
+        metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
       final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());

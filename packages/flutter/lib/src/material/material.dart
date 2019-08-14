@@ -1,11 +1,13 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -200,15 +202,23 @@ class Material extends StatefulWidget {
   /// {@template flutter.material.material.elevation}
   /// The z-coordinate at which to place this material relative to its parent.
   ///
-  /// This controls the size of the shadow below the material.
+  /// This controls the size of the shadow below the material and the opacity
+  /// of the elevation overlay color if it is applied.
   ///
   /// If this is non-zero, the contents of the material are clipped, because the
   /// widget conceptually defines an independent printed piece of material.
   ///
-  /// Defaults to 0. Changing this value will cause the shadow to animate over
-  /// [animationDuration].
+  /// Defaults to 0. Changing this value will cause the shadow and the elevation
+  /// overlay to animate over [animationDuration].
   ///
   /// The value is non-negative.
+  ///
+  /// See also:
+  ///
+  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
+  ///     an overlay color will be applied to indicate elevation.
+  ///   * [color] which may have an elevation overlay applied.
+  ///
   /// {@endtemplate}
   final double elevation;
 
@@ -216,6 +226,11 @@ class Material extends StatefulWidget {
   ///
   /// Must be opaque. To create a transparent piece of material, use
   /// [MaterialType.transparency].
+  ///
+  /// To support dark themes, if the surrounding
+  /// [ThemeData.applyElevationOverlayColor] is [true] and
+  /// this color is [ThemeData.colorScheme.surface] then a semi-transparent
+  /// white will be composited on top this color to indicate the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
@@ -252,7 +267,7 @@ class Material extends StatefulWidget {
   final Clip clipBehavior;
 
   /// Defines the duration of animated changes for [shape], [elevation],
-  /// and [shadowColor].
+  /// [shadowColor] and the elevation overlay if it is applied.
   ///
   /// The default value is [kThemeChangeDuration].
   final Duration animationDuration;
@@ -289,8 +304,8 @@ class Material extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<MaterialType>('type', type));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(properties, prefix: 'textStyle.');
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('borderOnForeground', borderOnForeground, defaultValue: true));
@@ -301,20 +316,43 @@ class Material extends StatefulWidget {
   static const double defaultSplashRadius = 35.0;
 }
 
+// Apply a semi-transparent white on surface colors to
+// indicate the level of elevation.
+Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
+  final ThemeData theme = Theme.of(context);
+  if (elevation > 0.0 &&
+      theme.applyElevationOverlayColor &&
+      background == theme.colorScheme.surface) {
+
+    // Compute the opacity for the given elevation
+    // This formula matches the values in the spec:
+    // https://material.io/design/color/dark-theme.html#properties
+    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
+    final Color overlay = Colors.white.withOpacity(opacity);
+    return Color.alphaBlend(overlay, background);
+  }
+  return background;
+}
+
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = GlobalKey(debugLabel: 'ink renderer');
 
   Color _getBackgroundColor(BuildContext context) {
-    if (widget.color != null)
-      return widget.color;
-    switch (widget.type) {
-      case MaterialType.canvas:
-        return Theme.of(context).canvasColor;
-      case MaterialType.card:
-        return Theme.of(context).cardColor;
-      default:
-        return null;
+    final ThemeData theme = Theme.of(context);
+    Color color = widget.color;
+    if (color == null) {
+      switch (widget.type) {
+        case MaterialType.canvas:
+          color = theme.canvasColor;
+          break;
+        case MaterialType.card:
+          color = theme.cardColor;
+          break;
+        default:
+          break;
+      }
     }
+    return color;
   }
 
   @override
@@ -366,7 +404,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
-        color: backgroundColor,
+        color: _elevationOverlayColor(context, backgroundColor, widget.elevation),
         shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
@@ -561,7 +599,7 @@ abstract class InkFeature {
   /// Typically used by subclasses to call
   /// [MaterialInkController.markNeedsPaint] when they need to repaint.
   MaterialInkController get controller => _controller;
-  _RenderInkFeatures _controller;
+  final _RenderInkFeatures _controller;
 
   /// The render box whose visual position defines the frame of reference for this ink feature.
   final RenderBox referenceBox;
@@ -691,8 +729,8 @@ class _MaterialInterior extends ImplicitlyAnimatedWidget {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ShapeBorder>('shape', shape));
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 
@@ -711,6 +749,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
   @override
   Widget build(BuildContext context) {
     final ShapeBorder shape = _border.evaluate(animation);
+    final double elevation = _elevation.evaluate(animation);
     return PhysicalShape(
       child: _ShapeBorderPaint(
         child: widget.child,
@@ -722,8 +761,8 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
         textDirection: Directionality.of(context),
       ),
       clipBehavior: widget.clipBehavior,
-      elevation: _elevation.evaluate(animation),
-      color: widget.color,
+      elevation: elevation,
+      color: _elevationOverlayColor(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

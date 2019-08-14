@@ -58,10 +58,11 @@ class FailingTestImageProvider extends TestImageProvider {
 
 Future<ImageInfo> extractOneFrame(ImageStream stream) {
   final Completer<ImageInfo> completer = Completer<ImageInfo>();
-  void listener(ImageInfo image, bool synchronousCall) {
+  ImageStreamListener listener;
+  listener = ImageStreamListener((ImageInfo image, bool synchronousCall) {
     completer.complete(image);
     stream.removeListener(listener);
-  }
+  });
   stream.addListener(listener);
   return completer.future;
 }

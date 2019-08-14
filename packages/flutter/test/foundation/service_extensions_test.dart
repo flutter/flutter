@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -77,6 +79,8 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
+    if (ui.window.onReportTimings != null)
+      ui.window.onReportTimings(<ui.FrameTiming>[]);
   }
 
   @override
@@ -128,10 +132,18 @@ void main() {
     firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'false'});
 
+    expect(binding.firstFrameRasterized, isFalse);
+    firstFrameResult = await binding.testExtension('didSendFirstFrameRasterizedEvent', <String, String>{});
+    expect(firstFrameResult, <String, String>{'enabled': 'false'});
+
     await binding.doFrame(); // initial frame scheduled by creating the binding
 
     expect(binding.debugDidSendFirstFrameEvent, isTrue);
     firstFrameResult = await binding.testExtension('didSendFirstFrameEvent', <String, String>{});
+    expect(firstFrameResult, <String, String>{'enabled': 'true'});
+
+    expect(binding.firstFrameRasterized, isTrue);
+    firstFrameResult = await binding.testExtension('didSendFirstFrameRasterizedEvent', <String, String>{});
     expect(firstFrameResult, <String, String>{'enabled': 'true'});
 
     expect(binding.frameScheduled, isFalse);
@@ -154,7 +166,7 @@ void main() {
 
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 26 + widgetInspectorExtensionCount);
+    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -417,7 +429,7 @@ void main() {
     bool completed;
 
     completed = false;
-    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -436,12 +448,13 @@ void main() {
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
     expect(data, isFalse);
     expect(completed, isTrue);
-    BinaryMessages.setMockMessageHandler('flutter/assets', null);
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {
     // no test for _calling_ 'exit', because that should terminate the process!
-    expect(binding.extensions.containsKey('exit'), isTrue);
+    // Not expecting extension to be available for web platform.
+    expect(binding.extensions.containsKey('exit'), !isBrowser);
   });
 
   test('Service extensions - platformOverride', () async {
@@ -659,5 +672,5 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  });
+  }, skip: isBrowser);
 }

@@ -251,7 +251,7 @@ void main() {
     expect(events[6].runtimeType, equals(PointerScrollEvent));
   });
 
-  test('Should synthesise kPrimaryButton for touch', () {
+  test('Should synthesize kPrimaryButton for touch', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
     const PointerDeviceKind kind = PointerDeviceKind.touch;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -282,7 +282,7 @@ void main() {
     PointerEventConverter.clearPointers();
   });
 
-  test('Should synthesise kPrimaryButton for stylus', () {
+  test('Should synthesize kPrimaryButton for stylus', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
     for (PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.stylus,
@@ -318,7 +318,7 @@ void main() {
     }
   });
 
-  test('Should synthesise kPrimaryButton for unknown devices', () {
+  test('Should synthesize kPrimaryButton for unknown devices', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
     const PointerDeviceKind kind = PointerDeviceKind.unknown;
     final ui.PointerDataPacket packet = ui.PointerDataPacket(
@@ -349,7 +349,7 @@ void main() {
     PointerEventConverter.clearPointers();
   });
 
-  test('Should not synthesise kPrimaryButton for mouse', () {
+  test('Should not synthesize kPrimaryButton for mouse', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
     for (PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,

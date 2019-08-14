@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../features.dart';
 import '../linux/build_linux.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -16,6 +17,7 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand() {
+    usesTargetOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app.',
@@ -34,9 +36,6 @@ class BuildLinuxCommand extends BuildSubCommand {
   final String name = 'linux';
 
   @override
-  bool isExperimental = true;
-
-  @override
   bool hidden = true;
 
   @override
@@ -53,13 +52,16 @@ class BuildLinuxCommand extends BuildSubCommand {
     Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
+    if (!featureFlags.isLinuxEnabled) {
+      throwToolExit('"build linux" is not currently supported.');
+    }
     if (!platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
     if (!flutterProject.linux.existsSync()) {
       throwToolExit('No Linux desktop project configured.');
     }
-    await buildLinux(flutterProject.linux, buildInfo);
+    await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
     return null;
   }
 }

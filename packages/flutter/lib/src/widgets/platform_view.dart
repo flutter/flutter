@@ -184,6 +184,7 @@ class AndroidView extends StatefulWidget {
 }
 
 // TODO(amirh): describe the embedding mechanism.
+// TODO(ychris): remove the documentation for conic path not supported once https://github.com/flutter/flutter/issues/35062 is resolved.
 /// Embeds an iOS view in the Widget hierarchy.
 ///
 /// {@macro flutter.rendering.platformView.preview}
@@ -199,6 +200,9 @@ class AndroidView extends StatefulWidget {
 ///
 /// Construction of UIViews is done asynchronously, before the UIView is ready this widget paints
 /// nothing while maintaining the same layout constraints.
+///
+/// If a conic path clipping is applied to a UIKitView,
+/// a quad path is used to approximate the clip due to limitation of Quartz.
 class UiKitView extends StatefulWidget {
   /// Creates a widget that embeds an iOS view.
   ///
@@ -217,7 +221,7 @@ class UiKitView extends StatefulWidget {
        assert(creationParams == null || creationParamsCodec != null),
        super(key: key);
 
-  // TODO(amirh): reference the iOS API doc once avaliable.
+  // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
@@ -306,6 +310,7 @@ class _AndroidViewState extends State<AndroidView> {
   Widget build(BuildContext context) {
     return Focus(
       focusNode: _focusNode,
+      onFocusChange: _onFocusChange,
       child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
@@ -383,6 +388,40 @@ class _AndroidViewState extends State<AndroidView> {
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
     }
+  }
+
+  void _onFocusChange(bool isFocused) {
+    if (!_controller.isCreated) {
+      return;
+    }
+    if (!isFocused) {
+      _controller.clearFocus().catchError((dynamic e) {
+       if (e is MissingPluginException) {
+         // We land the framework part of Android platform views keyboard
+         // support before the engine part. There will be a commit range where
+         // clearFocus isn't implemented in the engine. When that happens we
+         // just swallow the error here. Once the engine part is rolled to the
+         // framework I'll remove this.
+         // TODO(amirh): remove this once the engine's clearFocus is rolled.
+         return;
+       }
+      });
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      _id,
+    ).catchError((dynamic e) {
+      if (e is MissingPluginException) {
+        // We land the framework part of Android platform views keyboard
+        // support before the engine part. There will be a commit range where
+        // setPlatformViewClient isn't implemented in the engine. When that
+        // happens we just swallow the error here. Once the engine part is
+        // rolled to the framework I'll remove this.
+        // TODO(amirh): remove this once the engine's clearFocus is rolled.
+        return;
+      }
+    });
   }
 }
 
@@ -539,5 +578,97 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
     renderObject.viewController = controller;
     renderObject.hitTestBehavior = hitTestBehavior;
     renderObject.updateGestureRecognizers(gestureRecognizers);
+  }
+}
+
+/// Integrates a platform view with Flutter's compositor, touch, and semantics subsystems.
+///
+/// The compositor integration is done by adding a [PlatformViewLayer] to the layer tree. [PlatformViewLayer]
+/// isn't supported on all platforms (e.g on Android platform views are composited using a [TextureLayer]).
+/// Custom Flutter embedders can support [PlatformViewLayer]s by implementing a SystemCompositor.
+///
+/// The widget fills all available space, the parent of this object must provide bounded layout
+/// constraints.
+///
+/// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
+///
+/// See also:
+/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+// TODO(amirh): Link to the embedder's system compositor documentation once available.
+class PlatformViewSurface extends LeafRenderObjectWidget {
+
+  /// Construct a `PlatformViewSurface`.
+  ///
+  /// The [controller] must not be null.
+  const PlatformViewSurface({
+    @required this.controller,
+    @required this.hitTestBehavior,
+    @required this.gestureRecognizers,
+  }) : assert(controller != null),
+       assert(hitTestBehavior != null),
+       assert(gestureRecognizers != null);
+
+  /// The controller for the platform view integrated by this [PlatformViewSurface].
+  ///
+  /// [PlatformViewController] is used for dispatching touch events to the platform view.
+  /// [PlatformViewController.viewId] identifies the platform view whose contents are painted by this widget.
+  final PlatformViewController controller;
+
+  /// Which gestures should be forwarded to the PlatformView.
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescHead}
+  ///
+  /// For example, with the following setup vertical drags will not be dispatched to the platform view
+  /// as the vertical drag gesture is claimed by the parent [GestureDetector].
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: PlatformViewSurface(
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// To get the [PlatformViewSurface] to claim the vertical drag gestures we can pass a vertical drag
+  /// gesture recognizer factory in [gestureRecognizers] e.g:
+  ///
+  /// ```dart
+  /// GestureDetector(
+  ///   onVerticalDragStart: (DragStartDetails details) {},
+  ///   child: SizedBox(
+  ///     width: 200.0,
+  ///     height: 100.0,
+  ///     child: PlatformViewSurface(
+  ///       gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
+  ///         new Factory<OneSequenceGestureRecognizer>(
+  ///           () => new EagerGestureRecognizer(),
+  ///         ),
+  ///       ].toSet(),
+  ///     ),
+  ///   ),
+  /// )
+  /// ```
+  ///
+  /// {@macro flutter.widgets.platformViews.gestureRecognizersDescFoot}
+  // We use OneSequenceGestureRecognizers as they support gesture arena teams.
+  // TODO(amirh): get a list of GestureRecognizers here.
+  // https://github.com/flutter/flutter/issues/20953
+  final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
+
+  /// {@macro flutter.widgets.platformViews.hittestParam}
+  final PlatformViewHitTestBehavior hitTestBehavior;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return PlatformViewRenderBox(controller: controller, gestureRecognizers: gestureRecognizers, hitTestBehavior: hitTestBehavior);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, PlatformViewRenderBox renderObject) {
+    renderObject
+      ..controller = controller
+      ..hitTestBehavior = hitTestBehavior
+      ..updateGestureRecognizers(gestureRecognizers);
   }
 }

@@ -61,21 +61,23 @@ class _DefaultHeroTag {
 /// This example shows how to make a simple [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
+/// ![A screenshot of a green floating action button with a navigation icon](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the button below!')
+///       child: const Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
+///       child: Icon(Icons.navigation),
+///       backgroundColor: Colors.green,
 ///     ),
 ///   );
 /// }
@@ -84,17 +86,19 @@ class _DefaultHeroTag {
 ///
 /// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon] and a
+/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label.
+///
+/// ![A screenshot of a pink floating action button with a thumbs up icon and a label that reads "Approve"](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button Label'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the extended button below!'),
+///       child: const Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
@@ -431,18 +435,7 @@ class FloatingActionButton extends StatelessWidget {
       ?? floatingActionButtonTheme.shape
       ?? (isExtended ? _defaultExtendedShape : _defaultShape);
 
-    Widget result;
-
-    if (child != null) {
-      result = IconTheme.merge(
-        data: IconThemeData(
-          color: foregroundColor,
-        ),
-        child: child,
-      );
-    }
-
-    result = RawMaterialButton(
+    Widget result = RawMaterialButton(
       onPressed: onPressed,
       elevation: elevation,
       focusElevation: focusElevation,
@@ -458,15 +451,13 @@ class FloatingActionButton extends StatelessWidget {
       shape: shape,
       clipBehavior: clipBehavior ?? Clip.none,
       focusNode: focusNode,
-      child: result,
+      child: child,
     );
 
     if (tooltip != null) {
-      result = MergeSemantics(
-        child: Tooltip(
-          message: tooltip,
-          child: result,
-        ),
+      result = Tooltip(
+        message: tooltip,
+        child: result,
       );
     }
 
@@ -477,7 +468,7 @@ class FloatingActionButton extends StatelessWidget {
       );
     }
 
-    return result;
+    return MergeSemantics(child: result);
   }
 
   @override
@@ -485,16 +476,16 @@ class FloatingActionButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('hoverElevation', hoverElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));
+    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: null));
+    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: null));
+    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(FlagProperty('isExtended', value: isExtended, ifTrue: 'extended'));

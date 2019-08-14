@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
@@ -296,6 +297,87 @@ void main() {
     expect(tapCount, equals(1));
   });
 
+  testWidgets('Light theme SnackBar has dark background', (WidgetTester tester) async {
+    final ThemeData lightTheme = ThemeData.light();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: lightTheme,
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+        find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    // There is a somewhat complicated background color calculation based
+    // off of the surface color. For the default light theme it
+    // should be this value.
+    expect(renderModel.color, equals(const Color(0xFF333333)));
+  });
+
+  testWidgets('Dark theme SnackBar has light background', (WidgetTester tester) async {
+    final ThemeData darkTheme = ThemeData.dark();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: darkTheme,
+        home: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () { },
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final RenderPhysicalModel renderModel = tester.renderObject(
+      find.widgetWithText(Material, 'I am a snack bar.').first
+    );
+    expect(renderModel.color, equals(darkTheme.colorScheme.onSurface));
+  });
+
   testWidgets('Snackbar labels can be colored', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -386,7 +468,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
-  });
+  }, skip: isBrowser);
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -439,7 +521,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('SnackBar should push FloatingActionButton above', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -536,7 +618,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -592,7 +674,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -640,6 +722,61 @@ void main() {
     // Since padding and margin is handled inside snackBarBox,
     // the bottom offset of snackbar should equal with top offset of FAB
     expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
+  });
+
+  testWidgets('SnackBar bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
+    final Widget child = Directionality(
+      textDirection: TextDirection.ltr,
+      child: Scaffold(
+      resizeToAvoidBottomInset: false,
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.send),
+        onPressed: () {}
+      ),
+      body: Builder(
+        builder: (BuildContext context) {
+          return GestureDetector(
+            onTap: () {
+              Scaffold.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('I am a snack bar.'),
+                  duration: const Duration(seconds: 2),
+                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                )
+              );
+            },
+            child: const Text('X'),
+          );
+        }
+      ),
+    ));
+
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(bottom: 20.0),
+        ),
+        child: child
+      )
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(); // Show snackbar
+    final Offset initialPoint = tester.getCenter(find.byType(SnackBar));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.zero,
+          viewPadding: EdgeInsets.only(bottom: 20),
+          viewInsets: EdgeInsets.only(bottom: 300),
+        ),
+        child: child,
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+    final Offset finalPoint = tester.getCenter(find.byType(SnackBar));
+    expect(initialPoint, finalPoint);
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {

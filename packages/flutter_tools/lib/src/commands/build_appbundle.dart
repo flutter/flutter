@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../android/app_bundle.dart';
+import '../build_info.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -20,18 +21,11 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag(
-        'build-shared-library',
-        negatable: false,
-        help: 'Whether to prefer compiling to a *.so file (android only).',
-      )
-      ..addOption(
-        'target-platform',
+      ..addMultiOption('target-platform',
+        splitCommas: true,
+        defaultsTo: <String>['android-arm', 'android-arm64'],
         allowed: <String>['android-arm', 'android-arm64'],
-        help: 'The target platform for which the app is compiled.\n'
-            'By default, the bundle will include \'arm\' and \'arm64\', '
-            'which is the recommended configuration for app bundles.\n'
-            'For more, see https://developer.android.com/distribute/best-practices/develop/64-bit',
+        help: 'The target platform for which the app is compiled.',
       );
   }
 
@@ -47,10 +41,13 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+    );
     await buildAppBundle(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: getBuildInfo(),
+      androidBuildInfo: androidBuildInfo,
     );
     return null;
   }

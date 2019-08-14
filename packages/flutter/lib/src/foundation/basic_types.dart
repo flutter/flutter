@@ -8,7 +8,6 @@ import 'dart:collection';
 // COMMON SIGNATURES
 
 export 'dart:ui' show VoidCallback;
-export 'bitfield.dart' if (dart.library.html) 'bitfield_unsupported.dart';
 
 /// Signature for callbacks that report that an underlying value has changed.
 ///

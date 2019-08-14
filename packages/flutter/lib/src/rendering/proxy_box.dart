@@ -1592,8 +1592,8 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DoubleProperty('elevation', elevation));
-    description.add(DiagnosticsProperty<Color>('color', color));
-    description.add(DiagnosticsProperty<Color>('shadowColor', color));
+    description.add(ColorProperty('color', color));
+    description.add(ColorProperty('shadowColor', color));
   }
 }
 
@@ -2311,7 +2311,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    if (size.isEmpty)
+    if (size.isEmpty || child?.size?.isEmpty == true)
       return false;
     _updatePaintData();
     return result.addWithPaintTransform(
@@ -2325,7 +2325,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    if (size.isEmpty) {
+    if (size.isEmpty || child.size.isEmpty) {
       transform.setZero();
     } else {
       _updatePaintData();
@@ -2460,15 +2460,18 @@ typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
 /// Used by [Listener] and [RenderPointerListener].
 typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
 
-/// Calls callbacks in response to pointer events.
+/// Calls callbacks in response to common pointer events.
+///
+/// It responds to events that can construct gestures, such as when the
+/// pointer is pressed, moved, then released or canceled.
+///
+/// It does not respond to events that are exclusive to mouse, such as when the
+/// mouse enters, exits or hovers a region without pressing any buttons. For
+/// these events, use [RenderMouseRegion].
 ///
 /// If it has a child, defers to the child for sizing behavior.
 ///
 /// If it does not have a child, grows to fit the parent-provided constraints.
-///
-/// The [onPointerEnter], [onPointerHover], and [onPointerExit] events are only
-/// relevant to and fired by pointers that can hover (e.g. mouse pointers, but
-/// not most touch pointers).
 class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Creates a render object that forwards pointer events to callbacks.
   ///
@@ -2476,27 +2479,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   RenderPointerListener({
     this.onPointerDown,
     this.onPointerMove,
-    PointerEnterEventListener onPointerEnter,
-    PointerHoverEventListener onPointerHover,
-    PointerExitEventListener onPointerExit,
     this.onPointerUp,
     this.onPointerCancel,
     this.onPointerSignal,
     HitTestBehavior behavior = HitTestBehavior.deferToChild,
     RenderBox child,
-  }) : _onPointerEnter = onPointerEnter,
-       _onPointerHover = onPointerHover,
-       _onPointerExit = onPointerExit,
-       super(behavior: behavior, child: child) {
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-    }
-    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-  }
+  }) : super(behavior: behavior, child: child);
 
   /// Called when a pointer comes into contact with the screen (for touch
   /// pointers), or has its button pressed (for mouse pointers) at this widget's
@@ -2505,45 +2493,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Called when a pointer that triggered an [onPointerDown] changes position.
   PointerMoveEventListener onPointerMove;
-
-  /// Called when a hovering pointer enters the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer enters
-  /// the region defined by this widget.
-  PointerEnterEventListener get onPointerEnter => _onPointerEnter;
-  set onPointerEnter(PointerEnterEventListener value) {
-    if (_onPointerEnter != value) {
-      _onPointerEnter = value;
-      _updateAnnotations();
-    }
-  }
-  PointerEnterEventListener _onPointerEnter;
-
-  /// Called when a pointer that has not triggered an [onPointerDown] changes
-  /// position.
-  ///
-  /// Typically only triggered for mouse pointers.
-  PointerHoverEventListener get onPointerHover => _onPointerHover;
-  set onPointerHover(PointerHoverEventListener value) {
-    if (_onPointerHover != value) {
-      _onPointerHover = value;
-      _updateAnnotations();
-    }
-  }
-  PointerHoverEventListener _onPointerHover;
-
-  /// Called when a hovering pointer leaves the region for this widget.
-  ///
-  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
-  /// the region defined by this widget.
-  PointerExitEventListener get onPointerExit => _onPointerExit;
-  set onPointerExit(PointerExitEventListener value) {
-    if (_onPointerExit != value) {
-      _onPointerExit = value;
-      _updateAnnotations();
-    }
-  }
-  PointerExitEventListener _onPointerExit;
 
   /// Called when a pointer that triggered an [onPointerDown] is no longer in
   /// contact with the screen.
@@ -2556,119 +2505,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
-  // Object used for annotation of the layer used for hover hit detection.
-  MouseTrackerAnnotation _hoverAnnotation;
-
-  /// Object used for annotation of the layer used for hover hit detection.
-  ///
-  /// This is only public to allow for testing of Listener widgets. Do not call
-  /// in other contexts.
-  @visibleForTesting
-  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
-
-  void _updateAnnotations() {
-    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
-      "Shouldn't call _updateAnnotations if nothing has changed.");
-    bool changed = false;
-    final bool hadHoverAnnotation = _hoverAnnotation != null;
-    if (_hoverAnnotation != null && attached) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-      changed = true;
-    }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
-      _hoverAnnotation = MouseTrackerAnnotation(
-        onEnter: _onPointerEnter,
-        onHover: _onPointerHover,
-        onExit: _onPointerExit,
-      );
-      if (attached) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-        changed = true;
-      }
-    } else {
-      _hoverAnnotation = null;
-    }
-    if (changed) {
-      markNeedsPaint();
-    }
-    final bool hasHoverAnnotation = _hoverAnnotation != null;
-    if (hadHoverAnnotation != hasHoverAnnotation) {
-      markNeedsCompositingBitsUpdate();
-    }
-  }
-
-  bool _mouseIsConnected;
-  void _handleMouseTrackerChanged() {
-    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (newState != _mouseIsConnected) {
-      _mouseIsConnected = newState;
-      if (_hoverAnnotation != null) {
-        markNeedsCompositingBitsUpdate();
-        markNeedsPaint();
-      }
-    }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
-    postActivate();
-  }
-
-  /// Attaches the annotation for this render object, if any.
-  ///
-  /// This is called by [attach] to attach any new annotations.
-  ///
-  /// This is also called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
-  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
-  /// the widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void postActivate() {
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-    }
-  }
-
-  /// Detaches the annotation for this render object, if any.
-  ///
-  /// This is called by the [Listener]'s [Element] to tell this
-  /// [RenderPointerListener] that it will shortly be attached. That way,
-  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
-  /// widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void preDeactivate() {
-    if (_hoverAnnotation != null) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-    }
-  }
-
-  @override
-  void detach() {
-    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
-    super.detach();
-  }
-
-  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
-
-  @override
-  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_hasActiveAnnotation) {
-      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
-        _hoverAnnotation,
-        size: size,
-        offset: offset,
-      );
-      context.pushLayer(layer, super.paint, offset);
-    }
-    super.paint(context, offset);
-  }
-
   @override
   void performResize() {
     size = constraints.biggest;
@@ -2677,8 +2513,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     assert(debugHandleEvent(event, entry));
-    // The onPointerEnter, onPointerHover, and onPointerExit events are are
-    // triggered from within the MouseTracker, not here.
     if (onPointerDown != null && event is PointerDownEvent)
       return onPointerDown(event);
     if (onPointerMove != null && event is PointerMoveEvent)
@@ -2699,18 +2533,205 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       listeners.add('down');
     if (onPointerMove != null)
       listeners.add('move');
-    if (onPointerEnter != null)
-      listeners.add('enter');
-    if (onPointerHover != null)
-      listeners.add('hover');
-    if (onPointerExit != null)
-      listeners.add('exit');
     if (onPointerUp != null)
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
     if (onPointerSignal != null)
       listeners.add('signal');
+    if (listeners.isEmpty)
+      listeners.add('<none>');
+    properties.add(IterableProperty<String>('listeners', listeners));
+    // TODO(jacobr): add raw listeners to the diagnostics data.
+  }
+}
+
+/// Calls callbacks in response to pointer events that are exclusive to mice.
+///
+/// Simply put, it responds to events that are related to hovering,
+/// i.e. when the mouse enters, exits or hovers a region without pressing.
+///
+/// It does not respond to common events that construct gestures, such as when
+/// the pointer is pressed, moved, then released or canceled. For these events,
+/// use [RenderPointerListener].
+///
+/// If it has a child, it defers to the child for sizing behavior.
+///
+/// If it does not have a child, it grows to fit the parent-provided constraints.
+class RenderMouseRegion extends RenderProxyBox {
+  /// Creates a render object that forwards pointer events to callbacks.
+  RenderMouseRegion({
+    PointerEnterEventListener onEnter,
+    PointerHoverEventListener onHover,
+    PointerExitEventListener onExit,
+    RenderBox child,
+  }) : _onEnter = onEnter,
+       _onHover = onHover,
+       _onExit = onExit,
+       _annotationIsActive = false,
+       super(child) {
+    _hoverAnnotation = MouseTrackerAnnotation(
+      onEnter: _handleEnter,
+      onHover: _handleHover,
+      onExit: _handleExit,
+    );
+  }
+
+  /// Called when a hovering pointer enters the region for this widget.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer enters
+  /// the region defined by this widget.
+  PointerEnterEventListener get onEnter => _onEnter;
+  set onEnter(PointerEnterEventListener value) {
+    if (_onEnter != value) {
+      _onEnter = value;
+      _updateAnnotations();
+    }
+  }
+  PointerEnterEventListener _onEnter;
+  void _handleEnter(PointerEnterEvent event) {
+    if (_onEnter != null)
+      _onEnter(event);
+  }
+
+  /// Called when a pointer that has not triggered an [onPointerDown] changes
+  /// position.
+  ///
+  /// Typically only triggered for mouse pointers.
+  PointerHoverEventListener get onHover => _onHover;
+  set onHover(PointerHoverEventListener value) {
+    if (_onHover != value) {
+      _onHover = value;
+      _updateAnnotations();
+    }
+  }
+  PointerHoverEventListener _onHover;
+  void _handleHover(PointerHoverEvent event) {
+    if (_onHover != null)
+      _onHover(event);
+  }
+
+  /// Called when a hovering pointer leaves the region for this widget.
+  ///
+  /// If this is a mouse pointer, this will fire when the mouse pointer leaves
+  /// the region defined by this widget.
+  PointerExitEventListener get onExit => _onExit;
+  set onExit(PointerExitEventListener value) {
+    if (_onExit != value) {
+      _onExit = value;
+      _updateAnnotations();
+    }
+  }
+  PointerExitEventListener _onExit;
+  void _handleExit(PointerExitEvent event) {
+    if (_onExit != null)
+      _onExit(event);
+  }
+
+  // Object used for annotation of the layer used for hover hit detection.
+  MouseTrackerAnnotation _hoverAnnotation;
+
+  /// Object used for annotation of the layer used for hover hit detection.
+  ///
+  /// This is only public to allow for testing of Listener widgets. Do not call
+  /// in other contexts.
+  @visibleForTesting
+  MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+
+  void _updateAnnotations() {
+    final bool annotationWasActive = _annotationIsActive;
+    final bool annotationWillBeActive = (
+        _onEnter != null ||
+        _onHover != null ||
+        _onExit != null
+      ) &&
+      RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (annotationWasActive != annotationWillBeActive) {
+      markNeedsPaint();
+      markNeedsCompositingBitsUpdate();
+      if (annotationWillBeActive) {
+        RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+      } else {
+        RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      }
+      _annotationIsActive = annotationWillBeActive;
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    // Add a listener to listen for changes in mouseIsConnected.
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    _updateAnnotations();
+  }
+
+  /// Attaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it has transitioned from "inactive"
+  /// state to "active". We call it here so that
+  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
+  /// the widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void postActivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+  }
+
+  /// Detaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [MouseRegion]'s [Element] to tell this
+  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
+  /// state to "inactive". We call it here so that
+  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
+  /// widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void preDeactivate() {
+    if (_annotationIsActive)
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+  }
+
+  @override
+  void detach() {
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
+    super.detach();
+  }
+
+  bool _annotationIsActive;
+
+  @override
+  bool get needsCompositing => super.needsCompositing || _annotationIsActive;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_annotationIsActive) {
+      final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
+        _hoverAnnotation,
+        size: size,
+        offset: offset,
+      );
+      context.pushLayer(layer, super.paint, offset);
+    } else {
+      super.paint(context, offset);
+    }
+  }
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> listeners = <String>[];
+    if (onEnter != null)
+      listeners.add('enter');
+    if (onHover != null)
+      listeners.add('hover');
+    if (onExit != null)
+      listeners.add('exit');
     if (listeners.isEmpty)
       listeners.add('<none>');
     properties.add(IterableProperty<String>('listeners', listeners));
@@ -2969,7 +2990,7 @@ class RenderIgnorePointer extends RenderProxyBox {
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
-    return ignoring ? false : super.hitTest(result, position: position);
+    return !ignoring && super.hitTest(result, position: position);
   }
 
   // TODO(ianh): figure out a way to still include labels and flags in
@@ -3426,9 +3447,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool button,
     bool header,
     bool textField,
+    bool readOnly,
     bool focused,
     bool inMutuallyExclusiveGroup,
     bool obscured,
+    bool multiline,
     bool scopesRoute,
     bool namesRoute,
     bool hidden,
@@ -3473,9 +3496,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _button = button,
        _header = header,
        _textField = textField,
+       _readOnly = readOnly,
        _focused = focused,
        _inMutuallyExclusiveGroup = inMutuallyExclusiveGroup,
        _obscured = obscured,
+       _multiline = multiline,
        _scopesRoute = scopesRoute,
        _namesRoute = namesRoute,
        _liveRegion = liveRegion,
@@ -3629,6 +3654,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
+  /// If non-null, sets the [SemanticsNode.isReadOnly] semantic to the given value.
+  bool get readOnly => _readOnly;
+  bool _readOnly;
+  set readOnly(bool value) {
+    if (readOnly == value)
+      return;
+    _readOnly = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// If non-null, sets the [SemanticsNode.isFocused] semantic to the given value.
   bool get focused => _focused;
   bool _focused;
@@ -3658,6 +3693,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (obscured == value)
       return;
     _obscured = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// If non-null, sets the [SemanticsNode.isMultiline] semantic to the given
+  /// value.
+  bool get multiline => _multiline;
+  bool _multiline;
+  set multiline(bool value) {
+    if (multiline == value)
+      return;
+    _multiline = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -4252,12 +4298,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isHeader = header;
     if (textField != null)
       config.isTextField = textField;
+    if (readOnly != null)
+      config.isReadOnly = readOnly;
     if (focused != null)
       config.isFocused = focused;
     if (inMutuallyExclusiveGroup != null)
       config.isInMutuallyExclusiveGroup = inMutuallyExclusiveGroup;
     if (obscured != null)
       config.isObscured = obscured;
+    if (multiline != null)
+      config.isMultiline = multiline;
     if (hidden != null)
       config.isHidden = hidden;
     if (image != null)

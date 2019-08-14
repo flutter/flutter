@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -117,6 +115,93 @@ void main() {
     } on AssertionError catch (e) {
       expect(e.toString(), contains('children.length'));
     }
+  });
+
+  testWidgets('Padding works', (WidgetTester tester) async {
+    const Key key = Key('Container');
+
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 1'),
+    ) ;
+    children[1] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 2'),
+    ) ;
+
+    Future<void> verifyPadding({ EdgeInsets padding }) async {
+      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
+      final Rect segmentedControlRect = tester.getRect(find.byKey(key));
+      expect(
+          tester.getTopLeft(find.byWidget(children[0])),
+          segmentedControlRect.topLeft.translate(
+            effectivePadding.topLeft.dx,
+            effectivePadding.topLeft.dy,
+          )
+      );
+      expect(
+        tester.getBottomLeft(find.byWidget(children[0])),
+        segmentedControlRect.bottomLeft.translate(
+          effectivePadding.bottomLeft.dx,
+          effectivePadding.bottomLeft.dy,
+        ),
+      );
+
+      expect(
+        tester.getTopRight(find.byWidget(children[1])),
+        segmentedControlRect.topRight.translate(
+          effectivePadding.topRight.dx,
+          effectivePadding.topRight.dy,
+        ),
+      );
+      expect(
+        tester.getBottomRight(find.byWidget(children[1])),
+        segmentedControlRect.bottomRight.translate(
+          effectivePadding.bottomRight.dx,
+          effectivePadding.bottomRight.dy,
+        ),
+      );
+    }
+
+    await tester.pumpWidget(
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        )
+    );
+
+    // Default padding works.
+    await verifyPadding();
+
+    // Switch to Child 2 padding should remain the same.
+    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding();
+
+    await tester.pumpWidget(
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        )
+    );
+
+    // Custom padding works.
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
+
+    // Switch back to Child 1 padding should remain the same.
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
   });
 
   testWidgets('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {
@@ -1327,9 +1412,12 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.0.0.png'),
+      matchesGoldenFile(
+        'segmented_control_test.0.png',
+        version: 0,
+      ),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1365,7 +1453,10 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('segmented_control_test.1.0.png'),
+      matchesGoldenFile(
+        'segmented_control_test.1.png',
+        version: 0,
+      ),
     );
-  }, skip: !Platform.isLinux);
+  });
 }

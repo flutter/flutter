@@ -95,6 +95,23 @@ class TestWindow implements Window {
     onMetricsChanged();
   }
 
+  // TODO(dnfield): Remove this ignore once custom embedders have had time to catch up
+  // And make this property actually wrap _window.viewPadding.
+  // @override
+  // ignore: annotate_overrides, public_member_api_docs
+  WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
+  WindowPadding _viewPaddingTestValue;
+  /// Hides the real padding and reports the given [paddingTestValue] instead.
+  set viewPaddingTestValue(WindowPadding viewPaddingTestValue) {
+    _viewPaddingTestValue = viewPaddingTestValue;
+    onMetricsChanged();
+  }
+  /// Deletes any existing test padding and returns to using the real padding.
+  void clearViewPaddingTestValue() {
+    _viewPaddingTestValue = null;
+    onMetricsChanged();
+  }
+
   @override
   WindowPadding get padding => _paddingTestValue ?? _window.padding;
   WindowPadding _paddingTestValue;
@@ -227,6 +244,13 @@ class TestWindow implements Window {
   }
 
   @override
+  TimingsCallback get onReportTimings => _window.onReportTimings;
+  @override
+  set onReportTimings(TimingsCallback callback) {
+    _window.onReportTimings = callback;
+  }
+
+  @override
   PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;
   @override
   set onPointerDataPacket(PointerDataPacketCallback callback) {
@@ -348,5 +372,13 @@ class TestWindow implements Window {
     clearSemanticsEnabledTestValue();
     clearTextScaleFactorTestValue();
     clearViewInsetsTestValue();
+  }
+
+  /// This gives us some grace time when the dart:ui side adds something to
+  /// Window, and makes things easier when we do rolls to give us time to
+  /// catch up.
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    return null;
   }
 }

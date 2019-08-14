@@ -131,7 +131,7 @@ abstract class Logger {
   /// The `timeout` argument sets a duration after which an additional message
   /// may be shown saying that the operation is taking a long time. (Not all
   /// [Status] subclasses show such a message.) Set this to null if the
-  /// operation can legitimately take an abritrary amount of time (e.g. waiting
+  /// operation can legitimately take an arbitrary amount of time (e.g. waiting
   /// for the user).
   ///
   /// The `progressId` argument provides an ID that can be used to identify

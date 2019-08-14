@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -801,12 +799,12 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.standard_title.1.png'),
+        matchesGoldenFile(
+          'nav_bar_test.standard_title.png',
+          version: 1,
+        ),
       );
     },
-    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
-    // is fixed.
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -835,13 +833,13 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesGoldenFile('nav_bar_test.large_title.1.png'),
+        matchesGoldenFile(
+          'nav_bar_test.large_title.png',
+          version: 1,
+        ),
       );
     },
-    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
-    // is fixed.
-    skip: !Platform.isLinux,
-   );
+  );
 
 
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {

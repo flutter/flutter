@@ -56,6 +56,7 @@ void main() {
     expect(copied.devicePixelRatio, data.devicePixelRatio);
     expect(copied.textScaleFactor, data.textScaleFactor);
     expect(copied.padding, data.padding);
+    expect(copied.viewPadding, data.viewPadding);
     expect(copied.viewInsets, data.viewInsets);
     expect(copied.alwaysUse24HourFormat, data.alwaysUse24HourFormat);
     expect(copied.accessibleNavigation, data.accessibleNavigation);
@@ -72,6 +73,7 @@ void main() {
       devicePixelRatio: 1.41,
       textScaleFactor: 1.62,
       padding: const EdgeInsets.all(9.10938),
+      viewPadding: const EdgeInsets.all(11.24031),
       viewInsets: const EdgeInsets.all(1.67262),
       alwaysUse24HourFormat: true,
       accessibleNavigation: true,
@@ -84,6 +86,7 @@ void main() {
     expect(copied.devicePixelRatio, 1.41);
     expect(copied.textScaleFactor, 1.62);
     expect(copied.padding, const EdgeInsets.all(9.10938));
+    expect(copied.viewPadding, const EdgeInsets.all(11.24031));
     expect(copied.viewInsets, const EdgeInsets.all(1.67262));
     expect(copied.alwaysUse24HourFormat, true);
     expect(copied.accessibleNavigation, true);
@@ -98,6 +101,7 @@ void main() {
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
     MediaQueryData unpadded;
@@ -108,6 +112,7 @@ void main() {
           devicePixelRatio: devicePixelRatio,
           textScaleFactor: textScaleFactor,
           padding: padding,
+          viewPadding: viewPadding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
           accessibleNavigation: true,
@@ -139,6 +144,7 @@ void main() {
     expect(unpadded.devicePixelRatio, devicePixelRatio);
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, EdgeInsets.zero);
+    expect(unpadded.viewPadding, viewInsets);
     expect(unpadded.viewInsets, viewInsets);
     expect(unpadded.alwaysUse24HourFormat, true);
     expect(unpadded.accessibleNavigation, true);
@@ -152,6 +158,7 @@ void main() {
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
     MediaQueryData unpadded;
@@ -162,6 +169,7 @@ void main() {
           devicePixelRatio: devicePixelRatio,
           textScaleFactor: textScaleFactor,
           padding: padding,
+          viewPadding : viewPadding,
           viewInsets: viewInsets,
           alwaysUse24HourFormat: true,
           accessibleNavigation: true,
@@ -193,7 +201,65 @@ void main() {
     expect(unpadded.devicePixelRatio, devicePixelRatio);
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, padding);
+    expect(unpadded.viewPadding, padding);
     expect(unpadded.viewInsets, EdgeInsets.zero);
+    expect(unpadded.alwaysUse24HourFormat, true);
+    expect(unpadded.accessibleNavigation, true);
+    expect(unpadded.invertColors, true);
+    expect(unpadded.disableAnimations, true);
+    expect(unpadded.boldText, true);
+  });
+
+  testWidgets('MediaQuery.removeViewPadding removes specified viewPadding', (WidgetTester tester) async {
+    const Size size = Size(2.0, 4.0);
+    const double devicePixelRatio = 2.0;
+    const double textScaleFactor = 1.2;
+    const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
+    const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+
+    MediaQueryData unpadded;
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(
+          size: size,
+          devicePixelRatio: devicePixelRatio,
+          textScaleFactor: textScaleFactor,
+          padding: padding,
+          viewPadding : viewPadding,
+          viewInsets: viewInsets,
+          alwaysUse24HourFormat: true,
+          accessibleNavigation: true,
+          invertColors: true,
+          disableAnimations: true,
+          boldText: true,
+        ),
+        child: Builder(
+          builder: (BuildContext context) {
+            return MediaQuery.removeViewPadding(
+              context: context,
+              removeLeft: true,
+              removeTop: true,
+              removeRight: true,
+              removeBottom: true,
+              child: Builder(
+                builder: (BuildContext context) {
+                  unpadded = MediaQuery.of(context);
+                  return Container();
+                }
+              ),
+            );
+          },
+        ),
+      )
+    );
+
+    expect(unpadded.size, size);
+    expect(unpadded.devicePixelRatio, devicePixelRatio);
+    expect(unpadded.textScaleFactor, textScaleFactor);
+    expect(unpadded.padding, EdgeInsets.zero);
+    expect(unpadded.viewPadding, EdgeInsets.zero);
+    expect(unpadded.viewInsets, viewInsets);
     expect(unpadded.alwaysUse24HourFormat, true);
     expect(unpadded.accessibleNavigation, true);
     expect(unpadded.invertColors, true);

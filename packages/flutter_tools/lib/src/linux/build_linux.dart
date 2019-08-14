@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
@@ -37,6 +38,8 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
     ..createSync(recursive: true)
     ..writeAsStringSync(buffer.toString());
 
+  // Invoke make.
+  final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     'make',
     '-C',
@@ -63,4 +66,5 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }

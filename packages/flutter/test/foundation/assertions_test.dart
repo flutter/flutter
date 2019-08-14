@@ -122,6 +122,20 @@ void main() {
     );
   });
 
+  test('FlutterErrorDetails.toStringShort', () {
+    expect(
+        FlutterErrorDetails(
+          exception: 'MESSAGE',
+          library: 'library',
+          context: ErrorDescription('CONTEXTING'),
+          informationCollector: () sync* {
+            yield ErrorDescription('INFO');
+          },
+        ).toStringShort(),
+        'Exception caught by library',
+    );
+  });
+
   test('FlutterError default constructor', () {
     FlutterError error = FlutterError(
       'My Error Summary.\n'
@@ -312,6 +326,30 @@ void main() {
         '  https://github.com/flutter/flutter/issues/new?template=BUG.md\n'
         '═════════════════════════════════════════════════════════════════\n',
       );
+    }
+  });
+
+  test('User-thrown exceptions have ErrorSummary properties', () {
+    {
+      DiagnosticsNode node;
+      try {
+        throw 'User thrown string';
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['User thrown string']));
+    }
+
+    {
+      DiagnosticsNode node;
+      try {
+        throw ArgumentError.notNull('myArgument');
+      } catch (e) {
+        node = FlutterErrorDetails(exception: e).toDiagnosticsNode();
+      }
+      final ErrorSummary summary = node.getProperties().whereType<ErrorSummary>().single;
+      expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
     }
   });
 }

@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -36,6 +37,87 @@ import 'viewport.dart';
 /// See also:
 ///
 ///  * [PageView], which is the widget this object controls.
+///
+/// {@tool sample}
+///
+/// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
+/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// to animate the [PageView] using a [PageController].
+///
+/// ```dart
+/// class MyPageView extends StatefulWidget {
+///   MyPageView({Key key}) : super(key: key);
+///
+///   _MyPageViewState createState() => _MyPageViewState();
+/// }
+///
+/// class _MyPageViewState extends State<MyPageView> {
+///   PageController _pageController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _pageController = PageController();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _pageController.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: PageView(
+///           controller: _pageController,
+///           children: [
+///             Container(
+///               color: Colors.red,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         1,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Next'),
+///                 ),
+///               ),
+///             ),
+///             Container(
+///               color: Colors.blue,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         0,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Previous'),
+///                 ),
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+///
+/// ```
+/// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///
@@ -287,7 +369,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    return math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double round = actual.roundToDouble();
+    if ((actual - round).abs() < precisionErrorTolerance) {
+      return round;
+    }
+    return actual;
   }
 
   double getPixelsFromPage(double page) {
@@ -295,7 +382,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  double get page {
+    assert(
+      pixels == null || (minScrollExtent != null && maxScrollExtent != null),
+      'Page value is only available after content dimensions are established.',
+    );
+    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  }
 
   @override
   void saveScrollOffset() {
@@ -469,6 +562,10 @@ class PageView extends StatefulWidget {
   ///
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
+  ///
+  /// [PageView.builder] by default does not support child reordering. If
+  /// you are planning to change child order at a later time, consider using
+  /// [PageView] or [PageView.custom].
   PageView.builder({
     Key key,
     this.scrollDirection = Axis.horizontal,
@@ -486,6 +583,84 @@ class PageView extends StatefulWidget {
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
+  ///
+  /// {@tool sample}
+  ///
+  /// This [PageView] uses a custom [SliverChildBuilderDelegate] to support child
+  /// reordering.
+  ///
+  /// ```dart
+  /// class MyPageView extends StatefulWidget {
+  ///   @override
+  ///   _MyPageViewState createState() => _MyPageViewState();
+  /// }
+  ///
+  /// class _MyPageViewState extends State<MyPageView> {
+  ///   List<String> items = <String>['1', '2', '3', '4', '5'];
+  ///
+  ///   void _reverse() {
+  ///     setState(() {
+  ///       items = items.reversed.toList();
+  ///     });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return Scaffold(
+  ///       body: SafeArea(
+  ///         child: PageView.custom(
+  ///           childrenDelegate: SliverChildBuilderDelegate(
+  ///             (BuildContext context, int index) {
+  ///               return KeepAlive(
+  ///                 data: items[index],
+  ///                 key: ValueKey<String>(items[index]),
+  ///               );
+  ///             },
+  ///             childCount: items.length,
+  ///             findChildIndexCallback: (Key key) {
+  ///               final ValueKey valueKey = key;
+  ///               final String data = valueKey.value;
+  ///               return items.indexOf(data);
+  ///             }
+  ///           ),
+  ///         ),
+  ///       ),
+  ///       bottomNavigationBar: BottomAppBar(
+  ///         child: Row(
+  ///           mainAxisAlignment: MainAxisAlignment.center,
+  ///           children: <Widget>[
+  ///             FlatButton(
+  ///               onPressed: () => _reverse(),
+  ///               child: Text('Reverse items'),
+  ///             ),
+  ///           ],
+  ///         ),
+  ///       ),
+  ///     );
+  ///   }
+  /// }
+  ///
+  /// class KeepAlive extends StatefulWidget {
+  ///   const KeepAlive({Key key, this.data}) : super(key: key);
+  ///
+  ///   final String data;
+  ///
+  ///   @override
+  ///   _KeepAliveState createState() => _KeepAliveState();
+  /// }
+  ///
+  /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
+  ///   @override
+  ///   bool get wantKeepAlive => true;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     super.build(context);
+  ///     return Text(widget.data);
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
   PageView.custom({
     Key key,
     this.scrollDirection = Axis.horizontal,

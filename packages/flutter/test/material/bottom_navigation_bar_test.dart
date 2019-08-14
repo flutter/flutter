@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -200,8 +199,8 @@ void main() {
   });
 
   testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
 
     await tester.pumpWidget(
       MaterialApp(
@@ -234,10 +233,10 @@ void main() {
   });
 
   testWidgets('color on icon theme overrides selected and unselected item colors', (WidgetTester tester) async {
-    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
-    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
-    const Color selectedItemColor = Color(3);
-    const Color unselectedItemColor = Color(4);
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(0x00000001));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(0x00000002));
+    const Color selectedItemColor = Color(0x00000003);
+    const Color unselectedItemColor = Color(0x00000004);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -571,7 +570,7 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('Shifting BottomNavigationBar background color is overriden by item color', (WidgetTester tester) async {
+  testWidgets('Shifting BottomNavigationBar background color is overridden by item color', (WidgetTester tester) async {
     const Color itemColor = Colors.yellow;
     const Color backgroundColor = Colors.blue;
 
@@ -892,7 +891,7 @@ void main() {
     await tester.tap(find.text('Alarm'));
     await tester.pump(const Duration(seconds: 1));
     expect(Theme.of(tester.element(find.text('Alarm'))).brightness, equals(Brightness.dark));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar iconSize test', (WidgetTester tester) async {
     double builderIconSize;
@@ -1002,7 +1001,7 @@ void main() {
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, equals(66.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
     final Text longTextA = Text(''.padLeft(100, 'A'));
@@ -1034,7 +1033,7 @@ void main() {
     expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
     final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1104,7 +1103,7 @@ void main() {
           ..translate(x: 400.0)
           ..circle(x: 200.0),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar inactiveIcon shown', (WidgetTester tester) async {
     const Key filled = Key('filled');
@@ -1193,24 +1192,17 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1261,24 +1253,17 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'AC\nTab 1 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Alarm\nTab 2 of 3',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Hot Tub\nTab 3 of 3',
                   textDirection: TextDirection.ltr,
@@ -1435,11 +1420,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'bottom_navigation_bar.shifting_transition.$pump.png',
+          version: 2,
+        ),
       );
     }
-  });
+  }, skip: isBrowser);
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {
@@ -1564,16 +1551,12 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,
@@ -1622,16 +1605,12 @@ void main() {
                 TestSemantics(
                   flags: <SemanticsFlag>[
                     SemanticsFlag.isSelected,
-                    SemanticsFlag.isHeader,
                   ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Red\nTab 1 of 2',
                   textDirection: TextDirection.ltr,
                 ),
                 TestSemantics(
-                  flags: <SemanticsFlag>[
-                    SemanticsFlag.isHeader,
-                  ],
                   actions: <SemanticsAction>[SemanticsAction.tap],
                   label: 'Green\nTab 2 of 2',
                   textDirection: TextDirection.ltr,

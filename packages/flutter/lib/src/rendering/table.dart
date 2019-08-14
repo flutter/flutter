@@ -141,7 +141,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '$runtimeType(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -210,7 +210,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '$runtimeType(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -518,6 +518,8 @@ class RenderTable extends RenderBox {
   /// the table, unlike decorations for individual cells, which might not fill
   /// either.
   List<Decoration> get rowDecorations => List<Decoration>.unmodifiable(_rowDecorations ?? const <Decoration>[]);
+  // _rowDecorations and _rowDecorationPainters need to be in sync. They have to
+  // either both be null or have same length.
   List<Decoration> _rowDecorations;
   List<BoxPainter> _rowDecorationPainters;
   set rowDecorations(List<Decoration> value) {
@@ -703,7 +705,7 @@ class RenderTable extends RenderBox {
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
-      _rowDecorationPainters = null;
+      _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
     for (RenderBox child in _children)
       child?.detach();
@@ -879,7 +881,7 @@ class RenderTable extends RenderBox {
             }
           }
         }
-        assert(tableWidth >= targetWidth);
+        assert(tableWidth + precisionErrorTolerance >= targetWidth);
       }
     } // step 2 and 3 are mutually exclusive
 
@@ -916,10 +918,7 @@ class RenderTable extends RenderBox {
       // columns shrinking them proportionally until we have no
       // available columns, then do the same to the non-flexible ones.
       int availableColumns = columns;
-      // Handle double precision errors which causes this loop to become
-      // stuck in certain configurations.
-      const double minimumDeficit = precisionErrorTolerance;
-      while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
+      while (deficit > precisionErrorTolerance && totalFlex > precisionErrorTolerance) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
           if (flexes[x] != null) {
@@ -941,31 +940,30 @@ class RenderTable extends RenderBox {
         }
         totalFlex = newTotalFlex;
       }
-      if (deficit > 0.0) {
+      while (deficit > precisionErrorTolerance && availableColumns > 0) {
         // Now we have to take out the remaining space from the
         // columns that aren't minimum sized.
         // To make this fair, we repeatedly remove equal amounts from
         // each column, clamped to the minimum width, until we run out
         // of columns that aren't at their minWidth.
-        do {
-          final double delta = deficit / availableColumns;
-          int newAvailableColumns = 0;
-          for (int x = 0; x < columns; x += 1) {
-            final double availableDelta = widths[x] - minWidths[x];
-            if (availableDelta > 0.0) {
-              if (availableDelta <= delta) {
-                // shrank to minimum
-                deficit -= widths[x] - minWidths[x];
-                widths[x] = minWidths[x];
-              } else {
-                deficit -= delta;
-                widths[x] -= delta;
-                newAvailableColumns += 1;
-              }
+        final double delta = deficit / availableColumns;
+        assert(delta != 0);
+        int newAvailableColumns = 0;
+        for (int x = 0; x < columns; x += 1) {
+          final double availableDelta = widths[x] - minWidths[x];
+          if (availableDelta > 0.0) {
+            if (availableDelta <= delta) {
+              // shrank to minimum
+              deficit -= widths[x] - minWidths[x];
+              widths[x] = minWidths[x];
+            } else {
+              deficit -= delta;
+              widths[x] -= delta;
+              newAvailableColumns += 1;
             }
           }
-          availableColumns = newAvailableColumns;
-        } while (deficit > 0.0 && availableColumns > 0);
+        }
+        availableColumns = newAvailableColumns;
       }
     }
     return widths;
@@ -1137,6 +1135,7 @@ class RenderTable extends RenderBox {
     }
     assert(_rowTops.length == rows + 1);
     if (_rowDecorations != null) {
+      assert(_rowDecorations.length == _rowDecorationPainters.length);
       final Canvas canvas = context.canvas;
       for (int y = 0; y < rows; y += 1) {
         if (_rowDecorations.length <= y)
@@ -1178,8 +1177,8 @@ class RenderTable extends RenderBox {
     properties.add(DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     properties.add(DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     properties.add(MessageProperty('table size', '$columns\u00D7$rows'));
-    properties.add(IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    properties.add(IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
+    properties.add(IterableProperty<String>('column offsets', _columnLefts?.map(debugFormatDouble), ifNull: 'unknown'));
+    properties.add(IterableProperty<String>('row offsets', _rowTops?.map(debugFormatDouble), ifNull: 'unknown'));
   }
 
   @override

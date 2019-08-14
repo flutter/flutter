@@ -10,8 +10,12 @@ import 'src/base/context.dart';
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
 import 'src/build_runner/build_runner.dart';
+import 'src/build_runner/resident_web_runner.dart';
+import 'src/build_runner/web_compilation_delegate.dart';
+
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
+import 'src/commands/assemble.dart';
 import 'src/commands/attach.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
@@ -42,6 +46,8 @@ import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
+import 'src/web/compile.dart';
+import 'src/web/web_runner.dart';
 
 /// Main entry point for commands.
 ///
@@ -58,6 +64,7 @@ Future<void> main(List<String> args) async {
 
   await runner.run(args, <FlutterCommand>[
     AnalyzeCommand(verboseHelp: verboseHelp),
+    AssembleCommand(),
     AttachCommand(verboseHelp: verboseHelp),
     BuildCommand(verboseHelp: verboseHelp),
     ChannelCommand(verboseHelp: verboseHelp),
@@ -94,5 +101,9 @@ Future<void> main(List<String> args) async {
        // The build runner instance is not supported in google3 because
        // the build runner packages are not synced internally.
        CodeGenerator: () => const BuildRunner(),
+       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
+       // The web runner is not supported internally because it depends
+       // on dwds.
+       WebRunnerFactory: () => DwdsWebRunnerFactory(),
      });
 }

@@ -72,7 +72,7 @@ void main() {
 
     // Simulate system back button
     final ByteData message = const JSONMethodCodec().encodeMethodCall(const MethodCall('popRoute'));
-    await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) { });
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', message, (_) { });
     await tester.pumpAndSettle();
 
     expect(selectedResults, <void>[null]);
@@ -89,6 +89,20 @@ void main() {
     expect(find.text('HomeBody'), findsNothing);
     expect(find.text('HomeTitle'), findsNothing);
     expect(find.text('Suggestions'), findsOneWidget);
+  });
+
+  testWidgets('Hint text color overridden', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    final TextField textField = tester.widget<TextField>(find.byType(TextField));
+    final Color hintColor = textField.decoration.hintStyle.color;
+    expect(hintColor, delegate.hintTextColor);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -465,7 +479,37 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
-  testWidgets('keyboard show search button', (WidgetTester tester) async {
+  testWidgets('Custom searchFieldLabel value', (WidgetTester tester) async {
+    const String searchHint = 'custom search hint';
+    final String defaultSearchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate(searchHint: searchHint);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+    expect(find.text(defaultSearchHint), findsNothing);
+  });
+
+  testWidgets('Default searchFieldLabel is used when it is set to null', (WidgetTester tester) async {
+    final String searchHint = const DefaultMaterialLocalizations().searchFieldLabel;
+
+    final _TestSearchDelegate delegate = _TestSearchDelegate();
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    expect(find.text(searchHint), findsOneWidget);
+  });
+
+  testWidgets('keyboard show search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -477,6 +521,18 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
+
+  testWidgets('Custom textInputAction results in keyboard with corresponding button', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+    await tester.showKeyboard(find.byType(TextField));
+    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
   group('contributes semantics', () {
@@ -516,7 +572,7 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -525,6 +581,7 @@ void main() {
                         ],
                         label: 'Search',
                         textDirection: TextDirection.ltr,
+                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
                   ),
@@ -634,16 +691,26 @@ class TestHomePage extends StatelessWidget {
 }
 
 class _TestSearchDelegate extends SearchDelegate<String> {
-
   _TestSearchDelegate({
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-  });
+    String searchHint,
+    TextInputAction textInputAction = TextInputAction.search,
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
 
   final String suggestions;
   final String result;
   final List<Widget> actions;
+  final Color hintTextColor = Colors.green;
+
+  @override
+  ThemeData appBarTheme(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return theme.copyWith(
+      inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
+    );
+  }
 
   @override
   Widget buildLeading(BuildContext context) {

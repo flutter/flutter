@@ -79,7 +79,7 @@ const String fixWithDevelopmentTeamInstruction = '''
 
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
-    RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
+    RegExp(r'^\s*\d+\).+"(.+Develop(ment|er).+)"$');
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
@@ -120,7 +120,16 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   const List<String> findIdentityCommand =
       <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
-  final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
+
+  String findIdentityStdout;
+  try {
+    findIdentityStdout = runCheckedSync(findIdentityCommand);
+  } catch (error) {
+    printTrace('Unexpected failure from find-identity: $error.');
+    return null;
+  }
+
+  final List<String> validCodeSigningIdentities = findIdentityStdout
       .split('\n')
       .map<String>((String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern
@@ -148,12 +157,18 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (signingCertificateId == null)
     return null;
 
-  final String signingCertificate = runCheckedSync(
-    <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
-  );
+  String signingCertificateStdout;
+  try {
+    signingCertificateStdout = runCheckedSync(
+      <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
+    );
+  } catch (error) {
+    printTrace('Couldn\'t find the certificate: $error.');
+    return null;
+  }
 
   final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
-  await (opensslProcess.stdin..write(signingCertificate)).close();
+  await (opensslProcess.stdin..write(signingCertificateStdout)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
   // Fire and forget discard of the stderr stream so we don't hold onto resources.

@@ -542,7 +542,7 @@ void main() {
 
       expect(() => tester.getSemantics(find.text('hello')),
         throwsA(isInstanceOf<StateError>()));
-    });
+    }, semanticsEnabled: false);
 
     testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
       final SemanticsHandle semanticsHandle = tester.ensureSemantics();

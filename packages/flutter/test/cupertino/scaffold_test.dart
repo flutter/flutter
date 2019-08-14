@@ -25,7 +25,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Center)), const Offset(0.0, 0.0));
   });
 
-testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
+  testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     BuildContext childContext;
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
@@ -109,6 +109,45 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     ));
 
     expect(tester.getSize(find.byType(Container)).height, 600.0);
+  });
+
+  testWidgets('Contents bottom padding are not consumed by viewInsets when resizeToAvoidBottomInset overriden', (WidgetTester tester) async {
+    const Widget child = CupertinoPageScaffold(
+      resizeToAvoidBottomInset: false,
+      navigationBar: CupertinoNavigationBar(
+        middle: Text('Opaque'),
+        backgroundColor: Color(0xFFF8F8F8),
+      ),
+      child: Placeholder(),
+    );
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
+          child: child
+        ),
+      )
+    );
+
+    final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+    // Consume bottom padding - as if by the keyboard opening
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      )
+    );
+    final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+    expect(initialPoint, finalPoint);
   });
 
   testWidgets('Contents are between opaque bars', (WidgetTester tester) async {
@@ -394,5 +433,52 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     expect(tester.getTopLeft(find.text('0')).dy, 64);
     expect(tester.getTopLeft(find.text('6')).dy, 364);
     expect(find.text('12'), findsNothing);
+  });
+
+  testWidgets('resizeToAvoidBottomInset is supported even when no navigationBar', (WidgetTester tester) async {
+    Widget buildFrame(bool showNavigationBar, bool showKeyboard) {
+      return CupertinoApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: const EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: showKeyboard ? 300 : 20),
+          ),
+          child: CupertinoPageScaffold(
+            resizeToAvoidBottomInset: true,
+            navigationBar: showNavigationBar ? const CupertinoNavigationBar(
+              middle: Text('Title'),
+            ) : null,
+            child: const Center(
+              child: CupertinoTextField(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // When there is a nav bar and no keyboard.
+    await tester.pumpWidget(buildFrame(true, false));
+    final Offset positionNoInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+
+    // When there is a nav bar and keyboard, the CupertinoTextField moves up.
+    await tester.pumpWidget(buildFrame(true, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetWithNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetWithNavBar.dy, lessThan(positionNoInsetWithNavBar.dy));
+
+    // When there is no nav bar and no keyboard, the CupertinoTextField is still
+    // centered.
+    await tester.pumpWidget(buildFrame(false, false));
+    final Offset positionNoInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionNoInsetNoNavBar, equals(positionNoInsetWithNavBar));
+
+    // When there is a keyboard but no nav bar, the CupertinoTextField also
+    // moves up to the same position as when there is a keyboard and nav bar.
+    await tester.pumpWidget(buildFrame(false, true));
+    await tester.pumpAndSettle();
+    final Offset positionWithInsetNoNavBar = tester.getTopLeft(find.byType(CupertinoTextField));
+    expect(positionWithInsetNoNavBar.dy, lessThan(positionNoInsetNoNavBar.dy));
+    expect(positionWithInsetNoNavBar, equals(positionWithInsetWithNavBar));
   });
 }

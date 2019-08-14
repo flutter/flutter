@@ -400,15 +400,22 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// a [GridView] and have the bottom sheet be draggable, you should set this
 /// parameter to true.
 ///
+/// The `useRootNavigator` parameter ensures that the root navigator is used to
+/// display the [BottomSheet] when set to `true`. This is useful in the case
+/// that a modal [BottomSheet] needs to be displayed above all other content
+/// but the caller is inside another [Navigator].
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
 /// See also:
 ///
-///  * [BottomSheet], which is the widget normally returned by the function
-///    passed as the `builder` argument to [showModalBottomSheet].
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    function passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
+///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
+///    that grows and then becomes scrollable once it reaches its maximum size.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
@@ -417,14 +424,16 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   bool isScrollControlled = false,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
-  return Navigator.push(context, _ModalBottomSheetRoute<T>(
+  return Navigator.of(context, rootNavigator: useRootNavigator).push(_ModalBottomSheetRoute<T>(
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
@@ -464,7 +473,8 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// See also:
 ///
-///  * [BottomSheet], which is the widget typically returned by the `builder`.
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    `builder`.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].

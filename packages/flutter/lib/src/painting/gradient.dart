@@ -64,7 +64,7 @@ _ColorsAndStops _interpolateColorsAndStops(
 ///
 /// See also:
 ///
-///  * [Gradient](https://api.flutter.dev/flutter/dart-ui/Gradient-class.html), the class in the [dart:ui] library.
+///  * [Gradient](dart-ui/Gradient-class.html), the class in the [dart:ui] library.
 ///
 @immutable
 abstract class Gradient {

@@ -5,9 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
-
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -15,8 +12,10 @@ import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
+import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
-export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -116,7 +115,7 @@ Future<String> createProject(Directory temp, { List<String> arguments }) async {
   final String projectPath = fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
-  await runner.run(<String>['create']..addAll(arguments)..add(projectPath));
+  await runner.run(<String>['create', ...arguments, projectPath]);
   return projectPath;
 }
 
@@ -126,3 +125,14 @@ const Timeout allowForRemotePubInvocation = Timeout.factor(10.0);
 /// Test case timeout for tests involving creating a Flutter project with
 /// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
 const Timeout allowForCreateFlutterProject = Timeout.factor(3.0);
+
+Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+  try {
+    await future;
+    fail('ToolExit expected, but nothing thrown');
+  } on ToolExit catch(e) {
+    expect(e.message, messageMatcher);
+  } catch(e, trace) {
+    fail('ToolExit expected, got $e\n$trace');
+  }
+}

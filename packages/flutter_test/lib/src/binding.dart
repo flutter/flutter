@@ -23,6 +23,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'goldens.dart';
+import 'platform.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_exception_reporter.dart';
@@ -128,9 +129,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   bool get disableShadows => false;
 
   /// Increase the timeout for the current test by the given duration.
-  void addTime(Duration duration) {
-    // Noop, see [AutomatedTestWidgetsFlutterBinding. addTime] for an actual implementation.
-  }
+  ///
+  /// This only matters if the test has an `initialTimeout` set on
+  /// [testWidgets], and the test is running via `flutter test`. By default,
+  /// tests do not have such a timeout. Tests run using `flutter run` never time
+  /// out even if one is specified.
+  ///
+  /// This method has no effect on the timeout specified via `timeout` on
+  /// [testWidgets]. That timeout is implemented by the `test` package.
+  ///
+  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
+  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
+  /// it by a minute. If there is no timeout in the first place, this has no
+  /// effect.
+  ///
+  /// The granularity of timeouts is coarse: the time is checked once per
+  /// second, and only when the test is not executing. It is therefore possible
+  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
+  /// to still succeed. If precise timing is required, it should be implemented
+  /// as a part of the test rather than relying on this mechanism.
+  ///
+  /// See also:
+  ///
+  ///  * [testWidgets], on which a timeout can be set using the `timeout`
+  ///    argument.
+  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
+  ///    (That timeout is implemented by the `test` package.)
+  // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
+  void addTime(Duration duration);
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -147,11 +173,29 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This function will use [AutomatedTestWidgetsFlutterBinding] if
   /// the test was run using `flutter test`, and
   /// [LiveTestWidgetsFlutterBinding] otherwise (e.g. if it was run
-  /// using `flutter run`). (This is determined by looking at the
-  /// environment variables for a variable called `FLUTTER_TEST`.)
-  static WidgetsBinding ensureInitialized() {
+  /// using `flutter run`). This is determined by looking at the
+  /// environment variables for a variable called `FLUTTER_TEST`.
+  ///
+  /// If `FLUTTER_TEST` is set with a value of 'true', then this test was
+  /// invoked by `flutter test`. If `FLUTTER_TEST` is not set, or if it is set
+  /// to 'false', then this test was invoked by `flutter run`.
+  ///
+  /// Browser environments do not currently support the
+  /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
+  /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
+  ///
+  /// The parameter `environment` is exposed to test different environment
+  /// variable values, and should not be used.
+  static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
+    if (!isBrowser) {
+      // Accessing Platform may throw from a browser, so we guard this.
+      environment ??= Platform.environment;
+    }
     if (WidgetsBinding.instance == null) {
-      if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (isBrowser) {
+        // Browser environments do not support the LiveTestWidgetsFlutterBinding.
+        AutomatedTestWidgetsFlutterBinding();
+      } else if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
         AutomatedTestWidgetsFlutterBinding();
       } else {
         LiveTestWidgetsFlutterBinding();
@@ -182,11 +226,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The number of outstanding microtasks in the queue.
   int get microtaskCount;
 
-  /// The default test timeout for tests when using this binding.
+  /// The default maximum test timeout for tests when using this binding.
   ///
-  /// The [AutomatedTestWidgetsFlutterBinding] layers in an additional timeout
-  /// mechanism beyond this, with much more aggressive timeouts. See
-  /// [AutomatedTestWidgetsFlutterBinding.addTime].
+  /// This controls the default for the `timeout` argument on `testWidgets`. It
+  /// is 10 minutes for [AutomatedTestWidgetsFlutterBinding] (tests running
+  /// using `flutter test`), and unlimited for tests using
+  /// [LiveTestWidgetsFlutterBinding] (tests running using `flutter run`).
+  ///
+  /// This is the maximum that the timeout controlled by `initialTimeout` on
+  /// [testWidgets] can reach when augmented using [addTime].
   test_package.Timeout get defaultTestTimeout;
 
   /// The current time.
@@ -232,8 +280,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `additionalTime` argument is used by the
   /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
-  /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
-  /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
+  /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
+  /// for details.
   Future<T> runAsync<T>(
     Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
@@ -248,6 +296,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
+      if (isBrowser) {
+        return;
+      }
       dispatchLocalesChanged(<Locale>[locale]);
     });
   }
@@ -418,7 +469,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' });
+  ///
+  /// The `timeout` argument sets the initial timeout, if any. It can
+  /// be increased with [addTime]. By default there is no timeout.
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration timeout });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -586,7 +640,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
 
-    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles;
+    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
 
@@ -601,7 +655,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
-      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest);
+      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyInvariants();
@@ -735,10 +789,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get checkIntrinsicSizes => true;
 
-  // The timeout here is absurdly high because we do our own timeout logic and
-  // this is just a backstop.
   @override
-  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 5));
+  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 10));
 
   @override
   bool get inTest => _currentFakeAsync != null;
@@ -746,50 +798,37 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   int get microtaskCount => _currentFakeAsync.microtaskCount;
 
-  /// A whitelist [Set] that is used in mocking the asset message channel.
-  static Set<String> _allowedAssetKeys;
-
   void _mockFlutterAssets() {
+    if (isBrowser) {
+      return;
+    }
     if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
       return;
     }
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
-    _ensureInitialized(assetFolderPath);
+    final String prefix =  'packages/${Platform.environment['APP_NAME']}/';
 
-    if (_allowedAssetKeys.isNotEmpty) {
-      BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
-        final String key = utf8.decode(message.buffer.asUint8List());
-        if (_allowedAssetKeys.contains(key)) {
-          final File asset = File(path.join(assetFolderPath, key));
-          final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-          return Future<ByteData>.value(encoded.buffer.asByteData());
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
+      String key = utf8.decode(message.buffer.asUint8List());
+      File asset = File(path.join(assetFolderPath, key));
+
+      if (!asset.existsSync()) {
+        // For tests in package, it will load assets with its own package prefix.
+        // In this case, we do a best-effort look up.
+        if (!key.startsWith(prefix)) {
+          return null;
         }
-        return null;
-      });
-    }
-  }
 
-  void _ensureInitialized(String assetFolderPath) {
-    if (_allowedAssetKeys != null) {
-      return;
-    }
-    final File manifestFile = File(
-        path.join(assetFolderPath, 'AssetManifest.json'));
-    // If the file does not exist, it means there is no asset declared in
-    // the project.
-    if (!manifestFile.existsSync()) {
-      _allowedAssetKeys = <String>{};
-      return;
-    }
-    final Map<String, dynamic> manifest = json.decode(
-        manifestFile.readAsStringSync());
-    _allowedAssetKeys = <String>{
-      'AssetManifest.json',
-    };
-    for (List<dynamic> value in manifest.values) {
-      final List<String> strList = List<String>.from(value);
-      _allowedAssetKeys.addAll(strList);
-    }
+        key = key.replaceFirst(prefix, '');
+        asset = File(path.join(assetFolderPath, key));
+        if (!asset.existsSync()) {
+          return null;
+        }
+      }
+
+      final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+      return Future<ByteData>.value(encoded.buffer.asByteData());
+    });
   }
 
   @override
@@ -926,6 +965,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   void _checkTimeout(Timer timer) {
     assert(_timeoutTimer == timer);
+    assert(_timeout != null);
     if (_timeoutStopwatch.elapsed > _timeout) {
       _timeoutCompleter.completeError(
         TimeoutException(
@@ -937,33 +977,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  /// Increase the timeout for the current test by the given duration.
-  ///
-  /// Tests by default time out after two seconds, but the timeout can be
-  /// increased before an expensive operation to allow it to complete without
-  /// hitting the test timeout.
-  ///
-  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
-  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
-  /// it by several seconds.
-  ///
-  /// In general, unit tests are expected to run very fast, and this method is
-  /// usually not necessary.
-  ///
-  /// The granularity of timeouts is coarse: the time is checked once per
-  /// second, and only when the test is not executing. It is therefore possible
-  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
-  /// to still succeed. If precise timing is required, it should be implemented
-  /// as a part of the test rather than relying on this mechanism.
-  ///
-  /// See also:
-  ///
-  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
-  ///    (That timeout is implemented by the test package.)
   @override
   void addTime(Duration duration) {
-    assert(_timeout != null, 'addTime can only be called during a test.');
-    _timeout += duration;
+    if (_timeout != null)
+      _timeout += duration;
   }
 
   @override
@@ -971,7 +988,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> testBody(),
     VoidCallback invariantTester, {
     String description = '',
-    Duration timeout = const Duration(seconds: 2),
+    Duration timeout,
   }) {
     assert(description != null);
     assert(!inTest);
@@ -979,9 +996,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_clock == null);
 
     _timeout = timeout;
-    _timeoutStopwatch = Stopwatch()..start();
-    _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
-    _timeoutCompleter = Completer<void>();
+    if (_timeout != null) {
+      _timeoutStopwatch = Stopwatch()..start();
+      _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
+      _timeoutCompleter = Completer<void>();
+    }
 
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
@@ -990,7 +1009,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
       assert(fakeAsync == localFakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter.future);
+      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter?.future);
       assert(inTest);
     });
 
@@ -1044,7 +1063,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _clock = null;
     _currentFakeAsync = null;
     _timeoutCompleter = null;
-    _timeoutTimer.cancel();
+    _timeoutTimer?.cancel();
     _timeoutTimer = null;
     _timeoutStopwatch = null;
     _timeout = null;
@@ -1197,6 +1216,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
   @override
+  void addTime(Duration duration) {
+    // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
+    // See runTest().
+  }
+
+  @override
   void scheduleFrame() {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
       return; // In benchmark mode, don't actually schedule any engine frames.
@@ -1334,6 +1359,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       );
     }());
 
+    addTime(additionalTime); // doesn't do anything since we don't actually track the timeout, but just for correctness...
+
     _runningAsyncTasks = true;
     try {
       return await callback();
@@ -1351,11 +1378,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' }) async {
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration timeout }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
     renderView._setDescription(description);
+    // We drop the timeout on the floor in `flutter run` mode.
+    // We could support it, but we'd have to automatically add the entire duration of pumps
+    // and timers and so on, since those operate in real time when using this binding, but
+    // the timeouts expect them to happen near-instantaneously.
     return _runTest(testBody, invariantTester, description);
   }
 
@@ -1750,7 +1781,11 @@ class _MockHttpRequest extends HttpClientRequest {
 }
 
 /// A mocked [HttpClientResponse] which is empty and has a [statusCode] of 400.
-class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse {
+// TODO(tvolkert): Change to `extends Stream<Uint8List>` once
+// https://dart-review.googlesource.com/c/sdk/+/104525 is rolled into the framework.
+class _MockHttpResponse implements HttpClientResponse {
+  final Stream<Uint8List> _delegate = Stream<Uint8List>.fromIterable(const Iterable<Uint8List>.empty());
+
   @override
   final HttpHeaders headers = _MockHttpHeaders();
 
@@ -1763,9 +1798,10 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   @override
   int get contentLength => -1;
 
-  // @override
-  // TODO(tvolkert): Uncomment @override annotation once SDK change lands.
-  bool get autoUncompress => true;
+  @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
 
   @override
   List<Cookie> get cookies => null;
@@ -1779,8 +1815,8 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   bool get isRedirect => false;
 
   @override
-  StreamSubscription<List<int>> listen(void Function(List<int> event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
-    return const Stream<List<int>>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+  StreamSubscription<Uint8List> listen(void Function(Uint8List event) onData, { Function onError, void Function() onDone, bool cancelOnError }) {
+    return const Stream<Uint8List>.empty().listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override
@@ -1799,6 +1835,197 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
 
   @override
   int get statusCode => 400;
+
+  @override
+  Future<bool> any(bool Function(Uint8List element) test) {
+    return _delegate.any(test);
+  }
+
+  @override
+  Stream<Uint8List> asBroadcastStream({
+    void Function(StreamSubscription<Uint8List> subscription) onListen,
+    void Function(StreamSubscription<Uint8List> subscription) onCancel,
+  }) {
+    return _delegate.asBroadcastStream(onListen: onListen, onCancel: onCancel);
+  }
+
+  @override
+  Stream<E> asyncExpand<E>(Stream<E> Function(Uint8List event) convert) {
+    return _delegate.asyncExpand<E>(convert);
+  }
+
+  @override
+  Stream<E> asyncMap<E>(FutureOr<E> Function(Uint8List event) convert) {
+    return _delegate.asyncMap<E>(convert);
+  }
+
+  @override
+  Stream<R> cast<R>() {
+    return _delegate.cast<R>();
+  }
+
+  @override
+  Future<bool> contains(Object needle) {
+    return _delegate.contains(needle);
+  }
+
+  @override
+  Stream<Uint8List> distinct([bool Function(Uint8List previous, Uint8List next) equals]) {
+    return _delegate.distinct(equals);
+  }
+
+  @override
+  Future<E> drain<E>([E futureValue]) {
+    return _delegate.drain<E>(futureValue);
+  }
+
+  @override
+  Future<Uint8List> elementAt(int index) {
+    return _delegate.elementAt(index);
+  }
+
+  @override
+  Future<bool> every(bool Function(Uint8List element) test) {
+    return _delegate.every(test);
+  }
+
+  @override
+  Stream<S> expand<S>(Iterable<S> Function(Uint8List element) convert) {
+    return _delegate.expand(convert);
+  }
+
+  @override
+  Future<Uint8List> get first => _delegate.first;
+
+  @override
+  Future<Uint8List> firstWhere(
+    bool Function(Uint8List element) test, {
+    List<int> Function() orElse,
+  }) {
+    return _delegate.firstWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
+  }
+
+  @override
+  Future<S> fold<S>(S initialValue, S Function(S previous, Uint8List element) combine) {
+    return _delegate.fold<S>(initialValue, combine);
+  }
+
+  @override
+  Future<dynamic> forEach(void Function(Uint8List element) action) {
+    return _delegate.forEach(action);
+  }
+
+  @override
+  Stream<Uint8List> handleError(
+    Function onError, {
+    bool Function(dynamic error) test,
+  }) {
+    return _delegate.handleError(onError, test: test);
+  }
+
+  @override
+  bool get isBroadcast => _delegate.isBroadcast;
+
+  @override
+  Future<bool> get isEmpty => _delegate.isEmpty;
+
+  @override
+  Future<String> join([String separator = '']) {
+    return _delegate.join(separator);
+  }
+
+  @override
+  Future<Uint8List> get last => _delegate.last;
+
+  @override
+  Future<Uint8List> lastWhere(
+    bool Function(Uint8List element) test, {
+    List<int> Function() orElse,
+  }) {
+    return _delegate.lastWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
+  }
+
+  @override
+  Future<int> get length => _delegate.length;
+
+  @override
+  Stream<S> map<S>(S Function(Uint8List event) convert) {
+    return _delegate.map<S>(convert);
+  }
+
+  @override
+  Future<dynamic> pipe(StreamConsumer<List<int>> streamConsumer) {
+    return _delegate.cast<List<int>>().pipe(streamConsumer);
+  }
+
+  @override
+  Future<Uint8List> reduce(List<int> Function(Uint8List previous, Uint8List element) combine) {
+    return _delegate.reduce((Uint8List previous, Uint8List element) {
+      return Uint8List.fromList(combine(previous, element));
+    });
+  }
+
+  @override
+  Future<Uint8List> get single => _delegate.single;
+
+  @override
+  Future<Uint8List> singleWhere(bool Function(Uint8List element) test, {List<int> Function() orElse}) {
+    return _delegate.singleWhere(test, orElse: () {
+      return Uint8List.fromList(orElse());
+    });
+  }
+
+  @override
+  Stream<Uint8List> skip(int count) {
+    return _delegate.skip(count);
+  }
+
+  @override
+  Stream<Uint8List> skipWhile(bool Function(Uint8List element) test) {
+    return _delegate.skipWhile(test);
+  }
+
+  @override
+  Stream<Uint8List> take(int count) {
+    return _delegate.take(count);
+  }
+
+  @override
+  Stream<Uint8List> takeWhile(bool Function(Uint8List element) test) {
+    return _delegate.takeWhile(test);
+  }
+
+  @override
+  Stream<Uint8List> timeout(
+    Duration timeLimit, {
+    void Function(EventSink<Uint8List> sink) onTimeout,
+  }) {
+    return _delegate.timeout(timeLimit, onTimeout: onTimeout);
+  }
+
+  @override
+  Future<List<Uint8List>> toList() {
+    return _delegate.toList();
+  }
+
+  @override
+  Future<Set<Uint8List>> toSet() {
+    return _delegate.toSet();
+  }
+
+  @override
+  Stream<S> transform<S>(StreamTransformer<List<int>, S> streamTransformer) {
+    return _delegate.cast<List<int>>().transform<S>(streamTransformer);
+  }
+
+  @override
+  Stream<Uint8List> where(bool Function(Uint8List event) test) {
+    return _delegate.where(test);
+  }
 }
 
 /// A mocked [HttpHeaders] that ignores all writes.

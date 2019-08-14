@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -11,6 +10,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('BackdropFilter\'s cull rect does not shrink', (WidgetTester tester) async {
+    tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -43,8 +43,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('backdrop_filter_test.cull_rect.1.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'backdrop_filter_test.cull_rect.png',
+        version: 1,
+      ),
     );
-  });
+  }, skip: isBrowser);
 }

@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart' show kSecondaryButton;
 
 import 'semantics_tester.dart';
 
@@ -41,7 +42,7 @@ void main() {
     await tester.tap(find.text('target'));
     await tester.pumpWidget(subject);
     expect(tapped, isFalse,
-      reason: 'because the tap is prevented by ModalBarrier');
+      reason: 'because the tap is not prevented by ModalBarrier');
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
@@ -57,10 +58,38 @@ void main() {
     await tester.tap(find.text('target'));
     await tester.pumpWidget(subject);
     expect(tapped, isTrue,
-      reason: 'because the tap is not prevented by ModalBarrier');
+      reason: 'because the tap is prevented by ModalBarrier');
   });
 
-  testWidgets('ModalBarrier pops the Navigator when dismissed', (WidgetTester tester) async {
+  testWidgets('ModalBarrier does not prevent interactions with translucent widgets in front of it', (WidgetTester tester) async {
+    bool dragged = false;
+    final Widget subject = Stack(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        const ModalBarrier(dismissible: false),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: (_) {
+            dragged = true;
+          },
+          child: const Center(
+            child: Text('target', textDirection: TextDirection.ltr),
+          ),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(subject);
+    await tester.dragFrom(
+      tester.getBottomRight(find.byType(GestureDetector)) - const Offset(10, 10),
+      const Offset(-20, 0),
+    );
+    await tester.pumpWidget(subject);
+    expect(dragged, isTrue,
+      reason: 'because the drag is prevented by ModalBarrier');
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by primay tap', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => FirstWidget(),
       '/modal': (BuildContext context) => SecondWidget(),
@@ -78,6 +107,56 @@ void main() {
 
     // Tap on the barrier to dismiss it
     await tester.tap(find.byKey(const ValueKey<String>('barrier')));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.');
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by primary tap down', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => SecondWidget(),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    // Tap on the barrier to dismiss it
+    await tester.press(find.byKey(const ValueKey<String>('barrier')));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
+      reason: 'The route should have been dismissed by tapping the barrier.');
+  });
+
+  testWidgets('ModalBarrier pops the Navigator when dismissed by non-primary tap down', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => FirstWidget(),
+      '/modal': (BuildContext context) => SecondWidget(),
+    };
+
+    await tester.pumpWidget(MaterialApp(routes: routes));
+
+    // Initially the barrier is not visible
+    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
+
+    // Tapping on X routes to the barrier
+    await tester.tap(find.text('X'));
+    await tester.pump(); // begin transition
+    await tester.pump(const Duration(seconds: 1)); // end transition
+
+    // Tap on the barrier to dismiss it
+    await tester.press(find.byKey(const ValueKey<String>('barrier')), buttons: kSecondaryButton);
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 

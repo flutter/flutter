@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'button_bar.dart';
 import 'button_theme.dart';
 import 'card.dart';
+import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'debug.dart';
@@ -70,6 +71,10 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight = kMinInteractiveDimension,
+    this.headingRowHeight = 56.0,
+    this.horizontalMargin = 24.0,
+    this.columnSpacing = 56.0,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -83,6 +88,10 @@ class PaginatedDataTable extends StatefulWidget {
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(dataRowHeight != null),
+       assert(headingRowHeight != null),
+       assert(horizontalMargin != null),
+       assert(columnSpacing != null),
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
@@ -130,6 +139,31 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See [DataTable.onSelectAll].
   final ValueSetter<bool> onSelectAll;
+
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// specified.
+  final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value is optional and defaults to 56.0 if not specified.
+  final double headingRowHeight;
+
+  /// The horizontal margin between the edges of the table and the content
+  /// in the first and last cells of each row.
+  ///
+  /// When a checkbox is displayed, it is also the margin between the checkbox
+  /// the content in the first data column.
+  ///
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  final double horizontalMargin;
+
+  /// The horizontal margin between the contents of each data column.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double columnSpacing;
 
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
@@ -430,6 +464,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               sortColumnIndex: widget.sortColumnIndex,
               sortAscending: widget.sortAscending,
               onSelectAll: widget.onSelectAll,
+              dataRowHeight: widget.dataRowHeight,
+              headingRowHeight: widget.headingRowHeight,
+              horizontalMargin: widget.horizontalMargin,
+              columnSpacing: widget.columnSpacing,
               rows: _getRows(_firstRowIndex, widget.rowsPerPage),
             ),
           ),

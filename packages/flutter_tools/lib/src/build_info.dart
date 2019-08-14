@@ -14,11 +14,8 @@ class BuildInfo {
     this.mode,
     this.flavor, {
     this.trackWidgetCreation = false,
-    this.compilationTraceFilePath,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.buildSharedLibrary,
-    this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
@@ -41,20 +38,11 @@ class BuildInfo {
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
 
-  /// Dart compilation trace file to use for JIT VM snapshot.
-  final String compilationTraceFilePath;
-
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
-
-  /// Whether to prefer AOT compiling to a *so file.
-  final bool buildSharedLibrary;
-
-  /// Target platform for the build (e.g. android_arm versus android_arm64).
-  final TargetPlatform targetPlatform;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -72,8 +60,6 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -83,30 +69,43 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
-
-  /// Returns whether a dynamic build is requested.
-  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+  bool get isRelease => mode == BuildMode.release;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
+}
 
-  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      BuildInfo(mode, flavor,
-          trackWidgetCreation: trackWidgetCreation,
-          compilationTraceFilePath: compilationTraceFilePath,
-          extraFrontEndOptions: extraFrontEndOptions,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
-          buildSharedLibrary: buildSharedLibrary,
-          targetPlatform: targetPlatform);
+/// Information about an Android build to be performed or used.
+class AndroidBuildInfo {
+  const AndroidBuildInfo(
+    this.buildInfo, {
+    this.targetArchs = const <AndroidArch>[
+      AndroidArch.armeabi_v7a,
+      AndroidArch.arm64_v8a,
+    ],
+    this.splitPerAbi = false,
+  });
+
+  // The build info containing the mode and flavor.
+  final BuildInfo buildInfo;
+
+  /// Whether to split the shared library per ABI.
+  ///
+  /// When this is false, multiple ABIs will be contained within one primary
+  /// build artifact. When this is true, multiple build artifacts (one per ABI)
+  /// will be produced.
+  final bool splitPerAbi;
+
+  /// The target platforms for the build.
+  final Iterable<AndroidArch> targetArchs;
 }
 
 /// The type of build.
@@ -114,8 +113,30 @@ enum BuildMode {
   debug,
   profile,
   release,
-  dynamicProfile,
-  dynamicRelease
+}
+
+const List<String> _kBuildModes = <String>[
+  'debug',
+  'profile',
+  'release',
+];
+
+/// Return the name for the build mode, or "any" if null.
+String getNameForBuildMode(BuildMode buildMode) {
+  return _kBuildModes[buildMode.index];
+}
+
+/// Returns the [BuildMode] for a particular `name`.
+BuildMode getBuildModeForName(String name) {
+  switch (name) {
+    case 'debug':
+      return BuildMode.debug;
+    case 'profile':
+      return BuildMode.profile;
+    case 'release':
+      return BuildMode.release;
+  }
+  return null;
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
@@ -208,9 +229,7 @@ bool isAotBuildMode(BuildMode mode) {
 
 // Returns true if the given build mode can be used on emulators / simulators.
 bool isEmulatorBuildMode(BuildMode mode) {
-  return mode == BuildMode.debug ||
-    mode == BuildMode.dynamicRelease ||
-    mode == BuildMode.dynamicProfile;
+  return mode == BuildMode.debug;
 }
 
 enum HostPlatform {
@@ -243,7 +262,7 @@ enum TargetPlatform {
   windows_x64,
   fuchsia,
   tester,
-  web,
+  web_javascript,
 }
 
 /// iOS target device architecture.
@@ -252,6 +271,13 @@ enum TargetPlatform {
 enum IOSArch {
   armv7,
   arm64,
+}
+
+enum AndroidArch {
+  armeabi_v7a,
+  arm64_v8a,
+  x86,
+  x86_64,
 }
 
 /// The default set of iOS device architectures to build for.
@@ -303,8 +329,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'fuchsia';
     case TargetPlatform.tester:
       return 'flutter-tester';
-    case TargetPlatform.web:
-      return 'web';
+    case TargetPlatform.web_javascript:
+      return 'web-javascript';
   }
   assert(false);
   return null;
@@ -328,10 +354,55 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_x64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
-    case 'web':
-      return TargetPlatform.web;
+    case 'web-javascript':
+      return TargetPlatform.web_javascript;
   }
   assert(platform != null);
+  return null;
+}
+
+AndroidArch getAndroidArchForName(String platform) {
+  switch (platform) {
+    case 'android-arm':
+      return AndroidArch.armeabi_v7a;
+    case 'android-arm64':
+      return AndroidArch.arm64_v8a;
+    case 'android-x64':
+      return AndroidArch.x86_64;
+    case 'android-x86':
+      return AndroidArch.x86;
+  }
+  assert(false);
+  return null;
+}
+
+String getNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'armeabi-v7a';
+    case AndroidArch.arm64_v8a:
+      return 'arm64-v8a';
+    case AndroidArch.x86_64:
+      return 'x86_64';
+    case AndroidArch.x86:
+      return 'x86';
+  }
+  assert(false);
+  return null;
+}
+
+String getPlatformNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'android-arm';
+    case AndroidArch.arm64_v8a:
+      return 'android-arm64';
+    case AndroidArch.x86_64:
+      return 'android-x64';
+    case AndroidArch.x86:
+      return 'android-x86';
+  }
+  assert(false);
   return null;
 }
 
@@ -407,10 +478,4 @@ String getWindowsBuildDirectory() {
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'fuchsia');
-}
-
-/// Returns directory used by incremental compiler (IKG - incremental kernel
-/// generator) to store cached intermediate state.
-String getIncrementalCompilerByteStoreDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
 }

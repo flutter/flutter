@@ -2,10 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import '../painting/image_test_utils.dart' show TestImageProvider;
+
+Future<ui.Image> createTestImage() {
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(300, 300);
+}
 
 Key firstKey = const Key('first');
 Key secondKey = const Key('second');
@@ -124,6 +139,19 @@ class MutatingRoute extends MaterialPageRoute<void> {
   }
 }
 
+class _SimpleStatefulWidget extends StatefulWidget {
+  const _SimpleStatefulWidget({ Key key }) : super(key: key);
+  @override
+  _SimpleState createState() => _SimpleState();
+}
+
+class _SimpleState extends State<_SimpleStatefulWidget> {
+  int state = 0;
+
+  @override
+  Widget build(BuildContext context) => Text(state.toString());
+}
+
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
@@ -136,7 +164,9 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) => Text(widget.value);
 }
 
-void main() {
+Future<void> main() async {
+  final ui.Image testImage = await createTestImage();
+
   setUp(() {
     transitionFromUserGestures = false;
   });
@@ -168,16 +198,22 @@ void main() {
     // seeing them at t=16ms. The original page no longer contains the hero.
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnstage);
+
+    expect(find.byKey(secondKey), findsOneWidget);
     expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(secondKey), isOnstage);
 
     await tester.pump();
 
     // t=32ms for the journey. Surely they are still at it.
 
     expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnstage);
+
+    expect(find.byKey(secondKey), findsOneWidget);
+
+    expect(find.byKey(secondKey), findsOneWidget);
     expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(secondKey), isOnstage);
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -243,6 +279,29 @@ void main() {
     expect(find.byKey(secondKey), findsNothing);
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isInCard);
+  });
+
+  testWidgets('Heroes animate should hide original hero', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(routes: routes));
+    // Checks initial state.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle(); // Waits for transition finishes.
+
+    expect(find.byKey(firstKey), findsNothing);
+    final Offstage first = tester.widget(
+      find.ancestor(
+        of: find.byKey(firstKey, skipOffstage: false),
+        matching: find.byType(Offstage, skipOffstage: false),
+      ).first
+    );
+    // Original hero should stay hidden.
+    expect(first.offstage, isTrue);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
   });
 
   testWidgets('Destination hero is rebuilt midflight', (WidgetTester tester) async {
@@ -883,7 +942,14 @@ void main() {
             children: <Widget>[
               // This container will appear at Y=0
               Container(
-                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0)),
+                child: Hero(
+                  tag: 'BC',
+                  child: Container(
+                    key: heroBCKey,
+                    height: 150.0,
+                    child: const Text('Hero'),
+                  )
+                ),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -901,14 +967,27 @@ void main() {
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
               Container(
-                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0)),
+                child: Hero(
+                  tag: 'AB',
+                  child: Container(
+                    key: heroABKey,
+                    height: 200.0,
+                    child: const Text('Hero'),
+                  )
+                ),
               ),
               FlatButton(
                 child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
-                child: Hero(tag: 'BC', child: Container(height: 150.0)),
+                child: Hero(
+                  tag: 'BC',
+                  child: Container(
+                    height: 150.0,
+                    child: const Text('Hero'),
+                  )
+                ),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -928,7 +1007,14 @@ void main() {
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   Container(
-                    child: Hero(tag: 'AB', child: Container(height: 100.0, width: 100.0)),
+                    child: Hero(
+                      tag: 'AB',
+                      child: Container(
+                        height: 100.0,
+                        width: 100.0,
+                        child: const Text('Hero'),
+                      )
+                    ),
                   ),
                   FlatButton(
                     child: const Text('PUSH B'),
@@ -966,10 +1052,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    // One Opacity widget per Hero, only one now has opacity 0.0
-    final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
-    final Iterable<double> opacities = renderers.map<double>((RenderOpacity r) => r.opacity);
-    expect(opacities.singleWhere((double opacity) => opacity == 0.0), 0.0);
+    bool _isVisible(Element node) {
+      bool isVisible = true;
+      node.visitAncestorElements((Element ancestor) {
+          final RenderObject r = ancestor.renderObject;
+          if (r is RenderOpacity && r.opacity == 0) {
+            isVisible = false;
+            return false;
+          }
+          return true;
+      });
+      return isVisible;
+    }
+
+    // Of all heroes only one should be visible now.
+    final Iterable<Element> elements = find.text('Hero').evaluate();
+    expect(elements.where(_isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -1038,6 +1136,7 @@ void main() {
 
     // Push flight underway.
     await tester.pump(const Duration(milliseconds: 100));
+    // Visible in the hero animation.
     expect(find.text('456'), findsOneWidget);
 
     // Push flight finished.
@@ -1439,7 +1538,7 @@ void main() {
             Hero(
               tag: 'a',
               child: const Text('Batman'),
-              placeholderBuilder: (BuildContext context, Widget child) {
+              placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
                 return const Text('Venom');
               },
             ),
@@ -1452,7 +1551,7 @@ void main() {
                       child: Hero(
                         tag: 'a',
                         child: const Text('Wolverine'),
-                        placeholderBuilder: (BuildContext context, Widget child) {
+                        placeholderBuilder: (BuildContext context, Size size, Widget child) {
                           return const Text('Joker');
                         },
                       ),
@@ -1564,6 +1663,45 @@ void main() {
     expect(find.byKey(firstKey), isOnstage);
     expect(find.byKey(firstKey), isInCard);
     expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Heroes animate should hide destination hero and display original hero in case of dismissed', (WidgetTester tester) async {
+    transitionFromUserGestures = true;
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        platform: TargetPlatform.iOS,
+      ),
+      routes: routes,
+    ));
+
+    await tester.tap(find.text('two'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(50.0, 0.0));
+    await tester.pump();
+    // It will only register the drag if we move a second time.
+    await gesture.moveBy(const Offset(50.0, 0.0));
+    await tester.pump();
+
+    // We're going to page 1 so page 1's Hero is lifted into flight.
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isNotInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // Dismisses hero transition.
+    await gesture.up();
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // We goes back to second page.
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
   });
 
   testWidgets('Handles transitions when a non-default initial route is set', (WidgetTester tester) async {
@@ -1925,7 +2063,7 @@ void main() {
           // Since we're popping, only the destination route's builder is used.
           flightShuttleBuilder: shuttleBuilder,
           transitionOnUserGestures: true,
-          child: const Text('1')
+          child: const Text('1'),
         ),
       ),
     );
@@ -1936,7 +2074,7 @@ void main() {
           child: Hero(
             tag: navigatorKey,
             transitionOnUserGestures: true,
-            child: const Text('2')
+            child: const Text('2'),
           ),
         );
       }
@@ -1964,5 +2102,157 @@ void main() {
     expect(find.text('2'), findsNothing);
     // Still one shuttle.
     expect(shuttlesBuilt, 2);
+  });
+
+  testWidgets("From hero's state should be preserved, "
+    'heroes work well with child widgets that has global keys',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      final GlobalKey<_SimpleState> key1 = GlobalKey<_SimpleState>();
+      final GlobalKey key2 = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Hero(
+                tag: 'hero',
+                transitionOnUserGestures: true,
+                child: _SimpleStatefulWidget(key: key1),
+              ),
+              const SizedBox(
+                width: 10,
+                height: 10,
+                child: Text('1'),
+              )
+            ]
+          )
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Hero(
+              tag: 'hero',
+              transitionOnUserGestures: true,
+              // key2 is a `GlobalKey`. The hero animation should not
+              // assert by having the same global keyed widget in more
+              // than one place in the tree.
+              child: _SimpleStatefulWidget(key: key2),
+            ),
+          );
+        }
+      );
+
+      final _SimpleState state1 = key1.currentState;
+      state1.state = 1;
+
+      navigatorKey.currentState.push(route2);
+      await tester.pump();
+
+      expect(state1.mounted, isTrue);
+
+      await tester.pumpAndSettle();
+      expect(state1.state, 1);
+      // The element should be mounted and unique.
+      expect(state1.mounted, isTrue);
+
+      expect(navigatorKey.currentState.pop(), isTrue);
+      await tester.pumpAndSettle();
+
+      // State is preserved.
+      expect(state1.state, 1);
+      // The element should be mounted and unique.
+      expect(state1.mounted, isTrue);
+  });
+
+  testWidgets("Hero works with images that don't have both width and height specified",
+    // Regression test for https://github.com/flutter/flutter/issues/32356
+    // and https://github.com/flutter/flutter/issues/31503
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      const Key imageKey1 = Key('image1');
+      const Key imageKey2 = Key('image2');
+      final TestImageProvider imageProvider = TestImageProvider(testImage);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Hero(
+                tag: 'hero',
+                transitionOnUserGestures: true,
+                child: Container(
+                  width: 100,
+                  child: Image(
+                    image: imageProvider,
+                    key: imageKey1,
+                  )
+                )
+              ),
+              const SizedBox(
+                width: 10,
+                height: 10,
+                child: Text('1'),
+              )
+            ]
+          )
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Hero(
+              tag: 'hero',
+              transitionOnUserGestures: true,
+              child: Container(
+                child: Image(
+                  image: imageProvider,
+                  key: imageKey2,
+                )
+              )
+            ),
+          );
+        }
+      );
+
+    // Load image before measuring the `Rect` of the `RenderImage`.
+    imageProvider.complete();
+    await tester.pump();
+    final RenderImage renderImage = tester.renderObject(
+      find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
+    );
+
+    // Before push image1 should be laid out correctly.
+    expect(renderImage.size, const Size(100, 100));
+
+    navigatorKey.currentState.push(route2);
+    await tester.pump();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
+    await tester.pump();
+
+    // Move (almost) across the screen, to make the animation as close to finish
+    // as possible.
+    await gesture.moveTo(const Offset(800, 200));
+    await tester.pump();
+
+    // image1 should snap to the top left corner of the Row widget.
+    expect(
+      tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
+      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
+    );
+
+    // Text should respect the correct final size of image1.
+    expect(
+      tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
+      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
+    );
   });
 }

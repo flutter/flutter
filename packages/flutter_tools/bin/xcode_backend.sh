@@ -72,11 +72,11 @@ BuildApp() {
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
       EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
-      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
       EchoError "If that is not set, the CONFIGURATION environment variable is used."
       EchoError ""
       EchoError "You can fix this by either adding an appropriately named build"
-      EchoError "configuration, or adding an appriate value for FLUTTER_BUILD_MODE to the"
+      EchoError "configuration, or adding an appropriate value for FLUTTER_BUILD_MODE to the"
       EchoError ".xcconfig file for the current build configuration (${CONFIGURATION})."
       EchoError "========================================================================"
       exit -1;;
@@ -114,6 +114,7 @@ BuildApp() {
     flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
   fi
 
+  local bitcode_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
       EchoError "========================================================================"
@@ -130,6 +131,9 @@ BuildApp() {
     local_engine_flag="--local-engine=${LOCAL_ENGINE}"
     flutter_framework="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.framework"
     flutter_podspec="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/Flutter.podspec"
+    if [[ $ENABLE_BITCODE == "YES" ]]; then
+      bitcode_flag="--bitcode"
+    fi
   fi
 
   if [[ -e "${project_path}/.ios" ]]; then
@@ -174,6 +178,7 @@ BuildApp() {
       EchoError "========================================================================"
       exit -1
     fi
+
     RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics           \
       ${verbose_flag}                                                       \
       build aot                                                             \
@@ -183,7 +188,8 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${flutter_engine_flag}                                                \
-      ${local_engine_flag}
+      ${local_engine_flag}                                                  \
+      ${bitcode_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -195,27 +201,29 @@ BuildApp() {
 
     RunCommand cp -r -- "${app_framework}" "${derived_dir}"
 
-    StreamOutput " ├─Generating dSYM file..."
-    # Xcode calls `symbols` during app store upload, which uses Spotlight to
-    # find dSYM files for embedded frameworks. When it finds the dSYM file for
-    # `App.framework` it throws an error, which aborts the app store upload.
-    # To avoid this, we place the dSYM files in a folder ending with ".noindex",
-    # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
-    RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
-    RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
-      exit -1
-    fi
-    StreamOutput "done"
+    if [[ "${build_mode}" == "release" ]]; then
+      StreamOutput " ├─Generating dSYM file..."
+      # Xcode calls `symbols` during app store upload, which uses Spotlight to
+      # find dSYM files for embedded frameworks. When it finds the dSYM file for
+      # `App.framework` it throws an error, which aborts the app store upload.
+      # To avoid this, we place the dSYM files in a folder ending with ".noindex",
+      # which hides it from Spotlight, https://github.com/flutter/flutter/issues/22560.
+      RunCommand mkdir -p -- "${build_dir}/dSYMs.noindex"
+      RunCommand xcrun dsymutil -o "${build_dir}/dSYMs.noindex/App.framework.dSYM" "${app_framework}/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to generate debug symbols (dSYM) file for ${app_framework}/App."
+        exit -1
+      fi
+      StreamOutput "done"
 
-    StreamOutput " ├─Stripping debug symbols..."
-    RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
-    if [[ $? -ne 0 ]]; then
-      EchoError "Failed to strip ${derived_dir}/App.framework/App."
-      exit -1
+      StreamOutput " ├─Stripping debug symbols..."
+      RunCommand xcrun strip -x -S "${derived_dir}/App.framework/App"
+      if [[ $? -ne 0 ]]; then
+        EchoError "Failed to strip ${derived_dir}/App.framework/App."
+        exit -1
+      fi
+      StreamOutput "done"
     fi
-    StreamOutput "done"
 
   else
     RunCommand mkdir -p -- "${derived_dir}/App.framework"
@@ -249,7 +257,7 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"     \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \

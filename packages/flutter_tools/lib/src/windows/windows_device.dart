@@ -21,7 +21,12 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends Device {
-  WindowsDevice() : super('Windows');
+  WindowsDevice() : super(
+      'Windows',
+      category: Category.desktop,
+      platformType: PlatformType.windows,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }
@@ -51,6 +56,9 @@ class WindowsDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
+  Future<String> get emulatorId async => null;
+
+  @override
   bool isSupported() => true;
 
   @override
@@ -74,7 +82,11 @@ class WindowsDevice extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
-      await buildWindows(FlutterProject.current().windows, debuggingOptions.buildInfo);
+      await buildWindows(
+        FlutterProject.current().windows,
+        debuggingOptions.buildInfo,
+        target: mainPath,
+      );
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[
@@ -144,7 +156,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-final RegExp _whitespace = RegExp(r'\w+');
+final RegExp _whitespace = RegExp(r'\s+');
 
 /// Returns the running process matching `process` name.
 ///
@@ -162,8 +174,15 @@ List<String> runningProcess(String processName) {
       continue;
     }
     final List<String> parts = process.split(_whitespace);
+
+    final String processPid = parts[0];
+    final String currentRunningProcessPid = pid.toString();
+    // Don't kill the flutter tool process
+    if (processPid == currentRunningProcessPid) {
+      continue;
+    }
     final List<String> data = <String>[
-      parts[0], // ID
+      processPid, // ID
       parts[1], // Name
     ];
     return data;

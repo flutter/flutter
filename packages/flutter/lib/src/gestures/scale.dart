@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:vector_math/vector_math_64.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -34,15 +36,32 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint = Offset.zero })
-    : assert(focalPoint != null);
+  ScaleStartDetails({ this.focalPoint = Offset.zero, Offset localFocalPoint, })
+    : assert(focalPoint != null), localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The initial focal point of the pointers in contact with the screen.
+  ///
   /// Reported in global coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localFocalPoint], which is the same value reported in local
+  ///    coordinates.
   final Offset focalPoint;
 
+  /// The initial focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
+  /// constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [focalPoint], which is the same value reported in global
+  ///    coordinates.
+  final Offset localFocalPoint;
+
   @override
-  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint)';
+  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint)';
 }
 
 /// Details for [GestureScaleUpdateCallback].
@@ -54,6 +73,7 @@ class ScaleUpdateDetails {
   /// argument must be greater than or equal to zero.
   ScaleUpdateDetails({
     this.focalPoint = Offset.zero,
+    Offset localFocalPoint,
     this.scale = 1.0,
     this.horizontalScale = 1.0,
     this.verticalScale = 1.0,
@@ -62,12 +82,29 @@ class ScaleUpdateDetails {
        assert(scale != null && scale >= 0.0),
        assert(horizontalScale != null && horizontalScale >= 0.0),
        assert(verticalScale != null && verticalScale >= 0.0),
-       assert(rotation != null);
+       assert(rotation != null),
+       localFocalPoint = localFocalPoint ?? focalPoint;
 
   /// The focal point of the pointers in contact with the screen.
   ///
   /// Reported in global coordinates.
+  ///
+  /// See also:
+  ///
+  ///  * [localFocalPoint], which is the same value reported in local
+  ///    coordinates.
   final Offset focalPoint;
+
+  /// The focal point of the pointers in contact with the screen.
+  ///
+  /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
+  /// constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [focalPoint], which is the same value reported in global
+  ///    coordinates.
+  final Offset localFocalPoint;
 
   /// The scale implied by the average distance between the pointers in contact
   /// with the screen.
@@ -109,7 +146,7 @@ class ScaleUpdateDetails {
   final double rotation;
 
   @override
-  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale, horizontalScale: $horizontalScale, verticalScale: $verticalScale, rotation: $rotation)';
+  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, localFocalPoint: $localFocalPoint, scale: $scale, horizontalScale: $horizontalScale, verticalScale: $verticalScale, rotation: $rotation)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -203,6 +240,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   _ScaleState _state = _ScaleState.ready;
 
+  Matrix4 _lastTransform;
+
   Offset _initialFocalPoint;
   Offset _currentFocalPoint;
   double _initialSpan;
@@ -245,7 +284,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void addAllowedPointer(PointerEvent event) {
-    startTrackingPointer(event.pointer);
+    startTrackingPointer(event.pointer, event.transform);
     _velocityTrackers[event.pointer] = VelocityTracker();
     if (_state == _ScaleState.ready) {
       _state = _ScaleState.possible;
@@ -272,15 +311,18 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
+      _lastTransform = event.transform;
     } else if (event is PointerDownEvent) {
       _pointerLocations[event.pointer] = event.position;
       _pointerQueue.add(event.pointer);
       didChangeConfiguration = true;
       shouldStartIfAccepted = true;
+      _lastTransform = event.transform;
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       _pointerLocations.remove(event.pointer);
       _pointerQueue.remove(event.pointer);
       didChangeConfiguration = true;
+      _lastTransform = event.transform;
     }
 
     _updateLines();
@@ -398,6 +440,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
           horizontalScale: _horizontalScaleFactor,
           verticalScale: _verticalScaleFactor,
           focalPoint: _currentFocalPoint,
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
           rotation: _computeRotationFactor(),
         ));
       });
@@ -406,7 +449,12 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void _dispatchOnStartCallbackIfNeeded() {
     assert(_state == _ScaleState.started);
     if (onStart != null)
-      invokeCallback<void>('onStart', () => onStart(ScaleStartDetails(focalPoint: _currentFocalPoint)));
+      invokeCallback<void>('onStart', () {
+        onStart(ScaleStartDetails(
+          focalPoint: _currentFocalPoint,
+          localFocalPoint: PointerEvent.transformPosition(_lastTransform, _currentFocalPoint),
+        ));
+      });
   }
 
   @override

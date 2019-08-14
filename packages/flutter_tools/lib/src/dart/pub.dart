@@ -93,15 +93,15 @@ Future<void> pubGet({
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
-      'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
+      'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
       timeout: timeoutConfiguration.slowOperation,
     );
-    final List<String> args = <String>['--verbosity=warning'];
-    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
-      args.add('--verbose');
-    args.addAll(<String>[command, '--no-precompile']);
-    if (offline)
-      args.add('--offline');
+    final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'];
+    final List<String> args = <String>[
+      if (verbose) '--verbose' else '--verbosity=warning',
+      ...<String>[command, '--no-precompile'],
+      if (offline) '--offline',
+    ];
     try {
       await pub(
         args,
@@ -119,10 +119,11 @@ Future<void> pubGet({
   }
 
   if (!dotPackages.existsSync())
-    throwToolExit('$directory: pub did not create .packages file');
+    throwToolExit('$directory: pub did not create .packages file.');
 
-  if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync()))
-    throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
+  if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync())) {
+    throwToolExit('$directory: pub did not update .packages file (pubspec.yaml timestamp: ${pubSpecYaml.lastModifiedSync()}; .packages timestamp: ${dotPackages.lastModifiedSync()}).');
+  }
 }
 
 typedef MessageFilter = String Function(String message);
@@ -192,7 +193,7 @@ Future<void> pubInteractively(
 
 /// The command used for running pub.
 List<String> _pubCommand(List<String> arguments) {
-  return <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+  return <String>[sdkBinaryName('pub'), ...arguments];
 }
 
 /// The full environment used when running pub.
@@ -228,21 +229,13 @@ const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 String _getPubEnvironmentValue(PubContext pubContext) {
   // DO NOT update this function without contacting kevmoo.
   // We have server-side tooling that assumes the values are consistent.
-  final List<String> values = <String>[];
-
   final String existing = platform.environment[_pubEnvironmentKey];
-
-  if ((existing != null) && existing.isNotEmpty) {
-    values.add(existing);
-  }
-
-  if (isRunningOnBot) {
-    values.add('flutter_bot');
-  }
-
-  values.add('flutter_cli');
-  values.addAll(pubContext._values);
-
+  final List<String> values = <String>[
+    if (existing != null && existing.isNotEmpty) existing,
+    if (isRunningOnBot) 'flutter_bot',
+    'flutter_cli',
+    ...pubContext._values,
+  ];
   return values.join(':');
 }
 

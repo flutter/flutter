@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
+@TestOn('!chrome') // whole file needs triage.
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -107,8 +107,9 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(() => gesture?.removePointer());
     await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
     await tester.pumpAndSettle();
 
@@ -116,6 +117,7 @@ void main() {
 
     await gesture.moveTo(Offset.zero);
     await gesture.removePointer();
+    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -142,18 +144,17 @@ void main() {
     expect(find.text('Add'), findsNothing);
 
     // Test hover for tooltip.
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    try {
-      await gesture.addPointer();
-      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
-      await tester.pumpAndSettle();
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(() => gesture?.removePointer());
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
 
-      expect(find.text('Add'), findsOneWidget);
+    expect(find.text('Add'), findsOneWidget);
 
-      await gesture.moveTo(Offset.zero);
-    } finally {
-      await gesture.removePointer();
-    }
+    await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    gesture = null;
     await tester.pumpAndSettle();
 
     expect(find.text('Add'), findsNothing);
@@ -736,8 +737,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('floating_action_button_test.clip.2.png'), // .clip.1.png is obsolete and can be removed
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'floating_action_button_test.clip.png',
+        version: 2,
+      ),
     );
   });
 
@@ -762,6 +765,39 @@ void main() {
       tester.renderObject(find.byType(FloatingActionButton)),
       paintsExactlyCountTimes(#clipPath, 0),
     );
+  });
+
+  testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(onPressed: () {}),
+    ));
+
+    expect(
+      tester.getSemantics(find.byType(FloatingActionButton)),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+      ),
+    );
+  }, semanticsEnabled: true);
+
+  testWidgets('Foreground color applies to icon on fab', (WidgetTester tester) async {
+    const Color foregroundColor = Color(0xcafefeed);
+
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(
+        onPressed: () {},
+        foregroundColor: foregroundColor,
+        child: const Icon(Icons.access_alarm),
+      ),
+    ));
+
+    final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(Icons.access_alarm), matching: find.byType(RichText)),
+    );
+    expect(iconRichText.text.style.color, foregroundColor);
   });
 }
 

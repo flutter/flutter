@@ -728,4 +728,24 @@ void main() {
     );
     expect(page2.page, 4.0);
   });
+
+  testWidgets('Page controller can handle rounding issue', (WidgetTester tester) async {
+    final PageController pageController = PageController();
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        controller: pageController,
+        children: List<Widget>.generate(3, (int i) {
+          return Semantics(
+            child: Text('Page #$i'),
+            container: true,
+          );
+        }),
+      ),
+    ));
+    // Simulate precision error.
+    pageController.position.jumpTo(799.99999999999);
+    expect(pageController.page, 1);
+  });
 }

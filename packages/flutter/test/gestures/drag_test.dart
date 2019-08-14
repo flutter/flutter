@@ -767,7 +767,7 @@ void main() {
       pan.dispose();
     });
 
-    testGesture('A primary pan recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary pan recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       final TestPointer pointer = TestPointer(
         1,
         PointerDeviceKind.touch,
@@ -783,7 +783,7 @@ void main() {
       expect(recognized, <String>['tapSecondary']);
     });
 
-    testGesture('A primary pan recognizer forms competion with a primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary pan recognizer forms competition with a primary tap recognizer', (GestureTester tester) {
       final TestPointer pointer = TestPointer(
         1,
         PointerDeviceKind.touch,
@@ -805,7 +805,7 @@ void main() {
   testGesture('A secondary drag should not trigger primary', (GestureTester tester) {
     final List<String> recognized = <String>[];
     final TapGestureRecognizer tap = TapGestureRecognizer()
-      ..onTap = () {}; // Need a listener to enable competetion.
+      ..onTap = () {}; // Need a listener to enable competition.
     final PanGestureRecognizer pan = PanGestureRecognizer()
       ..onDown = (DragDownDetails details) {
         recognized.add('primaryDown');

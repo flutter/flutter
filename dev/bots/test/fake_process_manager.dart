@@ -35,8 +35,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   set fakeResults(Map<String, List<ProcessResult>> value) {
     _fakeResults = <String, List<ProcessResult>>{};
     for (String key in value.keys) {
-      _fakeResults[key] = <ProcessResult>[]
-        ..addAll(value[key] ?? <ProcessResult>[ProcessResult(0, 0, '', '')]);
+      _fakeResults[key] = (value[key] ?? <ProcessResult>[ProcessResult(0, 0, '', '')]).toList();
     }
   }
 

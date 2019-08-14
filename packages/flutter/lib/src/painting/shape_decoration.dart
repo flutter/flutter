@@ -10,6 +10,7 @@ import 'box_border.dart';
 import 'box_decoration.dart';
 import 'box_shadow.dart';
 import 'circle_border.dart';
+import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -262,7 +263,7 @@ class ShapeDecoration extends Decoration {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));

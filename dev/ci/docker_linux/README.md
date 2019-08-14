@@ -7,7 +7,7 @@ Google internal environment.
 
 After setup,
 * edit `Dockerfile` to change how the container image is built.
-* run `./build_docker.sh` to build the container image.
-* run `./push_docker.sh` to push the image to google cloud registry. This will
+* run `./docker_build.sh` to build the container image.
+* run `./docker_push.sh` to push the image to google cloud registry. This will
   affect our CI tests.
 

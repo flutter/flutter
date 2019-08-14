@@ -5,12 +5,14 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
+import 'material_localizations.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
 
-const double _kPanelHeaderCollapsedHeight = 48.0;
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
 class _SaltedKey<S, V> extends LocalKey {
@@ -446,7 +448,26 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         context,
         _isChildExpanded(index),
       );
-      final Row header = Row(
+
+      Widget expandIconContainer = Container(
+        margin: const EdgeInsetsDirectional.only(end: 8.0),
+        child: ExpandIcon(
+          isExpanded: _isChildExpanded(index),
+          padding: const EdgeInsets.all(16.0),
+          onPressed: !child.canTapOnHeader
+              ? (bool isExpanded) => _handlePressed(isExpanded, index)
+              : null,
+        ),
+      );
+      if (!child.canTapOnHeader) {
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        expandIconContainer = Semantics(
+          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          container: true,
+          child: expandIconContainer
+        );
+      }
+      Widget header = Row(
         children: <Widget>[
           Expanded(
             child: AnimatedContainer(
@@ -459,32 +480,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsetsDirectional.only(end: 8.0),
-            child: ExpandIcon(
-              isExpanded: _isChildExpanded(index),
-              padding: const EdgeInsets.all(16.0),
-              onPressed: !child.canTapOnHeader
-                ? (bool isExpanded) => _handlePressed(isExpanded, index)
-                : null,
-            ),
-          ),
+          expandIconContainer,
         ],
       );
-
+      if (child.canTapOnHeader) {
+        header = MergeSemantics(
+          child: InkWell(
+            onTap: () => _handlePressed(_isChildExpanded(index), index),
+            child: header,
+          )
+        );
+      }
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
           child: Column(
             children: <Widget>[
-              MergeSemantics(
-                child: child.canTapOnHeader
-                  ? InkWell(
-                  onTap: () => _handlePressed(_isChildExpanded(index), index),
-                  child: header,
-                )
-                  : header,
-              ),
+              header,
               AnimatedCrossFade(
                 firstChild: Container(height: 0.0),
                 secondChild: child.body,

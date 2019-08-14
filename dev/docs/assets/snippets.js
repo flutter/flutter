@@ -57,6 +57,30 @@ function supportsCopying() {
       !!document.queryCommandSupported('copy');
 }
 
+// Copies the given string to the clipboard.
+function copyStringToClipboard(string) {
+  var textArea = document.createElement("textarea");
+  textArea.value = string;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  if (!supportsCopying()) {
+    alert('Unable to copy to clipboard (not supported by browser)');
+    return;
+  }
+
+  try {
+    document.execCommand('copy');
+  } finally {
+    document.body.removeChild(textArea);
+  }
+}
+
+function fixHref(anchor, id) {
+  anchor.href = window.location.href.replace(/#.*$/, '') + '#' + id;
+}
+
 // Copies the text inside the currently visible snippet to the clipboard, or the
 // given element, if any.
 function copyTextToClipboard(element) {

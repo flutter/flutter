@@ -25,7 +25,6 @@ TaskFunction createHotModeTest() {
     final List<String> options = <String>[
       '--hot', '-d', device.deviceId, '--benchmark', '--verbose', '--resident',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     Map<String, dynamic> twoReloadsData;
     Map<String, dynamic> freshRestartReloadsData;
@@ -39,7 +38,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              flutterCommandArgs('run', options),
               environment: null,
           );
 
@@ -93,7 +92,7 @@ TaskFunction createHotModeTest() {
         {
           final Process process = await startProcess(
               path.join(flutterDirectory.path, 'bin', 'flutter'),
-              <String>['run']..addAll(options),
+              flutterCommandArgs('run', options),
               environment: null,
           );
           final Completer<void> stdoutDone = Completer<void>();

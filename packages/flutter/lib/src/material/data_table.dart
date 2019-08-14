@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 
 import 'checkbox.dart';
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'divider.dart';
 import 'dropdown.dart';
@@ -262,11 +263,19 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight = kMinInteractiveDimension,
+    this.headingRowHeight = 56.0,
+    this.horizontalMargin = 24.0,
+    this.columnSpacing = 56.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(dataRowHeight != null),
+       assert(headingRowHeight != null),
+       assert(horizontalMargin != null),
+       assert(columnSpacing != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
@@ -311,8 +320,35 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
 
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value defaults to kMinInteractiveDimension to adhere to the Material
+  /// Design specifications.
+  final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double headingRowHeight;
+
+  /// The horizontal margin between the edges of the table and the content
+  /// in the first and last cells of each row.
+  ///
+  /// When a checkbox is displayed, it is also the margin between the checkbox
+  /// the content in the first data column.
+  ///
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  final double horizontalMargin;
+
+  /// The horizontal margin between the contents of each data column.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double columnSpacing;
+
   /// The data to show in each row (excluding the row that contains
-  /// the column headings). Must be non-null, but may be empty.
+  /// the column headings).
+  ///
+  /// Must be non-null, but may be empty.
   final List<DataRow> rows;
 
   // Set by the constructor to the index of the only Column that is
@@ -349,10 +385,6 @@ class DataTable extends StatelessWidget {
     }
   }
 
-  static const double _headingRowHeight = 56.0;
-  static const double _dataRowHeight = 48.0;
-  static const double _tablePadding = 24.0;
-  static const double _columnSpacing = 56.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
@@ -368,7 +400,7 @@ class DataTable extends StatelessWidget {
     Widget contents = Semantics(
       container: true,
       child: Padding(
-        padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
+        padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
             activeColor: color,
@@ -414,14 +446,14 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _headingRowHeight,
+      height: headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
           // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
           fontSize: _headingFontSize,
-          height: math.min(1.0, _headingRowHeight / _headingFontSize),
+          height: math.min(1.0, headingRowHeight / _headingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
             ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
             : ((onSort != null && sorted) ? Colors.white : Colors.white70),
@@ -467,7 +499,7 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _dataRowHeight,
+      height: dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(
@@ -475,7 +507,7 @@ class DataTable extends StatelessWidget {
           fontSize: 13.0,
           color: isLightTheme
             ? (placeholder ? Colors.black38 : Colors.black87)
-            : (placeholder ? Colors.white30 : Colors.white70),
+            : (placeholder ? Colors.white38 : Colors.white70),
         ),
         child: IconTheme.merge(
           data: IconThemeData(
@@ -533,7 +565,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = const FixedColumnWidth(_tablePadding + Checkbox.width + _tablePadding / 2.0);
+      tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -554,9 +586,26 @@ class DataTable extends StatelessWidget {
 
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
+
+      double paddingStart;
+      if (dataColumnIndex == 0 && showCheckboxColumn) {
+        paddingStart = horizontalMargin / 2.0;
+      } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
+        paddingStart = horizontalMargin;
+      } else {
+        paddingStart = columnSpacing / 2.0;
+      }
+
+      double paddingEnd;
+      if (dataColumnIndex == columns.length - 1) {
+        paddingEnd = horizontalMargin;
+      } else {
+        paddingEnd = columnSpacing / 2.0;
+      }
+
       final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
-        start: dataColumnIndex == 0 ? showCheckboxColumn ? _tablePadding / 2.0 : _tablePadding : _columnSpacing / 2.0,
-        end: dataColumnIndex == columns.length - 1 ? _tablePadding : _columnSpacing / 2.0,
+        start: paddingStart,
+        end: paddingEnd,
       );
       if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);
@@ -569,7 +618,7 @@ class DataTable extends StatelessWidget {
         label: column.label,
         tooltip: column.tooltip,
         numeric: column.numeric,
-        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex == dataColumnIndex ? !sortAscending : true) : null,
+        onSort: () => column.onSort != null ? column.onSort(dataColumnIndex, sortColumnIndex != dataColumnIndex || !sortAscending) : null,
         sorted: dataColumnIndex == sortColumnIndex,
         ascending: sortAscending,
       );

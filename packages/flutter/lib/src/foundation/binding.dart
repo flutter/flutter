@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-// Before adding any more dart:ui imports, pleaes read the README.
 import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+// Before adding any more dart:ui imports, please read the README.
 
 import 'package:meta/meta.dart';
 
@@ -132,7 +132,7 @@ abstract class BindingBase {
       return true;
     }());
 
-    if (!kReleaseMode) {
+    if (!kReleaseMode && !kIsWeb) {
       registerSignalServiceExtension(
         name: 'exit',
         callback: _exitApplication,

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // flaky on CI
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -360,4 +361,91 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
     semantics.dispose();
   });
+
+  testWidgets('showModalBottomSheet does not use root Navigator by default', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
+          return const _TestPage();
+        })),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Item 1'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.style),
+              title: Text('Item 2'),
+            )
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Show bottom sheet'));
+    await tester.pumpAndSettle();
+
+    // Bottom sheet is displayed in correct position within the inner navigator
+    // and above the BottomNavigationBar.
+    expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 544.0);
+  });
+
+  testWidgets('showModalBottomSheet uses root Navigator when specified', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: Navigator(onGenerateRoute: (RouteSettings settings) => MaterialPageRoute<void>(builder: (_) {
+          return const _TestPage(useRootNavigator: true);
+        })),
+        bottomNavigationBar: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.ac_unit),
+              title: Text('Item 1'),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.style),
+              title: Text('Item 2'),
+            )
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Show bottom sheet'));
+    await tester.pumpAndSettle();
+
+    // Bottom sheet is displayed in correct position above all content including
+    // the BottomNavigationBar.
+    expect(tester.getBottomLeft(find.byType(BottomSheet)).dy, 600.0);
+  });
+}
+
+class _TestPage extends StatelessWidget {
+  const _TestPage({Key key, this.useRootNavigator}) : super(key: key);
+
+  final bool useRootNavigator;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: FlatButton(
+        child: const Text('Show bottom sheet'),
+        onPressed: () {
+          if (useRootNavigator != null) {
+            showModalBottomSheet<void>(
+              useRootNavigator: useRootNavigator,
+              context: context,
+              builder: (_) => const Text('Modal bottom sheet'),
+            );
+          } else {
+            showModalBottomSheet<void>(
+              context: context,
+              builder: (_) => const Text('Modal bottom sheet'),
+            );
+          }
+        }
+      ),
+    );
+  }
 }

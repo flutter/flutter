@@ -16,6 +16,8 @@ part of material_animated_icons;
 ///
 /// The available icons are specified in [AnimatedIcons].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=pJcbh8pbvJs}
+///
 /// {@tool sample}
 ///
 /// ```dart

@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
@@ -15,8 +16,8 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-// See: <https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size>
-const double _kMinButtonSize = 48.0;
+// See: <https://material.io/design/usability/accessibility.html#layout-typography>.
+const double _kMinButtonSize = kMinInteractiveDimension;
 
 /// A material design icon button.
 ///
@@ -31,9 +32,9 @@ const double _kMinButtonSize = 48.0;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// The hit region of an icon button will, if possible, be at least 48.0 pixels
-/// in size, regardless of the actual [iconSize], to satisfy the [touch target
-/// size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
+/// The hit region of an icon button will, if possible, be at least
+/// kMinInteractiveDimension pixels in size, regardless of the actual
+/// [iconSize], to satisfy the [touch target size](https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-touch-target-size)
 /// requirements in the Material Design specification. The [alignment] controls
 /// how the icon itself is positioned within the hit region.
 ///
@@ -334,12 +335,12 @@ class IconButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }

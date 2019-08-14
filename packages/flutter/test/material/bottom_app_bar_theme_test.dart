@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -82,10 +80,12 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'bottom_app_bar_theme.custom_shape.png',
+        version: null,
+      ),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(

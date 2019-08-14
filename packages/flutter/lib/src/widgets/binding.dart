@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures;
+import 'dart:ui' show AppLifecycleState, Locale, AccessibilityFeatures, FrameTiming, TimingsCallback;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -256,6 +256,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     window.onAccessibilityFeaturesChanged = handleAccessibilityFeaturesChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
+    FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -299,6 +300,20 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             // Devtools, the Intellij plugin, and the flutter tool all depend
             // on it returning a string and not a boolean.
             'enabled': _needToReportFirstFrame ? 'false' : 'true',
+          };
+        },
+      );
+
+      // This returns 'true' when the first frame is rasterized, and the trace
+      // event 'Rasterized first useful frame' is sent out.
+      registerServiceExtension(
+        name: 'didSendFirstFrameRasterizedEvent',
+        callback: (_) async {
+          return <String, dynamic>{
+            // This is defined to return a STRING, not a boolean.
+            // Devtools, the Intellij plugin, and the flutter tool all depend
+            // on it returning a string and not a boolean.
+            'enabled': firstFrameRasterized ? 'true' : 'false',
           };
         },
       );
@@ -549,7 +564,30 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   int _deferFirstFrameReportCount = 0;
   bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
-  /// Whether the first frame has finished rendering.
+
+  final Completer<void> _firstFrameCompleter = Completer<void>();
+
+  /// Whether the Flutter engine has rasterized the first frame.
+  ///
+  /// {@macro flutter.frame_rasterized_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [waitUntilFirstFrameRasterized], the future when [firstFrameRasterized]
+  ///    becomes true.
+  bool get firstFrameRasterized => _firstFrameCompleter.isCompleted;
+
+  /// A future that completes when the Flutter engine has rasterized the first
+  /// frame.
+  ///
+  /// {@macro flutter.frame_rasterize_vs_presented}
+  ///
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether this future has completed or not.
+  Future<void> get waitUntilFirstFrameRasterized => _firstFrameCompleter.future;
+
+  /// Whether the first frame has finished building.
   ///
   /// Only useful in profile and debug builds; in release builds, this always
   /// return false. This can be deferred using [deferFirstFrameReport] and
@@ -558,6 +596,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
   ///
   /// This value can also be obtained over the VM service protocol as
   /// `ext.flutter.didSendFirstFrameEvent`.
+  ///
+  /// See also:
+  ///
+  ///  * [firstFrameRasterized], whether the first frame has finished rendering.
   bool get debugDidSendFirstFrameEvent => !_needToReportFirstFrame;
 
   /// Tell the framework not to report the frame it is building as a "useful"
@@ -695,6 +737,24 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       debugBuildingDirtyElements = true;
       return true;
     }());
+
+    if (_needToReportFirstFrame && _reportFirstFrame) {
+      assert(!_firstFrameCompleter.isCompleted);
+      // TODO(liyuqian): use a broadcast stream approach
+      final TimingsCallback oldCallback = WidgetsBinding.instance.window.onReportTimings;
+      WidgetsBinding.instance.window.onReportTimings = (List<FrameTiming> timings) {
+        if (!kReleaseMode) {
+          developer.Timeline.instantSync('Rasterized first useful frame');
+          developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+        }
+        if (oldCallback != null) {
+          oldCallback(timings);
+        }
+        WidgetsBinding.instance.window.onReportTimings = oldCallback;
+        _firstFrameCompleter.complete();
+      };
+    }
+
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
@@ -708,11 +768,10 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     }
     if (!kReleaseMode) {
       if (_needToReportFirstFrame && _reportFirstFrame) {
-        developer.Timeline.instantSync('Widgets completed first useful frame');
-        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-        _needToReportFirstFrame = false;
+        developer.Timeline.instantSync('Widgets built first useful frame');
       }
     }
+    _needToReportFirstFrame = false;
   }
 
   /// The [Element] that is at the root of the hierarchy (and which wraps the
@@ -735,6 +794,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
+
+  /// Whether the [renderViewElement] has been initialized.
+  ///
+  /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
+  /// is called in the context of a [TestWidgetsFlutterBinding]).
+  bool get isRootWidgetAttached => _renderViewElement != null;
 
   @override
   Future<void> performReassemble() {

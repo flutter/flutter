@@ -19,18 +19,17 @@ class ColdRunner extends ResidentRunner {
     List<FlutterDevice> devices, {
     String target,
     DebuggingOptions debuggingOptions,
-    bool usesTerminalUI = true,
     this.traceStartup = false,
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
-    bool saveCompilationTrace = false,
-    bool stayResident = true,
     bool ipv6 = false,
+    bool usesTerminalUi = false,
+    bool stayResident = true,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI,
-             saveCompilationTrace: saveCompilationTrace,
+             hotMode: false,
+             usesTerminalUi: usesTerminalUi,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -40,11 +39,16 @@ class ColdRunner extends ResidentRunner {
   bool _didAttach = false;
 
   @override
+  bool get canHotReload => false;
+
+  @override
+  bool get canHotRestart => false;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
     String route,
-    bool shouldBuild = true,
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
@@ -61,7 +65,6 @@ class ColdRunner extends ResidentRunner {
       final int result = await device.runCold(
         coldRunner: this,
         route: route,
-        shouldBuild: shouldBuild,
       );
       if (result != 0)
         return result;
@@ -106,9 +109,6 @@ class ColdRunner extends ResidentRunner {
         );
       }
       appFinished();
-    } else if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
     }
 
     appStartedCompleter?.complete();
@@ -129,6 +129,13 @@ class ColdRunner extends ResidentRunner {
       await connectToServiceProtocol();
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
+      // https://github.com/flutter/flutter/issues/33050
+      // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
+      if (await hasDeviceRunningAndroidQ(flutterDevices) &&
+          error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
+        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
+      }
       return 2;
     }
     for (FlutterDevice device in flutterDevices) {
@@ -140,10 +147,6 @@ class ColdRunner extends ResidentRunner {
         printTrace('Connected to $view.');
       }
     }
-    if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
-    }
     appStartedCompleter?.complete();
     if (stayResident) {
       return waitForAppToFinish();
@@ -153,17 +156,12 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> handleTerminalCommand(String code) async { }
-
-  @override
   Future<void> cleanupAfterSignal() async {
     await stopEchoingDeviceLog();
     if (_didAttach) {
       appFinished();
-    } else {
-      await stopApp();
     }
-    await stopApp();
+    await exitApp();
   }
 
   @override
@@ -195,9 +193,6 @@ class ColdRunner extends ResidentRunner {
       ? 'To detach, press "d"; to quit, press "q".'
       : 'To quit, press "q".';
     if (haveDetails && !details) {
-      if (saveCompilationTrace) {
-        printStatus('Compilation training data will be saved when flutter run quits...');
-      }
       printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
       printStatus('To repeat this help message, press "h". $quitMessage');
@@ -207,7 +202,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> preStop() async {
+  Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

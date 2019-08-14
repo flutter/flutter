@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink, ProcessSignal;
+import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -35,6 +35,18 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
     ),
     iOS: BuildableIOSApp(MockIosProject())
   );
+}
+
+class MockApplicationPackageFactory extends Mock implements ApplicationPackageFactory {
+  final MockApplicationPackageStore _store = MockApplicationPackageStore();
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
+    return _store.getPackageForPlatform(platform);
+  }
 }
 
 /// An SDK installation with several SDK levels (19, 22, 23).
@@ -140,11 +152,12 @@ typedef ProcessFactory = Process Function(List<String> command);
 /// A ProcessManager that starts Processes by delegating to a ProcessFactory.
 class MockProcessManager implements ProcessManager {
   ProcessFactory processFactory = (List<String> commands) => MockProcess();
-  bool succeed = true;
+  bool canRunSucceeds = true;
+  bool runSucceeds = true;
   List<String> commands;
 
   @override
-  bool canRun(dynamic command, { String workingDirectory }) => succeed;
+  bool canRun(dynamic command, { String workingDirectory }) => canRunSucceeds;
 
   @override
   Future<Process> start(
@@ -155,7 +168,7 @@ class MockProcessManager implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
-    if (!succeed) {
+    if (!runSucceeds) {
       final String executable = command[0];
       final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
@@ -342,17 +355,56 @@ class MemoryIOSink implements IOSink {
   Future<void> flush() async { }
 }
 
+class MemoryStdout extends MemoryIOSink implements io.Stdout {
+  @override
+  bool get hasTerminal => _hasTerminal;
+  set hasTerminal(bool value) {
+    assert(value != null);
+    _hasTerminal = value;
+  }
+  bool _hasTerminal = true;
+
+  @override
+  io.IOSink get nonBlocking => this;
+
+  @override
+  bool get supportsAnsiEscapes => _supportsAnsiEscapes;
+  set supportsAnsiEscapes(bool value) {
+    assert(value != null);
+    _supportsAnsiEscapes = value;
+  }
+  bool _supportsAnsiEscapes = true;
+
+  @override
+  int get terminalColumns {
+    if (_terminalColumns != null)
+      return _terminalColumns;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalColumns(int value) => _terminalColumns = value;
+  int _terminalColumns;
+
+  @override
+  int get terminalLines {
+    if (_terminalLines != null)
+      return _terminalLines;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalLines(int value) => _terminalLines = value;
+  int _terminalLines;
+}
+
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
-  final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryStdout _stdout = MemoryStdout();
   final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
-  IOSink get stdout => _stdout;
+  MemoryStdout get stdout => _stdout;
 
   @override
-  IOSink get stderr => _stderr;
+  MemoryIOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
@@ -533,4 +585,29 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
     fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
+}
+
+/// A fake implementation of [ProcessResult].
+class FakeProcessResult implements ProcessResult {
+  FakeProcessResult({
+    this.exitCode = 0,
+    this.pid = 1,
+    this.stderr,
+    this.stdout,
+  });
+
+  @override
+  final int exitCode;
+
+  @override
+  final int pid;
+
+  @override
+  final dynamic stderr;
+
+  @override
+  final dynamic stdout;
+
+  @override
+  String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
 }

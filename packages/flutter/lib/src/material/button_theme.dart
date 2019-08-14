@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'flat_button.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'outline_button.dart';
 import 'raised_button.dart';
 import 'theme.dart';
@@ -467,22 +468,21 @@ class ButtonThemeData extends Diagnosticable {
     return button.textTheme ?? textTheme;
   }
 
-  Color _getDisabledColor(MaterialButton button) {
-    return getBrightness(button) == Brightness.dark
-      ? colorScheme.onSurface.withOpacity(0.30)  // default == Colors.white30
-      : colorScheme.onSurface.withOpacity(0.38); // default == Colors.black38;
-  }
-
   /// The foreground color of the [button]'s text and icon when
   /// [MaterialButton.onPressed] is null (when MaterialButton.enabled is false).
   ///
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
+  ///
+  /// If [MaterialButton.textColor] is a [MaterialStateProperty<Color>], it will be
+  /// used as the `disabledTextColor`. It will be resolved in the [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
+    if (button.textColor is MaterialStateProperty<Color>)
+      return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The [button]'s background color when [MaterialButton.onPressed] is null
@@ -494,13 +494,13 @@ class ButtonThemeData extends Diagnosticable {
   /// is returned, if it is non-null.
   ///
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
-  /// with its opacity set to 0.3 if [getBrightness] is dark, 0.38 otherwise.
+  /// with its opacity set to 0.38.
   Color getDisabledFillColor(MaterialButton button) {
     if (button.disabledColor != null)
       return button.disabledColor;
     if (_disabledColor != null)
       return _disabledColor;
-    return _getDisabledColor(button);
+    return colorScheme.onSurface.withOpacity(0.38);
   }
 
   /// The button's background fill color or null for buttons that don't have
@@ -562,10 +562,11 @@ class ButtonThemeData extends Diagnosticable {
   /// Otherwise the text color depends on the value of [getTextTheme]
   /// and [getBrightness].
   ///
-  ///  * [ButtonTextTheme.normal], [Colors.white] if [getBrightness] is dark,
-  ///    otherwise [Colors.black87].
-  ///  * ButtonTextTheme.accent], [colorScheme.secondary].
-  ///  * [ButtonTextTheme.primary], if [getFillColor] is dark then [Colors.white],
+  ///  * [ButtonTextTheme.normal]: [Colors.white] is used if [getBrightness]
+  ///    resolves to [Brightness.dark]. [Colors.black87] is used if
+  ///    [getBrightness] resolves to [Brightness.light].
+  ///  * [ButtonTextTheme.accent]: [colorScheme.secondary].
+  ///  * [ButtonTextTheme.primary]: If [getFillColor] is dark then [Colors.white],
   ///    otherwise if [button] is a [FlatButton] or an [OutlineButton] then
   ///    [colorScheme.primary], otherwise [Colors.black].
   Color getTextColor(MaterialButton button) {
@@ -918,12 +919,12 @@ class ButtonThemeData extends Diagnosticable {
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
     ));
-    properties.add(DiagnosticsProperty<Color>('buttonColor', _buttonColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', _disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', _focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', _hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', _highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', _splashColor, defaultValue: null));
+    properties.add(ColorProperty('buttonColor', _buttonColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', _disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', _focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', _hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', _highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', _splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', _materialTapTargetSize, defaultValue: null));
   }

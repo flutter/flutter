@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -466,7 +467,7 @@ class AndroidViewController {
   /// Android's [MotionEvent.ACTION_MOVE](https://developer.android.com/reference/android/view/MotionEvent#ACTION_MOVE)
   static const int kActionMove = 2;
 
-  /// Action code for when a motion event has been cancelled.
+  /// Action code for when a motion event has been canceled.
   ///
   /// Android's [MotionEvent.ACTION_CANCEL](https://developer.android.com/reference/android/view/MotionEvent#ACTION_CANCEL)
   static const int kActionCancel = 3;
@@ -505,9 +506,9 @@ class AndroidViewController {
 
   _AndroidViewState _state;
 
-  dynamic _creationParams;
+  final dynamic _creationParams;
 
-  MessageCodec<dynamic> _creationParamsCodec;
+  final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
@@ -581,6 +582,14 @@ class AndroidViewController {
       'id': id,
       'direction': _getAndroidDirection(layoutDirection),
     });
+  }
+
+  /// Clears the focus from the Android View if it is focused.
+  Future<void> clearFocus() {
+    if (_state != _AndroidViewState.created) {
+      return null;
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
   }
 
   static int _getAndroidDirection(TextDirection direction) {
@@ -704,4 +713,20 @@ class UiKitViewController {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
+}
+
+/// An interface for a controlling a single platform view.
+///
+/// Used by [PlatformViewSurface] to interface with the platform view it embeds.
+abstract class PlatformViewController {
+
+  /// The viewId associated with this controller.
+  ///
+  /// The viewId should always be unique and non-negative. And it must not be null.
+  ///
+  /// See also [PlatformViewRegistry] which is a helper for managing platform view ids.
+  int get viewId;
+
+  /// Dispatches the `event` to the platform view.
+  void dispatchPointerEvent(PointerEvent event);
 }

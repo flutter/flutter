@@ -242,8 +242,6 @@ class Colors {
 
   /// Black with 45% opacity.
   ///
-  /// Used for disabled icons.
-  ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
   /// See also:
@@ -254,7 +252,9 @@ class Colors {
 
   /// Black with 38% opacity.
   ///
-  /// Used for the placeholder text in data tables in light themes.
+  /// For light themes, i.e. when the Theme's [ThemeData.brightness] is
+  /// [Brightness.light], this color is used for disabled icons and for
+  /// placeholder text in [DataTable].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.blacks.png)
   ///
@@ -303,7 +303,7 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white70, white30, white12, white10], which are variants on this color
+  ///  * [white70, white60, white54, white38, white30, white12, white10], which are variants on this color
   ///    but with different opacities.
   ///  * [black], a solid black color.
   ///  * [transparent], a fully-transparent color.
@@ -320,11 +320,14 @@ class Colors {
   ///  * [Typography.white], which uses this color for its text styles.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white30, white12, white10], which are variants on this color
+  ///  * [white, white60, white54, white38, white30, white12, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white70 = Color(0xB3FFFFFF);
 
-  /// White with 54% opacity.
+  /// White with 60% opacity.
+  ///
+  /// Used for medium-emphasis text and hint text when [Theme.brightness] is
+  /// set to [Brightness.dark].
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
   ///
@@ -333,11 +336,23 @@ class Colors {
   ///  * [ExpandIcon], which uses this color for dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white30, white12, white10], which are variants on this color
+  ///  * [white, white54, white30, white38, white12, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white60 = Color(0x99FFFFFF);
+
+  /// White with 54% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
+  ///
+  /// See also:
+  ///
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [white, white60, white38, white30, white12, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white54 = Color(0x8AFFFFFF);
 
-  /// White with 32% opacity.
+  /// White with 38% opacity.
   ///
   /// Used for disabled radio buttons and the text of disabled flat buttons in dark themes.
   ///
@@ -348,7 +363,19 @@ class Colors {
   ///  * [ThemeData.disabledColor], which uses this color by default in dark themes.
   ///  * [Theme.of], which allows you to select colors from the current theme
   ///    rather than hard-coding colors in your build methods.
-  ///  * [white, white70, white12, white10], which are variants on this color
+  ///  * [white, white60, white54, white70, white30, white12, white10], which are variants on this color
+  ///    but with different opacities.
+  static const Color white38 = Color(0x62FFFFFF);
+
+  /// White with 30% opacity.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/Colors.whites.png)
+  ///
+  /// See also:
+  ///
+  ///  * [Theme.of], which allows you to select colors from the current theme
+  ///    rather than hard-coding colors in your build methods.
+  ///  * [white, white60, white54, white70, white38, white12, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white30 = Color(0x4DFFFFFF);
 
@@ -360,7 +387,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white70, white30, white10], which are variants on this color
+  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white24 = Color(0x3DFFFFFF);
 
@@ -372,7 +399,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white70, white30, white10], which are variants on this color
+  ///  * [white, white60, white54, white70, white38, white30, white10], which are variants on this color
   ///    but with different opacities.
   static const Color white12 = Color(0x1FFFFFFF);
 
@@ -382,7 +409,7 @@ class Colors {
   ///
   /// See also:
   ///
-  ///  * [white, white70, white30, white12], which are variants on this color
+  ///  * [white, white60, white54, white70, white38, white30, white12], which are variants on this color
   ///    but with different opacities.
   ///  * [transparent], a fully-transparent color, not far from this one.
   static const Color white10 = Color(0x1AFFFFFF);

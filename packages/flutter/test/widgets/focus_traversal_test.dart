@@ -8,6 +8,44 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   group(WidgetOrderFocusTraversalPolicy, () {
+    testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: WidgetOrderFocusTraversalPolicy(),
+        child: FocusScope(
+          key: key1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                key: key2,
+                child: Container(key: key3, width: 100, height: 100),
+              ),
+              Focus(
+                key: key4,
+                child: Container(key: key5, width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final Element secondChild = tester.element(find.byKey(key5));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+      secondFocusNode.nextFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(secondFocusNode.hasFocus, isFalse);
+      expect(scope.hasFocus, isTrue);
+    });
     testWidgets('Move focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -199,6 +237,44 @@ void main() {
     });
   });
   group(ReadingOrderTraversalPolicy, () {
+    testWidgets('Find the initial focus if there is none yet.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final GlobalKey key3 = GlobalKey(debugLabel: '3');
+      final GlobalKey key4 = GlobalKey(debugLabel: '4');
+      final GlobalKey key5 = GlobalKey(debugLabel: '5');
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: ReadingOrderTraversalPolicy(),
+        child: FocusScope(
+          key: key1,
+          child: Column(
+            children: <Widget>[
+              Focus(
+                key: key2,
+                child: Container(key: key3, width: 100, height: 100),
+              ),
+              Focus(
+                key: key4,
+                child: Container(key: key5, width: 100, height: 100),
+              ),
+            ],
+          ),
+        ),
+      ));
+
+      final Element firstChild = tester.element(find.byKey(key3));
+      final Element secondChild = tester.element(find.byKey(key5));
+      final FocusNode firstFocusNode = Focus.of(firstChild);
+      final FocusNode secondFocusNode = Focus.of(secondChild);
+      final FocusNode scope = Focus.of(firstChild).enclosingScope;
+      secondFocusNode.nextFocus();
+
+      await tester.pump();
+
+      expect(firstFocusNode.hasFocus, isTrue);
+      expect(secondFocusNode.hasFocus, isFalse);
+      expect(scope.hasFocus, isTrue);
+    });
     testWidgets('Move reading focus to next node.', (WidgetTester tester) async {
       final GlobalKey key1 = GlobalKey(debugLabel: '1');
       final GlobalKey key2 = GlobalKey(debugLabel: '2');
@@ -722,6 +798,56 @@ void main() {
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.down), equals(upperLeftNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.left), equals(upperRightNode));
       expect(policy.findFirstFocusInDirection(scope, TraversalDirection.right), equals(upperLeftNode));
+    });
+    testWidgets('Can find focus when policy data dirty', (WidgetTester tester) async {
+      final FocusNode focusTop = FocusNode(debugLabel: 'top');
+      final FocusNode focusCenter = FocusNode(debugLabel: 'center');
+      final FocusNode focusBottom = FocusNode(debugLabel: 'bottom');
+
+      final FocusTraversalPolicy policy = ReadingOrderTraversalPolicy();
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: policy,
+        child: FocusScope(
+          debugLabel: 'Scope',
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusCenter, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+            ],
+          ),
+        ),
+      ));
+
+      focusTop.requestFocus();
+      final FocusNode scope = focusTop.enclosingScope;
+
+      scope.focusInDirection(TraversalDirection.down);
+      scope.focusInDirection(TraversalDirection.down);
+
+      await tester.pump();
+      expect(focusBottom.hasFocus, isTrue);
+
+      // Remove center focus node.
+      await tester.pumpWidget(DefaultFocusTraversal(
+        policy: policy,
+        child: FocusScope(
+          debugLabel: 'Scope',
+          child: Column(
+            children: <Widget>[
+              Focus(focusNode: focusTop, child: Container(width: 100, height: 100)),
+              Focus(focusNode: focusBottom, child: Container(width: 100, height: 100)),
+            ],
+          ),
+        ),
+      ));
+
+      expect(focusBottom.hasFocus, isTrue);
+      scope.focusInDirection(TraversalDirection.up);
+      await tester.pump();
+
+      expect(focusCenter.hasFocus, isFalse);
+      expect(focusTop.hasFocus, isTrue);
     });
   });
 }

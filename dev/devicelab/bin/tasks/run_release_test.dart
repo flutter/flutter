@@ -54,9 +54,14 @@ void main() {
         throw 'flutter run --release had output on standard error.';
       if (stdout.first.startsWith('Building flutter tool...'))
         stdout.removeAt(0);
-      if (stdout.first.startsWith('Running "flutter packages get" in ui...'))
+      if (stdout.first.startsWith('Running "flutter pub get" in ui...'))
         stdout.removeAt(0);
       if (stdout.first.startsWith('Initializing gradle...'))
+        stdout.removeAt(0);
+      // TODO(blasten): Remove this and the one below once the migration to AAR is completed.
+      if (stdout.first.contains('settings_aar.gradle'))
+        stdout.removeAt(0);
+      if (stdout.first.contains('settings_aar.gradle'))
         stdout.removeAt(0);
       if (stdout.first.startsWith('Resolving dependencies...'))
         stdout.removeAt(0);

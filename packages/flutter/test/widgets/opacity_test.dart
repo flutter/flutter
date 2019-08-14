@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -179,10 +177,12 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('opacity_test.offset.1.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile(
+        'opacity_test.offset.png',
+        version: 1,
+      ),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -192,5 +192,5 @@ void main() {
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
     await element.renderObject.layer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  });
+  }, skip: isBrowser);
 }

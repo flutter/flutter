@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -66,14 +68,25 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
       if (index == 0 || index == columnWidths.length - 1)
         childWidth += remainingWidth / 2;
 
-      assert(
-        childWidth >= 0,
-        'Insufficient horizontal space to render the CupertinoDatePicker '
-        'because the parent is too narrow at ${size.width}px.\n'
-        'An additional ${-remainingWidth}px is needed to avoid overlapping '
-        'columns.',
-      );
-      layoutChild(index, BoxConstraints.tight(Size(childWidth, size.height)));
+      // We can't actually assert here because it would break things badly for
+      // semantics, which will expect that we laid things out here.
+      assert(() {
+        if (childWidth < 0) {
+          FlutterError.reportError(
+            FlutterErrorDetails(
+              exception: FlutterError(
+                'Insufficient horizontal space to render the '
+                'CupertinoDatePicker because the parent is too narrow at '
+                '${size.width}px.\n'
+                'An additional ${-remainingWidth}px is needed to avoid '
+                'overlapping columns.',
+              ),
+            ),
+          );
+        }
+        return true;
+      }());
+      layoutChild(index, BoxConstraints.tight(Size(math.max(0.0, childWidth), size.height)));
       positionChild(index, Offset(currentHorizontalOffset, 0.0));
 
       currentHorizontalOffset += childWidth;

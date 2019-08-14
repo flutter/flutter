@@ -21,7 +21,7 @@ the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
 We also have post-commit testing with actual devices, in what we call our
 [devicelab](../devicelab/README.md).
 
-## LUCI (Layered Universal Continuous Intergration)
+## LUCI (Layered Universal Continuous Integration)
 
 A [set of recipes](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter)
 are run on Windows, Linux, and Mac machines. The configuration for how many
@@ -190,3 +190,38 @@ not a direct result of changes made in your PR or that breaking this
 test is absolutely necessary, escalate this issue by [submitting an
 issue](https://github.com/material-components/material-components-flutter-codelabs/issues/new?title=%5BURGENT%5D%20Flutter%20Framework%20breaking%20PR)
 to the MDC-Flutter Team.
+
+## Unpublishing published archives
+
+Flutter downloadable archives are built for each release by our continuous
+integration systems using the [`prepare_package.dart`](prepare_package.dart)
+script, but if something goes very wrong, and a release is published that wasn't
+intended to be published, the [`unpublish_package.dart`](unpublish_package.dart)
+script may be used to remove the package or packages from the channels in which
+they were published.
+
+For example To remove a published package corresponding to the git hash
+`d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to
+see what it will do:
+
+```
+$ dart ./unpublish_package.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```
+
+And once you've verified the output of the dry run to be sure it is what you
+want to do, run:
+
+```
+$ dart ./unpublish_package.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
+```
+
+and it will actually perform the actions. You will of course need to have access
+to the cloud storage server and have gsutil installed in order to perform this
+operation. Only runs on Linux or macOS systems.
+
+See `dart ./unpublish_package.dart --help` for more details.
+
+Once the package is unpublished, it will not be available from the website for
+download, and will not be rebuilt (even though there is a tagged revision in the
+repo still) unless someone forces the packaging build to run again at that
+revision to rebuild the package.

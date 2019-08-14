@@ -5,7 +5,7 @@ set -e
 cd "$(dirname "$0")"
 
 pushd flutterapp
-../../../../bin/flutter build ios --debug --no-codesign -v
+../../../../bin/flutter build ios --debug --simulator --no-codesign
 popd
 
 pod install

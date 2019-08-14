@@ -2,18 +2,31 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../convert.dart';
 import '../devfs.dart';
+import '../globals.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 
-import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
+import 'fuchsia_sdk.dart';
+
+Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
+  final Stopwatch sw = Stopwatch()..start();
+  await action();
+  printTrace('$name: ${sw.elapsedMilliseconds} ms.');
+  flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
+}
 
 // Building a Fuchsia package has a few steps:
 // 1. Do the custom kernel compile using the kernel compiler from the Fuchsia
@@ -30,10 +43,13 @@ Future<void> buildFuchsia(
     outDir.createSync(recursive: true);
   }
 
-  await fuchsiaKernelCompiler.build(
-      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo);
-  await _buildAssets(fuchsiaProject, target, buildInfo);
-  await _buildPackage(fuchsiaProject, target, buildInfo);
+  await _timedBuildStep('fuchsia-kernel-compile',
+    () => fuchsiaSdk.fuchsiaKernelCompiler.build(
+      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo));
+  await _timedBuildStep('fuchsia-build-assets',
+    () => _buildAssets(fuchsiaProject, target, buildInfo));
+  await _timedBuildStep('fuchsia-build-package',
+    () => _buildPackage(fuchsiaProject, target, buildInfo));
 }
 
 Future<void> _buildAssets(
@@ -67,6 +83,31 @@ Future<void> _buildAssets(
   await outFile.close();
 }
 
+void _rewriteCmx(BuildMode mode, File src, File dst) {
+  final Map<String, dynamic> cmx = json.decode(src.readAsStringSync());
+  // If the app author has already specified the runner in the cmx file, then
+  // do not override it with something else.
+  if (cmx.containsKey('runner')) {
+    dst.writeAsStringSync(json.encode(cmx));
+    return;
+  }
+  String runner;
+  switch (mode) {
+    case BuildMode.debug:
+    case BuildMode.profile:
+      runner = 'flutter_jit_runner';
+      break;
+    case BuildMode.release:
+      runner = 'flutter_jit_product_runner';
+      break;
+    default:
+      throwToolExit('Fuchsia does not support build mode "$mode"');
+      break;
+  }
+  cmx['runner'] = 'fuchsia-pkg://fuchsia.com/$runner#meta/$runner.cmx';
+  dst.writeAsStringSync(json.encode(cmx));
+}
+
 // TODO(zra): Allow supplying a signing key.
 Future<void> _buildPackage(
     FuchsiaProject fuchsiaProject,
@@ -85,17 +126,22 @@ Future<void> _buildPackage(
     pkg.createSync(recursive: true);
   }
 
+  final File srcCmx =
+      fs.file(fs.path.join(fuchsiaProject.meta.path, '$appName.cmx'));
+  final File dstCmx = fs.file(fs.path.join(outDir, '$appName.cmx'));
+  _rewriteCmx(buildInfo.mode, srcCmx, dstCmx);
+
   // Concatenate dilpmanifest and pkgassets into package_manifest.
   final File manifestFile = fs.file(packageManifest);
   manifestFile.writeAsStringSync(fs.file(dilpmanifest).readAsStringSync());
   manifestFile.writeAsStringSync(fs.file(pkgassets).readAsStringSync(),
       mode: FileMode.append);
-  manifestFile.writeAsStringSync(
-      'meta/$appName.cmx=${fuchsiaProject.meta.path}/$appName.cmx\n',
+  manifestFile.writeAsStringSync('meta/$appName.cmx=${dstCmx.path}\n',
       mode: FileMode.append);
   manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
       mode: FileMode.append);
 
+  final FuchsiaPM fuchsiaPM = fuchsiaSdk.fuchsiaPM;
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;
   }
