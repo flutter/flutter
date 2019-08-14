@@ -63,7 +63,7 @@ enum ButtonBarLayoutBehavior {
 ///    based on the ambient button theme.
 ///  * [RawMaterialButton], which can be used to configure a button that doesn't
 ///    depend on any inherited themes.
-class ButtonTheme extends InheritedWidget {
+class ButtonTheme extends InheritedTheme {
   /// Creates a button theme.
   ///
   /// The [textTheme], [minWidth], [height], and [colorScheme] arguments
@@ -228,6 +228,29 @@ class ButtonTheme extends InheritedWidget {
       }
     }
     return buttonTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ButtonTheme ancestorTheme = context.ancestorWidgetOfExactType(ButtonTheme);
+    return identical(this, ancestorTheme) ? child : ButtonTheme(
+      textTheme: data.textTheme,
+      layoutBehavior: data.layoutBehavior,
+      minWidth: data.minWidth,
+      height: data.height,
+      padding: data._padding,
+      shape: data._shape,
+      alignedDropdown: data.alignedDropdown,
+      buttonColor: data._buttonColor,
+      disabledColor: data._disabledColor,
+      focusColor: data._focusColor,
+      hoverColor: data._hoverColor,
+      highlightColor: data._highlightColor,
+      splashColor: data._splashColor,
+      colorScheme: data.colorScheme,
+      materialTapTargetSize: data._materialTapTargetSize,
+      child: child,
+    );
   }
 
   @override

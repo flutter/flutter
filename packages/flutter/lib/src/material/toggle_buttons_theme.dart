@@ -213,7 +213,7 @@ class ToggleButtonsThemeData extends Diagnosticable {
 ///
 /// Values specified here are used for [ToggleButtons] properties that are not
 /// given an explicit non-null value.
-class ToggleButtonsTheme extends InheritedWidget {
+class ToggleButtonsTheme extends InheritedTheme {
   /// Creates a toggle buttons theme that controls the color and border
   /// parameters for [ToggleButtons].
   ///
@@ -240,6 +240,12 @@ class ToggleButtonsTheme extends InheritedWidget {
   static ToggleButtonsThemeData of(BuildContext context) {
     final ToggleButtonsTheme toggleButtonsTheme = context.inheritFromWidgetOfExactType(ToggleButtonsTheme);
     return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ToggleButtonsTheme ancestorTheme = context.ancestorWidgetOfExactType(ToggleButtonsTheme);
+    return identical(this, ancestorTheme) ? child : ToggleButtonsTheme(data: data, child: child);
   }
 
   @override
