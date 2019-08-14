@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -431,14 +431,6 @@ class TextPainter {
         ..layout(const ui.ParagraphConstraints(width: double.infinity));
     }
     return _layoutTemplate.height;
-  }
-
-  double _firstLineHeight;
-  double getRealFirstLineHeight() {
-    assert(!_needsLayout);
-    List<TextBox> boxes = _paragraph.getBoxesForRange(0, 1, boxHeightStyle: BoxHeightStyle.max);
-    if (!boxes.isEmpty())
-      return boxes[0].bottom - boxes[0].top;
   }
 
   // Unfortunately, using full precision floating point here causes bad layouts

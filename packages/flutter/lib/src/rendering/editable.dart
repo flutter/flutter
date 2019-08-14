@@ -1321,7 +1321,6 @@ class RenderEditable extends RenderBox {
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
   /// This does not required the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
-  double get getRealFirstLineHeight => _textPainter.getRealFirstLineHeight();
 
   double _preferredHeight(double width) {
     // Lock height to maxLines if needed.
