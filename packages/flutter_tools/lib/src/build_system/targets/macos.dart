@@ -14,6 +14,7 @@ import '../../build_info.dart';
 import '../../devfs.dart';
 import '../../globals.dart';
 import '../../macos/xcode.dart';
+import '../../project.dart';
 import '../build_system.dart';
 import 'dart.dart';
 
@@ -48,8 +49,9 @@ class MacOSAssetBehavior extends SourceBehavior {
       manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
       packagesPath: environment.projectDir.childFile('.packages').path,
     );
-    final String prefix = fs.path.join(environment.projectDir.path, 'macos',
-        'Flutter', 'ephemeral', 'App.framework', 'flutter_assets');
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final String prefix = fs.path.join(flutterProject.macos.ephemeralDirectory.path,
+        'App.framework', 'flutter_assets');
     final List<File> results = <File>[];
     for (String key in assetBundle.entries.keys) {
       final File file = fs.file(fs.path.join(prefix, key));
@@ -83,18 +85,20 @@ class UnpackMacOS extends Target {
   List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
+    Source.pattern('$_kOutputPrefix/Headers/FLEDartProject.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FLEEngine.h'),
     Source.pattern('$_kOutputPrefix/Headers/FLEViewController.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterMacros.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
     // Modules
     Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
     // Resources
     Source.pattern('$_kOutputPrefix/Resources/icudtl.dat'),
-    Source.pattern('$_kOutputPrefix/Resources/info.plist'),
+    Source.pattern('$_kOutputPrefix/Resources/Info.plist'),
     // Ignore Versions folder for now
   ];
 
@@ -104,11 +108,9 @@ class UnpackMacOS extends Target {
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
     final String basePath = artifacts.getArtifactPath(Artifact.flutterMacOSFramework);
-    final Directory targetDirectory = environment
-      .projectDir
-      .childDirectory('macos')
-      .childDirectory('Flutter')
-      .childDirectory('ephemeral')
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final Directory targetDirectory = flutterProject.macos
+      .ephemeralDirectory
       .childDirectory('FlutterMacOS.framework');
     if (targetDirectory.existsSync()) {
       targetDirectory.deleteSync(recursive: true);
@@ -138,7 +140,9 @@ class DebugMacOSFramework extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final File outputFile = fs.file(fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral', 'App.framework', 'App'));
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final File outputFile = fs.file(fs.path.join(
+        flutterProject.macos.ephemeralDirectory.path, 'App.framework', 'App'));
     outputFile.createSync(recursive: true);
     final File debugApp = environment.buildDir.childFile('debug_app.cc')
         ..writeAsStringSync(r'''
@@ -184,7 +188,9 @@ class DebugBundleFlutterAssets extends Target {
 
   @override
   Future<void> build(List<File> inputFiles, Environment environment) async {
-    final Directory outputDirectory = fs.directory(fs.path.join(environment.projectDir.path, 'macos', 'Flutter', 'ephemeral', 'App.framework'));
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(environment.projectDir);
+    final Directory outputDirectory = flutterProject.macos
+        .ephemeralDirectory.childDirectory('App.framework');
     if (!outputDirectory.existsSync()) {
       throw Exception('App.framework must exist to bundle assets.');
     }

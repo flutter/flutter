@@ -33,12 +33,6 @@ if [[ -n "$FLUTTER_TARGET" ]]; then
     target_path="${FLUTTER_TARGET}"
 fi
 
-# Set the track widget creation flag.
-track_widget_creation_flag=""
-if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
-  track_widget_creation_flag="--track-widget-creation"
-fi
-
 if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
@@ -66,6 +60,11 @@ build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[
 # to conditionally skip this script phase if neither have changed.
 build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
 build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
+
+# TODO(jonahwilliams): connect AOT rules once engine artifacts are published.
+# The build mode is currently hard-coded to debug only. Since this does not yet
+# support AOT, we need to ensure that we compile the kernel file in debug so that
+# the VM can load it.
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
     ${flutter_engine_flag}                                                  \

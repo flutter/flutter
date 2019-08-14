@@ -132,34 +132,6 @@ void main() {
 
     expect(fs.file(outputKernel).readAsStringSync(), 'testing');
   }));
-
-  test('DummyMacOSAotAssembly invokes silly build script', () => testbed.run(() async {
-    when(processManager.run(<String>[
-      fs.path.join(environment.flutterRootDir.path, 'packages', 'flutter_tools', 'bin', 'hack_script.sh')
-    ], runInShell: true)).thenAnswer((Invocation _) async {
-      return FakeProcessResult()..exitCode = 0;
-    });
-
-//    await const DummyMacOSAotAssembly().build(<File>[], environment);
-
-    expect(fs.file(fs.path.join(environment.projectDir.path, 'macos', 'Flutter',
-        'ephemeral', 'App.framework', 'App')).existsSync(), true);
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
-  }));
-
-  test('DummyMacOSAotAssembly throws exception if script does not exit cleanly', () => testbed.run(() async {
-    when(processManager.run(<String>[
-      fs.path.join(environment.flutterRootDir.path, 'packages', 'flutter_tools', 'bin', 'hack_script.sh')
-    ], runInShell: true)).thenAnswer((Invocation _) async {
-      return FakeProcessResult()..exitCode = 1;
-    });
-
-    // expect(const DummyMacOSAotAssembly().build(<File>[], environment),
-    //     throwsA(isInstanceOf<Exception>()));
-  }, overrides: <Type, Generator>{
-    ProcessManager: () => MockProcessManager(),
-  }));
 }
 
 class MockPlatform extends Mock implements Platform {}
