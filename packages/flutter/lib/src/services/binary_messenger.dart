@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import '../../foundation.dart';
 import 'binding.dart';
 
 /// A function which takes a platform message and asynchronously returns an encoded response.
@@ -67,10 +68,21 @@ abstract class BinaryMessenger {
 /// it may dispatch incoming messages to the registered handler.
 @Deprecated('Use ServicesBinding.instance.defaultBinaryMessenger instead.')
 BinaryMessenger get defaultBinaryMessenger {
-  const String errMsg =
-      'ServicesBinding is not properly initialized when accessing the [defaultBinaryMessenger] instance. '
-      'If you need the binding to be constructed before calling [runApp], e.g. using platform channels/plugins, '
-      'call the `WidgetsFlutterBinding.ensureInitialized()` function.';
-  assert(ServicesBinding.instance != null, errMsg);
+  assert(() {
+    if (ServicesBinding.instance == null) {
+      throw FlutterError(
+          'ServicesBinding.defaultBinaryMessenger was accessed before the '
+              'binding was initialized.\n'
+              'If you\'re running an application and need to access the binary '
+              'messenger before `runApp()` has been called (for example, during '
+              'plugin initialization), then you need to explicitly call the '
+              '`WidgetsFlutterBinding.ensureInitialized()` first.\n'
+              'If you\'re running a test, you can call the '
+              '`TestWidgetsFlutterBinding.ensureInitialized()` as the first line in '
+              'your test\'s `main()` or `setUp()` method to initialize the binding.'
+      );
+    }
+    return true;
+  }());
   return ServicesBinding.instance.defaultBinaryMessenger;
 }

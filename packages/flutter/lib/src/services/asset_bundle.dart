@@ -212,7 +212,6 @@ abstract class CachingAssetBundle extends AssetBundle {
 
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
-
   @override
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
