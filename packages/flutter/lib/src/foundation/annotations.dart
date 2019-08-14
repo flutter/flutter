@@ -67,7 +67,7 @@ class Category {
 ///
 /// See also:
 ///
-///  * [Subcategory], to help place the class in a subcategory index.
+///  * [Category], to help place the class in a subcategory index.
 ///  * [Summary], which is used to provide a one-line description of a
 ///    class that overrides the inline documentations' own description.
 class Subcategory {
