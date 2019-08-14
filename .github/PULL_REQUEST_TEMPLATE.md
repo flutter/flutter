@@ -28,6 +28,7 @@ Before you create this PR confirm that it meets all requirements listed below by
 ## Breaking Change
 
 Does your PR require Flutter developers to manually update their apps to accommodate your change?
+_This includes any changes affecting golden files & their associated widgets._
 
 - [ ] Yes, this is a breaking change (Please read [Handling breaking changes]). *Replace this with a link to the e-mail where you asked for input on this proposed change.*
 - [ ] No, this is *not* a breaking change.
