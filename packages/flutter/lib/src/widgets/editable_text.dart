@@ -1290,11 +1290,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     double scrollOffset = _scrollController.offset;
     final double viewportExtent = _scrollController.position.viewportDimension;
     if (caretStart < 0.0) { // cursor before start of bounds
-      scrollOffset = math.max(scrollOffset + caretStart, 0);
+      scrollOffset += caretStart;
     } else if (caretEnd >= viewportExtent) { // cursor after end of bounds
-      scrollOffset = math.min(renderEditable.size.height, scrollOffset + caretRect.bottom - viewportExtent);
+      scrollOffset += caretEnd - viewportExtent;
     }
-    return scrollOffset;
+    return scrollOffset.clamp(0, renderEditable.size.height);
   }
 
   // Calculates where the `caretRect` would be if `_scrollController.offset` is set to `scrollOffset`.
