@@ -816,8 +816,8 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Map<String, String> environment,
   List<String> tests = const <String>[],
 }) async {
-  // Support printing output or capturing it for matching, but not both.
-  assert(!printOutput || outputChecker == null);
+  assert(!printOutput || outputChecker == null,
+      'Output either can be printed or checked but not both');
 
   final List<String> args = <String>[
     'test',
