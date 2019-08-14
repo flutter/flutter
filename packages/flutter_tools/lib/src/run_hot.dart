@@ -8,6 +8,7 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
+import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -576,10 +577,10 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
-      result = await _restartFromSources(
+      result = await asyncGuard(() => _restartFromSources(
         reason: reason,
         benchmarkMode: benchmarkMode,
-      );
+      ));
       if (!result.isOk) {
         restartEvent = 'restart-failed';
       }
