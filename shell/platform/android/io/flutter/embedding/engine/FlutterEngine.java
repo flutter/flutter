@@ -110,6 +110,9 @@ public class FlutterEngine implements LifecycleOwner {
   /**
    * Constructs a new {@code FlutterEngine}.
    *
+   * {@code FlutterMain.startInitialization} must be called before constructing a {@code FlutterEngine}
+   * to load the native libraries needed to attach to JNI.
+   *
    * A new {@code FlutterEngine} does not execute any Dart code automatically. See
    * {@link #getDartExecutor()} and {@link DartExecutor#executeDartEntrypoint(DartExecutor.DartEntrypoint)}
    * to begin executing Dart code within this {@code FlutterEngine}.
