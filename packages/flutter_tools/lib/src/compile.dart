@@ -653,7 +653,7 @@ class ResidentCompiler {
     if (!_compileRequestNeedsConfirmation) {
       return Future<CompilerOutput>.value(null);
     }
-    _stdoutHandler.reset();
+    _stdoutHandler.reset(expectSources: false);
     _server.stdin.writeln('reject');
     printTrace('<- reject');
     _compileRequestNeedsConfirmation = false;

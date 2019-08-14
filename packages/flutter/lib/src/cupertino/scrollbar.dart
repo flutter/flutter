@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 // All values eyeballed.
@@ -207,6 +208,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _assertVertical();
     _fadeoutTimer?.cancel();
     _fadeoutAnimationController.forward();
+    HapticFeedback.mediumImpact();
     _dragScrollbar(details.localPosition.dy);
     _dragScrollbarPositionY = details.localPosition.dy;
   }
@@ -234,6 +236,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
     _assertVertical();
     _fadeoutTimer?.cancel();
     _thicknessAnimationController.forward();
+    HapticFeedback.mediumImpact();
     _dragScrollbar(details.localPosition.dy);
     _dragScrollbarPositionY = details.localPosition.dy;
   }

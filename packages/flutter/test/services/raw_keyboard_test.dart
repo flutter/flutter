@@ -467,9 +467,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
-          'keyCode': 0x04,
-          'scanCode': 0x01,
-          'codePoint': 0x10,
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'unicodeScalarValues': 97,
           'modifiers': modifier,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -501,9 +501,9 @@ void main() {
           'type': 'keydown',
           'keymap': 'linux',
           'toolkit': 'glfw',
-          'keyCode': 0x04,
-          'scanCode': 0x64,
-          'codePoint': 0x1,
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'unicodeScalarValues': 97,
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -538,13 +538,44 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'codePoint': 97,
+        'unicodeScalarValues': 113,
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = keyAEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
-      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
-      expect(data.keyLabel, equals('a'));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
+      expect(data.keyLabel, equals('q'));
+    });
+    test('Code points with two Unicode scalar values are allowed', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'linux',
+        'toolkit': 'glfw',
+        'keyCode': 65,
+        'scanCode': 0x00000026,
+        'unicodeScalarValues': 0x10FFFF,
+        'modifiers': 0x0,
+      });
+      final RawKeyEventDataLinux data = keyAEvent.data;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey.keyId, equals(0x10FFFF));
+      expect(data.keyLabel, equals('􏿿'));
+    });
+
+    test('Code points with more than three Unicode scalar values are not allowed', () {
+      // |keyCode| and |scanCode| are arbitrary values. This test should fail due to an invalid |unicodeScalarValues|.
+      void _createFailingKey() {
+        RawKeyEvent.fromMessage(const <String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'linux',
+          'toolkit': 'glfw',
+          'keyCode': 65,
+          'scanCode': 0x00000026,
+          'unicodeScalarValues': 0x1F00000000,
+          'modifiers': 0x0,
+        });
+      }
+      expect(() => _createFailingKey(), throwsAssertionError);
     });
     test('Control keyboard keys are correctly translated', () {
       final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
@@ -553,7 +584,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 256,
         'scanCode': 0x00000009,
-        'codePoint': 0,
+        'unicodeScalarValues': 0,
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = escapeKeyEvent.data;
@@ -568,7 +599,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 340,
         'scanCode': 0x00000032,
-        'codePoint': 0,
+        'unicodeScalarValues': 0,
       });
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));

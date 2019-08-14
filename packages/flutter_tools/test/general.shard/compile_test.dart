@@ -266,7 +266,6 @@ example:org-dartlang-app:/
 
     testUsingContext('compile and recompile', () async {
       final BufferLogger logger = context.get<Logger>();
-
       final StreamController<List<int>> streamController = StreamController<List<int>>();
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => streamController.stream);
@@ -289,11 +288,10 @@ example:org-dartlang-app:/
       await _accept(streamController, generator, mockFrontendServerStdIn, '^accept\\n\$');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
-          'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
-
-      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\nabc\nabc',
-          '^reject\\n\$');
-
+        'result abc\nline1\nline2\nabc\nabc /path/to/main.dart.dill 0\n');
+      // No sources returned from reject command.
+      await _reject(streamController, generator, mockFrontendServerStdIn, 'result abc\nabc\n',
+        '^reject\\n\$');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.errorText, equals(
@@ -578,7 +576,6 @@ Future<void> _reject(
   expect(commands, matches(re));
   mockFrontendServerStdIn._stdInWrites.clear();
 }
-
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}

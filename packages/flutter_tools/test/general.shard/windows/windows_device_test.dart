@@ -22,17 +22,22 @@ void main() {
     final WindowsDevice device = WindowsDevice();
     final MockPlatform notWindows = MockPlatform();
     final MockProcessManager mockProcessManager = MockProcessManager();
+    const String flutterToolBinary = 'flutter.exe';
 
     when(notWindows.isWindows).thenReturn(false);
     when(notWindows.environment).thenReturn(const <String, String>{});
     when(mockProcessManager.runSync(<String>[
       'powershell', '-script="Get-CimInstance Win32_Process"'
     ])).thenAnswer((Invocation invocation) {
+      // The flutter tool process is returned as output to the powershell script
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);
-      when<String>(result.stdout).thenReturn('');
+      when<String>(result.stdout).thenReturn('$pid  $flutterToolBinary');
       return result;
     });
+    when(mockProcessManager.run(<String>[
+      'Taskkill', '/PID', '$pid', '/F'
+    ])).thenThrow(Exception('Flutter tool process has been killed'));
 
     testUsingContext('defaults', () async {
       final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
@@ -81,6 +86,14 @@ void main() {
       expect(WindowsDevice().isSupportedForProject(flutterProject), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
+    });
+
+    testUsingContext('The current running process is not killed when stopping the app', () async {
+      // The name of the executable is the same as the flutter tool one
+      final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: flutterToolBinary);
+      expect(await device.stopApp(windowsApp), false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
   });
 }
