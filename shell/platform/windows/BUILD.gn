@@ -4,13 +4,100 @@
 
 assert(is_win)
 
-group("windows") {
-  deps = [
-    ":flutter_windows",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:publish_wrapper",
-    "$flutter_root/shell/platform/glfw:publish_headers_glfw",
-    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+import("$flutter_root/shell/platform/glfw/config.gni")
+
+_public_headers = [ "public/flutter_windows.h" ]
+
+config("relative_angle_headers") {
+  include_dirs = [ "//third_party/angle/include" ]
+}
+
+# Any files that are built by clients (client_wrapper code, library headers for
+# implementations using this shared code, etc.) include the public headers
+# assuming they are in the include path. This configuration should be added to
+# any such code that is also built by GN to make the includes work.
+config("relative_flutter_windows_headers") {
+  include_dirs = [ "public" ]
+}
+
+# The headers are a separate source set since the client wrapper is allowed
+# to depend on the public headers, but none of the rest of the code.
+source_set("flutter_windows_headers") {
+  public = _public_headers
+
+  public_deps = [
+    "$flutter_root/shell/platform/common/cpp:common_cpp_library_headers",
   ]
+
+  configs += [
+    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+  ]
+
+  public_configs = [
+    "$flutter_root/shell/platform/common/cpp:relative_flutter_library_headers",
+  ]
+}
+
+source_set("flutter_windows_source") {
+  sources = [
+    "angle_surface_manager.cc",
+    "angle_surface_manager.h",
+    "flutter_windows.cc",
+    "key_event_handler.cc",
+    "key_event_handler.h",
+    "keyboard_hook_handler.h",
+    "platform_handler.cc",
+    "platform_handler.h",
+    "text_input_plugin.cc",
+    "text_input_plugin.h",
+    "win32_dpi_helper.cc",
+    "win32_dpi_helper.h",
+    "win32_flutter_window.cc",
+    "win32_flutter_window.h",
+    "win32_window.cc",
+    "win32_window.h",
+    "window_state.h",
+  ]
+
+  defines = [ "USE_RAPID_JSON" ]
+
+  configs += [
+    "$flutter_root/shell/platform/common/cpp:desktop_library_implementation",
+    "//third_party/angle:gl_prototypes",
+  ]
+
+  public_configs = [ ":relative_angle_headers" ]
+
+  deps = [
+    ":flutter_windows_headers",
+    "$flutter_root/shell/platform/common/cpp:common_cpp",
+    "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper",
+    "$flutter_root/shell/platform/embedder:embedder_with_symbol_prefix",
+    "$flutter_root/shell/platform/windows/client_wrapper:client_wrapper_windows",
+    "//third_party/angle:libEGL_static",  # the order of libEGL_static and libGLESv2_static is important.. if reversed, will cause a linker error DllMain already defined in LIBCMTD.lib
+    "//third_party/angle:libGLESv2_static",
+    "//third_party/rapidjson",
+  ]
+}
+
+copy("publish_headers_windows") {
+  sources = _public_headers
+  outputs = [
+    "$root_out_dir/{{source_file_part}}",
+  ]
+
+  # The Windows header assumes the presence of the common headers.
+  deps = [
+    "$flutter_root/shell/platform/common/cpp:publish_headers",
+  ]
+}
+
+shared_library("flutter_windows_win32") {
+  deps = [
+    ":flutter_windows_source",
+  ]
+
+  public_configs = [ "$flutter_root:config" ]
 }
 
 shared_library("flutter_windows") {
@@ -19,4 +106,30 @@ shared_library("flutter_windows") {
   ]
 
   public_configs = [ "$flutter_root:config" ]
+}
+
+group("windows_win32") {
+  deps = [
+    ":flutter_windows_win32",
+    ":publish_headers_windows",
+    "$flutter_root/shell/platform/windows/client_wrapper:publish_wrapper_windows",
+  ]
+}
+
+group("windows_glfw") {
+  deps = [
+    ":flutter_windows",
+    "$flutter_root/shell/platform/glfw:publish_headers_glfw",
+    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_unprefixed",
+  ]
+}
+
+group("windows") {
+  deps = [
+    ":windows_win32",
+  ]
+  if (build_glfw_shell) {
+    deps += [ ":windows_glfw" ]
+  }
 }

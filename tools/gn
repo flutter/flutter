@@ -239,6 +239,11 @@ def to_gn_args(args):
       # Configure Skia for Vulkan support.
       gn_args['skia_use_vulkan'] = True
 
+    # The buildroot currently isn't set up to support Vulkan in the
+    # Windows ANGLE build, so disable it regardless of enable_vulkan's value.
+    if sys.platform.startswith(('cygwin', 'win')):
+       gn_args['angle_enable_vulkan'] = False
+
     # We should not need a special case for x86, but this seems to introduce text relocations
     # even with -fPIC everywhere.
     # gn_args['enable_profiling'] = args.runtime_mode != 'release' and args.android_cpu != 'x86'
