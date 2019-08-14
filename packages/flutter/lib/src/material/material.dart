@@ -185,8 +185,8 @@ class Material extends StatefulWidget {
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
-       assert(clipBehavior != null),
        assert(borderOnForeground != null),
+       assert(clipBehavior != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
