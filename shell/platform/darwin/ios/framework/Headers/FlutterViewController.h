@@ -131,6 +131,14 @@ FLUTTER_EXPORT
 - (id<FlutterPluginRegistry>)pluginRegistry;
 
 /**
+ * True if at least one frame has rendered and the ViewController has appeared.
+ *
+ * This property is reset to false when the ViewController disappears. It is
+ * guaranteed to only alternate between true and false for observers.
+ */
+@property(nonatomic, readonly, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
+
+/**
  * Specifies the view to use as a splash screen. Flutter's rendering is asynchronous, so the first
  * frame rendered by the Flutter application might not immediately appear when theFlutter view is
  * initially placed in the view hierarchy. The splash screen view will be used as

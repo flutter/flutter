@@ -29,6 +29,7 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 // change. Unfortunately unless you have Werror turned on, incompatible pointers as arguments are
 // just a warning.
 @interface FlutterViewController () <FlutterBinaryMessenger>
+@property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @end
 
 @implementation FlutterViewController {
@@ -48,6 +49,8 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   BOOL _engineNeedsLaunch;
   NSMutableSet<NSNumber*>* _ongoingTouches;
 }
+
+@synthesize displayingFlutterUI = _displayingFlutterUI;
 
 #pragma mark - Manage and override all designated initializers
 
@@ -263,7 +266,25 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   [self.view addSubview:splashScreenView];
 }
 
++ (BOOL)automaticallyNotifiesObserversOfDisplayingFlutterUI {
+  return NO;
+}
+
+- (void)setDisplayingFlutterUI:(BOOL)displayingFlutterUI {
+  if (_displayingFlutterUI != displayingFlutterUI) {
+    if (displayingFlutterUI == YES) {
+      if (!self.isViewLoaded || !self.view.window) {
+        return;
+      }
+    }
+    [self willChangeValueForKey:@"displayingFlutterUI"];
+    _displayingFlutterUI = displayingFlutterUI;
+    [self didChangeValueForKey:@"displayingFlutterUI"];
+  }
+}
+
 - (void)callViewRenderedCallback {
+  self.displayingFlutterUI = YES;
   if (_flutterViewRenderedCallback != nil) {
     _flutterViewRenderedCallback.get()();
     _flutterViewRenderedCallback.reset();
@@ -395,6 +416,7 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
     [_engine.get() platformViewsController] -> SetFlutterViewController(self);
     [_engine.get() platformView] -> NotifyCreated();
   } else {
+    self.displayingFlutterUI = NO;
     [_engine.get() platformView] -> NotifyDestroyed();
     [_engine.get() platformViewsController] -> SetFlutterView(nullptr);
     [_engine.get() platformViewsController] -> SetFlutterViewController(nullptr);
