@@ -18,18 +18,16 @@ import 'framework.dart';
 // when focus changes occur.
 const bool _kDebugFocus = false;
 
-void _focusDebug(String message, [Iterable<String> details]) {
-  assert(() {
-    if (_kDebugFocus) {
-      debugPrint('FOCUS: $message');
-      if (details != null && details.isNotEmpty) {
-        for (String detail in details) {
-          debugPrint('    $detail');
-        }
+bool _focusDebug(String message, [Iterable<String> details]) {
+  if (_kDebugFocus) {
+    debugPrint('FOCUS: $message');
+    if (details != null && details.isNotEmpty) {
+      for (String detail in details) {
+        debugPrint('    $detail');
       }
     }
-    return true;
-  }());
+  }
+  return true;
 }
 
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
@@ -79,7 +77,7 @@ class FocusAttachment {
   /// Calling [FocusNode.dispose] will also automatically detach the node.
   void detach() {
     assert(_node != null);
-    _focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']);
+    assert(_focusDebug('Detaching node:', <String>[_node.toString(), 'With enclosing scope ${_node.enclosingScope}']));
     if (isAttached) {
       if (_node.hasPrimaryFocus) {
         _node.unfocus();
@@ -1018,7 +1016,7 @@ class FocusManager with DiagnosticableTreeMixin {
   // Called to indicate that the given node is being disposed.
   void _willDisposeFocusNode(FocusNode node) {
     assert(node != null);
-    _focusDebug('Disposing of node:', <String>[node.toString(), 'with enclosing scope ${node.enclosingScope}']);
+    assert(_focusDebug('Disposing of node:', <String>[node.toString(), 'with enclosing scope ${node.enclosingScope}']));
     _willUnfocusNode(node);
     _dirtyNodes.remove(node);
   }
@@ -1027,7 +1025,7 @@ class FocusManager with DiagnosticableTreeMixin {
   // pending request to be focused should be canceled.
   void _willUnfocusNode(FocusNode node) {
     assert(node != null);
-    _focusDebug('Unfocusing node $node');
+    assert(_focusDebug('Unfocusing node $node'));
     if (_primaryFocus == node) {
       _primaryFocus = null;
       _dirtyNodes.add(node);
@@ -1038,7 +1036,7 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.add(node);
       _markNeedsUpdate();
     }
-    _focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_nextFocus']);
+    assert(_focusDebug('Unfocused node $node:', <String>['primary focus is $_primaryFocus', 'next focus will be $_nextFocus']));
   }
 
   // True indicates that there is an update pending.
@@ -1050,7 +1048,7 @@ class FocusManager with DiagnosticableTreeMixin {
     // If newFocus isn't specified, then don't mess with _nextFocus, just
     // schedule the update.
     _nextFocus = newFocus ?? _nextFocus;
-    _focusDebug('Scheduling update, next focus will be $_nextFocus');
+    assert(_focusDebug('Scheduling update, next focus will be $_nextFocus'));
     if (_haveScheduledUpdate) {
       return;
     }
@@ -1060,7 +1058,7 @@ class FocusManager with DiagnosticableTreeMixin {
 
   void _applyFocusChange() {
     _haveScheduledUpdate = false;
-    _focusDebug('Refreshing focus state. Next focus will be $_nextFocus');
+    assert(_focusDebug('Refreshing focus state. Next focus will be $_nextFocus'));
     final FocusNode previousFocus = _primaryFocus;
     if (_primaryFocus == null && _nextFocus == null) {
       // If we don't have any current focus, and nobody has asked to focus yet,
@@ -1078,7 +1076,7 @@ class FocusManager with DiagnosticableTreeMixin {
       _nextFocus = null;
     }
     if (previousFocus != _primaryFocus) {
-      _focusDebug('Updating focus from $previousFocus to $_primaryFocus');
+      assert(_focusDebug('Updating focus from $previousFocus to $_primaryFocus'));
       if (previousFocus != null) {
         _dirtyNodes.add(previousFocus);
       }
@@ -1086,7 +1084,7 @@ class FocusManager with DiagnosticableTreeMixin {
         _dirtyNodes.add(_primaryFocus);
       }
     }
-    _focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString()));
+    assert(_focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
     for (FocusNode node in _dirtyNodes) {
       node._notify();
     }
