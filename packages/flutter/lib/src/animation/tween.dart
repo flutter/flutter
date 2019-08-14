@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, Rect, Size, hashValues;
+import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
 
@@ -258,21 +258,6 @@ class Tween<T extends dynamic> extends Animatable<T> {
     if (t == 1.0)
       return end;
     return lerp(t);
-  }
-
-  @override
-  int get hashCode {
-    return hashValues(begin, end);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final Tween<T> typedOther = other;
-    return typedOther.begin == begin && typedOther.end == end;
   }
 
   @override

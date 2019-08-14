@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
-import 'package:flutter_tools/src/web/web_fs.dart';
+import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';

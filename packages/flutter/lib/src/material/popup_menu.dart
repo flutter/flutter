@@ -30,7 +30,7 @@ const Duration _kMenuDuration = Duration(milliseconds: 300);
 const double _kBaselineOffsetFromBottom = 20.0;
 const double _kMenuCloseIntervalEnd = 2.0 / 3.0;
 const double _kMenuHorizontalPadding = 16.0;
-const double _kMenuItemHeight = 48.0;
+const double _kMenuItemHeight = kMinInteractiveDimension;
 const double _kMenuDividerHeight = 16.0;
 const double _kMenuMaxWidth = 5.0 * _kMenuWidthStep;
 const double _kMenuMinWidth = 2.0 * _kMenuWidthStep;
@@ -132,8 +132,8 @@ class _PopupMenuDividerState extends State<PopupMenuDivider> {
 ///
 /// Typically the [child] of a [PopupMenuItem] is a [Text] widget. More
 /// elaborate menus with icons can use a [ListTile]. By default, a
-/// [PopupMenuItem] is 48 pixels high. If you use a widget with a different
-/// height, it must be specified in the [height] property.
+/// [PopupMenuItem] is kMinInteractiveDimension pixels high. If you use a widget
+/// with a different height, it must be specified in the [height] property.
 ///
 /// {@tool sample}
 ///
@@ -189,7 +189,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
   /// The height of the entry.
   ///
-  /// Defaults to 48 pixels.
+  /// Defaults to kMinInteractiveDimension pixels.
   @override
   final double height;
 
@@ -292,9 +292,10 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
 /// To show a popup menu, use the [showMenu] function. To create a button that
 /// shows a popup menu, consider using [PopupMenuButton].
 ///
-/// A [CheckedPopupMenuItem] is 48 pixels high, which matches the default height
-/// of a [PopupMenuItem]. The horizontal layout uses a [ListTile]; the checkmark
-/// is an [Icons.done] icon, shown in the [ListTile.leading] position.
+/// A [CheckedPopupMenuItem] is kMinInteractiveDimension pixels high, which
+/// matches the default height of a [PopupMenuItem]. The horizontal layout uses
+/// a [ListTile]; the checkmark is an [Icons.done] icon, shown in the
+/// [ListTile.leading] position.
 ///
 /// {@tool sample}
 ///

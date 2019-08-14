@@ -19,13 +19,12 @@ import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
-import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import '../version.dart';
-
+import '../web/web_runner.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -430,7 +429,7 @@ class RunCommand extends RunCommandBase {
         ipv6: ipv6,
       );
     } else if (webMode) {
-      runner = ResidentWebRunner(
+      runner = webRunnerFactory.createWebRunner(
         devices.single,
         target: targetFile,
         flutterProject: flutterProject,
