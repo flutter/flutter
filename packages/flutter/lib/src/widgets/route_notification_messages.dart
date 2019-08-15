@@ -4,7 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show Route;
+
+import 'navigator.dart';
 
 /// Messages for route change notifications.
 class RouteNotificationMessages {
