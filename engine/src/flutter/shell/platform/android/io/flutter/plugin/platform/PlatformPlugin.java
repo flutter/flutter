@@ -136,6 +136,7 @@ public class PlatformPlugin {
         activity.setRequestedOrientation(androidOrientation);
     }
 
+    @SuppressWarnings("deprecation")
     private void setSystemChromeApplicationSwitcherDescription(PlatformChannel.AppSwitcherDescription description) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return;
