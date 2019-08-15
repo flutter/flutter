@@ -308,27 +308,27 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 }
 
 - (void)installFirstFrameCallback {
-  auto weak_platform_view = [_engine.get() platformView];
-  if (!weak_platform_view) {
+  fml::WeakPtr<flutter::PlatformViewIOS> weakPlatformView = [_engine.get() platformView];
+  if (!weakPlatformView) {
     return;
   }
-  __unsafe_unretained auto weak_flutter_view_controller = self;
-  // This is on the platform thread.
-  weak_platform_view->SetNextFrameCallback([weak_platform_view, weak_flutter_view_controller,
-                                            task_runner = [_engine.get() platformTaskRunner]]() {
-    // This is on the GPU thread.
-    task_runner->PostTask([weak_platform_view, weak_flutter_view_controller]() {
-      // We check if the weak platform view is alive. If it is alive, then the view controller
-      // also has to be alive since the view controller owns the platform view via the shell
-      // association. Thus, we are not convinced that the unsafe unretained weak object is in
-      // fact alive.
-      if (weak_platform_view) {
-        if (weak_flutter_view_controller->_splashScreenView) {
-          [weak_flutter_view_controller removeSplashScreenView:^{
-            [weak_flutter_view_controller callViewRenderedCallback];
+
+  // Start on the platform thread.
+  weakPlatformView->SetNextFrameCallback([weakSelf = [self getWeakPtr],
+                                          platformTaskRunner = [_engine.get() platformTaskRunner],
+                                          gpuTaskRunner = [_engine.get() GPUTaskRunner]]() {
+    FML_DCHECK(gpuTaskRunner->RunsTasksOnCurrentThread());
+    // Get callback on GPU thread and jump back to platform thread.
+    platformTaskRunner->PostTask([weakSelf]() {
+      fml::scoped_nsobject<FlutterViewController> flutterViewController(
+          [(FlutterViewController*)weakSelf.get() retain]);
+      if (flutterViewController) {
+        if (flutterViewController.get()->_splashScreenView) {
+          [flutterViewController removeSplashScreenView:^{
+            [flutterViewController callViewRenderedCallback];
           }];
         } else {
-          [weak_flutter_view_controller callViewRenderedCallback];
+          [flutterViewController callViewRenderedCallback];
         }
       }
     });

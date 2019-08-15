@@ -154,6 +154,11 @@
   return _shell->GetTaskRunners().GetPlatformTaskRunner();
 }
 
+- (fml::RefPtr<fml::TaskRunner>)GPUTaskRunner {
+  FML_DCHECK(_shell);
+  return _shell->GetTaskRunners().GetGPUTaskRunner();
+}
+
 - (void)ensureSemanticsEnabled {
   self.iosPlatformView->SetSemanticsEnabled(true);
 }
