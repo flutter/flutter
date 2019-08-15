@@ -13,7 +13,7 @@ import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares image pixels against a golden image file.
 ///
 /// Instances of this comparator will be used as the backend for
 /// [matchesGoldenFile].
@@ -24,14 +24,16 @@ import 'package:test_api/test_api.dart' as test_package show TestFailure;
 /// need or the ability to call [WidgetTester.pump] to advance the microtask
 /// queue).
 abstract class GoldenFileComparator {
-  /// Compares [imageBytes] against the golden file identified by [golden].
+  /// Compares the pixels of decoded png [imageBytes] against the golden file
+  /// identified by [golden].
   ///
   /// The returned future completes with a boolean value that indicates whether
-  /// [imageBytes] matches the golden file's bytes within the tolerance defined
-  /// by the comparator.
+  /// the pixels decoded from [imageBytes] match the golden file's pixels.
   ///
   /// In the case of comparison mismatch, the comparator may choose to throw a
-  /// [TestFailure] if it wants to control the failure message.
+  /// [TestFailure] if it wants to control the failure message, often in the
+  /// form of a [ComparisonResult] that provides detailed information about the
+  /// mismatch.
   ///
   /// The method by which [golden] is located and by which its bytes are loaded
   /// is left up to the implementation class. For instance, some implementations
@@ -146,15 +148,15 @@ abstract class GoldenFileComparator {
   }
 }
 
-/// Compares rasterized image bytes against a golden image file.
+/// Compares pixels against those of a golden image file.
 ///
 /// This comparator is used as the backend for [matchesGoldenFile].
 ///
 /// When using `flutter test`, a comparator implemented by [LocalFileComparator]
 /// is used if no other comparator is specified. It treats the golden key as
 /// a relative path from the test file's directory. It will then load the
-/// golden file's bytes from disk and perform a byte-for-byte comparison of the
-/// encoded PNGs, returning true only if there's an exact match.
+/// golden file's bytes from disk and perform a pixel-for-pixel comparison of
+/// the decoded PNGs, returning true only if there's an exact match.
 ///
 /// When using `flutter test --update-goldens`, the [LocalFileComparator]
 /// updates the files on disk to match the rendering.
@@ -165,10 +167,8 @@ abstract class GoldenFileComparator {
 ///
 /// Callers may choose to override the default comparator by setting this to a
 /// custom comparator during test set-up (or using directory-level test
-/// configuration). For example, some projects may wish to install a more
-/// intelligent comparator that knows how to decode the PNG images to raw
-/// pixels and compare pixel vales, reporting specific differences between the
-/// images.
+/// configuration). For example, some projects may wish to install a comparator
+/// with tolerance levels for allowable differences.
 ///
 /// See also:
 ///
@@ -263,10 +263,8 @@ class TrivialComparator implements GoldenFileComparator {
 /// This comparator loads golden files from the local file system, treating the
 /// golden key as a relative path from the test file's directory.
 ///
-/// This comparator performs a very simplistic comparison, doing a byte-for-byte
-/// comparison of the encoded PNGs, returning true only if there's an exact
-/// match. This means it will fail the test if two PNGs represent the same
-/// pixels but are encoded differently.
+/// This comparator performs a pixel-for-pixel comparison of the decoded PNGs,
+/// returning true only if there's an exact match.
 ///
 /// When using `flutter test --update-goldens`, [LocalFileComparator]
 /// updates the files on disk to match the rendering.
