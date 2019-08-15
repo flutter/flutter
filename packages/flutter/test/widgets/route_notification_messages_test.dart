@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
+  const OnTapPage({Key key, this.id, this.onTap}) : super(key: key);
 
   final String id;
   final VoidCallback onTap;
@@ -35,16 +35,25 @@ class OnTapPage extends StatelessWidget {
 }
 
 void main() {
-  
-  testWidgets('Push and Pop should send platform messages', (WidgetTester tester) async {
+  testWidgets('Push and Pop should send platform messages',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
-      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
+      '/': (BuildContext context) => OnTapPage(
+          id: '/',
+          onTap: () {
+            Navigator.pushNamed(context, '/A');
+          }),
+      '/A': (BuildContext context) => OnTapPage(
+          id: 'A',
+          onTap: () {
+            Navigator.pop(context);
+          }),
     };
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation
+        .setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -53,42 +62,67 @@ void main() {
     ));
 
     expect(log, hasLength(1));
-    expect(log.last, isMethodCall(
-      'routePushed',
-      arguments: <String, dynamic>{'previousRouteName': null, 'routeName': '/'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routePushed',
+          arguments: <String, dynamic>{
+            'previousRouteName': null,
+            'routeName': '/'
+          },
+        ));
 
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(log, hasLength(2));
-    expect(log.last, isMethodCall(
-      'routePushed',
-      arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routePushed',
+          arguments: <String, dynamic>{
+            'previousRouteName': '/',
+            'routeName': '/A'
+          },
+        ));
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(log, hasLength(3));
-    expect(log.last, isMethodCall(
-      'routePopped',
-      arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routePopped',
+          arguments: <String, dynamic>{
+            'previousRouteName': '/',
+            'routeName': '/A'
+          },
+        ));
   });
 
-  testWidgets('Replace should send platform messages', (WidgetTester tester) async {
+  testWidgets('Replace should send platform messages',
+      (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
-      '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
+      '/': (BuildContext context) => OnTapPage(
+          id: '/',
+          onTap: () {
+            Navigator.pushNamed(context, '/A');
+          }),
+      '/A': (BuildContext context) => OnTapPage(
+          id: 'A',
+          onTap: () {
+            Navigator.pushReplacementNamed(context, '/B');
+          }),
       '/B': (BuildContext context) => OnTapPage(id: 'B', onTap: () {}),
     };
 
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.navigation.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.navigation
+        .setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -97,29 +131,44 @@ void main() {
     ));
 
     expect(log, hasLength(1));
-    expect(log.last, isMethodCall(
-      'routePushed',
-      arguments: <String, dynamic>{'previousRouteName': null, 'routeName': '/'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routePushed',
+          arguments: <String, dynamic>{
+            'previousRouteName': null,
+            'routeName': '/'
+          },
+        ));
 
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(log, hasLength(2));
-    expect(log.last, isMethodCall(
-      'routePushed',
-      arguments: <String, dynamic>{'previousRouteName': '/', 'routeName': '/A'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routePushed',
+          arguments: <String, dynamic>{
+            'previousRouteName': '/',
+            'routeName': '/A'
+          },
+        ));
 
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
     expect(log, hasLength(3));
-    expect(log.last, isMethodCall(
-      'routeReplaced',
-      arguments: <String, dynamic>{'previousRouteName': '/A', 'routeName': '/B'},
-    ));
+    expect(
+        log.last,
+        isMethodCall(
+          'routeReplaced',
+          arguments: <String, dynamic>{
+            'previousRouteName': '/A',
+            'routeName': '/B'
+          },
+        ));
   });
 }
