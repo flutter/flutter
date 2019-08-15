@@ -40,8 +40,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       )
       ..addMultiOption('ios-arch',
         splitCommas: true,
-        defaultsTo: defaultIOSArchs.map<String>(getNameForIOSArch),
-        allowed: IOSArch.values.map<String>(getNameForIOSArch),
+        defaultsTo: defaultIOSArchs.map<String>(getNameForAppleArch),
+        allowed: AppleArch.values.map<String>(getNameForAppleArch),
         help: 'iOS architectures to build.',
       )
       ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
@@ -118,17 +118,17 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
       // Build AOT snapshot.
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
-        final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
-        final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
-        for (IOSArch arch in buildArchs)
-          iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
+        final Iterable<AppleArch> buildArchs = argResults['ios-arch'].map<AppleArch>(getIOSArchForName);
+        final Map<AppleArch, String> iosBuilds = <AppleArch, String>{};
+        for (AppleArch arch in buildArchs)
+          iosBuilds[arch] = fs.path.join(outputPath, getNameForAppleArch(arch));
 
         // Generate AOT snapshot and compile to arch-specific App.framework.
-        final Map<IOSArch, Future<int>> exitCodes = <IOSArch, Future<int>>{};
-        iosBuilds.forEach((IOSArch iosArch, String outputPath) {
+        final Map<AppleArch, Future<int>> exitCodes = <AppleArch, Future<int>>{};
+        iosBuilds.forEach((AppleArch iosArch, String outputPath) {
           exitCodes[iosArch] = snapshotter.build(
             platform: platform,
-            iosArch: iosArch,
+            appleArch: iosArch,
             buildMode: buildMode,
             mainPath: mainPath,
             packagesPath: PackageMap.globalPackagesPath,
@@ -160,7 +160,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
           ]);
         } else {
           status?.cancel();
-          exitCodes.forEach((IOSArch iosArch, Future<int> exitCodeFuture) async {
+          exitCodes.forEach((AppleArch iosArch, Future<int> exitCodeFuture) async {
             final int buildExitCode = await exitCodeFuture;
             printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
           });

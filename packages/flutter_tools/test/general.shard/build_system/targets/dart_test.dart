@@ -323,10 +323,10 @@ class MockXcode extends Mock implements Xcode {}
 class FakeGenSnapshot implements GenSnapshot {
   List<String> lastCallAdditionalArgs;
   @override
-  Future<int> run({SnapshotType snapshotType, IOSArch iosArch, Iterable<String> additionalArgs = const <String>[]}) async {
+  Future<int> run({SnapshotType snapshotType, AppleArch appleArch, Iterable<String> additionalArgs = const <String>[]}) async {
     lastCallAdditionalArgs = additionalArgs.toList();
     final Directory out = fs.file(lastCallAdditionalArgs.last).parent;
-    if (iosArch == null) {
+    if (appleArch == null) {
       out.childFile('app.so').createSync();
       out.childFile('gen_snapshot.d').createSync();
       return 0;
