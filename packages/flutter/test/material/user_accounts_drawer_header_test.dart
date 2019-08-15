@@ -216,6 +216,35 @@ void main() {
     expect(transformWidget.transform.getRotation()[4], 1.0);
   });
 
+  testWidgets('UserAccountsDrawerHeader icon color changes', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: UserAccountsDrawerHeader(
+              onDetailsPressed: () { },
+              accountName: const Text('name'),
+              accountEmail: const Text('email'),
+        ),
+      ),
+    ));
+
+    Icon iconWidget = tester.firstWidget(find.byType(Icon));
+    expect(iconWidget.color, Colors.white);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: UserAccountsDrawerHeader(
+          onDetailsPressed: () { },
+          accountName: const Text('name'),
+          accountEmail: const Text('email'),
+          arrowColor: const Color.fromRGBO(255, 0, 0, 1.0),
+        ),
+      ),
+    ));
+
+    iconWidget = tester.firstWidget(find.byType(Icon));
+    expect(iconWidget.color, const Color.fromRGBO(255, 0, 0, 1.0));
+  });
+
   testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
       Widget currentAccountPicture,
