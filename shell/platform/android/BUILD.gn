@@ -315,8 +315,7 @@ action("android") {
   engine_artifact_id =
       string_replace(android_app_abi, "-", "_") + "_" + flutter_runtime_mode
 
-  engine_jar_filename =
-      "$root_build_dir/$engine_artifact_id-1.0.0-$engine_version.jar"
+  engine_jar_filename = "$engine_artifact_id-1.0.0-$engine_version.jar"
 
   outputs = [
     "$root_build_dir/flutter.jar",
