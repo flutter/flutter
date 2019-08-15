@@ -213,13 +213,13 @@ class IMobileDevice {
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
-            'Device info unavailable until the user selects "Trust This Computer" on the device',
+            'Device info unavailable. Is the device asking to "Trust This Computer?"',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
         if (result.stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
           throw const IOSDeviceNotTrustedError(
-            'Device info unavailable until the user resets their trust settings on the device',
+            'Device info unavailable. Device pairing "trust" may have been revoked.',
             LockdownReturnCode.invalidHostId,
           );
         }
