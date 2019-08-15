@@ -166,8 +166,6 @@ void main() {
     await tester.tap(find.byIcon(Icons.check));
     await tester.pumpAndSettle();
 
-    debugDumpApp();
-
     final Material material = tester.widget<Material>(
       find.descendant(
         of: find.byType(BottomSheet),
