@@ -143,14 +143,30 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
       home: Scaffold(
-        body: BottomSheet(
-          onClosing: () {},
+        body: Builder(
           builder: (BuildContext context) {
-            return Container();
+            return RawMaterialButton(
+              child: const Icon(Icons.check),
+              onPressed: () {
+                showBottomSheet<void>(
+                    context: context,
+                    builder: (_) => Container(
+                      child: Text(
+                        'This is a Material persistent bottom sheet.',
+                      ),
+                    ),
+                );
+              },
+            );
           },
         ),
       ),
     ));
+
+    await tester.tap(find.byIcon(Icons.check));
+    await tester.pumpAndSettle();
+
+    debugDumpApp();
 
     final Material material = tester.widget<Material>(
       find.descendant(
