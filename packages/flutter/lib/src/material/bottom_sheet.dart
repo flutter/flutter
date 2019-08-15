@@ -63,10 +63,10 @@ class BottomSheet extends StatefulWidget {
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
-        assert(onClosing != null),
-        assert(builder != null),
-        assert(elevation == null || elevation >= 0.0),
-        super(key: key);
+       assert(onClosing != null),
+       assert(builder != null),
+       assert(elevation == null || elevation >= 0.0),
+       super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -169,7 +169,7 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.onClosing();
     } else {
       widget.animationController.forward();
-    }
+   }
   }
 
   bool extentChanged(DraggableScrollableNotification notification) {
@@ -224,8 +224,8 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
       maxHeight: isScrollControlled
-          ? constraints.maxHeight
-          : constraints.maxHeight * 9.0 / 16.0,
+        ? constraints.maxHeight
+        : constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -249,7 +249,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.isScrollControlled = false,
   }) : assert(isScrollControlled != null),
-        super(key: key);
+       super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
@@ -326,7 +326,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
-        super(settings: settings);
+       super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
@@ -365,11 +365,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       context: context,
       removeTop: true,
       child: _ModalBottomSheet<T>(
-          route: this,
-          backgroundColor: backgroundColor,
-          elevation: elevation,
-          shape: shape,
-          isScrollControlled: isScrollControlled
+        route: this,
+        backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
+        isScrollControlled: isScrollControlled
       ),
     );
     if (theme != null)
