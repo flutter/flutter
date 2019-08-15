@@ -735,10 +735,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _doRequestFocus();
   }
 
+  bool get _hasUnfocusableAncestor {
+    return ancestors.whereType<UnfocusableNode>().isNotEmpty;
+  }
+
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus() {
     _setAsFocusedChild();
-    if (hasPrimaryFocus) {
+    if (hasPrimaryFocus || _hasUnfocusableAncestor) {
       return;
     }
     _hasKeyboardToken = true;
@@ -805,25 +809,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
 /// The type of [Focus.unfocusable], used as a sentinel value for
 /// [Focus.focusNode] to indicate that the [Focus] widget should not participate
-/// in focus operations.
+/// in the focus tree.
 ///
 /// Used to indicate and enforce that an unfocusable node doesn't appear in the
 /// focus tree.
 class UnfocusableNode extends FocusNode {
-  /// Creates an unfocusable focus node for use as the type for [Focus.unfocusable].
-  ///
-  /// This class is not useful other than as an implementation detail of [Focus.unfocusable].
-  UnfocusableNode() : super(debugLabel: 'Unfocusable Node');
+  /// Creates an unfocusable focus node for use as
+  UnfocusableNode() : super(debugLabel: 'Unfocusable Node', skipTraversal: true);
 
   @override
-  FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
-    _context = context;
-    return null;
-  }
-
-  @override
-  void requestFocus([FocusNode node]) {
-  }
+  void _doRequestFocus() {}
 }
 
 /// A subclass of [FocusNode] that acts as a scope for its descendants,
@@ -918,6 +913,9 @@ class FocusScopeNode extends FocusNode {
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
   void autofocus(FocusNode node) {
+    if (node is UnfocusableNode) {
+      return;
+    }
     if (focusedChild == null) {
       if (node._parent == null) {
         _reparent(node);

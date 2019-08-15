@@ -146,6 +146,7 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
+    this.unfocusable,
     this.skipTraversal = false,
   })  : assert(child != null),
         assert(autofocus != null),
@@ -315,11 +316,6 @@ class _FocusState extends State<Focus> {
   }
 
   void _initNode() {
-    if (identical(widget.focusNode, Focus.unfocusable)) {
-      _hasFocus = false;
-      return;
-    }
-
     if (widget.focusNode == null) {
       // Only create a new node if the widget doesn't have one.
       // This calls a function instead of just allocating in place because
@@ -340,12 +336,10 @@ class _FocusState extends State<Focus> {
 
   @override
   void dispose() {
-    if (!identical(widget.focusNode, Focus.unfocusable)) {
-      // Regardless of the node owner, we need to remove it from the tree and stop
-      // listening to it.
-      focusNode.removeListener(_handleFocusChanged);
-      _focusAttachment.detach();
-    }
+    // Regardless of the node owner, we need to remove it from the tree and stop
+    // listening to it.
+    focusNode.removeListener(_handleFocusChanged);
+    _focusAttachment.detach();
 
     // Don't manage the lifetime of external nodes given to the widget, just the
     // internal node.
@@ -403,10 +397,6 @@ class _FocusState extends State<Focus> {
 
   @override
   Widget build(BuildContext context) {
-    if (identical(widget.focusNode, Focus.unfocusable)) {
-      return widget.child;
-    }
-
     _focusAttachment.reparent();
     return _FocusMarker(
       node: focusNode,

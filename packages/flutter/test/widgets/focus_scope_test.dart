@@ -1156,18 +1156,50 @@ void main() {
       bool gotFocus;
       await tester.pumpWidget(
         Focus(
-          focusNode: Focus.unfocusable,
+          focusNode: UnfocusableNode(),
           onFocusChange: (bool focused) => gotFocus = focused,
           child: Container(key: key1),
         ),
       );
 
       final Element firstNode = tester.element(find.byKey(key1));
-      final FocusNode node = Focus.of(firstNode, nullOk: true);
-      expect(node, isNull);
-      expect(find.byWidgetPredicate((Widget widget) {
-        return widget.runtimeType.toString() == '_FocusMarker';
-      }), findsNothing);
+      final FocusNode node = Focus.of(firstNode);
+      node.requestFocus();
+
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(node.hasFocus, isFalse);
+    });
+    testWidgets('Child of unfocusable Focus cannot get focus.', (WidgetTester tester) async {
+      final GlobalKey key1 = GlobalKey(debugLabel: '1');
+      final GlobalKey key2 = GlobalKey(debugLabel: '2');
+      final FocusNode focusNode = FocusNode();
+      bool gotFocus;
+      await tester.pumpWidget(
+        Focus(
+          focusNode: UnfocusableNode(),
+          onFocusChange: (bool focused) => gotFocus = focused,
+          child: Focus(key: key1, focusNode: focusNode, child: Container(key: key2)),
+        ),
+      );
+
+      final Element childNode = tester.element(find.byKey(key1));
+      final Element containerNode = tester.element(find.byKey(key2));
+      final FocusNode unfocusableNode = Focus.of(childNode);
+      unfocusableNode.requestFocus();
+
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(unfocusableNode.hasFocus, isFalse);
+
+      unfocusableNode.requestFocus();
+
+      await tester.pump();
+
+      expect(gotFocus, isNull);
+      expect(unfocusableNode.hasFocus, isFalse);
     });
   });
   testWidgets('Nodes are removed when all Focuses are removed.', (WidgetTester tester) async {
