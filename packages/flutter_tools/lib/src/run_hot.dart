@@ -577,6 +577,10 @@ class HotRunner extends ResidentRunner {
       if (!(await hotRunnerConfig.setupHotRestart())) {
         return OperationResult(1, 'setupHotRestart failed');
       }
+      // The current implementation of the vmservice and JSON rpc may throw
+      // unhandled exceptions into the zone that cannot be caught with a regular
+      // try catch. The usage is [asyncGuard] is required to normalize the error
+      // handling, at least until we can refactor the underlying code.
       result = await asyncGuard(() => _restartFromSources(
         reason: reason,
         benchmarkMode: benchmarkMode,
