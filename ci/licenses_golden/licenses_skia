@@ -1,4 +1,4 @@
-Signature: fb3be43a6ece3d385b5995264c4f24c3
+Signature: b0d5a4e8062ad80c18fe150355241da1
 
 UNUSED LICENSES:
 
@@ -3965,7 +3965,6 @@ FILE: ../../../third_party/skia/docs/examples/ImageInfo_validRowBytes.cpp
 FILE: ../../../third_party/skia/docs/examples/ImageInfo_width.cpp
 FILE: ../../../third_party/skia/docs/examples/Image_Filter_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Image_MakeBackendTextureFromSkImage.cpp
-FILE: ../../../third_party/skia/docs/examples/Image_MakeCrossContextFromEncoded.cpp
 FILE: ../../../third_party/skia/docs/examples/Image_MakeCrossContextFromPixmap.cpp
 FILE: ../../../third_party/skia/docs/examples/Image_MakeFromAdoptedTexture.cpp
 FILE: ../../../third_party/skia/docs/examples/Image_MakeFromBitmap.cpp
@@ -4697,6 +4696,7 @@ FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/gm/labyrinth.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
+FILE: ../../../third_party/skia/src/core/SkPixelRefPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrSampleMaskProcessor.h
