@@ -32,6 +32,20 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
 @property(nonatomic, readwrite, getter=isDisplayingFlutterUI) BOOL displayingFlutterUI;
 @end
 
+// The following conditional compilation defines an API 13 concept on earlier API targets so that
+// a compiler compiling against API 12 or below does not blow up due to non-existent members.
+#if __IPHONE_OS_VERSION_MAX_ALLOWED < 130000
+typedef enum UIAccessibilityContrast : NSInteger {
+  UIAccessibilityContrastUnspecified = 0,
+  UIAccessibilityContrastNormal = 1,
+  UIAccessibilityContrastHigh = 2
+} UIAccessibilityContrast;
+
+@interface UITraitCollection (MethodsFromNewerSDK)
+- (UIAccessibilityContrast)accessibilityContrast;
+@end
+#endif
+
 @implementation FlutterViewController {
   std::unique_ptr<fml::WeakPtrFactory<FlutterViewController>> _weakFactory;
   fml::scoped_nsobject<FlutterEngine> _engine;
@@ -433,6 +447,9 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
     [_engine.get() setViewController:self];
     _engineNeedsLaunch = NO;
   }
+
+  // Send platform settings to Flutter, e.g., platform brightness.
+  [self onUserSettingsChanged:nil];
 
   // Only recreate surface on subsequent appearances when viewport metrics are known.
   // First time surface creation is done on viewDidLayoutSubviews.
@@ -885,10 +902,17 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Set user settings
 
+- (void)traitCollectionDidChange:(UITraitCollection*)previousTraitCollection {
+  [super traitCollectionDidChange:previousTraitCollection];
+  [self onUserSettingsChanged:nil];
+}
+
 - (void)onUserSettingsChanged:(NSNotification*)notification {
   [[_engine.get() settingsChannel] sendMessage:@{
     @"textScaleFactor" : @([self textScaleFactor]),
     @"alwaysUse24HourFormat" : @([self isAlwaysUse24HourFormat]),
+    @"platformBrightness" : [self brightnessMode],
+    @"platformContrast" : [self contrastMode]
   }];
 }
 
@@ -960,6 +984,40 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
                                                          options:0
                                                           locale:[NSLocale currentLocale]];
   return [dateFormat rangeOfString:@"a"].location == NSNotFound;
+}
+
+// The brightness mode of the platform, e.g., light or dark, expressed as a string that
+// is understood by the Flutter framework. See the settings system channel for more
+// information.
+- (NSString*)brightnessMode {
+  if (@available(iOS 13, *)) {
+    UIUserInterfaceStyle style = self.traitCollection.userInterfaceStyle;
+
+    if (style == UIUserInterfaceStyleDark) {
+      return @"dark";
+    } else {
+      return @"light";
+    }
+  } else {
+    return @"light";
+  }
+}
+
+// The contrast mode of the platform, e.g., normal or high, expressed as a string that is
+// understood by the Flutter framework. See the settings system channel for more
+// information.
+- (NSString*)contrastMode {
+  if (@available(iOS 13, *)) {
+    UIAccessibilityContrast contrast = self.traitCollection.accessibilityContrast;
+
+    if (contrast == UIAccessibilityContrastHigh) {
+      return @"high";
+    } else {
+      return @"normal";
+    }
+  } else {
+    return @"normal";
+  }
 }
 
 #pragma mark - Status Bar touch event handling
