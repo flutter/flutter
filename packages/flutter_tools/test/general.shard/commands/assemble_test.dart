@@ -73,7 +73,7 @@ void main() {
       return BuildResult(
         success: true,
         inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
-        outputFiles: <File>[fs.file('bar')]);
+        outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
     });
     await commandRunner.run(<String>['assemble', '--build-outputs=outputs', '--build-inputs=inputs', 'unpack_macos']);
 
