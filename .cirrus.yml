@@ -534,6 +534,8 @@ task:
     - name: add2app-macos
       env:
         SHARD: add2app_test
+      setup_xcpretty_script:
+        - sudo gem install xcpretty
       test_all_script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts dev/bots/test.dart
