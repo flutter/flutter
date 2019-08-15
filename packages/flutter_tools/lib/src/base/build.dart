@@ -18,7 +18,6 @@ import '../reporting/reporting.dart';
 
 import 'context.dart';
 import 'file_system.dart';
-import 'fingerprint.dart';
 import 'process.dart';
 
 GenSnapshot get genSnapshot => context.get<GenSnapshot>();
