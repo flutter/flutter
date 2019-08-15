@@ -1932,5 +1932,114 @@ void main() {
       );
       expect(factoryInvocationCount, 1);
     });
+
+    testWidgets('PlatformViewLink Widget init, should create a SizedBox widget before onPlatformViewCreated and a PlatformViewSurface after', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      int createdPlatformViewId;
+
+      PlatformViewCreatedCallback onPlatformViewCreatedCallBack;
+
+      final PlatformViewLink platformViewLink = PlatformViewLink(createPlatformViewController: (PlatformViewCreationParams params){
+        onPlatformViewCreatedCallBack = params.onPlatformViewCreated;
+        createdPlatformViewId = params.id;
+        return FakePlatformViewController(params.id);
+      }, surfaceFactory: (BuildContext context, PlatformViewController controller) {
+        return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        );
+      });
+
+      await tester.pumpWidget(platformViewLink);
+      final SizedBox sizedBox = tester.allWidgets.firstWhere((Widget widget) => widget is SizedBox);
+      expect(sizedBox, isNotNull);
+
+      onPlatformViewCreatedCallBack(createdPlatformViewId);
+
+      await tester.pump();
+
+      final PlatformViewSurface surface = tester.allWidgets.firstWhere((Widget widget) => widget is PlatformViewSurface);
+      expect(surface, isNotNull);
+
+      expect(createdPlatformViewId, currentViewId+1);
+    });
+
+    testWidgets('PlatformViewLink Widget dispose', (WidgetTester tester) async {
+      FakePlatformViewController disposedController;
+      final PlatformViewLink platformViewLink = PlatformViewLink(createPlatformViewController: (PlatformViewCreationParams params){
+        params.onPlatformViewCreated(params.id);
+        disposedController = FakePlatformViewController(params.id);
+        params.onPlatformViewCreated(params.id);
+        return disposedController;
+      }, surfaceFactory: (BuildContext context,PlatformViewController controller) {
+        return PlatformViewSurface(
+            gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+            controller: controller,
+            hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+        );
+      });
+
+      await tester.pumpWidget(platformViewLink);
+
+      await tester.pumpWidget(Container());
+
+      expect(disposedController.disposed, true);
+    });
+
+    testWidgets('PlatformViewLink widget survives widget tree change', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final List<int> ids = <int>[];
+
+      FakePlatformViewController controller;
+
+      PlatformViewLink createPlatformViewLink() {
+        return PlatformViewLink(
+          key: key,
+          createPlatformViewController: (PlatformViewCreationParams params){
+            ids.add(params.id);
+            controller = FakePlatformViewController(params.id);
+            params.onPlatformViewCreated(params.id);
+            return controller;
+          },
+          surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            return PlatformViewSurface(
+              gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
+              controller: controller,
+              hitTestBehavior: PlatformViewHitTestBehavior.opaque,
+            );
+          },
+        );
+      }
+      await tester.pumpWidget(
+        Center(
+          child: SizedBox(
+            width: 200.0,
+            height: 100.0,
+            child: createPlatformViewLink(),
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        Center(
+          child: Container(
+            child: SizedBox(
+              width: 200.0,
+              height: 100.0,
+              child: createPlatformViewLink(),
+            ),
+          ),
+        ),
+      );
+
+      expect(
+        ids,
+        unorderedEquals(<int>[
+          currentViewId+1,
+        ]),
+      );
+    });
   });
 }

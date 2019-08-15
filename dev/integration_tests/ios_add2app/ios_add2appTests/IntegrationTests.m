@@ -11,36 +11,6 @@
 #import "../ios_add2app/MainViewController.h"
 #import "../ios_add2app/HybridViewController.h"
 
-static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
-  int tries = 10;
-  double delay = 1.0;
-
-  // ensureSemanticsEnabled is a synchronous call, but only ensures that the
-  // semantics tree will be built on a subsequent frame (as opposed to being
-  // available at time it returns).
-  // To actually get the tree, we have to wait for the FlutterSemanticsUpdate
-  // notification, which lets us know that a semantics tree has been built;
-  // but we cannot block the main thread while waiting (so we use
-  // CFRunLoopRunInMode).
-
-  __block BOOL semanticsAvailable = NO;
-  __block id<NSObject> observer = [[NSNotificationCenter defaultCenter]
-      addObserverForName:@"FlutterSemanticsUpdate"
-                  object:viewController
-                   queue:nil
-              usingBlock:^(NSNotification *notification) {
-                semanticsAvailable = YES;
-                [[NSNotificationCenter defaultCenter] removeObserver:observer];
-              }];
-  [viewController.engine ensureSemanticsEnabled];
-  while (semanticsAvailable == NO && tries != 0) {
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, delay, false);
-    tries--;
-    [viewController.engine ensureSemanticsEnabled];
-  }
-  GREYAssertTrue(semanticsAvailable, @"Semantics Tree did not build!");
-}
-
 @interface FlutterTests : XCTestCase
 @end
 
@@ -56,6 +26,12 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
   }
 
   return self;
+}
+
+- (void)expectSemanticsNotification:(FlutterViewController*)viewController {
+  [self expectationForNotification:FlutterSemanticsUpdateNotification object:viewController handler:nil];
+  [viewController.engine ensureSemanticsEnabled];
+  [self waitForExpectationsWithTimeout:30.0 handler:nil];
 }
 
 - (void)testFullScreenCanPop {
@@ -74,7 +50,7 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
             .window.rootViewController;
     weakViewController =
         (FullScreenViewController *)navController.visibleViewController;
-    waitForFlutterSemanticsTree(weakViewController);
+    [self expectSemanticsNotification:weakViewController];
     GREYAssertNotNil(weakViewController,
                      @"Expected non-nil FullScreenViewController.");
   }
@@ -112,8 +88,8 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
         (DualFlutterViewController *)navController.visibleViewController;
     GREYAssertNotNil(viewController,
                      @"Expected non-nil DualFlutterViewController.");
-    waitForFlutterSemanticsTree(viewController.topFlutterViewController);
-    waitForFlutterSemanticsTree(viewController.bottomFlutterViewController);
+    [self expectSemanticsNotification:viewController.topFlutterViewController];
+    [self expectSemanticsNotification:viewController.bottomFlutterViewController];
   }
 
   // Verify that there are two Flutter views with the expected marquee text.
@@ -148,7 +124,7 @@ static void waitForFlutterSemanticsTree(FlutterViewController *viewController) {
         (HybridViewController *)navController.visibleViewController;
     GREYAssertNotNil(viewController.flutterViewController,
                      @"Expected non-nil FlutterViewController.");
-    waitForFlutterSemanticsTree(viewController.flutterViewController);
+    [self expectSemanticsNotification:viewController.flutterViewController];
   }
 
   [self validateCountsFlutter:@"Platform" count:0];
