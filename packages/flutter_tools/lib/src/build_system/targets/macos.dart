@@ -258,6 +258,7 @@ class DebugBundleFlutterAssets extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.behavior(MacOSAssetBehavior()),
     Source.pattern('{BUILD_DIR}/app.dill'),
     Source.artifact(Artifact.isolateSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.debug),

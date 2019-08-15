@@ -64,6 +64,7 @@ class KernelSnapshot extends Target {
 
   @override
   List<Source> get inputs => const <Source>[
+    Source.pattern('{PROJECT_DIR}/.packages'),
     Source.pattern('{FLUTTER_ROOT}/packages/flutter_tools/lib/src/build_system/targets/dart.dart'),
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and in .packages
     Source.artifact(Artifact.platformKernelDill),
