@@ -477,7 +477,7 @@ void main() {
     root.append(child1);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, position, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, position, onlyFirst: false);
     expect(absorbed, isTrue);
     expect(result, <int>[1]);
   });
@@ -493,7 +493,7 @@ void main() {
     root.append(child1);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, position, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, position, onlyFirst: false);
     expect(absorbed, isFalse);
     expect(result, <int>[]);
   });
@@ -523,7 +523,7 @@ void main() {
     child2.append(child21);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, Offset.zero, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, Offset.zero, onlyFirst: false);
     expect(absorbed, isFalse);
     expect(result, <int>[21, 2, 11, 1, 0]);
   });
@@ -553,7 +553,7 @@ void main() {
     child2.append(child21);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, Offset.zero, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, Offset.zero, onlyFirst: false);
     expect(absorbed, isFalse);
     expect(result, <int>[2, 11]);
   });
@@ -591,7 +591,7 @@ void main() {
     child2.append(child21);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, position, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, position, onlyFirst: false);
     expect(absorbed, isFalse);
     expect(result, <int>[21, 11, 1, 0]);
   });
@@ -616,13 +616,13 @@ void main() {
     root.append(child3);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, Offset.zero, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, Offset.zero, onlyFirst: false);
     expect(absorbed, isTrue);
     expect(result, <int>[3, 2, 0]);
   });
 
   test('AnnotatedRegionLayer.hitTest when translucent should stop at the first '
-    'that absorbs, then return false', () {
+    'that absorbs, then return the value from its children', () {
 
     // Tests:
     //
@@ -641,8 +641,8 @@ void main() {
     root.append(child3);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, Offset.zero, onlyFirst: false);
-    expect(absorbed, isFalse);
+    final bool absorbed = root.findAnnotations(result, Offset.zero, onlyFirst: false);
+    expect(absorbed, isTrue);
     expect(result, <int>[3, 2, 0]);
   });
 
@@ -664,7 +664,7 @@ void main() {
     root.append(child1);
 
     final List<int> result = <int>[];
-    final bool absorbed = root.hitTest(result, position, onlyFirst: false);
+    final bool absorbed = root.findAnnotations(result, position, onlyFirst: false);
     expect(absorbed, isFalse);
     expect(result, <int>[1]);
   });
