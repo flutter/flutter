@@ -799,6 +799,26 @@ void main() {
     );
     expect(iconRichText.text.style.color, foregroundColor);
   });
+
+  testWidgets('FloatingActionButton uses custom splash color', (WidgetTester tester) async {
+    const Color splashColor = Color(0xcafefeed);
+
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(
+        onPressed: () {},
+        splashColor: splashColor,
+        child: const Icon(Icons.access_alarm),
+      ),
+    ));
+
+    await tester.press(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byType(FloatingActionButton),
+      paints..circle(color: splashColor),
+    );
+  });
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {
