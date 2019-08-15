@@ -190,6 +190,12 @@ enum SchedulerPhase {
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
 mixin SchedulerBinding on BindingBase, ServicesBinding {
+  /// Subscription of FrameTiming used by developer tools.
+  ///
+  /// This should only be used for unit tests, and it's always null in release.
+  @protected
+  StreamSubscription<FrameTiming> debugFlutterFrameSubscription;
+
   @override
   void initInstances() {
     super.initInstances();
@@ -202,7 +208,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (!kReleaseMode) {
       int frameNumber = 0;
 
-      frameTimingStream.listen((FrameTiming frameTiming) {
+      debugFlutterFrameSubscription = frameTimingStream.listen((FrameTiming frameTiming) {
         frameNumber += 1;
         _profileFramePostEvent(frameNumber, frameTiming);
       });
@@ -348,10 +354,15 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   TimingsCallback _oldTimingsCallback;
   StreamController<FrameTiming> _frameTimingBroadcastController;
-  int _frameTimingListenCount = 0;
 
   void _onFrameTimingListen() {
-    _frameTimingListenCount += 1;
+    _oldTimingsCallback = window.onReportTimings;
+    window.onReportTimings = (List<FrameTiming> timings) {
+      if (_oldTimingsCallback != null) {
+        _oldTimingsCallback(timings);
+      }
+      timings.forEach(_frameTimingBroadcastController.add);
+    };
   }
 
   // If there's no one listening, remove `_frameTimingBroadcastController` and
@@ -360,12 +371,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // [window.onReportTimings] back to null tells the engine that there's no need
   // to send [FrameTiming] from engine to the framework.
   void _onFrameTimingCancel() {
-    _frameTimingListenCount -= 1;
-    assert(_frameTimingListenCount >= 0);
-    if (_frameTimingListenCount == 0) {
       window.onReportTimings = _oldTimingsCallback;
       _frameTimingBroadcastController = null;
-    }
   }
 
   /// A broadcast stream of the frames' time-related performance metrics.
@@ -386,13 +393,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         onListen: _onFrameTimingListen,
         onCancel: _onFrameTimingCancel,
       );
-      _oldTimingsCallback = window.onReportTimings;
-      window.onReportTimings = (List<FrameTiming> timings) {
-        if (_oldTimingsCallback != null) {
-          _oldTimingsCallback(timings);
-        }
-        timings.forEach(_frameTimingBroadcastController.add);
-      };
     }
     return _frameTimingBroadcastController.stream;
   }

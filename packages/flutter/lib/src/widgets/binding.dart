@@ -740,14 +740,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
     if (_needToReportFirstFrame && _reportFirstFrame) {
       assert(!_firstFrameCompleter.isCompleted);
-      StreamSubscription<FrameTiming> firstFrameSubscription;
-      firstFrameSubscription = WidgetsBinding.instance.frameTimingStream.listen((FrameTiming timing) {
+      WidgetsBinding.instance.frameTimingStream.first.then((FrameTiming timing) {
         if (!kReleaseMode) {
           developer.Timeline.instantSync('Rasterized first useful frame');
           developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
         }
         _firstFrameCompleter.complete();
-        firstFrameSubscription.cancel();
       });
     }
 

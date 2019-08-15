@@ -31,6 +31,15 @@ class TestServiceExtensionsBinding extends BindingBase
   final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
 
   @override
+  void initInstances() {
+    super.initInstances();
+    // Remove the subscription as we don't need it in the test. Moreover,
+    // we'll test that we properly reset onReportTimings to null after the
+    // first frame.
+    debugFlutterFrameSubscription.cancel();
+  }
+
+    @override
   void registerServiceExtension({
     @required String name,
     @required ServiceExtensionCallback callback,
@@ -150,6 +159,9 @@ void main() {
     expect(firstFrameResult, <String, String>{'enabled': 'true'});
 
     expect(binding.frameScheduled, isFalse);
+
+    // Checks that onReportTimings is reset to null after the first frame.
+    expect(binding.window.onReportTimings, isNull);
 
     expect(debugPrint, equals(debugPrintThrottled));
     debugPrint = (String message, { int wrapWidth }) {
