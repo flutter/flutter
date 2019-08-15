@@ -501,4 +501,81 @@ void main() {
     children = result['children'];
     expect(children.single['children'], isEmpty);
   });
+
+  group('waitUntilFrameSync', () {
+    FlutterDriverExtension extension;
+    Map<String, dynamic> result;
+
+    setUp(() {
+      extension = FlutterDriverExtension((String arg) async => '', true);
+      result = null;
+    });
+
+    testWidgets('returns immediately when frame is synced', (
+        WidgetTester tester) async {
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      await tester.idle();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no transient callbacks', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrameCallback((_) {
+        // Intentionally blank. We only care about existence of a callback.
+      });
+
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+
+    testWidgets(
+        'waits until no pending scheduled frame', (WidgetTester tester) async {
+      SchedulerBinding.instance.scheduleFrame();
+
+      extension.call(const WaitUntilNoPendingFrame().serialize()) // ignore: deprecated_member_use_from_same_package
+          .then<void>(expectAsync1((Map<String, dynamic> r) {
+        result = r;
+      }));
+
+      // Nothing should happen until the next frame.
+      await tester.idle();
+      expect(result, isNull);
+
+      // NOW we should receive the result.
+      await tester.pump();
+      expect(
+        result,
+        <String, dynamic>{
+          'isError': false,
+          'response': null,
+        },
+      );
+    });
+  });
 }
