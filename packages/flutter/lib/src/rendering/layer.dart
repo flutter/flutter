@@ -137,7 +137,11 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// See also:
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S find<S>(Offset regionOffset);
+  S find<S>(Offset regionOffset) {
+    final List<S> result = <S>[];
+    hitTest<S>(result, regionOffset, onlyFirst: true);
+    return result.isEmpty ? null : result.first;
+  }
 
   /// Returns an iterable of [S] values that corresponds to the point described
   /// by [regionOffset] on all layers under the point.
@@ -155,10 +159,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   Iterable<S> findAll<S>(Offset regionOffset) {
     final List<S> result = <S>[];
-    hitTest<S>(result, regionOffset: regionOffset);
-    return result.map((S entry) {
-      return entry;
-    });
+    hitTest<S>(result, regionOffset, onlyFirst: false);
+    return result;
   }
 
   /// Determines the list of annotations located at the given position.
@@ -170,7 +172,12 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// (preventing non-ancestral layers below this one from being hit).
   /// Returns false if the hit can continue to other non-ancestral objects
   /// behind this one.
-  bool hitTest<S>(List<S> result, { @required Offset regionOffset });
+  @protected
+  bool hitTest<S>(
+    List<S> result,
+    Offset regionOffset, {
+    @required bool onlyFirst,
+  });
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -293,7 +300,9 @@ class PictureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -365,7 +374,9 @@ class TextureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -404,7 +415,9 @@ class PlatformViewLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -481,7 +494,9 @@ class PerformanceOverlayLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A composited layer that has a list of children.
@@ -637,9 +652,9 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     for (Layer child = lastChild; child != null; child = child.previousSibling) {
-      final bool isAbsorbed = child.hitTest<S>(result, regionOffset: regionOffset);
+      final bool isAbsorbed = child.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
       if (isAbsorbed)
         return true;
     }
@@ -871,8 +886,8 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
-    return super.hitTest<S>(result, regionOffset: regionOffset - offset);
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return super.hitTest<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1025,10 +1040,10 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRect.contains(regionOffset))
       return false;
-    return super.hitTest<S>(result, regionOffset: regionOffset);
+    return super.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1106,10 +1121,10 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRRect.contains(regionOffset))
       return false;
-    return super.hitTest<S>(result, regionOffset: regionOffset);
+    return super.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1187,10 +1202,10 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipPath.contains(regionOffset))
       return false;
-    return super.hitTest<S>(result, regionOffset: regionOffset);
+    return super.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1322,12 +1337,11 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     final Offset transformedOffset = _transformOffset(regionOffset);
-    if (transformedOffset == null) {
+    if (transformedOffset == null)
       return false;
-    }
-    return super.hitTest<S>(result, regionOffset: transformedOffset);
+    return super.hitTest<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1640,10 +1654,10 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipPath.contains(regionOffset))
       return false;
-    return super.hitTest<S>(result, regionOffset: regionOffset);
+    return super.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1760,8 +1774,8 @@ class LeaderLayer extends ContainerLayer {
   S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
-    return super.hitTest<S>(result, regionOffset: regionOffset - offset);
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return super.hitTest<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1898,17 +1912,17 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (link.leader == null) {
       if (showWhenUnlinked)
-        return super.hitTest(result, regionOffset: regionOffset - unlinkedOffset);
+        return super.hitTest(result, regionOffset - unlinkedOffset, onlyFirst: onlyFirst);
       return false;
     }
     final Offset transformedOffset = _transformOffset<S>(regionOffset);
     if (transformedOffset == null) {
       return false;
     }
-    return super.hitTest<S>(result, regionOffset: transformedOffset);
+    return super.hitTest<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
   /// The transform that was used during the last composition phase.
@@ -2121,8 +2135,8 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     return null;
   }
 
-  bool _hitTest<S>(List<S> result, {Offset regionOffset}) {
-    bool isAbsorbed = super.hitTest(result, regionOffset: regionOffset);
+  bool _hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    bool isAbsorbed = super.hitTest(result, regionOffset, onlyFirst: onlyFirst);
     if (size != null && !(offset & size).contains(regionOffset)) {
       return isAbsorbed;
     }
@@ -2136,8 +2150,8 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   }
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) {
-    return _hitTest(result, regionOffset: regionOffset) && opaque;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+    return _hitTest(result, regionOffset, onlyFirst: onlyFirst) && opaque;
   }
 
   @override

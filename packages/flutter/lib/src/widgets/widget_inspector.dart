@@ -61,7 +61,7 @@ class _ProxyLayer extends Layer {
   S find<S>(Offset regionOffset) => _layer.find(regionOffset);
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { bool onlyFirst }) => false;
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -2643,7 +2643,7 @@ class _InspectorOverlayLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
-  bool hitTest<S>(List<S> result, {Offset regionOffset}) => false;
+  bool hitTest<S>(List<S> result, Offset regionOffset, { bool onlyFirst }) => false;
 }
 
 const double _kScreenEdgeMargin = 10.0;
