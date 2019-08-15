@@ -25,15 +25,16 @@ const String _kOutputPrefix = 'macos/Flutter/ephemeral/FlutterMacOS.framework';
 final List<File> inputs = <File>[
   fs.file('$_kInputPrefix/FlutterMacOS'),
   // Headers
-  fs.file('$_kInputPrefix/Headers/FLEDartProject.h'),
-  fs.file('$_kInputPrefix/Headers/FLEEngine.h'),
-  fs.file('$_kInputPrefix/Headers/FLEViewController.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterDartProject.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterEngine.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterViewController.h'),
   fs.file('$_kInputPrefix/Headers/FlutterBinaryMessenger.h'),
   fs.file('$_kInputPrefix/Headers/FlutterChannels.h'),
   fs.file('$_kInputPrefix/Headers/FlutterCodecs.h'),
   fs.file('$_kInputPrefix/Headers/FlutterMacros.h'),
   fs.file('$_kInputPrefix/Headers/FlutterPluginMacOS.h'),
   fs.file('$_kInputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterMacOS.h'),
   // Modules
   fs.file('$_kInputPrefix/Modules/module.modulemap'),
   // Resources

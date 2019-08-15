@@ -85,15 +85,16 @@ class UnpackMacOS extends Target {
   List<Source> get outputs => const <Source>[
     Source.pattern('$_kOutputPrefix/FlutterMacOS'),
     // Headers
-    Source.pattern('$_kOutputPrefix/Headers/FLEDartProject.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FLEEngine.h'),
-    Source.pattern('$_kOutputPrefix/Headers/FLEViewController.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterDartProject.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterEngine.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterViewController.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterBinaryMessenger.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterChannels.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterCodecs.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterMacros.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterPluginMacOS.h'),
     Source.pattern('$_kOutputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
+    Source.pattern('$_kOutputPrefix/Headers/FlutterMacOS.h'),
     // Modules
     Source.pattern('$_kOutputPrefix/Modules/module.modulemap'),
     // Resources
@@ -131,7 +132,7 @@ class UnpackMacOS extends Target {
 ///
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
-/// string.
+/// constant.
 class DebugMacOSFramework extends Target {
   const DebugMacOSFramework();
 
@@ -174,7 +175,6 @@ static const int Moo = 88;
 
   @override
   List<Source> get outputs => const <Source>[
-    Source.pattern('{BUILD_DIR}/debug_app.cc'),
     Source.pattern('{PROJECT_DIR}/macos/Flutter/ephemeral/App.framework/App'),
   ];
 }

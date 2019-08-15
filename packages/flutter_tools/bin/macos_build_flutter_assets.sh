@@ -58,8 +58,9 @@ build_mode="$(echo "${FLUTTER_BUILD_MODE:-${CONFIGURATION}}" | tr "[:upper:]" "[
 
 # The path where the input/output xcfilelists are stored. These are used by xcode
 # to conditionally skip this script phase if neither have changed.
-build_inputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterInputs.xcfilelist"
-build_outputs_path="${SOURCE_ROOT}/Flutter/ephemeral/FlutterOutputs.xcfilelist"
+ephemeral_dir="${SOURCE_ROOT}/Flutter/ephemeral"
+build_inputs_path="${ephemeral_dir}/FlutterInputs.xcfilelist"
+build_outputs_path="${ephemeral_dir}/FlutterOutputs.xcfilelist"
 
 # TODO(jonahwilliams): connect AOT rules once engine artifacts are published.
 # The build mode is currently hard-coded to debug only. Since this does not yet
