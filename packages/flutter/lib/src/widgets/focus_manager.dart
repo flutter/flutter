@@ -365,8 +365,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-    this.skipTraversal = false,
+    bool skipTraversal = false,
+    bool focusable = true,
   })  : assert(skipTraversal != null),
+        assert(focusable != null),
+        _skipTraversal = skipTraversal,
+        _focusable = focusable,
         _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
@@ -378,7 +382,30 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// This may be used to place nodes in the focus tree that may be focused, but
   /// not traversed, allowing them to receive key events as part of the focus
   /// chain, but not be traversed to via focus traversal.
-  bool skipTraversal;
+  bool get skipTraversal => _skipTraversal;
+  bool _skipTraversal;
+  set skipTraversal(bool value) {
+    if (value != _skipTraversal) {
+      _skipTraversal = value;
+      _notify();
+    }
+  }
+
+  /// If true, this focus node may be focused.
+  ///
+  /// Defaults to true.  Set to false if you want this node to do nothing when
+  /// [requestFocus] is called on it. Does not affect the children of this node.
+  bool get focusable => _focusable;
+  bool _focusable;
+  set focusable(bool value) {
+    if (value != _focusable) {
+      _focusable = value;
+      if (!_focusable) {
+        unfocus();
+      }
+      _notify();
+    }
+  }
 
   /// The context that was supplied to [attach].
   ///
@@ -680,6 +707,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// need to be attached. [FocusAttachment.detach] should be called on the old
   /// node, and then [attach] called on the new node. This typically happens in
   /// the [State.didUpdateWidget] method.
+  @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
     _onKey = onKey ?? _onKey;
@@ -735,14 +763,13 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _doRequestFocus();
   }
 
-  bool get _hasUnfocusableAncestor {
-    return ancestors.whereType<UnfocusableNode>().isNotEmpty;
-  }
-
   // Note that this is overridden in FocusScopeNode.
   void _doRequestFocus() {
+    if (!focusable) {
+      return;
+    }
     _setAsFocusedChild();
-    if (hasPrimaryFocus || _hasUnfocusableAncestor) {
+    if (hasPrimaryFocus) {
       return;
     }
     _hasKeyboardToken = true;
@@ -793,6 +820,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BuildContext>('context', context, defaultValue: null));
+    properties.add(FlagProperty('focusable', value: focusable, ifFalse: 'NOT FOCUSABLE', defaultValue: true));
     properties.add(FlagProperty('hasFocus', value: hasFocus, ifTrue: 'FOCUSED', defaultValue: false));
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
   }
@@ -804,21 +832,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       return child.toDiagnosticsNode(name: 'Child ${count++}');
     }).toList();
   }
-}
-
-
-/// The type of [Focus.unfocusable], used as a sentinel value for
-/// [Focus.focusNode] to indicate that the [Focus] widget should not participate
-/// in the focus tree.
-///
-/// Used to indicate and enforce that an unfocusable node doesn't appear in the
-/// focus tree.
-class UnfocusableNode extends FocusNode {
-  /// Creates an unfocusable focus node for use as
-  UnfocusableNode() : super(debugLabel: 'Unfocusable Node', skipTraversal: true);
-
-  @override
-  void _doRequestFocus() {}
 }
 
 /// A subclass of [FocusNode] that acts as a scope for its descendants,
@@ -913,9 +926,6 @@ class FocusScopeNode extends FocusNode {
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
   void autofocus(FocusNode node) {
-    if (node is UnfocusableNode) {
-      return;
-    }
     if (focusedChild == null) {
       if (node._parent == null) {
         _reparent(node);
@@ -928,6 +938,10 @@ class FocusScopeNode extends FocusNode {
 
   @override
   void _doRequestFocus() {
+    if (!focusable) {
+      return;
+    }
+
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
