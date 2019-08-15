@@ -31,9 +31,9 @@ class RawMaterialButton extends StatefulWidget {
   /// Create a button based on [Semantics], [Material], and [InkWell] widgets.
   ///
   /// The [shape], [elevation], [focusElevation], [hoverElevation],
-  /// [highlightElevation], [disabledElevation], [padding], [constraints], and
-  /// [clipBehavior] arguments must not be null. Additionally, [elevation],
-  /// [focusElevation], [hoverElevation], [highlightElevation], and
+  /// [highlightElevation], [disabledElevation], [padding], [constraints],
+  /// [autofocus], and [clipBehavior] arguments must not be null. Additionally,
+  /// [elevation], [focusElevation], [hoverElevation], [highlightElevation], and
   /// [disabledElevation] must be non-negative.
   const RawMaterialButton({
     Key key,
@@ -56,6 +56,7 @@ class RawMaterialButton extends StatefulWidget {
     this.animationDuration = kThemeChangeDuration,
     this.clipBehavior = Clip.none,
     this.focusNode,
+    this.autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     this.child,
   }) : materialTapTargetSize = materialTapTargetSize ?? MaterialTapTargetSize.padded,
@@ -69,6 +70,7 @@ class RawMaterialButton extends StatefulWidget {
        assert(constraints != null),
        assert(animationDuration != null),
        assert(clipBehavior != null),
+       assert(autofocus != null),
        super(key: key);
 
   /// Called when the button is tapped or otherwise activated.
@@ -232,13 +234,11 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// An optional focus node to use for requesting focus when pressed.
-  ///
-  /// If not supplied, the button will create and host its own [FocusNode].
-  ///
-  /// If supplied, the given focusNode will be _hosted_ by this widget. See
-  /// [FocusNode] for more information on what that implies.
+  /// {@macro flutter.widgets.Focus.focusNode}
   final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
 
   /// {@macro flutter.widgets.Clip}
   final Clip clipBehavior;
@@ -331,6 +331,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     final Widget result = Focus(
       focusNode: widget.focusNode,
       onFocusChange: _handleFocusedChanged,
+      autofocus: widget.autofocus,
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
