@@ -6,7 +6,7 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
-if (is_fuchsia) {
+if (is_fuchsia || is_fuchsia_host) {
   import("//build/fuchsia/sdk.gni")
 }
 
@@ -15,7 +15,11 @@ if (target_cpu == "arm" || target_cpu == "arm64") {
 }
 
 if (is_ios || is_mac) {
-  import("//build/toolchain/clang.gni")
+  if (using_fuchsia_sdk) {
+    import("//build/toolchain/clang.gni")
+  } else {
+    import("//build/toolchain/clang_toolchain.gni")
+  }
 }
 
 declare_args() {
@@ -53,6 +57,6 @@ if (is_fuchsia && using_fuchsia_sdk) {
   feature_defines_list += [ "FUCHSIA_SDK=1" ]
 }
 
-if (is_ios || is_mac) {
+if ((is_ios || is_mac) && defined(enable_bitcode)) {
   flutter_enable_bitcode = enable_bitcode
 }
