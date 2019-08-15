@@ -10,7 +10,7 @@ import 'navigator.dart';
 /// Messages for route change notifications.
 class RouteNotificationMessages {
   RouteNotificationMessages._();
-  
+
   /// When the engine is Web notify the platform for a route change.
   static void maybeNotifyRouteChange(String methodName, Route<dynamic> route, Route<dynamic> previousRoute) {
     if(kIsWeb) {
