@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashList, lerpDouble;
+import 'dart:ui' show Color, hashList;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -19,6 +19,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
+import 'divider_theme.dart';
 import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
@@ -129,7 +130,6 @@ class ThemeData extends Diagnosticable {
     Color bottomAppBarColor,
     Color cardColor,
     Color dividerColor,
-    double dividerThickness,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -179,6 +179,7 @@ class ThemeData extends Diagnosticable {
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
+    DividerThemeData dividerTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -197,7 +198,6 @@ class ThemeData extends Diagnosticable {
     bottomAppBarColor ??= isDark ? Colors.grey[800] : Colors.white;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
-    dividerThickness ??= 0.0;
 
     // Create a ColorScheme that is backwards compatible as possible
     // with the existing default ThemeData color values.
@@ -284,6 +284,7 @@ class ThemeData extends Diagnosticable {
     bottomSheetTheme ??= const BottomSheetThemeData();
     popupMenuTheme ??= const PopupMenuThemeData();
     bannerTheme ??= const MaterialBannerThemeData();
+    dividerTheme ??= const DividerThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -298,7 +299,6 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: bottomAppBarColor,
       cardColor: cardColor,
       dividerColor: dividerColor,
-      dividerThickness: dividerThickness,
       focusColor: focusColor,
       hoverColor: hoverColor,
       highlightColor: highlightColor,
@@ -347,6 +347,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: bottomSheetTheme,
       popupMenuTheme: popupMenuTheme,
       bannerTheme: bannerTheme,
+      dividerTheme: dividerTheme,
     );
   }
 
@@ -373,7 +374,6 @@ class ThemeData extends Diagnosticable {
     @required this.bottomAppBarColor,
     @required this.cardColor,
     @required this.dividerColor,
-    @required this.dividerThickness,
     @required this.focusColor,
     @required this.hoverColor,
     @required this.highlightColor,
@@ -422,6 +422,7 @@ class ThemeData extends Diagnosticable {
     @required this.bottomSheetTheme,
     @required this.popupMenuTheme,
     @required this.bannerTheme,
+    @required this.dividerTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -434,7 +435,6 @@ class ThemeData extends Diagnosticable {
        assert(bottomAppBarColor != null),
        assert(cardColor != null),
        assert(dividerColor != null),
-       assert(dividerThickness != null),
        assert(focusColor != null),
        assert(hoverColor != null),
        assert(highlightColor != null),
@@ -479,7 +479,8 @@ class ThemeData extends Diagnosticable {
        assert(snackBarTheme != null),
        assert(bottomSheetTheme != null),
        assert(popupMenuTheme != null),
-       assert(bannerTheme != null);
+       assert(bannerTheme != null),
+       assert(dividerTheme != null);
 
   /// Create a [ThemeData] based on the colors in the given [colorScheme] and
   /// text styles of the optional [textTheme].
@@ -634,13 +635,6 @@ class ThemeData extends Diagnosticable {
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
   final Color dividerColor;
-
-  /// The thickness of [Divider]s and [PopupMenuDivider]s, also used
-  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
-  ///
-  /// To create an appropriate [BorderSide] that uses this value, consider
-  /// [Divider.createBorderSide].
-  final double dividerThickness;
 
   /// The focus color used indicate that a component has the input focus.
   final Color focusColor;
@@ -879,6 +873,10 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the color and text style of a [MaterialBanner].
   final MaterialBannerThemeData bannerTheme;
 
+  /// A theme for customizing the color, thickness, and indents of [Divider]s,
+  /// [VerticalDivider]s, etc.
+  final DividerThemeData dividerTheme;
+
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
@@ -893,7 +891,6 @@ class ThemeData extends Diagnosticable {
     Color bottomAppBarColor,
     Color cardColor,
     Color dividerColor,
-    double dividerThickness,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -942,6 +939,7 @@ class ThemeData extends Diagnosticable {
     BottomSheetThemeData bottomSheetTheme,
     PopupMenuThemeData popupMenuTheme,
     MaterialBannerThemeData bannerTheme,
+    DividerThemeData dividerTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -957,7 +955,6 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       cardColor: cardColor ?? this.cardColor,
       dividerColor: dividerColor ?? this.dividerColor,
-      dividerThickness: dividerThickness ?? this.dividerThickness,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       highlightColor: highlightColor ?? this.highlightColor,
@@ -1006,6 +1003,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
       popupMenuTheme: popupMenuTheme ?? this.popupMenuTheme,
       bannerTheme: bannerTheme ?? this.bannerTheme,
+      dividerTheme: dividerTheme ?? this.dividerTheme,
     );
   }
 
@@ -1099,7 +1097,6 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
       cardColor: Color.lerp(a.cardColor, b.cardColor, t),
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
-      dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       focusColor: Color.lerp(a.focusColor, b.focusColor, t),
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t),
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
@@ -1148,6 +1145,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
       popupMenuTheme: PopupMenuThemeData.lerp(a.popupMenuTheme, b.popupMenuTheme, t),
       bannerTheme: MaterialBannerThemeData.lerp(a.bannerTheme, b.bannerTheme, t),
+      dividerTheme: DividerThemeData.lerp(a.dividerTheme, b.dividerTheme, t),
     );
   }
 
@@ -1171,7 +1169,6 @@ class ThemeData extends Diagnosticable {
            (otherData.bottomAppBarColor == bottomAppBarColor) &&
            (otherData.cardColor == cardColor) &&
            (otherData.dividerColor == dividerColor) &&
-           (otherData.dividerThickness == dividerThickness) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
            (otherData.splashFactory == splashFactory) &&
@@ -1217,7 +1214,8 @@ class ThemeData extends Diagnosticable {
            (otherData.snackBarTheme == snackBarTheme) &&
            (otherData.bottomSheetTheme == bottomSheetTheme) &&
            (otherData.popupMenuTheme == popupMenuTheme) &&
-           (otherData.bannerTheme == bannerTheme);
+           (otherData.bannerTheme == bannerTheme) &&
+           (otherData.dividerTheme == dividerTheme);
   }
 
   @override
@@ -1238,7 +1236,6 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor,
       cardColor,
       dividerColor,
-      dividerThickness,
       focusColor,
       hoverColor,
       highlightColor,
@@ -1287,6 +1284,7 @@ class ThemeData extends Diagnosticable {
       bottomSheetTheme,
       popupMenuTheme,
       bannerTheme,
+      dividerTheme,
     ];
     return hashList(values);
   }
@@ -1306,7 +1304,6 @@ class ThemeData extends Diagnosticable {
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor));
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
-    properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: defaultData.dividerThickness));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
@@ -1353,6 +1350,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
     properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
     properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
+    properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme));
   }
 }
 

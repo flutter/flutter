@@ -50,6 +50,7 @@ export 'src/material/debug.dart';
 export 'src/material/dialog.dart';
 export 'src/material/dialog_theme.dart';
 export 'src/material/divider.dart';
+export 'src/material/divider_theme.dart';
 export 'src/material/drawer.dart';
 export 'src/material/drawer_header.dart';
 export 'src/material/dropdown.dart';
