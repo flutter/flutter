@@ -12,6 +12,7 @@ import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart';
 import 'macos/cocoapods.dart';
+import 'platform_plugins.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
@@ -26,10 +27,7 @@ class Plugin {
   Plugin({
     this.name,
     this.path,
-    this.androidPackage,
-    this.iosPrefix,
-    this.macosPrefix,
-    this.pluginClass,
+    this.platformPlugins,
   });
 
   /// Parses [Plugin] specification from the provided pluginYaml.
@@ -61,7 +59,7 @@ class Plugin {
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
     } else {
-      return Plugin._fromLegacyYaml(name, path, pluginYaml);
+      return Plugin._fromLegacyYaml(name, path, pluginYaml); // ignore: deprecated_member_use_from_same_package
     }
   }
 
@@ -70,92 +68,71 @@ class Plugin {
             'Invalid multi-platform plugin specification.');
     final dynamic platforms = pluginYaml['platforms'];
 
-    final Set<String> pluginClassNames = {};
-    String androidPackage;
-    String iosPrefix;
-    String macosPrefix;
-    String pluginClass;
+    final Map<String, PlatformPlugin> platformPlugins = <String, PlatformPlugin>{};
 
-    if (platforms['android'] != null) {
-      final dynamic androidConfig = platforms['android'];
-      androidPackage = androidConfig['package'];
-      if (androidConfig['pluginClass'] != null) {
-        pluginClassNames.add(androidConfig['pluginClass']);
-      } else {
-        throw Exception('"pluginClass" needs to be specified for android platform');
-      }
+    if (platforms[AndroidPlugin.kConfigKey] != null) {
+      platformPlugins[AndroidPlugin.kConfigKey] =
+          AndroidPlugin.fromYaml(name, platforms[AndroidPlugin.kConfigKey]);
     }
 
-    if (platforms['ios'] != null) {
-      final dynamic iosConfig = platforms['ios'];
-      iosPrefix = iosConfig['classPrefix'] ?? '';
-      if (iosConfig['pluginClass'] != null) {
-        pluginClassNames.add(iosConfig['pluginClass']);
-      } else {
-        throw Exception('"pluginClass" needs to be specified for iOS platform');
-      }
+    if (platforms[IOSPlugin.kConfigKey] != null) {
+      platformPlugins[IOSPlugin.kConfigKey] =
+          IOSPlugin.fromYaml(name, platforms[IOSPlugin.kConfigKey]);
     }
 
-    if (platforms['macos'] != null) {
-      final dynamic macosConfig = platforms['macos'];
-      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
-      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
-      macosPrefix = macosConfig['classPrefix'];
-      if (macosConfig['pluginClass'] != null) {
-        pluginClassNames.add(macosConfig['pluginClass']);
-      } else {
-        throw Exception('"pluginClass" needs to be specified for macOS platform');
-      }
-    }
-
-    if (pluginClassNames.length > 1) {
-      throw Exception('Currently flutter only support creating plugins with the '
-          'same plugin class name: https://github.com/flutter/flutter/issues/38628.');
-    } else if (pluginClassNames.length == 1) {
-      pluginClass = pluginClassNames.single;
+    if (platforms[MacOSPlugin.kConfigKey] != null) {
+      platformPlugins[MacOSPlugin.kConfigKey] =
+          MacOSPlugin.fromYaml(name, platforms[MacOSPlugin.kConfigKey]);
     }
 
     return Plugin(
       name: name,
       path: path,
-      androidPackage: androidPackage,
-      iosPrefix: iosPrefix,
-      macosPrefix: macosPrefix,
-      pluginClass: pluginClass,
+      platformPlugins: platformPlugins,
     );
   }
 
 
   @deprecated
   factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
-    String androidPackage;
-    String iosPrefix;
-    String macosPrefix;
-    String pluginClass;
-    if (pluginYaml != null) {
-      androidPackage = pluginYaml['androidPackage'];
-      iosPrefix = pluginYaml['iosPrefix'] ?? '';
+    final Map<String, PlatformPlugin> platformPlugins = <String, PlatformPlugin>{};
+    final String pluginClass = pluginYaml['pluginClass'];
+    if (pluginYaml != null && pluginClass != null) {
+      final String androidPackage = pluginYaml['androidPackage'];
+      if (androidPackage != null) {
+        platformPlugins[AndroidPlugin.kConfigKey] =
+            AndroidPlugin(
+              package: pluginYaml['androidPackage'],
+              pluginClass: pluginClass,
+            );
+      }
+
+      final String iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      platformPlugins[IOSPlugin.kConfigKey] =
+          IOSPlugin(
+            classPrefix: iosPrefix,
+            pluginClass: pluginClass,
+          );
+
       // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
       // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
-      macosPrefix = pluginYaml['macosPrefix'];
-      pluginClass = pluginYaml['pluginClass'];
+      final String macosPrefix = pluginYaml['macosPrefix'];
+      platformPlugins[MacOSPlugin.kConfigKey] =
+          IOSPlugin(
+            classPrefix: macosPrefix,
+            pluginClass: pluginClass,
+          );
     }
     return Plugin(
       name: name,
       path: path,
-      androidPackage: androidPackage,
-      iosPrefix: iosPrefix,
-      macosPrefix: macosPrefix,
-      pluginClass: pluginClass,
+      platformPlugins: platformPlugins,
     );
   }
 
   final String name;
   final String path;
-  final String androidPackage;
-  final String iosPrefix;
-  final String macosPrefix;
-  final String pluginClass;
+  final Map<String, PlatformPlugin> platformPlugins;
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
@@ -248,15 +225,19 @@ public final class GeneratedPluginRegistrant {
 }
 ''';
 
+List<Map<String, dynamic>> _filterPlugins(List<Plugin> plugins, String type) {
+  final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
+  for (Plugin p in plugins) {
+    final PlatformPlugin platformPlugin = p.platformPlugins[type];
+    if (platformPlugin != null) {
+      pluginConfigs.add(platformPlugin.toMap());
+    }
+  }
+  return pluginConfigs;
+}
+
 Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> androidPlugins = plugins
-      .where((Plugin p) => p.androidPackage != null && p.pluginClass != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-          'name': p.name,
-          'package': p.androidPackage,
-          'class': p.pluginClass,
-      })
-      .toList();
+  final List<Map<String, dynamic>> androidPlugins = _filterPlugins(plugins, AndroidPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'plugins': androidPlugins,
   };
@@ -357,13 +338,7 @@ end
 ''';
 
 Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
-  final List<Map<String, dynamic>> iosPlugins = plugins
-      .where((Plugin p) => p.pluginClass != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-    'name': p.name,
-    'prefix': p.iosPrefix,
-    'class': p.pluginClass,
-  }).toList();
+  final List<Map<String, dynamic>> iosPlugins = _filterPlugins(plugins, IOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'ios',
     'deploymentTarget': '8.0',
@@ -405,12 +380,7 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
   // TODO(stuartmorgan): Replace macosPrefix check with formal metadata check,
   // see https://github.com/flutter/flutter/issues/33597.
-  final List<Map<String, dynamic>> macosPlugins = plugins
-      .where((Plugin p) => p.pluginClass != null && p.macosPrefix != null)
-      .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
-    'name': p.name,
-    'class': p.pluginClass,
-  }).toList();
+  final List<Map<String, dynamic>> macosPlugins = _filterPlugins(plugins, MacOSPlugin.kConfigKey);
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',
     'framework': 'FlutterMacOS',

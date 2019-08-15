@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:yaml/yaml.dart';
 
@@ -21,60 +22,42 @@ void main() {
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
 
-      expect(plugin.pluginClass, 'SamplePlugin');
-      expect(plugin.iosPrefix, 'FLT');
-      expect(plugin.androidPackage, 'com.flutter.dev');
+      final AndroidPlugin androidPlugin =
+          plugin.platformPlugins[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platformPlugins[IOSPlugin.kConfigKey];
+      final String androidPluginClass = androidPlugin.pluginClass;
+      final String iosPluginClass = iosPlugin.pluginClass;
+
+      expect(iosPluginClass, 'SamplePlugin');
+      expect(androidPluginClass, 'SamplePlugin');
+      expect(iosPlugin.classPrefix, 'FLT');
+      expect(androidPlugin.package, 'com.flutter.dev');
     });
 
     test('Multi-platform Format', () {
       const String pluginYamlRaw = 'platforms:\n'
           ' android:\n'
           '  package: com.flutter.dev\n'
-          '  pluginClass: SamplePlugin\n'
+          '  pluginClass: ASamplePlugin\n'
           ' ios:\n'
           '  classPrefix: FLT\n'
-          '  pluginClass: SamplePlugin\n';
+          '  pluginClass: ISamplePlugin\n';
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
 
-      expect(plugin.pluginClass, 'SamplePlugin');
-      expect(plugin.iosPrefix, 'FLT');
-      expect(plugin.androidPackage, 'com.flutter.dev');
+      final AndroidPlugin androidPlugin =
+          plugin.platformPlugins[AndroidPlugin.kConfigKey];
+      final IOSPlugin iosPlugin = plugin.platformPlugins[IOSPlugin.kConfigKey];
+      final String androidPluginClass = androidPlugin.pluginClass;
+      final String iosPluginClass = iosPlugin.pluginClass;
+
+      expect(iosPluginClass, 'ISamplePlugin');
+      expect(androidPluginClass, 'ASamplePlugin');
+      expect(iosPlugin.classPrefix, 'FLT');
+      expect(androidPlugin.package, 'com.flutter.dev');
     });
 
-    test('Multi-platform Format', () {
-      const String pluginYamlRaw = 'platforms:\n'
-          ' android:\n'
-          '  package: com.flutter.dev\n'
-          '  pluginClass: SamplePlugin\n'
-          ' ios:\n'
-          '  classPrefix: FLT\n'
-          '  pluginClass: SamplePlugin\n';
-
-      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
-      final Plugin plugin =
-          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
-
-      expect(plugin.pluginClass, 'SamplePlugin');
-      expect(plugin.iosPrefix, 'FLT');
-      expect(plugin.androidPackage, 'com.flutter.dev');
-    });
-
-    test('Multi-platform Format currently expects unique "pluginClass"', () {
-      const String pluginYamlRaw = 'platforms:\n'
-          ' android:\n'
-          '  package: com.flutter.dev\n'
-          '  pluginClass: SamplePlugin1\n'
-          ' ios:\n'
-          '  classPrefix: FLT\n'
-          '  pluginClass: SamplePlugin2\n';
-
-      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
-      expect(
-          () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml),
-          throwsException);
-    });
   });
 }
