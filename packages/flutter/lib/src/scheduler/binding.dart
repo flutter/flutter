@@ -372,7 +372,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // to send [FrameTiming] from engine to the framework.
   void _onFrameTimingCancel() {
       window.onReportTimings = _oldTimingsCallback;
-      _frameTimingBroadcastController = null;
   }
 
   /// A broadcast stream of the frames' time-related performance metrics.
@@ -388,12 +387,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   ///    and the Flutter engine use. It's recommended to use this stream instead
   ///    of overriding [Window.onReportTimings] directly.
   Stream<FrameTiming> get frameTimingStream {
-    if (_frameTimingBroadcastController == null) {
-      _frameTimingBroadcastController = StreamController<FrameTiming>.broadcast(
-        onListen: _onFrameTimingListen,
-        onCancel: _onFrameTimingCancel,
-      );
-    }
+    _frameTimingBroadcastController ??= StreamController<FrameTiming>.broadcast(
+      onListen: _onFrameTimingListen,
+      onCancel: _onFrameTimingCancel,
+    );
     return _frameTimingBroadcastController.stream;
   }
 

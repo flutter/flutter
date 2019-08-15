@@ -163,6 +163,12 @@ void main() {
     // Checks that onReportTimings is reset to null after the first frame.
     expect(binding.window.onReportTimings, isNull);
 
+    // Checks that we can listen to frameTimnigStream again.
+    final ui.FrameTiming mockTiming = ui.FrameTiming(<int>[1, 2, 3, 4]);
+    final Future<ui.FrameTiming> frameTiming = SchedulerBinding.instance.frameTimingStream.first;
+    ui.window.onReportTimings(<ui.FrameTiming>[mockTiming]);
+    expect(await frameTiming, equals(mockTiming));
+
     expect(debugPrint, equals(debugPrintThrottled));
     debugPrint = (String message, { int wrapWidth }) {
       console.add(message);
