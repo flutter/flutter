@@ -358,7 +358,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
+      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
     }
   }
 
