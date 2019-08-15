@@ -73,15 +73,15 @@ abstract class GoldenFileComparator {
   /// [test] and [master] image bytes provided.
   static ComparisonResult compareLists<T>(List<int> test, List<int> master) {
     if (identical(test, master))
-      return ComparisonResult(true);
+      return ComparisonResult(passed: true);
 
     if (test == null
       || master == null
       || test.isEmpty
       || master.isEmpty) {
       return ComparisonResult(
-        false,
-        failMessage: 'Pixel test failed, null image provided.'
+        passed: false,
+        error: 'Pixel test failed, null image provided.'
       );
     }
 
@@ -96,8 +96,8 @@ abstract class GoldenFileComparator {
 
     if (width != masterImage.width || height != masterImage.height)
       return ComparisonResult(
-        false,
-        failMessage: 'Pixel test failed, image sizes do not match.\n'
+        passed: false,
+        error: 'Pixel test failed, image sizes do not match.\n'
           'Master Image: ${masterImage.width} X ${masterImage.height}\n'
           'Test Image: ${testImage.width} X ${testImage.height}',
       );
@@ -137,12 +137,12 @@ abstract class GoldenFileComparator {
 
     if (pixelDiffCount > 0) {
       return ComparisonResult(
-        false,
-        failMessage: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
-        fileOutput: diffs,
+        passed: false,
+        error: 'Pixel test failed, ${((pixelDiffCount/totalPixels) * 100).toStringAsFixed(2)}% diff detected.',
+        diffs: diffs,
       );
     }
-    return ComparisonResult(true);
+    return ComparisonResult(passed: true);
   }
 }
 
@@ -199,18 +199,15 @@ bool autoUpdateGoldenFiles = false;
 /// The result of a pixel comparison test.
 ///
 /// The [ComparisonResult] will always indicate if a test has [passed]. The
-/// optional [failMessage] and [fileOutput] parameters are used ot set [error]
-/// and [diffs], which provide further information about the result of a failing
-/// test.
+/// optional [error] and [diffs] parameters provide further information about
+/// the result of a failing test.
 class ComparisonResult {
   /// Creates a new [ComparisonResult] for the current test.
-  ComparisonResult(
-    this.passed, {
-    String failMessage,
-    Map<String, Image> fileOutput,
-  }) : assert(passed != null),
-       error = failMessage,
-       diffs = fileOutput;
+  ComparisonResult({
+    @required this.passed,
+    this.error,
+    this.diffs,
+  }) : assert(passed != null);
 
   /// Indicates whether or not a pixel comparison test has failed.
   ///
