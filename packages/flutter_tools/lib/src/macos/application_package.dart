@@ -141,7 +141,7 @@ class BuildableMacOSApp extends MacOSApp {
       return null;
     }
     final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
-    return executableAndId.executable;
+    return executableAndId?.executable;
   }
 }
 
