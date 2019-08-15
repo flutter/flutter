@@ -1,4 +1,4 @@
-Signature: 6c211470af466caa2c028b5294651a86
+Signature: fb3be43a6ece3d385b5995264c4f24c3
 
 UNUSED LICENSES:
 
@@ -3119,7 +3119,6 @@ FILE: ../../../third_party/skia/include/effects/SkDropShadowImageFilter.h
 FILE: ../../../third_party/skia/include/effects/SkLumaColorFilter.h
 FILE: ../../../third_party/skia/include/effects/SkPerlinNoiseShader.h
 FILE: ../../../third_party/skia/include/effects/SkTileImageFilter.h
-FILE: ../../../third_party/skia/include/gpu/GrBlend.h
 FILE: ../../../third_party/skia/include/gpu/gl/GrGLExtensions.h
 FILE: ../../../third_party/skia/include/ports/SkFontConfigInterface.h
 FILE: ../../../third_party/skia/include/private/GrTypesPriv.h
@@ -3168,6 +3167,7 @@ FILE: ../../../third_party/skia/src/effects/imagefilters/SkComposeImageFilter.cp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDisplacementMapEffect.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkDropShadowImageFilter.cpp
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkTileImageFilter.cpp
+FILE: ../../../third_party/skia/src/gpu/GrBlend.h
 FILE: ../../../third_party/skia/src/gpu/GrCaps.h
 FILE: ../../../third_party/skia/src/gpu/GrCoordTransform.h
 FILE: ../../../third_party/skia/src/gpu/GrGeometryProcessor.h
