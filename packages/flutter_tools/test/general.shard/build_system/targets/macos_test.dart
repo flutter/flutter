@@ -19,21 +19,27 @@ import 'package:process/process.dart';
 import '../../../src/common.dart';
 import '../../../src/testbed.dart';
 
+const String _kInputPrefix = 'bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework';
+const String _kOutputPrefix = 'macos/Flutter/ephemeral/FlutterMacOS.framework';
+
 final List<File> inputs = <File>[
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/FlutterMacOS'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEOpenGLContextHandling.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEReshapeListener.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEView.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FLEViewController.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterChannels.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterCodecs.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterMacOS.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Modules/module.modulemap'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/icudtl.dat'),
-  fs.file('bin/cache/artifacts/engine/darwin-x64/FlutterMacOS.framework/Resources/info.plist'),
+  fs.file('$_kInputPrefix/FlutterMacOS'),
+  // Headers
+  fs.file('$_kInputPrefix/Headers/FLEDartProject.h'),
+  fs.file('$_kInputPrefix/Headers/FLEEngine.h'),
+  fs.file('$_kInputPrefix/Headers/FLEViewController.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterBinaryMessenger.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterChannels.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterCodecs.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterMacros.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterPluginMacOS.h'),
+  fs.file('$_kInputPrefix/Headers/FlutterPluginRegistrarMacOS.h'),
+  // Modules
+  fs.file('$_kInputPrefix/Modules/module.modulemap'),
+  // Resources
+  fs.file('$_kInputPrefix/Resources/icudtl.dat'),
+  fs.file('$_kInputPrefix/Resources/Info.plist'),
+  // Ignore Versions folder for now
   fs.file('packages/flutter_tools/lib/src/build_system/targets/macos.dart'),
 ];
 
@@ -90,18 +96,10 @@ void main() {
     });
     await const UnpackMacOS().build(<File>[], environment);
 
-    expect(fs.directory('macos/Flutter/ephemeral/FlutterMacOS.framework').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/FlutterMacOS').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FLEViewController.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterBinaryMessenger.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterChannels.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterCodecs.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterPluginMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Headers/FlutterPluginRegisrarMacOS.h').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Modules/module.modulemap').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Resources/icudtl.dat').existsSync(), true);
-    expect(fs.file('macos/Flutter/ephemeral/FlutterMacOS.framework/Resources/info.plist').existsSync(), true);
+    expect(fs.directory('$_kOutputPrefix').existsSync(), true);
+    for (File file in inputs) {
+      expect(fs.file(file.path.replaceFirst(_kInputPrefix, _kOutputPrefix)).existsSync(), true);
+    }
   }));
 
   test('debug macOS application fails if App.framework missing', () => testbed.run(() async {
