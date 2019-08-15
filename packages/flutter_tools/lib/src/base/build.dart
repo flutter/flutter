@@ -46,7 +46,7 @@ class GenSnapshot {
 
   Future<int> run({
     @required SnapshotType snapshotType,
-    AppleArch appleArch,
+    DarwinArch darwinArch,
     Iterable<String> additionalArgs = const <String>[],
   }) {
     final List<String> args = <String>[
@@ -59,7 +59,7 @@ class GenSnapshot {
     // iOS has a separate gen_snapshot for armv7 and arm64 in the same,
     // directory. So we need to select the right one.
     if (snapshotType.platform == TargetPlatform.ios) {
-      snapshotterPath += '_' + getNameForAppleArch(appleArch);
+      snapshotterPath += '_' + getNameForDarwinArch(darwinArch);
     }
 
     StringConverter outputFilter;
@@ -89,7 +89,7 @@ class AOTSnapshotter {
     @required String mainPath,
     @required String packagesPath,
     @required String outputPath,
-    AppleArch appleArch,
+    DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
   }) async {
@@ -103,7 +103,7 @@ class AOTSnapshotter {
       return 1;
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
-    assert(platform != TargetPlatform.ios || appleArch != null);
+    assert(platform != TargetPlatform.ios || darwinArch != null);
 
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
@@ -143,7 +143,7 @@ class AOTSnapshotter {
       genSnapshotArgs.add('--strip');
     }
 
-    if (platform == TargetPlatform.android_arm || appleArch == AppleArch.armv7) {
+    if (platform == TargetPlatform.android_arm || darwinArch == DarwinArch.armv7) {
       // Use softfp for Android armv7 devices.
       // This is the default for armv7 iOS builds, but harmless to set.
       // TODO(cbracken): eliminate this when we fix https://github.com/flutter/flutter/issues/17489
@@ -168,7 +168,7 @@ class AOTSnapshotter {
         () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
-      appleArch: appleArch,
+      darwinArch: darwinArch,
     ));
     if (genSnapshotExitCode != 0) {
       printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
@@ -199,7 +199,7 @@ class AOTSnapshotter {
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
-        appleArch: appleArch,
+        appleArch: darwinArch,
         assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
@@ -213,16 +213,16 @@ class AOTSnapshotter {
   /// Builds an iOS or macOS framework at [outputPath]/App.framework from the assembly
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
-    @required AppleArch appleArch,
+    @required DarwinArch appleArch,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
   }) async {
-    final String targetArch = getNameForAppleArch(appleArch);
+    final String targetArch = getNameForDarwinArch(appleArch);
     printStatus('Building App.framework for $targetArch...');
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
-      if (appleArch == AppleArch.arm64 || appleArch == AppleArch.armv7)
+      if (appleArch == DarwinArch.arm64 || appleArch == DarwinArch.armv7)
         '-miphoneos-version-min=8.0',
     ];
 

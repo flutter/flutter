@@ -32,8 +32,8 @@ abstract class AotAssemblyBase extends Target {
     final bool bitcode = environment.defines[kBitcodeFlag] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
-    final List<AppleArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
-        ?? <AppleArch>[AppleArch.arm64];
+    final List<DarwinArch> iosArchs = environment.defines[kIosArchs]?.split(',')?.map(getIOSArchForName)?.toList()
+        ?? <DarwinArch>[DarwinArch.arm64];
     if (targetPlatform != TargetPlatform.ios) {
       throw Exception('aot_assembly is only supported for iOS applications');
     }
@@ -46,7 +46,7 @@ abstract class AotAssemblyBase extends Target {
         mainPath: environment.buildDir.childFile('app.dill').path,
         packagesPath: environment.projectDir.childFile('.packages').path,
         outputPath: outputPath,
-        appleArch: iosArchs.single,
+        darwinArch: iosArchs.single,
         bitcode: bitcode,
       );
       if (snapshotExitCode != 0) {
@@ -56,14 +56,14 @@ abstract class AotAssemblyBase extends Target {
       // If we're building multiple iOS archs the binaries need to be lipo'd
       // together.
       final List<Future<int>> pending = <Future<int>>[];
-      for (AppleArch iosArch in iosArchs) {
+      for (DarwinArch iosArch in iosArchs) {
         pending.add(snapshotter.build(
           platform: targetPlatform,
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           packagesPath: environment.projectDir.childFile('.packages').path,
-          outputPath: fs.path.join(outputPath, getNameForAppleArch(iosArch)),
-          appleArch: iosArch,
+          outputPath: fs.path.join(outputPath, getNameForDarwinArch(iosArch)),
+          darwinArch: iosArch,
           bitcode: bitcode,
         ));
       }
@@ -73,8 +73,8 @@ abstract class AotAssemblyBase extends Target {
       }
       final ProcessResult result = await processManager.run(<String>[
         'lipo',
-        ...iosArchs.map((AppleArch iosArch) =>
-            fs.path.join(outputPath, getNameForAppleArch(iosArch), 'App.framework', 'App')),
+        ...iosArchs.map((DarwinArch iosArch) =>
+            fs.path.join(outputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
         '-create',
         '-output',
         fs.path.join(outputPath, 'App.framework', 'App'),

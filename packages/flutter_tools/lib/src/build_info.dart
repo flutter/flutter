@@ -268,7 +268,7 @@ enum TargetPlatform {
 /// iOS and macOS target device architecture.
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
-enum AppleArch {
+enum DarwinArch {
   armv7,
   arm64,
   x86_64,
@@ -282,29 +282,29 @@ enum AndroidArch {
 }
 
 /// The default set of iOS device architectures to build for.
-const List<AppleArch> defaultIOSArchs = <AppleArch>[
-  AppleArch.arm64,
+const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
+  DarwinArch.arm64,
 ];
 
-String getNameForAppleArch(AppleArch arch) {
+String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
-    case AppleArch.armv7:
+    case DarwinArch.armv7:
       return 'armv7';
-    case AppleArch.arm64:
+    case DarwinArch.arm64:
       return 'arm64';
-    case AppleArch.x86_64:
+    case DarwinArch.x86_64:
       return 'x86_64';
   }
   assert(false);
   return null;
 }
 
-AppleArch getIOSArchForName(String arch) {
+DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
-      return AppleArch.armv7;
+      return DarwinArch.armv7;
     case 'arm64':
-      return AppleArch.arm64;
+      return DarwinArch.arm64;
   }
   assert(false);
   return null;
