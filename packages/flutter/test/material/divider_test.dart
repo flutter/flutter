@@ -19,10 +19,11 @@ void main() {
     );
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
-    expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration;
+    expect(decoration.border.bottom.width, 0.0);
   });
 
-  // TODO: This test isn't passing, the painting check seems to be wrong here and above.
   testWidgets('Divider custom thickness', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -34,7 +35,9 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(Divider), paints..path(strokeWidth: 5.0));
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration;
+    expect(decoration.border.bottom.width, 5.0);
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
@@ -101,10 +104,12 @@ void main() {
     );
     final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
-    expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration;
+    final Border border = decoration.border;
+    expect(border.left.width, 0.0);
   });
 
-  // TODO: This test isn't passing, the painting check seems to be wrong here and above.
   testWidgets('Divider custom thickness', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -116,7 +121,10 @@ void main() {
         ),
       ),
     );
-    expect(find.byType(Divider), paints..path(strokeWidth: 5.0));
+    final Container container = tester.widget(find.byType(Container));
+    final BoxDecoration decoration = container.decoration;
+    final Border border = decoration.border;
+    expect(border.left.width, 5.0);
   });
 
   testWidgets('Vertical Divider Test 2', (WidgetTester tester) async {
