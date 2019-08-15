@@ -137,7 +137,7 @@ class Focus extends StatefulWidget {
   ///
   /// The [child] argument is required and must not be null.
   ///
-  /// The [autofocus] argument must not be null.
+  /// The [autofocus] and [skipTraversal] arguments must not be null.
   const Focus({
     Key key,
     @required this.child,
@@ -190,24 +190,33 @@ class Focus extends StatefulWidget {
   /// focus.
   final ValueChanged<bool> onFocusChange;
 
+  /// {@template flutter.widgets.Focus.autofocus}
   /// True if this widget will be selected as the initial focus when no other
   /// node in its scope is currently focused.
   ///
-  /// Ideally, there is only one [Focus] with autofocus set in each
-  /// [FocusScope]. If there is more than one [Focus] with autofocus set, then
-  /// the first one added to the tree will get focus.
+  /// Ideally, there is only one widget with autofocus set in each [FocusScope].
+  /// If there is more than one widget with autofocus set, then the first one
+  /// added to the tree will get focus.
+  ///
+  /// Must not be null. Defaults to false.
+  /// {@endtemplate}
   final bool autofocus;
 
-  /// An optional focus node to use as the focus node for this [Focus] widget.
+  /// {@template flutter.widgets.Focus.focusNode}
+  /// An optional focus node to use as the focus node for this widget.
   ///
-  /// If one is not supplied, then one will be allocated and owned by this
-  /// widget.
+  /// If one is not supplied, then one will be automatically allocated, owned,
+  /// and managed by this widget. The widget will be focusable even if a
+  /// [focusNode] is not supplied. If supplied, the given `focusNode` will be
+  /// _hosted_ by this widget, but not owned. See [FocusNode] for more
+  /// information on what being hosted and/or owned implies.
   ///
   /// Supplying a focus node is sometimes useful if an ancestor to this widget
   /// wants to control when this widget has the focus. The owner will be
   /// responsible for calling [FocusNode.dispose] on the focus node when it is
-  /// done with it, but this [Focus] widget will attach/detach and reparent the
-  /// node when needed.
+  /// done with it, but this widget will attach/detach and reparent the node
+  /// when needed.
+  /// {@endtemplate}
   final FocusNode focusNode;
 
   /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't

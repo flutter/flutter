@@ -101,9 +101,10 @@ import 'theme_data.dart';
 class RaisedButton extends MaterialButton {
   /// Create a filled button.
   ///
-  /// The [elevation], [highlightElevation], [disabledElevation], and
-  /// [clipBehavior] arguments must not be null. Additionally,  [elevation],
-  /// [highlightElevation], and [disabledElevation] must be non-negative.
+  /// The [autofocus] and [clipBehavior] arguments must not be null.
+  /// Additionally,  [elevation], [hoverElevation], [focusElevation],
+  /// [highlightElevation], and [disabledElevation] must be non-negative, if
+  /// specified.
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,
@@ -127,10 +128,12 @@ class RaisedButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     Widget child,
-  }) : assert(elevation == null || elevation >= 0.0),
+  }) : assert(autofocus != null),
+       assert(elevation == null || elevation >= 0.0),
        assert(focusElevation == null || focusElevation >= 0.0),
        assert(hoverElevation == null || hoverElevation >= 0.0),
        assert(highlightElevation == null || highlightElevation >= 0.0),
@@ -158,6 +161,7 @@ class RaisedButton extends MaterialButton {
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: child,
@@ -191,6 +195,7 @@ class RaisedButton extends MaterialButton {
     ShapeBorder shape,
     Clip clipBehavior,
     FocusNode focusNode,
+    bool autofocus,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -220,6 +225,7 @@ class RaisedButton extends MaterialButton {
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       focusNode: focusNode,
+      autofocus: autofocus,
       animationDuration: buttonTheme.getAnimationDuration(this),
       materialTapTargetSize: buttonTheme.getMaterialTapTargetSize(this),
       child: child,
@@ -262,6 +268,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
+    bool autofocus = false,
     MaterialTapTargetSize materialTapTargetSize,
     Duration animationDuration,
     @required Widget icon,
@@ -271,6 +278,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
        assert(disabledElevation == null || disabledElevation >= 0.0),
        assert(icon != null),
        assert(label != null),
+       assert(autofocus != null),
        super(
          key: key,
          onPressed: onPressed,
@@ -291,6 +299,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
+         autofocus: autofocus,
          materialTapTargetSize: materialTapTargetSize,
          animationDuration: animationDuration,
          child: Row(
