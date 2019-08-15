@@ -70,9 +70,9 @@ class LockdownReturnCode {
   /// If the [code] maps to one of the known codes, a `const` instance will be
   /// returned.
   factory LockdownReturnCode.fromCode(int code) {
-    const Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
-      19: pairingDialogResponsePending,
-      21: invalidHostId,
+    final Map<int, LockdownReturnCode> knownCodes = <int, LockdownReturnCode>{
+      pairingDialogResponsePending.code: pairingDialogResponsePending,
+      invalidHostId.code: invalidHostId,
     };
 
     return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
