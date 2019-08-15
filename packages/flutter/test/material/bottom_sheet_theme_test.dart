@@ -134,10 +134,6 @@ void main() {
   });
 
   testWidgets('BottomSheet persistentElevation takes priority over elevation', (WidgetTester tester) async {
-    const Color backgroundColor = Colors.purple;
-    const ShapeBorder shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(9.0)),
-    );
     const persistentElevation = 7.0;
     const bottomSheetTheme = BottomSheetThemeData(
       elevation: 5.0,

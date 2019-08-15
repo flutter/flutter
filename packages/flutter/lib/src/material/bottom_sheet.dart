@@ -410,10 +410,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [BottomSheet], which is the widget normally returned by the function
-///    passed as the `builder` argument to [showModalBottomSheet].
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    function passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
+///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
+///    that grows and then becomes scrollable once it reaches its maximum size.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
@@ -471,7 +473,8 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// See also:
 ///
-///  * [BottomSheet], which is the widget typically returned by the `builder`.
+///  * [BottomSheet], which becomes the parent of the widget returned by the
+///    `builder`.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].
