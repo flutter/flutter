@@ -170,9 +170,9 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Finds the list of annotations defined by this layer and its children
   /// located at the given position.
   ///
-  /// It adds the annotations of its children to `result`, then the annotation
-  /// of itself. These annotations must meet the given restrictions, such as type
-  /// `S` and position `regionOffset`.
+  /// It adds the annotations of its children to `result` from visually front
+  /// to back, then the annotation of itself. These annotations must meet the
+  /// given restrictions, such as type `S` and position `regionOffset`.
   ///
   /// If `onlyFirst` is true, it will stop after the first result.
   ///
@@ -312,6 +312,7 @@ class PictureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
   }
@@ -386,6 +387,7 @@ class TextureLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
   }
@@ -427,6 +429,7 @@ class PlatformViewLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
   }
@@ -506,6 +509,7 @@ class PerformanceOverlayLayer extends Layer {
   S find<S>(Offset regionOffset) => null;
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return false;
   }
@@ -664,6 +668,7 @@ class ContainerLayer extends Layer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     for (Layer child = lastChild; child != null; child = child.previousSibling) {
       final bool isAbsorbed = child.findAnnotations<S>(result, regionOffset, onlyFirst: onlyFirst);
@@ -900,6 +905,7 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
   }
@@ -1054,6 +1060,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRect.contains(regionOffset))
       return false;
@@ -1135,6 +1142,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipRRect.contains(regionOffset))
       return false;
@@ -1216,6 +1224,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipPath.contains(regionOffset))
       return false;
@@ -1351,6 +1360,7 @@ class TransformLayer extends OffsetLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     final Offset transformedOffset = _transformOffset(regionOffset);
     if (transformedOffset == null)
@@ -1668,6 +1678,7 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (!clipPath.contains(regionOffset))
       return false;
@@ -1788,6 +1799,7 @@ class LeaderLayer extends ContainerLayer {
   S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     return super.findAnnotations<S>(result, regionOffset - offset, onlyFirst: onlyFirst);
   }
@@ -1926,6 +1938,7 @@ class FollowerLayer extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     if (link.leader == null) {
       if (showWhenUnlinked)
@@ -2147,6 +2160,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   }
 
   @override
+  @protected
   bool findAnnotations<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     bool isAbsorbed = super.findAnnotations(result, regionOffset, onlyFirst: onlyFirst);
     if (result.isNotEmpty && onlyFirst)
