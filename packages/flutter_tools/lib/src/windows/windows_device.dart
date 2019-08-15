@@ -156,7 +156,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => const <String>[];
 }
 
-final RegExp _whitespace = RegExp(r'\w+');
+final RegExp _whitespace = RegExp(r'\s+');
 
 /// Returns the running process matching `process` name.
 ///
@@ -174,8 +174,15 @@ List<String> runningProcess(String processName) {
       continue;
     }
     final List<String> parts = process.split(_whitespace);
+
+    final String processPid = parts[0];
+    final String currentRunningProcessPid = pid.toString();
+    // Don't kill the flutter tool process
+    if (processPid == currentRunningProcessPid) {
+      continue;
+    }
     final List<String> data = <String>[
-      parts[0], // ID
+      processPid, // ID
       parts[1], // Name
     ];
     return data;
