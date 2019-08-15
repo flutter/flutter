@@ -29,6 +29,7 @@ class BottomSheetThemeData extends Diagnosticable {
   const BottomSheetThemeData({
     this.backgroundColor,
     this.elevation,
+    this.persistentElevation,
     this.shape,
   });
 
@@ -44,6 +45,11 @@ class BottomSheetThemeData extends Diagnosticable {
   /// If null, [BottomSheet] defaults to 0.0.
   final double elevation;
 
+  /// Value for [BottomSheet.elevation] if specified.
+  ///
+  /// If null, [BottomSheet.elevation] defaults to [elevation].
+  final double persistentElevation;
+
   /// Default value for [BottomSheet.shape].
   ///
   /// If null, no overriding shape is specified for [BottomSheet], so the
@@ -55,11 +61,13 @@ class BottomSheetThemeData extends Diagnosticable {
   BottomSheetThemeData copyWith({
     Color backgroundColor,
     double elevation,
+    double persistentElevation,
     ShapeBorder shape,
   }) {
     return BottomSheetThemeData(
       backgroundColor: backgroundColor ?? this.backgroundColor,
       elevation: elevation ?? this.elevation,
+      persistentElevation: persistentElevation ?? this.persistentElevation,
       shape: shape ?? this.shape,
     );
   }
@@ -76,6 +84,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return BottomSheetThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      persistentElevation: lerpDouble(a?.persistentElevation, b?.persistentElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
     );
   }
@@ -85,6 +94,7 @@ class BottomSheetThemeData extends Diagnosticable {
     return hashValues(
       backgroundColor,
       elevation,
+      persistentElevation,
       shape,
     );
   }
@@ -98,6 +108,7 @@ class BottomSheetThemeData extends Diagnosticable {
     final BottomSheetThemeData typedOther = other;
     return typedOther.backgroundColor == backgroundColor
         && typedOther.elevation == elevation
+        && typedOther.persistentElevation == persistentElevation
         && typedOther.shape == shape;
   }
 
@@ -106,6 +117,7 @@ class BottomSheetThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('persistentElevation', persistentElevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

@@ -63,10 +63,10 @@ class BottomSheet extends StatefulWidget {
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
-       assert(onClosing != null),
-       assert(builder != null),
-       assert(elevation == null || elevation >= 0.0),
-       super(key: key);
+        assert(onClosing != null),
+        assert(builder != null),
+        assert(elevation == null || elevation >= 0.0),
+        super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
   /// exit animations.
@@ -169,7 +169,7 @@ class _BottomSheetState extends State<BottomSheet> {
       widget.onClosing();
     } else {
       widget.animationController.forward();
-   }
+    }
   }
 
   bool extentChanged(DraggableScrollableNotification notification) {
@@ -183,7 +183,7 @@ class _BottomSheetState extends State<BottomSheet> {
   Widget build(BuildContext context) {
     final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
     final Color color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
-    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
+    final double elevation = widget.elevation ?? bottomSheetTheme.persistentElevation ?? bottomSheetTheme.elevation ?? 0;
     final ShapeBorder shape = widget.shape ?? bottomSheetTheme.shape;
 
     final Widget bottomSheet = Material(
@@ -224,8 +224,8 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
       maxWidth: constraints.maxWidth,
       minHeight: 0.0,
       maxHeight: isScrollControlled
-        ? constraints.maxHeight
-        : constraints.maxHeight * 9.0 / 16.0,
+          ? constraints.maxHeight
+          : constraints.maxHeight * 9.0 / 16.0,
     );
   }
 
@@ -249,7 +249,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.isScrollControlled = false,
   }) : assert(isScrollControlled != null),
-       super(key: key);
+        super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
@@ -326,7 +326,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
-       super(settings: settings);
+        super(settings: settings);
 
   final WidgetBuilder builder;
   final ThemeData theme;
@@ -365,11 +365,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
       context: context,
       removeTop: true,
       child: _ModalBottomSheet<T>(
-        route: this,
-        backgroundColor: backgroundColor,
-        elevation: elevation,
-        shape: shape,
-        isScrollControlled: isScrollControlled
+          route: this,
+          backgroundColor: backgroundColor,
+          elevation: elevation,
+          shape: shape,
+          isScrollControlled: isScrollControlled
       ),
     );
     if (theme != null)
@@ -410,12 +410,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [BottomSheet], which becomes the parent of the widget returned by the
-///    function passed as the `builder` argument to [showModalBottomSheet].
+///  * [BottomSheet], which is the widget normally returned by the function
+///    passed as the `builder` argument to [showModalBottomSheet].
 ///  * [showBottomSheet] and [ScaffoldState.showBottomSheet], for showing
 ///    non-modal bottom sheets.
-///  * [DraggableScrollableSheet], which allows you to create a bottom sheet
-///    that grows and then becomes scrollable once it reaches its maximum size.
 ///  * <https://material.io/design/components/sheets-bottom.html#modal-bottom-sheet>
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
@@ -473,8 +471,7 @@ Future<T> showModalBottomSheet<T>({
 ///
 /// See also:
 ///
-///  * [BottomSheet], which becomes the parent of the widget returned by the
-///    `builder`.
+///  * [BottomSheet], which is the widget typically returned by the `builder`.
 ///  * [showModalBottomSheet], which can be used to display a modal bottom
 ///    sheet.
 ///  * [Scaffold.of], for information about how to obtain the [BuildContext].

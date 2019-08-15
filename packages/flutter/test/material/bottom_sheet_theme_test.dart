@@ -132,6 +132,38 @@ void main() {
     expect(material.elevation, elevation);
     expect(material.shape, shape);
   });
+
+  testWidgets('BottomSheet persistentElevation takes priority over elevation', (WidgetTester tester) async {
+    const Color backgroundColor = Colors.purple;
+    const ShapeBorder shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(9.0)),
+    );
+    const persistentElevation = 7.0;
+    const bottomSheetTheme = BottomSheetThemeData(
+      elevation: 5.0,
+      persistentElevation: persistentElevation,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
+      home: Scaffold(
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
+      ),
+    ));
+
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ).first,
+    );
+    expect(material.elevation, persistentElevation);
+  });
 }
 
 BottomSheetThemeData _bottomSheetTheme() {
