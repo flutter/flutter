@@ -121,7 +121,8 @@ abstract class GoldenFileComparator {
 
         final int diffPixel = (getRed(testPixel) - getRed(masterPixel)).abs()
           + (getGreen(testPixel) - getGreen(masterPixel)).abs()
-          + (getBlue(testPixel) - getBlue(masterPixel)).abs();
+          + (getBlue(testPixel) - getBlue(masterPixel)).abs()
+          + (getAlpha(testPixel) - getAlpha(masterPixel)).abs();
 
         if (diffPixel != 0 ) {
           final int invertedMasterPixel = invertedMaster.getPixel(x, y);
