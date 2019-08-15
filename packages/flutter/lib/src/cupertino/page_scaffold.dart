@@ -39,7 +39,7 @@ class CupertinoPageScaffold extends StatefulWidget {
   ///
   /// By default `navigationBar` has its text scale factor set to 1.0 and does
   /// not respond to text scale factor changes from the operating system, to match
-  /// the native behavior. To override such behavior, wrap each of the `navigationBar`'s
+  /// the native iOS behavior. To override such behavior, wrap each of the `navigationBar`'s
   /// components inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
   /// value. The text scale factor value from the operating system can be retrieved
   /// in many ways, such as querying [MediaQuery.textScaleFactorOf] against
