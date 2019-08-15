@@ -86,6 +86,8 @@ import 'framework.dart';
 /// ```
 /// {@end-tool}
 abstract class InheritedTheme extends InheritedWidget {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const InheritedTheme({
     Key key,
     @required Widget child,
