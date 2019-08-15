@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 
 /// An [InheritedWidget] that defines visual properties like colors
@@ -88,6 +87,7 @@ import 'framework.dart';
 abstract class InheritedTheme extends InheritedWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
+
   const InheritedTheme({
     Key key,
     @required Widget child,
@@ -138,7 +138,8 @@ class _CaptureAll extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget wrappedChild = Builder(builder: (BuildContext context) => child);
+    //Widget wrappedChild = Builder(builder: (BuildContext context) => child);
+    Widget wrappedChild = child;
     for (InheritedTheme theme in themes)
       wrappedChild = theme.wrap(context, wrappedChild);
     return wrappedChild;

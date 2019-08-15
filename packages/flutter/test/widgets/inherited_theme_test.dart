@@ -39,27 +39,39 @@ void main() {
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
           return TestRoute(
+            // The outer DefaultTextStyle and IconTheme widgets must have
+            // no effect on the test because InheritedTheme.captureAll()
+            // is required to only save the closest InheritedTheme ancestors.
             DefaultTextStyle(
-              style: const TextStyle(fontSize: fontSize, color: textColor),
+              style: const TextStyle(fontSize: iconSize, color: iconColor),
               child: IconTheme(
-                data: const IconThemeData(size: iconSize, color: iconColor),
-                child: Builder(
-                  builder: (BuildContext context) {
-                    return GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        navigatorContext = context;
-                        Navigator.of(context).push(
-                          TestRoute(
-                            useCaptureAll
-                              ? InheritedTheme.captureAll(context, const IconTextBox('Hello'))
-                              : const IconTextBox('Hello')
-                          ),
+                data: const IconThemeData(size: fontSize, color: textColor),
+                // The inner DefaultTextStyle and IconTheme widgets define
+                // InheritedThemes that captureAll() will wrap() around
+                // TestRoute's IconTextBox child.
+                child: DefaultTextStyle(
+                  style: const TextStyle(fontSize: fontSize, color: textColor),
+                  child: IconTheme(
+                    data: const IconThemeData(size: iconSize, color: iconColor),
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            navigatorContext = context;
+                            Navigator.of(context).push(
+                              TestRoute(
+                                useCaptureAll
+                                  ? InheritedTheme.captureAll(context, const IconTextBox('Hello'))
+                                  : const IconTextBox('Hello')
+                              ),
+                            );
+                          },
+                          child: const IconTextBox('Tap'),
                         );
                       },
-                      child: const IconTextBox('Tap'),
-                    );
-                  },
+                    ),
+                  ),
                 ),
               ),
             ),
