@@ -209,11 +209,11 @@ class IMobileDevice {
         ),
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
+        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}. Try unlocking attached devices.');
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Is the device asking to "Trust This Computer?" Try unlocking attached devices.',
+            'Device info unavailable. Is the device asking to "Trust This Computer?"',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
