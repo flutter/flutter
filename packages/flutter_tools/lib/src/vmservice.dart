@@ -13,7 +13,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'base/async_guard.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -359,7 +358,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await asyncGuard(() => _sendRequest('streamListen', <String, dynamic>{'streamId': streamId}));
+      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
     }
   }
 
