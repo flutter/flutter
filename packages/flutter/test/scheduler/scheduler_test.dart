@@ -132,12 +132,17 @@ void main() {
   });
 
   test('Flutter.Frame event fired', () async {
+    // We can't use Future in scheduler_test so we'll use dynamic instead.
+    final dynamic firstFrameEventFired = scheduler.frameTimingStream.first;
+
     window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
       // build start, build finish
       10000, 15000,
       // raster start, raster finish
       16000, 20000,
     ])]);
+
+    await firstFrameEventFired;
 
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
     expect(events, hasLength(1));

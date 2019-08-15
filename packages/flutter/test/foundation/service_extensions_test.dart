@@ -79,10 +79,11 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
-    if (ui.window.onReportTimings != null)
-      ui.window.onReportTimings(<ui.FrameTiming>[
-        ui.FrameTiming(List<int>.filled(ui.FramePhase.values.length, 0)),
-      ]);
+    final Future<ui.FrameTiming> firstFrameEventFired = SchedulerBinding.instance.frameTimingStream.first;
+    ui.window.onReportTimings(<ui.FrameTiming>[
+      ui.FrameTiming(List<int>.filled(ui.FramePhase.values.length, 0)),
+    ]);
+    await firstFrameEventFired;
   }
 
   @override
