@@ -459,8 +459,8 @@ class ContextMenuSheetAction extends StatefulWidget {
 }
 
 class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
-  static const Color _kBackgroundColor = Color(0xCCFFFFFF);
-  static const Color _kBackgroundColorPressed = Color(0xCCDDDDDD);
+  static const Color _kBackgroundColor = Color(0xFFEEEEEE);
+  static const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
   static const double _kButtonHeight = 56.0;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
     fontFamily: '.SF UI Text',
@@ -508,7 +508,12 @@ class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
         child: Semantics(
           button: true,
           child: Container(
-            color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
+            decoration: BoxDecoration(
+              color: _isPressed ? _kBackgroundColorPressed : _kBackgroundColor,
+              border: Border(
+                bottom: BorderSide(width: 1.0, color: _kBackgroundColorPressed),
+              ),
+            ),
             padding: const EdgeInsets.symmetric(
               vertical: 16.0,
               horizontal: 10.0,
