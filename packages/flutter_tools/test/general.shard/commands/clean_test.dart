@@ -20,6 +20,8 @@ void main() {
   MockDirectory exampleDirectory;
   MockDirectory buildDirectory;
   MockDirectory dartToolDirectory;
+  MockDirectory androidEphemeralDirectory;
+  MockDirectory iosEphemeralDirectory;
   MockFile pubspec;
   MockFile examplePubspec;
   MockPlatform windowsPlatform;
@@ -30,6 +32,8 @@ void main() {
     exampleDirectory = MockDirectory();
     buildDirectory = MockDirectory();
     dartToolDirectory = MockDirectory();
+    androidEphemeralDirectory = MockDirectory();
+    iosEphemeralDirectory = MockDirectory();
     pubspec = MockFile();
     examplePubspec = MockFile();
     windowsPlatform = MockPlatform();
@@ -39,6 +43,8 @@ void main() {
     when(pubspec.path).thenReturn('/test/pubspec.yaml');
     when(exampleDirectory.childFile('pubspec.yaml')).thenReturn(examplePubspec);
     when(currentDirectory.childDirectory('.dart_tool')).thenReturn(dartToolDirectory);
+    when(currentDirectory.childDirectory('.android')).thenReturn(androidEphemeralDirectory);
+    when(currentDirectory.childDirectory('.ios')).thenReturn(iosEphemeralDirectory);
     when(examplePubspec.path).thenReturn('/test/example/pubspec.yaml');
     when(mockFileSystem.isFileSync('/test/pubspec.yaml')).thenReturn(false);
     when(mockFileSystem.isFileSync('/test/example/pubspec.yaml')).thenReturn(false);
@@ -46,14 +52,18 @@ void main() {
     when(mockFileSystem.path).thenReturn(fs.path);
     when(buildDirectory.existsSync()).thenReturn(true);
     when(dartToolDirectory.existsSync()).thenReturn(true);
+    when(androidEphemeralDirectory.existsSync()).thenReturn(true);
+    when(iosEphemeralDirectory.existsSync()).thenReturn(true);
     when(windowsPlatform.isWindows).thenReturn(true);
   });
 
   group(CleanCommand, () {
-    testUsingContext('removes build and .dart_tool directories', () async {
+    testUsingContext('removes build and .dart_tool and ephemeral directories', () async {
       await CleanCommand().runCommand();
       verify(buildDirectory.deleteSync(recursive: true)).called(1);
       verify(dartToolDirectory.deleteSync(recursive: true)).called(1);
+      verify(androidEphemeralDirectory.deleteSync(recursive: true)).called(1);
+      verify(iosEphemeralDirectory.deleteSync(recursive: true)).called(1);
     }, overrides: <Type, Generator>{
       Config: () => null,
       FileSystem: () => mockFileSystem,

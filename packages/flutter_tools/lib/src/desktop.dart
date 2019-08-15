@@ -29,9 +29,15 @@ Future<bool> killProcess(String executable) async {
       if (values.length < 2) {
         continue;
       }
-      final String pid = values[1];
+      final String processPid = values[1];
+      final String currentRunningProcessPid = pid.toString();
+      // Don't kill the flutter tool process
+      if (processPid == currentRunningProcessPid) {
+        continue;
+      }
+
       final ProcessResult killResult = await processManager.run(<String>[
-        'kill', pid,
+        'kill', processPid,
       ]);
       succeeded &= killResult.exitCode == 0;
     }

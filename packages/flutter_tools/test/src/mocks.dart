@@ -9,6 +9,7 @@ import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -24,6 +25,8 @@ import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import 'common.dart';
+
+final Generator kNoColorTerminalPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
@@ -611,3 +614,25 @@ class FakeProcessResult implements ProcessResult {
   @override
   String toString() => stdout?.toString() ?? stderr?.toString() ?? runtimeType.toString();
 }
+
+class MockStdIn extends Mock implements IOSink {
+  final StringBuffer stdInWrites = StringBuffer();
+
+  String getAndClear() {
+    final String result = stdInWrites.toString();
+    stdInWrites.clear();
+    return result;
+  }
+
+  @override
+  void write([ Object o = '' ]) {
+    stdInWrites.write(o);
+  }
+
+  @override
+  void writeln([ Object o = '' ]) {
+    stdInWrites.writeln(o);
+  }
+}
+
+class MockStream extends Mock implements Stream<List<int>> {}

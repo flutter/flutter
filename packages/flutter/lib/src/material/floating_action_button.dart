@@ -61,21 +61,23 @@ class _DefaultHeroTag {
 /// This example shows how to make a simple [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
+/// ![A screenshot of a green floating action button with a navigation icon](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the button below!')
+///       child: const Text('Press the button below!')
 ///     ),
 ///     floatingActionButton: FloatingActionButton(
 ///       onPressed: () {
 ///         // Add your onPressed code here!
 ///       },
-///       child: Icon(Icons.thumb_up),
-///       backgroundColor: Colors.pink,
+///       child: Icon(Icons.navigation),
+///       backgroundColor: Colors.green,
 ///     ),
 ///   );
 /// }
@@ -84,17 +86,19 @@ class _DefaultHeroTag {
 ///
 /// {@tool snippet --template=stateless_widget_material}
 /// This example shows how to make an extended [FloatingActionButton] in a
-/// [Scaffold], with a  pink [backgroundColor] and a thumbs up [Icon] and a
+/// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label.
+///
+/// ![A screenshot of a pink floating action button with a thumbs up icon and a label that reads "Approve"](https://flutter.github.io/assets-for-api-docs/assets/material/floating_action_button_label.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     appBar: AppBar(
-///       title: Text('Floating Action Button Sample'),
+///       title: const Text('Floating Action Button Label'),
 ///     ),
 ///     body: Center(
-///       child: Text('Press the extended button below!'),
+///       child: const Text('Press the button with a label below!'),
 ///     ),
 ///     floatingActionButton: FloatingActionButton.extended(
 ///       onPressed: () {
@@ -129,6 +133,7 @@ class FloatingActionButton extends StatelessWidget {
     this.backgroundColor,
     this.focusColor,
     this.hoverColor,
+    this.splashColor,
     this.heroTag = const _DefaultHeroTag(),
     this.elevation,
     this.focusElevation,
@@ -169,6 +174,7 @@ class FloatingActionButton extends StatelessWidget {
     this.elevation,
     this.focusElevation,
     this.hoverElevation,
+    this.splashColor,
     this.highlightElevation,
     this.disabledElevation,
     @required this.onPressed,
@@ -238,6 +244,12 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// Defaults to [ThemeData.hoverColor] for the current theme.
   final Color hoverColor;
+
+  /// The splash color for this [FloatingActionButton]'s [InkWell].
+  ///
+  /// If null, [FloatingActionButtonThemeData.splashColor] is used, if that is
+  /// null, [ThemeData.splashColor] is used.
+  final Color splashColor;
 
   /// The tag to apply to the button's [Hero] widget.
   ///
@@ -406,6 +418,9 @@ class FloatingActionButton extends StatelessWidget {
     final Color hoverColor = this.hoverColor
       ?? floatingActionButtonTheme.hoverColor
       ?? theme.hoverColor;
+    final Color splashColor = this.splashColor
+      ?? floatingActionButtonTheme.splashColor
+      ?? theme.splashColor;
     final double elevation = this.elevation
       ?? floatingActionButtonTheme.elevation
       ?? _defaultElevation;
@@ -443,6 +458,7 @@ class FloatingActionButton extends StatelessWidget {
       fillColor: backgroundColor,
       focusColor: focusColor,
       hoverColor: hoverColor,
+      splashColor: splashColor,
       textStyle: textStyle,
       shape: shape,
       clipBehavior: clipBehavior ?? Clip.none,
@@ -476,6 +492,7 @@ class FloatingActionButton extends StatelessWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: null));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: null));
