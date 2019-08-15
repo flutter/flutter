@@ -65,9 +65,6 @@ class IOSDeviceNotTrustedError implements Exception {
 class LockdownReturnCode {
   const LockdownReturnCode._(this.code);
 
-  /// The OS exit code.
-  final int code;
-
   /// Creates a new [LockdownReturnCode] from the specified OS exit code.
   ///
   /// If the [code] maps to one of the known codes, a `const` instance will be
@@ -80,6 +77,9 @@ class LockdownReturnCode {
 
     return knownCodes.containsKey(code) ? knownCodes[code] : LockdownReturnCode._(code);
   }
+
+  /// The OS exit code.
+  final int code;
 
   /// Error code indicating that the pairing dialog has been shown to the user,
   /// and the user has not yet responded as to whether to trust the host.
