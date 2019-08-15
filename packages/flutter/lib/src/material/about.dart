@@ -152,8 +152,8 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The `context` and `settings` argument is passed to [showDialog],
+/// the documentation for which discusses how it is used.
 void showAboutDialog({
   @required BuildContext context,
   String applicationName,
@@ -161,6 +161,7 @@ void showAboutDialog({
   Widget applicationIcon,
   String applicationLegalese,
   List<Widget> children,
+  RouteSettings settings,
 }) {
   assert(context != null);
   showDialog<void>(
@@ -174,6 +175,7 @@ void showAboutDialog({
         children: children,
       );
     },
+    settings: settings,
   );
 }
 

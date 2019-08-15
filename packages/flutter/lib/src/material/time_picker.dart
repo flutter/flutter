@@ -1734,8 +1734,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```
 /// {@end-tool}
 ///
-/// The [context] argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [settings] argument is passed to [showDialog],
+/// the documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Localizations.override],
@@ -1783,6 +1783,7 @@ Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime,
   TransitionBuilder builder,
+  RouteSettings settings,
 }) async {
   assert(context != null);
   assert(initialTime != null);
@@ -1794,6 +1795,7 @@ Future<TimeOfDay> showTimePicker({
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },
+    settings: settings,
   );
 }
 

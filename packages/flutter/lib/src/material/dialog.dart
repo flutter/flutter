@@ -669,6 +669,9 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
+/// The `settings` argument is passed to [showGeneralDialog],
+/// see [RouteSettings] for details.
+///
 /// The `child` argument is deprecated, and should be replaced with `builder`.
 ///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
@@ -697,6 +700,7 @@ Future<T> showDialog<T>({
     'is appropriate for widgets built in the dialog.'
   ) Widget child,
   WidgetBuilder builder,
+  RouteSettings settings,
 }) {
   assert(child == null || builder == null);
   assert(debugCheckHasMaterialLocalizations(context));
@@ -721,5 +725,6 @@ Future<T> showDialog<T>({
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
+    settings: settings,
   );
 }

@@ -1560,6 +1560,7 @@ Future<T> showGeneralDialog<T>({
   Color barrierColor,
   Duration transitionDuration,
   RouteTransitionsBuilder transitionBuilder,
+  RouteSettings settings,
 }) {
   assert(pageBuilder != null);
   assert(!barrierDismissible || barrierLabel != null);
@@ -1570,6 +1571,7 @@ Future<T> showGeneralDialog<T>({
     barrierColor: barrierColor,
     transitionDuration: transitionDuration,
     transitionBuilder: transitionBuilder,
+    settings: settings,
   ));
 }
 

@@ -942,6 +942,7 @@ Widget _buildCupertinoDialogTransitions(BuildContext context, Animation<double> 
 Future<T> showCupertinoDialog<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
+  RouteSettings settings,
 }) {
   assert(builder != null);
   return showGeneralDialog(
@@ -954,5 +955,6 @@ Future<T> showCupertinoDialog<T>({
       return builder(context);
     },
     transitionBuilder: _buildCupertinoDialogTransitions,
+    settings: settings,
   );
 }
