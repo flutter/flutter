@@ -136,8 +136,8 @@ Future<void> runCommand(String executable, List<String> arguments, {
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
 
   if (output != null) {
-    output.stdout = flattenToString(await savedStdout);
-    output.stderr = flattenToString(await savedStderr);
+    output.stdout = _flattenToString(await savedStdout);
+    output.stderr = _flattenToString(await savedStderr);
   }
 
   // If the test is flaky we don't care about the actual exit.
@@ -156,8 +156,8 @@ Future<void> runCommand(String executable, List<String> arguments, {
         break;
       case OutputMode.capture:
       case OutputMode.discard:
-        stdout.writeln(flattenToString(await savedStdout));
-        stderr.writeln(flattenToString(await savedStderr));
+        stdout.writeln(_flattenToString(await savedStdout));
+        stderr.writeln(_flattenToString(await savedStderr));
         break;
     }
     print(
@@ -171,11 +171,9 @@ Future<void> runCommand(String executable, List<String> arguments, {
   }
 }
 
-T identity<T>(T x) => x;
-
 /// Flattens a nested list of UTF-8 code units into a single string.
-String flattenToString(List<List<int>> chunks) =>
-  utf8.decode(chunks.expand<int>(identity).toList(growable: false));
+String _flattenToString(List<List<int>> chunks) =>
+  utf8.decode(chunks.expand<int>((List<int> ints) => ints).toList());
 
 /// Specifies what to do with command output from [runCommand].
 enum OutputMode { print, capture, discard }
