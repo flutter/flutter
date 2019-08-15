@@ -32,7 +32,102 @@ class Plugin {
     this.pluginClass,
   });
 
+  /// Parses [Plugin] specification from the provided pluginYaml.
+  ///
+  /// This currently supports two formats. V1 (Legacy) and V2 (Multi-platform).
+  /// Example V1 format. Which is deprecated.
+  /// flutter:
+  ///  plugin:
+  ///    androidPackage: io.flutter.plugins.sample
+  ///    iosPrefix: FLT
+  ///    macosPrefix: FLT
+  ///    pluginClass: SamplePlugin
+  ///
+  /// Example V2 format.
+  /// flutter:
+  ///  plugin:
+  ///    platforms:
+  ///      android:
+  ///        package: io.flutter.plugins.sample
+  ///        pluginClass: SamplePlugin
+  ///      ios:
+  ///        classPrefix: FLT
+  ///        pluginClass: SamplePlugin
+  ///      macos:
+  ///        classPrefix: FLT
+  ///        pluginClass: SamplePlugin
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
+    // TODO(kaushikiska): Fail if both old and new formats are present.
+    if (pluginYaml != null && pluginYaml['platforms'] != null) {
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+    } else {
+      return Plugin._fromLegacyYaml(name, path, pluginYaml);
+    }
+  }
+
+  factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
+    assert (pluginYaml != null && pluginYaml['platforms'] != null,
+            'Invalid multi-platform plugin specification.');
+    final dynamic platforms = pluginYaml['platforms'];
+
+    final Set<String> pluginClassNames = {};
+    String androidPackage;
+    String iosPrefix;
+    String macosPrefix;
+    String pluginClass;
+
+    if (platforms['android'] != null) {
+      final dynamic androidConfig = platforms['android'];
+      androidPackage = androidConfig['package'];
+      if (androidConfig['pluginClass'] != null) {
+        pluginClassNames.add(androidConfig['pluginClass']);
+      } else {
+        throw Exception('"pluginClass" needs to be specified for android platform');
+      }
+    }
+
+    if (platforms['ios'] != null) {
+      final dynamic iosConfig = platforms['ios'];
+      iosPrefix = iosConfig['classPrefix'] ?? '';
+      if (iosConfig['pluginClass'] != null) {
+        pluginClassNames.add(iosConfig['pluginClass']);
+      } else {
+        throw Exception('"pluginClass" needs to be specified for iOS platform');
+      }
+    }
+
+    if (platforms['macos'] != null) {
+      final dynamic macosConfig = platforms['macos'];
+      // TODO(stuartmorgan): Add |?? ''| here as well once this isn't used as
+      // an indicator of macOS support, see https://github.com/flutter/flutter/issues/33597
+      macosPrefix = macosConfig['classPrefix'];
+      if (macosConfig['pluginClass'] != null) {
+        pluginClassNames.add(macosConfig['pluginClass']);
+      } else {
+        throw Exception('"pluginClass" needs to be specified for macOS platform');
+      }
+    }
+
+    if (pluginClassNames.length > 1) {
+      throw Exception('Currently flutter only support creating plugins with the '
+          'same plugin class name: https://github.com/flutter/flutter/issues/38628.');
+    } else if (pluginClassNames.length == 1) {
+      pluginClass = pluginClassNames.single;
+    }
+
+    return Plugin(
+      name: name,
+      path: path,
+      androidPackage: androidPackage,
+      iosPrefix: iosPrefix,
+      macosPrefix: macosPrefix,
+      pluginClass: pluginClass,
+    );
+  }
+
+
+  @deprecated
+  factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
     String androidPackage;
     String iosPrefix;
     String macosPrefix;
