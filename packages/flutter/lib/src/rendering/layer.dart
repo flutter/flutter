@@ -169,7 +169,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// the given layer hit test result.
   ///
   /// It returns true if this layer or one of its descendants absorbs the hit
-  /// (preventing non-ancestral layers below this one from being hit).
+  /// (preventing non-ancestral layers behind this one from being hit).
   /// Returns false if the hit can continue to other non-ancestral objects
   /// behind this one.
   @protected
@@ -657,6 +657,8 @@ class ContainerLayer extends Layer {
       final bool isAbsorbed = child.hitTest<S>(result, regionOffset, onlyFirst: onlyFirst);
       if (isAbsorbed)
         return true;
+      if (onlyFirst && result.isNotEmpty)
+        return isAbsorbed;
     }
     return false;
   }
@@ -2103,14 +2105,11 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// Whether this layer should prevent layers visually behind it from being
   /// hit during a hit test.
   ///
-  /// If [opaque] is true, this layer will absorb the hit if any of its
-  /// children absorb it, or if this layer contains the target position and
-  /// has the requested annotation. A hit that is absorbed will not be received
-  /// by this layer's siblings (or any other layers that are not ancestors or
-  /// descendants of this layer).
+  /// If [opaque] is true, this layer will absorb the hit if this layer contains
+  /// the target position and has the requested annotation.
   ///
-  /// If [opaque] is false, this layer will unconditionally allow layers
-  /// visually behind it to receive the hit .
+  /// If [opaque] is false, this layer will not change the absorption state
+  /// returned by its children.
   ///
   /// This defaults to false.
   ///
@@ -2135,23 +2134,21 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     return null;
   }
 
-  bool _hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
+  @override
+  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
     bool isAbsorbed = super.hitTest(result, regionOffset, onlyFirst: onlyFirst);
+    if (result.isNotEmpty && onlyFirst)
+      return isAbsorbed;
     if (size != null && !(offset & size).contains(regionOffset)) {
       return isAbsorbed;
     }
     if (T == S) {
-      isAbsorbed = true;
+      isAbsorbed = isAbsorbed || opaque;
       final Object untypedValue = value;
       final S typedEntry = untypedValue;
       result.add(typedEntry);
     }
     return isAbsorbed;
-  }
-
-  @override
-  bool hitTest<S>(List<S> result, Offset regionOffset, { @required bool onlyFirst }) {
-    return _hitTest(result, regionOffset, onlyFirst: onlyFirst) && opaque;
   }
 
   @override
