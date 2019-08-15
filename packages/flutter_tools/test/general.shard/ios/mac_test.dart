@@ -113,6 +113,19 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
+    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when ideviceinfo cannot connect to lockdownd', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(1, 255, '', 'ERROR: Could not connect to lockdownd, error code -irrelevant')));
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
     group('screenshot', () {
       final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;

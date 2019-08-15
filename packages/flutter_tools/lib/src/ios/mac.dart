@@ -34,7 +34,18 @@ IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 /// Specialized exception for expected situations where the ideviceinfo
 /// tool responds with exit code 255 / 'No device found' message
 class IOSDeviceNotFoundError implements Exception {
-  IOSDeviceNotFoundError(this.message);
+  const IOSDeviceNotFoundError(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+/// Exception representing an attempt to find information on an iOS device
+/// that failed because the user had not paired the device with the host yet.
+class IOSDeviceNotTrustedError implements Exception {
+  const IOSDeviceNotTrustedError(this.message);
 
   final String message;
 
@@ -160,6 +171,8 @@ class IMobileDevice {
       );
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
+      if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd'))
+        throw IOSDeviceNotTrustedError('Device info unavailable until the user selects "Trust This Computer" on the device (${result.stderr.trim()})');
       if (result.exitCode != 0)
         throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
