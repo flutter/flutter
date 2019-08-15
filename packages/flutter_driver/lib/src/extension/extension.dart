@@ -378,6 +378,7 @@ class FlutterDriverExtension {
   }
 
   Future<Result> _waitForCondition(Command command) async {
+    assert(command != null);
     final WaitForCondition waitForConditionCommand = command;
     await waitForConditionCommand.condition.wait();
     return null;
