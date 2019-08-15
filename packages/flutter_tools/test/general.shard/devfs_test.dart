@@ -10,9 +10,11 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -100,6 +102,7 @@ void main() {
       vmService = MockVMService();
       await vmService.setUp();
     });
+
     tearDownAll(() async {
       await vmService.tearDown();
       _cleanupTempDirs();
@@ -171,6 +174,33 @@ void main() {
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
+
+    testUsingContext('reports unsuccessful compile when errors are returned', () async {
+      devFS = DevFS(vmService, 'test', tempDir);
+      await devFS.create();
+
+      final RealMockResidentCompiler residentCompiler = RealMockResidentCompiler();
+      when(residentCompiler.recompile(
+        any,
+        any,
+        outputPath: anyNamed('outputPath'),
+      )).thenAnswer((Invocation invocation) {
+        return Future<CompilerOutput>.value(const CompilerOutput('example', 2, <Uri>[]));
+      });
+
+      final UpdateFSReport report = await devFS.update(
+        mainPath: 'lib/foo.txt',
+        generator: residentCompiler,
+        pathToReload: 'lib/foo.txt.dill',
+        trackWidgetCreation: false,
+        invalidatedFiles: <Uri>[],
+      );
+
+      expect(report.success, false);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
   });
 }
 
@@ -260,6 +290,7 @@ class MockVM implements VM {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+class RealMockResidentCompiler extends Mock implements ResidentCompiler {}
 
 final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
