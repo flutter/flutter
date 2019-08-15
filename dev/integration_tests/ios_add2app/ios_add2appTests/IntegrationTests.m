@@ -89,7 +89,7 @@
     GREYAssertNotNil(viewController,
                      @"Expected non-nil DualFlutterViewController.");
     [self expectSemanticsNotification:viewController.topFlutterViewController];
-    [self expectSemanticsNotification:viewController.topFlutterViewController];
+    [self expectSemanticsNotification:viewController.bottomFlutterViewController];
   }
 
   // Verify that there are two Flutter views with the expected marquee text.
