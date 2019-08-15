@@ -6,6 +6,10 @@ declare_args() {
   # Minimum supported version of the Mac SDK.
   mac_sdk_min = "10.12"
 
+  # The MACOSX_DEPLOYMENT_TARGET variable used when compiling.
+  # Must be of the form x.x.x for Info.plist files.
+  mac_deployment_target = "10.11.0"
+
   # Path to a specific version of the Mac SDKJ, not including a backslash at
   # the end. If empty, the path to the lowest version greater than or equal to
   # mac_sdk_min is used.

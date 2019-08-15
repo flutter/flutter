@@ -278,5 +278,5 @@ mac_toolchain("clang_x64") {
   }
   ld = cxx
   is_clang = true
-  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_sdk_min"
+  sysroot_flags = "-isysroot $mac_sdk_path -mmacosx-version-min=$mac_deployment_target"
 }
