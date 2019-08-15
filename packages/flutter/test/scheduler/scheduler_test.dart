@@ -144,8 +144,19 @@ void main() {
 
     await firstFrameEventFired;
 
+    // Test that frameTimingStream is a broadcast stream so it won't be shut
+    // down after the completion of Stream.first.
+    final dynamic secondFrameEventFired = scheduler.frameTimingStream.first;
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+      // build start, build finish
+      10000, 15000,
+      // raster start, raster finish
+      16000, 20000,
+    ])]);
+    await secondFrameEventFired;
+
     final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
-    expect(events, hasLength(1));
+    expect(events, hasLength(2));
 
     final Map<String, dynamic> event = events.first;
     expect(event['number'], isNonNegative);
