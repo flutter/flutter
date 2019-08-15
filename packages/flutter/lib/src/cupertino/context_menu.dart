@@ -293,12 +293,15 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       child.height / _kOpenScale,
     );
 
-    // TODO(justinmc): Use real padding and/or safe area.
+    // TODO(justinmc): Use real padding and/or safe area. Child needs to line up
+    // with menu when full width, but unfortunately it's always coming out too
+    // thin.
     const double topInset = 40.0;
+    const double horizontalPadding = 20.0;
     final Rect container = Rect.fromLTWH(
-      parent.left,
+      parent.left + horizontalPadding,
       parent.top + topInset,
-      parent.width,
+      parent.width - horizontalPadding * 2,
       parent.height / 2 - topInset,
     );
 
@@ -310,6 +313,7 @@ class ContextMenuRoute<T> extends PopupRoute<T> {
       originalChild.width * endScale,
       originalChild.height * endScale,
     );
+    print('justin container left ${container.left}');
     final Offset topLeftEnd = Offset(
       // Center horizontally, which won't be affected by the center alignment.
       container.left + (container.width - originalChild.width) / 2,
@@ -410,26 +414,29 @@ class _ContextMenuSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Flexible(
-          fit: FlexFit.tight,
-          flex: 2,
-          child: IntrinsicHeight(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: actions,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Flexible(
+            fit: FlexFit.tight,
+            flex: 2,
+            child: IntrinsicHeight(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: actions,
+                ),
               ),
             ),
           ),
-        ),
-        const Spacer(
-          flex: 1,
-        ),
-      ],
+          const Spacer(
+            flex: 1,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -452,8 +459,8 @@ class ContextMenuSheetAction extends StatefulWidget {
 }
 
 class _ContextMenuSheetActionState extends State<ContextMenuSheetAction> {
-  static const Color _kBackgroundColor = Color(0xAAFFFFFF);
-  static const Color _kBackgroundColorPressed = Color(0xAADDDDDD);
+  static const Color _kBackgroundColor = Color(0xCCFFFFFF);
+  static const Color _kBackgroundColorPressed = Color(0xCCDDDDDD);
   static const double _kButtonHeight = 56.0;
   static const TextStyle _kActionSheetActionStyle = TextStyle(
     fontFamily: '.SF UI Text',
