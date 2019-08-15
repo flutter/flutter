@@ -588,8 +588,9 @@ class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
     @required this.id,
-    @required this.onPlatformViewCreated}):assert(id != null),
-                          assert(onPlatformViewCreated != null);
+    @required this.onPlatformViewCreated
+  }) : assert(id != null),
+       assert(onPlatformViewCreated != null);
 
   /// The unique identifier for the new platform view.
   ///
@@ -597,18 +598,18 @@ class PlatformViewCreationParams {
   final int id;
 
   /// Callback invoked after the platform view has been created.
-  ///
-  /// Must be invoked as soon as the embedded platform view is ready.
-  /// For example, on iOS, this has to be called when we know the `UIView` is initialized.
   final PlatformViewCreatedCallback onPlatformViewCreated;
 }
 
-/// The factory to construct a [PlatformViewSurface].
+/// A factory for a surface presenting a platform view as part of the widget hierarchy.
 ///
-/// It is required when constructing a [PlatformViewLink].
-typedef PlatformViewSurfaceFactory = PlatformViewSurface Function(BuildContext context, PlatformViewController controller);
+/// The returned widget should present the platform view associated with `controller`.
+///
+/// See also:
+/// * [PlatformViewSurface], a common widget for presenting platform views.
+typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, PlatformViewController controller);
 
-///Constructs a [PlatformViewController].
+/// Constructs a [PlatformViewController].
 ///
 /// The [PlatformViewController.id] field of the created controller must match the value of the
 /// params [PlatformViewCreationParams.id] field.
@@ -669,9 +670,7 @@ class PlatformViewLink extends StatefulWidget {
   final CreatePlatformViewController _createPlatformViewController;
 
   @override
-  State<StatefulWidget> createState() {
-    return _PlatformViewLinkState();
-  }
+  State<StatefulWidget> createState() => _PlatformViewLinkState();
 }
 
 class _PlatformViewLinkState extends State<PlatformViewLink> {
@@ -702,9 +701,7 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
   }
 
   void _onPlatformViewCreated(int id) {
-    setState((){
-      _platformViewCreated = true;
-    });
+    setState(() => _platformViewCreated = true);
   }
 
   @override
