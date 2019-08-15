@@ -26,11 +26,11 @@ import 'toggle_buttons_theme.dart';
 /// Each toggle's behavior can be configured by the [onPressed] callback, which
 /// can update the [isSelected] list however it wants to.
 ///
+/// {@animation 700 300 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_simple.mp4}
+///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring none of the buttons to be
 /// selected.
-///
-/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_simple.mp4}
 /// ```dart
 /// ToggleButtons(
 ///   children: <Widget>[
@@ -47,11 +47,11 @@ import 'toggle_buttons_theme.dart';
 /// ),
 /// ```
 ///
+/// {@animation 700 300 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required_mutually_exclusive.mp4}
+///
 /// Here is an implementation that requires mutually exclusive selection
 /// while requiring at least one selection. Note that this assumes that
 /// [isSelected] was properly initialized with one selection.
-///
-/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required_mutually_exclusive.mp4}
 /// ```dart
 /// ToggleButtons(
 ///   children: <Widget>[
@@ -74,10 +74,10 @@ import 'toggle_buttons_theme.dart';
 /// ),
 /// ```
 ///
+/// {@animation 700 300 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_mutually_exclusive.mp4}
+///
 /// Here is an implementation that requires mutually exclusive selection,
 /// but allows for none of the buttons to be selected.
-///
-/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_mutually_exclusive.mp4}
 /// ```dart
 /// ToggleButtons(
 ///   children: <Widget>[
@@ -100,12 +100,12 @@ import 'toggle_buttons_theme.dart';
 /// ),
 /// ```
 ///
+/// {@animation 700 300 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required.mp4}
+///
 /// Here is an implementation that allows for multiple buttons to be
 /// simultaneously selected, while requiring at least one selection. Note
 /// that this assumes that [isSelected] was properly initialized with one
 /// selection.
-///
-/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/toggle_buttons_required.mp4}
 /// ```dart
 /// ToggleButtons(
 ///   children: <Widget>[
