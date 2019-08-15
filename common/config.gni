@@ -6,9 +6,7 @@ if (is_android) {
   import("//build/config/android/config.gni")
 }
 
-if (is_fuchsia || is_fuchsia_host) {
-  import("//build/fuchsia/sdk.gni")
-}
+import("//build/fuchsia/sdk.gni")
 
 if (target_cpu == "arm" || target_cpu == "arm64") {
   import("//build/config/arm.gni")
