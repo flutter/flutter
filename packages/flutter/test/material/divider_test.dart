@@ -22,6 +22,21 @@ void main() {
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
   });
 
+  // TODO: This test isn't passing, the painting check seems to be wrong here and above.
+  testWidgets('Divider custom thickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(
+            thickness: 5.0,
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Divider), paints..path(strokeWidth: 5.0));
+  });
+
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
     const double customIndent = 10.0;
     Rect dividerRect;
@@ -87,6 +102,21 @@ void main() {
     final RenderBox box = tester.firstRenderObject(find.byType(VerticalDivider));
     expect(box.size.width, 16.0);
     expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
+  });
+
+  // TODO: This test isn't passing, the painting check seems to be wrong here and above.
+  testWidgets('Divider custom thickness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: VerticalDivider(
+            thickness: 5.0,
+          ),
+        ),
+      ),
+    );
+    expect(find.byType(Divider), paints..path(strokeWidth: 5.0));
   });
 
   testWidgets('Vertical Divider Test 2', (WidgetTester tester) async {

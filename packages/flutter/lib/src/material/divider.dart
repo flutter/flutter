@@ -10,13 +10,12 @@ import 'theme.dart';
 // Examples can assume:
 // BuildContext context;
 
-/// A one device pixel thick horizontal line, with padding on either
-/// side.
+/// A thin horizontal line, with padding on either side.
 ///
 /// In the material design language, this represents a divider. Dividers can be
 /// used in lists, [Drawer]s, and elsewhere to separate content.
 ///
-/// To create a one-pixel divider between [ListTile] items, consider using
+/// To create a divider between [ListTile] items, consider using
 /// [ListTile.divideTiles], which is optimized for this case.
 ///
 /// The box's total height is controlled by [height]. The appropriate
@@ -30,25 +29,33 @@ import 'theme.dart';
 class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///
-  /// The height must be positive.
+  /// The [height] must be positive. The [thickness] must be null or positive.
   const Divider({
     Key key,
     this.height = 16.0,
+    this.thickness,
     this.indent = 0.0,
     this.endIndent = 0.0,
     this.color,
   }) : assert(height >= 0.0),
+       assert(thickness == null || thickness >= 0.0),
        super(key: key);
 
 
   /// The divider's height extent.
   ///
-  /// The divider itself is always drawn as one device pixel thick horizontal
-  /// line that is centered within the height specified by this value.
-  ///
-  /// A divider with a [height] of 0.0 is always drawn as a line with a height
-  /// of exactly one device pixel, without any padding around it.
+  /// The divider itself is always drawn as a horizontal line that is centered
+  /// within the height specified by this value.
   final double height;
+
+  /// The thickness that the divider is drawn as.
+  ///
+  /// A divider with a [thickness] of 0.0 is always drawn as a line with a
+  /// height of exactly one device pixel.
+  ///
+  /// If this is null, then the [ThemeData.dividerThickness] is used which
+  /// defaults to 0.0.
+  final double thickness;
 
   /// The amount of empty space to the left of the divider.
   final double indent;
@@ -76,7 +83,7 @@ class Divider extends StatelessWidget {
   /// [ThemeData.dividerColor] specified in the ambient [Theme].
   ///
   /// The `width` argument can be used to override the default width of the
-  /// divider border, which is usually 0.0 (a hairline border).
+  /// divider border, which defaults to 0.0 (a hairline border).
   ///
   /// {@tool sample}
   ///
@@ -96,11 +103,10 @@ class Divider extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
-  static BorderSide createBorderSide(BuildContext context, { Color color, double width = 0.0 }) {
-    assert(width != null);
+  static BorderSide createBorderSide(BuildContext context, { Color color, double width }) {
     return BorderSide(
       color: color ?? Theme.of(context).dividerColor,
-      width: width,
+      width: width ?? Theme.of(context).dividerThickness,
     );
   }
 
@@ -110,11 +116,11 @@ class Divider extends StatelessWidget {
       height: height,
       child: Center(
         child: Container(
-          height: 0.0,
+          height: thickness ?? Theme.of(context).dividerThickness,
           margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
             border: Border(
-              bottom: createBorderSide(context, color: color),
+              bottom: createBorderSide(context, color: color, width: thickness),
             ),
           ),
         ),
@@ -123,8 +129,7 @@ class Divider extends StatelessWidget {
   }
 }
 
-/// A one device pixel thick vertical line, with padding on either
-/// side.
+/// A thin vertical line, with padding on either side.
 ///
 /// In the material design language, this represents a divider. Vertical
 /// dividers can be used in horizontally scrolling lists, such as a
@@ -140,24 +145,32 @@ class Divider extends StatelessWidget {
 class VerticalDivider extends StatelessWidget {
   /// Creates a material design divider.
   ///
-  /// The width must be positive.
+  /// The [width] must be positive. The [thickness] must be null or positive.
   const VerticalDivider({
     Key key,
     this.width = 16.0,
+    this.thickness,
     this.indent = 0.0,
     this.endIndent = 0.0,
     this.color,
   }) : assert(width >= 0.0),
+       assert(thickness == null || thickness >= 0.0),
        super(key: key);
 
   /// The divider's width.
   ///
-  /// The divider itself is always drawn as one device pixel thick
-  /// line that is centered within the width specified by this value.
-  ///
-  /// A divider with a [width] of 0.0 is always drawn as a line with a width
-  /// of exactly one device pixel, without any padding around it.
+  /// The divider itself is always drawn as a vertical line that is centered
+  /// within the width specified by this value.
   final double width;
+
+  /// The thickness that the divider is drawn as.
+  ///
+  /// A divider with a [thickness] of 0.0 is always drawn as a line with a
+  /// width of exactly one device pixel.
+  ///
+  /// If this is null, then the [ThemeData.dividerThickness] is used which
+  /// defaults to 0.0.
+  final double thickness;
 
   /// The amount of empty space on top of the divider.
   final double indent;
@@ -186,11 +199,11 @@ class VerticalDivider extends StatelessWidget {
       width: width,
       child: Center(
         child: Container(
-          width: 0.0,
+          width: thickness ?? Theme.of(context).dividerThickness,
           margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
             border: Border(
-              left: Divider.createBorderSide(context, color: color),
+              left: Divider.createBorderSide(context, color: color, width: thickness),
             ),
           ),
         ),

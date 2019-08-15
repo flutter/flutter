@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashList;
+import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -129,6 +129,7 @@ class ThemeData extends Diagnosticable {
     Color bottomAppBarColor,
     Color cardColor,
     Color dividerColor,
+    double dividerThickness,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -196,6 +197,7 @@ class ThemeData extends Diagnosticable {
     bottomAppBarColor ??= isDark ? Colors.grey[800] : Colors.white;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
     dividerColor ??= isDark ? const Color(0x1FFFFFFF) : const Color(0x1F000000);
+    dividerThickness ??= 0.0;
 
     // Create a ColorScheme that is backwards compatible as possible
     // with the existing default ThemeData color values.
@@ -296,6 +298,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: bottomAppBarColor,
       cardColor: cardColor,
       dividerColor: dividerColor,
+      dividerThickness: dividerThickness,
       focusColor: focusColor,
       hoverColor: hoverColor,
       highlightColor: highlightColor,
@@ -370,6 +373,7 @@ class ThemeData extends Diagnosticable {
     @required this.bottomAppBarColor,
     @required this.cardColor,
     @required this.dividerColor,
+    @required this.dividerThickness,
     @required this.focusColor,
     @required this.hoverColor,
     @required this.highlightColor,
@@ -430,6 +434,7 @@ class ThemeData extends Diagnosticable {
        assert(bottomAppBarColor != null),
        assert(cardColor != null),
        assert(dividerColor != null),
+       assert(dividerThickness != null),
        assert(focusColor != null),
        assert(hoverColor != null),
        assert(highlightColor != null),
@@ -629,6 +634,13 @@ class ThemeData extends Diagnosticable {
   /// To create an appropriate [BorderSide] that uses this color, consider
   /// [Divider.createBorderSide].
   final Color dividerColor;
+
+  /// The thickness of [Divider]s and [PopupMenuDivider]s, also used
+  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
+  ///
+  /// To create an appropriate [BorderSide] that uses this value, consider
+  /// [Divider.createBorderSide].
+  final double dividerThickness;
 
   /// The focus color used indicate that a component has the input focus.
   final Color focusColor;
@@ -881,6 +893,7 @@ class ThemeData extends Diagnosticable {
     Color bottomAppBarColor,
     Color cardColor,
     Color dividerColor,
+    double dividerThickness,
     Color focusColor,
     Color hoverColor,
     Color highlightColor,
@@ -944,6 +957,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       cardColor: cardColor ?? this.cardColor,
       dividerColor: dividerColor ?? this.dividerColor,
+      dividerThickness: dividerThickness ?? this.dividerThickness,
       focusColor: focusColor ?? this.focusColor,
       hoverColor: hoverColor ?? this.hoverColor,
       highlightColor: highlightColor ?? this.highlightColor,
@@ -1085,6 +1099,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor: Color.lerp(a.bottomAppBarColor, b.bottomAppBarColor, t),
       cardColor: Color.lerp(a.cardColor, b.cardColor, t),
       dividerColor: Color.lerp(a.dividerColor, b.dividerColor, t),
+      dividerThickness: lerpDouble(a.dividerThickness, b.dividerThickness, t),
       focusColor: Color.lerp(a.focusColor, b.focusColor, t),
       hoverColor: Color.lerp(a.hoverColor, b.hoverColor, t),
       highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t),
@@ -1156,6 +1171,7 @@ class ThemeData extends Diagnosticable {
            (otherData.bottomAppBarColor == bottomAppBarColor) &&
            (otherData.cardColor == cardColor) &&
            (otherData.dividerColor == dividerColor) &&
+           (otherData.dividerThickness == dividerThickness) &&
            (otherData.highlightColor == highlightColor) &&
            (otherData.splashColor == splashColor) &&
            (otherData.splashFactory == splashFactory) &&
@@ -1222,6 +1238,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarColor,
       cardColor,
       dividerColor,
+      dividerThickness,
       focusColor,
       hoverColor,
       highlightColor,
@@ -1289,6 +1306,7 @@ class ThemeData extends Diagnosticable {
     properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
     properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor));
     properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
+    properties.add(DoubleProperty('dividerThickness', dividerThickness, defaultValue: defaultData.dividerThickness));
     properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
     properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
     properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
