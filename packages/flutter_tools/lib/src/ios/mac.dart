@@ -213,7 +213,7 @@ class IMobileDevice {
       if (result.exitCode == 255 && result.stderr != null && result.stderr.contains('Could not connect to lockdownd')) {
         if (result.stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
           throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Is the device asking to "Trust This Computer?"',
+            'Device info unavailable. Is the device asking to "Trust This Computer?" Try unlocking attached devices.',
             LockdownReturnCode.pairingDialogResponsePending,
           );
         }
