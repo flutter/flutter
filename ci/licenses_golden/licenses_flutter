@@ -325,10 +325,6 @@ FILE: ../../../flutter/lib/ui/text/paragraph.cc
 FILE: ../../../flutter/lib/ui/text/paragraph.h
 FILE: ../../../flutter/lib/ui/text/paragraph_builder.cc
 FILE: ../../../flutter/lib/ui/text/paragraph_builder.h
-FILE: ../../../flutter/lib/ui/text/paragraph_impl.cc
-FILE: ../../../flutter/lib/ui/text/paragraph_impl.h
-FILE: ../../../flutter/lib/ui/text/paragraph_impl_txt.cc
-FILE: ../../../flutter/lib/ui/text/paragraph_impl_txt.h
 FILE: ../../../flutter/lib/ui/text/text_box.cc
 FILE: ../../../flutter/lib/ui/text/text_box.h
 FILE: ../../../flutter/lib/ui/ui.dart
