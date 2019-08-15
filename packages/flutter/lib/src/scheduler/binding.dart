@@ -369,6 +369,17 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
 
   /// A broadcast stream of the frames' time-related performance metrics.
+  ///
+  /// It's recommended to listen to this stream instead of overriding
+  /// [Window.onReportTimings] directly because the latter may accidentally
+  /// break other listeners or callbacks.
+  ///
+  /// See also:
+  ///
+  ///  * [FrameTiming], the data event of this stream
+  ///  * [Window.onReportTimings], the low level callback that this stream
+  ///    and the Flutter engine use. It's recommended to use this stream instead
+  ///    of overriding [Window.onReportTimings] directly.
   Stream<FrameTiming> get frameTimingStream {
     if (_frameTimingBroadcastController == null) {
       _frameTimingBroadcastController = StreamController<FrameTiming>.broadcast(
