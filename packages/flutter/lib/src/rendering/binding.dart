@@ -404,7 +404,7 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// that layer's binding.
 ///
 /// See also [BindingBase].
-class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, RendererBinding {
+class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is
