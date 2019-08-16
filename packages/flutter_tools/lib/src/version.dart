@@ -332,6 +332,11 @@ class FlutterVersion {
   }
 
   @visibleForTesting
+  static List<String> gitLog(List<String> args) {
+    return <String>['git', '-c', 'log.showSignature=false', 'log'] + args;
+  }
+
+  @visibleForTesting
   static String versionOutOfDateMessage(Duration frameworkAge) {
     String warning = 'WARNING: your installation of Flutter is ${frameworkAge.inDays} days old.';
     // Append enough spaces to match the message box width.
