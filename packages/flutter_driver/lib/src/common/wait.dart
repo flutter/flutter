@@ -13,6 +13,8 @@ import 'message.dart';
 /// A Flutter Driver command that waits until a given [condition] is satisfied.
 class WaitForCondition extends Command {
   /// Creates a command that waits for the given [condition] is met.
+  ///
+  /// The [condition] argument must not be null.
   const WaitForCondition(this.condition, {Duration timeout})
       : assert(condition != null),
         super(timeout: timeout);
@@ -22,7 +24,7 @@ class WaitForCondition extends Command {
   /// The [json] argument cannot be null.
   WaitForCondition.deserialize(Map<String, String> json)
       : assert(json != null),
-        condition = _WaitConditionDecoder.deserialize(json),
+        condition = _deserialize(json),
         super.deserialize(json);
 
   /// The condition that this command shall wait for.
@@ -147,7 +149,7 @@ class NoTransientCallbacksCondition implements WaitCondition {
   /// Factory constructor to parse a [NoTransientCallbacksCondition] instance
   /// from the given JSON map.
   ///
-  /// The [json] argument cannot be null.
+  /// The [json] argument must not be null.
   factory NoTransientCallbacksCondition.deserialize(Map<String, dynamic> json) {
     assert(json != null);
     if (json['conditionName'] != 'NoTransientCallbacksCondition')
@@ -182,7 +184,7 @@ class NoPendingFrameCondition implements WaitCondition {
   /// Factory constructor to parse a [NoPendingFrameCondition] instance from the
   /// given JSON map.
   ///
-  /// The [json] argument cannot be null.
+  /// The [json] argument must not be null.
   factory NoPendingFrameCondition.deserialize(Map<String, dynamic> json) {
     assert(json != null);
     if (json['conditionName'] != 'NoPendingFrameCondition')
@@ -217,7 +219,7 @@ class FirstFrameRasterizedCondition implements WaitCondition {
   /// Factory constructor to parse a [NoPendingFrameCondition] instance from the
   /// given JSON map.
   ///
-  /// The [json] argument cannot be null.
+  /// The [json] argument must not be null.
   factory FirstFrameRasterizedCondition.deserialize(Map<String, dynamic> json) {
     assert(json != null);
     if (json['conditionName'] != 'FirstFrameRasterizedCondition')
@@ -247,14 +249,14 @@ class CombinedCondition implements WaitCondition {
   /// Creates a [CombinedCondition] instance with the given list of
   /// [conditions].
   ///
-  /// The [conditions] argument cannot be null.
+  /// The [conditions] argument must not be null.
   const CombinedCondition(this.conditions)
     : assert(conditions != null);
 
   /// Factory constructor to parse a [CombinedCondition] instance from the given
   /// JSON map.
   ///
-  /// The [jsonMap] argument cannot be null.
+  /// The [jsonMap] argument must not be null.
   factory CombinedCondition.deserialize(Map<String, dynamic> jsonMap) {
     assert(jsonMap != null);
     if (jsonMap['conditionName'] != 'CombinedCondition')
@@ -265,7 +267,7 @@ class CombinedCondition implements WaitCondition {
 
     final List<WaitCondition> conditions = <WaitCondition>[];
     for (Map<String, dynamic> condition in json.decode(jsonMap['conditions'])) {
-      conditions.add(_WaitConditionDecoder.deserialize(condition));
+      conditions.add(_deserialize(condition));
     }
     return CombinedCondition(conditions);
   }
@@ -304,22 +306,19 @@ class CombinedCondition implements WaitCondition {
   }
 }
 
-/// A JSON decoder that parses JSON map to a [WaitCondition] or its subclass.
-class _WaitConditionDecoder {
-  /// Parses a [WaitCondition] or its subclass from the given [json] map.
-  ///
-  /// The [json] argument cannot be null.
-  static WaitCondition deserialize(Map<String, dynamic> json) {
-    assert(json != null);
-    final String conditionName = json['conditionName'];
-    switch (conditionName) {
-      case 'NoTransientCallbacksCondition':
-        return NoTransientCallbacksCondition.deserialize(json);
-      case 'NoPendingFrameCondition':
-        return NoPendingFrameCondition.deserialize(json);
-      case 'CombinedCondition':
-        return CombinedCondition.deserialize(json);
-    }
-    throw SerializationException('Unsupported wait condition $conditionName in the JSON string $json');
+/// Parses a [WaitCondition] or its subclass from the given [json] map.
+///
+/// The [json] argument cannot be null.
+WaitCondition _deserialize(Map<String, dynamic> json) {
+  assert(json != null);
+  final String conditionName = json['conditionName'];
+  switch (conditionName) {
+    case 'NoTransientCallbacksCondition':
+      return NoTransientCallbacksCondition.deserialize(json);
+    case 'NoPendingFrameCondition':
+      return NoPendingFrameCondition.deserialize(json);
+    case 'CombinedCondition':
+      return CombinedCondition.deserialize(json);
   }
+  throw SerializationException('Unsupported wait condition $conditionName in the JSON string $json');
 }
