@@ -1246,8 +1246,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// ### Why is the [build] method on [State], and not [StatefulWidget]?
   ///
   /// Putting a `Widget build(BuildContext context)` method on [State] rather
-  /// putting a `Widget build(BuildContext context, State state)` method on
-  /// [StatefulWidget] gives developers more flexibility when subclassing
+  /// than putting a `Widget build(BuildContext context, State state)` method
+  /// on [StatefulWidget] gives developers more flexibility when subclassing
   /// [StatefulWidget].
   ///
   /// For example, [AnimatedWidget] is a subclass of [StatefulWidget] that
@@ -2569,7 +2569,7 @@ class BuildOwner {
 ///    state. When this happens, the framework will call [update] with the new
 ///    widget. The new widget will always have the same [runtimeType] and key as
 ///    old widget. If the parent wishes to change the [runtimeType] or key of
-///    the widget at this location in the tree, can do so by unmounting this
+///    the widget at this location in the tree, it can do so by unmounting this
 ///    element and inflating the new widget at this location.
 ///  * At some point, an ancestor might decide to remove this element (or an
 ///    intermediate ancestor) from the tree, which the ancestor does by calling
@@ -4411,7 +4411,7 @@ class InheritedElement extends ProxyElement {
   ///
   /// Subclasses can manage these values with [updateDependencies]
   /// so that they can selectively rebuild dependents in
-  /// [notifyDependents].
+  /// [notifyDependent].
   ///
   /// This method is typically only called in overrides of [updateDependencies].
   ///
@@ -4438,7 +4438,7 @@ class InheritedElement extends ProxyElement {
   /// null by default so that dependent elements are rebuilt unconditionally.
   ///
   /// Subclasses can manage these values with [updateDependencies]
-  /// so that they can selectively rebuild dependents in [notifyDependents].
+  /// so that they can selectively rebuild dependents in [notifyDependent].
   ///
   /// This method is typically only called in overrides of [updateDependencies].
   ///
@@ -4468,7 +4468,7 @@ class InheritedElement extends ProxyElement {
   /// [dependent].
   ///
   /// Subclasses can manage their own dependencies values so that they
-  /// can selectively rebuild dependents in [notifyDependents].
+  /// can selectively rebuild dependents in [notifyDependent].
   ///
   /// See also:
   ///

@@ -380,7 +380,7 @@ class PaintingContext extends ClipContext {
   ///
   /// * `needsCompositing` is whether the child needs compositing. Typically
   ///   matches the value of [RenderObject.needsCompositing] for the caller.
-  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  /// * `offset` is the offset from the origin of the canvas's coordinate system
   ///   to the origin of the caller's coordinate system.
   /// * `clipRect` is rectangle (in the caller's coordinate system) to use to
   ///   clip the painting done by [painter].
@@ -1405,7 +1405,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Some subclasses of [RenderObject], notably [RenderBox], have other
   /// situations in which the parent needs to be notified if the child is
-  /// dirtied. Such subclasses override markNeedsLayout and either call
+  /// dirtied (e.g., if the child's intrinsic dimensions or baseline changes).
+  /// Such subclasses override markNeedsLayout and either call
   /// `super.markNeedsLayout()`, in the normal case, or call
   /// [markParentNeedsLayout], in the case where the parent needs to be laid out
   /// as well as the child.
@@ -1532,7 +1533,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// This method is the main entry point for parents to ask their children to
   /// update their layout information. The parent passes a constraints object,
-  /// which informs the child as which layouts are permissible. The child is
+  /// which informs the child as to which layouts are permissible. The child is
   /// required to obey the given constraints.
   ///
   /// If the parent reads information computed during the child's layout, the
@@ -1836,7 +1837,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Mark the compositing state for this render object as dirty.
   ///
   /// This is called to indicate that the value for [needsCompositing] needs to
-  /// be recomputed during the next [flushCompositingBits] engine phase.
+  /// be recomputed during the next [PipelineOwner.flushCompositingBits] engine
+  /// phase.
   ///
   /// When the subtree is mutated, we need to recompute our
   /// [needsCompositing] bit, and some of our ancestors need to do the

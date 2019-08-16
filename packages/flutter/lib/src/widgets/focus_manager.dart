@@ -825,7 +825,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 /// as the [focusedChild] of this node, adopting if it isn't already part of the
 /// focus tree.
 ///
-/// {@macro flutter.widgets.focusManager.lifecycle}
+/// {@macro flutter.widgets.focus_manager.focus.lifecycle}
 /// {@macro flutter.widgets.focus_manager.focus.keyEvents}
 ///
 /// See also:
@@ -999,7 +999,7 @@ enum FocusHighlightStrategy {
 /// See also:
 ///
 ///  * [FocusNode], which is a node in the focus tree that can receive focus.
-///  * [FocusScopeNode], which is an node in the focus tree used to collect
+///  * [FocusScopeNode], which is a node in the focus tree used to collect
 ///    subtrees into groups.
 ///  * [Focus.of], which provides the nearest ancestor [FocusNode] for a given
 ///    [BuildContext].

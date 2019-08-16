@@ -72,7 +72,7 @@ enum Orientation {
 /// Widgets whose layouts consume space defined by [viewInsets], [viewPadding],
 /// or [padding] should enclose their children in secondary MediaQuery
 /// widgets that reduce those properties by the same amount.
-/// The [removePadding], [removeViewPadding], and [removeInsets] methods are
+/// The [removePadding], [removeViewPadding], and [removeViewInsets] methods are
 /// useful for this.
 /// See also:
 ///
