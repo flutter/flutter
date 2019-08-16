@@ -1959,7 +1959,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
         rightThumbOffset = startThumbCenter;
         break;
     }
-    
+
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
       offset: offset,

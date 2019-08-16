@@ -251,6 +251,52 @@ void main() {
     );
   });
 
+  testWidgets('Default slider edges draw correctly', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(
+      thumbColor: Colors.red.shade500,
+      activeTrackColor: Colors.blue.shade500,
+      inactiveTrackColor: Colors.green.shade500,
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // when the slider is empty, both edges should not be active colored.
+    expect(
+      sliderBox,
+      paints
+        ..arc(color: sliderTheme.inactiveTrackColor)
+        ..arc(color: sliderTheme.inactiveTrackColor),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 1));
+    await tester.pumpAndSettle(); // wait for disable animation
+
+    // when the slider is full, both edges should be active colored.
+    expect(
+      sliderBox,
+      paints
+        ..arc(color: sliderTheme.activeTrackColor)
+        ..arc(color: sliderTheme.activeTrackColor),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5));
+    await tester.pumpAndSettle(); // wait for disable animation
+
+    // when the slider is in between empty and full, one of the edges will
+    // not be active but the other edge will be.
+    expect(
+      sliderBox,
+      paints
+        ..arc(color: sliderTheme.activeTrackColor)
+        ..arc(color: sliderTheme.inactiveTrackColor),
+    );
+  });
+
   testWidgets('Default slider overlay draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
