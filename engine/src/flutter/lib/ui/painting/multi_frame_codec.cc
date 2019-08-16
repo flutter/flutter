@@ -118,10 +118,8 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage(
   if (resourceContext) {
     SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                     bitmap.pixelRef()->rowBytes());
-    // This indicates that we do not want a "linear blending" decode.
-    sk_sp<SkColorSpace> dstColorSpace = nullptr;
     return SkImage::MakeCrossContextFromPixmap(resourceContext.get(), pixmap,
-                                               true, dstColorSpace.get());
+                                               true);
   } else {
     // Defer decoding until time of draw later on the GPU thread. Can happen
     // when GL operations are currently forbidden such as in the background
