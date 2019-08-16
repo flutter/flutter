@@ -177,7 +177,6 @@ static SkiaGPUObject<SkImage> UploadRasterImage(
       SkImage::MakeCrossContextFromPixmap(context.get(),  // context
                                           pixmap,         // pixmap
                                           true,           // buildMips,
-                                          nullptr,        // dstColorSpace,
                                           true  // limitToMaxTextureSize
       );
 
