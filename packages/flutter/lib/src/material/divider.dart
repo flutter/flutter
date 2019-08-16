@@ -31,7 +31,7 @@ class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///
   /// The [height], [thickness], [indent], and [endIndent] must be null or
-  /// positive.
+  /// non-negative.
   const Divider({
     Key key,
     this.height,
@@ -55,7 +55,7 @@ class Divider extends StatelessWidget {
   /// also null, then this defaults to 16.0.
   final double height;
 
-  /// The thickness that the divider is drawn as.
+  /// The thickness of the line drawn within the divider.
   ///
   /// A divider with a [thickness] of 0.0 is always drawn as a line with a
   /// height of exactly one device pixel.
@@ -125,10 +125,11 @@ class Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double height = this.height ?? DividerTheme.of(context).space ?? 16.0;
-    final double thickness = this.thickness ?? DividerTheme.of(context).thickness ?? 0.0;
-    final double indent = this.indent ?? DividerTheme.of(context).indent ?? 0.0;
-    final double endIndent = this.endIndent ?? DividerTheme.of(context).endIndent ?? 0.0;
+    final DividerThemeData dividerTheme = DividerTheme.of(context);
+    final double height = this.height ?? dividerTheme.space ?? 16.0;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
+    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
 
     return SizedBox(
       height: height,
@@ -164,7 +165,7 @@ class VerticalDivider extends StatelessWidget {
   /// Creates a material design vertical divider.
   ///
   /// The [width], [thickness], [indent], and [endIndent] must be null or
-  /// positive.
+  /// non-negative.
   const VerticalDivider({
     Key key,
     this.width,
@@ -187,7 +188,7 @@ class VerticalDivider extends StatelessWidget {
   /// also null, then this defaults to 16.0.
   final double width;
 
-  /// The thickness that the divider is drawn as.
+  /// The thickness of the line drawn within the divider.
   ///
   /// A divider with a [thickness] of 0.0 is always drawn as a line with a
   /// width of exactly one device pixel.
@@ -225,10 +226,11 @@ class VerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double width = this.width ?? DividerTheme.of(context).space ?? 16.0;
-    final double thickness = this.thickness ?? DividerTheme.of(context).thickness ?? 0.0;
-    final double indent = this.indent ?? DividerTheme.of(context).indent ?? 0.0;
-    final double endIndent = this.endIndent ?? DividerTheme.of(context).endIndent ?? 0.0;
+    final DividerThemeData dividerTheme = DividerTheme.of(context);
+    final double width = this.width ?? dividerTheme.space ?? 16.0;
+    final double thickness = this.thickness ?? dividerTheme.thickness ?? 0.0;
+    final double indent = this.indent ?? dividerTheme.indent ?? 0.0;
+    final double endIndent = this.endIndent ?? dividerTheme.endIndent ?? 0.0;
 
     return SizedBox(
       width: width,

@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-/// Defines the visual properties of [Divider], [VerticalDivider], and dividers
-/// between [ListTile]s and between rows in [DataTable]s.
+/// Defines the visual properties of [Divider], [VerticalDivider], dividers
+/// between [ListTile]s, and dividers between rows in [DataTable]s.
 ///
 /// Descendant widgets obtain the current [DividerThemeData] object using
 /// `DividerTheme.of(context)`. Instances of [DividerThemeData]
@@ -42,21 +42,21 @@ class DividerThemeData extends Diagnosticable {
   /// used between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color color;
 
-  /// The [Divider]'s width extent or the [VerticalDivider]'s height extent.
+  /// The [Divider]'s width or the [VerticalDivider]'s height.
   ///
   /// This represents the amount of horizontal or vertical space the divider
   /// takes up.
   final double space;
 
-  /// The thickness that the divider is drawn as.
+  /// The thickness of the line drawn within the divider.
   final double thickness;
 
-  /// The amount of empty space to leading edge of [Divider] or top edge of
+  /// The amount of empty space at the leading edge of [Divider] or top edge of
   /// [VerticalDivider].
   final double indent;
 
-  /// The amount of empty space to trailing edge of [Divider] or bottom edge of
-  /// [VerticalDivider].
+  /// The amount of empty space at the trailing edge of [Divider] or bottom edge
+  /// of [VerticalDivider].
   final double endIndent;
 
   /// Creates a copy of this object with the given fields replaced with the
@@ -130,20 +130,21 @@ class DividerThemeData extends Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for
-/// [Divider]s, [VerticalDividers]s, etc. in this widget's subtree.
-///
-/// Values specified here are used for [Divider]s, [VerticalDividers]s, etc.
-/// properties that are not given an explicit non-null value.
+/// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
+/// between rows in [DataTable]s in this widget's subtree.
 class DividerTheme extends InheritedWidget {
   /// Creates a divider theme that controls the configurations for
-  /// [Divider]s, [VerticalDividers]s, etc. in its widget subtree.
+  /// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
+  /// between rows in [DataTable]s in its widget subtree.
   const DividerTheme({
     Key key,
-    this.data,
+    @required this.data,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : assert(data != null),
+       super(key: key, child: child);
 
-  /// The properties for descendant [Divider] widgets.
+  /// The properties for descendant [Divider]s, [VerticalDividers]s, dividers
+  /// between [ListTile]s, and dividers between rows in [DataTable]s.
   final DividerThemeData data;
 
   /// The closest instance of this class's [data] value that encloses the given
